@@ -67,27 +67,29 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
-      recordId,
-      dtId: null,
-      reference: '',
-      date: new Date(),
-      plantId: null,
-      vendorId: null,
-      currencyId: defCurrencyId || null,
-      siteId: defSiteId || null,
-      description: '',
-      status: 1,
-      wip: 1,
-      isVattable: false,
-      taxId: null,
-      weight: 0,
-      disSkuLookup: false,
-      invoiceId: null,
-      invoiceRef: '',
-      subTotal: 0,
-      vatAmount: 0,
-      amount: 0,
-      search: '',
+      recordId: recordId || null,
+      header: {
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        plantId: null,
+        vendorId: null,
+        currencyId: defCurrencyId || null,
+        siteId: defSiteId || null,
+        description: '',
+        status: 1,
+        wip: 1,
+        isVattable: false,
+        taxId: null,
+        weight: 0,
+        disSkuLookup: false,
+        invoiceId: null,
+        invoiceRef: '',
+        subTotal: 0,
+        vatAmount: 0,
+        amount: 0,
+        search: ''
+      },
       serials: [
         {
           id: 1,
@@ -109,7 +111,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           unitPrice: 0,
           taxId: null,
           taxDetails: null,
-          taxDetailsButton: true,
           volume: 0,
           invoiceReference: '',
           invoiceTrxId: null,
@@ -124,10 +125,12 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      date: yup.string().required(),
-      currencyId: yup.string().required(),
-      vendorId: yup.string().required(),
-      siteId: yup.string().required(),
+      header: yup.object({
+        date: yup.string().required(),
+        currencyId: yup.string().required(),
+        vendorId: yup.string().required(),
+        siteId: yup.string().required()
+      }),
       serials: yup.array().of(
         yup.object().shape({
           srlNo: yup.string().test({
@@ -145,44 +148,30 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       )
     }),
     onSubmit: async obj => {
-      const {
-        invoiceId,
-        invoiceRef,
-        taxId,
-        disSkuLookup,
-        search,
-        taxDetailsStore,
-        metalGridData,
-        itemGridData,
-        serials,
-        date,
-        ...rest
-      } = obj
-
-      const header = {
-        ...rest,
-        pcs: serials.length,
-        date: formatDateToApi(date)
-      }
-
-      const updatedRows = formik?.values?.serials
-        .filter(row => row.srlNo)
-        .map(({ taxDetails, recordId, ...rest }, index) => ({
-          ...rest,
-          seqNo: index + 1,
-          returnId: recordId || 0
-        }))
+      const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = obj.header
 
       const DraftReturnPack = {
-        header,
-        items: updatedRows
+        header: {
+          ...rest,
+          pcs: obj?.serials.length,
+          date: formatDateToApi(date)
+        },
+        items: formik?.values?.serials
+          .filter(row => row.srlNo)
+          .map(({ taxDetails, recordId, ...rest }, index) => ({
+            ...rest,
+            seqNo: index + 1,
+            returnId: recordId || 0
+          }))
       }
 
       postRequest({
         extension: PurchaseRepository.PUDraftReturn.set2,
         record: JSON.stringify(DraftReturnPack)
       }).then(async diRes => {
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
+        formik.setFieldValue('recordId', diRes.recordId)
+        formik.setFieldValue('header.recordId', diRes.recordId)
         await refetchForm(diRes.recordId)
         invalidate()
       })
@@ -203,7 +192,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
     const vendorRes = await getRequest({
       extension: PurchaseRepository.Vendor.get,
-      parameters: `_recordId=${res.record.vendorId}`
+      parameters: `_recordId=${res?.record?.vendorId}`
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
@@ -266,8 +255,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
-  const editMode = !!formik.values.recordId
-  const isPosted = formik.values.status === 3
+  const editMode = !!formik.values.header?.recordId
+  const isPosted = formik.values.header?.status === 3
 
   const assignStoreTaxDetails = serials => {
     if (serials.length) {
@@ -294,7 +283,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     if (!row?.returnId || !row?.itemId) return true
 
     const LastSerPack = {
-      returnId: formik?.values?.recordId,
+      returnId: formik?.values?.header?.recordId,
       lineItem: row
     }
 
@@ -350,19 +339,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   async function saveHeader(lastLine, type) {
-    const {
-      invoiceId,
-      invoiceRef,
-      taxId,
-      disSkuLookup,
-      search,
-      taxDetailsStore,
-      metalGridData,
-      itemGridData,
-      serials,
-      date,
-      ...rest
-    } = formik?.values
+    const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = formik?.values?.header
 
     const DraftReturnPack = {
       header: {
@@ -379,9 +356,9 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     })
 
     const diHeader = await getDraftReturn(diRes.recordId)
-    formik.setFieldValue('recordId', diRes.recordId)
-    formik.setFieldValue('reference', diHeader?.record?.reference)
-    formik.setFieldValue('date', diHeader?.record?.date)
+    formik.setFieldValue('header.recordId', diRes.recordId)
+    formik.setFieldValue('header.reference', diHeader?.record?.reference)
+    formik.setFieldValue('header.date', diHeader?.record?.date)
 
     const success =
       type === 'import' ? await autoSaveImport(diHeader?.record, lastLine) : await autoSave(diHeader?.record, lastLine)
@@ -420,7 +397,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         if (newRow?.srlNo && newRow.srlNo !== oldRow?.srlNo) {
           const res = await getRequest({
             extension: PurchaseRepository.Serials.last,
-            parameters: `_currencyId=${formik?.values?.currencyId}&_vendorId=${formik?.values?.vendorId}&_srlNo=${newRow?.srlNo}`
+            parameters: `_currencyId=${formik?.values?.header?.currencyId}&_vendorId=${formik?.values?.header?.vendorId}&_srlNo=${newRow?.srlNo}`
           })
 
           let lineObj = {
@@ -430,7 +407,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               seqNo: newRow.id,
               invoiceSeqNo: newRow.id,
               invoiceComponentSeqNo: res?.record?.invoiceComponentSeqNo || 0,
-              returnId: formik?.values?.recordId,
+              returnId: formik?.values?.header?.recordId,
               srlNo: res?.record?.srlNo,
               sku: res?.record?.sku,
               itemName: res?.record?.itemName,
@@ -453,9 +430,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 taxId: formik.values?.taxId || res?.record?.taxId,
                 taxDetails: await FilteredListByTaxId(
                   formik?.values?.taxDetailsStore,
-                  formik.values?.taxId || res?.record?.taxId
-                ),
-                taxDetailsButton: true
+                  formik.values?.header?.taxId || res?.record?.taxId
+                )
               })
             }
           }
@@ -470,8 +446,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               (lineObj.changes.taxDetails = FilteredListByTaxId(formik?.values?.taxDetailsStore, lineObj.changes.taxId))
           }
 
-          const successSave = formik?.values?.recordId
-            ? await autoSave(formik?.values, lineObj.changes)
+          const successSave = formik?.values?.header?.recordId
+            ? await autoSave(formik?.values?.header, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
           if (!successSave) {
@@ -541,42 +517,33 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       name: 'taxDetailsButton',
       flex: 0.75,
       props: {
-        imgSrc: '/images/buttonsIcons/tax-icon.png'
+        onCondition: row => {
+          if (row.itemId && row.taxId) {
+            return {
+              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              hidden: false
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
       },
       label: labels.tax,
       onClick: (e, row) => {
         row.qty = row.weight
         row.basePrice = 0
-        if (row?.taxId) {
-          stack({
-            Component: TaxDetails,
-            props: {
-              taxId: row?.taxId,
-              obj: row
-            }
-          })
-        }
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
       }
     }
-
-    /* {
-      component: 'numberfield',
-      label: labels.baseLaborPrice,
-      name: 'baseLaborPrice',
-      updateOn: 'blur',
-      props: {
-        decimalScale: 2,
-        readOnly: true
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.unitPrice,
-      name: 'unitPrice',
-      props: {
-        readOnly: true
-      }
-    } */
   ]
 
   async function onWorkFlowClick() {
@@ -584,7 +551,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       Component: WorkFlow,
       props: {
         functionId: SystemFunction.PUDraftSerialReturn,
-        recordId: formik.values.recordId
+        recordId: formik.values.header?.recordId
       }
     })
   }
@@ -595,7 +562,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       props: {
         endPoint: PurchaseRepository.PUDraftReturnSerial.batch,
         header: {
-          draftId: formik?.values?.recordId
+          draftId: formik?.values?.header?.recordId
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
@@ -604,19 +571,19 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { serials, ...restValues } = formik.values
+    const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = formik?.values?.header
 
     await postRequest({
       extension: PurchaseRepository.PUDraftReturn.post,
       record: JSON.stringify({
-        ...restValues,
-        date: formatDateToApi(formik.values.date),
+        ...rest,
+        date: formatDateToApi(date),
         wip: 2
       })
     }).then(async () => {
       toast.success(platformLabels.Posted)
       invalidate()
-      await refetchForm(formik?.values?.recordId)
+      await refetchForm(formik?.values?.header?.recordId)
     })
   }
 
@@ -640,7 +607,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         stack({
           Component: AccountSummary,
           props: {
-            accountId: parseInt(formik.values.accountId),
+            accountId: parseInt(formik.values.header?.accountId),
             moduleId: 1
           }
         })
@@ -660,8 +627,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   ]
 
   async function fillGrids() {
-    const diHeader = await getDraftReturn(formik?.values?.recordId)
-    const diItems = await getDraftReturnItems(formik?.values?.recordId)
+    const diHeader = await getDraftReturn(formik?.values?.header?.recordId)
+    const diItems = await getDraftReturnItems(formik?.values?.header?.recordId)
 
     const modifiedList = await Promise.all(
       diItems.list?.map(async (item, index) => {
@@ -674,7 +641,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -705,7 +671,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           vatAmount: parseFloat(item.vatAmount).toFixed(2),
           amount: parseFloat(item.amount).toFixed(2),
-          taxDetailsButton: true,
           taxDetails: taxDetailsResponse
         }
       })
@@ -713,11 +678,16 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
     await formik.setValues({
       ...formik.values,
-      ...diHeader.record,
-      amount: diHeader?.record?.amount,
-      vatAmount: diHeader?.record?.vatAmount,
-      subTotal: diHeader?.record?.subTotal,
-      weight: diHeader?.record?.weight,
+      recordId: diHeader.record.recordId,
+      dtId: diHeader.record.dtId,
+      header: {
+        ...formik.values.header,
+        ...diHeader.record,
+        amount: diHeader?.record?.amount,
+        vatAmount: diHeader?.record?.vatAmount,
+        subTotal: diHeader?.record?.subTotal,
+        weight: diHeader?.record?.weight
+      },
       serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
     })
 
@@ -735,19 +705,19 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     return res?.list
   }
 
-  const filteredData = formik.values.search
+  const filteredData = formik.values.header?.search
     ? formik.values.serials.filter(
         item =>
-          item.srlNo?.toString()?.includes(formik.values.search.toLowerCase()) ||
-          item.sku?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.search.toLowerCase()) ||
-          item.weight?.toString()?.includes(formik.values.search)
+          item.srlNo?.toString()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.sku?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.itemName?.toString()?.toLowerCase()?.includes(formik.values.header?.search.toLowerCase()) ||
+          item.weight?.toString()?.includes(formik.values.header?.search)
       )
     : formik.values.serials
 
   const handleSearchChange = event => {
     const { value } = event.target
-    formik.setFieldValue('search', value)
+    formik.setFieldValue('header.search', value)
   }
 
   const handleGridChange = (value, action, row) => {
@@ -769,8 +739,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         parameters: `_dtId=${recordId}`
       })
 
-      formik.setFieldValue('plantId', dtd?.record?.plantId || null)
-      formik.setFieldValue('siteId', dtd?.record?.siteId || defSiteId || null)
+      formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
+      formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
     }
   }
 
@@ -825,30 +795,32 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       const weight = parseFloat(row?.weight) || 0
 
       return {
-        subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.subTotal || 0,
-        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
-        weight: reCal ? acc?.weight + weight : formik.values?.weight || 0,
+        subTotal: reCal ? parseFloat((acc?.subTotal + subTot).toFixed(2)) : formik.values?.header?.subTotal || 0,
+        vatAmount: reCal
+          ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2))
+          : formik.values?.header?.vatAmount || 0,
+        weight: reCal ? acc?.weight + weight : formik.values?.header?.weight || 0,
         amount: reCal
           ? parseFloat((acc?.subTotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
-          : formik.values?.amount || 0
+          : formik.values?.header?.amount || 0
       }
     },
     { subTotal: 0, vatAmount: 0, weight: 0, amount: 0 }
   )
 
   useEffect(() => {
-    formik.setFieldValue('subTotal', subTotal)
-    formik.setFieldValue('vatAmount', vatAmount)
-    formik.setFieldValue('weight', weight)
-    formik.setFieldValue('amount', amount)
+    formik.setFieldValue('header.subTotal', subTotal)
+    formik.setFieldValue('header.vatAmount', vatAmount)
+    formik.setFieldValue('header.weight', weight)
+    formik.setFieldValue('header.amount', amount)
   }, [weight, subTotal, vatAmount, amount])
 
   useEffect(() => {
     ;(async function () {
       fillTaxStore()
 
-      if (formik?.values?.recordId) {
-        await refetchForm(formik?.values?.recordId)
+      if (recordId) {
+        await refetchForm(recordId)
       }
     })()
   }, [])
@@ -861,7 +833,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
     const res = await getRequest({
       extension: PurchaseRepository.Serials.import,
-      parameters: `_invoiceId=${formik?.values?.invoiceId}`
+      parameters: `_invoiceId=${formik?.values?.header?.invoiceId}`
     })
 
     let lId = updatedSerials.length ? updatedSerials[updatedSerials.length - 1].id : 0
@@ -874,7 +846,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           itemId: x.itemId,
           sku: x.sku,
           itemName: x.itemName,
-          invoiceReference: formik?.values?.invoiceRef,
+          invoiceReference: formik?.values?.header?.invoiceRef,
           invoiceTrxId: x.trxId,
           invoiceSeqNo: x.seqNo,
           invoiceComponentSeqNo: x.componentSeqNo,
@@ -887,8 +859,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           seqNo: lId + 1,
           id: lId + 1,
           ...(res?.record?.taxId && {
-            taxId: formik.values?.taxId || res?.record?.taxId,
-            taxDetailsButton: true
+            taxId: formik.values?.header?.taxId || res?.record?.taxId
           })
         }
 
@@ -901,12 +872,9 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           draft.extendedPrice = unitPrice
         }
 
-        const header = formik?.values
-        const { taxDetailsStore, metalGridData, itemGridData, ...restHeader } = header
-
         const successSave =
-          formik?.values?.recordId || updatedSerials.length > 0
-            ? await autoSaveImport(restHeader, draft, updatedSerials?.[0]?.returnId)
+          formik?.values?.header?.recordId || updatedSerials.length > 0
+            ? await autoSaveImport(formik?.values?.header, draft, updatedSerials?.[0]?.returnId)
             : await saveHeader(draft, 'import')
 
         if (successSave) {
@@ -964,7 +932,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PUDraftSerialReturn}`}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -974,98 +942,98 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     required
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId)
                       await onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    name='header.siteId'
                     readOnly={isPosted}
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     required
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       if (!newValue?.isInactive) {
-                        formik.setFieldValue('siteId', newValue?.recordId || null)
+                        formik.setFieldValue('header.siteId', newValue?.recordId || null)
                       } else {
-                        formik.setFieldValue('siteId', null)
+                        formik.setFieldValue('header.siteId', null)
                         stackError({
                           message: labels.inactiveSite
                         })
                       }
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched.header?.siteId && Boolean(formik.errors.header?.siteId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.docReference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', '')}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', '')}
+                    error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
+                    name='header.plantId'
                     label={labels.plant}
                     readOnly
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
+                      formik.setFieldValue('header.plantId', newValue?.recordId)
                     }}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     required
                     label={labels.postingDate}
-                    value={formik?.values?.date}
+                    value={formik?.values?.header?.date}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('date', newValue)
-                      formik.setFieldValue('invoiceId', null)
-                      formik.setFieldValue('invoiceRef', '')
+                      formik.setFieldValue('header.date', newValue)
+                      formik.setFieldValue('header.invoiceId', null)
+                      formik.setFieldValue('header.invoiceRef', '')
                     }}
                     editMode={editMode}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    onClear={() => formik.setFieldValue('header.date', '')}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                   />
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
+                    name='header.currencyId'
                     filter={item => item.currencyType === 1}
                     label={labels.currency}
                     valueField='recordId'
@@ -1076,30 +1044,30 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     ]}
                     required
                     readOnly={editMode}
-                    values={formik.values}
+                    values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('invoiceId', null)
-                      formik.setFieldValue('invoiceRef', '')
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('header.invoiceId', null)
+                      formik.setFieldValue('header.invoiceRef', '')
+                      formik.setFieldValue('header.currencyId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    error={formik.touched.header?.currencyId && Boolean(formik.errors.header?.currencyId)}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
               <CustomTextArea
-                name='description'
+                name='header.description'
                 label={labels.description}
-                value={formik.values.description}
+                value={formik.values.header?.description}
                 rows={4.2}
                 editMode={editMode}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('description', e.target.value)}
-                onClear={() => formik.setFieldValue('description', '')}
-                error={formik.touched.description && Boolean(formik.errors.description)}
+                onChange={e => formik.setFieldValue('header.description', e.target.value)}
+                onClear={() => formik.setFieldValue('header.description', '')}
+                error={formik.touched.header?.description && Boolean(formik.errors.header?.description)}
               />
             </Grid>
             <Grid item xs={8}>
@@ -1109,40 +1077,45 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 valueField='reference'
                 displayField='name'
                 secondFieldLabel={labels.name}
-                name='vendorId'
+                name='header.vendorId'
                 label={labels.vendor}
+                formObject={formik.values.header}
                 form={formik}
                 required
                 readOnly={isPosted}
                 displayFieldWidth={2}
                 firstFieldWidth={3}
+                secondFieldName={'header.vendorName'}
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
                 maxAccess={maxAccess}
                 editMode={editMode}
+                onSecondValueChange={(name, value) => {
+                  formik.setFieldValue('header.vendorName', value)
+                }}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
                 onChange={async (event, newValue) => {
-                  formik.setFieldValue('vendorName', newValue?.name || '')
-                  formik.setFieldValue('vendorRef', newValue?.reference || '')
+                  formik.setFieldValue('header.vendorName', newValue?.name || '')
+                  formik.setFieldValue('header.vendorRef', newValue?.reference || '')
 
-                  formik.setFieldValue('accountId', newValue?.accountId || null)
-                  formik.setFieldValue('isVattable', newValue?.isTaxable || false)
-                  formik.setFieldValue('taxId', newValue?.taxId || null)
-                  formik.setFieldValue('invoiceId', null)
-                  formik.setFieldValue('invoiceRef', '')
-                  formik.setFieldValue('vendorId', newValue?.recordId || null)
+                  formik.setFieldValue('header.accountId', newValue?.accountId || null)
+                  formik.setFieldValue('header.isVattable', newValue?.isTaxable || false)
+                  formik.setFieldValue('header.taxId', newValue?.taxId || null)
+                  formik.setFieldValue('header.invoiceId', null)
+                  formik.setFieldValue('header.invoiceRef', '')
+                  formik.setFieldValue('header.vendorId', newValue?.recordId || null)
                 }}
-                errorCheck={'vendorId'}
+                errorCheck={'header.vendorId'}
               />
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={FinancialRepository.TaxSchedules.qry}
-                name='taxId'
+                name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
                 displayField={['reference', 'name']}
@@ -1151,35 +1124,41 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 readOnly
-                values={formik.values}
+                values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('taxId', newValue?.recordId || null)
+                  formik.setFieldValue('header.taxId', newValue?.recordId || null)
                 }}
-                error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
               />
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                key={`${formik.values.vendorId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
+                key={`${formik.values.header?.vendorId}-${formik.values.header?.date?.toISOString()}-${
+                  formik.values.header?.currencyId
+                }`}
                 endpointId={
-                  formik?.values?.vendorId && formik?.values?.date && PurchaseRepository.PUInvoiceRetBalance.balance
+                  formik?.values?.header?.vendorId &&
+                  formik?.values?.header?.date &&
+                  PurchaseRepository.PUInvoiceRetBalance.balance
                 }
-                parameters={`_vendorId=${formik?.values?.vendorId}&_returnDate=${formik?.values?.date?.toISOString()}`}
-                filter={item => item.currencyId == formik?.values?.currencyId}
-                name='invoiceId'
+                parameters={`_vendorId=${
+                  formik?.values?.header?.vendorId
+                }&_returnDate=${formik?.values?.header?.date?.toISOString()}`}
+                filter={item => item.currencyId == formik?.values?.header?.currencyId}
+                name='header.invoiceId'
                 label={labels.puInv}
                 valueField='recordId'
                 displayField={'reference'}
                 displayFieldWidth={1}
                 readOnly={isPosted}
-                values={formik.values}
+                values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('invoiceId', newValue?.recordId || null)
-                  formik.setFieldValue('invoiceRef', newValue?.reference || '')
+                  formik.setFieldValue('header.invoiceId', newValue?.recordId || null)
+                  formik.setFieldValue('header.invoiceRef', newValue?.reference || '')
                 }}
-                error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
+                error={formik.touched.header?.invoiceId && Boolean(formik.errors.header?.invoiceId)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -1188,19 +1167,19 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 label={platformLabels.import}
                 image={'import.png'}
                 color='#000'
-                disabled={!formik?.values?.invoiceId || isPosted}
+                disabled={!formik?.values?.header?.invoiceId || isPosted}
               />
             </Grid>
             <Grid item xs={4}>
               <CustomTextField
-                name='search'
-                value={formik.values.search}
+                name='header.search'
+                value={formik.values.header?.search}
                 label={platformLabels.Search}
                 onClear={() => {
-                  formik.setFieldValue('search', '')
+                  formik.setFieldValue('header.search', '')
                 }}
                 onChange={handleSearchChange}
-                onSearch={e => formik.setFieldValue('search', e)}
+                onSearch={e => formik.setFieldValue('header.search', e)}
                 search={true}
               />
             </Grid>
@@ -1218,7 +1197,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isPosted}
             allowAddNewLine={
-              !formik?.values?.search &&
+              !formik?.values?.header?.search &&
               (formik.values?.serials?.length === 0 ||
                 !!formik.values?.serials?.[formik.values?.serials?.length - 1]?.srlNo)
             }
@@ -1247,7 +1226,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               <Grid item xs={12} height={20}></Grid>
               <Grid item xs={12}>
                 <CustomNumberField
-                  name='weight'
+                  name='header.weight'
                   maxAccess={maxAccess}
                   label={labels.totalWeight}
                   value={weight}
