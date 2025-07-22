@@ -516,6 +516,7 @@ export const ResourceIds = {
   UserProperties: 71113,
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
+  OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
 
   // GL
