@@ -9,5 +9,9 @@ export const TimeAttendanceRepository = {
     set: service + 'setOTP',
     get: service + 'getOTP',
     del: service + 'delOTP'
+  },
+  PendingPunches: {
+    page: service + 'pagePP',
+    del: service + 'delPP',
   }
 }

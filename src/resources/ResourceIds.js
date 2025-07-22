@@ -518,6 +518,7 @@ export const ResourceIds = {
   LMOpeningBalances: 73104,
   OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
+  HRPendingPunches: 72207,
 
   // GL
   GLSalesInvoice: 51604,
