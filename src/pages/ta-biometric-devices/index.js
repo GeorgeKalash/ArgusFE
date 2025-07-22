@@ -12,6 +12,7 @@ import { useWindow } from 'src/windows'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import BiometricDevicesForm from './Form/BiometricDevicesForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const BiometricDevices = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -39,7 +40,7 @@ const BiometricDevices = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: TimeAttendanceRepository.BiometricDevices.page,
-    datasetId: ResourceIds.BiometricDevices
+    datasetId: ResourceIds.PurchaseRequisition
   })
 
   const columns = [
@@ -79,7 +80,7 @@ const BiometricDevices = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: TimeAttendanceRepository.BiometricDevices.del,
+      extension: SystemRepository.RecordRemarks.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -99,6 +100,7 @@ const BiometricDevices = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
           refetch={refetch}
+          isLoading={false}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
