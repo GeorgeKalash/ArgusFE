@@ -62,7 +62,7 @@ export default function TerminationForm({ labels, maxAccess, recordId }) {
         formik?.setValues(res?.record)
       }
     })()
-  }, [recordId])
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.TerminationReasons} form={formik} maxAccess={maxAccess} editMode={editMode}>
