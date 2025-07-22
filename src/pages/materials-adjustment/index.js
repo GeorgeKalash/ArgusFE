@@ -12,8 +12,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import SystemFunction from '../system-functions'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -110,7 +110,7 @@ const MaterialsAdjustment = () => {
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.materialsAdjustment,
+    functionId: SystemFunction.MaterialAdjustment,
     action: openForm
   })
 

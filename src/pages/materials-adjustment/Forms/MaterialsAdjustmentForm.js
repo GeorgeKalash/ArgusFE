@@ -40,7 +40,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialAdjustment,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -50,7 +50,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
   const initialValues = {
     disableSKULookup: false,
-    recordId: recordId,
+    recordId,
     dtId: null,
     reference: '',
     plantId,
@@ -596,7 +596,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               id: index
             }
           }),
-          totalCost: (item.unitCost * item.qty).toFixed(2)
+          totalCost: (calcTotalCost(item)).toFixed(2)
         }
       })
     )
@@ -678,8 +678,9 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      datasetId: ResourceIds.GLMaterialAdjustment,
-      disabled: !editMode
+      disabled: !editMode,
+      valuesPath: formik.values,
+      datasetId: ResourceIds.GLMaterialAdjustment
     },
     {
       key: 'IV',
@@ -698,7 +699,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   return (
     <FormShell
       resourceId={ResourceIds.MaterialsAdjustment}
-      functionId={SystemFunction.MaterialsAdjustment}
+      functionId={SystemFunction.MaterialAdjustment}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -723,14 +724,14 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={!editMode && maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -741,8 +742,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
                     label={labels.reference}
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
-                    maxLength='30'
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
