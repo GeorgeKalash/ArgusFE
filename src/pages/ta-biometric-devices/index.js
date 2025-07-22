@@ -40,7 +40,7 @@ const BiometricDevices = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: TimeAttendanceRepository.BiometricDevices.page,
-    datasetId: ResourceIds.PurchaseRequisition
+    datasetId: ResourceIds.BiometricDevices
   })
 
   const columns = [
@@ -80,7 +80,7 @@ const BiometricDevices = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: SystemRepository.RecordRemarks.del,
+      extension: TimeAttendanceRepository.BiometricDevices.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -100,7 +100,6 @@ const BiometricDevices = () => {
           paginationParameters={paginationParameters}
           paginationType='api'
           refetch={refetch}
-          isLoading={false}
           onEdit={edit}
           onDelete={del}
           pageSize={50}

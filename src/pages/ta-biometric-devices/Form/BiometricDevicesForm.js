@@ -34,6 +34,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
+      name: yup.string().required(),
       branchId: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -42,6 +43,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       formik.setFieldValue('recordId', response?.recordId)
 
       invalidate()
@@ -62,7 +64,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PurchaseRequisition} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.BiometricDevices} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -126,6 +128,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('branchId', newValue?.recordId)
                 }}
+                required
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
               />
             </Grid>
