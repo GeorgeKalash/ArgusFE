@@ -47,6 +47,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { createConditionalSchema } from 'src/lib/validation'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 export default function PuQtnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1082,17 +1083,17 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceLookup
-                    endpointId={SaleRepository.Client.snapshot}
+                    endpointId={PurchaseRepository.Vendor.snapshot}
                     valueField='reference'
                     displayField='name'
                     secondFieldLabel={labels.name}
-                    name='clientId'
-                    label={labels.client}
+                    name='vendorId'
+                    label={labels.vendor}
                     form={formik}
-                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={formik?.values?.items?.some(item => item.itemId)}
                     displayFieldWidth={4}
-                    valueShow='clientRef'
-                    secondValueShow='clientName'
+                    valueShow='vendorRef'
+                    secondValueShow='vendorName'
                     maxAccess={maxAccess}
                     editMode={editMode}
                     required={!formik.values.dpId}
@@ -1101,34 +1102,26 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId)
-                      formik.setFieldValue('clientName', newValue?.name)
-                      formik.setFieldValue('clientRef', newValue?.reference)
-                      formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
-                      formik.setFieldValue('taxId', newValue?.taxId)
+                      formik.setFieldValue('vendorId', newValue?.recordId)
+                      formik.setFieldValue('vendorName', newValue?.name)
+                      formik.setFieldValue('vendorRef', newValue?.reference)
                       fillVendorData(newValue?.recordId)
                     }}
-                    errorCheck={'clientId'}
+                    errorCheck={'vendorId'}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={9}>
                   <ResourceLookup
-                    endpointId={BusinessPartnerRepository.MasterData.qry2}
-                    parameters={{
-                      _functionId: SystemFunction.PurchaseQuotation,
-                      _startAt: 0,
-                      _pageSize: 1000,
-                      _sortBy: 'reference desc'
-                    }}
+                    endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
                     valueField='reference'
                     displayField='name'
-                    name='bpId'
-                    label={labels.lead}
+                    name='requestId'
+                    label={labels.request}
                     form={formik}
-                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId)}
+                    readOnly={!isRaw}
                     displayFieldWidth={3}
-                    valueShow='bpRef'
-                    secondValueShow='bpName'
+                    valueShow='requestRef'
+                    secondValueShow='requestName'
                     maxAccess={maxAccess}
                     editMode={editMode}
                     columnsInDropDown={[
@@ -1136,37 +1129,25 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('bpId', newValue?.recordId)
-                      formik.setFieldValue('bpName', newValue?.name)
-                      formik.setFieldValue('bpRef', newValue?.reference)
+                      formik.setFieldValue('requestName', newValue?.name)
+                      formik.setFieldValue('requestRef', newValue?.reference)
+                      formik.setFieldValue('requestId', newValue?.recordId)
                     }}
-                    errorCheck={'bpId'}
+                    errorCheck={'requestId'}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomButton
+                    onClick={() => {}}
+                    tooltipText={platformLabels.import}
+                    image={'import.png'}
+                    disabled={!formik.values.requestId || !isRaw}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
-                    name='spId'
-                    label={labels.salesPerson}
-                    columnsInDropDown={[
-                      { key: 'spRef', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={!isRaw}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('spId', newValue?.recordId)
-                    }}
-                    error={formik.touched.spId && Boolean(formik.errors.spId)}
-                  />
-                </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
@@ -1179,6 +1160,28 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Currency.qry}
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    readOnly={formik?.values?.items?.some(item => item.itemId)}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('items', formik.initialValues.items)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1222,29 +1225,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             </Grid>
             <Grid item xs={3}>
               <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('items', [{ id: 1 }])
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
-                </Grid>
-
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.Plant.qry}
