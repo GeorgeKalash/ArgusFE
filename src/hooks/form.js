@@ -13,6 +13,8 @@ export function useForm({
 }) {
   const [validation, setFieldValidation] = useState({})
 
+  console.log(validation)
+
   function explode(str) {
     const parts = str.split('.')
 
@@ -22,17 +24,16 @@ export function useForm({
     }
   }
 
-  function getValueByPath(obj, path) {
-    return path.split('.').reduce((o, key) => (o ? o[key] : undefined), obj)
-  }
-
-  function filterRowsWithEmptyRequiredFields(rows) {
+  function filterRows(objectName, rows) {
     return rows.filter(row =>
-      Object.entries(validation).some(([fieldPath, rule]) => {
-        if (!rule?.required) return false
-        const value = getValueByPath(row, fieldPath)
+      Object.entries(validation).every(([fieldPath, rule]) => {
+        const { gridName, fieldName } = explode(fieldPath)
 
-        return value === '' || value === null || value === undefined
+        if (!rule?.required || gridName !== objectName) return true
+
+        const value = row?.[fieldName]
+
+        return value !== '' && value !== null && value !== undefined
       })
     )
   }
@@ -41,7 +42,7 @@ export function useForm({
     let result = ''
 
     if (rule.required && (value === '' || value == null)) {
-      result = `${field} is required.`
+      result = `${field} is required  test.`
     } else {
       if (value != '' && value != null && rule.minLength != null && value.length < rule.minLength) {
         result = `${field} must be at least ${rule.minLength} characters`
@@ -118,7 +119,9 @@ export function useForm({
                   const rowHasAnyValue = requiredFieldsInRow.some(field => {
                     const val = row?.[field]
 
-                    return val !== '' && val != null
+                    console.log('field', field, val)
+
+                    return val !== '' && val != null && val != undefined && val != 'NaN'
                   })
 
                   if (allowNoLines && !rowHasAnyValue) return
@@ -235,5 +238,5 @@ export function useForm({
     }
   }, [reference?.isEmpty])
 
-  return { formik, setFieldValidation, filterRowsWithEmptyRequiredFields }
+  return { formik, setFieldValidation, filterRows }
 }

@@ -55,7 +55,6 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useError } from 'src/error'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
-import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurchaseOrderForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -182,17 +181,10 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     endpointId: PurchaseRepository.PurchaseOrder.page
   })
 
-  const conditions = {
-    sku: row => row?.sku,
-    itemName: row => row?.itemName,
-    qty: row => row?.qty > 0
-  }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
-    conditionSchema: ['items'],
+    allowNoLines: true,
     initialValues: initialValues,
     enableReinitialize: false,
     validateOnChange: true,
@@ -201,8 +193,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
         date: yup.date().required(),
         currencyId: yup.number().required(),
         vendorId: yup.number().required()
-      }),
-      items: yup.array().of(schema)
+      })
     }),
     onSubmit: async obj => {
       const payload = {
@@ -287,7 +278,8 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
           { key: 'flName', value: 'FL Name' }
         ],
         displayFieldWidth: 5,
-        minChars: 2
+        minChars: 2,
+        required: true
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.itemId) {
@@ -319,7 +311,8 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       name: 'itemName',
       flex: 3,
       props: {
-        readOnly: true
+        readOnly: true,
+        required: true
       }
     },
     {
@@ -356,6 +349,14 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        required: true,
+        onCondition: row => {
+          return {
+            minValue: 1
+          }
+        }
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -1580,6 +1581,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
               Object.entries(formik?.errors || {}).filter(([key]) => key !== 'items').length > 0
             }
             onValidationRequired={onValidationRequired}
+            setFieldValidation={setFieldValidation}
           />
         </Grow>
 

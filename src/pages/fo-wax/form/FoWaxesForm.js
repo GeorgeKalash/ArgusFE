@@ -23,7 +23,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { createConditionalSchema } from 'src/lib/validation'
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -41,17 +40,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     endpointId: FoundryRepository.Wax.page
   })
 
-  const conditions = {
-    jobId: row => row?.jobId,
-    pieces: row => row?.jobId > 0 && row?.pieces <= row?.jobPcs
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
-  const { formik, setFieldValidation, filterRowsWithEmptyRequiredFields } = useForm({
+  const { formik, setFieldValidation, filterRows } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-
-    // conditionSchema: ['items'],
     initialValues: {
       recordId: null,
       header: {
@@ -99,30 +89,28 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         lineId: yup.number().required(),
         metalId: yup.number().required(),
         metalColorId: yup.number().required(),
-
-        // grossWgt: yup.number().required(),
+        grossWgt: yup.number().required(),
         rmWgt: yup.number().required(),
         mouldWgt: yup.number().required(),
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
       })
-
-      // items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { items, header } = obj
-
-      // console.log('getRequiredFields', validation)
 
       const response = await postRequest({
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items: filterRowsWithEmptyRequiredFields(items)
+          items: filterRows(
+            'items',
+            items?.map(({ id, ...rest }) => rest)
+          )
         })
       })
-      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
-      toast.success(actionMessage)
+
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       refetchForm(response.recordId)
       invalidate()
     }
@@ -390,7 +378,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       props: {
         onCondition: row => {
           return {
-            maxValue: row?.qty <= row?.jobPcs || null
+            maxValue: row?.jobPcs || null
           }
         },
         required: true,
@@ -713,7 +701,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             error={formik.errors.items}
             allowDelete={!isClosed}
             disabled={!formik.values.header.lineId}
-            initialValues={formik.values.items?.[0]}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

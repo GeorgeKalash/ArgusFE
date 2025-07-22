@@ -20,7 +20,7 @@ const ViewComponent = ({ column: { props, name }, data, value, setFieldValidatio
         return isEqual ? prev : { ...prev, [fullName]: next }
       })
     }
-  }, [setFieldValidation, _required, _hidden])
+  }, [_required, _hidden])
 
   let changes = props?.mapping
     ? props?.mapping

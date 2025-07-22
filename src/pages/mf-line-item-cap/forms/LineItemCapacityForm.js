@@ -16,7 +16,6 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { createConditionalSchema } from 'src/lib/validation'
 
 export default function LineItemCapacityForm({ labels, access: maxAccess, obj }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,15 +27,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
     endpointId: ManufacturingRepository.LineItemCapacity.page
   })
 
-  const conditions = {
-    lineId: row => row?.lineId > 0,
-    fullCapacityWgtPerHr: row => row?.fullCapacityWgtPerHr != null,
-    preparationHrs: row => row?.preparationHrs != null,
-    nbOfLabors: row => row?.nbOfLabors != null
-  }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
-
-  const { formik } = useForm({
+  const { formik, setFieldValidation, filterRows } = useForm({
     initialValues: {
       itemId: null,
       itemName: '',
@@ -45,24 +36,24 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
       data: [{ id: 1, lineId: null, fullCapacityWgtPerHr: null, preparationHrs: null, nbOfLabors: null }]
     },
     maxAccess,
-    conditionSchema: ['data'],
+    allowNoLines: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      itemId: yup.number().required(),
-      data: yup.array().of(schema)
+      itemId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
         extension: ManufacturingRepository.LineItemCapacity.set2,
         record: JSON.stringify({
           ...obj,
-          data: obj.data
-            .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-            .map(({ id, lineName, lineRef, ...item }) => ({
+          data: filterRows(
+            'data',
+            obj.data.map(({ id, lineName, lineRef, ...item }) => ({
               ...item,
               lineId: item.lineId || null,
               itemId: obj.itemId
             }))
+          )
         })
       })
 
@@ -116,27 +107,28 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
-        ]
+        ],
+        required: true
       }
     },
     {
       component: 'numberfield',
       label: labels.fullCapacity,
       name: 'fullCapacityWgtPerHr',
-      props: { decimalScale: 2, maxLength: 9 }
+      props: { decimalScale: 2, maxLength: 9, required: true }
     },
     {
       component: 'numberfield',
       label: labels.startStopHrs,
       name: 'preparationHrs',
-      props: { decimalScale: 2, maxLength: 5 }
+      props: { decimalScale: 2, maxLength: 5, required: true }
     },
 
     {
       component: 'numberfield',
       label: labels.nbLabors,
       name: 'nbOfLabors',
-      props: { decimalScale: 0, maxLength: 4 }
+      props: { decimalScale: 0, maxLength: 4, required: true }
     }
   ]
 
@@ -203,6 +195,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
             name='data'
             maxAccess={maxAccess}
             initialValues={formik.initialValues.data[0]}
+            setFieldValidation={setFieldValidation}
           />
         </Grow>
       </VertLayout>

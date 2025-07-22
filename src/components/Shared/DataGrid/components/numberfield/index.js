@@ -11,24 +11,44 @@ export function View({ value, data, gridName, setFieldValidation, column: { prop
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
   const symbol = props?.iconKey && props?.iconKey({ data })
   const fullName = `${gridName}.${name}`
+  const conditions = props?.onCondition ? props?.onCondition(data) : {}
 
-  const { _required, _hidden } = checkAccess(fullName, props.maxAccess, props.required, props.readOnly, props.hidden)
+  const { _required, _hidden } = checkAccess(
+    fullName,
+    props?.maxAccess,
+    props?.required,
+    props?.readOnly,
+    props?.hidden
+  )
 
   useEffect(() => {
     if (typeof setFieldValidation === 'function') {
       setFieldValidation(prev => {
         const existing = prev?.[fullName]
 
+        // const shouldRemove = existing && !_required && !conditions?.minValue && !conditions?.maxValue
+        // if (shouldRemove) {
+        //   const newState = { ...prev }
+        //   delete newState[fullName]
+
+        //   return newState
+        // }
+
         const next = {
-          required: _required && !_hidden
+          required: _required && !_hidden,
+          minValue: conditions?.minValue,
+          maxValue: conditions?.maxValue
         }
 
-        const isEqual = existing?.required === next.required
+        const isEqual =
+          existing?.required === next.required &&
+          existing?.minValue === next.minValue &&
+          existing?.maxValue === next.maxValue
 
         return isEqual ? prev : { ...prev, [fullName]: next }
       })
     }
-  }, [setFieldValidation, _required, _hidden])
+  }, [conditions?.minValue, conditions?.maxValue, _required])
 
   const formatValue = val => {
     if (!val && val !== 0) return ''
