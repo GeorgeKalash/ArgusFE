@@ -1349,42 +1349,45 @@ export default function RetailTransactionsForm({
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
                 </Grid>
-                <Grid item xs={9}>
-                  <ResourceLookup
-                    endpointId={PointofSaleRepository.RetailInvoice.snapshot}
-                    parameters={{
-                      _posId: parseInt(posUser?.posId),
-                      _functionId: SystemFunction.RetailInvoice
-                    }}
-                    valueField='reference'
-                    displayField='reference'
-                    name='header.oDocRef'
-                    label={labels.invoices}
-                    readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
-                    form={formik}
-                    displayFieldWidth={1.5}
-                    formObject={formik.values.header}
-                    secondDisplayField={false}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.isVatable', newValue?.isVatable || false)
-                      formik.setFieldValue('header.oDocRef', newValue?.reference || '')
-                      formik.setFieldValue('header.oDocId', newValue?.recordId || null)
-                    }}
-                    errorCheck={'oDocId'}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-
-                <Grid item xs={2}>
-                  <CustomButton
-                    onClick={() => importInvoiceItems()}
-                    tooltipText={platformLabels.import}
-                    image={'import.png'}
-                    disabled={
-                      !formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId) || isPosted
-                    }
-                  />
-                </Grid>
+                {SystemFunction.RetailReturn == functionId && (
+                  <>
+                    <Grid item xs={9}>
+                      <ResourceLookup
+                        endpointId={PointofSaleRepository.RetailInvoice.snapshot}
+                        parameters={{
+                          _posId: parseInt(posUser?.posId),
+                          _functionId: SystemFunction.RetailInvoice
+                        }}
+                        valueField='reference'
+                        displayField='reference'
+                        name='header.oDocRef'
+                        label={labels.invoices}
+                        readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
+                        form={formik}
+                        displayFieldWidth={1.5}
+                        formObject={formik.values.header}
+                        secondDisplayField={false}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('header.isVatable', newValue?.isVatable || false)
+                          formik.setFieldValue('header.oDocRef', newValue?.reference || '')
+                          formik.setFieldValue('header.oDocId', newValue?.recordId || null)
+                        }}
+                        errorCheck={'oDocId'}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <CustomButton
+                        onClick={() => importInvoiceItems()}
+                        tooltipText={platformLabels.import}
+                        image={'import.png'}
+                        disabled={
+                          !formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId) || isPosted
+                        }
+                      />
+                    </Grid>
+                  </>
+                )}
               </Grid>
             </Grid>
 
