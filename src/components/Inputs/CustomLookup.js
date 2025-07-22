@@ -26,6 +26,7 @@ const CustomLookup = ({
   onChange,
   onKeyDown,
   error,
+  success,
   firstFieldWidth = secondDisplayField ? 6 : 12,
   displayFieldWidth = 1,
   helperText,
@@ -49,7 +50,6 @@ const CustomLookup = ({
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState(false)
   const valueHighlightedOption = useRef(null)
 
   const selectFirstValue = useRef(null)
@@ -78,10 +78,6 @@ const CustomLookup = ({
     }
   }, [firstValue])
 
-  useEffect(() => {
-    setOpenDropdown(isFocused && !error && (store.length > 0 || freeSolo))
-  }, [isFocused, error, store, freeSolo])
-
   return _hidden ? (
     <></>
   ) : (
@@ -89,8 +85,7 @@ const CustomLookup = ({
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
-          open={openDropdown}
-          PopperComponent={!error ? PopperComponent : () => null}
+          PopperComponent={success ? PopperComponent : () => null}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           name={name}
@@ -228,7 +223,7 @@ const CustomLookup = ({
                   setFreeSolo(true)
                 } else {
                   setStore([])
-                  setFreeSolo(false)
+                  setFreeSolo(true)
                 }
               }}
               onKeyDown={onKeyDown}
