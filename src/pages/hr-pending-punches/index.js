@@ -79,7 +79,7 @@ const PendingPunches = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.LockedRecords.del,
+      extension: TimeAttendanceRepository.PendingPunches.del,
       record: JSON.stringify(obj)
     })
     invalidate()
