@@ -61,5 +61,11 @@ export const EmployeeRepository = {
     set: service + 'setUP',
     del: service + 'delUP',
     page: service + 'pageUP'
+  },
+  LoanTypes: {
+    get: service + 'getTR',
+    set: service + 'setTR',
+    del: service + 'delTR',
+    page: service + 'pageTR'
   }
 }

@@ -517,6 +517,7 @@ export const ResourceIds = {
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
   PurchaseRequisition: 50301,
+  LoanTypes: 74101,
 
   // GL
   GLSalesInvoice: 51604,
