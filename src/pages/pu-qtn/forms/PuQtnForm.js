@@ -48,6 +48,7 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { createConditionalSchema } from 'src/lib/validation'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function PuQtnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,7 +122,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         mdValue: 0,
         unitPrice: 0,
         unitCost: 0,
-        overheadId: null,
         vatAmount: 0,
         mdAmount: 0,
         upo: 0,
@@ -383,8 +383,14 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       }
     },
     {
+      component: 'textfield',
+      label: labels.requestRef,
+      name: 'requestRef',
+      flex: 2
+    },
+    {
       component: 'numberfield',
-      label: labels.unitPrice,
+      label: labels.unitCost,
       name: 'unitPrice',
       props: {
         decimalScale: 5
@@ -397,49 +403,10 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     },
     {
       component: 'numberfield',
-      label: labels.upo,
-      name: 'upo',
-      updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
-        update(data)
-      }
-    },
-    {
-      component: 'numberfield',
       label: labels.VAT,
       name: 'vatAmount',
       props: {
         readOnly: true
-      }
-    },
-    {
-      component: 'button',
-      name: 'taxDetailsButton',
-      props: {
-        onCondition: row => {
-          if (row.itemId && row.taxId) {
-            return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
-              hidden: false
-            }
-          } else {
-            return {
-              imgSrc: '',
-              hidden: true
-            }
-          }
-        }
-      },
-      label: labels.tax,
-      onClick: (e, row) => {
-        stack({
-          Component: TaxDetails,
-          props: {
-            taxId: row?.taxId,
-            obj: row
-          }
-        })
       }
     },
     {
@@ -461,29 +428,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       }
     },
     {
-      component: 'button',
-      name: 'saTrx',
-      label: labels.salesTrx,
-      props: {
-        onCondition: row => {
-          return {
-            disabled: !row.itemId
-          }
-        }
-      },
-      onClick: (e, row, update, newRow) => {
-        stack({
-          Component: SalesTrxForm,
-          props: {
-            recordId: 0,
-            functionId: SystemFunction.SalesInvoice,
-            itemId: row?.itemId,
-            clientId: formik?.values?.clientId
-          }
-        })
-      }
-    },
-    {
       component: 'numberfield',
       label: labels.extendedprice,
       name: 'extendedPrice',
@@ -498,6 +442,11 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       label: labels.notes,
       name: 'notes',
       flex: 2
+    },
+    {
+      component: 'date',
+      label: labels.deliveryDate,
+      name: 'deliveryDate'
     }
   ]
 
@@ -1184,43 +1133,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={FinancialRepository.TaxSchedules.qry}
-                    name='taxId'
-                    label={labels.tax}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
-                    }}
-                    error={formik.touched.taxId && Boolean(formik.errors.taxId)}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                    name='szId'
-                    label={labels.saleZone}
-                    valueField='recordId'
-                    displayField='name'
-                    readOnly={!isRaw}
-                    values={formik.values}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('szId', newValue?.recordId)
-                    }}
-                    error={formik.touched.szId && Boolean(formik.errors.szId)}
-                  />
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -1248,25 +1160,83 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    datasetId={DataSets.PAYMENT_METHOD}
+                    name='paymentMethod'
                     readOnly={!isRaw}
-                    label={labels.site}
+                    label={labels.paymentMethod}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.paymentMethod', newValue?.key || null)
+                    }}
+                    error={formik.touched?.paymentMethod && Boolean(formik.errors?.paymentMethod)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.TaxSchedules.qry}
+                    name='taxId'
+                    label={labels.tax}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly
                     values={formik.values}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={2}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
-                      formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
-                      formik.setFieldValue('siteName', newValue ? newValue.name : null)
+                      formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='vendorDocRef'
+                    label={labels.vendorDocRef}
+                    value={formik?.values?.vendorDocRef}
+                    maxAccess={maxAccess}
+                    readOnly={!isRaw}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('vendorDocRef', '')}
+                    error={formik.touched.vendorDocRef && Boolean(formik.errors.vendorDocRef)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='deliveryDate'
+                    label={labels.deliveryDate}
+                    value={formik?.values?.deliveryDate}
+                    onChange={formik.setFieldValue}
+                    editMode={editMode}
+                    readOnly={!isRaw}
+                    maxAccess={maxAccess}
+                    onClear={() => formik.setFieldValue('deliveryDate', null)}
+                    error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={PurchaseRepository.DeliveryMethods.qry}
+                    name='deliveryMethodId'
+                    label={labels.deliveryMethod}
+                    readOnly={!isRaw}
+                    valueField='recordId'
+                    displayField={['name']}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('deliveryMethodId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched?.deliveryMethodId && Boolean(formik.errors?.deliveryMethodId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1279,43 +1249,13 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     maxAccess={maxAccess}
                   />
                 </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='validity'
-                    label={labels.validity}
-                    value={formik?.values?.validity}
+                  <CustomCheckBox
+                    name='exWorks'
+                    value={formik.values?.exWorks}
+                    onChange={event => formik.setFieldValue('exWorks', event.target.checked)}
+                    label={labels.exWorks}
                     maxAccess={maxAccess}
-                    readOnly={!isRaw}
-                    onChange={e => {
-                      formik.handleChange(e)
-                      if (e.target.value) {
-                        const date = new Date(formik.values.date)
-                        date.setDate(date.getDate() + Number(e.target.value))
-                        formik.setFieldValue('expiryDate', date)
-                      } else formik.setFieldValue('expiryDate', null)
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('validity', 0)
-                      formik.setFieldValue('expiryDate', null)
-                    }}
-                    error={formik.touched.validity && Boolean(formik.errors.validity)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='expiryDate'
-                    label={labels.expiryDate}
-                    value={formik?.values?.expiryDate}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
-                    readOnly
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('expiryDate', null)}
-                    error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
                   />
                 </Grid>
               </Grid>
