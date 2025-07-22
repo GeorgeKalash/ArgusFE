@@ -125,21 +125,15 @@ const MfWorksheet = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Worksheet,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   function openForm(obj) {
     stack({
       Component: WorksheetWindow,
       props: {
-        labels: _labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 1200,
-      height: 650,
-      title: _labels.Worksheet
+        recordId: obj?.recordId
+      }
     })
   }
 

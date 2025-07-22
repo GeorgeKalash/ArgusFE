@@ -40,7 +40,6 @@ import { getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -49,6 +48,7 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import AddressForm from 'src/components/Shared/AddressForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -991,16 +991,12 @@ export default function RetailTransactionsForm({
 
   function openAddressForm() {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 620,
-      title: labels.address
+        isCleared: false
+      }
     })
   }
 

@@ -39,49 +39,39 @@ const FoCastings = () => {
 
   const columns = [
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'loss',
-      headerName: labels.loss,
+      field: 'date',
+      headerName: labels.date,
       flex: 1,
-      type: 'number'
+      type: 'date'
     },
     {
-      field: 'outputWgt',
-      headerName: labels.outputWgt,
-      flex: 1,
-      type: 'number'
+      field: 'waxRef',
+      headerName: labels.waxRef,
+      flex: 1
     },
     {
-      field: 'netInputWgt',
-      headerName: labels.netInputWgt,
-      flex: 1,
-      type: 'number'
+      field: 'mouldRef',
+      headerName: labels.mould,
+      flex: 1
     },
     {
-      field: 'inputWgt',
-      headerName: labels.inputWgt,
-      flex: 1,
-      type: 'number'
+      field: 'metalRef',
+      headerName: labels.metal,
+      flex: 1
     },
     {
-      field: 'suggestedWgt',
-      headerName: labels.suggestedWgt,
-      flex: 1,
-      type: 'number'
+      field: 'metalColorRef',
+      headerName: labels.metalColor,
+      flex: 1
     },
     {
-      field: 'netWgt',
-      headerName: labels.netWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'mouldWgt',
-      headerName: labels.mouldWgt,
+      field: 'grossWgt',
+      headerName: labels.grossWgt,
       flex: 1,
       type: 'number'
     },
@@ -92,35 +82,50 @@ const FoCastings = () => {
       type: 'number'
     },
     {
-      field: 'grossWgt',
-      headerName: labels.grossWgt,
+      field: 'mouldWgt',
+      headerName: labels.mouldWgt,
       flex: 1,
       type: 'number'
     },
     {
-      field: 'metalColorRef',
-      headerName: labels.metalColor,
-      flex: 1
-    },
-    {
-      field: 'metalRef',
-      headerName: labels.metal,
-      flex: 1
-    },
-    {
-      field: 'mouldRef',
-      headerName: labels.mould,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
+      field: 'netWgt',
+      headerName: labels.netWgt,
       flex: 1,
-      type: 'date'
+      type: 'number'
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'suggestedWgt',
+      headerName: labels.suggestedWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'inputWgt',
+      headerName: labels.inputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'netInputWgt',
+      headerName: labels.netInputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'outputWgt',
+      headerName: labels.outputWgt,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]

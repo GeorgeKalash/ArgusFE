@@ -179,8 +179,7 @@ const SaTrx = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {

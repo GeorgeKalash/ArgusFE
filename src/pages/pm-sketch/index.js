@@ -129,8 +129,7 @@ const Sketch = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Sketch,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const add = async () => {

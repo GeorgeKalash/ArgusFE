@@ -301,7 +301,6 @@ export const ResourceIds = {
   BranchFilter: 70102,
   CompanyPosition: 70103,
   DepartmentFilter: 70104,
-  CertificateFilter: 71102,
   HRDocTypeFilter: 71104,
   SalaryChangeReasonFilter: 71105,
   EmploymentStatusFilter: 71107,
@@ -501,10 +500,22 @@ export const ResourceIds = {
   RequisitionDocumentTypeDefaults: 50612,
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
+  DocumentsAging: 31409,
   PhysicalCountItemDetailsImport: 44305,
   GenerateMRPs: 46304,
   FITrialBalanceGridView: 31402,
+  Folders: 70111,
+  BgCheck: 71103,
+  RelationshipTypes: 71109,
+  BonusTypes: 71101,
+  CertificateLevels: 71102,
+  ApplyManual: 31117,
+  ImportProductionOrder: 42703,
+  NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
+  SyncJobOrderRouting: 42704,
+  LMOpeningBalances: 73104,
+  PurchaseRequisition: 50301,
 
   // GL
   GLSalesInvoice: 51604,
@@ -549,6 +560,7 @@ export const ResourceIds = {
   IomProperties: 42606,
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
+  IssueOfMaterials: 42304,
 
   //MCR
   MCRSalesInvoice: 51607,

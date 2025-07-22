@@ -76,7 +76,8 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashInvoice
+    datasetId: ResourceIds.CashInvoice,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels?.cashInvoice, window: windowStack })
