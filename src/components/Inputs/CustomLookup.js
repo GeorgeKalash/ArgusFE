@@ -248,7 +248,7 @@ const CustomLookup = ({
               label={label}
               required={_required}
               onKeyUp={e => {
-                onKeyUp(e)
+                if (typeof onKeyUp === 'function') onKeyUp(e)
                 if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{

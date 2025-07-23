@@ -25,9 +25,11 @@ export const ResourceLookup = ({
   const [success, setSuccess] = useState(false)
 
   const onLookup = async searchQry => {
+    setSuccess(false)
     setStore([])
     setRenderOption(false)
     if (!endpointId) {
+      setSuccess(true)
       const res = await rest?.onLookup(searchQry)
       setStore(res)
       setRenderOption(true)
