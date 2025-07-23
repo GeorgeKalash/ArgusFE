@@ -202,7 +202,6 @@ export default function RetailTransactionsForm({
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
-        dtId: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
           const { street1, street2, name, phone, cityId } = this.parent
 
@@ -1047,6 +1046,7 @@ export default function RetailTransactionsForm({
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
     const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1059,13 +1059,23 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('header.siteName', posInfo?.siteName)
     formik.setFieldValue('header.posRef', posInfo?.reference)
     formik.setFieldValue('header.plId', posInfo?.plId)
-    formik.setFieldValue('header.dtId', formik.values.header.dtId || posInfo?.dtId)
+    formik.setFieldValue('header.dtId', formik.values.header.dtId || posDtId ? posInfo?.dtId : null)
     formik.setFieldValue('header.countryId', countryId?.value)
     setAddress(prevAddress => ({
       ...prevAddress,
       countryId: countryId?.value
     }))
   }
+
+  async function isPosDtMatchesdgId(posDtId) {
+    const res = await getRequest({
+      extension: PointofSaleRepository.RetailInvoice.level,
+      parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
+    })
+
+    return res?.record?.documentTypes?.some(x => x.recordId == posDtId) || false
+  }
+
   async function fillCashObjects() {
     const cashAccounts = await getAllCashBanks()
     const creditCards = await fillCreditCardStore()
