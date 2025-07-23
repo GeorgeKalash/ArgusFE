@@ -278,6 +278,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   function calcTotalCost(rec) {
+    console.log(rec)
     if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
@@ -596,7 +597,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
               id: index
             }
           }),
-          totalCost: (calcTotalCost(item)).toFixed(2)
+          totalCost: calcTotalCost(item)
         }
       })
     )
