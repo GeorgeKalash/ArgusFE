@@ -22,6 +22,7 @@ export const ResourceLookup = ({
   const [store, setStore] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const onLookup = async searchQry => {
     setStore([])
@@ -41,6 +42,7 @@ export const ResourceLookup = ({
           disableLoading: true
         })
           .then(res => {
+            res.list !== undefined && setSuccess(true)
             if (filter) {
               res.list = res?.list?.filter(item => {
                 return Object.entries(filter).every(([key, value]) => {
@@ -133,6 +135,7 @@ export const ResourceLookup = ({
           firstValue: _firstValue,
           secondValue: _secondValue,
           error,
+          success,
           onKeyUp,
           onFocus,
           onBlur,
