@@ -14,6 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { useForm } from 'src/hooks/form'
 
 export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
@@ -23,7 +24,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
     endpointId: TimeAttendanceRepository.BiometricDevices.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: {
       recordId: null,
       reference: '',
@@ -75,7 +76,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='6'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -86,7 +87,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
-                maxLength='40'
+                maxLength='30'
                 required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
@@ -99,15 +100,12 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 endpointId={companyStructureRepository.DivisionFilters.qry}
                 name='divisionId'
                 label={labels.division}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={'name'}
                 maxAccess={maxAccess}
+                values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('divisionId', newValue?.recordId)
+                  formik.setFieldValue('divisionId', newValue?.recordId || null)
                 }}
                 error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
               />
@@ -126,7 +124,7 @@ export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('branchId', newValue?.recordId)
+                  formik.setFieldValue('branchId', newValue?.recordId || null)
                 }}
                 required
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
