@@ -82,8 +82,6 @@ const CustomTextField = ({
     }
   }
 
-  console.log()
-
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus()
