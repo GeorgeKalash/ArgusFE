@@ -9,5 +9,11 @@ export const TimeAttendanceRepository = {
     set: service + 'setOTP',
     get: service + 'getOTP',
     del: service + 'delOTP'
+  },
+  BiometricDevices: {
+    page: service + 'pageBM',
+    del: service + 'delBM',
+    set: service + 'setBM',
+    get: service + 'getBM'
   }
 }
