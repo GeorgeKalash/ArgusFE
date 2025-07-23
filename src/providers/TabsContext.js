@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from './RequestsContext'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 
 const TabsContext = createContext()
 
@@ -87,11 +88,21 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex
   } = useContext(MenuContext)
 
+  const lockedRoutes = ['/mf-job-orders', '/sa-trx']
+
+  const currentPath = router.asPath.replace(/\/$/, '')
+
+  const hasLocking = lockedRoutes.some(prefix => currentPath.startsWith(prefix))
+  console.log(router.asPath.replace(/\/$/, ''))
+  console.log(lockedRoutes.includes(router.asPath.replace(/\/$/, '')))
+
   const [anchorEl, setAnchorEl] = useState(null)
 
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  const { postRequest } = useContext(RequestsContext)
 
   const open = Boolean(anchorEl)
 
@@ -115,6 +126,21 @@ const TabsProvider = ({ children }) => {
         }
       } else if (node.path && node.path === targetRouter) {
         return node.name
+      }
+    }
+
+    return null
+  }
+
+  const findResourceId = (nodes, targetRouter) => {
+    for (const node of nodes) {
+      if (node.children) {
+        const result = findResourceId(node.children, targetRouter)
+        if (result) {
+          return result
+        }
+      } else if (node.path && node.path === targetRouter) {
+        return node.resourceId
       }
     }
 
@@ -223,7 +249,9 @@ const TabsProvider = ({ children }) => {
             route: router.asPath,
             label: lastOpenedPage
               ? lastOpenedPage.name
-              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+            resourceId: findResourceId(menu, router.asPath.replace(/\/$/, '')),
+            hasLocking
           }
         ])
 
@@ -262,7 +290,9 @@ const TabsProvider = ({ children }) => {
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, '')),
+          hasLocking
         })
 
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
@@ -274,6 +304,20 @@ const TabsProvider = ({ children }) => {
       menu.length > 0 && setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+
+  function unlockRecord(resourceId) {
+    const body = {
+      resourceId: resourceId,
+      recordId: 0,
+      reference: '',
+      userId: userId,
+      clockStamp: new Date()
+    }
+    postRequest({
+      extension: AccessControlRepository.unlockRecord,
+      record: JSON.stringify(body)
+    })
+  }
 
   return (
     <>
@@ -346,6 +390,9 @@ const TabsProvider = ({ children }) => {
                         size='small'
                         onClick={event => {
                           event.stopPropagation()
+                          if (activeTab.hasLocking && activeTab.resourceId) {
+                            unlockRecord(activeTab.resourceId)
+                          }
                           closeTab(activeTab.route)
                         }}
                       >
