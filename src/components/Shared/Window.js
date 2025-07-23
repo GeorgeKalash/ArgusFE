@@ -138,7 +138,7 @@ const Window = React.memo(
                 ref={paperRef}
                 tabIndex={-1}
                 sx={{
-                  transition: 'width 0.3s, height 0.3s',
+                  transition: 'width 0.3s, height 0.3s, background-color 0.3s',
                   height: !minimized
                     ? controlled
                       ? expanded
@@ -150,7 +150,11 @@ const Window = React.memo(
                     : '40px',
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset'
+                  flexDirection: controlled ? 'column' : 'unset',
+                  backgroundColor: minimized ? 'rgba(255, 255, 255, 0.4)' : 'background.paper',
+                  backdropFilter: minimized ? 'blur(4px)' : 'none',
+                  boxShadow: minimized ? 'none' : 6,
+                  overflow: 'hidden'
                 }}
               >
                 <DialogTitle
@@ -168,7 +172,8 @@ const Window = React.memo(
                     borderTopRightRadius: '5px',
                     borderBottomLeftRadius: '0px',
                     borderBottomRightRadius: '0px',
-                    height: '40px'
+                    height: '40px',
+                    zIndex: 10
                   }}
                 >
                   <Box>
