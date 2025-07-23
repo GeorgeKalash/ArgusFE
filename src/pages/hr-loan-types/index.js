@@ -10,8 +10,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import HrLoanForm from './forms/HrLoanForm'
+import { LoanTrackingRepository } from 'src/repositories/LoanTrackingRepository'
 
 const HrLoanTypesPage = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,7 +22,7 @@ const HrLoanTypesPage = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: EmployeeRepository.LoanTypes.page,
+      extension: LoanTrackingRepository.LoanType.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,19 +38,35 @@ const HrLoanTypesPage = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.LoanTypes.page,
+    endpointId: LoanTrackingRepository.LoanType.page,
     datasetId: ResourceIds.LoanTypes
   })
 
   const columns = [
-    { field: 'reference', headerName: labels.Reference, flex: 1 },
-    { field: 'name', headerName: labels.Name, flex: 1 },
-    { field: 'ldMethodName', headerName: labels.LoanDeductionMethod, flex: 1 },
-    { field: 'ldValue', headerName: labels.LoanDeductionValue, flex: 1 },
+    {
+      field: 'reference',
+      headerName: labels.Reference,
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: labels.Name,
+      flex: 1
+    },
+    {
+      field: 'ldValue',
+      headerName: labels.payment,
+      flex: 1
+    },
+    {
+      field: 'ldName',
+      headerName: labels.loan,
+      flex: 1
+    },
     {
       field: 'disableEditing',
-      headerName: labels.DisableEditing,
-      type: 'boolean',
+      headerName: labels.disable,
+      type: 'checkbox',
       flex: 1
     }
   ]
@@ -64,13 +80,13 @@ const HrLoanTypesPage = () => {
       props: { labels, recordId, maxAccess: access },
       width: 500,
       height: 300,
-      title: labels.LoanType
+      title: labels.loanType
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: LoanTypeRepository.del,
+      extension: LoanTrackingRepository.LoanType.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

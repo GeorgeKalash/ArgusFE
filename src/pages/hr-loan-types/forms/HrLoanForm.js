@@ -14,14 +14,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { LoanTrackingRepository } from 'src/repositories/LoanTrackingRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function HrLoanForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.LoanTypes.page
+    endpointId: LoanTrackingRepository.LoanType.page
   })
 
   const validationSchema = yup.object({
@@ -32,9 +33,9 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
       .number()
       .nullable()
       .test('ldValue-validation', 'Invalid ldValue for selected method', function (value) {
-        const { ldMethod } = this.parent
-        if (ldMethod === null || ldMethod === undefined) return true
-        if (![4, 5, 6].includes(ldMethod)) return value > 0 && value < 100
+        const { loan } = this.parent
+        if (loan === null || loan === undefined) return true
+        if (![4, 5, 6].includes(loan)) return value > 0 && value < 100
 
         return value >= 0
       }),
@@ -46,16 +47,16 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      ldMethod: null,
+      ldName: null,
       ldValue: null,
-      disableEditing: false // <--- added initial value
+      disableEditing: false
     },
     maxAccess,
     validateOnChange: true,
     validationSchema,
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: EmployeeRepository.LoanTypes.set,
+        extension: LoanTrackingRepository.LoanType.set,
         record: JSON.stringify(obj)
       })
 
@@ -73,13 +74,13 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
     if (recordId) {
       ;(async function () {
         const res = await getRequest({
-          extension: EmployeeRepository.LoanTypes.get,
-          parameters: `_loanTypeId=${recordId}`
+          extension: LoanTrackingRepository.LoanType.get,
+          parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)
       })()
     }
-  }, [recordId])
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.LoanTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -116,7 +117,7 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 datasetId={DataSets.LOAN_DEDUCTION_METHOD}
                 name='ldMethod'
-                label={labels.LoanDeductionMethod}
+                label={labels.loan}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
@@ -126,13 +127,12 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='ldValue'
-                type='number'
-                label={labels.LoanDeductionValue}
+                label={labels.payment}
                 value={formik.values.ldValue}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('ldValue', null)}
+                onClear={() => formik.setFieldValue('ldValue', '')}
                 maxAccess={maxAccess}
                 error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
               />
@@ -140,7 +140,7 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
             <Grid item xs={12}>
               <CustomCheckBox
                 name='disableEditing'
-                label={labels.DisableEditing}
+                label={labels.disable}
                 value={formik.values.disableEditing}
                 onChange={e => formik.setFieldValue('disableEditing', e.target.checked)}
                 maxAccess={maxAccess}
