@@ -39,7 +39,8 @@ export default function JobOrderForm({
   store,
   setRefetchRouting,
   invalidate,
-  lockRecord
+  lockRecord,
+  window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -143,7 +144,10 @@ export default function JobOrderForm({
         ...prevStore,
         recordId: res?.recordId
       }))
-      await refetchForm(res.recordId)
+      const reference = await refetchForm(res.recordId)
+      if (window.setTitle) {
+        window.setTitle(reference ? `${labels.jobOrder} ${reference}` : labels.jobOrder)
+      }
     }
   })
   const editMode = !!formik.values.recordId
@@ -200,8 +204,7 @@ export default function JobOrderForm({
     {
       key: 'SerialsLots',
       condition: true,
-      onClick: openSerials,
-      disabled: !editMode || !formik.values.itemId || (!isReleased && formik.values.trackBy == 1)
+      onClick: openSerials
     },
     {
       key: 'Start',
@@ -390,6 +393,8 @@ export default function JobOrderForm({
         reference: res?.record.reference,
         resourceId: ResourceIds.MFJobOrders
       })
+
+    return res?.record.reference
   }
 
   async function getRouting(recordId) {
