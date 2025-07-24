@@ -19,5 +19,11 @@ export const TimeAttendanceRepository = {
     del: service + 'delBM',
     set: service + 'setBM',
     get: service + 'getBM'
+  },
+  DSLReasons: {
+    page: service + 'pageLR',
+    set: service + 'setLR',
+    get: service + 'getLR',
+    del: service + 'delLR'
   }
 }

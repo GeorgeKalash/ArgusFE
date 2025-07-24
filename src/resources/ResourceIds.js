@@ -520,6 +520,7 @@ export const ResourceIds = {
   PurchaseRequisition: 50301,
   HRPendingPunches: 72207,
   BiometricDevices: 72101,
+  DSLReasons: 72107,
 
   // GL
   GLSalesInvoice: 51604,
