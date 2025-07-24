@@ -519,6 +519,7 @@ export const ResourceIds = {
   OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
   HRPendingPunches: 72207,
+  BiometricDevices: 72101,
 
   // GL
   GLSalesInvoice: 51604,
@@ -564,6 +565,7 @@ export const ResourceIds = {
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
+  GLMaterialAdjustment: 41606,
 
   //MCR
   MCRSalesInvoice: 51607,

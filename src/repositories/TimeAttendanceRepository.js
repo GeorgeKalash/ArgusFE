@@ -13,5 +13,11 @@ export const TimeAttendanceRepository = {
   PendingPunches: {
     page: service + 'pagePP',
     del: service + 'delPP',
+  },
+  BiometricDevices: {
+    page: service + 'pageBM',
+    del: service + 'delBM',
+    set: service + 'setBM',
+    get: service + 'getBM'
   }
 }
