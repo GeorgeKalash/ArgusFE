@@ -10,6 +10,10 @@ export const TimeAttendanceRepository = {
     get: service + 'getOTP',
     del: service + 'delOTP'
   },
+  PendingPunches: {
+    page: service + 'pagePP',
+    del: service + 'delPP',
+  },
   BiometricDevices: {
     page: service + 'pageBM',
     del: service + 'delBM',
