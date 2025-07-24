@@ -293,15 +293,15 @@ export function DataGrid({
       if (Object.keys(rowCondition).length > 0) {
         newValidation[fullName] = rowCondition
       }
-
-      // newValidation[fullName] = newFieldValidation
     }
 
-    setFieldValidation(prev => {
-      const isSame = isEqual(prev, newValidation)
+    setTimeout(() => {
+      setFieldValidation(prev => {
+        console.log('prev', prev, isEqual(prev, { ...prev, ...newValidation }))
 
-      return isSame ? prev : newValidation
-    })
+        return isEqual(prev, { ...prev, ...newValidation }) ? prev : { ...prev, ...newValidation }
+      })
+    }, 0)
   }, [value, columns, name])
 
   const addNewRow = () => {

@@ -209,7 +209,7 @@ export default function SaleTransactionForm({
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        // date: yup.string().required(),
         currencyId: yup.string().required(),
         clientId: yup.string().required(),
         siteId: yup
@@ -650,12 +650,6 @@ export default function SaleTransactionForm({
       props: {
         required: true,
         minValue: 1
-
-        // onCondition: row => {
-        //   return {
-        //     minValue: 1
-        //   }
-        // }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -1915,6 +1909,7 @@ export default function SaleTransactionForm({
                   formik.setFieldValue('header.date', newValue)
                   await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
                 }}
+                setFieldValidation={setFieldValidation}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', null)}

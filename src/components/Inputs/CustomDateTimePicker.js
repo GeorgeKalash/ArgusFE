@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -32,6 +32,7 @@ const CustomDateTimePicker = ({
   hidden = false,
   formatTime = 'hh:mm aa',
   defaultValue,
+  setFieldValidation,
   ...props
 }) => {
   const dateFormat = `${
@@ -42,6 +43,22 @@ const CustomDateTimePicker = ({
   const [isFocused, setIsFocused] = useState(false)
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const next = {
+          required: _required && !_hidden
+        }
+
+        const isEqual = existing?.required === next.required
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [_required])
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)

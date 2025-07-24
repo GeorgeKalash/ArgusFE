@@ -74,7 +74,7 @@ const AddressTab = ({
 
   const validate = options && {
     // name: yup.string().required(),
-    street1: yup.string().required(),
+    // street1: yup.string().required(),
     phone: yup.string().required(),
     countryId: yup.number().required(),
     city: yup.string().required(),
@@ -285,6 +285,7 @@ const AddressTab = ({
               value={addressValidation.values.street1}
               required={required}
               readOnly={readOnly}
+              setFieldValidation={setFieldValidation}
               maxLength='100'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
