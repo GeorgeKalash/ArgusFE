@@ -290,7 +290,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'pcs', to: 'jobPcs' },
+
+          // { from: 'pcs', to: 'jobPcs' },
           { from: 'routingSeqNo', to: 'routingSeqNo' }
         ],
         columnsInDropDown: [
@@ -312,12 +313,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           standardId: design?.standardId,
           standardRef: design?.standardRef,
           pieces: parseFloat(jobRouting?.pcs || 0),
-          rmWgt: parseFloat(jobRouting?.qty || 0)
+          rmWgt: parseFloat(jobRouting?.qty || 0),
+          jobPcs: newRow?.id * 1000
         })
 
         setReCal(true)
       }
     },
+
     {
       component: 'textfield',
       label: labels.sku,
@@ -381,6 +384,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             maxValue: row?.jobPcs || null
           }
         },
+
         required: true,
         allowNegative: false,
         readOnly: isClosed

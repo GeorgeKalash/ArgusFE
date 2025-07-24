@@ -60,7 +60,6 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import AddressForm from 'src/components/Shared/AddressForm'
-import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
@@ -105,10 +104,8 @@ export default function SaleTransactionForm({
     qty: row => row?.qty > 0
   }
 
-  // const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines)
-
   const { formik, setFieldValidation, filterRows } = useForm({
-    // maxAccess,
+    maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     allowNoLines,
     initialValues: {
@@ -230,8 +227,6 @@ export default function SaleTransactionForm({
             return true
           })
       })
-
-      // items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       if (obj.header.serializedAddress) {
@@ -654,11 +649,13 @@ export default function SaleTransactionForm({
       updateOn: 'blur',
       props: {
         required: true,
-        onCondition: row => {
-          return {
-            minValue: 1
-          }
-        }
+        minValue: 1
+
+        // onCondition: row => {
+        //   return {
+        //     minValue: 1
+        //   }
+        // }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -1768,6 +1765,8 @@ export default function SaleTransactionForm({
 
     invalidate()
   }
+
+  console.log('formik', formik)
 
   return (
     <FormShell

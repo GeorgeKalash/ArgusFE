@@ -11,6 +11,8 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import isEqual from 'lodash/isEqual'
+import { checkAccess } from 'src/lib/maxAccess'
 
 export function DataGrid({
   name, // maxAccess
@@ -227,6 +229,80 @@ export function DataGrid({
       }
     }
   }, [rowSelectionModel])
+
+  useEffect(() => {
+    if (!Array.isArray(value)) return
+    if (typeof setFieldValidation !== 'function') return
+
+    const newValidation = {}
+
+    for (const column of columns) {
+      const { name: fieldName, props = {} } = column
+      const fullName = `${name}.${fieldName}`
+
+      const { _required, _hidden } = checkAccess(
+        fullName,
+        props?.maxAccess,
+        props?.required,
+        props?.readOnly,
+        props?.hidden
+      )
+
+      const hasCondition =
+        typeof props.onCondition === 'function' || (_required && !_hidden) || props?.minValue || props?.maxValue
+
+      if (!hasCondition) continue
+
+      const condition = {}
+
+      value.forEach((row, rowIndex) => {
+        const result = props?.onCondition && props?.onCondition(row)
+        if (result?.minValue != null || result?.maxValue != null) {
+          condition[rowIndex] = {
+            minValue: result.minValue,
+            maxValue: result.maxValue
+          }
+        }
+      })
+      const minValue = props?.minValue
+      const maxValue = props?.maxValue
+      const required = props?.required
+
+      // const newFieldValidation = {
+      //   required: props.required || false,
+      //   condition,
+      //   minValue,
+      //   maxValue
+      // }
+
+      const rowCondition = {}
+
+      if (Object.keys(condition).length > 0) {
+        rowCondition.condition = condition
+      }
+      if (required) {
+        rowCondition.required = required
+      }
+      if (minValue != null) {
+        rowCondition.minValue = minValue
+      }
+      if (maxValue != null) {
+        rowCondition.maxValue = maxValue
+      }
+
+      if (Object.keys(rowCondition).length > 0) {
+        newValidation[fullName] = rowCondition
+      }
+
+      // newValidation[fullName] = newFieldValidation
+    }
+
+    setFieldValidation(prev => {
+      const isSame = isEqual(prev, newValidation)
+
+      return isSame ? prev : newValidation
+    })
+  }, [value, columns, name])
 
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
@@ -459,14 +535,7 @@ export function DataGrid({
             'center'
         }}
       >
-        <Component
-          {...params}
-          gridName={name}
-          column={column.colDef}
-          updateRow={updateRow}
-          update={update}
-          setFieldValidation={setFieldValidation}
-        />
+        <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
   }

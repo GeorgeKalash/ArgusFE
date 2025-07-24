@@ -13,7 +13,7 @@ export function useForm({
 }) {
   const [validation, setFieldValidation] = useState({})
 
-  console.log(validation)
+  console.log('validation', validation)
 
   function explode(str) {
     const parts = str.split('.')
@@ -41,17 +41,17 @@ export function useForm({
   const checkValidation = (field, value, rule) => {
     let result = ''
 
-    if (rule.required && (value === '' || value == null)) {
+    if (rule.required && (value === '' || value == null || value == 'NaN')) {
       result = `${field} is required  test.`
     } else {
-      if (value != '' && value != null && rule.minLength != null && value.length < rule.minLength) {
+      if (value != '' && value != null && rule?.minLength != null && value.length < rule.minLength) {
         result = `${field} must be at least ${rule.minLength} characters`
       }
 
-      if (value != '' && value != null && rule.maxValue != null && value > rule.maxValue) {
+      if (value != '' && value != null && rule?.maxValue != null && value > rule.maxValue) {
         result = `${field} value must less than ${rule.maxValue}`
       }
-      if (value != '' && value != null && rule.minValue != null && value < rule.minValue) {
+      if (value != '' && value != null && rule?.minValue != null && value < rule.minValue) {
         result = `${field} value must be more than  ${rule.minValue}`
       }
     }
@@ -119,8 +119,6 @@ export function useForm({
                   const rowHasAnyValue = requiredFieldsInRow.some(field => {
                     const val = row?.[field]
 
-                    console.log('field', field, val)
-
                     return val !== '' && val != null && val != undefined && val != 'NaN'
                   })
 
@@ -134,8 +132,18 @@ export function useForm({
                 if (!maxAccessErrors[gridName][index]) {
                   maxAccessErrors[gridName][index] = {}
                 }
-                const error = checkValidation(field, row[fieldName], rule)
-                if (error) maxAccessErrors[gridName][index][fieldName] = error
+
+                const rowCondition = rule?.condition?.[index]
+
+                if (rowCondition) {
+                  const error = checkValidation(fieldName, row[fieldName], { ...rule, ...rowCondition })
+                  if (error) {
+                    maxAccessErrors[gridName][index][fieldName] = error
+                  }
+                } else {
+                  const error = checkValidation(field, row[fieldName], rule)
+                  if (error) maxAccessErrors[gridName][index][fieldName] = error
+                }
 
                 if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
                   delete maxAccessErrors[gridName]

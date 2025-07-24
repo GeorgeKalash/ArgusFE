@@ -52,9 +52,7 @@ const CustomNumberField = ({
     if (typeof setFieldValidation === 'function') {
       setFieldValidation(prev => {
         const existing = prev?.[name]
-
         const shouldRemove = existing && !_required && minValue == null && maxValue == null
-
         if (shouldRemove) {
           const newState = { ...prev }
           delete newState[name]

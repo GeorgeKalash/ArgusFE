@@ -3,19 +3,10 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
-export default function NumberfieldEdit({
-  id,
-  column: { props, field },
-  value,
-  data,
-  update,
-  updateRow,
-  setFieldValidation
-}) {
+export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
-  const conditions = props?.onCondition && props?.onCondition(data)
-  console.log(conditions, setFieldValidation)
+
   const typing = useRef(false)
 
   const handleIconClick = () => {
@@ -66,8 +57,6 @@ export default function NumberfieldEdit({
       }}
       handleButtonClick={handleIconClick}
       {...props}
-      setFieldValidation={setFieldValidation}
-      maxValue={conditions?.maxValue}
       iconKey={props?.iconKey && props?.iconKey({ value, data })}
     />
   )
