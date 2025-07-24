@@ -5,14 +5,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
+export default function SerialsLots({ labels, maxAccess, recordId }) {
   const { getRequest } = useContext(RequestsContext)
   const editMode = !!recordId
 
@@ -21,14 +20,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
     initialValues: {
       jobId: recordId,
       serials: []
-    },
-    validationSchema: yup.object({
-      serials: yup.array().of(
-        yup.object({
-          weight: yup.string().required()
-        })
-      )
-    })
+    }
   })
 
   const totWeight = formik.values.serials.reduce((weightSum, row) => {

@@ -11,7 +11,7 @@ import ItemProductionForm from '../forms/ItemProductionForm.js'
 import KitForm from '../forms/KitForm.js'
 import RetailForm from '../forms/RetailForm.js'
 
-const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
+const ItemWindow = ({ recordId, labels, msId, maxAccess, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [formikInitial, setFormikInitial] = useState([])
   const editMode = !!recordId
@@ -54,6 +54,7 @@ const ItemWindow = ({ recordId, labels, msId, maxAccess }) => {
           editMode={editMode}
           maxAccess={maxAccess}
           setFormikInitial={setFormikInitial}
+          window={window}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
