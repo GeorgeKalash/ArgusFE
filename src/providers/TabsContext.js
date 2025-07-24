@@ -8,6 +8,7 @@ import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from './RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { LockedScreensContext } from './LockedScreensContext'
 
 const TabsContext = createContext()
 
@@ -88,11 +89,7 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex
   } = useContext(MenuContext)
 
-  const lockedRoutes = ['/mf-job-orders', '/sa-trx']
-
-  const currentPath = router.asPath.replace(/\/$/, '')
-
-  const hasLocking = lockedRoutes.some(prefix => currentPath.startsWith(prefix))
+  const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
 
   const [anchorEl, setAnchorEl] = useState(null)
 
@@ -248,8 +245,7 @@ const TabsProvider = ({ children }) => {
             label: lastOpenedPage
               ? lastOpenedPage.name
               : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
-            resourceId: findResourceId(menu, router.asPath.replace(/\/$/, '')),
-            hasLocking
+            resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
           }
         ])
 
@@ -289,8 +285,7 @@ const TabsProvider = ({ children }) => {
           label: lastOpenedPage
             ? lastOpenedPage.name
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
-          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, '')),
-          hasLocking
+          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
 
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
@@ -315,6 +310,14 @@ const TabsProvider = ({ children }) => {
       extension: AccessControlRepository.unlockRecord,
       record: JSON.stringify(body)
     })
+
+    removeLockedScreen(resourceId)
+  }
+
+  const unlockIfLocked = tab => {
+    if (!tab?.resourceId) return
+    const locked = lockedScreens.some(screen => screen.resourceId === tab.resourceId)
+    if (locked) unlockRecord(tab.resourceId)
   }
 
   return (
@@ -388,9 +391,7 @@ const TabsProvider = ({ children }) => {
                         size='small'
                         onClick={event => {
                           event.stopPropagation()
-                          if (activeTab.hasLocking && activeTab.resourceId) {
-                            unlockRecord(activeTab.resourceId)
-                          }
+                          if (activeTab) unlockIfLocked(activeTab)
                           closeTab(activeTab.route)
                         }}
                       >
