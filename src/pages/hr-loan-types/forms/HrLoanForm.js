@@ -7,7 +7,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox' // <--- added import
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -33,9 +33,11 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
       .number()
       .nullable()
       .test('ldValue-validation', 'Invalid ldValue for selected method', function (value) {
-        const { loan } = this.parent
-        if (loan === null || loan === undefined) return true
-        if (![4, 5, 6].includes(loan)) return value > 0 && value < 100
+        const { ldMethod } = this.parent
+        if (ldMethod === null || ldMethod === undefined || value === null) return true
+        if (![4, 5, 6].includes(ldMethod)) {
+          return value > 0 && value < 100
+        }
 
         return value >= 0
       }),
@@ -61,9 +63,7 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', response.recordId)
-      }
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
       invalidate()
     }
   })
@@ -132,7 +132,7 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
                 label={labels.payment}
                 value={formik.values.ldValue}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('ldValue', '')}
+                onClear={() => formik.setFieldValue('ldValue', null)}
                 maxAccess={maxAccess}
                 error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
               />

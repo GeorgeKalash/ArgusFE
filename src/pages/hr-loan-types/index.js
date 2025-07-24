@@ -79,7 +79,7 @@ const HrLoanTypesPage = () => {
       Component: HrLoanForm,
       props: { labels, recordId, maxAccess: access },
       width: 500,
-      height: 300,
+      height: 400,
       title: labels.loanType
     })
   }
