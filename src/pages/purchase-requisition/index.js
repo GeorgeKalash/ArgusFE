@@ -12,10 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import FOCastingWindow from './window/FOCastingWindow'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import PurchaseRquisitionForm from './form/PurchaseRquisitionForm'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 
-const FoCastings = () => {
+export default function PurchaseRquisition() {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const FoCastings = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.Casting.page,
-    datasetId: ResourceIds.FoCastings,
+    endpointId: PurchaseRepository.PurchaseRequisition.page,
+    datasetId: ResourceIds.PurchaseRequisition,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -50,82 +50,34 @@ const FoCastings = () => {
       type: 'date'
     },
     {
-      field: 'waxRef',
-      headerName: labels.waxRef,
+      field: 'deliveryDate',
+      headerName: labels.deliveryDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'departmentName',
+      headerName: labels.department,
       flex: 1
     },
     {
-      field: 'mouldRef',
-      headerName: labels.mould,
+      field: 'notes',
+      headerName: labels.notes,
       flex: 1
-    },
-    {
-      field: 'metalRef',
-      headerName: labels.metal,
-      flex: 1
-    },
-    {
-      field: 'metalColorRef',
-      headerName: labels.metalColor,
-      flex: 1
-    },
-    {
-      field: 'grossWgt',
-      headerName: labels.grossWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'rmWgt',
-      headerName: labels.rmWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'mouldWgt',
-      headerName: labels.mouldWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'netWgt',
-      headerName: labels.netWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'suggestedWgt',
-      headerName: labels.suggestedWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'inputWgt',
-      headerName: labels.inputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'netInputWgt',
-      headerName: labels.netInputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'outputWgt',
-      headerName: labels.outputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'loss',
-      headerName: labels.loss,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'statusName',
       headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'rsName',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     }
   ]
@@ -134,8 +86,8 @@ const FoCastings = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.Casting.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      extension: PurchaseRepository.PurchaseRequisition.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_sortBy=recordId desc&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -144,42 +96,37 @@ const FoCastings = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: FoundryRepository.Casting.snapshot,
+        extension: PurchaseRepository.PurchaseRequisition.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Casting,
+    functionId: SystemFunction.PurchaseRequisition,
     action: openForm
   })
 
-  const add = () => {
-    proxyAction()
+  const add = async () => {
+    await proxyAction()
   }
 
-  const editCAS = obj => {
+  const editREQ = obj => {
     openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: FOCastingWindow,
+      Component: PurchaseRquisitionForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1150,
-      height: 700,
-      title: labels.castings
+      }
     })
   }
 
-  const delCAS = async obj => {
+  const delREQ = async obj => {
     await postRequest({
-      extension: FoundryRepository.Casting.del,
+      extension: PurchaseRepository.PurchaseRequisition.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -189,19 +136,18 @@ const FoCastings = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FOCAS'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'PUREQ'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
-          name='casting'
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editCAS}
+          onEdit={editREQ}
           refetch={refetch}
-          onDelete={delCAS}
+          onDelete={delREQ}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
@@ -211,5 +157,3 @@ const FoCastings = () => {
     </VertLayout>
   )
 }
-
-export default FoCastings

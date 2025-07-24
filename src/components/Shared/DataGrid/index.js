@@ -758,9 +758,9 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
-    const disableRefocus = true
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
+    const disableRefocus = colDef?.component === 'numberfield'
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
     if (newValue == currentValue && newValue !== '.') return
