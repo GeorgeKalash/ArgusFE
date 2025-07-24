@@ -93,8 +93,6 @@ const TabsProvider = ({ children }) => {
   const currentPath = router.asPath.replace(/\/$/, '')
 
   const hasLocking = lockedRoutes.some(prefix => currentPath.startsWith(prefix))
-  console.log(router.asPath.replace(/\/$/, ''))
-  console.log(lockedRoutes.includes(router.asPath.replace(/\/$/, '')))
 
   const [anchorEl, setAnchorEl] = useState(null)
 
