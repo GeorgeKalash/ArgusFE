@@ -27,6 +27,7 @@ export const ResourceIds = {
   BranchAvailability: 60306,
   Alerts: 60307,
   PendingPunches: 60308,
+  BalanceAdjustment: 73204,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
