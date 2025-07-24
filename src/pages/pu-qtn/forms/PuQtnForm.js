@@ -32,7 +32,6 @@ import {
   DIRTYFIELD_BASE_PRICE,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_AMOUNT,
   MDTYPE_PCT
@@ -41,14 +40,12 @@ import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import TaxDetails from 'src/components/Shared/TaxDetails'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { createConditionalSchema } from 'src/lib/validation'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
 export default function PuQtnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -59,7 +56,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
-  const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
@@ -88,7 +84,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     subtotal: 0,
     tdPct: 0,
     tdAmount: 0,
-    tdType: 0,
+    tdType: 2,
     paymentMethod: null,
     miscAmount: 0,
     amount: 0,
@@ -154,11 +150,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(),
+      currencyId: yup.number().required(),
+      vendorId: yup.number().required(),
       date: yup.string().required(),
-      clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
-        return this.parent.bpId ? true : !!value
-      }),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -236,7 +230,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           { key: 'flName', value: 'FL Name' }
         ],
         displayFieldWidth: 5,
-        filter: { salesItem: true }
+        filter: { purchaseItem: true }
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
@@ -285,24 +279,18 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
           basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
+          mdAmount: 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
-          extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          mdType: 1,
-          siteId: formik?.values?.siteId,
-          siteRef: await getSiteRef(formik?.values?.siteId),
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty),
+          applyVat: formik.values.isVattable || false
         })
-
-        formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
       }
     },
     {
@@ -316,7 +304,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     },
     {
       component: 'resourcecombobox',
-      label: labels.measurementUnit,
+      label: labels.mu,
       name: 'muRef',
       props: {
         store: filteredMeasurements?.current,
@@ -345,10 +333,10 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
+          ...data,
           baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
         })
       }
@@ -410,6 +398,28 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       }
     },
     {
+      component: 'button',
+      name: 'taxDetailsButton',
+      props: {
+        onCondition: row => {
+          return {
+            imgSrc: row.itemId && row.taxId ? '/images/buttonsIcons/tax-icon.png' : '',
+            hidden: !(row.itemId && row.taxId)
+          }
+        }
+      },
+      label: labels.tax,
+      onClick: (e, row) => {
+        stack({
+          Component: TaxDetails,
+          props: {
+            taxId: row?.taxId,
+            obj: row
+          }
+        })
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.markdown,
       name: 'mdAmount',
@@ -424,7 +434,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
         update(data)
-        checkMdAmountPct(newRow, update)
       }
     },
     {
@@ -616,17 +625,14 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     })
   }
 
-  async function fillVendorData(clientId) {
-    // if (!clientId) return
-    // const res = await getRequest({
-    //   extension: SaleRepository.Client.get,
-    //   parameters: `_recordId=${clientId}`
-    // })
-    // formik.setFieldValue('ptId', res?.record?.ptId)
-    // formik.setFieldValue('plId', res?.record?.plId || formik.values?.plId || 0)
-    // formik.setFieldValue('szId', res?.record?.szId)
-    // formik.setFieldValue('currencyId', res?.record?.currencyId)
-    // formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
+  async function fillVendorData(values) {
+    formik.setFieldValue('isVattable', values?.isTaxable || false)
+    formik.setFieldValue('tdAmount', values?.tradeDiscount || null)
+    formik.setFieldValue('tdType', values?.tradeDiscount ? 2 : formik.values.tdType)
+    formik.setFieldValue('taxId', values?.taxId || null)
+    formik.setFieldValue('vendorName', values?.name || '')
+    formik.setFieldValue('vendorRef', values?.reference || '')
+    formik.setFieldValue('vendorId', values?.recordId || null)
   }
 
   async function getItemPhysProp(itemId) {
@@ -854,50 +860,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     recalcNewVat(tdPct)
   }
 
-  function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
-    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
-      formik.setFieldValue('mdAmount', clientMaxDiscount)
-      rowData.mdAmount = clientMaxDiscount
-      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
-      update(data)
-      stackError({
-        message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
-      })
-    }
-  }
-
-  function ShowMdAmountErrorMessage(actualDiscountAmount, clientMaxDiscountValue, rowData, update) {
-    if (actualDiscountAmount > clientMaxDiscountValue) {
-      formik.setFieldValue('mdType', 2)
-      formik.setFieldValue('mdAmount', clientMaxDiscountValue)
-      rowData.mdType = 2
-      rowData.mdAmount = clientMaxDiscountValue
-      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
-      update(data)
-      stackError({
-        message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
-      })
-    }
-  }
-
-  function checkMdAmountPct(rowData, update) {
-    const maxClientAmountDiscount = rowData.unitPrice * (formik.values.maxDiscount / 100)
-    if (!formik.values.maxDiscount) return
-    if (rowData.mdType == 1) {
-      if (rowData.mdAmount > formik.values.maxDiscount) {
-        ShowMdValueErrorMessage(formik.values.maxDiscount, rowData, update)
-
-        return false
-      }
-    } else {
-      if (rowData.mdAmount > maxClientAmountDiscount) {
-        ShowMdAmountErrorMessage(rowData.mdAmount, maxClientAmountDiscount, rowData, update)
-
-        return false
-      }
-    }
-  }
-
   async function refetchForm(recordId) {
     const sqHeader = await getPurchaseQuotation(recordId)
     const sqItems = await getPurchaseQuotationItems(recordId)
@@ -921,17 +883,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     return res?.record?.reference
   }
 
-  async function onChangeDtId(dtId) {
-    if (!dtId) return
-
-    const res = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
-    formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
-  }
-
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
@@ -947,35 +898,12 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
-  useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
-  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
-      //   const muList = await getMeasurementUnits()
-      //   setMeasurements(muList?.list)
-      //   const defaultValues = await getDefaultData()
-      //   if (recordId) await refetchForm(recordId)
-      //   else {
-      //     const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
-      //     if (defaultSalesTD) {
-      //       setCycleButtonState({ text: '%', value: 2 })
-      //       formik.setFieldValue('tdType', 2)
-      //     } else {
-      //       setCycleButtonState({ text: '123', value: 1 })
-      //       formik.setFieldValue('tdType', 1)
-      //     }
-      //     const userDefaultSite = defaultValues.userDefaultsList.siteId
-      //     const userDefaultSASite = defaultValues.systemDefaultsList.siteId
-      //     const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-      //     const plant = defaultValues.userDefaultsList.plantId
-      //     const salesPerson = defaultValues.userDefaultsList.spId
-      //     formik.setFieldValue('siteId', parseInt(siteId))
-      //     formik.setFieldValue('spId', parseInt(salesPerson))
-      //     formik.setFieldValue('plantId', parseInt(plant))
-      //     formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
-      //}
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+      if (recordId) await refetchForm(recordId)
     })()
   }, [])
 
@@ -994,145 +922,133 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseQuotation}`}
-                    name='dtId'
-                    label={labels.documentType}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={editMode}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
-                      changeDT(newValue)
-                    }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik?.values?.reference}
-                    maxAccess={!editMode && maxAccess}
-                    readOnly={editMode}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', null)}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={PurchaseRepository.Vendor.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    secondFieldLabel={labels.name}
-                    name='vendorId'
-                    label={labels.vendor}
-                    form={formik}
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
-                    displayFieldWidth={4}
-                    valueShow='vendorRef'
-                    secondValueShow='vendorName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    required={!formik.values.dpId}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('vendorId', newValue?.recordId)
-                      formik.setFieldValue('vendorName', newValue?.name)
-                      formik.setFieldValue('vendorRef', newValue?.reference)
-                      fillVendorData(newValue?.recordId)
-                    }}
-                    errorCheck={'vendorId'}
-                  />
-                </Grid>
-                <Grid item xs={9}>
-                  <ResourceLookup
-                    endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    name='requestId'
-                    label={labels.request}
-                    form={formik}
-                    readOnly={!isRaw}
-                    displayFieldWidth={3}
-                    valueShow='requestRef'
-                    secondValueShow='requestName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('requestName', newValue?.name)
-                      formik.setFieldValue('requestRef', newValue?.reference)
-                      formik.setFieldValue('requestId', newValue?.recordId)
-                    }}
-                    errorCheck={'requestId'}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <CustomButton
-                    onClick={() => {}}
-                    tooltipText={platformLabels.import}
-                    image={'import.png'}
-                    disabled={!formik.values.requestId || !isRaw}
-                  />
+            <Grid container spacing={2} xs={6} sx={{ pt: 2 }}>
+              <Grid item xs={6}>
+                <Grid container direction='column' spacing={2}>
+                  <Grid item>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.DocumentType.qry}
+                      parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseQuotation}`}
+                      name='dtId'
+                      label={labels.documentType}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      readOnly={editMode}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      values={formik.values}
+                      maxAccess={maxAccess}
+                      onChange={async (event, newValue) => {
+                        await changeDT(newValue)
+                        formik.setFieldValue('dtId', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <CustomTextField
+                      name='reference'
+                      label={labels.reference}
+                      value={formik?.values?.reference}
+                      maxAccess={!editMode && maxAccess}
+                      readOnly={editMode}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('reference', null)}
+                      error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='date'
-                    required
-                    label={labels.date}
-                    value={formik?.values?.date}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
-                    readOnly={!isRaw}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
-                  />
+              <Grid item xs={6}>
+                <Grid container direction='column' spacing={2}>
+                  <Grid item>
+                    <CustomDatePicker
+                      name='date'
+                      required
+                      label={labels.date}
+                      value={formik?.values?.date}
+                      onChange={formik.setFieldValue}
+                      readOnly={!isRaw}
+                      maxAccess={maxAccess}
+                      onClear={() => formik.setFieldValue('date', null)}
+                      error={formik.touched.date && Boolean(formik.errors.date)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Currency.qry}
+                      name='currencyId'
+                      label={labels.currency}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      required
+                      readOnly={formik?.values?.items?.some(item => item.itemId)}
+                      values={formik.values}
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('currencyId', newValue?.recordId || null)
+                        formik.setFieldValue('items', formik.initialValues.items)
+                      }}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('items', formik.initialValues.items)
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
-                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={PurchaseRepository.Vendor.snapshot}
+                  valueField='reference'
+                  displayField='name'
+                  secondFieldLabel={labels.name}
+                  name='vendorId'
+                  label={labels.vendor}
+                  form={formik}
+                  readOnly={formik?.values?.items?.some(item => item.itemId)}
+                  displayFieldWidth={2}
+                  valueShow='vendorRef'
+                  secondValueShow='vendorName'
+                  maxAccess={maxAccess}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  onChange={(event, newValue) => {
+                    fillVendorData(newValue)
+                  }}
+                  errorCheck={'vendorId'}
+                />
+              </Grid>
+              <Grid item xs={10}>
+                <ResourceLookup
+                  endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
+                  valueField='reference'
+                  displayField='reference'
+                  name='requestRef'
+                  label={labels.request}
+                  form={formik}
+                  readOnly={!isRaw}
+                  secondDisplayField={false}
+                  maxAccess={maxAccess}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('requestRef', newValue?.reference)
+                    formik.setFieldValue('requestId', newValue?.recordId)
+                  }}
+                  errorCheck={'requestId'}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <CustomButton
+                  onClick={() => {}}
+                  tooltipText={platformLabels.import}
+                  image={'import.png'}
+                  disabled={!formik.values.requestId || !isRaw}
+                />
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -1152,7 +1068,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
                     displayFieldWidth={2}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -1168,7 +1084,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     displayField='value'
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.paymentMethod', newValue?.key || null)
+                      formik.setFieldValue('paymentMethod', newValue?.key || null)
                     }}
                     error={formik.touched?.paymentMethod && Boolean(formik.errors?.paymentMethod)}
                     maxAccess={maxAccess}
@@ -1188,7 +1104,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     readOnly
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('taxId', newValue?.recordId || null)
                     }}
                     error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                     maxAccess={maxAccess}
@@ -1201,6 +1117,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     value={formik?.values?.vendorDocRef}
                     maxAccess={maxAccess}
                     readOnly={!isRaw}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('vendorDocRef', '')}
                     error={formik.touched.vendorDocRef && Boolean(formik.errors.vendorDocRef)}
@@ -1216,7 +1133,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     label={labels.deliveryDate}
                     value={formik?.values?.deliveryDate}
                     onChange={formik.setFieldValue}
-                    editMode={editMode}
                     readOnly={!isRaw}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('deliveryDate', null)}
@@ -1277,7 +1193,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={!formik.values.clientId || !isRaw}
+            disabled={!formik.values.vendorId || !isRaw}
             allowDelete={isRaw}
           />
         </Grow>
@@ -1290,7 +1206,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                   label={labels.description}
                   value={formik.values.description}
                   rows={3}
-                  editMode={editMode}
                   readOnly={!isRaw}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('description', e.target.value)}

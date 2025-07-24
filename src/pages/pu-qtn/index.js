@@ -132,7 +132,7 @@ export default function PurchaseQuotations() {
       },
       width: 1300,
       height: 730,
-      title: labels.puqtn
+      title: labels.quotations
     })
   }
 
