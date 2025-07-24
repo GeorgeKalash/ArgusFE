@@ -38,12 +38,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     endpointId: LoanManagementRepository.BalanceAdjustment.page
   })
 
-  useEffect(() => {
-    if (documentType?.dtId) {
-      formik.setFieldValue('dtId', documentType.dtId)
-    }
-  }, [documentType?.dtId])
-
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -63,7 +57,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
       notes: '',
       status: 1
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -139,7 +132,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -176,6 +169,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                   _branchId: 0
                 }}
                 form={formik}
+                maxAccess={maxAccess}
                 valueField='reference'
                 displayField='fullName'
                 name='employeeRef'
@@ -184,15 +178,9 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 required
                 secondValue={formik.values.employeeName}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('employeeId', newValue?.recordId)
-                    formik.setFieldValue('employeeRef', newValue?.reference)
-                    formik.setFieldValue('employeeName', newValue?.fullName)
-                  } else {
-                    formik.setFieldValue('employeeId', null)
-                    formik.setFieldValue('employeeRef', '')
-                    formik.setFieldValue('employeeName', '')
-                  }
+                  formik.setFieldValue('employeeRef', newValue?.reference || '')
+                  formik.setFieldValue('employeeName', newValue?.fullName || '')
+                  formik.setFieldValue('employeeId', newValue?.recordId || null)
                 }}
                 error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
               />
@@ -225,7 +213,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 values={formik.values}
                 valueField='key'
                 displayField='value'
-                maxAccess={access}
+                maxAccess={maxAccess}
                 required
                 onChange={(event, newValue) => {
                   formik.setFieldValue('leaveTrackTime', newValue?.key || null)
@@ -240,7 +228,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 value={formik.values.effectiveDate}
                 onChange={formik.setFieldValue}
                 required
-                maxAccess={access}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('effectiveDate', null)}
                 error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
               />
@@ -253,6 +241,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
                 maxLength={6}
                 decimalScale={2}
+                maxAccess={maxAccess}
                 required
                 onClear={() => formik.setFieldValue('hours', 0)}
                 error={formik.touched.hours && Boolean(formik.errors.hours)}
@@ -266,6 +255,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
                 maxLength={6}
                 decimalScale={2}
+                maxAccess={maxAccess}
                 required
                 onClear={() => formik.setFieldValue('duration', 0)}
                 error={formik.touched.duration && Boolean(formik.errors.duration)}
