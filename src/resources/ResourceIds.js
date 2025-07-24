@@ -515,7 +515,11 @@ export const ResourceIds = {
   UserProperties: 71113,
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
+  OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
+  HRPendingPunches: 72207,
+  BiometricDevices: 72101,
+  DSLReasons: 72107,
   PurchaseQuotations: 50302,
 
   // GL
@@ -562,6 +566,7 @@ export const ResourceIds = {
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
+  GLMaterialAdjustment: 41606,
 
   //MCR
   MCRSalesInvoice: 51607,

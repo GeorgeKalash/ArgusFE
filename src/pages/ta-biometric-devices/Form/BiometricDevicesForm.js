@@ -1,27 +1,27 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
+import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { useForm } from 'src/hooks/form'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { useForm } from 'src/hooks/form'
 
-export default function ProductionLineForm({ labels, maxAccess, recordId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.ProductionLine.page
+    endpointId: TimeAttendanceRepository.BiometricDevices.page
   })
 
   const { formik } = useForm({
@@ -29,55 +29,54 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      ccId: null
+      divisionId: null,
+      branchId: null
     },
-    maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      branchId: yup.number().required()
     }),
     onSubmit: async obj => {
-      const res = await postRequest({
-        extension: ManufacturingRepository.ProductionLine.set,
+      const response = await postRequest({
+        extension: TimeAttendanceRepository.BiometricDevices.set,
         record: JSON.stringify(obj)
       })
-      formik.setFieldValue('recordId', res.recordId)
-      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
+
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      formik.setFieldValue('recordId', response?.recordId)
 
       invalidate()
     }
   })
-
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: ManufacturingRepository.ProductionLine.get,
+          extension: TimeAttendanceRepository.BiometricDevices.get,
           parameters: `_recordId=${recordId}`
         })
-
-        formik.setValues(res.record)
+        formik.setValues({ ...res.record })
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ProductionLines} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.BiometricDevices} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
                 required
-                maxLength='4'
                 maxAccess={maxAccess}
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -88,9 +87,9 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
+                maxLength='30'
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
@@ -98,10 +97,24 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={GeneralLedgerRepository.CostCenter.qry}
-                parameters={`_params=&_startAt=0&_pageSize=1000`}
-                name='ccId'
-                label={labels.costCenter}
+                endpointId={companyStructureRepository.DivisionFilters.qry}
+                name='divisionId'
+                label={labels.division}
+                valueField='recordId'
+                displayField={'name'}
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('divisionId', newValue?.recordId || null)
+                }}
+                error={formik.touched.divisionId && Boolean(formik.errors.divisionId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={companyStructureRepository.BranchFilters.qry}
+                name='branchId'
+                label={labels.branch}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -111,9 +124,10 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('ccId', newValue?.recordId)
+                  formik.setFieldValue('branchId', newValue?.recordId || null)
                 }}
-                error={formik.touched.ccId && Boolean(formik.errors.ccId)}
+                required
+                error={formik.touched.branchId && Boolean(formik.errors.branchId)}
               />
             </Grid>
           </Grid>
