@@ -1,0 +1,229 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+
+export default function HrSponsorForm({ labels, maxAccess, recordId }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: EmployeeRepository.SponsorFilters.page
+  })
+
+  const validationSchema = yup.object({
+    name: yup.string().required(),
+    idRef: yup.string(),
+    rtwRef: yup.string(),
+    address: yup.string().required(),
+    city: yup.string(),
+    mobile: yup
+      .number()
+      .typeError()
+      .integer()
+      .positive()
+      .max(99999999)
+      .nullable()
+      .transform((value, originalValue) => (originalValue === '' ? null : value)),
+    phone: yup.string().max(8).nullable(),
+    email: yup.string(),
+    fax: yup.string(),
+    isSupplier: yup.boolean()
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      name: '',
+      idRef: '',
+      rtwRef: '',
+      address: '',
+      city: '',
+      mobile: null,
+      phone: '',
+      email: '',
+      fax: '',
+      isSupplier: false
+    },
+    maxAccess,
+    validateOnChange: true,
+    validationSchema,
+    onSubmit: async obj => {
+      const response = await postRequest({
+        extension: EmployeeRepository.SponsorFilters.set,
+        record: JSON.stringify(obj)
+      })
+
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
+      }
+      invalidate()
+    }
+  })
+
+  const editMode = !!formik?.values?.recordId
+
+  useEffect(() => {
+    if (recordId) {
+      ;(async function () {
+        const res = await getRequest({
+          extension: EmployeeRepository.SponsorFilters.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res?.record)
+      })()
+    }
+  }, [])
+
+  return (
+    <FormShell resourceId={ResourceIds.SponsorFilter} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='100'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+                helperText={formik.touched.name && formik.errors.name}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='idRef'
+                label={labels.ref}
+                value={formik.values.idRef}
+                required
+                maxAccess={maxAccess}
+                maxLength='50'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('idRef', '')}
+                error={formik.touched.idRef && Boolean(formik.errors.idRef)}
+                helperText={formik.touched.idRef && formik.errors.idRef}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='rtwRef'
+                label={labels.rightt}
+                value={formik.values.rtwRef}
+                required
+                maxAccess={maxAccess}
+                maxLength='50'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rtwRef', '')}
+                error={formik.touched.rtwRef && Boolean(formik.errors.rtwRef)}
+                helperText={formik.touched.rtwRef && formik.errors.rtwRef}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='address'
+                label={labels.address}
+                value={formik.values.address}
+                required
+                maxAccess={maxAccess}
+                maxLength='200'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('address', '')}
+                error={formik.touched.address && Boolean(formik.errors.address)}
+                helperText={formik.touched.address && formik.errors.address}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='city'
+                label={labels.city}
+                value={formik.values.city}
+                required
+                maxAccess={maxAccess}
+                maxLength='100'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('city', '')}
+                error={formik.touched.city && Boolean(formik.errors.city)}
+                helperText={formik.touched.city && formik.errors.city}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='mobile'
+                label={labels.mobile}
+                value={formik.values.mobile}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('mobile', null)}
+                error={formik.touched.mobile && Boolean(formik.errors.mobile)}
+                helperText={formik.touched.mobile && formik.errors.mobile}
+                inputProps={{ maxLength: 8 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='phone'
+                label={labels.phone}
+                value={formik.values.phone}
+                maxAccess={maxAccess}
+                maxLength='8'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('phone', '')}
+                error={formik.touched.phone && Boolean(formik.errors.phone)}
+                helperText={formik.touched.phone && formik.errors.phone}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='email'
+                label={labels.email}
+                value={formik.values.email}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('email', '')}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='fax'
+                label={labels.fax}
+                value={formik.values.fax}
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('fax', '')}
+                error={formik.touched.fax && Boolean(formik.errors.fax)}
+                helperText={formik.touched.fax && formik.errors.fax}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isSupplier'
+                label={labels.supplier}
+                value={formik.values.isSupplier}
+                onChange={e => formik.setFieldValue('isSupplier', e.target.checked)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
