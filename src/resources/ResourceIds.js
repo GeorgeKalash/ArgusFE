@@ -519,6 +519,7 @@ export const ResourceIds = {
   OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
   BiometricDevices: 72101,
+  DSLReasons: 72107,
 
   // GL
   GLSalesInvoice: 51604,
