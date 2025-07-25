@@ -38,11 +38,43 @@ const CustomNumberField = ({
   handleButtonClick,
   cycleButtonLabel = '',
   iconMapIndex = 0,
+  minValue = null,
+  maxValue = null,
+  setFieldValidation,
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+
+  useEffect(() => {
+    if (!name) return
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+        const shouldRemove = existing && !_required && minValue == null && maxValue == null
+        if (shouldRemove) {
+          const newState = { ...prev }
+          delete newState[name]
+
+          return newState
+        }
+
+        const next = {
+          required: _required && !_hidden,
+          minValue,
+          maxValue
+        }
+
+        const isEqual =
+          existing?.required === next.required &&
+          existing?.minValue === next.minValue &&
+          existing?.maxValue === next.maxValue
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [minValue, maxValue, _required])
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/

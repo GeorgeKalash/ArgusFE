@@ -31,6 +31,7 @@ const CustomDatePicker = ({
   editMode = false,
   hasBorder = true,
   hidden = false,
+  setFieldValidation,
   ...props
 }) => {
   const inputRef = useRef(null)
@@ -42,6 +43,26 @@ const CustomDatePicker = ({
   const [isFocused, setIsFocused] = useState(false)
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
+  console.log(name, _readOnly, _required, _hidden)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      console.log(_readOnly, _required, _hidden)
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const next = {
+          required: _required && !_hidden
+        }
+
+        const isEqual = existing?.required === next.required
+        console.log('next', name, next, isEqual)
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [_required])
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)

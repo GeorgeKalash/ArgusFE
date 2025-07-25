@@ -23,7 +23,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { createConditionalSchema } from 'src/lib/validation'
 
 export default function FoWaxesForm({ labels, access, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -41,16 +40,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     endpointId: FoundryRepository.Wax.page
   })
 
-  const conditions = {
-    jobId: row => row?.jobId,
-    pieces: row => row?.jobId > 0 && row?.pieces <= row?.jobPcs
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
-  const { formik } = useForm({
+  const { formik, setFieldValidation, filterRows } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
-    conditionSchema: ['items'],
     initialValues: {
       recordId: null,
       header: {
@@ -77,7 +68,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           id: 1,
           jobId: null,
           waxId: recordId || 0,
-          pieces: 0,
+          pieces: null,
           jobPcs: 0,
           classId: null,
           sku: '',
@@ -89,6 +80,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       ]
     },
     maxAccess,
+    allowNoLines: true,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -102,8 +94,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         mouldWgt: yup.number().required(),
         netWgt: yup.number().min(0).required(),
         suggestedWgt: yup.number().required()
-      }),
-      items: yup.array().of(schema)
+      })
     }),
     onSubmit: async obj => {
       const { items, header } = obj
@@ -112,11 +103,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         extension: FoundryRepository.Wax.set2,
         record: JSON.stringify({
           header,
-          items: items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+          items: filterRows(
+            'items',
+            items?.map(({ id, ...rest }) => rest)
+          )
         })
       })
-      const actionMessage = !obj.recordId ? platformLabels.Added : platformLabels.Edited
-      toast.success(actionMessage)
+
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       refetchForm(response.recordId)
       invalidate()
     }
@@ -281,6 +275,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       name: 'jobId',
       flex: 1,
       props: {
+        required: true,
         endpointId: ManufacturingRepository.MFJobOrder.snapshot2,
         parameters: {
           _workCenterId: formik.values?.header?.workCenterId
@@ -295,7 +290,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'pcs', to: 'jobPcs' },
+
+          // { from: 'pcs', to: 'jobPcs' },
           { from: 'routingSeqNo', to: 'routingSeqNo' }
         ],
         columnsInDropDown: [
@@ -317,12 +313,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           standardId: design?.standardId,
           standardRef: design?.standardRef,
           pieces: parseFloat(jobRouting?.pcs || 0),
-          rmWgt: parseFloat(jobRouting?.qty || 0)
+          rmWgt: parseFloat(jobRouting?.qty || 0),
+          jobPcs: newRow?.id * 1000
         })
 
         setReCal(true)
       }
     },
+
     {
       component: 'textfield',
       label: labels.sku,
@@ -368,20 +366,26 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'rmWgt',
       label: labels.rmWgt,
-      defaultValue: 0,
       onChange: () => {
         setReCal(true)
       },
       props: {
-        readOnly: isClosed
+        readOnly: isClosed,
+        required: true
       }
     },
     {
       component: 'numberfield',
       name: 'pieces',
       label: labels.pieces,
-      defaultValue: 0,
       props: {
+        onCondition: row => {
+          return {
+            maxValue: row?.jobPcs || null
+          }
+        },
+
+        required: true,
         allowNegative: false,
         readOnly: isClosed
       }
@@ -640,6 +644,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                     readOnly={isClosed}
                     value={formik.values.header.grossWgt}
                     maxAccess={maxAccess}
+                    setFieldValidation={setFieldValidation}
                     onChange={e => formik.setFieldValue('header.grossWgt', e.target.value)}
                     onClear={() => formik.setFieldValue('header.grossWgt', 0)}
                     error={formik.touched?.header?.grossWgt && Boolean(formik.errors?.header?.grossWgt)}
@@ -703,6 +708,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            setFieldValidation={setFieldValidation}
           />
         </Grow>
       </VertLayout>

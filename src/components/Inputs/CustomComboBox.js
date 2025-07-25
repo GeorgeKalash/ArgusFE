@@ -36,6 +36,7 @@ const CustomComboBox = ({
   refresh = true,
   isLoading,
   onBlur = () => {},
+  setFieldValidation,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -59,6 +60,22 @@ const CustomComboBox = ({
   const selectFirstValue = useRef(null)
 
   const filterOptions = useRef(null)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const next = {
+          required: _required && !_hidden
+        }
+
+        const isEqual = existing?.required === next.required
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [_required])
 
   useEffect(() => {
     function handleBlur(event) {

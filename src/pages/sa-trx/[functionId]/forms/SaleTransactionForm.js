@@ -60,7 +60,6 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import AddressForm from 'src/components/Shared/AddressForm'
-import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function SaleTransactionForm({
@@ -99,17 +98,10 @@ export default function SaleTransactionForm({
 
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
-  const conditions = {
-    sku: row => row?.sku,
-    itemName: row => row?.itemName,
-    qty: row => row?.qty > 0
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines)
-
-  const { formik } = useForm({
+  const { formik, setFieldValidation, filterRows } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
+    allowNoLines,
     initialValues: {
       recordId: recordId || null,
       search: '',
@@ -172,7 +164,8 @@ export default function SaleTransactionForm({
           seqNo: 1,
           siteId: null,
           muId: null,
-          qty: 0,
+
+          qty: null,
           volume: 0,
           weight: 0,
           isMetal: false,
@@ -210,7 +203,7 @@ export default function SaleTransactionForm({
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        // date: yup.string().required(),
         currencyId: yup.string().required(),
         clientId: yup.string().required(),
         siteId: yup
@@ -227,8 +220,7 @@ export default function SaleTransactionForm({
 
             return true
           })
-      }),
-      items: yup.array().of(schema)
+      })
     }),
     onSubmit: async obj => {
       if (obj.header.serializedAddress) {
@@ -247,9 +239,9 @@ export default function SaleTransactionForm({
 
       let serialsValues = []
 
-      const updatedRows = obj.items
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-        .map(({ id, isVattable, taxDetails, ...rest }) => {
+      const updatedRows = filterRows(
+        'items',
+        obj.items?.map(({ id, isVattable, taxDetails, ...rest }) => {
           const { serials, ...restDetails } = rest
 
           if (serials) {
@@ -272,6 +264,7 @@ export default function SaleTransactionForm({
             applyVat: isVattable
           }
         })
+      )
 
       const payload = {
         header: {
@@ -550,7 +543,8 @@ export default function SaleTransactionForm({
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Item Name' }
         ],
-        displayFieldWidth: 5
+        displayFieldWidth: 5,
+        required: true
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) return
@@ -571,7 +565,8 @@ export default function SaleTransactionForm({
       name: 'itemName',
       flex: 3,
       props: {
-        readOnly: true
+        readOnly: true,
+        required: true
       }
     },
     {
@@ -646,6 +641,10 @@ export default function SaleTransactionForm({
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        required: true,
+        minValue: 1
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -857,6 +856,8 @@ export default function SaleTransactionForm({
     }
   ]
 
+  console.log(formik, allowNoLines)
+
   function checkMinMaxAmount(amount, type, modType) {
     let currentAmount = parseFloat(amount) || 0
 
@@ -1065,30 +1066,32 @@ export default function SaleTransactionForm({
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = await Promise.all(
-      saTrxItems?.map(async (item, index) => {
-        const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
+    const modifiedList = saTrxItems?.length
+      ? await Promise.all(
+          saTrxItems?.map(async (item, index) => {
+            const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
-        return {
-          ...item,
-          id: index + 1,
-          basePrice: parseFloat(item.basePrice).toFixed(5),
-          unitPrice: parseFloat(item.unitPrice).toFixed(3),
-          upo: parseFloat(item.upo).toFixed(2),
-          vatAmount: parseFloat(item.vatAmount).toFixed(2),
-          extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          serials: saTrxPack?.serials
-            ?.filter(row => row.seqNo == item.seqNo)
-            .map((serialDetail, index) => {
-              return {
-                ...serialDetail,
-                id: index
-              }
-            }),
-          taxDetails
-        }
-      })
-    )
+            return {
+              ...item,
+              id: index + 1,
+              basePrice: parseFloat(item.basePrice).toFixed(5),
+              unitPrice: parseFloat(item.unitPrice).toFixed(3),
+              upo: parseFloat(item.upo).toFixed(2),
+              vatAmount: parseFloat(item.vatAmount).toFixed(2),
+              extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+              serials: saTrxPack?.serials
+                ?.filter(row => row.seqNo == item.seqNo)
+                .map((serialDetail, index) => {
+                  return {
+                    ...serialDetail,
+                    id: index
+                  }
+                }),
+              taxDetails
+            }
+          })
+        )
+      : formik.initialValues.items
 
     itemsUpdate.current = modifiedList
     const res = await getClientInfo(saTrxHeader.clientId)
@@ -1365,6 +1368,8 @@ export default function SaleTransactionForm({
 
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
+    console.log(itemPriceRow?.qty)
+
     const vatCalcRow = getVatCalc({
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
@@ -1379,7 +1384,7 @@ export default function SaleTransactionForm({
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
+      qty: itemPriceRow?.qty != null ? parseFloat(itemPriceRow?.qty).toFixed(2) : null,
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
       weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
@@ -1749,6 +1754,8 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
+  console.log('formik', formik)
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1896,6 +1903,7 @@ export default function SaleTransactionForm({
                   formik.setFieldValue('header.date', newValue)
                   await getMultiCurrencyFormData(formik.values.header.currencyId, newValue, RateDivision.FINANCIALS)
                 }}
+                setFieldValidation={setFieldValidation}
                 editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('header.date', null)}
@@ -2094,6 +2102,7 @@ export default function SaleTransactionForm({
               if (field == 'muRef') getFilteredMU(row?.itemId)
             }}
             name='items'
+            setFieldValidation={setFieldValidation}
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}

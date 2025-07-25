@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -33,6 +33,31 @@ const CustomTimePicker = ({
   const [isFocused, setIsFocused] = useState(false)
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+
+  useEffect(() => {
+    if (!name) return
+
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const shouldRemove = !_required && !minLength
+
+        if (shouldRemove) {
+          const newState = { ...prev }
+          delete newState[name]
+
+          return newState
+        }
+
+        return {
+          ...prev,
+          [name]: {
+            required: _required && !_hidden,
+            minLength
+          }
+        }
+      })
+    }
+  }, [_required])
 
   return _hidden ? (
     <></>
