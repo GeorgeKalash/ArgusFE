@@ -134,6 +134,7 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('ldValue', null)}
                 maxAccess={maxAccess}
+                allowNegative={false}
                 error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
               />
             </Grid>
