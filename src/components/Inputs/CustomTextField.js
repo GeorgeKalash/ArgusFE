@@ -83,11 +83,11 @@ const CustomTextField = ({
   }
 
   useEffect(() => {
-    if (autoFocus && inputRef.current) {
+    if (autoFocus && inputRef.current && value == '') {
       inputRef.current.focus()
       inputRef.current.select()
     }
-  }, [autoFocus, inputRef.current])
+  }, [autoFocus, inputRef.current, value])
 
   return _hidden ? (
     <></>
@@ -101,7 +101,7 @@ const CustomTextField = ({
       value={value ? value : null}
       size={size}
       fullWidth={fullWidth}
-      autoFocus={autoFocus}
+      autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
         setIsFocused(false), setFocus(false)
