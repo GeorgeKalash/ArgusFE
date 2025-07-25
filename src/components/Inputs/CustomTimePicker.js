@@ -14,7 +14,8 @@ const CustomTimePicker = ({
   label,
   value,
   onChange,
-  error,
+  error = false,
+  helperText = '',
   disabledRangeTime = {},
   variant = 'outlined',
   size = 'small',
@@ -27,6 +28,7 @@ const CustomTimePicker = ({
   editMode = false,
   hasBorder = true,
   hidden = false,
+  use24Hour = false,
   ...props
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
@@ -44,6 +46,7 @@ const CustomTimePicker = ({
         value={value}
         label={label}
         fullWidth={fullWidth}
+        ampm={!use24Hour}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         sx={{
@@ -74,9 +77,10 @@ const CustomTimePicker = ({
         slotProps={{
           textField: {
             required: _required,
-            size: size,
-            fullWidth: fullWidth,
-            error: error,
+            size,
+            fullWidth,
+            error: !!error,
+            helperText: typeof error === 'string' ? error : helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
@@ -100,6 +104,7 @@ const CustomTimePicker = ({
           actionBar: props => <PickersActionBar {...props} actions={['accept']} />,
           popper: PopperComponent
         }}
+        {...props}
       />
     </LocalizationProvider>
   )

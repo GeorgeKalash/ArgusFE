@@ -1,4 +1,4 @@
-import { FormControlLabel, Checkbox } from '@mui/material'
+import { FormControlLabel, Checkbox, FormGroup } from '@mui/material'
 import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomCheckBox = ({
@@ -13,10 +13,11 @@ const CustomCheckBox = ({
   maxAccess,
   required = false,
   disabled = false,
+  error = false,
+  helperText = '',
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
-
   const _disabled = _readOnly || _hidden || disabled
 
   const handleChange = event => {
@@ -26,24 +27,38 @@ const CustomCheckBox = ({
   }
 
   return _hidden ? null : (
-    <FormControlLabel
-      control={
-        <Checkbox
-          name={name}
-          checked={value}
-          required={_required}
-          onChange={handleChange}
-          disabled={_disabled}
-          inputProps={{ 'aria-label': label }}
-          sx={{ ml: 2, '& .MuiSvgIcon-root': { fontSize: 15 }, '&.aria-label': { fontSize: 15 } }}
-          {...props}
-        />
-      }
-      label={label}
-      dir={dir}
-      componentsProps={{ typography: { sx: { fontSize: 15 } } }}
-      {...props}
-    />
+    <FormGroup dir={dir}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            name={name}
+            checked={!!value}
+            required={_required}
+            onChange={handleChange}
+            disabled={_disabled}
+            inputProps={{ 'aria-label': label }}
+            sx={{
+              ml: 2,
+              '& .MuiSvgIcon-root': { fontSize: 15 },
+              ...(error && {
+                color: '#fd3535ff',
+                '&.Mui-checked': {
+                  color: '#fd3535ff'
+                }
+              })
+            }}
+            {...props}
+          />
+        }
+        label={label}
+        sx={{
+          '& .MuiFormControlLabel-label': {
+            fontSize: 15,
+            ...(error && { color: '#fd3535ff' })
+          }
+        }}
+      />
+    </FormGroup>
   )
 }
 
