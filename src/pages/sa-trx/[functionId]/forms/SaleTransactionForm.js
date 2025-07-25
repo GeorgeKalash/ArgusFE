@@ -98,12 +98,6 @@ export default function SaleTransactionForm({
 
   const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
-  const conditions = {
-    sku: row => row?.sku,
-    itemName: row => row?.itemName,
-    qty: row => row?.qty > 0
-  }
-
   const { formik, setFieldValidation, filterRows } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },

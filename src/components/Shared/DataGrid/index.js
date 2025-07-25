@@ -268,13 +268,6 @@ export function DataGrid({
       const maxValue = props?.maxValue
       const required = props?.required
 
-      // const newFieldValidation = {
-      //   required: props.required || false,
-      //   condition,
-      //   minValue,
-      //   maxValue
-      // }
-
       const rowCondition = {}
 
       if (Object.keys(condition).length > 0) {
