@@ -163,7 +163,8 @@ const JobOrder = () => {
       },
       width: 1150,
       height: 700,
-      title: labels.jobOrder
+      title: labels.jobOrder,
+      nextToTitle: reference
     })
   }
 
