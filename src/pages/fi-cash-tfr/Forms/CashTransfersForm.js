@@ -55,7 +55,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     statusName: '',
     functionId: SystemFunction.CashTransfers,
     reference: '',
-    dtId: null,
+    dtId: documentType?.dtId,
     date: new Date(),
     status: 1,
     releaseStatus: 1,
