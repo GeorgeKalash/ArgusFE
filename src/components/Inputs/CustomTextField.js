@@ -82,6 +82,12 @@ const CustomTextField = ({
     }
   }
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current && value == '' && !focus) {
+      inputRef.current.focus()
+    }
+  }, [autoFocus, inputRef.current, value])
+
   return _hidden ? (
     <></>
   ) : (
