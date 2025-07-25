@@ -8,7 +8,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -25,21 +24,16 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
 
   const validationSchema = yup.object({
     name: yup.string().required(),
-    idRef: yup.string(),
-    rtwRef: yup.string(),
     address: yup.string().required(),
-    city: yup.string(),
     mobile: yup
       .number()
-      .typeError()
       .integer()
       .positive()
+      .min(10000000)
       .max(99999999)
       .nullable()
       .transform((value, originalValue) => (originalValue === '' ? null : value)),
     phone: yup.string().max(8).nullable(),
-    email: yup.string(),
-    fax: yup.string(),
     isSupplier: yup.boolean()
   })
 
@@ -50,7 +44,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
       rtwRef: '',
       address: '',
       city: '',
-      mobile: null,
+      mobile: '',
       phone: '',
       email: '',
       fax: '',
@@ -103,7 +97,6 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -111,13 +104,11 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='idRef'
                 label={labels.ref}
                 value={formik.values.idRef}
-                required
                 maxAccess={maxAccess}
                 maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('idRef', '')}
                 error={formik.touched.idRef && Boolean(formik.errors.idRef)}
-                helperText={formik.touched.idRef && formik.errors.idRef}
               />
             </Grid>
             <Grid item xs={12}>
@@ -125,13 +116,11 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='rtwRef'
                 label={labels.rightt}
                 value={formik.values.rtwRef}
-                required
                 maxAccess={maxAccess}
                 maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rtwRef', '')}
                 error={formik.touched.rtwRef && Boolean(formik.errors.rtwRef)}
-                helperText={formik.touched.rtwRef && formik.errors.rtwRef}
               />
             </Grid>
             <Grid item xs={12}>
@@ -145,7 +134,6 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('address', '')}
                 error={formik.touched.address && Boolean(formik.errors.address)}
-                helperText={formik.touched.address && formik.errors.address}
               />
             </Grid>
             <Grid item xs={12}>
@@ -153,26 +141,23 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='city'
                 label={labels.city}
                 value={formik.values.city}
-                required
                 maxAccess={maxAccess}
                 maxLength='100'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('city', '')}
                 error={formik.touched.city && Boolean(formik.errors.city)}
-                helperText={formik.touched.city && formik.errors.city}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='mobile'
                 label={labels.mobile}
                 value={formik.values.mobile}
                 maxAccess={maxAccess}
+                maxLength='8'
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('mobile', null)}
+                onClear={() => formik.setFieldValue('mobile', '')}
                 error={formik.touched.mobile && Boolean(formik.errors.mobile)}
-                helperText={formik.touched.mobile && formik.errors.mobile}
-                inputProps={{ maxLength: 8 }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -185,7 +170,6 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('phone', '')}
                 error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
               />
             </Grid>
             <Grid item xs={12}>
@@ -197,7 +181,6 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('email', '')}
                 error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
               />
             </Grid>
             <Grid item xs={12}>
@@ -206,10 +189,10 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 label={labels.fax}
                 value={formik.values.fax}
                 maxAccess={maxAccess}
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('fax', '')}
                 error={formik.touched.fax && Boolean(formik.errors.fax)}
-                helperText={formik.touched.fax && formik.errors.fax}
               />
             </Grid>
             <Grid item xs={12}>
