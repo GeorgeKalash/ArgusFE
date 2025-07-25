@@ -7,6 +7,8 @@ import PropTypes from 'prop-types'
 import { MenuContext } from 'src/providers/MenuContext'
 import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from './RequestsContext'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { LockedScreensContext } from './LockedScreensContext'
 
 const TabsContext = createContext()
 
@@ -87,11 +89,15 @@ const TabsProvider = ({ children }) => {
     setCurrentTabIndex
   } = useContext(MenuContext)
 
+  const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
+
   const [anchorEl, setAnchorEl] = useState(null)
 
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
+  const { postRequest } = useContext(RequestsContext)
 
   const open = Boolean(anchorEl)
 
@@ -115,6 +121,21 @@ const TabsProvider = ({ children }) => {
         }
       } else if (node.path && node.path === targetRouter) {
         return node.name
+      }
+    }
+
+    return null
+  }
+
+  const findResourceId = (nodes, targetRouter) => {
+    for (const node of nodes) {
+      if (node.children) {
+        const result = findResourceId(node.children, targetRouter)
+        if (result) {
+          return result
+        }
+      } else if (node.path && node.path === targetRouter) {
+        return node.resourceId
       }
     }
 
@@ -223,7 +244,8 @@ const TabsProvider = ({ children }) => {
             route: router.asPath,
             label: lastOpenedPage
               ? lastOpenedPage.name
-              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+            resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
           }
         ])
 
@@ -262,7 +284,8 @@ const TabsProvider = ({ children }) => {
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
 
         const index = newTabs.findIndex(tab => tab.route === router.asPath)
@@ -274,6 +297,28 @@ const TabsProvider = ({ children }) => {
       menu.length > 0 && setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+
+  function unlockRecord(resourceId) {
+    const body = {
+      resourceId: resourceId,
+      recordId: 0,
+      reference: '',
+      userId: userId,
+      clockStamp: new Date()
+    }
+    postRequest({
+      extension: AccessControlRepository.unlockRecord,
+      record: JSON.stringify(body)
+    })
+
+    removeLockedScreen(resourceId)
+  }
+
+  const unlockIfLocked = tab => {
+    if (!tab?.resourceId) return
+    const locked = lockedScreens.some(screen => screen.resourceId === tab.resourceId)
+    if (locked) unlockRecord(tab.resourceId)
+  }
 
   return (
     <>
@@ -346,6 +391,7 @@ const TabsProvider = ({ children }) => {
                         size='small'
                         onClick={event => {
                           event.stopPropagation()
+                          if (activeTab) unlockIfLocked(activeTab)
                           closeTab(activeTab.route)
                         }}
                       >

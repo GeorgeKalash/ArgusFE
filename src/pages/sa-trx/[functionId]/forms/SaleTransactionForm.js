@@ -62,6 +62,7 @@ import AccountSummary from 'src/components/Shared/AccountSummary'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function SaleTransactionForm({
   labels,
@@ -74,6 +75,7 @@ export default function SaleTransactionForm({
   getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -917,6 +919,11 @@ export default function SaleTransactionForm({
         reference: formik.values.header.reference,
         resourceId: getResourceId(parseInt(functionId)),
         onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId,
+            reference
+          })
           refetchForm(res.recordId)
         },
         isAlreadyLocked: name => {
@@ -1116,7 +1123,15 @@ export default function SaleTransactionForm({
       lockRecord({
         recordId: saTrxHeader.recordId,
         reference: saTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId))
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId: saTrxHeader.recordId,
+            reference: saTrxHeader.reference
+          })
+          refetchForm(res.recordId)
+        }
       })
   }
 

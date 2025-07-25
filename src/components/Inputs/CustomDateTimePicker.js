@@ -88,6 +88,8 @@ const CustomDateTimePicker = ({
     return value
   }
 
+  const resolvedValue = value === undefined ? getDefaultValue() : value
+
   return _hidden ? (
     <></>
   ) : (
@@ -95,7 +97,7 @@ const CustomDateTimePicker = ({
       <DateTimePicker
         variant={variant}
         size={size}
-        value={value || getDefaultValue()}
+        value={resolvedValue}
         label={label}
         views={views}
         minDate={!!min ? min : disabledRangeDate.date}
@@ -142,7 +144,7 @@ const CustomDateTimePicker = ({
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
-                  {value && (
+                  {resolvedValue  && (
                     <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
                       <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
