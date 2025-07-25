@@ -106,5 +106,11 @@ export const AccessControlRepository = {
     qry: service + 'qryPLS',
     set2: service + 'set2PLS',
     verify: service + 'verifyPLS'
+  },
+  ResourceDowntime: {
+    page: service + 'pageRDT',
+    get2: service + 'get2RDT',
+    set2: service + 'set2RDT',
+    del: service + 'delRDT'
   }
 }
