@@ -44,6 +44,8 @@ const formatDateFrom = value => {
 }
 
 const convertDateToCompactFormat = input => {
+  if (!input) return
+
   let date
 
   if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
@@ -62,6 +64,8 @@ const convertDateToCompactFormat = input => {
 }
 
 const convertCompactFormatToDate = compactDate => {
+  if (!compactDate) return
+
   const year = parseInt(compactDate.slice(0, 4), 10)
   const month = parseInt(compactDate.slice(4, 6), 10) - 1
   const day = parseInt(compactDate.slice(6, 8), 10)
@@ -252,7 +256,39 @@ const GetDate = ({ field, formik, rpbParams }) => {
 
 const GetDateTimePicker = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+    const currentValue = formik.values?.parameters?.[field.id]?.value
+
+    if (currentValue !== undefined && currentValue !== null) return
+
+    if (field.defaultValue) {
+      let defVal
+      switch (field.defaultValue) {
+        case 'today':
+          defVal = new Date()
+          break
+        case 'yesterday':
+          defVal = new Date()
+          defVal.setDate(defVal.getDate() - 1)
+          break
+        case 'boy':
+          defVal = new Date(new Date().getFullYear(), 0, 1)
+          break
+        default:
+          defVal = null
+      }
+
+      if (defVal) {
+        formik.setFieldValue(`parameters[${field.id}]`, {
+          fieldId: field.id,
+          fieldKey: field.key,
+          defaultValue: field.defaultValue,
+          value: defVal,
+          controlType: field?.controlType,
+          caption: field.caption,
+          display: formatDateTimeDefault(defVal)
+        })
+      }
+    } else if (field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
