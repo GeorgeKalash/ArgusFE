@@ -12,8 +12,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import SystemFunction from '../system-functions'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,6 +29,11 @@ const MaterialsAdjustment = () => {
         params || ''
       }&_dgId=0&_sortBy=recordId&_trxType=1`
     })
+
+    response.list = response?.list?.map(item => ({
+      ...item,
+      isVerified: item?.isVerified === null ? false : item?.isVerified
+    }))
 
     return { ...response, _startAt: _startAt }
   }
@@ -90,11 +95,22 @@ const MaterialsAdjustment = () => {
       field: 'qty',
       headerName: labels.qty,
       flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.materialsAdjustment,
+    functionId: SystemFunction.MaterialAdjustment,
     action: openForm
   })
 

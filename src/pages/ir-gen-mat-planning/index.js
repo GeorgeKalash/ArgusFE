@@ -131,7 +131,7 @@ const GenerateMaterialPlaning = () => {
     {
       component: 'numberfield',
       label: labels.onHand,
-      name: 'onhand',
+      name: 'onHand',
       width: 100,
       props: {
         readOnly: true

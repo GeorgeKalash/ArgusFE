@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
@@ -14,7 +14,6 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getGridData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,13 +22,13 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       ilId,
       sign: '',
-      tagId: '',
+      tagId: null,
       integrationLevel: '',
       masterSource: '',
-      postTypeId: '',
+      postTypeId: null,
       description: '',
       costCenterSource: null
     },
@@ -43,65 +42,49 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
       postTypeId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const res2 = await fetchData()
+      const res2 = await fetchData()
 
-        const updatedList = obj?.seqNo
-          ? res2?.list?.map(item => (item?.seqNo === obj?.seqNo ? obj : item))
-          : [
-              ...res2?.list,
-              { ...obj, seqNo: res2?.list?.length > 0 ? res2.list[res2?.list?.length - 1]?.seqNo + 1 : 1 }
-            ]
+      const updatedList = obj?.seqNo
+        ? res2?.list?.map(item => (item?.seqNo === obj?.seqNo ? obj : item))
+        : [...res2?.list, { ...obj, seqNo: res2?.list?.length > 0 ? res2.list[res2?.list?.length - 1]?.seqNo + 1 : 1 }]
 
-        const dataToSave = {
-          ilId,
-          details: updatedList
-        }
+      const dataToSave = {
+        ilId,
+        details: updatedList
+      }
 
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.IntegrationLogicDetails.set2,
-          record: JSON.stringify(dataToSave)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.IntegrationLogicDetails.set2,
+        record: JSON.stringify(dataToSave)
+      })
 
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-        formik.setFieldValue('recordId', response.recordId)
-        await getGridData(ilId)
-        window.close()
-      } catch (error) {}
+      await getGridData(response.recordId)
+      window.close()
     }
   })
 
   async function fetchData() {
-    try {
-      if (ilId) {
-        const response = await getRequest({
-          extension: GeneralLedgerRepository.IntegrationLogicDetails.qry,
-          parameters: `_ilId=${ilId}`
-        })
+    if (!ilId) return
 
-        return response
-      }
-    } catch (error) {}
-  }
-
-  const getIntegrationLogicById = async recordId => {
-    try {
-      const res = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationLogicDetails.get,
-        parameters: `_seqNo=${recordId}&_ilId=${ilId}`
-      })
-
-      formik.setValues(res.record)
-    } catch (error) {}
+    return await getRequest({
+      extension: GeneralLedgerRepository.IntegrationLogicDetails.qry,
+      parameters: `_ilId=${ilId}`
+    })
   }
 
   useEffect(() => {
-    console.log(recordId, 'recordId')
-    if (recordId) {
-      console.log(recordId, 'recordId')
-      getIntegrationLogicById(recordId)
-    }
+    ;(async function () {
+      if (recordId && ilId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.IntegrationLogicDetails.get,
+          parameters: `_seqNo=${recordId}&_ilId=${ilId}`
+        })
+
+        formik.setValues(res.record)
+      }
+    })()
   }, [recordId])
 
   return (
@@ -131,7 +114,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 secondValueShow='ptName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('postTypeId', newValue?.recordId || '')
+                  formik.setFieldValue('postTypeId', newValue?.recordId || null)
                   formik.setFieldValue('ptRef', newValue?.reference || '')
                   formik.setFieldValue('ptName', newValue?.name || '')
                 }}
@@ -150,7 +133,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('sign', newValue ? newValue.key : '')
+                  formik && formik.setFieldValue('sign', newValue?.key || null)
                 }}
                 error={formik.touched.sign && Boolean(formik.errors.sign)}
               />
@@ -166,7 +149,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('masterSource', newValue ? parseInt(newValue.key) : '')
+                  formik && formik.setFieldValue('masterSource', newValue?.key || null)
                 }}
                 error={formik.touched.masterSource && Boolean(formik.errors.masterSource)}
               />
@@ -182,7 +165,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('tagId', newValue ? newValue.key : '')
+                  formik && formik.setFieldValue('tagId', newValue?.key || null)
                 }}
                 error={formik.touched.tagId && Boolean(formik.errors.tagId)}
               />
@@ -198,7 +181,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('integrationLevel', newValue ? newValue.key : '')
+                  formik && formik.setFieldValue('integrationLevel', newValue?.key || null)
                 }}
                 error={formik.touched.integrationLevel && Boolean(formik.errors.integrationLevel)}
               />
