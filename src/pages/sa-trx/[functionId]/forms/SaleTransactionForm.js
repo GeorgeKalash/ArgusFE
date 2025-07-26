@@ -1106,7 +1106,8 @@ export default function SaleTransactionForm({
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
         accountId: res?.record?.accountId,
-        commitItems: dtInfo?.record?.commitItems
+        commitItems: dtInfo?.record?.commitItems,
+        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
