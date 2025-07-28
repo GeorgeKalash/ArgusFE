@@ -85,12 +85,12 @@ const BalanceAdjustment = () => {
       type: 'date'
     },
     {
-      field: 'employee.parent.fullName',
+      field: 'employeeName',
       headerName: labels.employee,
       flex: 1
     },
     {
-      field: 'schedule.reference',
+      field: 'scheduleRef',
       headerName: labels.schedule,
       flex: 1
     },

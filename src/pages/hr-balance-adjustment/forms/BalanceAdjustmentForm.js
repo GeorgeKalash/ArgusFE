@@ -42,7 +42,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
-      recordId,
+      recordId: null,
       dtId: null,
       reference: '',
       employeeId: null,
@@ -66,7 +66,6 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
       effectiveDate: yup.date().required(),
       date: yup.date().required(),
       hours: yup.number().required(),
-      duration: yup.number().required(),
       notes: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -75,10 +74,11 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
         record: JSON.stringify({
           ...obj,
           effectiveDate: formatDateToApi(obj.effectiveDate),
-          date: formatDateToApi(obj.date)
+          date: formatDateToApi(obj.date),
+          duration: obj.hours
         })
       }).then(async res => {
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
+        toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(res.recordId)
         invalidate()
       })
@@ -156,6 +156,7 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 label={labels.date}
                 value={formik.values?.date}
                 onChange={formik.setFieldValue}
+                disabledDate={'>='}
                 required
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', null)}
@@ -241,24 +242,11 @@ export default function BalanceAdjustmentForm({ labels, access, recordId }) {
                 onChange={formik.handleChange}
                 maxLength={6}
                 decimalScale={2}
+                allowNegative={false}
                 maxAccess={maxAccess}
                 required
                 onClear={() => formik.setFieldValue('hours', 0)}
                 error={formik.touched.hours && Boolean(formik.errors.hours)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='duration'
-                label={labels.duration}
-                value={formik.values.duration}
-                onChange={formik.handleChange}
-                maxLength={6}
-                decimalScale={2}
-                maxAccess={maxAccess}
-                required
-                onClear={() => formik.setFieldValue('duration', 0)}
-                error={formik.touched.duration && Boolean(formik.errors.duration)}
               />
             </Grid>
             <Grid item xs={12}>
