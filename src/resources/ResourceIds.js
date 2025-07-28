@@ -520,6 +520,7 @@ export const ResourceIds = {
   HRPendingPunches: 72207,
   BiometricDevices: 72101,
   DSLReasons: 72107,
+  TerminationReasons: 71110,
   PurchaseQuotations: 50302,
 
   // GL
