@@ -60,55 +60,55 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
         })
     }),
     onSubmit: async obj => {
-      const data = {
-        ...obj,
-        timeFrom: obj.timeFrom ? dayjs(obj.timeFrom).format('HH:mm') : '',
-        timeTo: obj.timeTo ? dayjs(obj.timeTo).format('HH:mm') : ''
-      }
-
-      const response = await postRequest({
+      await postRequest({
         extension: AccessControlRepository.ResourceDowntime.set2,
-        record: JSON.stringify(data)
+        record: JSON.stringify({
+          ...obj,
+          timeFrom: obj.timeFrom ? dayjs(obj.timeFrom).format('HH:mm') : '',
+          timeTo: obj.timeTo ? dayjs(obj.timeTo).format('HH:mm') : ''
+        })
+      }).then(async res => {
+        toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
+        await refetchForm(res.recordId)
+        invalidate()
       })
-
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      formik.setFieldValue('recordId', response.recordId)
-      invalidate()
     }
   })
 
   const editMode = !!formik.values.recordId
 
+  async function refetchForm(recordId) {
+    const res = await getRequest({
+      extension: AccessControlRepository.ResourceDowntime.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    formik.setValues({
+      ...res.record,
+      timeFrom: dayjs(res.record.timeFrom, 'HH:mm'),
+      timeTo: dayjs(res.record.timeTo, 'HH:mm')
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: AccessControlRepository.ResourceDowntime.get2,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record,
-          timeFrom: dayjs(res.record.timeFrom, 'HH:mm'),
-          timeTo: dayjs(res.record.timeTo, 'HH:mm')
-        })
-      } else {
-        await getAllKvsByDataset({
-          _dataset: DataSets.WEEK_DAY,
-          callback: res => {
-            if (res.length > 0) {
-              formik.setFieldValue(
-                'flags',
-                res.map(item => ({
-                  weekday: item.key,
-                  weekdayName: item.value,
-                  flag: false
-                }))
-              )
+      recordId
+        ? refetchForm(recordId)
+        : await getAllKvsByDataset({
+            _dataset: DataSets.WEEK_DAY,
+            callback: res => {
+              if (res.length > 0) {
+                formik.setFieldValue(
+                  'flags',
+                  res.map(item => ({
+                    weekday: item.key,
+                    weekdayName: item.value,
+                    flag: false
+                  }))
+                )
+              }
             }
-          }
-        })
-      }
+          })
     })()
   }, [])
 

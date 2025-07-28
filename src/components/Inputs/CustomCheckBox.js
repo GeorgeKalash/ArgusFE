@@ -27,38 +27,36 @@ const CustomCheckBox = ({
   }
 
   return _hidden ? null : (
-    <FormGroup dir={dir}>
-      <FormControlLabel
-        control={
-          <Checkbox
-            name={name}
-            checked={!!value}
-            required={_required}
-            onChange={handleChange}
-            disabled={_disabled}
-            inputProps={{ 'aria-label': label }}
-            sx={{
-              ml: 2,
-              '& .MuiSvgIcon-root': { fontSize: 15 },
-              ...(error && {
-                color: '#fd3535ff',
-                '&.Mui-checked': {
-                  color: '#fd3535ff'
-                }
-              })
-            }}
-            {...props}
-          />
+    <FormControlLabel
+      control={
+        <Checkbox
+          name={name}
+          checked={!!value}
+          required={_required}
+          onChange={handleChange}
+          disabled={_disabled}
+          inputProps={{ 'aria-label': label }}
+          sx={{
+            ml: 2,
+            '& .MuiSvgIcon-root': { fontSize: 15 },
+            ...(error && {
+              color: '#fd3535ff',
+              '&.Mui-checked': {
+                color: '#fd3535ff'
+              }
+            })
+          }}
+          {...props}
+        />
+      }
+      label={label}
+      sx={{
+        '& .MuiFormControlLabel-label': {
+          fontSize: 15,
+          ...(error && { color: '#fd3535ff' })
         }
-        label={label}
-        sx={{
-          '& .MuiFormControlLabel-label': {
-            fontSize: 15,
-            ...(error && { color: '#fd3535ff' })
-          }
-        }}
-      />
-    </FormGroup>
+      }}
+    />
   )
 }
 
