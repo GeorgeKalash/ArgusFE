@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -98,11 +98,10 @@ const FoGeneralSettings = () => {
       form={formik}
       infoVisible={false}
       isCleared={false}
-      isSavedClear={false}
       maxAccess={access}
     >
       <VertLayout>
-        <Grid container spacing={3} xs={5}>
+        <Grid container spacing={2} xs={5}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Site.qry}
@@ -211,7 +210,7 @@ const FoGeneralSettings = () => {
                 { key: 'name', value: 'Name' }
               ]}
               onChange={(event, newValue) => {
-                formik.setFieldValue('mfRestoredMetalItem', newValue?.recordId || 0)
+                formik.setFieldValue('mfRestoredMetalItem', newValue?.recordId || null)
                 formik.setFieldValue('mfRestoredMetalItemName', newValue?.name || '')
                 formik.setFieldValue('mfRestoredMetalItemRef', newValue?.sku || '')
               }}
