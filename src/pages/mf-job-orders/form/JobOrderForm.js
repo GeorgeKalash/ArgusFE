@@ -110,7 +110,7 @@ export default function JobOrderForm({
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
-      expectedPcs: yup.number().required(),
+      expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
       routingId: yup.string().required()
