@@ -47,7 +47,7 @@ const FoGeneralSettings = () => {
         if (keysToExtract.includes(key)) {
           myObject[key] = value ? parseInt(value) : null
 
-          if (key === 'mfRestoredMetalItem' && value) {
+          if (key === 'mfRestoredMetalItem' && parseInt(value)) {
             const itemRes = await getRequest({
               extension: InventoryRepository.Item.get,
               parameters: `_recordId=${parseInt(value)}`
