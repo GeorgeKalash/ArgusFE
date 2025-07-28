@@ -85,10 +85,11 @@ export default function JobsForm({ labels, maxAccess, store }) {
     return lossSum + lossValue
   }, 0)
 
-  const balanceWgt =
+  const balanceWgtRaw =
     (parseFloat(formik.values.footerOutputWgt) || 0) -
     (parseFloat(formik?.values?.disassemblyWgt) || 0) -
     (parseFloat(assignedWgtBB) || 0)
+  const balanceWgt = Number(balanceWgtRaw.toFixed(2))
 
   const columns = [
     {
