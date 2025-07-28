@@ -81,45 +81,52 @@ const CTExchangeRates = () => {
       }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.min,
       name: 'minRate',
-      props: {
-        onCondition: row => {
-          return {
-            maxValue: row?.rate || null
-          }
-        }
-      }
+      validate: row => row?.rate && row?.rate > row?.minRate
+
+      // props: {
+      //   onCondition: row => {
+      //     return {
+      //       maxValue: row?.rate || null
+      //     }
+      //   }
+      // }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.rate,
       name: 'rate',
-      props: {
-        onCondition: row => {
-          return {
-            maxValue: row?.maxRate || null,
-            minValue: row?.minRate || null
-          }
-        }
-      }
+      validate: row => row?.maxRate > row?.rate
+
+      // props: {
+      //   onCondition: row => {
+      //     return {
+      //       maxValue: row?.maxRate || null,
+      //       minValue: row?.minRate || null
+      //     }
+      //   }
+      // }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.max,
       name: 'maxRate',
-      onCondition: row => {
-        return {
-          minValue: row?.rate || null
-        }
-      }
+      validate: row => row?.rate && row?.maxRate && row?.maxRate > row?.rate
+
+      // props: {
+      //   onCondition: row => {
+      //     return {
+      //       minValue: row?.rate || null
+      //     }
+      //   }
+      // }
     }
   ]
 
   const { formik: puFormik, setFieldValidation: setPuFieldValidation } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
 
     // validationSchema: yup.object({
@@ -632,11 +639,12 @@ const CTExchangeRates = () => {
                           </Grid>
                         </Grid>
                       </Fixed>
-                      <Grow>
+                      {/* <Grow>
                         {formik.values.currencyId != null &&
                           formik.values.raCurrencyId != null &&
                           formik.values.saRateTypeId != null && (
                             <DataGrid
+                              name='rows2'
                               onChange={value => saFormik.setFieldValue('rows', value)}
                               value={saFormik.values.rows}
                               error={saFormik.errors.rows}
@@ -646,7 +654,7 @@ const CTExchangeRates = () => {
                               setFieldValidation={setSaFieldValidation}
                             />
                           )}
-                      </Grow>
+                      </Grow> */}
                     </VertLayout>
                   </FieldSet>
                 </Grid>

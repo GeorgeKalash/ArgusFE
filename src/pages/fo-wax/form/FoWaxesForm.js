@@ -378,13 +378,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'pieces',
       label: labels.pieces,
+      validate: row => {
+        return row?.pieces < row?.jobPcs
+      },
       props: {
-        onCondition: row => {
-          return {
-            maxValue: row?.jobPcs || null
-          }
-        },
-
         required: true,
         allowNegative: false,
         readOnly: isClosed

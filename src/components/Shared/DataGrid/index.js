@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
@@ -230,72 +230,213 @@ export function DataGrid({
     }
   }, [rowSelectionModel])
 
+  const stableColumns = useMemo(() => columns, [columns])
+
+  const prevValidationRef = useRef({})
+
   useEffect(() => {
-    if (!Array.isArray(value)) return
-    if (typeof setFieldValidation !== 'function') return
+    if (!Array.isArray(value) || typeof setFieldValidation !== 'function') return
 
-    const newValidation = {}
+    const computeValidation = async () => {
+      const newValidation = {}
 
-    for (const column of columns) {
-      const { name: fieldName, props = {} } = column
-      const fullName = `${name}.${fieldName}`
+      for (const column of stableColumns) {
+        const { name: fieldName, props = {}, validate } = column
+        const fullName = `${name}.${fieldName}`
 
-      const { _required, _hidden } = checkAccess(
-        fullName,
-        props?.maxAccess,
-        props?.required,
-        props?.readOnly,
-        props?.hidden
-      )
+        const { _required, _hidden } = checkAccess(
+          fullName,
+          props?.maxAccess,
+          props?.required,
+          props?.readOnly,
+          props?.hidden
+        )
 
-      const hasCondition =
-        typeof props.onCondition === 'function' || (_required && !_hidden) || props?.minValue || props?.maxValue
+        const hasCondition =
+          typeof props.onCondition === 'function' ||
+          (_required && !_hidden) ||
+          props?.minValue != null ||
+          props?.maxValue != null ||
+          typeof validate === 'function'
 
-      if (!hasCondition) continue
+        if (!hasCondition) continue
 
-      const condition = {}
+        const rowCondition = {}
 
-      value.forEach((row, rowIndex) => {
-        const result = props?.onCondition && props?.onCondition(row)
-        if (result?.minValue != null || result?.maxValue != null) {
-          condition[rowIndex] = {
-            minValue: result.minValue,
-            maxValue: result.maxValue
-          }
+        if (typeof validate === 'function') {
+          const validationResults = await Promise.all(
+            value.map(async (row, rowIndex) => {
+              const isValid = await validate(row)
+
+              return [rowIndex, { error: isValid === true ? false : true }]
+            })
+          )
+
+          rowCondition.condition = Object.fromEntries(validationResults)
+          rowCondition.validate = validate
         }
-      })
-      const minValue = props?.minValue
-      const maxValue = props?.maxValue
-      const required = props?.required
 
-      const rowCondition = {}
+        if (props?.required) {
+          rowCondition.required = props.required
+        }
 
-      if (Object.keys(condition).length > 0) {
-        rowCondition.condition = condition
-      }
-      if (required) {
-        rowCondition.required = required
-      }
-      if (minValue != null) {
-        rowCondition.minValue = minValue
-      }
-      if (maxValue != null) {
-        rowCondition.maxValue = maxValue
-      }
-
-      if (Object.keys(rowCondition).length > 0) {
         newValidation[fullName] = rowCondition
+      }
+
+      const prevValidation = prevValidationRef.current
+
+      if (!isEqual(prevValidation, newValidation)) {
+        prevValidationRef.current = newValidation
+        setFieldValidation(prev => ({ ...prev, ...newValidation }))
       }
     }
 
-    setTimeout(() => {
-      setFieldValidation(prev => {
-        console.log('prev', prev, isEqual(prev, { ...prev, ...newValidation }))
+    computeValidation()
+  }, [value, name]) // ✅ intentionally removed "columns" from dependency array
 
-        return isEqual(prev, { ...prev, ...newValidation }) ? prev : { ...prev, ...newValidation }
-      })
-    }, 0)
-  }, [value, columns, name])
+  // useEffect(() => {
+  //   if (!Array.isArray(value)) return
+  //   if (typeof setFieldValidation !== 'function') return
+
+  //   const newValidation = {}
+
+  //   for (const column of columns) {
+  //     const { name: fieldName, props = {}, validate } = column
+  //     const fullName = `${name}.${fieldName}`
+
+  //     const { _required, _hidden } = checkAccess(
+  //       fullName,
+  //       props?.maxAccess,
+  //       props?.required,
+  //       props?.readOnly,
+  //       props?.hidden
+  //     )
+
+  //     const hasCondition =
+  //       typeof props.onCondition === 'function' ||
+  //       (_required && !_hidden) ||
+  //       props?.minValue != null ||
+  //       props?.maxValue != null ||
+  //       typeof validate === 'function'
+
+  //     if (!hasCondition) continue
+
+  //     const condition = {}
+
+  //     if (typeof validate === 'function') {
+  //       value.forEach(async (row, rowIndex) => {
+  //         const isValid = await validate(row)
+  //         console.log('isValid', rowIndex, isValid)
+  //         condition[rowIndex] = { error: isValid === true ? false : true }
+  //       })
+  //     }
+
+  //     const rowCondition = {}
+
+  //     // if (Object.keys(condition).length > 0) {
+  //     rowCondition.condition = condition
+
+  //     // }
+  //     if (typeof validate === 'function') {
+  //       rowCondition.validate = validate
+  //     }
+  //     if (props?.required) {
+  //       rowCondition.required = props.required
+  //     }
+
+  //     // if (Object.keys(rowCondition).length > 0) {
+  //     newValidation[fullName] = rowCondition
+
+  //     // }
+  //   }
+
+  //   // setTimeout(() => {
+  //   //   // ✅ Compare before updating
+  //   setFieldValidation(prev => {
+  //     const merged = { ...prev, ...newValidation }
+
+  //     console.log('test', prev, newValidation, merged, isEqual(prev, merged))
+
+  //     return isEqual(prev, merged) ? prev : merged
+  //   })
+
+  //   // }, 0)
+  // }, [value, columns, name])
+
+  // useEffect(() => {
+  //   if (!Array.isArray(value)) return
+  //   if (typeof setFieldValidation !== 'function') return
+
+  //   const newValidation = {}
+
+  //   for (const column of columns) {
+  //     const { name: fieldName, props = {}, validate } = column
+  //     const fullName = `${name}.${fieldName}`
+
+  //     const { _required, _hidden } = checkAccess(
+  //       fullName,
+  //       props?.maxAccess,
+  //       props?.required,
+  //       props?.readOnly,
+  //       props?.hidden
+  //     )
+
+  //     const hasCondition =
+  //       typeof props.onCondition === 'function' ||
+  //       (_required && !_hidden) ||
+  //       props?.minValue ||
+  //       props?.maxValue ||
+  //       typeof validate === 'function'
+
+  //     if (!hasCondition) continue
+
+  //     const condition = {}
+
+  //     value.forEach((row, rowIndex) => {
+  //       // const result = props?.onCondition && props?.onCondition(row)
+
+  //       if (typeof validate === 'function') {
+  //         console.log(validate(row))
+  //         condition[rowIndex] = { error: !validate(row) }
+
+  //         // minValue: result.minValue,
+  //         // maxValue: result.maxValue
+  //       }
+  //     })
+  //     const minValue = props?.minValue
+  //     const maxValue = props?.maxValue
+  //     const required = props?.required
+
+  //     const rowCondition = {}
+
+  //     console.log('length', Object.keys(condition).length)
+  //     if (Object.keys(condition).length > 0) {
+  //       rowCondition.condition = condition
+  //     }
+  //     if (required) {
+  //       rowCondition.required = required
+  //     }
+
+  //     // if (minValue != null) {
+  //     //   rowCondition.minValue = minValue
+  //     // }
+  //     // if (maxValue != null) {
+  //     //   rowCondition.maxValue = maxValue
+  //     // }
+
+  //     if (Object.keys(rowCondition).length > 0) {
+  //       newValidation[fullName] = rowCondition
+  //     }
+  //   }
+
+  //   setTimeout(() => {
+  //     setFieldValidation(prev => {
+  //       console.log('prev', prev, isEqual(prev, { ...prev, ...newValidation }))
+
+  //       return { ...prev, ...newValidation }
+  //     })
+  //   }, 0)
+  // }, [value, columns, name])
 
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1
@@ -608,7 +749,6 @@ export function DataGrid({
             ...column.colDef,
             props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
           }}
-          setFieldValidation={setFieldValidation}
           updateRow={updateRow}
           update={update}
         />

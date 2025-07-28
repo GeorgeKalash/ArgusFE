@@ -38,20 +38,24 @@ export function useForm({
     )
   }
 
-  const checkValidation = (field, value, rule) => {
+  const checkValidation = (field, value, rule, row) => {
     let result = ''
+    console.log('field', field, value, rule, rule?.condition?.error)
 
     if (rule.required && (value === '' || value == null || value == 'NaN')) {
-      result = `${field} is required  test.`
+      result = `${field} is required .`
     } else {
-      if (value != '' && value != null && rule?.minLength != null && value.length < rule.minLength) {
-        result = `${field} must be at least ${rule.minLength} characters`
-      }
+      if (typeof rule?.validate === 'function' && !rule.validate(row)) {
+        result = `${field} is errorssssss`
 
-      if (value != '' && value != null && rule?.maxValue != null && value > rule.maxValue) {
+        // } else if (rule?.error) {
+        //   result = `${field} is error`
+        // }
+      } else if (value != '' && value != null && rule?.minLength != null && value.length < rule.minLength) {
+        result = `${field} must be at least ${rule.minLength} characters`
+      } else if (value != '' && value != null && rule?.maxValue != null && value > rule.maxValue) {
         result = `${field} value must less than ${rule.maxValue}`
-      }
-      if (value != '' && value != null && rule?.minValue != null && value < rule.minValue) {
+      } else if (value != '' && value != null && rule?.minValue != null && value < rule.minValue) {
         result = `${field} value must be more than  ${rule.minValue}`
       }
     }
@@ -136,7 +140,8 @@ export function useForm({
                 const rowCondition = rule?.condition?.[index]
 
                 if (rowCondition) {
-                  const error = checkValidation(fieldName, row[fieldName], { ...rule, ...rowCondition })
+                  console.log('hhhh', rowCondition)
+                  const error = checkValidation(fieldName, row[fieldName], { ...rule, error: rowCondition?.error }, row)
                   if (error) {
                     maxAccessErrors[gridName][index][fieldName] = error
                   }
