@@ -95,7 +95,7 @@ const BalanceAdjustment = () => {
       flex: 1
     },
     {
-      field: 'leaveTrackTime',
+      field: 'leaveTrackTimeName',
       headerName: labels.leaveTrackTime,
       flex: 1
     },
