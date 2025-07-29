@@ -523,6 +523,7 @@ export const ResourceIds = {
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
+  ShiftLeave: 72210,
 
   // GL
   GLSalesInvoice: 51604,

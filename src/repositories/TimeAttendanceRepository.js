@@ -12,7 +12,7 @@ export const TimeAttendanceRepository = {
   },
   PendingPunches: {
     page: service + 'pagePP',
-    del: service + 'delPP',
+    del: service + 'delPP'
   },
   BiometricDevices: {
     page: service + 'pageBM',
@@ -25,5 +25,18 @@ export const TimeAttendanceRepository = {
     set: service + 'setLR',
     get: service + 'getLR',
     del: service + 'delLR'
+  },
+  ShitLeave: {
+    page: service + 'pageLQ',
+    qry: service + 'qryLQ',
+    set: service + 'setLQ',
+    get: service + 'getLQ',
+    del: service + 'delLQ'
+  },
+  FlatSchedule: {
+    qry: service + 'qryFS'
+  },
+  DSLReason: {
+    qry: service + 'qryLR'
   }
 }

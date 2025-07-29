@@ -67,5 +67,8 @@ export const EmployeeRepository = {
     set: service + 'setTR',
     del: service + 'delTR',
     page: service + 'pageTR'
+  },
+  QuickView: {
+    get: service + 'getQV'
   }
 }

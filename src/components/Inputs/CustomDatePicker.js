@@ -13,7 +13,8 @@ const CustomDatePicker = ({
   name,
   label,
   value,
-  onChange,
+  onChange = () => {},
+  onBlur,
   error,
   helperText,
   disabledRangeDate = {},
@@ -122,6 +123,9 @@ const CustomDatePicker = ({
             inputRef: inputRef,
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
+            },
+            onBlur: e => {
+              onBlur?.(e)
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
