@@ -56,26 +56,25 @@ export default function ChangeClient({ form, window }) {
   })
 
   function isValidClient(values) {
-    console.log('form.plId != values.plId', form.plId, values.plId)
-    if (form.plId != values.plId) {
+    if (form.values.plId != values.plId) {
       stackError({
         message: labels.mismatchPrice
       })
 
       return false
-    } else if (form.isVattable != values.IsSubjectToVat) {
+    } else if (form.values.isVattable != values.isSubjectToVAT) {
       stackError({
         message: labels.mismatchVat
       })
 
       return false
-    } else if (form.taxId != values.taxId) {
+    } else if (form.values.taxId != values.taxId) {
       stackError({
         message: labels.mismatchTax
       })
 
       return false
-    } else if (form.maxDiscount <= values.maxDiscount) {
+    } else if (form.values.maxDiscount <= values.maxDiscount) {
       stackError({
         message: labels.mismatchDiscount
       })

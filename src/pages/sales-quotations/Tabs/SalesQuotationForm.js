@@ -1263,7 +1263,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       })
                     }}
                     image='popup.png'
-                    disabled={!isRaw || !formik.values.clientId}
+                    disabled={!(editMode && isRaw && formik.values.clientId)}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>
