@@ -33,12 +33,12 @@ export default function JobInfoForm({ labels, access, recordId }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.Group.page
+    endpointId: EmployeeRepository.JobInfo.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
+      recordId: recordId || null,
       reference: '',
       employeeId: null,
       employeeName: '',
@@ -89,7 +89,24 @@ export default function JobInfoForm({ labels, access, recordId }) {
     refetchForm(recordId)
   }, [])
 
+  const onClose = async () => {
+    const res = await postRequest({
+      extension: EmployeeRepository.JobInfo.close,
+      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
+    })
+
+    toast.success(platformLabels.Closed)
+    refetchForm(recordId)
+    invalidate()
+  }
+
   const actions = [
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
     {
       key: 'Approval',
       condition: true,
@@ -128,6 +145,7 @@ export default function JobInfoForm({ labels, access, recordId }) {
                 parameters={{ _branchId: 0 }}
                 valueField='fullName'
                 name='employeeId'
+                required
                 label={labels.employee}
                 form={formik}
                 secondDisplayField={false}
@@ -145,9 +163,9 @@ export default function JobInfoForm({ labels, access, recordId }) {
                 name='date'
                 label={labels.date}
                 value={formik.values?.date}
-                required={true}
+                required
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
               />
@@ -161,11 +179,11 @@ export default function JobInfoForm({ labels, access, recordId }) {
                 label={labels.department}
                 values={formik.values}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
+                  { key: 'departmentRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 required
-                displayField={['reference', 'name']}
+                displayField={['departmentRef', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('departmentId', newValue?.recordId || null)
@@ -202,7 +220,7 @@ export default function JobInfoForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
-                  { key: 'branchRef', value: 'Reference' },
+                  { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 maxAccess={maxAccess}

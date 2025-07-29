@@ -137,7 +137,7 @@ const EMJobInfo = () => {
     stack({
       Component: JobInfoForm,
       props: {
-        labels: labels,
+        labels,
         recordId,
         access
       },

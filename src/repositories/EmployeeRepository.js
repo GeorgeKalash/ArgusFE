@@ -71,6 +71,7 @@ export const EmployeeRepository = {
   JobInfo: {
     snapshot: service + 'snapshotJI',
     page: service + 'pageJI',
+    close: service + 'closeJI',
     get: service + 'getJI',
     set: service + 'setJI',
     del: service + 'delJI'
