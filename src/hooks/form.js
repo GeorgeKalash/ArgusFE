@@ -13,8 +13,6 @@ export function useForm({
 }) {
   const [validation, setFieldValidation] = useState({})
 
-  console.log('validation', validation)
-
   function explode(str) {
     const parts = str.split('.')
 
@@ -40,17 +38,16 @@ export function useForm({
 
   const checkValidation = (field, value, rule, row) => {
     let result = ''
-    console.log('field', field, value, rule, rule?.condition?.error)
 
     if (rule.required && (value === '' || value == null || value == 'NaN')) {
-      result = `${field} is required .`
+      result = `${field} is required.`
     } else {
-      if (typeof rule?.validate === 'function' && !rule.validate(row)) {
-        result = `${field} is errorssssss`
+      if (typeof rule?.validate === 'function') {
+        const isValid = rule.validate(row)
 
-        // } else if (rule?.error) {
-        //   result = `${field} is error`
-        // }
+        if (!isValid) {
+          result = `${field} is invalid.`
+        }
       } else if (value != '' && value != null && rule?.minLength != null && value.length < rule.minLength) {
         result = `${field} must be at least ${rule.minLength} characters`
       } else if (value != '' && value != null && rule?.maxValue != null && value > rule.maxValue) {
@@ -137,10 +134,9 @@ export function useForm({
                   maxAccessErrors[gridName][index] = {}
                 }
 
-                const rowCondition = rule?.condition?.[index]
+                const rowCondition = rule?.validate
 
-                if (rowCondition) {
-                  console.log('hhhh', rowCondition)
+                if (typeof rule?.validate == 'function') {
                   const error = checkValidation(fieldName, row[fieldName], { ...rule, error: rowCondition?.error }, row)
                   if (error) {
                     maxAccessErrors[gridName][index][fieldName] = error
@@ -240,6 +236,10 @@ export function useForm({
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
   const { key, value, reference } = documentType
+
+  useEffect(() => {
+    formik.validateForm() // ⬅️ triggers your custom validation function
+  }, [formik.values])
 
   useEffect(() => {
     if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)

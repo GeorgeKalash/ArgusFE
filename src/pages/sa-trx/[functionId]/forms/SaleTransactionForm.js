@@ -204,7 +204,7 @@ export default function SaleTransactionForm({
     validationSchema: yup.object({
       header: yup.object({
         // date: yup.string().required(),
-        currencyId: yup.string().required(),
+        // currencyId: yup.string().required(),
         clientId: yup.string().required(),
         siteId: yup
           .string()
@@ -1997,7 +1997,7 @@ export default function SaleTransactionForm({
                 autoSelectFistValue={!formik.values.clientId}
                 readOnly={formik.values.items.length > 0 && formik.values.items[0].sku}
                 displayFieldWidth={5}
-                editMode={editMode}
+                setFieldValidation={setFieldValidation}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
               />
             </Grid>

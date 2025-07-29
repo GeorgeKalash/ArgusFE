@@ -38,7 +38,6 @@ const CTExchangeRates = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -84,44 +83,25 @@ const CTExchangeRates = () => {
       component: 'numberfield',
       label: labels.min,
       name: 'minRate',
-      validate: row => row?.rate && row?.rate > row?.minRate
-
-      // props: {
-      //   onCondition: row => {
-      //     return {
-      //       maxValue: row?.rate || null
-      //     }
-      //   }
-      // }
+      validate: row => {
+        return row?.rate > row?.minRate
+      }
     },
     {
       component: 'numberfield',
       label: labels.rate,
       name: 'rate',
-      validate: row => row?.maxRate > row?.rate
-
-      // props: {
-      //   onCondition: row => {
-      //     return {
-      //       maxValue: row?.maxRate || null,
-      //       minValue: row?.minRate || null
-      //     }
-      //   }
-      // }
+      validate: row => {
+        return row?.maxRate > row?.rate && row?.rate > row?.minRate
+      }
     },
     {
       component: 'numberfield',
       label: labels.max,
       name: 'maxRate',
-      validate: row => row?.rate && row?.maxRate && row?.maxRate > row?.rate
-
-      // props: {
-      //   onCondition: row => {
-      //     return {
-      //       minValue: row?.rate || null
-      //     }
-      //   }
-      // }
+      validate: row => {
+        return row?.maxRate > row?.rate
+      }
     }
   ]
 
@@ -129,40 +109,6 @@ const CTExchangeRates = () => {
     maxAccess: access,
     validateOnChange: true,
 
-    // validationSchema: yup.object({
-    //   rows: yup
-    //     .array()
-    //     .of(
-    //       yup.object().shape({
-    //         minRate: yup
-    //           .number()
-    //           .required()
-    //           .test('min-rate-check', function (value) {
-    //             const { rate } = this.parent
-
-    //             return value <= rate
-    //           }),
-    //         maxRate: yup
-    //           .number()
-    //           .required()
-    //           .test('max-rate-check', function (value) {
-    //             const { rate } = this.parent
-
-    //             return value >= rate
-    //           }),
-    //         rate: yup
-    //           .number()
-    //           .required()
-    //           .test('rate-check', function (value) {
-    //             const { minRate, maxRate } = this.parent
-
-    //             return value >= minRate && value <= maxRate
-    //           }),
-    //         rateCalcMethodName: yup.string().required()
-    //       })
-    //     )
-    //     .required()
-    // }),
     initialValues: {
       rows: [
         {
@@ -187,7 +133,6 @@ const CTExchangeRates = () => {
 
   const { formik: saFormik, setFieldValidation: setSaFieldValidation } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup
@@ -302,14 +247,14 @@ const CTExchangeRates = () => {
         parameters: parameters
       })
 
-      const valuesMap = values.list.reduce((acc, fee) => {
+      const valuesMap = values.list?.reduce((acc, fee) => {
         acc[fee.plantId] = fee
 
         return acc
       }, {})
 
       const rows = plantStore.map((plant, index) => {
-        const value = valuesMap[plant.recordId] || 0
+        const value = valuesMap?.[plant.recordId] || 0
 
         return {
           id: index,
@@ -639,12 +584,12 @@ const CTExchangeRates = () => {
                           </Grid>
                         </Grid>
                       </Fixed>
-                      {/* <Grow>
+                      <Grow>
                         {formik.values.currencyId != null &&
                           formik.values.raCurrencyId != null &&
                           formik.values.saRateTypeId != null && (
                             <DataGrid
-                              name='rows2'
+                              name='rows'
                               onChange={value => saFormik.setFieldValue('rows', value)}
                               value={saFormik.values.rows}
                               error={saFormik.errors.rows}
@@ -654,7 +599,7 @@ const CTExchangeRates = () => {
                               setFieldValidation={setSaFieldValidation}
                             />
                           )}
-                      </Grow> */}
+                      </Grow>
                     </VertLayout>
                   </FieldSet>
                 </Grid>
