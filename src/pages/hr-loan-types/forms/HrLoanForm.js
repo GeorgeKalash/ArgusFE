@@ -136,6 +136,8 @@ export default function HrLoanForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 allowNegative={false}
                 error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
+                maxLength={5}
+                decimalScale={3}
               />
             </Grid>
             <Grid item xs={12}>
