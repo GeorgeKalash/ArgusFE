@@ -61,5 +61,20 @@ export const EmployeeRepository = {
     set: service + 'setUP',
     del: service + 'delUP',
     page: service + 'pageUP'
+  },
+  ResignationRequest: {
+    qry: service + 'qryRR',
+    get: service + 'getRR',
+    set: service + 'setRR',
+    del: service + 'delRR',
+    page: service + 'pageRR',
+    close: service + 'closeRR',
+    reopen: service + 'reopenRR'
+  },
+  EmployeeQuickView: {
+    get: service + 'getQV'
+  },
+  TerminationReason: {
+    qry: service + 'qryTR'
   }
 }
