@@ -205,21 +205,12 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={AccessControlRepository.SecurityGroup.qry}
-                    parameters={`_startAt=0&_pageSize=1000&filter=`}
-                    name='sgId'
-                    label={labels.securityGrp}
-                    values={formik.values}
-                    valueField='recordId'
-                    displayField='name'
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                    label={labels.inactive}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('sgId', newValue?.recordId || null)
-                    }}
-                    required={formik.values.isConfidential}
-                    readOnly={!formik.values.isConfidential}
-                    error={formik.touched.sgId && Boolean(formik.errors.sgId)}
                   />
                 </Grid>
               </Grid>
@@ -299,15 +290,6 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomCheckBox
-                    name='isInactive'
-                    value={formik.values?.isInactive}
-                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
-                    label={labels.inactive}
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomCheckBox
                     name='isConfidential'
                     value={formik.values?.isConfidential}
                     onChange={event => {
@@ -316,6 +298,24 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     }}
                     label={labels.isConfidential}
                     maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={AccessControlRepository.SecurityGroup.qry}
+                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    name='sgId'
+                    label={labels.securityGrp}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('sgId', newValue?.recordId || null)
+                    }}
+                    required={formik.values.isConfidential}
+                    readOnly={!formik.values.isConfidential}
+                    error={formik.touched.sgId && Boolean(formik.errors.sgId)}
                   />
                 </Grid>
               </Grid>
