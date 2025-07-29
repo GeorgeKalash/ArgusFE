@@ -156,37 +156,36 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      //   const copy = {
-      //     ...obj,
-      //     date: formatDateToApi(obj.date),
-      //     miscAmount: obj.miscAmount || 0
-      //   }
-      //   delete copy.items
-      //   ;['expiryDate', 'deliveryDate', 'rateCalcMethod'].forEach(field => {
-      //     if (!obj[field]) delete copy[field]
-      //   })
-      //
-      //   const updatedRows = formik.values.items
-      //     .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-      //     .map((itemDetails, index) => {
-      //       const { physicalProperty, ...rest } = itemDetails
-      //       return {
-      //         ...rest,
-      //         seqNo: index + 1,
-      //         applyVat: obj.isVattable
-      //       }
-      //     })
-      //   const itemsGridData = {
-      //     header: copy,
-      //     items: updatedRows
-      //   }
-      //   const sqRes = await postRequest({
-      //     extension: PurchaseRepository.PurchaseQuotation.set2,
-      //     record: JSON.stringify(itemsGridData)
-      //   })
-      //   toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-      //   await refetchForm(sqRes.recordId)
-      //   invalidate()
+
+      const copy = {
+        ...obj,
+        date: formatDateToApi(obj.date),
+        deliveryDate: obj.deliveryDate ? formatDateToApi(obj.deliveryDate) : null,
+        miscAmount: obj.miscAmount || 0
+      }
+      delete copy.items
+
+      const updatedRows = obj.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((itemDetails, index) => {
+          return {
+            ...itemDetails,
+            seqNo: index + 1
+          }
+        })
+
+      const itemsGridData = {
+        header: copy,
+        items: updatedRows
+      }
+
+      const qtnRes = await postRequest({
+        extension: PurchaseRepository.PurchaseQuotation.set2,
+        record: JSON.stringify(itemsGridData)
+      })
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      await refetchForm(qtnRes.recordId)
+      invalidate()
     }
   })
 
@@ -475,49 +474,14 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function toInvoice() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
-
-    await postRequest({
-      extension: PurchaseRepository.PurchaseQuotation.postToInvTrx,
-      record: JSON.stringify(copy)
-    })
-
-    toast.success(platformLabels.Invoice)
-    invalidate()
-    window.close()
-  }
-
-  async function toConsignments() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
-
-    await postRequest({
-      extension: PurchaseRepository.PurchaseQuotation.postToCons,
-      record: JSON.stringify(copy)
-    })
-
-    toast.success(platformLabels.Consignments)
-    invalidate()
-    window.close()
-  }
-
   async function toOrder() {
     const copy = { ...formik.values }
     delete copy.items
     copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
+    copy.deliveryDate = copy.deliveryDate ? formatDateToApi(copy.deliveryDate) : null
 
     await postRequest({
-      extension: PurchaseRepository.PurchaseQuotation.postQuotTrx,
+      extension: PurchaseRepository.PurchaseQuotation.toOrder,
       record: JSON.stringify(copy)
     })
 
@@ -550,35 +514,29 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       disabled: !editMode
     },
     {
-      key: 'Invoice',
-      condition: true,
-      onClick: toInvoice,
-      disabled: !(editMode && isRaw)
-    },
-    {
       key: 'Order',
       condition: true,
       onClick: toOrder,
       disabled: !(editMode && isRaw)
     },
     {
-      key: 'Consignments',
+      key: 'Attachment',
       condition: true,
-      onClick: toConsignments,
-      disabled: !(editMode && isRaw)
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
-  async function fillForm(sqHeader, sqItems) {
-    sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
+  async function fillForm(qtnHeader, qtnItems) {
+    qtnHeader?.record?.tdType == 1 || qtnHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
     const modifiedList =
-      sqItems?.list.length != 0
+      qtnItems?.list.length != 0
         ? await Promise.all(
-            sqItems.list?.map(async (item, index) => {
-              const taxDetailsResponse = sqHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+            qtnItems.list?.map(async (item, index) => {
+              const taxDetailsResponse = qtnHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
 
               return {
                 ...item,
@@ -595,33 +553,32 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         : formik.values.items
 
     formik.setValues({
-      ...sqHeader.record,
+      ...qtnHeader.record,
       currentDiscount:
-        sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
-          ? sqHeader?.record?.tdAmount
-          : sqHeader?.record?.tdPct,
-      amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
+        qtnHeader?.record?.tdType == 1 || qtnHeader?.record?.tdType == null
+          ? qtnHeader?.record?.tdAmount
+          : qtnHeader?.record?.tdPct,
+      amount: parseFloat(qtnHeader?.record?.amount).toFixed(2),
       items: modifiedList
     })
   }
 
-  async function getPurchaseQuotation(sqId) {
+  async function getPurchaseQuotation(qtnId) {
     const res = await getRequest({
       extension: PurchaseRepository.PurchaseQuotation.get,
-      parameters: `_recordId=${sqId}`
+      parameters: `_recordId=${qtnId}`
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.expiryDate = formatDateFromApi(res?.record?.expiryDate)
     res.record.deliveryDate = formatDateFromApi(res?.record?.deliveryDate)
 
     return res
   }
 
-  async function getPurchaseQuotationItems(sqId) {
+  async function getPurchaseQuotationItems(qtnId) {
     return await getRequest({
-      extension: SaleRepository.QuotationItem.qry,
-      parameters: `_params=1|${sqId}&_startAt=0&_pageSize=3000&_sortBy=seqno`
+      extension: PurchaseRepository.QuotationItem.qry,
+      parameters: `_quotationId=${qtnId}`
     })
   }
 
@@ -861,9 +818,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   }
 
   async function refetchForm(recordId) {
-    const sqHeader = await getPurchaseQuotation(recordId)
-    const sqItems = await getPurchaseQuotationItems(recordId)
-    await fillForm(sqHeader, sqItems)
+    const qtnHeader = await getPurchaseQuotation(recordId)
+    const qtnItems = await getPurchaseQuotationItems(recordId)
+    await fillForm(qtnHeader, qtnItems)
   }
 
   const getMeasurementUnits = async () => {
@@ -871,16 +828,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       extension: InventoryRepository.MeasurementUnit.qry,
       parameters: `_msId=0`
     })
-  }
-  async function getSiteRef(siteId) {
-    if (!siteId) return
-
-    const res = await getRequest({
-      extension: InventoryRepository.Site.get,
-      parameters: `_recordId=${siteId}`
-    })
-
-    return res?.record?.reference
   }
 
   useEffect(() => {
@@ -1024,7 +971,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                   errorCheck={'vendorId'}
                 />
               </Grid>
-              <Grid item xs={10}>
+              <Grid item xs={6}>
                 <ResourceLookup
                   endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
                   valueField='reference'
@@ -1217,9 +1164,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             <Grid item xs={3}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
-                </Grid>
-                <Grid item xs={12}>
                   <CustomNumberField
                     name='totalVolume'
                     maxAccess={maxAccess}
@@ -1227,6 +1171,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     value={totalVolume}
                     readOnly
                   />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
               </Grid>
             </Grid>
