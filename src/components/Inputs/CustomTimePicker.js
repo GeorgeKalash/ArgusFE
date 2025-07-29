@@ -29,6 +29,8 @@ const CustomTimePicker = ({
   hasBorder = true,
   hidden = false,
   use24Hour = false,
+  min = null,
+  max = null,
   ...props
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
@@ -47,6 +49,8 @@ const CustomTimePicker = ({
         label={label}
         fullWidth={fullWidth}
         ampm={!use24Hour}
+        minTime={min}
+        maxTime={max}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         sx={{

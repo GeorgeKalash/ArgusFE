@@ -153,6 +153,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 use24Hour
                 maxAccess={maxAccess}
                 error={formik.touched.timeFrom && Boolean(formik.errors.timeFrom)}
+                max={dayjs(formik.values.timeTo, 'HH:mm')}
               />
             </Grid>
             <Grid item xs={6}>
@@ -166,6 +167,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 use24Hour
                 maxAccess={maxAccess}
                 error={formik.touched.timeTo && Boolean(formik.errors.timeTo)}
+                min={dayjs(formik.values.timeFrom, 'HH:mm')}
               />
             </Grid>
             <Grid item xs={12}>
