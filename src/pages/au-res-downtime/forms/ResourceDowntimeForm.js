@@ -69,7 +69,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
         })
       }).then(async res => {
         toast.success(obj?.recordId ? platformLabels.Edited : platformLabels.Added)
-        await refetchForm(res.recordId)
+        !obj.recordId && formik.setFieldValue('recordId', res.recordId)
         invalidate()
       })
     }
@@ -77,38 +77,36 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
 
   const editMode = !!formik.values.recordId
 
-  async function refetchForm(recordId) {
-    const res = await getRequest({
-      extension: AccessControlRepository.ResourceDowntime.get2,
-      parameters: `_recordId=${recordId}`
-    })
-
-    formik.setValues({
-      ...res.record,
-      timeFrom: dayjs(res.record.timeFrom, 'HH:mm'),
-      timeTo: dayjs(res.record.timeTo, 'HH:mm')
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
-      recordId
-        ? refetchForm(recordId)
-        : await getAllKvsByDataset({
-            _dataset: DataSets.WEEK_DAY,
-            callback: res => {
-              if (res.length > 0) {
-                formik.setFieldValue(
-                  'flags',
-                  res.map(item => ({
-                    weekday: item.key,
-                    weekdayName: item.value,
-                    flag: false
-                  }))
-                )
-              }
+      if (recordId) {
+        const res = await getRequest({
+          extension: AccessControlRepository.ResourceDowntime.get2,
+          parameters: `_recordId=${recordId}`
+        })
+
+        formik.setValues({
+          ...res.record,
+          timeFrom: dayjs(res.record.timeFrom, 'HH:mm'),
+          timeTo: dayjs(res.record.timeTo, 'HH:mm')
+        })
+      } else {
+        await getAllKvsByDataset({
+          _dataset: DataSets.WEEK_DAY,
+          callback: res => {
+            if (res.length > 0) {
+              formik.setFieldValue(
+                'flags',
+                res.map(item => ({
+                  weekday: item.key,
+                  weekdayName: item.value,
+                  flag: false
+                }))
+              )
             }
-          })
+          }
+        })
+      }
     })()
   }, [])
 
