@@ -56,6 +56,7 @@ export default function ChangeClient({ form, window }) {
   })
 
   function isValidClient(values) {
+    console.log('form.plId != values.plId', form.plId, values.plId)
     if (form.plId != values.plId) {
       stackError({
         message: labels.mismatchPrice

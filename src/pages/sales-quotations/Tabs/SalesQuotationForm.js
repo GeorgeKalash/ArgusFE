@@ -48,6 +48,8 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import ChangeClient from 'src/components/Shared/ChangeClient'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -69,7 +71,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   })
 
   const initialValues = {
-    recordId: recordId,
+    recordId,
     dtId: null,
     reference: null,
     date: new Date(),
@@ -848,7 +850,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: mdAmount,
+      mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
@@ -1218,7 +1220,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                   <ResourceLookup
                     endpointId={SaleRepository.Client.snapshot}
                     valueField='reference'
@@ -1244,9 +1246,25 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       formik.setFieldValue('clientRef', newValue?.reference)
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                       formik.setFieldValue('taxId', newValue?.taxId)
+                      formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                       fillClientData(newValue?.recordId)
                     }}
                     errorCheck={'clientId'}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={() => {
+                      stack({
+                        Component: ChangeClient,
+                        props: {
+                          form: formik
+                        }
+                      })
+                    }}
+                    image='popup.png'
+                    disabled={!isRaw || !formik.values.clientId}
+                    tooltipText={platformLabels.editClient}
                   />
                 </Grid>
                 <Grid item xs={12}>
