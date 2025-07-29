@@ -1460,7 +1460,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       stack({
                         Component: ChangeClient,
                         props: {
-                          form: formik
+                          form: formik,
                         }
                       })
                     }}
