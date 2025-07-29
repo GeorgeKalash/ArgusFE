@@ -522,6 +522,7 @@ export const ResourceIds = {
   BiometricDevices: 72101,
   DSLReasons: 72107,
   TerminationReasons: 71110,
+  GeneralSettings: 20600,
   JobInfos: 71207,
 
   // GL

@@ -218,11 +218,7 @@ export default function JobInfoForm({ labels, access, recordId }) {
                 name='divisionId'
                 label={labels.division}
                 valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
+                displayField='name'
                 maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(_, newValue) => {
