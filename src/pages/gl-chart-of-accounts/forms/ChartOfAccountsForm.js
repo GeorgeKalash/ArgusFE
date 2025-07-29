@@ -33,6 +33,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
       description: '',
       groupId: '',
       disableManualEntry: false,
+      isConfidential: false,
       sign: '',
       activeStatus: ''
     },
@@ -183,6 +184,15 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 value={formik.values?.disableManualEntry}
                 onChange={event => formik.setFieldValue('disableManualEntry', event.target.checked)}
                 label={labels.disableManualEntry}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isConfidential'
+                value={formik.values?.isConfidential}
+                onChange={event => formik.setFieldValue('isConfidential', event.target.checked)}
+                label={labels.isConfidential}
                 maxAccess={maxAccess}
               />
             </Grid>

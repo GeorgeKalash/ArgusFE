@@ -40,7 +40,8 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       BpRef: null,
       szId: null,
       spId: null,
-      isInactive: false
+      isInactive: false,
+      isConfidential: false
     },
     maxAccess: maxAccess,
     validateOnChange: true,
@@ -271,6 +272,15 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                   value={formik.values?.isInactive}
                   onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={labels.inactive}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomCheckBox
+                  name='isConfidential'
+                  value={formik.values?.isConfidential}
+                  onChange={event => formik.setFieldValue('isConfidential', event.target.checked)}
+                  label={labels.isConfidential}
                   maxAccess={maxAccess}
                 />
               </Grid>
