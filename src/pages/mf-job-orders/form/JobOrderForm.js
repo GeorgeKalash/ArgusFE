@@ -541,6 +541,21 @@ export default function JobOrderForm({
 
   useEffect(() => {
     ;(async function () {
+      if (formik.values.dtId) {
+        const dtd = await getRequest({
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${formik.values.dtId}`
+        })
+
+        formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      } else {
+        formik.setFieldValue('plantId', null)
+      }
+    })()
+  }, [formik.values.dtId])
+
+  useEffect(() => {
+    ;(async function () {
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
         parameters: `_filter=&_key=mf_jo_pic_source`

@@ -11,31 +11,25 @@ import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, window }) {
+export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: InventoryRepository.DocumentTypeDefaults.page
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({
     initialValues: {
       recordId,
-      functionId: SystemFunction.MaterialTransfer,
+      functionId: SystemFunction.JobOrder,
       dtId: null,
-      siteId: null,
-      toSiteId: null,
-      carrierId: null,
-      plantId: null,
-      disableSKULookup: false
+      plantId: null
     },
     maxAccess,
     enableReinitialize: false,
@@ -44,7 +38,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: ManufacturingRepository.DocumentTypeDefaults.set,
+        extension: ManufacturingRepository.DocumentTypeDefault.set,
         record: JSON.stringify(obj)
       })
 
@@ -64,7 +58,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: InventoryRepository.DocumentTypeDefaults.get,
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
           parameters: `_dtId=${recordId}`
         })
 
@@ -78,11 +72,11 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
 
   return (
     <FormShell
-      resourceId={ResourceIds.MaterialTransferDTD}
+      resourceId={ResourceIds.JoDTd}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      functionId={SystemFunction.MaterialTransfer}
+      functionId={SystemFunction.JobOrder}
     >
       <VertLayout>
         <Grow>
@@ -90,10 +84,10 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JobOrder}`}
                 name='dtId'
                 required
-                label={labels.documentType}
+                label={labels.docType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
@@ -107,72 +101,6 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
                   formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
-                name='siteId'
-                label={labels.fromSite}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
-                }}
-                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
-                name='toSiteId'
-                label={labels.toSite}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('toSiteId', newValue?.recordId)
-                }}
-                error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomCheckBox
-                name='disableSKULookup'
-                value={formik.values?.disableSKULookup}
-                onChange={event => formik.setFieldValue('disableSKULookup', event.target.checked)}
-                label={labels.dsl}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={LogisticsRepository.LoCarrier.qry}
-                name='carrierId'
-                label={labels.carrier}
-                values={formik?.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('carrierId', newValue?.recordId || '')
-                }}
-                error={formik.touched.carrierId && Boolean(formik.errors.carrierId)}
               />
             </Grid>
             <Grid item xs={12}>
