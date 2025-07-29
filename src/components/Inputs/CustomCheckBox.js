@@ -1,4 +1,4 @@
-import { FormControlLabel, Checkbox, FormGroup } from '@mui/material'
+import { FormControlLabel, Checkbox } from '@mui/material'
 import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomCheckBox = ({
