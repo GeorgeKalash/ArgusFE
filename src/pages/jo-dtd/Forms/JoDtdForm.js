@@ -72,7 +72,7 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.JoDTd}
+      resourceId={ResourceIds.ProdSheetDocumentTypeDefault}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
