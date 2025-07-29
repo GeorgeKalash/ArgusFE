@@ -1096,9 +1096,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
       qty: parseFloat(itemPriceRow?.qty),
+      weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
@@ -1192,8 +1194,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: parseFloar(item?.priceType),
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),
+        weight: parseFloat(item?.weight),
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),

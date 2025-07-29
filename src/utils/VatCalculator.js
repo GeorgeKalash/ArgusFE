@@ -4,9 +4,11 @@ const TAXBASE_FAPIUW = 3 // percentage of base price
 const TAXBASE_PLP = 4 // percentage of labor price
 
 class VatCalcRow {
-  constructor(_basePrice, _qty, _extendedPrice, _baseLaborPrice, _tdPct, _taxDetails) {
+  constructor(_priceType, _basePrice, _weight, _qty, _extendedPrice, _baseLaborPrice, _tdPct, _taxDetails) {
+    this.priceType = _priceType
     this.basePrice = _basePrice
     this.qty = _qty
+    this.weight = _weight
     this.extendedPrice = _extendedPrice
     this.baseLaborPrice = _baseLaborPrice
     this.vatAmount = 0
@@ -28,7 +30,11 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
       }
       break
     case TAXBASE_FAPQU:
-      vatAmount = taxDetail.amount * vatCalcRow.qty
+      if (priceType === 3) vatAmount = taxDetail.amount * vatCalcRow.qty
+      else vatAmount = taxDetail.amount * vatCalcRow.qty
+
+      //price type = 1 -> taxDetail.amount * vatCalcRow.qty
+      //price type = 3 => qty * weight
       break
     case TAXBASE_FAPIUW: // base price
       vatAmount = (vatCalcRow.basePrice * vatCalcRow.qty * taxDetail.amount) / 100
