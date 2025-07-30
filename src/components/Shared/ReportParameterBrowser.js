@@ -306,7 +306,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
       <CustomDateTimePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
         onChange={(name, newValue) => {
