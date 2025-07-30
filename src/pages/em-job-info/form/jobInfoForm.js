@@ -52,7 +52,8 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
       reportToName: '',
       reportToRef: '',
       notes: '',
-      status: 1
+      status: 1,
+      wip: 1
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -143,7 +144,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      disabledSubmit={editMode}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
