@@ -65,8 +65,7 @@ const TransactionLog = props => {
       extension: SystemRepository.TransactionLog.get,
       parameters: parameters
     }).then(res => {
-      if (JSON.parse(res.record.data).header) setInfo(JSON.parse(res.record.data)?.header)
-      else setInfo(JSON.parse(res.record.data))
+      setInfo(JSON.parse(res.record.data) || {})
     })
   }
 
@@ -105,6 +104,58 @@ const TransactionLog = props => {
       flex: 1
     }
   ]
+
+  const renderObject = (obj, level = 0) => {
+    if (obj === null || obj === undefined) return null
+
+    const paddingLeft = `${level * 16}px`
+
+    return Object.entries(obj).map(([key, value]) => {
+      const isObject = typeof value === 'object' && value !== null
+
+      if (Array.isArray(value)) {
+        
+        return (
+          <Grid key={key} style={{ paddingLeft }}>
+            <strong>{key}:</strong> [
+            {value.length === 0 ? (
+              ' ]'
+            ) : (
+              <>
+                {value.map((item, index) => (
+                  <Grid key={index} style={{ paddingLeft: `${(level + 1) * 16}px` }}>
+                    {'{'}
+                    {Object.entries(item).map(([k, v]) => (
+                      <Grid key={k} style={{ paddingLeft: `${(level + 2) * 16}px` }}>
+                        <strong>{k}:</strong> {String(v)}
+                      </Grid>
+                    ))}
+                    {'},'}
+                  </Grid>
+                ))}
+                <Grid style={{ paddingLeft }}>]</Grid>
+              </>
+            )}
+          </Grid>
+        )
+      }
+
+      if (isObject) {
+        return (
+          <Grid key={key} style={{ paddingLeft }}>
+            <strong>{key}:</strong>
+            {renderObject(value, level + 1)}
+          </Grid>
+        )
+      }
+
+      return (
+        <Grid key={key} style={{ paddingLeft }}>
+          <strong>{key}:</strong> {key === 'date' ? formatDateDefault(value) : String(value)}
+        </Grid>
+      )
+    })
+  }
 
   return (
     <VertLayout>
@@ -161,14 +212,11 @@ const TransactionLog = props => {
         />
       </Grow>
       <Fixed>
-        <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto', m: 2 }}>
-          {Object.entries(info).map(([key, value]) => (
-            <Grid key={key} style={{ display: 'flex', alignItems: 'center' }}>
-              <Grid style={{ minWidth: '100px', fontWeight: 'bold' }}>{key}:</Grid>
-              <Grid>{key && key === 'date' ? formatDateDefault(value) : value}</Grid>
-            </Grid>
-          ))}
-        </Grid>
+        <Fixed>
+          <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto', m: 2 }}>
+            {renderObject(info)}
+          </Grid>
+        </Fixed>
       </Fixed>
     </VertLayout>
   )
