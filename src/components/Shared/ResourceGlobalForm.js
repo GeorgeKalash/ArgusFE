@@ -14,7 +14,7 @@ import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
+export default function ResourceGlobalForm({ labels, maxAccess, row, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -55,7 +55,6 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, invalidate,
         })
       }
       toast.success(platformLabels.Edited)
-      invalidate()
       window.close()
     }
   })

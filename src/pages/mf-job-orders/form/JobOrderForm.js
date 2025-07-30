@@ -791,6 +791,7 @@ export default function JobOrderForm({
                         name='lineId'
                         label={labels.line}
                         valueField='recordId'
+                        maxAccess={maxAccess}
                         readOnly={isCancelled || isReleased}
                         displayField='name'
                         value={formik.values.lineId}
@@ -851,13 +852,31 @@ export default function JobOrderForm({
                       />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField name='qty' label={labels.netProduction} value={formik.values.qty} readOnly />
+                      <CustomNumberField
+                        name='qty'
+                        label={labels.netProduction}
+                        value={formik.values.qty}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField name='pcs' label={labels.producedPcs} value={formik.values.pcs} readOnly />
+                      <CustomNumberField
+                        name='pcs'
+                        label={labels.producedPcs}
+                        value={formik.values.pcs}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
                     <Grid item>
-                      <CustomNumberField name='RMCost' label={labels.rmCost} value={formik.values.RMCost} readOnly />
+                      <CustomNumberField
+                        name='RMCost'
+                        label={labels.rmCost}
+                        value={formik.values.RMCost}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
                     <Grid item>
                       <ResourceComboBox
@@ -920,6 +939,7 @@ export default function JobOrderForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   valueField='recordId'
+                  maxAccess={maxAccess}
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}
@@ -993,6 +1013,7 @@ export default function JobOrderForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   valueField='recordId'
+                  maxAccess={maxAccess}
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}

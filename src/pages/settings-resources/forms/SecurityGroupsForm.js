@@ -24,8 +24,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const {
     query: { data: sgData },
     paginationParameters,
-    refetch,
-    invalidate
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AccessControlRepository.SecurityGroup.qry,
@@ -110,7 +109,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     stack({
       Component: ResourceGlobalForm,
       props: {
-        labels: labels,
+        labels,
         maxAccess,
         row: {
           resourceId: formik.values?.resourceId,
@@ -118,7 +117,6 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
           sgId: row?.recordId,
           moduleId: formik.values?.moduleId
         },
-        invalidate,
         resourceId: ResourceIds.SecurityGroup
       }
     })
