@@ -42,12 +42,7 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        formik.setFieldValue('recordId', formik.values.dtId)
-
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
-
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
       window.close()
     }
@@ -80,7 +75,7 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -98,7 +93,7 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
@@ -117,7 +112,7 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
