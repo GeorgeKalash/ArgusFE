@@ -145,7 +145,7 @@ export default function JobOrderForm({
         recordId: res?.recordId
       }))
       const reference = await refetchForm(res.recordId)
-      if (window.setTitle) {
+      if (window.setTitle && !editMode) {
         window.setTitle(reference ? `${labels.jobOrder} ${reference}` : labels.jobOrder)
       }
     }

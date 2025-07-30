@@ -141,7 +141,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       }))
 
       formik.setFieldValue('sku', res.record.sku)
-      if (window.setTitle) {
+      if (window.setTitle && !editMode) {
         window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
       }
 
