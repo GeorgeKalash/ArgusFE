@@ -1233,6 +1233,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     }
   }
 
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(key, val)
+    })
+  }
+
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
@@ -1460,7 +1466,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       stack({
                         Component: ChangeClient,
                         props: {
-                          form: formik,
+                          formValues: formik.values,
+                          onSubmit: fields => updateValues(fields)
                         }
                       })
                     }}

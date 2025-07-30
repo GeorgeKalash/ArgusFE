@@ -1088,6 +1088,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       systemDefaultsList: systemObject
     }
   }
+
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(key, val)
+    })
+  }
+
   async function onChangeDtId(dtId) {
     if (!dtId) return
 
@@ -1258,7 +1265,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       stack({
                         Component: ChangeClient,
                         props: {
-                          form: formik
+                          formValues: formik.values,
+                          onSubmit: fields => updateValues(fields)
                         }
                       })
                     }}

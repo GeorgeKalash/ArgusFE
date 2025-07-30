@@ -18,10 +18,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { useContext } from 'react'
 
-export default function ChangeClient({ form, specificStructure = null, window }) {
+export default function ChangeClient({ formValues, onSubmit, window }) {
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
-  const formValues = specificStructure ? form.values[specificStructure] : form.values
 
   useSetWindow({ title: platformLabels.ChangeClient, window })
 
@@ -54,36 +53,32 @@ export default function ChangeClient({ form, specificStructure = null, window })
           szId: values.changeSzId
         }
 
-        Object.entries(fields).forEach(([key, val]) => {
-          const fieldPath = specificStructure ? `${specificStructure}.${key}` : key
-          form.setFieldValue(fieldPath, val)
-        })
-
+        onSubmit(fields)
         window.close()
       }
     }
   })
 
   function isValidClient(values) {
-    if (formValues.plId != values.plId) {
+    if (formValues?.plId != values.plId) {
       stackError({
         message: labels.mismatchPrice
       })
 
       return false
-    } else if (formValues.isVattable != values.isSubjectToVAT) {
+    } else if (formValues?.isVattable != values.isSubjectToVAT) {
       stackError({
         message: labels.mismatchVat
       })
 
       return false
-    } else if (formValues.taxId != values.taxId) {
+    } else if (formValues?.taxId != values.taxId) {
       stackError({
         message: labels.mismatchTax
       })
 
       return false
-    } else if (formValues.maxDiscount <= values.maxDiscount) {
+    } else if (formValues?.maxDiscount <= values.maxDiscount) {
       stackError({
         message: labels.mismatchDiscount
       })
@@ -108,7 +103,7 @@ export default function ChangeClient({ form, specificStructure = null, window })
             <CustomTextArea
               name='billAddress'
               label={labels.billAddress}
-              value={formValues.billAddress}
+              value={formValues?.billAddress}
               rows={3}
               maxLength='100'
               readOnly
@@ -147,8 +142,7 @@ export default function ChangeClient({ form, specificStructure = null, window })
               secondFieldLabel={labels.name}
               name='clientId'
               label={labels.client}
-              form={form}
-              formObject={specificStructure ? form.values[specificStructure] : null}
+              form={{ values: formValues }}
               readOnly
               displayFieldWidth={4}
               valueShow='clientRef'
