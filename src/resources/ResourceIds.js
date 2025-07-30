@@ -27,6 +27,7 @@ export const ResourceIds = {
   BranchAvailability: 60306,
   Alerts: 60307,
   PendingPunches: 60308,
+  BalanceAdjustment: 73204,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -518,10 +519,12 @@ export const ResourceIds = {
   LMOpeningBalances: 73104,
   OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
+  LoanTypes: 74101,
   HRPendingPunches: 72207,
   BiometricDevices: 72101,
   DSLReasons: 72107,
   TerminationReasons: 71110,
+  GeneralSettings: 20600,
 
   // GL
   GLSalesInvoice: 51604,
