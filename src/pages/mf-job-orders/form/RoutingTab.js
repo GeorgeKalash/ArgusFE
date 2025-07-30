@@ -76,6 +76,9 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.seqNo,
       name: 'seqNo',
       width: 65,
+      props: {
+        unClearable: true
+      },
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
