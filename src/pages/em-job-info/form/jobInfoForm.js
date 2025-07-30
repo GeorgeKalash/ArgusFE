@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -58,7 +57,10 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
     validateOnChange: true,
     validationSchema: yup.object({
       employeeId: yup.number().required(),
-      date: yup.date().required(),
+      date: yup
+        .date()
+        .max(new Date(), 'Date cannot be in the future') // Maximum allowed date = today
+        .required(),
       departmentId: yup.number().required(),
       branchId: yup.number().required(),
       positionId: yup.number().required()
@@ -94,7 +96,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
   }, [])
 
   const onClose = async () => {
-    const res = await postRequest({
+    await postRequest({
       extension: EmployeeRepository.JobInfo.close,
       record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values.date) })
     })
@@ -155,6 +157,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
                 label={labels.ref}
                 value={formik.values.reference}
                 maxAccess={maxAccess}
+                readOnly={editMode}
                 maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -195,6 +198,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
                 value={formik.values?.date}
                 readOnly={isClosed}
                 required
+                max={new Date()}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -253,6 +257,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
+                readOnly={isClosed}
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('divisionId', newValue?.recordId || null)
