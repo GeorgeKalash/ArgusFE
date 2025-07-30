@@ -153,11 +153,12 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='mobile'
                 label={labels.mobile}
                 value={formik.values.mobile}
-                maxAccess={maxAccess}
                 maxLength='8'
+                phone={true}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('mobile', '')}
                 error={formik.touched.mobile && Boolean(formik.errors.mobile)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
@@ -165,11 +166,12 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='phone'
                 label={labels.phone}
                 value={formik.values.phone}
-                maxAccess={maxAccess}
                 maxLength='8'
+                phone={true}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('phone', '')}
                 error={formik.touched.phone && Boolean(formik.errors.phone)}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
