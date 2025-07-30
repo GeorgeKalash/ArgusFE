@@ -116,8 +116,6 @@ const CustomLookup = ({
 
             await onChange(name, newValue)
             setAutoFocus(true)
-
-            valueHighlightedOption.current = ''
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
