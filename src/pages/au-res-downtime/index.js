@@ -45,6 +45,11 @@ const ResourceDowntime = () => {
 
   const columns = [
     {
+      field: 'name',
+      headerName: labels.name,
+      flex: 1
+    },
+    {
       field: 'moduleName',
       headerName: labels.module,
       flex: 1

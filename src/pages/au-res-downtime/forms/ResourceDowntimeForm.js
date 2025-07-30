@@ -145,7 +145,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-            {formik.values.flags.map((day, index) => (
+            {formik?.values?.flags?.map((day, index) => (
               <Grid item xs={6} key={day.weekday}>
                 <CustomCheckBox
                   name={`flags.${index}.flag`}
