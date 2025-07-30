@@ -58,7 +58,7 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
     validateOnChange: true,
     validationSchema: yup.object({
       employeeId: yup.number().required(),
-      date: yup.number().required(),
+      date: yup.date().required(),
       departmentId: yup.number().required(),
       branchId: yup.number().required(),
       positionId: yup.number().required()
