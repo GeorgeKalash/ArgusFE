@@ -4,24 +4,19 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ChartOfAccountsForm from './forms/ChartOfAccountsForm'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ChartOfAccounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  const invalidate = useInvalidate({
-    endpointId: GeneralLedgerRepository.ChartOfAccounts.page
-  })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -38,10 +33,11 @@ const ChartOfAccounts = () => {
     query: { data },
     search,
     clear,
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page,
@@ -64,36 +60,34 @@ const ChartOfAccounts = () => {
   const columns = [
     {
       field: 'accountRef',
-      headerName: _labels.accountRef,
+      headerName: labels.accountRef,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'description',
-      headerName: _labels.description,
+      headerName: labels.description,
       flex: 1
     },
     {
       field: 'activeStatusName',
-      headerName: _labels.status,
+      headerName: labels.status,
       flex: 1
     }
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: GeneralLedgerRepository.ChartOfAccounts.del,
-        record: JSON.stringify(obj)
-      })
+    await postRequest({
+      extension: GeneralLedgerRepository.ChartOfAccounts.del,
+      record: JSON.stringify(obj)
+    })
 
-      invalidate()
-      toast.success('Record Deleted Successfully')
-    } catch (err) {}
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const edit = obj => {
@@ -108,13 +102,13 @@ const ChartOfAccounts = () => {
     stack({
       Component: ChartOfAccountsForm,
       props: {
-        labels: _labels,
+        labels,
         maxAccess: access,
-        recordId: recordId ? recordId : null
+        recordId
       },
-      width: 500,
-      height: 540,
-      title: _labels.chartOfAccount
+      width: 600,
+      height: 600,
+      title: labels.chartOfAccount
     })
   }
 
@@ -126,20 +120,20 @@ const ChartOfAccounts = () => {
           maxAccess={access}
           onSearch={search}
           onSearchClear={clear}
-          labels={_labels}
+          labels={labels}
           inputSearch={true}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
-          gridData={data ?? { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           refetch={refetch}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'
