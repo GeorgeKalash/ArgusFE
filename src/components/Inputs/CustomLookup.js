@@ -111,11 +111,13 @@ const CustomLookup = ({
 
             return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
           }}
-          onChange={(event, newValue) => {
+          onChange={async (event, newValue) => {
             setInputValue(newValue ? newValue[valueField] : '')
 
-            onChange(name, newValue)
+            await onChange(name, newValue)
             setAutoFocus(true)
+
+            valueHighlightedOption.current = ''
 
           }}
           onHighlightChange={(event, newValue) => {
