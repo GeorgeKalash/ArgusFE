@@ -44,8 +44,26 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      timeTo: yup.string().required(),
-      timeFrom: yup.string().required(),
+      timeFrom: yup
+        .mixed()
+        .required()
+        .test('before-timeTo', 'timeFrom must be before timeTo', function (value) {
+          const { timeTo } = this.parent
+          if (!value || !timeTo) return true
+
+          return dayjs(value).isBefore(dayjs(timeTo))
+        }),
+
+      timeTo: yup
+        .mixed()
+        .required()
+        .test('after-timeFrom', 'timeTo must be after timeFrom', function (value) {
+          const { timeFrom } = this.parent
+          if (!value || !timeFrom) return true
+
+          return dayjs(value).isAfter(dayjs(timeFrom))
+        }),
+
       flags: yup
         .array()
         .of(
@@ -140,7 +158,6 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 />
               </Grid>
             ))}
-
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <CustomTimePicker
