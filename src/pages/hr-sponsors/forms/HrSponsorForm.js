@@ -21,6 +21,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.SponsorFilters.page
   })
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   const validationSchema = yup.object({
     name: yup.string().required(),
@@ -34,7 +35,8 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
       .nullable()
       .transform((value, originalValue) => (originalValue === '' ? null : value)),
     phone: yup.string().max(8).nullable(),
-    isSupplier: yup.boolean()
+    isSupplier: yup.boolean(),
+    email: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
   })
 
   const { formik } = useForm({
@@ -179,7 +181,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 name='email'
                 label={labels.email}
                 value={formik.values.email}
-                maxAccess={maxAccess}
+                type='email'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('email', '')}
                 error={formik.touched.email && Boolean(formik.errors.email)}
