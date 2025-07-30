@@ -156,7 +156,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-
       const copy = {
         ...obj,
         date: formatDateToApi(obj.date),
@@ -237,7 +236,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -276,9 +274,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
           vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-          basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          priceType: ItemConvertPrice?.priceType || 1,
+          basePrice: 0,
+          unitPrice: 0,
+          priceType: itemInfo?.priceType || 1,
           mdAmount: 0,
           qty: 0,
           msId: itemInfo?.msId,
@@ -373,7 +371,10 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       component: 'textfield',
       label: labels.requestRef,
       name: 'requestRef',
-      flex: 2
+      flex: 2,
+      props: {
+        readOnly: true
+      }
     },
     {
       component: 'numberfield',
@@ -621,29 +622,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId, update) {
-    if (!formik.values.currencyId) {
-      update({
-        itemId: null,
-        itemName: null,
-        sku: null
-      })
-
-      stackError({
-        message: labels.noCurrency
-      })
-
-      return
-    }
-
-    const res = await getRequest({
-      extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
-    })
-
-    return res?.record
-  }
-
   const handleDiscountButtonClick = () => {
     setReCal(true)
     let currentTdAmount
@@ -830,6 +808,68 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     })
   }
 
+  async function importPuItems() {
+    const requestItems = await getRequisitionItem(formik.values?.requestId)
+    if (requestItems?.list?.length == 0) {
+      stackError({
+        message: labels.invalidSKU
+      })
+
+      return
+    }
+
+    const modifiedItemsList = await Promise.all(
+      requestItems?.list?.map(async item => {
+        const getItems = await constructItem({
+          ...item,
+          deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+          requestId: item?.trxId,
+          requestSeqNo: item?.seqNo,
+          requestRef: formik.values.requestRef,
+          mdType: 1,
+          notes: item?.justification
+        })
+
+        return getItems
+      })
+    )
+    const oldItems = formik.values.items || []
+
+    const combinedItems = [...oldItems, ...modifiedItemsList].map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+    formik.setFieldValue('items', combinedItems)
+    setReCal(true)
+  }
+  async function constructItem(item) {
+    const [itemInfo, itemPhysProp] = await Promise.all([getItem(item?.itemId), getItemPhysProp(item?.itemId)])
+
+    return {
+      ...item,
+      volume: itemPhysProp?.volume || 0,
+      weight: itemPhysProp?.weight || 0,
+      priceType: itemPhysProp?.priceType || null,
+      vatPct: itemPhysProp?.vatpct || 0,
+      basePrice: 0,
+      unitPrice: 0,
+      extendedPrice: 0,
+      mdValue: 0,
+      mdAmount: 0,
+      taxId: itemInfo?.taxId || null
+    }
+  }
+
+  async function getRequisitionItem(requestId) {
+    if (!requestId) return
+
+    const response = await getRequest({
+      extension: PurchaseRepository.RequisitionDetail.qry,
+      parameters: `_trxId=${requestId}`
+    })
+
+    return response
+  }
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
@@ -991,7 +1031,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
               </Grid>
               <Grid item xs={2}>
                 <CustomButton
-                  onClick={() => {}}
+                  onClick={() => importPuItems()}
                   tooltipText={platformLabels.import}
                   image={'import.png'}
                   disabled={!formik.values.requestId || !isRaw}
