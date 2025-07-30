@@ -13,10 +13,11 @@ const CustomCheckBox = ({
   maxAccess,
   required = false,
   disabled = false,
+  error = false,
+  helperText = '',
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
-
   const _disabled = _readOnly || _hidden || disabled
 
   const handleChange = event => {
@@ -30,19 +31,31 @@ const CustomCheckBox = ({
       control={
         <Checkbox
           name={name}
-          checked={value}
+          checked={!!value}
           required={_required}
           onChange={handleChange}
           disabled={_disabled}
           inputProps={{ 'aria-label': label }}
-          sx={{ ml: 2, '& .MuiSvgIcon-root': { fontSize: 15 }, '&.aria-label': { fontSize: 15 } }}
+          sx={{
+            ml: 2,
+            '& .MuiSvgIcon-root': { fontSize: 15 },
+            ...(error && {
+              color: '#fd3535ff',
+              '&.Mui-checked': {
+                color: '#fd3535ff'
+              }
+            })
+          }}
           {...props}
         />
       }
       label={label}
-      dir={dir}
-      componentsProps={{ typography: { sx: { fontSize: 15 } } }}
-      {...props}
+      sx={{
+        '& .MuiFormControlLabel-label': {
+          fontSize: 15,
+          ...(error && { color: '#fd3535ff' })
+        }
+      }}
     />
   )
 }

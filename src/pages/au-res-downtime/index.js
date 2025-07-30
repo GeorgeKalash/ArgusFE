@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import RoleForm from './forms/RoleForm'
+import ResourceDowntimeForm from './forms/ResourceDowntimeForm'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const BpRoles = () => {
+const ResourceDowntime = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -21,7 +21,7 @@ const BpRoles = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: BusinessPartnerRepository.Role.page,
+      extension: AccessControlRepository.ResourceDowntime.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -32,32 +32,49 @@ const BpRoles = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
     refetch,
-    access,
+    access: maxAccess,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: BusinessPartnerRepository.Role.page,
-    datasetId: ResourceIds.Roles
+    endpointId: AccessControlRepository.ResourceDowntime.page,
+    datasetId: ResourceIds.ResourceDowntime
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
-      field: 'description',
-      headerName: _labels.description,
+      field: 'moduleName',
+      headerName: labels.module,
       flex: 1
+    },
+    {
+      field: 'resourceName',
+      headerName: labels.resource,
+      flex: 1
+    },
+    {
+      field: 'sgName',
+      headerName: labels.SecurityGroup,
+      flex: 1
+    },
+    {
+      field: 'timeFrom',
+      headerName: labels.timeFrom,
+      flex: 1,
+      type: 'time'
+    },
+    {
+      field: 'timeTo',
+      headerName: labels.timeTo,
+      flex: 1,
+      type: 'time'
     }
   ]
 
@@ -71,7 +88,7 @@ const BpRoles = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: BusinessPartnerRepository.Role.del,
+      extension: AccessControlRepository.ResourceDowntime.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -80,40 +97,40 @@ const BpRoles = () => {
 
   function openForm(recordId) {
     stack({
-      Component: RoleForm,
+      Component: ResourceDowntimeForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
-        maxAccess: access
+        labels,
+        recordId,
+        maxAccess
       },
-      width: 500,
+      width: 700,
       height: 500,
-      title: _labels.businessPartnerRole
+      title: labels.resourceDowntime
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
-          maxAccess={access}
+          maxAccess={maxAccess}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default BpRoles
+export default ResourceDowntime

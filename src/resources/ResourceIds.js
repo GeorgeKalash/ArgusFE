@@ -32,6 +32,9 @@ export const ResourceIds = {
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
 
+  // AU
+  ResourceDowntime: 23109,
+
   // self service
   MyYearlySalesPerformance: 60500,
   MyMonthlySalesPerformance: 60501,
