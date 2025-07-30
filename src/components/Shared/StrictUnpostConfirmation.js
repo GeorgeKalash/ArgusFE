@@ -51,6 +51,7 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
           onChange={handleChange}
           onClear={handleClear}
           placeholder={platformLabels.placeHolderUnpost}
+          autoFocus={true}
         />
       </Grid>
       <Grid item xs={12}>
