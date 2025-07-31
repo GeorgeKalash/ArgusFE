@@ -30,7 +30,11 @@ export const EmployeeRepository = {
     del: service + 'delST'
   },
   SponsorFilters: {
-    qry: service + 'qrySP'
+    qry: service + 'qrySP',
+    page: service + 'pageSP',
+    set: service + 'setSP',
+    get: service + 'getSP',
+    del: service + 'delSP'
   },
   RelationshipTypes: {
     page: service + 'pageRT',
@@ -67,5 +71,14 @@ export const EmployeeRepository = {
     set: service + 'setTR',
     del: service + 'delTR',
     page: service + 'pageTR'
+  },
+  JobInfo: {
+    snapshot: service + 'snapshotJI',
+    page: service + 'pageJI',
+    close: service + 'closeJI',
+    reopen: service + 'reopenJI',
+    get: service + 'getJI',
+    set: service + 'setJI',
+    del: service + 'delJI'
   }
 }

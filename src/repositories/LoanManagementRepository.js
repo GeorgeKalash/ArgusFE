@@ -13,5 +13,12 @@ export const LoanManagementRepository = {
     get: service + 'getOBA',
     del: service + 'delOBA',
     qry: service + 'qryOBA'
+  },
+  BalanceAdjustment: {
+    page: service + 'pageBA',
+    set: service + 'setBA',
+    get: service + 'getBA',
+    del: service + 'delBA',
+    snapshot: service + 'snapshotBA'
   }
 }

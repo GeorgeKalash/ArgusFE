@@ -51,6 +51,7 @@ const StrictDeleteConfirmation = ({ window, action }) => {
           onChange={handleChange}
           onClear={handleClear}
           placeholder={platformLabels.placeHolder}
+          autoFocus={true}
         />
       </Grid>
       <Grid item xs={12}>
