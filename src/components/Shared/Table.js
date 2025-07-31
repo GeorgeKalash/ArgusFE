@@ -714,7 +714,7 @@ const Table = ({
 
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props?.onEdit && (
+              {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
                   onClick={e => {
@@ -740,21 +740,26 @@ const Table = ({
                   <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
                 </IconButton>
               )}
-              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    if (props?.deleteConfirmationType == 'strict') {
-                      openDeleteConfirmation(data)
-                    } else {
-                      openDelete(data)
-                    }
-                  }}
-                  color='error'
-                >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-                </IconButton>
-              )}
+              {globalStatus &&
+                !isStatus3 &&
+                !isStatusCanceled &&
+                deleteBtnVisible &&
+                !isWIP &&
+                (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
+                  <IconButton
+                    size='small'
+                    onClick={e => {
+                      if (props?.deleteConfirmationType == 'strict') {
+                        openDeleteConfirmation(data)
+                      } else {
+                        openDelete(data)
+                      }
+                    }}
+                    color='error'
+                  >
+                    <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                  </IconButton>
+                )}
             </Box>
           )
         }

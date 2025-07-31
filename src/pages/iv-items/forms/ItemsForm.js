@@ -20,7 +20,7 @@ import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
@@ -141,6 +141,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       }))
 
       formik.setFieldValue('sku', res.record.sku)
+      if (window.setTitle && !editMode) {
+        window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
+      }
 
       invalidate()
     }

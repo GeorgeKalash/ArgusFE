@@ -15,7 +15,8 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
   const { stack } = useWindow()
 
   const {
-    query: { data }
+    query: { data },
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
@@ -75,7 +76,8 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
     stack({
       Component: WorksheetWindow,
       props: {
-        recordId
+        recordId,
+        joInvalidate: invalidate,
       }
     })
   }

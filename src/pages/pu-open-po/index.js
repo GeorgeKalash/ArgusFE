@@ -346,7 +346,7 @@ const OpenPurchaseOrder = () => {
                   displayFieldWidth={2}
                   valueShow='vendorRef'
                   secondValueShow='vendorName'
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -438,7 +438,7 @@ const OpenPurchaseOrder = () => {
                   secondDisplayField={false}
                   displayFieldWidth={2}
                   valueShow='poRef'
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
