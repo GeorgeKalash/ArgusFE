@@ -30,7 +30,11 @@ export const EmployeeRepository = {
     del: service + 'delST'
   },
   SponsorFilters: {
-    qry: service + 'qrySP'
+    qry: service + 'qrySP',
+    page: service + 'pageSP',
+    set: service + 'setSP',
+    get: service + 'getSP',
+    del: service + 'delSP'
   },
   RelationshipTypes: {
     page: service + 'pageRT',
