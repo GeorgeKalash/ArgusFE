@@ -8,6 +8,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -40,6 +41,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       BpRef: null,
       szId: null,
       spId: null,
+      sgId: null,
       isInactive: false,
       isConfidential: false
     },
@@ -49,7 +51,15 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       name: yup.string().required(),
       type: yup.string().required(),
       groupId: yup.string().required(),
-      reference: yup.string().required()
+      reference: yup.string().required(),
+      sgId: yup
+        .number()
+        .nullable()
+        .test('sgId-required-if-confidential', 'sgId is required when confidential', function (value) {
+          const { isConfidential } = this.parent
+
+          return !(isConfidential && !value)
+        })
     }),
     onSubmit: async values => {
       await postAccount(values)
@@ -116,173 +126,198 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={FinancialRepository.Group.qry}
-                  name='groupId'
-                  required
-                  label={labels.accountGroup}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('groupId', newValue?.recordId)
-                      formik.setFieldValue('groupName', newValue?.name)
-                    } else {
-                      formik.setFieldValue('groupId', '')
-                      formik.setFieldValue('groupName', '')
-                    }
-                  }}
-                  error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='reference'
-                  label={labels.reference}
-                  value={formik.values.reference}
-                  maxAccess={maxAccess}
-                  required
-                  maxLength='10'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('reference', '')}
-                  error={formik.touched.reference && Boolean(formik.errors.reference)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='name'
-                  label={labels.name}
-                  value={formik.values.name}
-                  required
-                  maxAccess={maxAccess}
-                  maxLength='30'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('name', '')}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='keywords'
-                  label={labels.keyWords}
-                  value={formik.values.keywords}
-                  maxAccess={maxAccess}
-                  maxLength='30'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('keywords', '')}
-                  error={formik.touched.keywords && Boolean(formik.errors.keywords)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='flName'
-                  label={labels.foreinLanguageName}
-                  value={formik.values.flName}
-                  maxAccess={maxAccess}
-                  maxLength='30'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('flName', '')}
-                  error={formik.touched.flName && Boolean(formik.errors.flName)}
-                />
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={FinancialRepository.Group.qry}
+                    name='groupId'
+                    required
+                    label={labels.accountGroup}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('groupId', newValue?.recordId)
+                        formik.setFieldValue('groupName', newValue?.name)
+                      } else {
+                        formik.setFieldValue('groupId', '')
+                        formik.setFieldValue('groupName', '')
+                      }
+                    }}
+                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    maxAccess={maxAccess}
+                    required
+                    maxLength='10'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='name'
+                    label={labels.name}
+                    value={formik.values.name}
+                    required
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('name', '')}
+                    error={formik.touched.name && Boolean(formik.errors.name)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='keywords'
+                    label={labels.keyWords}
+                    value={formik.values.keywords}
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('keywords', '')}
+                    error={formik.touched.keywords && Boolean(formik.errors.keywords)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='flName'
+                    label={labels.foreinLanguageName}
+                    value={formik.values.flName}
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('flName', '')}
+                    error={formik.touched.flName && Boolean(formik.errors.flName)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                    label={labels.inactive}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-            <Grid container rowGap={2} xs={6} sx={{ px: 2 }}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  name='type'
-                  label={labels.type}
-                  datasetId={DataSets.FI_GROUP_TYPE}
-                  required
-                  values={formik.values}
-                  valueField='key'
-                  displayField='value'
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('type', newValue?.key)
-                    } else {
-                      formik.setFieldValue('type', newValue?.key)
-                    }
-                  }}
-                  error={formik.touched.type && Boolean(formik.errors.type)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextField
-                  name='BpRef'
-                  label={labels.BpRef}
-                  value={formik.values.BpRef}
-                  readOnly
-                  maxAccess={maxAccess}
-                  maxLength='30'
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('BpRef', '')}
-                  error={formik.touched.BpRef && Boolean(formik.errors.BpRef)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SaleRepository.SalesZone.qry}
-                  parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                  name='szId'
-                  label={labels.salesZone}
-                  columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('szId', newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('szId', '')
-                    }
-                  }}
-                  error={formik.touched.szId && Boolean(formik.errors.szId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SaleRepository.SalesPerson.qry}
-                  name='spId'
-                  label={labels.salesPerson}
-                  columnsInDropDown={[{ key: 'name', value: 'Name' }]}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      formik.setFieldValue('spId', newValue?.recordId)
-                    } else {
-                      formik.setFieldValue('spId', '')
-                    }
-                  }}
-                  error={formik.touched.spId && Boolean(formik.errors.spId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomCheckBox
-                  name='isInactive'
-                  value={formik.values?.isInactive}
-                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
-                  label={labels.inactive}
-                  maxAccess={maxAccess}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomCheckBox
-                  name='isConfidential'
-                  value={formik.values?.isConfidential}
-                  onChange={event => formik.setFieldValue('isConfidential', event.target.checked)}
-                  label={labels.isConfidential}
-                  maxAccess={maxAccess}
-                />
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    name='type'
+                    label={labels.type}
+                    datasetId={DataSets.FI_GROUP_TYPE}
+                    required
+                    values={formik.values}
+                    valueField='key'
+                    displayField='value'
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('type', newValue?.key)
+                      } else {
+                        formik.setFieldValue('type', newValue?.key)
+                      }
+                    }}
+                    error={formik.touched.type && Boolean(formik.errors.type)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='BpRef'
+                    label={labels.BpRef}
+                    value={formik.values.BpRef}
+                    readOnly
+                    maxAccess={maxAccess}
+                    maxLength='30'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('BpRef', '')}
+                    error={formik.touched.BpRef && Boolean(formik.errors.BpRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesZone.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='szId'
+                    label={labels.salesZone}
+                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('szId', newValue?.recordId)
+                      } else {
+                        formik.setFieldValue('szId', '')
+                      }
+                    }}
+                    error={formik.touched.szId && Boolean(formik.errors.szId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesPerson.qry}
+                    name='spId'
+                    label={labels.salesPerson}
+                    columnsInDropDown={[{ key: 'name', value: 'Name' }]}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      if (newValue) {
+                        formik.setFieldValue('spId', newValue?.recordId)
+                      } else {
+                        formik.setFieldValue('spId', '')
+                      }
+                    }}
+                    error={formik.touched.spId && Boolean(formik.errors.spId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isConfidential'
+                    value={formik.values?.isConfidential}
+                    onChange={event => {
+                      formik.setFieldValue('isConfidential', event.target.checked)
+                      formik.setFieldValue('sgId', null)
+                    }}
+                    label={labels.isConfidential}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={AccessControlRepository.SecurityGroup.qry}
+                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    name='sgId'
+                    label={labels.securityGrp}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('sgId', newValue?.recordId || null)
+                    }}
+                    required={formik.values.isConfidential}
+                    readOnly={!formik.values.isConfidential}
+                    error={formik.touched.sgId && Boolean(formik.errors.sgId)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

@@ -15,11 +15,13 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import JobOrderWindow from './window/JobOrderWindow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const JobOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -163,7 +165,8 @@ const JobOrder = () => {
       },
       width: 1150,
       height: 700,
-      title: labels.jobOrder
+      title: labels.jobOrder,
+      nextToTitle: reference
     })
   }
 
@@ -183,6 +186,11 @@ const JobOrder = () => {
         reference: reference,
         resourceId: ResourceIds.MFJobOrders,
         onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.MFJobOrders,
+            recordId,
+            reference
+          })
           openStack(recordId, reference)
         },
         isAlreadyLocked: name => {

@@ -40,7 +40,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   })
 
   const initialValues = {
-    recordId,
+    recordId: recordId || null,
     currencyId: parseInt(getDefaultsData()?.currencyId),
     currencyRef: '',
     currencyName: '',
@@ -102,7 +102,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
           message: labels.errorMessage
         })
 
-        return
+        throw { silent: true }
       }
 
       const res = await postRequest({
