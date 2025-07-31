@@ -1472,7 +1472,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       })
                     }}
                     image='popup.png'
-                    disabled={isPosted || !formik.values.clientId}
+                    disabled={!(editMode && !isPosted && formik.values.clientId)}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>

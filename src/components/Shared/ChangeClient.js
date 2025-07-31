@@ -60,25 +60,25 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
   })
 
   function isValidClient(values) {
-    if (formValues?.plId != values.plId) {
+    if (formValues?.plId != values?.plId) {
       stackError({
         message: labels.mismatchPrice
       })
 
       return false
-    } else if (formValues?.isVattable != values.isSubjectToVAT) {
+    } else if (formValues?.isVattable != values?.isSubjectToVAT) {
       stackError({
         message: labels.mismatchVat
       })
 
       return false
-    } else if (formValues?.taxId != values.taxId) {
+    } else if (formValues?.taxId != values?.taxId) {
       stackError({
         message: labels.mismatchTax
       })
 
       return false
-    } else if (formValues?.maxDiscount <= values.maxDiscount) {
+    } else if (formValues?.maxDiscount <= values?.maxDiscount) {
       stackError({
         message: labels.mismatchDiscount
       })
@@ -171,7 +171,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
                 { key: 'cgName', value: 'Client Group' }
               ]}
               required
-              onChange={async (event, newValue) => {
+              onChange={(event, newValue) => {
                 const isValid = isValidClient(newValue)
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
