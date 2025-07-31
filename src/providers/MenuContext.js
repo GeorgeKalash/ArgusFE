@@ -58,7 +58,8 @@ const MenuProvider = ({ children }) => {
                 title: commandLine.name,
                 path: `/${commandLine.nextAPI}`,
                 name: commandLine.name,
-                iconName: commandLine.addToBookmarks && 'FavIcon'
+                iconName: commandLine.addToBookmarks && 'FavIcon',
+                resourceId: commandLine.resourceId
               })
           })
 

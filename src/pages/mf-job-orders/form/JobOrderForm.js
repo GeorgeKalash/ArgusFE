@@ -31,6 +31,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function JobOrderForm({
   labels,
@@ -50,6 +51,7 @@ export default function JobOrderForm({
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -289,6 +291,11 @@ export default function JobOrderForm({
       reference: formik.values.reference,
       resourceId: ResourceIds.MFJobOrders,
       onSuccess: () => {
+        addLockedScreen({
+          resourceId: ResourceIds.MFJobOrders,
+          recordId,
+          reference
+        })
         refetchForm(res.recordId)
       },
       isAlreadyLocked: name => {
@@ -391,7 +398,14 @@ export default function JobOrderForm({
       lockRecord({
         recordId: res?.record.recordId,
         reference: res?.record.reference,
-        resourceId: ResourceIds.MFJobOrders
+        resourceId: ResourceIds.MFJobOrders,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.MFJobOrders,
+            recordId: res?.record.recordId,
+            reference: res?.record.reference
+          })
+        }
       })
 
     return res?.record.reference
