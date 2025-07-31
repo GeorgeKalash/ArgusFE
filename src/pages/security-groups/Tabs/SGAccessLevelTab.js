@@ -111,7 +111,6 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         labels: labels,
         maxAccess,
         row: row.data,
-        invalidate,
         resourceId: ResourceIds.SecurityGroup
       }
     })
