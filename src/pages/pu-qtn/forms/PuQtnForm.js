@@ -168,7 +168,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         .map((itemDetails, index) => {
           return {
             ...itemDetails,
-            seqNo: index + 1
+            seqNo: index + 1,
+            deliveryDate: itemDetails?.deliveryDate ? formatDateToApi(itemDetails.deliveryDate) : null,
+            lastPurchaseDate: itemDetails?.lastPurchaseDate ? formatDateToApi(itemDetails.lastPurchaseDate) : null
           }
         })
 
@@ -546,6 +548,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+                lastPurchaseDate: item?.lastPurchaseDate ? formatDateFromApi(item.lastPurchaseDate) : null,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -782,7 +786,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
-        tdPct: tdPct,
+        tdPct,
         taxDetails: item.taxDetails
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
@@ -811,7 +815,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     const requestItems = await getRequisitionItem(formik.values?.requestId)
     if (requestItems?.list?.length == 0) {
       stackError({
-        message: labels.invalidSKU
+        message: labels.noItemsToImport
       })
 
       return
@@ -842,6 +846,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           const getItems = await constructItem({
             ...item,
             deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+            lastPurchaseDate: item?.lastPurchaseDate ? formatDateFromApi(item.lastPurchaseDate) : null,
             requestId: item?.trxId,
             requestSeqNo: item?.seqNo,
             requestRef: formik.values.requestRef,
@@ -864,19 +869,21 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   }
   async function constructItem(item) {
     const [itemInfo, itemPhysProp] = await Promise.all([getItem(item?.itemId), getItemPhysProp(item?.itemId)])
+    const taxDetails = formik.values.isVattable ? await getTaxDetails(itemInfo?.taxId) : null
 
     return {
       ...item,
       volume: itemPhysProp?.volume || 0,
       weight: itemPhysProp?.weight || 0,
-      priceType: itemPhysProp?.priceType || null,
+      priceType: itemPhysProp?.priceType || 1,
       vatPct: itemPhysProp?.vatpct || 0,
       basePrice: 0,
       unitPrice: 0,
       extendedPrice: 0,
       mdValue: 0,
       mdAmount: 0,
-      taxId: itemInfo?.taxId || null
+      taxId: itemInfo?.taxId || null,
+      taxDetails
     }
   }
 
