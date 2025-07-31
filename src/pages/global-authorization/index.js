@@ -78,7 +78,6 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
-        invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       }
     })

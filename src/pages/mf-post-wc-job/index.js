@@ -106,7 +106,8 @@ const PostWorkCenterJob = () => {
     {
       key: 'Locked',
       condition: isLocked,
-      onClick: onUnlock,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnlock,
       disabled: false
     }
   ]
