@@ -14,6 +14,7 @@ export const ResourceIds = {
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
   SalesTeamOrdersSummary: 60113,
+  JoDTd: 42607,
 
   // inventory
   InventoryBelowMinimum: 60200,
