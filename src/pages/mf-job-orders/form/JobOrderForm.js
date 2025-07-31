@@ -113,7 +113,7 @@ export default function JobOrderForm({
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
-      expectedPcs: yup.number().required(),
+      expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
       routingId: yup.string().required()
@@ -147,7 +147,7 @@ export default function JobOrderForm({
         recordId: res?.recordId
       }))
       const reference = await refetchForm(res.recordId)
-      if (window.setTitle) {
+      if (window.setTitle && !editMode) {
         window.setTitle(reference ? `${labels.jobOrder} ${reference}` : labels.jobOrder)
       }
     }
@@ -557,6 +557,21 @@ export default function JobOrderForm({
       !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
     })()
   }, [formik.values.designId])
+
+  useEffect(() => {
+    ;(async function () {
+      if (formik.values.dtId) {
+        const dtd = await getRequest({
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${formik.values.dtId}`
+        })
+
+        formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+      } else {
+        formik.setFieldValue('plantId', null)
+      }
+    })()
+  }, [formik.values.dtId])
 
   useEffect(() => {
     ;(async function () {
