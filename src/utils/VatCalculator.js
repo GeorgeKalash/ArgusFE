@@ -30,7 +30,7 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
       }
       break
     case TAXBASE_FAPQU:
-      if (priceType === 3) vatAmount = taxDetail.amount * vatCalcRow.qty
+      if (vatCalcRow?.priceType === 3) vatAmount = vatCalcRow.qty * vatCalcRow.weight
       else vatAmount = taxDetail.amount * vatCalcRow.qty
 
       //price type = 1 -> taxDetail.amount * vatCalcRow.qty
