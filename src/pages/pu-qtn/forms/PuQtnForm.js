@@ -117,7 +117,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         basePrice: 0,
         mdValue: 0,
         unitPrice: 0,
-        unitCost: 0,
         vatAmount: 0,
         mdAmount: 0,
         upo: 0,
@@ -818,22 +817,43 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       return
     }
 
-    const modifiedItemsList = await Promise.all(
-      requestItems?.list?.map(async item => {
-        const getItems = await constructItem({
-          ...item,
-          deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
-          requestId: item?.trxId,
-          requestSeqNo: item?.seqNo,
-          requestRef: formik.values.requestRef,
-          mdType: 1,
-          notes: item?.justification
-        })
-
-        return getItems
-      })
+    const allItemsImported = requestItems?.list?.every(item =>
+      formik.values.items?.some(
+        existingItem => existingItem.requestId === item?.trxId && existingItem.requestSeqNo === item?.seqNo
+      )
     )
-    const oldItems = formik.values.items || []
+    if (allItemsImported) {
+      stackError({
+        message: labels.allItemsImported
+      })
+
+      return
+    }
+
+    const modifiedItemsList = await Promise.all(
+      requestItems?.list
+        ?.filter(
+          item =>
+            !formik.values.items?.some(
+              existingItem => existingItem.requestId === item?.trxId && existingItem.requestSeqNo === item?.seqNo
+            )
+        )
+        .map(async ({ unitCost, ...item }) => {
+          const getItems = await constructItem({
+            ...item,
+            deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+            requestId: item?.trxId,
+            requestSeqNo: item?.seqNo,
+            requestRef: formik.values.requestRef,
+            mdType: 1,
+            notes: item?.justification
+          })
+
+          return getItems
+        })
+    )
+
+    const oldItems = formik.values.items || null
 
     const combinedItems = [...oldItems, ...modifiedItemsList].map((item, index) => ({
       ...item,
