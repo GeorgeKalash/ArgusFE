@@ -94,7 +94,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='100'
+                maxLength='70'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
@@ -106,7 +106,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 label={labels.ref}
                 value={formik.values.idRef}
                 maxAccess={maxAccess}
-                maxLength='50'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('idRef', '')}
                 error={formik.touched.idRef && Boolean(formik.errors.idRef)}
@@ -118,7 +118,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 label={labels.rightt}
                 value={formik.values.rtwRef}
                 maxAccess={maxAccess}
-                maxLength='50'
+                maxLength='20'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rtwRef', '')}
                 error={formik.touched.rtwRef && Boolean(formik.errors.rtwRef)}
