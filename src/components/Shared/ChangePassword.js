@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Grid, IconButton, InputAdornment } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
@@ -14,6 +14,10 @@ import { AuthContext } from 'src/providers/AuthContext'
 import NewPassword from './NewPassword'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import CustomNumberField from '../Inputs/CustomNumberField'
+import { AccountRepository } from 'src/repositories/AccountRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { getStorageData } from 'src/storage/storage'
 
 const ChangePassword = ({
   _labels,
@@ -29,8 +33,23 @@ const ChangePassword = ({
   const auth = useAuth()
   const { encryptePWD, getAccessToken } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
+  const { getIdentityRequest, postIdentityRequest } = useContext(RequestsContext)
 
   useSetWindow({ title: platformLabels.ChangePassword, window })
+
+  const userData = getStorageData('userData')
+
+  useEffect(() => {
+    ;(async function () {
+      if (reopenLogin == false) {
+        const res = await getIdentityRequest({
+          extension: AccountRepository.Identity.get,
+          parameters: `_email=${userData?.username}`
+        })
+        formik.setFieldValue('passwordExpiryDays', res.record?.passwordExpiryDays)
+      }
+    })()
+  }, [reopenLogin])
 
   const { formik } = useForm({
     enableReinitialize: true,
@@ -54,22 +73,22 @@ const ChangePassword = ({
         }
 
         try {
-          const accessToken = propLoggedUser ? propLoggedUser.accessToken : await getAccessToken()
+          let accessToken
+
+          if (propLoggedUser && propLoggedUser.accessToken) {
+            accessToken = propLoggedUser.accessToken
+          } else {
+            accessToken = await getAccessToken()
+          }
 
           if (!accessToken) {
             throw new Error('Failed to retrieve access token')
           }
-          var bodyFormData = new FormData()
-          bodyFormData.append('record', JSON.stringify(loginVal))
 
-          const res = await axios({
-            method: 'POST',
-            url: `${process.env.NEXT_PUBLIC_AuthURL}MA.asmx/changePW`,
-            headers: {
-              Authorization: 'Bearer ' + accessToken,
-              'Content-Type': 'multipart/form-data'
-            },
-            data: bodyFormData
+          await postIdentityRequest({
+            extension: AccountRepository.changePW,
+            accessToken: accessToken,
+            record: JSON.stringify(loginVal)
           }).then(res => {
             toast.success(_labels.passSuccess)
             formik.setFieldValue('password', '')
@@ -94,6 +113,15 @@ const ChangePassword = ({
     <VertLayout>
       <Grow>
         <Grid container spacing={3} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='passwordExpiryDays'
+              label={_labels.passwordExpiryDays}
+              value={formik.values?.passwordExpiryDays}
+              readOnly
+              hidden={reopenLogin}
+            />
+          </Grid>
           <Grid item xs={12}>
             <CustomTextField
               name='password'
