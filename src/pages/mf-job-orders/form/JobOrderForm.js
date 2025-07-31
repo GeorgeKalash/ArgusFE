@@ -113,7 +113,7 @@ export default function JobOrderForm({
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
-      expectedPcs: yup.number().required(),
+      expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
       routingId: yup.string().required()
@@ -147,7 +147,7 @@ export default function JobOrderForm({
         recordId: res?.recordId
       }))
       const reference = await refetchForm(res.recordId)
-      if (window.setTitle) {
+      if (window.setTitle && !editMode) {
         window.setTitle(reference ? `${labels.jobOrder} ${reference}` : labels.jobOrder)
       }
     }
