@@ -44,7 +44,7 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: ManufacturingRepository.DocumentTypeDefaults.set,
+        extension: InventoryRepository.DocumentTypeDefaults.set,
         record: JSON.stringify(obj)
       })
 
