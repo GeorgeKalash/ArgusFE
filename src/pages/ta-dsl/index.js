@@ -77,7 +77,7 @@ const FoWax = () => {
     },
     {
       field: 'rsName',
-      headerName: labels.releaseStatus,
+      headerName: labels.statusRelease,
       flex: 1
     },
     {
@@ -96,7 +96,7 @@ const FoWax = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.ShitLeave.qry,
+      extension: TimeAttendanceRepository.ShitLeave.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
     })
 
@@ -124,15 +124,15 @@ const FoWax = () => {
         access,
         recordId
       },
-      width: 1200,
-      height: 700,
-      title: labels.wax
+      width: 1000,
+      height: 550,
+      title: labels.duringShiftLeave
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.Wax.del,
+      extension: TimeAttendanceRepository.ShitLeave.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -153,8 +153,6 @@ const FoWax = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

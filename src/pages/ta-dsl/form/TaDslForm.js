@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -8,22 +8,13 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { DataGrid } from 'src/components/Shared/DataGrid'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { createConditionalSchema } from 'src/lib/validation'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
@@ -31,7 +22,7 @@ import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceReposit
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
 
-export default function TaDslForm({ labels, access, recordId, window }) {
+export default function TaDslForm({ labels, access, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -42,20 +33,15 @@ export default function TaDslForm({ labels, access, recordId, window }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.Wax.page
+    endpointId: TimeAttendanceRepository.ShitLeave.page
   })
-
-  const conditions = {
-    jobId: row => row?.jobId,
-    pieces: row => row?.jobId > 0 && row?.pieces <= row?.jobPcs
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
       employeeId: null,
+      employeeRef: '',
+      employeeName: '',
       reference: '',
       date: new Date(),
       leaveDate: null,
@@ -72,7 +58,6 @@ export default function TaDslForm({ labels, access, recordId, window }) {
       departmentName: '',
       reportToRef: '',
       reportToName: '',
-      positionName: '',
       departmentHeadName: '',
       departmentHeadRef: '',
       position: ''
@@ -80,6 +65,11 @@ export default function TaDslForm({ labels, access, recordId, window }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
+      employeeId: yup.number().required(),
+      reasonId: yup.number().required(),
+      duration: yup.string().required(),
+      destination: yup.string().required(),
+      leaveDate: yup.date().required(),
       fromTime: yup
         .mixed()
         .required()
@@ -100,9 +90,37 @@ export default function TaDslForm({ labels, access, recordId, window }) {
         })
     }),
     onSubmit: async obj => {
+      const {
+        date,
+        leaveDate,
+        fromTime,
+        toTime,
+        returnTime,
+        statusName,
+        rsName,
+        wipName,
+        employeeRef,
+        employeeName,
+        departmentRef,
+        departmentName,
+        reportToRef,
+        reportToName,
+        departmentHeadName,
+        departmentHeadRef,
+        position,
+        ...rest
+      } = obj
+
       const response = await postRequest({
-        extension: TimeAttendanceRepository.FlatSchedule.set,
-        record: JSON.stringify({ ...obj })
+        extension: TimeAttendanceRepository.ShitLeave.set,
+        record: JSON.stringify({
+          ...rest,
+          date: formatDateToApi(date),
+          leaveDate: formatDateToApi(leaveDate),
+          fromTime: dayjs(fromTime).format('HH:mm'),
+          toTime: dayjs(toTime).format('HH:mm'),
+          returnTime: dayjs(returnTime).format('HH:mm')
+        })
       })
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       refetchForm(response.recordId)
@@ -111,71 +129,61 @@ export default function TaDslForm({ labels, access, recordId, window }) {
   })
 
   const editMode = !!formik.values?.recordId
-  const isPosted = formik?.values?.status === 3
   const isClosed = formik?.values?.wip === 2
 
-  const getHeaderData = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: FoundryRepository.Wax.get,
-      parameters: `_recordId=${recordId}`
-    })
-
-    return {
-      ...response?.record,
-      date: formatDateFromApi(response?.record.date)
-    }
-  }
-
-  const getMetalSetting = async (metalId, metalColorId) => {
-    if (!metalId || !metalColorId) return
-
-    const response = await getRequest({
-      extension: FoundryRepository.MetalSettings.get,
-      parameters: `_metalId=${metalId}&_metalColorId=${metalColorId}`
-    })
-
-    return response?.record
-  }
-
-  const onPost = async () => {
-    await postRequest({
-      extension: FoundryRepository.Wax.post,
-      record: JSON.stringify(formik.values.header)
-    })
-
-    toast.success(platformLabels.Posted)
-    invalidate()
-    window.close()
-  }
-
-  const onUnpost = async () => {
-    await postRequest({
-      extension: FoundryRepository.Wax.unpost,
-      record: JSON.stringify(formik.values.header)
-    })
-
-    refetchForm(formik.values.recordId)
-    invalidate()
-  }
+  const {
+    date,
+    leaveDate,
+    fromTime,
+    toTime,
+    returnTime,
+    statusName,
+    rsName,
+    wipName,
+    employeeRef,
+    employeeName,
+    departmentRef,
+    departmentName,
+    reportToRef,
+    reportToName,
+    departmentHeadName,
+    departmentHeadRef,
+    position,
+    ...rest
+  } = formik.values
 
   const onClose = async () => {
     await postRequest({
-      extension: FoundryRepository.Wax.close,
-      record: JSON.stringify(formik.values.header)
+      extension: TimeAttendanceRepository.ShitLeave.close,
+      record: JSON.stringify({
+        ...rest,
+        date: formatDateToApi(date),
+        leaveDate: formatDateToApi(leaveDate),
+        fromTime: dayjs(fromTime).format('HH:mm'),
+        toTime: dayjs(toTime).format('HH:mm'),
+        returnTime: dayjs(returnTime).format('HH:mm')
+      })
     })
 
+    toast.success(platformLabels.Closed)
     refetchForm(formik.values.recordId)
     invalidate()
   }
 
   const onReopen = async () => {
     await postRequest({
-      extension: FoundryRepository.Wax.reopen,
-      record: JSON.stringify(formik.values.header)
+      extension: TimeAttendanceRepository.ShitLeave.reopen,
+      record: JSON.stringify({
+        ...rest,
+        date: formatDateToApi(date),
+        leaveDate: formatDateToApi(leaveDate),
+        fromTime: dayjs(fromTime).format('HH:mm'),
+        toTime: dayjs(toTime).format('HH:mm'),
+        returnTime: dayjs(returnTime).format('HH:mm')
+      })
     })
 
+    toast.success(platformLabels.Reopened)
     refetchForm(formik.values.recordId)
     invalidate()
   }
@@ -185,8 +193,21 @@ export default function TaDslForm({ labels, access, recordId, window }) {
       extension: TimeAttendanceRepository.ShitLeave.get,
       parameters: `_recordId=${recordId}`
     })
-    formik.setValues({ ...record })
+    formik.setValues({
+      ...record,
+      date: formatDateFromApi(record.date),
+      leaveDate: formatDateFromApi(record.leaveDate),
+      fromTime: dayjs(record.fromTime, 'HH:mm'),
+      toTime: dayjs(record.toTime, 'HH:mm'),
+      returnTime: record?.returnTime?.trim() ? dayjs(record?.returnTime, 'HH:mm') : null
+    })
+
+    setViewField(record.recordId)
+
+    return record
   }
+
+  console.log(formik.values)
 
   useEffect(() => {
     if (recordId) {
@@ -205,7 +226,7 @@ export default function TaDslForm({ labels, access, recordId, window }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || isPosted
+      disabled: !isClosed
     }
   ]
 
@@ -219,7 +240,7 @@ export default function TaDslForm({ labels, access, recordId, window }) {
   }
 
   useEffect(() => {
-    console.log(formik.values.leaveDate)
+    console.log(formik.values.leaveDate, formik.values.employeeId)
     ;(async function () {
       if (formik.values.leaveDate && formik.values.employeeId) {
         const { list } = await getRequest({
@@ -247,8 +268,24 @@ export default function TaDslForm({ labels, access, recordId, window }) {
     })()
   }, [formik.values.employeeId, formik.values.leaveDate])
 
+  useEffect(() => {
+    const duration = getDuration(
+      dayjs(formik.values.fromTime).format('HH:mm'),
+      dayjs(formik.values.toTime).format('HH:mm')
+    )
+    formik.setFieldValue('duration', duration || null)
+  }, [formik.values.fromTime, formik.values.toTime])
+
+  useEffect(() => {
+    const duration = getDuration(
+      dayjs(formik.values.fromTime).format('HH:mm'),
+      dayjs(formik.values.returnTime).format('HH:mm')
+    )
+    formik.setFieldValue('realDuration', duration || null)
+  }, [formik.values.fromTime, formik.values.returnTime])
+
   const getDuration = (start, end) => {
-    if (!start || !end) return
+    if (!start || !end || end === 'Invalid Date' || start === 'Invalid Date') return
     console.log(start, end)
 
     const [startH, startM] = start.split(':').map(Number)
@@ -262,8 +299,29 @@ export default function TaDslForm({ labels, access, recordId, window }) {
 
     const hours = Math.floor(diff / 60)
     const minutes = diff % 60
+    if (hours === NaN || minutes === NaN) return
 
-    return `${hours}:${minutes.toString().padStart(2, '0')}`
+    return `${hours}.${minutes.toString().padStart(2, '0')}`
+  }
+
+  async function setViewField(recordId) {
+    if (recordId) {
+      const { record } = await getRequest({
+        extension: EmployeeRepository.QuickView.get,
+        parameters: `_recordId=${recordId}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
+      })
+
+      formik.setFieldValue('departmentRef', record?.departmentRef)
+      formik.setFieldValue('departmentName', record?.departmentName)
+      formik.setFieldValue('departmentHeadRef', record?.departmentHeadRef)
+      formik.setFieldValue('departmentHeadName', record?.departmentHeadName)
+      formik.setFieldValue('reportToRef', record?.reportToRef)
+      formik.setFieldValue('reportToName', record?.reportToName)
+      formik.setFieldValue(
+        'position',
+        `${record?.positionName || ''}${record?.positionRef ? ` ${record.positionRef}` : ''}`
+      )
+    }
   }
 
   return (
@@ -280,16 +338,30 @@ export default function TaDslForm({ labels, access, recordId, window }) {
         <Grid container spacing={2}>
           <Grid item xs={8}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <CustomTextField
                   name='reference'
                   label={labels.ref}
                   value={formik.values.reference}
                   maxAccess={maxAccess}
                   maxLength='30'
+                  readOnly={editMode}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
+                />
+              </Grid>
+              <Grid item xs={6}></Grid>
+              <Grid item xs={6}>
+                <CustomDatePicker
+                  name='date'
+                  label={labels.date}
+                  value={formik.values.date}
+                  onChange={formik.setFieldValue}
+                  maxAccess={access}
+                  readOnly
+                  onClear={() => formik.setFieldValue('date', '')}
+                  error={formik.touched.date && Boolean(formik.errors.date)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -312,25 +384,7 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                   ]}
                   maxAccess={maxAccess}
                   onChange={async (event, newValue) => {
-                    if (newValue?.recordId) {
-                      const { record } = await getRequest({
-                        extension: EmployeeRepository.QuickView.get,
-                        parameters: `_recordId=${newValue?.recordId}&_asOfDate=${formatDateForGetApI(
-                          formik.values.date
-                        )}`
-                      })
-
-                      formik.setFieldValue('departmentRef', record?.departmentRef)
-                      formik.setFieldValue('departmentName', record?.departmentName)
-                      formik.setFieldValue('departmentHeadRef', record?.departmentHeadRef)
-                      formik.setFieldValue('departmentHeadName', record?.departmentHeadName)
-                      formik.setFieldValue('reportToRef', record?.reportToRef)
-                      formik.setFieldValue('reportToName', record?.reportToName)
-                      formik.setFieldValue(
-                        'position',
-                        `${record?.positionName || ''}${record?.positionRef ? ` ${record.positionRef}` : ''}`
-                      )
-                    }
+                    await setViewField(newValue?.recordId)
                     formik.setFieldValue('employeeRef', newValue?.employeeRef || '')
                     formik.setFieldValue('employeeName', newValue?.fullName || '')
                     formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -338,16 +392,14 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                   errorCheck={'employeeId'}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <ResourceLookup
                   valueField='reference'
                   displayField='fullName'
-                  name='reportToId'
-                  required
+                  name='department'
                   readOnly
-                  label={labels.employee}
-                  secondFieldLabel={labels.employee}
+                  label={labels.department}
+                  secondFieldLabel={labels.department}
                   form={formik}
                   valueShow='reportToRef'
                   secondValueShow='reportToName'
@@ -358,11 +410,10 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                 <ResourceLookup
                   valueField='reference'
                   displayField='fullName'
-                  name='reportToId'
-                  required
+                  name='reportTo'
                   readOnly
-                  label={labels.employee}
-                  secondFieldLabel={labels.employee}
+                  label={labels.reportTo}
+                  secondFieldLabel={labels.reportTo}
                   form={formik}
                   valueShow='departmentRef'
                   secondValueShow='departmentName'
@@ -373,33 +424,30 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                 <ResourceLookup
                   valueField='reference'
                   displayField='fullName'
-                  name='reportToId'
-                  required
+                  name='depManager'
                   readOnly
-                  label={labels.employee}
-                  secondFieldLabel={labels.employee}
+                  label={labels.depManager}
+                  secondFieldLabel={labels.depManager}
                   form={formik}
                   valueShow='departmentHeadRef'
                   secondValueShow='departmentHeadName'
                   maxAccess={maxAccess}
                 />
               </Grid>
-
               <Grid item xs={6}>
                 <CustomTextField
                   name='position'
-                  label={labels.flName}
+                  label={labels.empPosition}
                   value={formik.values.position}
                   readOnly
                   maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={6}></Grid>
-
               <Grid item xs={6}>
                 <CustomTextField
                   name='schedule'
-                  label={labels.flName}
+                  label={labels.schedule}
                   value={formik.values.schedule}
                   readOnly
                   maxAccess={maxAccess}
@@ -412,34 +460,39 @@ export default function TaDslForm({ labels, access, recordId, window }) {
               <Grid item xs={12}>
                 <CustomDatePicker
                   name='leaveDate'
-                  label={labels.leaveDate}
-                  value={formik.values?.birthDate}
-                  onBlur={e => formik.setFieldValue('leaveDate', e.target.value)}
-                  disabledDate={'>='}
+                  label={labels.dateOfLeave}
+                  value={formik.values?.leaveDate}
+                  onChange={(name, newValue) => console.log('newValue', newValue, name)}
+                  onBlur={(_, newValue) => {
+                    formik.setFieldValue('leaveDate', newValue)
+                  }}
+                  onAccept={newValue => {
+                    formik.setFieldValue('leaveDate', newValue)
+                  }}
                   onClear={() => formik.setFieldValue('leaveDate', null)}
                   error={formik.touched.leaveDate && Boolean(formik.errors.leaveDate)}
                   maxAccess={maxAccess}
-                  readOnly={editMode}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomTimePicker
-                  label={labels.fromTime}
+                  label={labels.from}
                   name='fromTime'
                   required
                   use24Hour
+                  readOnly={isClosed}
                   value={formik.values.fromTime}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('fromTime', '')}
                   maxAccess={maxAccess}
                   error={formik.touched.fromTime && Boolean(formik.errors.fromTime)}
-                  max={dayjs(formik.values.fromTime, 'HH:mm')}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomTimePicker
-                  label={labels.toTime}
+                  label={labels.to}
                   name='toTime'
+                  readOnly={isClosed}
                   use24Hour
                   required
                   value={formik.values.toTime}
@@ -447,17 +500,13 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                   onClear={() => formik.setFieldValue('toTime', '')}
                   maxAccess={maxAccess}
                   error={formik.touched.toTime && Boolean(formik.errors.toTime)}
-                  min={dayjs(formik.values.toTime, 'HH:mm')}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField
                   name='duration'
-                  label={labels.duration}
-                  value={getDuration(
-                    dayjs(formik.values.fromTime).format('HH:mm'),
-                    dayjs(formik.values.toTime).format('HH:mm')
-                  )}
+                  label={labels.leaveDuration}
+                  value={formik.values.duration}
                   readOnly
                   maxAccess={maxAccess}
                 />
@@ -466,35 +515,36 @@ export default function TaDslForm({ labels, access, recordId, window }) {
                 <ResourceComboBox
                   endpointId={TimeAttendanceRepository.DSLReason.qry}
                   name='reasonId'
-                  label={labels.reason}
+                  label={labels.dsltype}
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('reasonId', newValue?.recordId || null)
                   }}
+                  readOnly={isClosed}
                   maxAccess={maxAccess}
                   error={formik?.touched?.reasonId && Boolean(formik?.errors?.reasonId)}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomTimePicker
-                  label={labels.fromTime}
-                  name='fromTime'
+                  label={labels.returnTime}
+                  name='returnTime'
                   required
                   use24Hour
-                  value={formik.values.fromTime}
+                  readOnly={isClosed}
+                  value={formik.values.returnTime}
                   onChange={formik.setFieldValue}
-                  onClear={() => formik.setFieldValue('fromTime', '')}
+                  onClear={() => formik.setFieldValue('returnTime', '')}
                   maxAccess={maxAccess}
-                  error={formik.touched.fromTime && Boolean(formik.errors.fromTime)}
-                  max={dayjs(formik.values.fromTime, 'HH:mm')}
+                  error={formik.touched.fromTime && Boolean(formik.errors.returnTime)}
                 />
               </Grid>
               <Grid item xs={12}>
                 <CustomTextField
                   name='realDuration'
-                  label={labels.realDuration}
+                  label={labels.duration}
                   value={formik.values.realDuration}
                   readOnly
                   maxAccess={maxAccess}
@@ -508,6 +558,8 @@ export default function TaDslForm({ labels, access, recordId, window }) {
               label={labels.destination}
               value={formik.values.destination}
               onChange={formik.handleChange}
+              required
+              readOnly={isClosed}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('destination', '')}
               error={formik.touched.destination && Boolean(formik.errors.destination)}

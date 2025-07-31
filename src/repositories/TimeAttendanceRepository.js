@@ -31,7 +31,9 @@ export const TimeAttendanceRepository = {
     qry: service + 'qryLQ',
     set: service + 'setLQ',
     get: service + 'getLQ',
-    del: service + 'delLQ'
+    del: service + 'delLQ',
+    close: service + 'closeLQ',
+    reopen: service + 'reopenLQ'
   },
   FlatSchedule: {
     qry: service + 'qryFS'

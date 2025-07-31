@@ -14,7 +14,8 @@ const CustomDatePicker = ({
   label,
   value,
   onChange = () => {},
-  onBlur,
+  onAccept = () => {},
+  onBlur = () => {},
   error,
   helperText,
   disabledRangeDate = {},
@@ -35,6 +36,7 @@ const CustomDatePicker = ({
   ...props
 }) => {
   const inputRef = useRef(null)
+  const inputValue = useRef(null)
 
   const dateFormat =
     window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
@@ -85,6 +87,9 @@ const CustomDatePicker = ({
         onBlur={() => setIsFocused(false)}
         minDate={!!min ? min : disabledRangeDate.date}
         maxDate={!!max ? max : newDate}
+        onAccept={newValue => {
+          onAccept(newValue)
+        }}
         fullWidth={fullWidth}
         sx={{
           '& .MuiOutlinedInput-root': {
@@ -106,7 +111,10 @@ const CustomDatePicker = ({
         }}
         autoFocus={autoFocus}
         format={dateFormat}
-        onChange={newValue => onChange(name, newValue)}
+        onChange={newValue => {
+          inputValue.current.value = newValue
+          onChange(name, newValue)
+        }}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
         disabled={disabled}
@@ -125,7 +133,7 @@ const CustomDatePicker = ({
               tabIndex: _readOnly ? -1 : 0
             },
             onBlur: e => {
-              onBlur?.(e)
+              onBlur(e, inputValue?.current.value)
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
