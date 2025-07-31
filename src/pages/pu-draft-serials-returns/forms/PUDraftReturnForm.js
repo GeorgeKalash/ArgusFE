@@ -47,7 +47,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PUDraftSerialReturn,
     access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const invalidate = useInvalidate({
@@ -67,7 +68,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       header: {
         dtId: null,
         reference: '',
@@ -122,14 +123,15 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       itemGridData: [],
       taxDetailsStore: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
-        currencyId: yup.string().required(),
-        vendorId: yup.string().required(),
-        siteId: yup.string().required()
+        dtId: yup.number().required(),
+        date: yup.date().required(),
+        currencyId: yup.number().required(),
+        vendorId: yup.number().required(),
+        plantId: yup.number().required(),
+        siteId: yup.number().required()
       }),
       serials: yup.array().of(
         yup.object().shape({
@@ -170,8 +172,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         record: JSON.stringify(DraftReturnPack)
       }).then(async diRes => {
         toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
-        formik.setFieldValue('recordId', diRes.recordId)
-        formik.setFieldValue('header.recordId', diRes.recordId)
         await refetchForm(diRes.recordId)
         invalidate()
       })
@@ -181,7 +181,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   async function refetchForm(recordId) {
     const diHeader = await getDraftReturn(recordId)
     const diItems = await getDraftReturnItems(recordId)
-    await fillForm(diHeader, diItems)
+    fillForm(diHeader, diItems)
   }
 
   async function getDraftReturn(diId) {
@@ -255,7 +255,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
-  const editMode = !!formik.values.header?.recordId
+  const editMode = !!formik.values?.recordId
   const isPosted = formik.values.header?.status === 3
 
   const assignStoreTaxDetails = serials => {
@@ -283,7 +283,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     if (!row?.returnId || !row?.itemId) return true
 
     const LastSerPack = {
-      returnId: formik?.values?.header?.recordId,
+      returnId: formik?.values?.recordId,
       lineItem: row
     }
 
@@ -407,7 +407,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               seqNo: newRow.id,
               invoiceSeqNo: newRow.id,
               invoiceComponentSeqNo: res?.record?.invoiceComponentSeqNo || 0,
-              returnId: formik?.values?.header?.recordId,
+              returnId: formik?.values?.recordId,
               srlNo: res?.record?.srlNo,
               sku: res?.record?.sku,
               itemName: res?.record?.itemName,
@@ -446,7 +446,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               (lineObj.changes.taxDetails = FilteredListByTaxId(formik?.values?.taxDetailsStore, lineObj.changes.taxId))
           }
 
-          const successSave = formik?.values?.header?.recordId
+          const successSave = formik?.values?.recordId
             ? await autoSave(formik?.values?.header, lineObj.changes)
             : await saveHeader(lineObj.changes)
 
@@ -551,7 +551,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       Component: WorkFlow,
       props: {
         functionId: SystemFunction.PUDraftSerialReturn,
-        recordId: formik.values.header?.recordId
+        recordId: formik.values?.recordId
       }
     })
   }
@@ -562,7 +562,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       props: {
         endPoint: PurchaseRepository.PUDraftReturnSerial.batch,
         header: {
-          draftId: formik?.values?.header?.recordId
+          draftId: formik?.values?.recordId
         },
         onCloseimport: fillGrids,
         maxAccess: maxAccess
@@ -583,7 +583,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     }).then(async () => {
       toast.success(platformLabels.Posted)
       invalidate()
-      await refetchForm(formik?.values?.header?.recordId)
+      await refetchForm(formik?.values?.recordId)
     })
   }
 
@@ -627,8 +627,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   ]
 
   async function fillGrids() {
-    const diHeader = await getDraftReturn(formik?.values?.header?.recordId)
-    const diItems = await getDraftReturnItems(formik?.values?.header?.recordId)
+    const diHeader = await getDraftReturn(formik?.values?.recordId)
+    const diItems = await getDraftReturnItems(formik?.values?.recordId)
 
     const modifiedList = await Promise.all(
       diItems.list?.map(async (item, index) => {
@@ -649,10 +649,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
     await formik.setValues({
       ...formik.values,
       ...diHeader.record,
-      amount: diHeader?.record?.amount,
-      vatAmount: diHeader?.record?.vatAmount,
-      subTotal: diHeader?.record?.subTotal,
-      weight: diHeader?.record?.weight,
       serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
     })
 
@@ -741,6 +737,9 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
       formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
+    } else {
+      formik.setFieldValue('header.plantId', null)
+      formik.setFieldValue('header.siteId', null)
     }
   }
 
@@ -873,7 +872,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         }
 
         const successSave =
-          formik?.values?.header?.recordId || updatedSerials.length > 0
+          formik?.values?.recordId || updatedSerials.length > 0
             ? await autoSaveImport(formik?.values?.header, draft, updatedSerials?.[0]?.returnId)
             : await saveHeader(draft, 'import')
 
@@ -921,7 +920,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={isPosted && !editMode}
-      disabledSavedClear={isPosted && !editMode}
     >
       <VertLayout>
         <Fixed>
@@ -945,9 +943,9 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
                       await onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
@@ -997,7 +995,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     endpointId={SystemRepository.Plant.qry}
                     name='header.plantId'
                     label={labels.plant}
-                    readOnly
+                    readOnly={isPosted}
+                    required
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -1023,7 +1022,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                       formik.setFieldValue('header.invoiceId', null)
                       formik.setFieldValue('header.invoiceRef', '')
                     }}
-                    editMode={editMode}
                     readOnly={isPosted}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.date', '')}
@@ -1062,7 +1060,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 label={labels.description}
                 value={formik.values.header?.description}
                 rows={4.2}
-                editMode={editMode}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.description', e.target.value)}
@@ -1089,7 +1086,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
                 maxAccess={maxAccess}
-                editMode={editMode}
                 onSecondValueChange={(name, value) => {
                   formik.setFieldValue('header.vendorName', value)
                 }}
