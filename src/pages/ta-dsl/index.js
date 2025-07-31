@@ -11,7 +11,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import TaDslForm from './form/TaDslForm'
@@ -37,17 +36,17 @@ const FoWax = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: labels.reference,
+      headerName: labels.ref,
       flex: 1
     },
     {
       field: 'employeeRef',
-      headerName: labels.employeeRef,
+      headerName: labels.empRef,
       flex: 1
     },
     {
       field: 'employeeName',
-      headerName: labels.employeeName,
+      headerName: labels.name,
       flex: 1
     },
     {
@@ -105,7 +104,8 @@ const FoWax = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Wax,
-    action: openForm
+    action: openForm,
+    hasDT: false
   })
 
   const add = async () => {

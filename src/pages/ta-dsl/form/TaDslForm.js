@@ -60,7 +60,8 @@ export default function TaDslForm({ labels, access, recordId }) {
       reportToName: '',
       departmentHeadName: '',
       departmentHeadRef: '',
-      position: ''
+      position: '',
+      schedule: ''
     },
     maxAccess,
     validateOnChange: true,
@@ -70,24 +71,8 @@ export default function TaDslForm({ labels, access, recordId }) {
       duration: yup.string().required(),
       destination: yup.string().required(),
       leaveDate: yup.date().required(),
-      fromTime: yup
-        .mixed()
-        .required()
-        .test('before-timeTo', 'test', function (value) {
-          const { toTime } = this.parent
-          if (!value || !toTime) return true
-
-          return dayjs(value).isBefore(dayjs(toTime))
-        }),
-      toTime: yup
-        .mixed()
-        .required()
-        .test('after-timeFrom', 'ee', function (value) {
-          const { fromTime } = this.parent
-          if (!value || !fromTime) return true
-
-          return dayjs(value).isAfter(dayjs(fromTime))
-        })
+      fromTime: yup.string().required(),
+      toTime: yup.string().required()
     }),
     onSubmit: async obj => {
       const {
@@ -108,6 +93,7 @@ export default function TaDslForm({ labels, access, recordId }) {
         departmentHeadName,
         departmentHeadRef,
         position,
+        schedule,
         ...rest
       } = obj
 
@@ -149,6 +135,7 @@ export default function TaDslForm({ labels, access, recordId }) {
     departmentHeadName,
     departmentHeadRef,
     position,
+    schedule,
     ...rest
   } = formik.values
 
@@ -226,6 +213,12 @@ export default function TaDslForm({ labels, access, recordId }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
+      disabled: !isClosed
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
       disabled: !isClosed
     }
   ]
@@ -328,6 +321,7 @@ export default function TaDslForm({ labels, access, recordId }) {
     <FormShell
       form={formik}
       resourceId={ResourceIds.ShiftLeave}
+      functionId={SystemFunction.DuringShiftLeave}
       maxAccess={maxAccess}
       editMode={editMode}
       previewReport={editMode}
@@ -385,7 +379,8 @@ export default function TaDslForm({ labels, access, recordId }) {
                   maxAccess={maxAccess}
                   onChange={async (event, newValue) => {
                     await setViewField(newValue?.recordId)
-                    formik.setFieldValue('employeeRef', newValue?.employeeRef || '')
+                    console.log(newValue)
+                    formik.setFieldValue('employeeRef', newValue?.reference || '')
                     formik.setFieldValue('employeeName', newValue?.fullName || '')
                     formik.setFieldValue('employeeId', newValue?.recordId || null)
                   }}
@@ -394,8 +389,6 @@ export default function TaDslForm({ labels, access, recordId }) {
               </Grid>
               <Grid item xs={12}>
                 <ResourceLookup
-                  valueField='reference'
-                  displayField='fullName'
                   name='department'
                   readOnly
                   label={labels.department}
@@ -408,8 +401,6 @@ export default function TaDslForm({ labels, access, recordId }) {
               </Grid>
               <Grid item xs={12}>
                 <ResourceLookup
-                  valueField='reference'
-                  displayField='fullName'
                   name='reportTo'
                   readOnly
                   label={labels.reportTo}
@@ -422,8 +413,6 @@ export default function TaDslForm({ labels, access, recordId }) {
               </Grid>
               <Grid item xs={12}>
                 <ResourceLookup
-                  valueField='reference'
-                  displayField='fullName'
                   name='depManager'
                   readOnly
                   label={labels.depManager}
@@ -462,12 +451,13 @@ export default function TaDslForm({ labels, access, recordId }) {
                   name='leaveDate'
                   label={labels.dateOfLeave}
                   value={formik.values?.leaveDate}
-                  onChange={(name, newValue) => console.log('newValue', newValue, name)}
+                  required
+                  readOnly={isClosed}
                   onBlur={(_, newValue) => {
-                    formik.setFieldValue('leaveDate', newValue)
+                    formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onAccept={newValue => {
-                    formik.setFieldValue('leaveDate', newValue)
+                    formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onClear={() => formik.setFieldValue('leaveDate', null)}
                   error={formik.touched.leaveDate && Boolean(formik.errors.leaveDate)}
@@ -508,7 +498,9 @@ export default function TaDslForm({ labels, access, recordId }) {
                   label={labels.leaveDuration}
                   value={formik.values.duration}
                   readOnly
+                  required
                   maxAccess={maxAccess}
+                  error={formik.touched.duration && Boolean(formik.errors.duration)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -518,6 +510,7 @@ export default function TaDslForm({ labels, access, recordId }) {
                   label={labels.dsltype}
                   valueField='recordId'
                   displayField='name'
+                  required
                   values={formik.values}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('reasonId', newValue?.recordId || null)
@@ -531,14 +524,13 @@ export default function TaDslForm({ labels, access, recordId }) {
                 <CustomTimePicker
                   label={labels.returnTime}
                   name='returnTime'
-                  required
                   use24Hour
                   readOnly={isClosed}
                   value={formik.values.returnTime}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('returnTime', '')}
                   maxAccess={maxAccess}
-                  error={formik.touched.fromTime && Boolean(formik.errors.returnTime)}
+                  error={formik.touched.returnTime && Boolean(formik.errors.returnTime)}
                 />
               </Grid>
               <Grid item xs={12}>

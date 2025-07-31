@@ -104,8 +104,8 @@ export const ResourceLookup = ({
     setStore([])
   }, [_firstValue])
 
-  const onKeyUp = e => {
-    if (e.key === 'Enter') {
+  const onKeyUp = (e, HighlightedOption) => {
+    if (e.key === 'Enter' && !HighlightedOption) {
       selectFirstOption()
     }
   }

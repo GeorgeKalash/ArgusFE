@@ -112,7 +112,7 @@ const CustomDatePicker = ({
         autoFocus={autoFocus}
         format={dateFormat}
         onChange={newValue => {
-          inputValue.current.value = newValue
+          inputValue.current = newValue
           onChange(name, newValue)
         }}
         onClose={() => setOpenDatePicker(false)}
@@ -133,7 +133,7 @@ const CustomDatePicker = ({
               tabIndex: _readOnly ? -1 : 0
             },
             onBlur: e => {
-              onBlur(e, inputValue?.current.value)
+              onBlur(e, inputValue?.current)
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
