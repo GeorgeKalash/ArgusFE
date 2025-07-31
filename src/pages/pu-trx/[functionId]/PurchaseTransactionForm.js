@@ -1194,7 +1194,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
-        priceType: parseFloar(item?.priceType),
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),
         weight: parseFloat(item?.weight),

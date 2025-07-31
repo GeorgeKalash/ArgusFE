@@ -1068,7 +1068,7 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
       if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
       if (!item.requestId) {
         const vatCalcRow = getVatCalc({
-          priceType: parseFloar(item?.priceType),
+          priceType: item?.priceType,
           basePrice: parseFloat(item?.basePrice),
           qty: parseFloat(item?.qty),
           weight: parseFloat(item?.weight),

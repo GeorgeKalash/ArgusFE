@@ -1071,7 +1071,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
-        priceType: parseFloat(item?.priceType),
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
         weight: item?.weight,

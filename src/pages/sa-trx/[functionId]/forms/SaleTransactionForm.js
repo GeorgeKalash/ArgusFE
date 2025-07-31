@@ -1470,7 +1470,7 @@ export default function SaleTransactionForm({
       if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
 
       const vatCalcRow = getVatCalc({
-        priceType: parseFloat(item?.priceType),
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),
         weight: parseFloat(item?.weight),
