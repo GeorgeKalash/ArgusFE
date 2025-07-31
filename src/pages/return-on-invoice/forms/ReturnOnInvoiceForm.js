@@ -855,6 +855,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       commitItems: dtInfo?.commitItems,
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
+      maxDiscount: clientDiscount.tdPct || 0,
       items: modifiedList
     })
   }

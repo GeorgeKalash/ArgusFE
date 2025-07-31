@@ -639,7 +639,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   ]
 
-  async function fillForm(sqHeader, sqItems) {
+  async function fillForm(sqHeader, sqItems, clientDiscount) {
     const shipAdd = await getAddress(sqHeader?.record?.shipToAddressId)
 
     sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
@@ -673,6 +673,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           ? sqHeader?.record?.tdAmount
           : sqHeader?.record?.tdPct,
       amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
+      maxDiscount: clientDiscount?.record?.tdPct || 0,
       shipAddress: shipAdd,
       items: modifiedList
     })
@@ -708,14 +709,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
-
-  async function fillClientData(clientId) {
-    if (!clientId) return
-
+  async function getClientInfo(clientId) {
     const res = await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
     })
+
+    return res
+  }
+
+  async function fillClientData(clientId) {
+    if (!clientId) return
+
+    const res = await getClientInfo(clientId)
 
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || formik.values?.plId || 0)
@@ -1010,7 +1016,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   async function refetchForm(recordId) {
     const sqHeader = await getSalesQuotation(recordId)
     const sqItems = await getSalesQuotationItems(recordId)
-    await fillForm(sqHeader, sqItems)
+    const clientDiscount = await getClientInfo(sqHeader.record.clientId)
+    await fillForm(sqHeader, sqItems, clientDiscount)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
