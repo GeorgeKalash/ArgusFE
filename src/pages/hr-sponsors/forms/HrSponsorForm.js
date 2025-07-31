@@ -36,7 +36,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
       .transform((value, originalValue) => (originalValue === '' ? null : value)),
     phone: yup.string().max(8).nullable(),
     isSupplier: yup.boolean(),
-    email: yup.string().nullable().matches(emailRegex, { message: 'Invalid email format', excludeEmptyString: true })
+    email: yup.string().email().required()
   })
 
   const { formik } = useForm({
