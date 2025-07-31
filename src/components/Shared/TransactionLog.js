@@ -151,7 +151,7 @@ const TransactionLog = props => {
 
       return (
         <Grid key={key} style={{ paddingLeft }}>
-          <strong>{key}:</strong> {key === 'date' ? formatDateDefault(value) : String(value)}
+          <strong>{key}:</strong> {String(value)}
         </Grid>
       )
     })
