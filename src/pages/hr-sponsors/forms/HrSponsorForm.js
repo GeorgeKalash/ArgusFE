@@ -21,7 +21,6 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.SponsorFilters.page
   })
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   const validationSchema = yup.object({
     name: yup.string().required(),
