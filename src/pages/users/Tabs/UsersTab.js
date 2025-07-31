@@ -26,6 +26,7 @@ import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateFromApi } from 'src/lib/date-helper'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
@@ -56,7 +57,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       password: '',
       confirmPassword: '',
       platform: '',
-      passwordExpiryDays: null,
       dashboardId: null,
       umcpnl: false,
       is2FAEnabled: false,
@@ -169,10 +169,29 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       setEmailPresent(false)
       setPasswordState(false)
       formik.setFieldValue('passwordExpiryDays', passwordExpiryDays)
+      formik.setFieldValue('passwordLastSet', null)
+      formik.setFieldValue('passwordExpiresAt', null)
+      formik.setFieldValue('forcePasswordReset', false)
     } catch (error) {
       if (error.response && error.response.status === 303) {
         setEmailPresent(true)
         setPasswordState(true)
+
+        const resID = await getIdentityRequest({
+          extension: AccountRepository.Identity.get,
+          parameters: `_email=${email}`
+        })
+
+        formik.setFieldValue('passwordExpiryDays', resID?.record?.passwordExpiryDays)
+        formik.setFieldValue(
+          'passwordLastSet',
+          resID?.record?.passwordLastSet ? formatDateFromApi(resID?.record?.passwordLastSet) : null
+        )
+        formik.setFieldValue(
+          'passwordExpiresAt',
+          resID?.record?.passwordExpiresAt ? formatDateFromApi(resID?.record?.passwordExpiresAt) : null
+        )
+        formik.setFieldValue('forcePasswordReset', resID?.record?.forcePasswordReset)
         formik.validateForm()
       } else {
         setEmailPresent(false)
@@ -191,17 +210,18 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
         const resID = await getIdentityRequest({
           extension: AccountRepository.Identity.get,
-          parameters: `_email=${userData?.username}`
+          parameters: `_email=${res?.record?.username}`
         })
 
         const updateUser = {
           ...res.record,
-          passwordLastSet: resID?.record?.passwordLastSet,
-          passwordExpiresAt: resID?.record?.passwordExpiresAt,
+          passwordLastSet: resID?.record?.passwordLastSet ? formatDateFromApi(resID?.record?.passwordLastSet) : null,
+          passwordExpiresAt: resID?.record?.passwordExpiresAt
+            ? formatDateFromApi(resID?.record?.passwordExpiresAt)
+            : null,
           forcePasswordReset: resID?.record?.forcePasswordReset,
           passwordExpiryDays: resID?.record?.passwordExpiryDays
         }
-        console.log(updateUser)
         formik.setValues(updateUser)
         setPasswordState(true)
       }
@@ -422,79 +442,93 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   />
                 </FormGrid>
 
-                <FormGrid item hideonempty xs={12}>
-                  <CustomTextField
-                    name='password'
-                    label={labels.password}
-                    value={formik.values.password}
-                    required
-                    hidden={editMode || passwordState}
-                    readOnly={passwordState}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('password', '')}
-                    error={formik.touched.password && Boolean(formik.errors.password)}
-                  />
-                </FormGrid>
-                <FormGrid item hideonempty xs={12}>
-                  <CustomTextField
-                    name='confirmPassword'
-                    label={labels.confirmPassword}
-                    value={formik.values.confirmPassword}
-                    required
-                    hidden={editMode || passwordState}
-                    readOnly={passwordState}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    onClear={() => formik.setFieldValue('confirmPassword', '')}
-                    error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  />
-                </FormGrid>
-                <FormGrid item xs={12}>
-                  <CustomNumberField
-                    name='passwordExpiryDays'
-                    label={labels.passwordExpiryDays}
-                    value={formik.values?.passwordExpiryDays}
-                    maxAccess={maxAccess}
-                    readOnly={passwordState}
-                    onChange={formik.handleChange}
-                    hidden={editMode || passwordState}
-                    decimalScale={0}
-                    maxLength={4}
-                    onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
-                  />
-                </FormGrid>
-                <FormGrid item xs={12}>
-                  <CustomDatePicker
-                    name='passwordLastSet'
-                    label={labels.passwordLastSet}
-                    value={formik.values?.passwordLastSet}
-                    maxAccess={maxAccess}
-                    readOnly
-                    hidden={!passwordState}
-                  />
-                </FormGrid>
-                <FormGrid item xs={12}>
-                  <CustomDatePicker
-                    name='passwordExpiresAt'
-                    label={labels.passwordExpiresAt}
-                    value={formik.values.passwordExpiresAt}
-                    readOnly
-                    maxAccess={maxAccess}
-                    hidden={!passwordState}
-                  />
-                </FormGrid>
-                <FormGrid item xs={12}>
-                  <CustomCheckBox
-                    name='forcePasswordReset'
-                    value={formik.values.forcePasswordReset}
-                    label={labels.forcePasswordReset}
-                    readOnly
-                    maxAccess={maxAccess}
-                    hidden={!passwordState}
-                  />
-                </FormGrid>
+                {!(editMode || passwordState) && (
+                  <FormGrid item hideonempty xs={12}>
+                    <CustomTextField
+                      name='password'
+                      label={labels.password}
+                      value={formik.values.password}
+                      required
+                      readOnly={passwordState}
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('password', '')}
+                      error={formik.touched.password && Boolean(formik.errors.password)}
+                    />
+                  </FormGrid>
+                )}
+                {!(editMode || passwordState) && (
+                  <FormGrid item hideonempty xs={12}>
+                    <CustomTextField
+                      name='confirmPassword'
+                      label={labels.confirmPassword}
+                      value={formik.values.confirmPassword}
+                      required
+                      readOnly={passwordState}
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      onClear={() => formik.setFieldValue('confirmPassword', '')}
+                      error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                    />
+                  </FormGrid>
+                )}
+                {
+                  !(
+                    editMode ||
+                    (passwordState && (
+                      <FormGrid item xs={12}>
+                        <CustomNumberField
+                          name='passwordExpiryDays'
+                          label={labels.passwordExpiryDays}
+                          value={formik.values?.passwordExpiryDays}
+                          maxAccess={maxAccess}
+                          readOnly={passwordState}
+                          onChange={formik.handleChange}
+                          hidden={editMode || passwordState}
+                          decimalScale={0}
+                          maxLength={4}
+                          onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
+                        />
+                      </FormGrid>
+                    ))
+                  )
+                }
+                {passwordState && (
+                  <FormGrid item xs={12}>
+                    <CustomDatePicker
+                      name='passwordLastSet'
+                      label={labels.passwordLastSet}
+                      value={formik.values?.passwordLastSet}
+                      maxAccess={maxAccess}
+                      readOnly
+                      hidden={!passwordState}
+                    />
+                  </FormGrid>
+                )}
+                {passwordState && (
+                  <FormGrid item xs={12}>
+                    <CustomDatePicker
+                      name='passwordExpiresAt'
+                      label={labels.passwordExpiresAt}
+                      value={formik.values.passwordExpiresAt}
+                      readOnly
+                      maxAccess={maxAccess}
+                    />
+                  </FormGrid>
+                )}
+                {passwordState && (
+                  <FormGrid item xs={12}>
+                    <CustomCheckBox
+                      name='forcePasswordReset'
+                      value={formik.values.forcePasswordReset}
+                      label={labels.forcePasswordReset}
+                      readOnly
+                      maxAccess={maxAccess}
+                    />
+                  </FormGrid>
+                )}
+
                 <FormGrid item xs={12}>
                   <CustomNumberField
                     name='passwordExpiryDays'
