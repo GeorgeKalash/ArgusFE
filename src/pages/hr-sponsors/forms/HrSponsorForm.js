@@ -131,7 +131,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 value={formik.values.address}
                 required
                 maxAccess={maxAccess}
-                maxLength='200'
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('address', '')}
                 error={formik.touched.address && Boolean(formik.errors.address)}
@@ -143,7 +143,7 @@ export default function HrSponsorForm({ labels, maxAccess, recordId }) {
                 label={labels.city}
                 value={formik.values.city}
                 maxAccess={maxAccess}
-                maxLength='100'
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('city', '')}
                 error={formik.touched.city && Boolean(formik.errors.city)}
