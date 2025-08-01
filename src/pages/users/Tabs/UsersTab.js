@@ -533,15 +533,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                   />
                 </FormGrid>
 
-                <FormGrid item xs={12}>
-                  <CustomNumberField
-                    name='passwordExpiryDays'
-                    label={labels.passwordExpiryDays}
-                    value={formik.values?.passwordExpiryDays}
-                    maxAccess={maxAccess}
-                    readOnly
-                  />
-                </FormGrid>
                 <FormGrid item hideonempty xs={12}>
                   <CustomCheckBox
                     name='umcpnl'
