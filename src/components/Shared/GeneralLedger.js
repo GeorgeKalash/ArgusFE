@@ -142,7 +142,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
       if (datasetId === 42604) {
         if (!formValues.endingDT) {
           stackError({
-            message: _labels.emptyEndingDate
+            message: platformLabels.emptyEndingDate
           })
           window.close()
         }
