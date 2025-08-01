@@ -577,8 +577,10 @@ export default function RetailTransactionsForm({
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: parseFloat(itemPriceRow?.qty),
+      weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,

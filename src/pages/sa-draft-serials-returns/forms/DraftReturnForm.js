@@ -241,8 +241,10 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: 0,
       qty: parseFloat(newRow?.weight),
+      weight: parseFloat(newRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       tdPct: 0,
       baseLaborPrice: 0,

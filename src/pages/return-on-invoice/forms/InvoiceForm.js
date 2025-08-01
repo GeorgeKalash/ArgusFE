@@ -96,8 +96,10 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
         }))
 
         const vatCalcRow = getVatCalc({
+          priceType: itemPriceRow?.priceType,
           basePrice: (form.values.metalPrice || 0) * (form.values.metalPurity || 0),
           qty,
+          weight: itemPriceRow?.weight,
           extendedPrice: parseFloat(itemPriceRow.extendedPrice) || 0,
           baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
           vatAmount: 0,
