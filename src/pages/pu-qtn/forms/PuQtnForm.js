@@ -20,7 +20,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import WorkFlow from 'src/components/Shared/WorkFlow'
@@ -57,10 +56,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
-
   const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
-  const currencyId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+  const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseQuotation,
@@ -139,7 +136,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     sku: row => row?.sku,
     qty: row => row?.qty > 0
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     maxAccess,
@@ -588,7 +585,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
 
   async function fillVendorData(values) {
     formik.setFieldValue('isVattable', values?.isTaxable || false)
-    formik.setFieldValue('tdAmount', values?.tradeDiscount || null)
+    formik.setFieldValue('tdAmount', values?.tradeDiscount || 0)
     formik.setFieldValue('tdType', values?.tradeDiscount ? 2 : formik.values.tdType)
     formik.setFieldValue('taxId', values?.taxId || null)
     formik.setFieldValue('vendorName', values?.name || '')
@@ -775,7 +772,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
   }
 
   function recalcNewVat(tdPct) {
@@ -797,7 +794,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
     recalcNewVat(tdPct)
   }
-
   async function refetchForm(recordId) {
     const qtnHeader = await getPurchaseQuotation(recordId)
     const qtnItems = await getPurchaseQuotationItems(recordId)
@@ -843,7 +839,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             )
         )
         .map(async ({ unitCost, ...item }) => {
-          const getItems = await constructItem({
+          const getItem = await constructItem({
             ...item,
             deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
             lastPurchaseDate: item?.lastPurchaseDate ? formatDateFromApi(item.lastPurchaseDate) : null,
@@ -851,19 +847,32 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             requestSeqNo: item?.seqNo,
             requestRef: formik.values.requestRef,
             mdType: 1,
+            qty: parseFloat(item?.qty || 0).toFixed(2),
             notes: item?.justification
           })
 
-          return getItems
+          const vatCalc = getVatCalc({
+            basePrice: parseFloat(getItem?.basePrice),
+            qty: getItem?.qty,
+            extendedPrice: parseFloat(getItem?.extendedPrice),
+            baseLaborPrice: parseFloat(getItem?.baseLaborPrice),
+            vatAmount: parseFloat(getItem?.vatAmount),
+            tdPct: formik.values.tdPct || 0,
+            taxDetails: getItem?.taxDetails || []
+          })
+
+          return { ...getItem, vatAmount: parseFloat(vatCalc?.vatAmount || 0).toFixed(2) }
         })
     )
 
     const oldItems = formik.values.items || null
 
-    const combinedItems = [...oldItems, ...modifiedItemsList].map((item, index) => ({
-      ...item,
-      id: index + 1
-    }))
+    const combinedItems = [...oldItems, ...modifiedItemsList]
+      .filter(item => item?.itemId)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
     formik.setFieldValue('items', combinedItems)
     setReCal(true)
   }
@@ -883,6 +892,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       mdValue: 0,
       mdAmount: 0,
       taxId: itemInfo?.taxId || null,
+      baseQty: parseFloat(item?.baseQty || item?.qty).toFixed(2),
       taxDetails
     }
   }
@@ -985,6 +995,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                       value={formik?.values?.date}
                       onChange={formik.setFieldValue}
                       readOnly={!isRaw}
+                      max={new Date()}
                       maxAccess={maxAccess}
                       onClear={() => formik.setFieldValue('date', null)}
                       error={formik.touched.date && Boolean(formik.errors.date)}
@@ -1006,8 +1017,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                       values={formik.values}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        formik.setFieldValue('currencyId', newValue?.recordId || null)
                         formik.setFieldValue('items', formik.initialValues.items)
+                        formik.setFieldValue('currencyId', newValue?.recordId || null)
                       }}
                       error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                     />
@@ -1030,7 +1041,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                   maxAccess={maxAccess}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
                   ]}
                   onChange={(event, newValue) => {
                     fillVendorData(newValue)
@@ -1041,6 +1053,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
               <Grid item xs={6}>
                 <ResourceLookup
                   endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
+                  filter={{ status: 4 }}
                   valueField='reference'
                   displayField='reference'
                   name='requestRef'
@@ -1061,7 +1074,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                   onClick={() => importPuItems()}
                   tooltipText={platformLabels.import}
                   image={'import.png'}
-                  disabled={!formik.values.requestId || !isRaw}
+                  disabled={!isRaw || !formik.values.requestId || !formik.values.currencyId || !formik.values.vendorId}
                 />
               </Grid>
             </Grid>
@@ -1207,7 +1220,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={!formik.values.vendorId || !isRaw}
+            disabled={!formik.values.vendorId || !formik.values.currencyId || !isRaw}
             allowDelete={isRaw}
           />
         </Grow>
