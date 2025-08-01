@@ -195,7 +195,9 @@ export default function JobOrderForm({
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLMFJobOrders,
-      disabled: !editMode
+      disabled: !editMode,
+      error: !formik?.values?.endingDT ? { message: platformLabels.emptyEndingDate } : null,
+      values: { ...formik.values, date: formik?.values?.endingDT }
     },
     {
       key: 'IV',

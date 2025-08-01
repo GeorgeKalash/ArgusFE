@@ -26,7 +26,6 @@ import { VertLayout } from './Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { useError } from 'src/error'
 
 const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,7 +34,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
   const [baseGridData, setBaseGridData] = useState({ credit: 0, debit: 0, balance: 0 })
   const [exRateValue, setExRateValue] = useState(null)
   const [currencyGridData, setCurrencyGridData] = useState([])
-  const { stack: stackError } = useError()
   const formValues = valuesPath ? valuesPath : values
 
   useSetWindow({ title: platformLabels.GeneralLedger, window })
@@ -65,7 +63,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
     initialValues: {
       recordId: formValues.recordId,
       reference: formValues.reference,
-      date: datasetId === 42604 ? formValues.endingDT : formValues.date,
+      date: formValues.date,
       functionId: functionId,
       seqNo: '',
       glTransactions: [
@@ -139,14 +137,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
 
   useEffect(() => {
     if (formValues) {
-      if (datasetId === 42604) {
-        if (!formValues.endingDT) {
-          stackError({
-            message: platformLabels.emptyEndingDate
-          })
-          window.close()
-        }
-      }
       setformik(formValues)
     }
   }, [formValues])
@@ -343,7 +333,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 <CustomDatePicker
                   name='date'
                   label={_labels.date}
-                  value={datasetId === 42604 ? formik.endingDT : formik.date}
+                  value={formik.date}
                   readOnly={true}
                   maxAccess={access}
                 />
