@@ -15,6 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const SystemDefaults = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -38,7 +39,8 @@ const SystemDefaults = () => {
         obj.key === 'backofficeEmail' ||
         obj.key === 'dateFormat' ||
         obj.key === 'ActivityBlankQryDaysBack' ||
-        obj.key === 'extentionsPath'
+        obj.key === 'extentionsPath' ||
+        obj.key === 'passwordExpiryDays'
       )
     })
     filteredList?.forEach(obj => {
@@ -66,7 +68,8 @@ const SystemDefaults = () => {
       dateFormat: null,
       timeZone: null,
       backofficeEmail: '',
-      enableHijri: false
+      enableHijri: false,
+      passwordExpiryDays: null
     },
     validationSchema: yup.object({
       baseCurrencyId: yup.string().required(' '),
@@ -231,6 +234,18 @@ const SystemDefaults = () => {
                 onChange={event => formik.setFieldValue('enableHijri', event.target.checked)}
                 label={_labels.enableHijri}
                 maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='passwordExpiryDays'
+                label={_labels.passwordExpiryDays}
+                value={formik.values?.passwordExpiryDays}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                decimalScale={0}
+                maxLength={4}
+                onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
               />
             </Grid>
           </Grid>

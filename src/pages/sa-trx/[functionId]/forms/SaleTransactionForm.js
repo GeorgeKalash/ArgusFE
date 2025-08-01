@@ -357,12 +357,13 @@ export default function SaleTransactionForm({
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
+    const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
 
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-    const TotPricePerG = basePriceValue
+    const TotPricePerG = basePriceValue + baseLaborPrice
 
     const unitPrice =
       ItemConvertPrice?.priceType === 3
@@ -437,7 +438,7 @@ export default function SaleTransactionForm({
           : metalPurity > 0
           ? basePriceValue
           : 0,
-      baseLaborPrice: 0,
+      baseLaborPrice,
       TotPricePerG,
       unitPrice,
       upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
@@ -1113,7 +1114,8 @@ export default function SaleTransactionForm({
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
         accountId: res?.record?.accountId,
-        commitItems: dtInfo?.record?.commitItems
+        commitItems: dtInfo?.record?.commitItems,
+        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]

@@ -99,8 +99,7 @@ const RPBGridToolbar = ({
             paramsDict: formatDataDictForApi(rpbParams),
             search: search
           })
-      },
-      disabled: !reportName
+      }
     }
   ].filter(item => !item?.hidden)
 
