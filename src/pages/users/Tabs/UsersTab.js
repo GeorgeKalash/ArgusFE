@@ -417,6 +417,22 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     maxAccess={maxAccess}
                   />
                 </FormGrid>
+
+                <FormGrid item hideonempty xs={12}>
+                  <ResourceComboBox
+                    name='dashboardId'
+                    label={labels.dashboard}
+                    datasetId={DataSets.DASHBOARD}
+                    values={formik.values}
+                    valueField='key'
+                    displayField='value'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dashboardId', newValue ? newValue?.key : '')
+                    }}
+                    error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
+                  />
+                </FormGrid>
               </Grid>
             </Grid>
             <Grid item xs={6}>
@@ -473,61 +489,49 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     />
                   </FormGrid>
                 )}
-                {
-                  !(
-                    editMode ||
-                    (passwordState && (
-                      <FormGrid item xs={12}>
-                        <CustomNumberField
-                          name='passwordExpiryDays'
-                          label={labels.passwordExpiryDays}
-                          value={formik.values?.passwordExpiryDays}
-                          maxAccess={maxAccess}
-                          readOnly={passwordState}
-                          onChange={formik.handleChange}
-                          hidden={editMode || passwordState}
-                          decimalScale={0}
-                          maxLength={4}
-                          onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
-                        />
-                      </FormGrid>
-                    ))
-                  )
-                }
-                {passwordState && (
-                  <FormGrid item xs={12}>
-                    <CustomDatePicker
-                      name='passwordLastSet'
-                      label={labels.passwordLastSet}
-                      value={formik.values?.passwordLastSet}
-                      maxAccess={maxAccess}
-                      readOnly
-                      hidden={!passwordState}
-                    />
-                  </FormGrid>
-                )}
-                {passwordState && (
-                  <FormGrid item xs={12}>
-                    <CustomDatePicker
-                      name='passwordExpiresAt'
-                      label={labels.passwordExpiresAt}
-                      value={formik.values.passwordExpiresAt}
-                      readOnly
-                      maxAccess={maxAccess}
-                    />
-                  </FormGrid>
-                )}
-                {passwordState && (
-                  <FormGrid item xs={12}>
-                    <CustomCheckBox
-                      name='forcePasswordReset'
-                      value={formik.values.forcePasswordReset}
-                      label={labels.forcePasswordReset}
-                      readOnly
-                      maxAccess={maxAccess}
-                    />
-                  </FormGrid>
-                )}
+                <FormGrid item xs={12}>
+                  <CustomNumberField
+                    name='passwordExpiryDays'
+                    label={labels.passwordExpiryDays}
+                    value={formik.values?.passwordExpiryDays}
+                    maxAccess={maxAccess}
+                    readOnly={passwordState}
+                    onChange={formik.handleChange}
+                    decimalScale={0}
+                    maxLength={4}
+                    onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomDatePicker
+                    name='passwordLastSet'
+                    label={labels.passwordLastSet}
+                    value={formik.values?.passwordLastSet}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomDatePicker
+                    name='passwordExpiresAt'
+                    label={labels.passwordExpiresAt}
+                    value={formik.values.passwordExpiresAt}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomCheckBox
+                    name='forcePasswordReset'
+                    value={formik.values.forcePasswordReset}
+                    label={labels.forcePasswordReset}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
 
                 <FormGrid item xs={12}>
                   <CustomNumberField
@@ -536,22 +540,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     value={formik.values?.passwordExpiryDays}
                     maxAccess={maxAccess}
                     readOnly
-                    hidden={!passwordState}
-                  />
-                </FormGrid>
-                <FormGrid item hideonempty xs={12}>
-                  <ResourceComboBox
-                    name='dashboardId'
-                    label={labels.dashboard}
-                    datasetId={DataSets.DASHBOARD}
-                    values={formik.values}
-                    valueField='key'
-                    displayField='value'
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dashboardId', newValue ? newValue?.key : '')
-                    }}
-                    error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
                   />
                 </FormGrid>
                 <FormGrid item hideonempty xs={12}>
