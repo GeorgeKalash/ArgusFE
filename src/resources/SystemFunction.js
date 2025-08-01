@@ -122,7 +122,8 @@ export const SystemFunction = {
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
   BalanceTransferPurchase: Module.Financials * 100 + 10,
   BalanceTransferSales: Module.Financials * 100 + 11,
-  BalanceAdjustment: Module.LeaveReq * 100 + 4
+  BalanceAdjustment: Module.LeaveReq * 100 + 4,
+  EarnedLeaves: Module.LeaveReq * 100 + 3,
 }
 
 export const getSystemFunctionModule = functionId => {
