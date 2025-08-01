@@ -20,5 +20,13 @@ export const LoanManagementRepository = {
     get: service + 'getBA',
     del: service + 'delBA',
     snapshot: service + 'snapshotBA'
+  },
+  EarnedLeave: {
+    page: service + 'pageEL',
+    set2: service + 'set2EL',
+    get2: service + 'get2EL',
+    del: service + 'delEL',
+    preview: service + 'previewEL',
+    post: service + 'postEL',
   }
 }

@@ -530,6 +530,7 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  EarnedLeave: 73304,
 
   // GL
   GLSalesInvoice: 51604,
