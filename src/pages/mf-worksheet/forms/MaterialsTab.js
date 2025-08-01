@@ -61,7 +61,7 @@ const MaterialsTab = ({ store }) => {
       field: 'qty',
       headerName: labels.qty,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'notes',

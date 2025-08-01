@@ -544,7 +544,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 name: 'qty',
                 props: {
                   maxLength: 10,
-                  decimalScale: 3
+                  decimalScale: 2
                 }
               },
               {
