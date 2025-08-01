@@ -9,6 +9,7 @@ import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import { useEffect } from 'react'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -24,12 +25,29 @@ export default function CustomDatePickerHijri({
   hidden = false,
   required = false,
   editMode = false,
+  setFieldValidation,
   ...props
 }) {
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const next = {
+          required: _required && !_hidden
+        }
+
+        const isEqual = existing?.required === next.required
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [_required])
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)

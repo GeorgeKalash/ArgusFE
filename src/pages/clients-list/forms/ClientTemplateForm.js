@@ -401,7 +401,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     })
   }
 
-  const { formik } = useForm({
+  const { formik, setFieldValidation } = useForm({
     maxAccess: formikSettings.maxAccess,
     initialValues,
     validateOnChange: true,
@@ -454,6 +454,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
     }
   })
+
+  // console.log('formik', formik)
 
   const isClosed = !(editMode && formik.values.status === -1 && !formik.values.otpVerified && formik.values.wip !== 2)
 
@@ -1695,6 +1697,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       readOnly={editMode && !allowEdit}
                       access={maxAccess}
                       setFormik={setFormik}
+                      setFieldValidation={setFieldValidation}
                     />
                   </FieldSet>
                 </Grid>
