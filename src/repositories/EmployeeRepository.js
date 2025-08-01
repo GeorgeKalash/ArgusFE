@@ -80,5 +80,8 @@ export const EmployeeRepository = {
     get: service + 'getJI',
     set: service + 'setJI',
     del: service + 'delJI'
+  },
+  EmployeeDeduction: {
+    qry: service + 'qryED'
   }
 }
