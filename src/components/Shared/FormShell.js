@@ -23,6 +23,7 @@ import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useError } from 'src/error'
 
 function LoadingOverlay() {
   return (
@@ -76,6 +77,7 @@ export default function FormShell({
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
+  const { stack: stackError } = useError()
 
   const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
@@ -200,10 +202,15 @@ export default function FormShell({
           break
         case 'onClickGL':
           action.onClick = () => {
+            if (action.error) {
+              stackError(action.error)
+
+              return
+            }
             stack({
               Component: GeneralLedger,
               props: {
-                values: form.values,
+                values: action.values || form.values,
                 recordId: form.values?.recordId,
                 functionId: functionId,
                 valuesPath: action.valuesPath,
