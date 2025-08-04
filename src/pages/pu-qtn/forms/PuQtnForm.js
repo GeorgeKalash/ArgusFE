@@ -190,9 +190,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
 
   async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
-
     const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-    const updatedMsId = currentItemId == 0 ? msId || currentItemId : currentItemId
+    const updatedMsId = !currentItemId ? msId || currentItemId : currentItemId
     const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
     filteredMeasurements.current = arrayMU
   }
@@ -452,7 +451,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     {
       component: 'date',
       label: labels.deliveryDate,
-      name: 'deliveryDate'
+      name: 'deliveryDate',
+      flex: 2
     }
   ]
 
@@ -691,6 +691,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
+      weight: parseFloat(itemPriceRow?.weight),
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
@@ -777,6 +779,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
+        weight: parseFloat(item?.weight),
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
         extendedPrice: parseFloat(item?.extendedPrice),
@@ -851,6 +855,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           })
 
           const vatCalc = getVatCalc({
+            priceType: getItem?.priceType,
+            weight: parseFloat(getItem?.weight),
             basePrice: parseFloat(getItem?.basePrice),
             qty: getItem?.qty,
             extendedPrice: parseFloat(getItem?.extendedPrice),
@@ -890,6 +896,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       extendedPrice: 0,
       mdValue: 0,
       mdAmount: 0,
+      msId: itemInfo?.msId || null,
       taxId: itemInfo?.taxId || null,
       baseQty: parseFloat(item?.baseQty || item?.qty).toFixed(2),
       taxDetails
@@ -940,7 +947,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       actions={actions}
       editMode={editMode}
       disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
     >
       <VertLayout>
         <Fixed>
@@ -1172,7 +1178,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     label={labels.deliveryMethod}
                     readOnly={!isRaw}
                     valueField='recordId'
-                    displayField={['name']}
+                    displayField='name'
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('deliveryMethodId', newValue?.recordId || null)
@@ -1188,15 +1194,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
                     onChange={event => formik.setFieldValue('isVattable', event.target.checked)}
                     label={labels.VAT}
                     disabled
-                    maxAccess={maxAccess}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomCheckBox
-                    name='exWorks'
-                    value={formik.values?.exWorks}
-                    onChange={event => formik.setFieldValue('exWorks', event.target.checked)}
-                    label={labels.exWorks}
                     maxAccess={maxAccess}
                   />
                 </Grid>

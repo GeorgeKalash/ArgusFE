@@ -115,7 +115,7 @@ export default function PurchaseQuotations() {
   })
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
   const edit = obj => {
