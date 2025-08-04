@@ -18,10 +18,12 @@ import { formatDateTimeForGetAPI } from 'src/lib/date-helper'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import TransactionLogPerformance from './Forms/TransactionLogPerformance'
+import { useWindow } from 'src/windows'
 
 const ResourcePerformance = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
   const now = new Date()
   const fromDT = new Date(now.getTime() - 5 * 60 * 1000) 
   const toDT = now

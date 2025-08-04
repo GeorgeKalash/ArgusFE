@@ -14,6 +14,7 @@ export const ResourceIds = {
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
   SalesTeamOrdersSummary: 60113,
+  JoDTd: 42607,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -27,9 +28,13 @@ export const ResourceIds = {
   BranchAvailability: 60306,
   Alerts: 60307,
   PendingPunches: 60308,
+  BalanceAdjustment: 73204,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
+
+  // AU
+  ResourceDowntime: 23109,
 
   // self service
   MyYearlySalesPerformance: 60500,
@@ -513,9 +518,18 @@ export const ResourceIds = {
   ImportProductionOrder: 42703,
   NoticePeriods: 71111,
   TransactionLogPerformance: 20137,
+  UserProperties: 71113,
   SyncJobOrderRouting: 42704,
   LMOpeningBalances: 73104,
+  OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
+  LoanTypes: 74101,
+  HRPendingPunches: 72207,
+  BiometricDevices: 72101,
+  DSLReasons: 72107,
+  TerminationReasons: 71110,
+  GeneralSettings: 20600,
+  JobInfos: 71207,
 
   // GL
   GLSalesInvoice: 51604,
@@ -561,6 +575,7 @@ export const ResourceIds = {
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
+  GLMaterialAdjustment: 41606,
 
   //MCR
   MCRSalesInvoice: 51607,
