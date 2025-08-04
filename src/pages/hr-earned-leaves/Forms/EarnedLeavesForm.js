@@ -21,6 +21,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import Table from 'src/components/Shared/Table'
 
 export default function EarnedLeavesForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -122,17 +123,17 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   }
 
   const columns = [
+    
     {
-      component: 'textfield',
-      label: labels?.employee,
-      name: 'employee',
-      props: { readOnly: true }
+      field: 'employee',
+      headerName: labels.employee,
+      flex: 1,
     },
     {
-      component: 'numberfield',
-      label: labels?.days,
-      name: 'days',
-      props: { readOnly: true }
+      field: 'days',
+      headerName: labels.days,
+      type: 'number',
+      flex: 1,
     }
   ]
 
@@ -274,14 +275,13 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
           </Grid>
         </Fixed>
         <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values.items}
-            error={formik.errors.items}
+          <Table
+            name='earnedLeaves'
             columns={columns}
-            disabled={true}
-            allowDelete={false}
-            allowAddNewLine={false}
+            gridData={{ list: formik.values.items }}
+            rowId={['recordId']}
+            pagination={false}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>

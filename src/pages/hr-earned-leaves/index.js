@@ -65,6 +65,11 @@ const EarnedLeaves = () => {
       field: 'lsName',
       headerName: labels.leaveSchedule,
       flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
