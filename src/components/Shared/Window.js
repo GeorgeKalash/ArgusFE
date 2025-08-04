@@ -101,6 +101,8 @@ const Window = React.memo(
       setExpanded(prev => !prev)
     }, [expanded])
 
+    const childFormRef = useRef()
+
     return (
       <CacheDataProvider>
         <Box
@@ -119,6 +121,25 @@ const Window = React.memo(
           onKeyDown={e => {
             if (e.key === 'Escape') {
               onClose()
+            } else {
+              const target = e.target
+              const role = target.getAttribute('role') || ''
+
+              if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault()
+
+                return
+              }
+              if (e.key === 'Enter') {
+                const isDropDownOpen = target.classList.contains('MuiAutocomplete-option')
+                const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+                if (!isEqual) {
+                  e.preventDefault()
+                  console.log('childFormRef')
+                  childFormRef.current?.submit()
+                }
+              }
             }
           }}
         >
@@ -229,7 +250,8 @@ const Window = React.memo(
                   React.Children.map(children, child => {
                     return React.cloneElement(child, {
                       expanded: expanded,
-                      height: expanded ? containerHeightPanel : heightPanel
+                      height: expanded ? containerHeightPanel : heightPanel,
+                      ref: childFormRef
                     })
                   })
                 )}
