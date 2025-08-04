@@ -1229,8 +1229,6 @@ export default function SaleTransactionForm({
     const billAdd = await getAddress(record.billAddressId)
     const accountLimit = await getAccountLimit(currencyId, accountId)
 
-    console.log(clientObject, 'clientObject')
-
     formik.setValues({
       ...formik.values,
       header: {
