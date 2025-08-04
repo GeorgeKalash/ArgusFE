@@ -25,7 +25,6 @@ const StrictDeleteConfirmation = forwardRef(({ window, action }, ref) => {
     action()
     window.close()
   }
-  console.log('ref', ref)
   useImperativeHandle(ref, () => ({
     submit: () => handleSubmit()
   }))

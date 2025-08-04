@@ -62,6 +62,7 @@ const Window = React.memo(
     const [expanded, setExpanded] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
+    const actionRef = useRef()
 
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
@@ -127,8 +128,7 @@ const Window = React.memo(
 
               if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
                 e.preventDefault()
-
-                return
+                actionRef.current?.submit()
               }
               if (e.key === 'Enter') {
                 const isDropDownOpen = target.classList.contains('MuiAutocomplete-option')
@@ -136,8 +136,7 @@ const Window = React.memo(
 
                 if (!isEqual) {
                   e.preventDefault()
-                  console.log('childFormRef')
-                  childFormRef.current?.submit()
+                  actionRef.current?.submit()
                 }
               }
             }
@@ -251,7 +250,7 @@ const Window = React.memo(
                     return React.cloneElement(child, {
                       expanded: expanded,
                       height: expanded ? containerHeightPanel : heightPanel,
-                      ref: childFormRef
+                      ref: actionRef
                     })
                   })
                 )}
