@@ -123,17 +123,16 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   }
 
   const columns = [
-    
     {
       field: 'employee',
       headerName: labels.employee,
-      flex: 1,
+      flex: 1
     },
     {
       field: 'days',
       headerName: labels.days,
       type: 'number',
-      flex: 1,
+      flex: 1
     }
   ]
 
@@ -270,7 +269,12 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
               />
             </Grid>
             <Grid item xs={4}>
-              <CustomButton onClick={onPreview} image={'preview.png'} tooltipText={platformLabels.Preview} />
+              <CustomButton
+                onClick={onPreview}
+                image={'preview.png'}
+                tooltipText={platformLabels.Preview}
+                disabled={isPosted}
+              />
             </Grid>
           </Grid>
         </Fixed>
