@@ -61,7 +61,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseQuotation,
-    access: access,
+    access,
     enabled: !recordId
   })
 
@@ -99,8 +99,8 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         id: 1,
         quotationId: recordId || 0,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         seqNo: 1,
         siteId: null,
         muId: null,
@@ -140,15 +140,14 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.number().required(),
       vendorId: yup.number().required(),
-      date: yup.string().required(),
+      date: yup.date().required(),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {

@@ -118,7 +118,7 @@ export default function PurchaseQuotations() {
     proxyAction()
   }
 
-  const editQTN = obj => {
+  const edit = obj => {
     openForm(obj?.recordId)
   }
 
@@ -136,7 +136,7 @@ export default function PurchaseQuotations() {
     })
   }
 
-  const delQTN = async obj => {
+  const del = async obj => {
     await postRequest({
       extension: PurchaseRepository.PurchaseQuotation.del,
       record: JSON.stringify(obj)
@@ -156,9 +156,9 @@ export default function PurchaseQuotations() {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editQTN}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delQTN}
+          onDelete={del}
           deleteConfirmationType={'strict'}
           pageSize={50}
           maxAccess={access}
