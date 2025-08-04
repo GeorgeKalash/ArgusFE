@@ -63,7 +63,6 @@ export const EmployeeRepository = {
     page: service + 'pageUP'
   },
   ResignationRequest: {
-    qry: service + 'qryRR',
     get: service + 'getRR',
     set: service + 'setRR',
     del: service + 'delRR',

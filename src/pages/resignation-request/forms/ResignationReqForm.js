@@ -35,7 +35,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId,
+      recordId,
       reference: '',
       date: new Date(),
       effectiveDate: null,
@@ -76,17 +76,17 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
     }
   })
 
-  async function refetchForm(recordId) {
-    await getRequest({
+  function refetchForm(recordId) {
+    getRequest({
       extension: EmployeeRepository.ResignationRequest.get,
       parameters: `_recordId=${recordId}`
-    }).then(async res => {
-      await refetchFormJob(res.record)
+    }).then(res => {
+      refetchFormJob(res.record)
     })
   }
 
-  async function refetchFormJob(res) {
-    await getRequest({
+  function refetchFormJob(res) {
+    getRequest({
       extension: EmployeeRepository.EmployeeQuickView.get,
       parameters: `_recordId=${res?.employeeId}&_asOfDate=${formatDateForGetApI(formatDateFromApi(res?.date))}`
     }).then(employeeRes => {
@@ -215,11 +215,9 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
       functionId={SystemFunction.ResignationRequest}
       form={formik}
       maxAccess={maxAccess}
-      previewReport={editMode}
       actions={actions}
       editMode={editMode}
       disabledSubmit={isClosed}
-      disabledSavedClear={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -319,7 +317,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
                         readOnly
                       />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12}>
                       <CustomDatePicker
                         name='hireDate'
                         label={labels.hireDate}
