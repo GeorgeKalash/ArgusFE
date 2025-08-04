@@ -405,6 +405,25 @@ export default function FormShell({
             pb: '0px !important'
           }
         }}
+        onKeyDown={e => {
+          const target = e.target
+          const role = target.getAttribute('role') || ''
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault()
+            form?.submitForm?.()
+
+            return
+          }
+          if (e.key === 'Enter') {
+            const isEqual = role === 'combobox' || role === 'gridcell'
+
+            if (!isEqual) {
+              e.preventDefault()
+              form?.submitForm?.()
+            }
+          }
+        }}
       >
         {!showOverlay && LoadingOverlay()}
         {children}

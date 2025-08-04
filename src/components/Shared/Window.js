@@ -116,6 +116,12 @@ const Window = React.memo(
             alignItems: 'center',
             zIndex: 2
           }}
+          onKeyDown={e => {
+            console.log(e.key)
+            if (e.key === 'Escape') {
+              onClose()
+            }
+          }}
         >
           <Draggable
             handle='#draggable-dialog-title'
