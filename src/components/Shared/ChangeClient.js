@@ -18,7 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { useContext } from 'react'
 
-export default function ChangeClient({ form, window }) {
+export default function ChangeClient({ formValues, onSubmit, window }) {
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
 
@@ -44,37 +44,41 @@ export default function ChangeClient({ form, window }) {
     }),
     onSubmit: async values => {
       if (values.changeToId) {
-        form.setFieldValue('clientId', values.changeToId)
-        form.setFieldValue('clientName', values.changeToName)
-        form.setFieldValue('clientRef', values.changeToRef)
-        form.setFieldValue('billAddressId', values.changeBillAddressId)
-        form.setFieldValue('billAddress', values.changeBill)
-        form.setFieldValue('szId', values.changeSzId)
+        const fields = {
+          clientId: values.changeToId,
+          clientName: values.changeToName,
+          clientRef: values.changeToRef,
+          billAddressId: values.changeBillAddressId,
+          billAddress: values.changeBill,
+          szId: values.changeSzId
+        }
+
+        onSubmit(fields)
         window.close()
       }
     }
   })
 
   function isValidClient(values) {
-    if (form.plId != values.plId) {
+    if (formValues?.plId != values?.plId) {
       stackError({
         message: labels.mismatchPrice
       })
 
       return false
-    } else if (form.isVattable != values.IsSubjectToVat) {
+    } else if (formValues?.isVattable != values?.isSubjectToVAT) {
       stackError({
         message: labels.mismatchVat
       })
 
       return false
-    } else if (form.taxId != values.taxId) {
+    } else if (formValues?.taxId != values?.taxId) {
       stackError({
         message: labels.mismatchTax
       })
 
       return false
-    } else if (form.maxDiscount <= values.maxDiscount) {
+    } else if (formValues?.maxDiscount <= values?.maxDiscount) {
       stackError({
         message: labels.mismatchDiscount
       })
@@ -90,16 +94,16 @@ export default function ChangeClient({ form, window }) {
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
-            <CustomTextField name='reference' label={labels.reference} value={form?.values?.reference} readOnly />
+            <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly />
           </Grid>
           <Grid item xs={12}>
-            <CustomDatePicker name='date' label={labels.date} value={form?.values?.date} readOnly />
+            <CustomDatePicker name='date' label={labels.date} value={formValues?.date} readOnly />
           </Grid>
           <Grid item xs={12}>
             <CustomTextArea
               name='billAddress'
               label={labels.billAddress}
-              value={form.values.billAddress}
+              value={formValues?.billAddress}
               rows={3}
               maxLength='100'
               readOnly
@@ -113,11 +117,11 @@ export default function ChangeClient({ form, window }) {
               readOnly
               valueField='recordId'
               displayField={['reference', 'name']}
-              values={form.values}
+              values={formValues}
             />
           </Grid>
           <Grid item xs={9}>
-            <CustomCheckBox name='isVattable' value={form.values?.isVattable} label={labels.vat} disabled={true} />
+            <CustomCheckBox name='isVattable' value={formValues?.isVattable} label={labels.vat} disabled={true} />
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
@@ -127,7 +131,7 @@ export default function ChangeClient({ form, window }) {
               valueField='recordId'
               displayField={['reference', 'name']}
               readOnly
-              values={form.values}
+              values={formValues}
             />
           </Grid>
           <Grid item xs={12}>
@@ -138,7 +142,7 @@ export default function ChangeClient({ form, window }) {
               secondFieldLabel={labels.name}
               name='clientId'
               label={labels.client}
-              form={form}
+              form={{ values: formValues }}
               readOnly
               displayFieldWidth={4}
               valueShow='clientRef'
@@ -167,7 +171,7 @@ export default function ChangeClient({ form, window }) {
                 { key: 'cgName', value: 'Client Group' }
               ]}
               required
-              onChange={async (event, newValue) => {
+              onChange={(event, newValue) => {
                 const isValid = isValidClient(newValue)
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
