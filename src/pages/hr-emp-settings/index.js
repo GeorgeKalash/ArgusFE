@@ -9,12 +9,12 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
-
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ControlContext } from 'src/providers/ControlContext'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import * as yup from 'yup'
+import { DataSets } from 'src/resources/DataSets'
 
 const EmpSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,7 +45,7 @@ const EmpSettings = () => {
 
       for (const { key, value } of res.list) {
         if (keysToExtract.includes(key)) {
-          myObject[key] = value ? parseInt(value) : null
+          myObject[key] = value ? (key === 'nameFormat' ? value : parseInt(value)) : null
 
           if (key === 'ep_nraId' && parseInt(value)) {
             const itemRes = await getRequest({
@@ -58,6 +58,7 @@ const EmpSettings = () => {
           }
         }
       }
+      formik.setFieldValue('firstNameFormat', myObject?.nameFormat)
 
       formik.setValues(myObject)
     })()
@@ -75,11 +76,28 @@ const EmpSettings = () => {
       lvEdId: null,
       ep_nraId: null,
       ep_nraRef: '',
-      ep_nraDes: ''
+      ep_nraDes: '',
+      firstNameFormat: ''
     },
+    validationSchema: yup.object().shape({
+      retirementAge: yup
+        .number()
+        .max(100)
+        .nullable()
+        .transform((value, originalValue) => {
+          return originalValue === '' || originalValue == null ? null : value
+        }),
+      employeeRefSize: yup
+        .number()
+        .max(10)
+        .nullable()
+        .transform((value, originalValue) => {
+          return originalValue === '' || originalValue == null ? null : value
+        })
+    }),
     onSubmit: async obj => {
       const data = Object.entries(obj)
-        .filter(([key]) => !['ep_nraRef', 'ep_nraDes'].includes(key))
+        .filter(([key]) => !['ep_nraRef', 'ep_nraDes', 'firstNameFormat'].includes(key))
 
         .map(([key, value]) => ({
           key,
@@ -90,13 +108,22 @@ const EmpSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
+
+      if (obj.nameFormat !== obj.firstNameFormat) {
+        await postRequest({
+          extension: EmployeeRepository.FullName.sync,
+          record: JSON.stringify({ recordId: 1 })
+        })
+      }
+
+      formik.setFieldValue('firstNameFormat', obj.nameFormat)
       toast.success(platformLabels.Edited)
     }
   })
 
   return (
     <FormShell
-      resourceId={ResourceIds.GeneralSettings}
+      resourceId={ResourceIds.EmpSettings}
       form={formik}
       infoVisible={false}
       isCleared={false}
@@ -106,17 +133,15 @@ const EmpSettings = () => {
         <Grid container spacing={2} xs={5}>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={SystemRepository.Defaults.qry}
-              // filter={(row)=> row.key  }
-              // parameters='_filter=&_size=30&_startAt=0'
+              datasetId={DataSets.FULL_NAME}
               name='nameFormat'
-              label={labels.waxSite}
-              valueField='recordId'
+              label={labels.nameFormat}
+              valueField='key'
               displayField='value'
               values={formik.values}
               maxAccess={access}
               onChange={(event, newValue) => {
-                formik.setFieldValue('nameFormat', newValue?.recordId || null)
+                formik.setFieldValue('nameFormat', newValue?.key || null)
               }}
               error={formik.touched.nameFormat && Boolean(formik.errors.nameFormat)}
             />
@@ -198,7 +223,7 @@ const EmpSettings = () => {
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
               name='ep_nraId'
-              label={labels.restoredMetalLossItem}
+              label={labels.empNumberRange}
               valueField='reference'
               displayField='description'
               valueShow='ep_nraRef'

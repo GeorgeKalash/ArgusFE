@@ -83,5 +83,8 @@ export const EmployeeRepository = {
   },
   EmployeeDeduction: {
     qry: service + 'qryED'
+  },
+  FullName: {
+    sync: service + 'syncFullName'
   }
 }
