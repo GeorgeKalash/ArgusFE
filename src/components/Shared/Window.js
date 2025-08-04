@@ -117,7 +117,6 @@ const Window = React.memo(
             zIndex: 2
           }}
           onKeyDown={e => {
-            console.log(e.key)
             if (e.key === 'Escape') {
               onClose()
             }
