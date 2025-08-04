@@ -416,7 +416,8 @@ export default function FormShell({
             return
           }
           if (e.key === 'Enter') {
-            const isEqual = role === 'combobox' || role === 'gridcell'
+            const isDropDownOpen = target.classList.contains('MuiAutocomplete-option')
+            const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
 
             if (!isEqual) {
               e.preventDefault()
