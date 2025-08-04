@@ -27,8 +27,8 @@ export default function TaDslForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.Wax,
-    access: access,
+    functionId: SystemFunction.DuringShiftLeave,
+    access,
     enabled: !recordId
   })
 
@@ -189,7 +189,7 @@ export default function TaDslForm({ labels, access, recordId }) {
       returnTime: record?.returnTime?.trim() ? dayjs(record?.returnTime, 'HH:mm') : null
     })
 
-    setViewField(record.recordId)
+    setViewField(record.employeeId)
 
     return record
   }
@@ -270,16 +270,19 @@ export default function TaDslForm({ labels, access, recordId }) {
   }, [formik.values.fromTime, formik.values.toTime])
 
   useEffect(() => {
-    const duration = getDuration(
-      dayjs(formik.values.fromTime).format('HH:mm'),
-      dayjs(formik.values.returnTime).format('HH:mm')
-    )
-    formik.setFieldValue('realDuration', duration || null)
+    if (formik.values.returnTime) {
+      const duration = getDuration(
+        dayjs(formik.values.fromTime).format('HH:mm'),
+        dayjs(formik.values.returnTime).format('HH:mm')
+      )
+      formik.setFieldValue('realDuration', duration || null)
+    } else {
+      formik.setFieldValue('realDuration', null)
+    }
   }, [formik.values.fromTime, formik.values.returnTime])
 
   const getDuration = (start, end) => {
     if (!start || !end || end === 'Invalid Date' || start === 'Invalid Date') return
-    console.log(start, end)
 
     const [startH, startM] = start.split(':').map(Number)
     const [endH, endM] = end.split(':').map(Number)
@@ -290,11 +293,9 @@ export default function TaDslForm({ labels, access, recordId }) {
     let diff = (endDate - startDate) / (1000 * 60)
     if (diff < 0) diff += 24 * 60
 
-    const hours = Math.floor(diff / 60)
-    const minutes = diff % 60
-    if (hours === NaN || minutes === NaN) return
+    const decimalHours = diff / 60
 
-    return `${hours}.${minutes.toString().padStart(2, '0')}`
+    return Number(decimalHours.toFixed(2))
   }
 
   async function setViewField(recordId) {
@@ -370,6 +371,7 @@ export default function TaDslForm({ labels, access, recordId }) {
                   label={labels.employee}
                   secondFieldLabel={labels.employee}
                   form={formik}
+                  displayFieldWidth={2}
                   valueShow='employeeRef'
                   secondValueShow='employeeName'
                   columnsInDropDown={[
@@ -454,9 +456,11 @@ export default function TaDslForm({ labels, access, recordId }) {
                   required
                   readOnly={isClosed}
                   onBlur={(_, newValue) => {
+                    console.log('onblur', newValue)
                     formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onAccept={newValue => {
+                    console.log('onAccept', newValue)
                     formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onClear={() => formik.setFieldValue('leaveDate', null)}
@@ -551,6 +555,7 @@ export default function TaDslForm({ labels, access, recordId }) {
               value={formik.values.destination}
               onChange={formik.handleChange}
               required
+              maxLength={100}
               readOnly={isClosed}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('destination', '')}

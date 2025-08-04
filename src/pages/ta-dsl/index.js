@@ -15,7 +15,7 @@ import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceReposit
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import TaDslForm from './form/TaDslForm'
 
-const FoWax = () => {
+const TaDsl = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -48,6 +48,12 @@ const FoWax = () => {
       field: 'employeeName',
       headerName: labels.name,
       flex: 1
+    },
+    {
+      field: 'leaveDate',
+      headerName: labels.leaveDate,
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'fromTime',
@@ -103,7 +109,7 @@ const FoWax = () => {
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Wax,
+    functionId: SystemFunction.DuringShiftLeave,
     action: openForm,
     hasDT: false
   })
@@ -163,4 +169,4 @@ const FoWax = () => {
   )
 }
 
-export default FoWax
+export default TaDsl

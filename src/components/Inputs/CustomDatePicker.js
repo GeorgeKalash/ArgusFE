@@ -16,6 +16,7 @@ const CustomDatePicker = ({
   onChange = () => {},
   onAccept = () => {},
   onBlur = () => {},
+  onClear,
   error,
   helperText,
   disabledRangeDate = {},
@@ -74,6 +75,17 @@ const CustomDatePicker = ({
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
+  function formatDate(newValue) {
+    const offsetMinutes = -new Date().getTimezoneOffset()
+    const hours = Math.floor(offsetMinutes / 60)
+    const minutes = offsetMinutes % 60
+
+    const value = new Date(newValue)
+    value.setHours(hours, minutes, 0, 0)
+
+    return value
+  }
+
   return _hidden ? (
     <></>
   ) : (
@@ -88,7 +100,11 @@ const CustomDatePicker = ({
         minDate={!!min ? min : disabledRangeDate.date}
         maxDate={!!max ? max : newDate}
         onAccept={newValue => {
-          onAccept(newValue)
+          if (!(newValue instanceof Date) || isNaN(newValue)) return
+
+          const value = formatDate(newValue)
+
+          onAccept(value)
         }}
         fullWidth={fullWidth}
         sx={{
@@ -112,8 +128,10 @@ const CustomDatePicker = ({
         autoFocus={autoFocus}
         format={dateFormat}
         onChange={newValue => {
-          inputValue.current = newValue
-          onChange(name, newValue)
+          if (!(newValue instanceof Date) || isNaN(newValue)) return
+          const value = formatDate(newValue)
+          inputValue.current = value
+          onChange(name, value)
         }}
         onClose={() => setOpenDatePicker(false)}
         open={openDatePicker}
@@ -133,13 +151,18 @@ const CustomDatePicker = ({
               tabIndex: _readOnly ? -1 : 0
             },
             onBlur: e => {
-              onBlur(e, inputValue?.current)
+              onBlur(e, inputValue?.current || value)
             },
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
+                    <IconButton
+                      tabIndex={-1}
+                      edge='start'
+                      onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
+                      sx={{ mr: -3 }}
+                    >
                       <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
                     </IconButton>
                   )}
