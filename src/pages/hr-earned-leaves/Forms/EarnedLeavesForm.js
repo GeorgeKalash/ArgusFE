@@ -87,6 +87,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+  const preview = formik.values.items.length > 0
 
   useEffect(() => {
     ;(async function () {
@@ -230,7 +231,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                readOnly={isPosted}
+                readOnly={isPosted || preview}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
@@ -260,7 +261,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={isPosted}
+                readOnly={isPosted || preview}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('lsId', newValue?.recordId || null)
