@@ -60,6 +60,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
   })
 
   function isValidClient(values) {
+    console.log(formValues, values)
     if (formValues?.plId != values?.plId) {
       stackError({
         message: labels.mismatchPrice
@@ -172,7 +173,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               ]}
               required
               onChange={(event, newValue) => {
-                const isValid = isValidClient(newValue)
+                const isValid = newValue ? isValidClient(newValue) : true
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
                 formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
