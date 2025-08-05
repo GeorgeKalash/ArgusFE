@@ -532,6 +532,7 @@ export const ResourceIds = {
   JobInfos: 71207,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  DocumentReverseReasons: 20111,
 
   // GL
   GLSalesInvoice: 51604,
