@@ -85,7 +85,7 @@ export default function RetailTransactionsForm({
     [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -1290,7 +1290,8 @@ export default function RetailTransactionsForm({
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      await changeDT(newValue)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
