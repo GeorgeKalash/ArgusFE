@@ -266,7 +266,7 @@ export default function TaDslForm({ labels, access, recordId }) {
       dayjs(formik.values.fromTime).format('HH:mm'),
       dayjs(formik.values.toTime).format('HH:mm')
     )
-    formik.setFieldValue('duration', duration || null)
+    formik.setFieldValue('duration', duration || 0)
   }, [formik.values.fromTime, formik.values.toTime])
 
   useEffect(() => {
@@ -275,7 +275,7 @@ export default function TaDslForm({ labels, access, recordId }) {
         dayjs(formik.values.fromTime).format('HH:mm'),
         dayjs(formik.values.returnTime).format('HH:mm')
       )
-      formik.setFieldValue('realDuration', duration || null)
+      formik.setFieldValue('realDuration', duration || 0)
     } else {
       formik.setFieldValue('realDuration', null)
     }
@@ -363,6 +363,7 @@ export default function TaDslForm({ labels, access, recordId }) {
                 <ResourceLookup
                   endpointId={EmployeeRepository.Employee.snapshot}
                   parameters={{ _branchId: 0 }}
+                  filter={{ activeStatus: 1 }}
                   valueField='reference'
                   displayField='fullName'
                   name='employeeId'
@@ -396,8 +397,8 @@ export default function TaDslForm({ labels, access, recordId }) {
                   label={labels.department}
                   secondFieldLabel={labels.department}
                   form={formik}
-                  valueShow='reportToRef'
-                  secondValueShow='reportToName'
+                  valueShow='departmentRef'
+                  secondValueShow='departmentName'
                   maxAccess={maxAccess}
                 />
               </Grid>
@@ -408,8 +409,8 @@ export default function TaDslForm({ labels, access, recordId }) {
                   label={labels.reportTo}
                   secondFieldLabel={labels.reportTo}
                   form={formik}
-                  valueShow='departmentRef'
-                  secondValueShow='departmentName'
+                  valueShow='reportToRef'
+                  secondValueShow='reportToName'
                   maxAccess={maxAccess}
                 />
               </Grid>
