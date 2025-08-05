@@ -33,16 +33,39 @@ export default function RebuildACForm({ _labels, maxAccess }) {
     },
     maxAccess,
     validationSchema: yup.object({
+      startDate: yup
+        .date()
+        .nullable()
+        .test('start-before-end', 'Start date must be before end date', function (startDate) {
+          const { endDate } = this.parent
+          if (!startDate || !endDate) return true 
+
+          return startDate.getTime() < endDate.getTime()
+        }),
+      endDate: yup
+        .date()
+        .nullable()
+        .test('end-after-start', 'End date must be after start date', function (endDate) {
+          const { startDate } = this.parent
+          if (!startDate || !endDate) return true 
+
+          return endDate.getTime() > startDate.getTime()
+        }),
       year: yup.number().required()
     }),
     onSubmit: async data => {
+      const { itemId, ...rest } = data
+
+      const dataFormatted = {
+        ...rest,
+        startDate: data.startDate ? formatDateToApi(data.startDate) : null,
+        endDate: data.endDate ? formatDateToApi(data.endDate) : null,
+        ...(itemId && { itemId })
+      }
+
       const res = await postRequest({
         extension: InventoryRepository.RebuildAC.rebuild,
-        record: JSON.stringify({
-          ...data,
-          startDate: data.startDate ? formatDateToApi(data.startDate) : null,
-          endDate: data.endDate ? formatDateToApi(data.endDate) : null
-        })
+        record: JSON.stringify(dataFormatted)
       })
 
       stack({
