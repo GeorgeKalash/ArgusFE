@@ -706,7 +706,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
       ...newRow,
       id: newRow?.id,
       qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
-      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
+      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
       unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
@@ -916,7 +916,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
+    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(4))
     formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
