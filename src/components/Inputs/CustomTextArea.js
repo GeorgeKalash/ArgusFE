@@ -29,6 +29,7 @@ const CustomTextArea = ({
   position,
   rows = 4,
   hidden = false,
+  setFieldValidation,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -42,6 +43,22 @@ const CustomTextArea = ({
 
   const inputRef = useRef(null)
   const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    if (typeof setFieldValidation === 'function') {
+      setFieldValidation(prev => {
+        const existing = prev?.[name]
+
+        const next = {
+          required: _required && !_hidden
+        }
+
+        const isEqual = existing?.required === next.required
+
+        return isEqual ? prev : { ...prev, [name]: next }
+      })
+    }
+  }, [_required])
 
   useEffect(() => {
     // Save the cursor position before the value changes

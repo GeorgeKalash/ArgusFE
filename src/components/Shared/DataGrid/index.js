@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, Checkbox, Grid, IconButton } from '@mui/material'
 import components from './components'
@@ -11,6 +11,8 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import isEqual from 'lodash/isEqual'
+import { checkAccess } from 'src/lib/maxAccess'
 
 export function DataGrid({
   name, // maxAccess
@@ -30,7 +32,8 @@ export function DataGrid({
   initialValues,
   bg,
   searchValue,
-  onValidationRequired
+  onValidationRequired,
+  setFieldValidation
 }) {
   const gridApiRef = useRef(null)
 
@@ -226,6 +229,59 @@ export function DataGrid({
       }
     }
   }, [rowSelectionModel])
+
+  const prevValidationRef = useRef({})
+
+  useEffect(() => {
+    if (!Array.isArray(value) || typeof setFieldValidation !== 'function') return
+
+    const computeValidation = async () => {
+      const newValidation = {}
+
+      for (const column of columns) {
+        const { name: fieldName, props = {}, validate } = column
+        const fullName = `${name}.${fieldName}`
+
+        const { _required, _hidden } = checkAccess(
+          fullName,
+          props?.maxAccess,
+          props?.required,
+          props?.readOnly,
+          props?.hidden
+        )
+
+        const hasCondition =
+          typeof props.onCondition === 'function' ||
+          (_required && !_hidden) ||
+          props?.minValue != null ||
+          props?.maxValue != null ||
+          typeof validate === 'function'
+
+        if (!hasCondition) continue
+
+        const rowCondition = {}
+
+        if (typeof validate === 'function') {
+          rowCondition.validate = validate
+        }
+
+        if (props?.required) {
+          rowCondition.required = props.required
+        }
+
+        newValidation[fullName] = rowCondition
+      }
+
+      const prevValidation = prevValidationRef.current
+
+      if (!isEqual(prevValidation, newValidation)) {
+        prevValidationRef.current = newValidation
+        setFieldValidation(prev => ({ ...prev, ...newValidation }))
+      }
+    }
+
+    computeValidation()
+  }, [value, name])
 
   const addNewRow = () => {
     const highestIndex = Math.max(...value?.map(item => item.id), 0) + 1

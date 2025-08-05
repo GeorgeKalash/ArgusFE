@@ -16,7 +16,8 @@ const AddressTab = ({
   defaultReadOnly = {},
   required = true,
   setFormik,
-  access
+  access,
+  setFieldValidation
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
@@ -72,8 +73,8 @@ const AddressTab = ({
     required
 
   const validate = options && {
-    name: yup.string().required(),
-    street1: yup.string().required(),
+    // name: yup.string().required(),
+    // street1: yup.string().required(),
     phone: yup.string().required(),
     countryId: yup.number().required(),
     city: yup.string().required(),
@@ -93,10 +94,8 @@ const AddressTab = ({
   useEffect(() => {
     if (!address?.recordId) {
       const hasAddressData = address && Object.values(address).some(val => val !== null && val !== '')
-
       if (hasAddressData && address !== lastRecordIdRef.current) {
         lastRecordIdRef.current = address
-
         Object.entries(initialValues).forEach(([key, value]) => {
           addressValidation.setFieldValue(key, value, false)
         })
@@ -146,6 +145,8 @@ const AddressTab = ({
     getCountry()
   }, [])
 
+  console.log(required)
+
   return (
     <FormGrid container hideonempty xs={12} spacing={2}>
       <FormGrid item hideonempty xs={12}>
@@ -156,6 +157,7 @@ const AddressTab = ({
           readOnly={readOnly}
           maxLength='50'
           required={required}
+          setFieldValidation={setFieldValidation}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('name', '')}
           error={addressValidation.touched?.name && Boolean(addressValidation.errors?.name)}
@@ -283,6 +285,7 @@ const AddressTab = ({
               value={addressValidation.values.street1}
               required={required}
               readOnly={readOnly}
+              setFieldValidation={setFieldValidation}
               maxLength='100'
               onChange={addressValidation.handleChange}
               onClear={() => addressValidation.setFieldValue('street1', '')}
@@ -310,7 +313,9 @@ const AddressTab = ({
           name='bldgNo'
           label={labels.bldgNo}
           value={addressValidation.values.bldgNo}
-          maxLength='10'
+          minLength={4}
+          maxLength={4}
+          setFieldValidation={setFieldValidation}
           readOnly={readOnly}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('bldgNo', '')}
@@ -323,7 +328,8 @@ const AddressTab = ({
           name='unitNo'
           label={labels.unitNo}
           value={addressValidation.values.unitNo}
-          maxLength='10'
+          minLength={4}
+          setFieldValidation={setFieldValidation}
           readOnly={readOnly}
           onChange={addressValidation.handleChange}
           onClear={() => addressValidation.setFieldValue('unitNo', '')}
@@ -347,7 +353,8 @@ const AddressTab = ({
       <FormGrid item hideonempty xs={4}>
         <CustomTextField
           name='postalCode'
-          maxLength='5'
+          minLength={5}
+          maxLength={5}
           label={labels.postalCode}
           readOnly={readOnly}
           value={addressValidation.values.postalCode}
