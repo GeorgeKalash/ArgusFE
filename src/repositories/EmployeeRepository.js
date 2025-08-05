@@ -82,7 +82,6 @@ export const EmployeeRepository = {
     del: service + 'delJI'
   },
   EmployeePenalty: {
-    snapshot: service + 'snapshotPE',
     page: service + 'pagePE',
     close: service + 'closePE',
     reopen: service + 'reopenPE',
