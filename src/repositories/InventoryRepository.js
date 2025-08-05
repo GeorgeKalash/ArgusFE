@@ -340,5 +340,8 @@ export const InventoryRepository = {
   },
   Materials: {
     snapshot: service + 'snapshotUF'
+  },
+  RebuildAC: {
+    rebuild: service + 'rebuildAC'
   }
 }
