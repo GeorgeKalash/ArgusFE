@@ -40,7 +40,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
           const { endDate } = this.parent
           if (!startDate || !endDate) return true 
 
-          return startDate.getTime() < endDate.getTime()
+          return startDate.getTime() <= endDate.getTime()
         }),
       endDate: yup
         .date()
@@ -49,7 +49,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
           const { startDate } = this.parent
           if (!startDate || !endDate) return true 
 
-          return endDate.getTime() > startDate.getTime()
+          return endDate.getTime() >= startDate.getTime()
         }),
       year: yup.number().required()
     }),
