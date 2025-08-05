@@ -28,7 +28,6 @@ export const TimeAttendanceRepository = {
   },
   ShitLeave: {
     page: service + 'pageLQ',
-    qry: service + 'qryLQ',
     set: service + 'setLQ',
     get: service + 'getLQ',
     del: service + 'delLQ',
