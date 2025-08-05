@@ -172,7 +172,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               ]}
               required
               onChange={(event, newValue) => {
-                const isValid = newValue ? isValidClient(newValue) : true
+                const isValid = newValue ? isValidClient(newValue) : null
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
                 formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
