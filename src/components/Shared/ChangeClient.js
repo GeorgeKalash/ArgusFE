@@ -60,7 +60,6 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
   })
 
   function isValidClient(values) {
-    console.log(formValues, values)
     if (formValues?.plId != values?.plId) {
       stackError({
         message: labels.mismatchPrice
