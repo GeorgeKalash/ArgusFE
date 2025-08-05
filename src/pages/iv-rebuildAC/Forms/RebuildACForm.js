@@ -122,6 +122,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 max={formik.values.endDate}
                 value={formik.values?.startDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('startDate', '')}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />
@@ -133,6 +134,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 value={formik.values?.endDate}
                 min={formik.values.startDate}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('endDate', '')}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
