@@ -195,7 +195,9 @@ export default function JobOrderForm({
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLMFJobOrders,
-      disabled: !editMode
+      disabled: !editMode,
+      error: !formik?.values?.endingDT ? { message: labels.emptyEndingDate } : null,
+      values: { ...formik.values, date: formik?.values?.endingDT }
     },
     {
       key: 'IV',
@@ -560,16 +562,17 @@ export default function JobOrderForm({
 
   useEffect(() => {
     ;(async function () {
-      if (formik.values.dtId) {
-        const dtd = await getRequest({
-          extension: ManufacturingRepository.DocumentTypeDefault.get,
-          parameters: `_dtId=${formik.values.dtId}`
-        })
+      if (!editMode)
+        if (formik.values.dtId) {
+          const dtd = await getRequest({
+            extension: ManufacturingRepository.DocumentTypeDefault.get,
+            parameters: `_dtId=${formik.values.dtId}`
+          })
 
-        formik.setFieldValue('plantId', dtd?.record?.plantId || null)
-      } else {
-        formik.setFieldValue('plantId', null)
-      }
+          formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+        } else {
+          formik.setFieldValue('plantId', null)
+        }
     })()
   }, [formik.values.dtId])
 
@@ -682,6 +685,25 @@ export default function JobOrderForm({
                         maxAccess={maxAccess}
                         onClear={() => formik.setFieldValue('deliveryDate', null)}
                         error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={SystemRepository.Plant.qry}
+                        name='plantId'
+                        label={platformLabels.plant}
+                        valueField='recordId'
+                        displayField={['reference', 'name']}
+                        columnsInDropDown={[
+                          { key: 'reference', value: 'plant Ref' },
+                          { key: 'name', value: 'Name' }
+                        ]}
+                        values={formik.values}
+                        readOnly={isCancelled || isPosted}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('plantId', newValue?.recordId || null)
+                        }}
+                        error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                       />
                     </Grid>
                     <Grid item>

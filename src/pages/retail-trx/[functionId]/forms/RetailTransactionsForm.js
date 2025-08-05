@@ -85,7 +85,7 @@ export default function RetailTransactionsForm({
     [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -577,8 +577,10 @@ export default function RetailTransactionsForm({
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: parseFloat(itemPriceRow?.qty),
+      weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
@@ -1288,7 +1290,8 @@ export default function RetailTransactionsForm({
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      await changeDT(newValue)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
