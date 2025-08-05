@@ -194,8 +194,6 @@ export default function TaDslForm({ labels, access, recordId }) {
     return record
   }
 
-  console.log(formik.values)
-
   useEffect(() => {
     if (recordId) {
       refetchForm(recordId)
@@ -233,7 +231,6 @@ export default function TaDslForm({ labels, access, recordId }) {
   }
 
   useEffect(() => {
-    console.log(formik.values.leaveDate, formik.values.employeeId)
     ;(async function () {
       if (formik.values.leaveDate && formik.values.employeeId) {
         const { list } = await getRequest({
@@ -382,7 +379,6 @@ export default function TaDslForm({ labels, access, recordId }) {
                   maxAccess={maxAccess}
                   onChange={async (event, newValue) => {
                     await setViewField(newValue?.recordId)
-                    console.log(newValue)
                     formik.setFieldValue('employeeRef', newValue?.reference || '')
                     formik.setFieldValue('employeeName', newValue?.fullName || '')
                     formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -457,11 +453,9 @@ export default function TaDslForm({ labels, access, recordId }) {
                   required
                   readOnly={isClosed}
                   onBlur={(_, newValue) => {
-                    console.log('onblur', newValue)
                     formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onAccept={newValue => {
-                    console.log('onAccept', newValue)
                     formik.setFieldValue('leaveDate', newValue || null)
                   }}
                   onClear={() => formik.setFieldValue('leaveDate', null)}
