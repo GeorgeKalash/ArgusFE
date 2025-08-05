@@ -25,5 +25,8 @@ export const TimeAttendanceRepository = {
     set: service + 'setLR',
     get: service + 'getLR',
     del: service + 'delLR'
+  },
+  ResetTV: {
+    reset: service + 'resetTV'
   }
 }
