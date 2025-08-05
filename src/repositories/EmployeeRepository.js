@@ -80,5 +80,14 @@ export const EmployeeRepository = {
     get: service + 'getJI',
     set: service + 'setJI',
     del: service + 'delJI'
+  },
+  EmployeePenalty: {
+    snapshot: service + 'snapshotPE',
+    page: service + 'pagePE',
+    close: service + 'closePE',
+    reopen: service + 'reopenPE',
+    get: service + 'getPE',
+    set: service + 'setPE',
+    del: service + 'delPE'
   }
 }

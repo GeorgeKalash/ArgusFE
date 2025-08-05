@@ -6,5 +6,8 @@ export const PayrollRepository = {
   },
   BankTransferFilters: {
     qry: service + 'qrySB'
+  },
+  Penalty: {
+    qry: service + 'qryPT'
   }
 }
