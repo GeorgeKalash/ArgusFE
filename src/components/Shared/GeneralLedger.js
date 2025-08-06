@@ -55,7 +55,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
       default: { functionId }
     },
     DatasetIdAccess: datasetId,
-    datasetId: ResourceIds.GeneralLedger
+    datasetId: ResourceIds.GeneralLedger,
+    key: values?.recordId
   })
 
   const { formik: formik2 } = useForm({

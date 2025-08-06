@@ -12,6 +12,7 @@ export function useResourceQuery({
   enabled = true,
   enabledOnApplyOnly = false,
   defaultLoad = true,
+  key,
   params
 }) {
   const [searchValue, setSearchValue] = useState('')
@@ -38,7 +39,7 @@ export function useResourceQuery({
 
   const query = useQuery({
     retry: false,
-    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption],
+    queryKey: [endpointId, searchValue, JSON.stringify(filters), apiOption, key],
     queryFn: isSearchMode
       ? ({ queryKey: [_, qry] }) =>
           search.searchFn({
