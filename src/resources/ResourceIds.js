@@ -532,6 +532,7 @@ export const ResourceIds = {
   ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
 
   // GL
