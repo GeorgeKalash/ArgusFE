@@ -529,6 +529,7 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
   PurchaseQuotations: 50302,
