@@ -30,11 +30,18 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function FiPaymentVouchersForm({ labels, maxAccess: access, recordId, window }) {
+export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PaymentVouchers,
+    editMode: !!recordId
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
@@ -45,6 +52,8 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.PaymentVouchers.page3
   })
+
+  useSetWindow({ title: labels.paymentVoucher, window })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
@@ -768,3 +777,6 @@ export default function FiPaymentVouchersForm({ labels, maxAccess: access, recor
     </FormShell>
   )
 }
+
+FiPaymentVouchersForm.width = 1250
+FiPaymentVouchersForm.height = 550

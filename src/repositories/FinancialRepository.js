@@ -262,7 +262,9 @@ export const FinancialRepository = {
     snapshot2: service + 'snapshot2PO',
     cancel: service + 'cancelPO',
     close: service + 'closePO',
-    reopen: service + 'reopenPO'
+    reopen: service + 'reopenPO',
+    open: service + 'openPO',
+    generate: service + 'generatePO2PV'
   },
   PaymentOrdersExpenses: {
     qry2: service + 'qry2POX'
