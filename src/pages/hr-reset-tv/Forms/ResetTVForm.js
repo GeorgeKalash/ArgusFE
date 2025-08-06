@@ -30,8 +30,22 @@ export default function ResetTVForm({ _labels, maxAccess }) {
     },
     maxAccess,
     validationSchema: yup.object({
-      startDate: yup.date().required(),
-      endDate: yup.date().required()
+      startDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { endDate } = this.parent
+
+          return value.getTime() <= endDate?.getTime()
+        }),
+      endDate: yup
+        .date()
+        .required()
+        .test(function (value) {
+          const { startDate } = this.parent
+
+          return value.getTime() >= startDate?.getTime()
+        })
     }),
     onSubmit: async data => {
       const { employeeId, branchId, ...rest } = data
@@ -41,7 +55,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
         startDate: formatDateToApi(data.startDate),
         endDate: formatDateToApi(data.endDate),
         ...(employeeId && { employeeId }),
-        ...(branchId && { branchId }),
+        ...(branchId && { branchId })
       }
 
       await postRequest({
@@ -69,6 +83,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
                 name='startDate'
                 label={_labels.fromDate}
                 onChange={formik.setFieldValue}
+                max={formik.values.endDate}
                 maxAccess={maxAccess}
                 required
                 onClear={() => formik.setFieldValue('startDate', null)}
@@ -82,6 +97,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
                 label={_labels.toDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                min={formik.values.startDate}
                 required
                 onClear={() => formik.setFieldValue('endDate', null)}
                 value={formik.values?.endDate}
