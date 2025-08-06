@@ -87,13 +87,7 @@ const EmpSettings = () => {
         .transform((value, originalValue) => {
           return originalValue === '' || originalValue == null ? null : value
         }),
-      employeeRefSize: yup
-        .number()
-        .max(10)
-        .nullable()
-        .transform((value, originalValue) => {
-          return originalValue === '' || originalValue == null ? null : value
-        })
+      employeeRefSize: yup.number().required().notOneOf([1, 2]).max(10)
     }),
     onSubmit: async obj => {
       const data = Object.entries(obj)
@@ -165,7 +159,7 @@ const EmpSettings = () => {
             <ResourceComboBox
               endpointId={EmployeeRepository.HRDocTypeFilters.qry}
               name='idCombo'
-              label={labels.castingSite}
+              label={labels.idDocType}
               valueField='recordId'
               displayField='name'
               values={formik.values}
