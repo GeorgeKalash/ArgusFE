@@ -32,7 +32,8 @@ export const IVReplenishementRepository = {
     print: service + 'printREQ'
   },
   OrderItem: {
-    qry: service + 'qryREI'
+    qry: service + 'qryREI',
+    open: service + 'openREI'
   },
   MatPlanning: {
     page: service + 'pageMPL',
