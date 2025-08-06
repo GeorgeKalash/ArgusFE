@@ -267,5 +267,8 @@ export const SystemRepository = {
   },
   ResourcePerformance: {
     page: service + 'pageTLP'
+  },
+  SystemAlerts: {
+    qry: service + 'qryAA'
   }
 }
