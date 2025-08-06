@@ -281,7 +281,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
           mdValue: 0,
           taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty),
+          baseQty: filteredItems?.[0]?.qty * newRow?.qty,
           applyVat: formik.values.isVattable || false
         })
       }
@@ -330,7 +330,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
           ...data,
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          baseQty: filteredItems?.[0]?.qty * newRow?.qty
         })
       }
     },
