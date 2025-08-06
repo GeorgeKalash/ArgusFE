@@ -310,9 +310,9 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId == newRow?.muId)
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * filteredItems?.[0]?.qty
         })
       },
       propsReducer({ row, props }) {
@@ -585,6 +585,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   async function fillVendorData(values) {
     formik.setFieldValue('isVattable', values?.isTaxable || false)
     formik.setFieldValue('tdAmount', values?.tradeDiscount || 0)
+    formik.setFieldValue('currentDiscount', values?.tradeDiscount || 0)
     formik.setFieldValue('tdType', values?.tradeDiscount ? 2 : formik.values.tdType)
     formik.setFieldValue('taxId', values?.taxId || null)
     formik.setFieldValue('vendorName', values?.name || '')
