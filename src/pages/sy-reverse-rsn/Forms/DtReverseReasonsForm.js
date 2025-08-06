@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,10 +13,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-export default function DocumentReverseReasonsForm({ labels, maxAccess, recordId, name, window }) {
+export default function DocumentReverseReasonsForm({ labels, maxAccess, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
 
-  const { postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.DocumentReverseReasons.page
@@ -25,10 +25,9 @@ export default function DocumentReverseReasonsForm({ labels, maxAccess, recordId
   const { formik } = useForm({
     initialValues: {
       recordId,
-      name
+      name: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       name: yup.string().required()
     }),
@@ -43,16 +42,23 @@ export default function DocumentReverseReasonsForm({ labels, maxAccess, recordId
       window.close()
     }
   })
+
   const editMode = !!formik.values.recordId
 
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const { record } = await getRequest({
+          extension: SystemRepository.DocumentReverseReasons.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(record)
+      }
+    })()
+  }, [])
+
   return (
-    <FormShell
-      resourceId={ResourceIds.DocumentReverseReasons}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.DocumentReverseReasons} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

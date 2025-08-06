@@ -69,7 +69,6 @@ const DtReverseReasons = () => {
       props: {
         labels,
         recordId: record?.recordId,
-        name: record?.name,
         maxAccess: access
       },
       width: 500,
