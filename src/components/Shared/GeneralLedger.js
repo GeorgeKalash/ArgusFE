@@ -52,7 +52,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
   } = useResourceQuery({
     filter: {
       filterFn: fetchGridData,
-      default: { functionId }
+      default: { functionId, recordId: formValues?.recordId }
     },
     DatasetIdAccess: datasetId,
     datasetId: ResourceIds.GeneralLedger
