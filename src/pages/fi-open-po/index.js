@@ -52,7 +52,8 @@ const OpenPaymentOrder = () => {
     labels,
     filterBy,
     refetch,
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.PaymentOrders.page2,
@@ -138,8 +139,7 @@ const OpenPaymentOrder = () => {
   }
 
   const generatePV = async record => {
-    console.log(record.checked)
-    if (!record.checked) {
+    if (!record?.checked) {
       stackError({
         message: platformLabels.selectRow
       })
@@ -165,6 +165,7 @@ const OpenPaymentOrder = () => {
             }
           })
         }
+        invalidate()
       })
     }
   }
