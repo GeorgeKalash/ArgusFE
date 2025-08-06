@@ -65,7 +65,7 @@ const Users = () => {
         maxAccess: access
       },
       width: 900,
-      height: 600,
+      height: 650,
       title: _labels.users
     })
   }
