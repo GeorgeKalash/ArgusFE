@@ -140,7 +140,7 @@ const EmpPenalty = () => {
         access
       },
       width: 600,
-      height: 450,
+      height: 470,
       title: labels.empPenalty
     })
   }
@@ -154,35 +154,33 @@ const EmpPenalty = () => {
           hasSearch={false}
           filterBy={filterBy}
           leftSection={
-            <Grid container sx={{ width: '500px', mt: 5, ml: 5 }}>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={EmployeeRepository.Employee.snapshot}
-                  parameters={{ _branchId: 0 }}
-                  filter={{ activeStatus: 1 }}
-                  valueField='reference'
-                  displayField='fullName'
-                  name='employeeId'
-                  label={labels.employee}
-                  secondFieldLabel={labels.empName}
-                  formObject={values}
-                  displayFieldWidth={2}
-                  valueShow='employeeRef'
-                  secondValueShow='employeeName'
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'fullName', value: 'Name' }
-                  ]}
-                  maxAccess={access}
-                  onChange={(_, newValue) => {
-                    setValues({
-                      employeeId: newValue?.recordId || null,
-                      employeeRef: newValue?.reference || '',
-                      employeeName: newValue?.fullName || ''
-                    })
-                  }}
-                />
-              </Grid>
+            <Grid item xs={4}>
+              <ResourceLookup
+                endpointId={EmployeeRepository.Employee.snapshot}
+                parameters={{ _branchId: 0 }}
+                filter={{ activeStatus: 1 }}
+                valueField='reference'
+                displayField='fullName'
+                name='employeeId'
+                label={labels.employee}
+                secondFieldLabel={labels.empName}
+                formObject={values}
+                displayFieldWidth={2}
+                valueShow='employeeRef'
+                secondValueShow='employeeName'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'fullName', value: 'Name' }
+                ]}
+                maxAccess={access}
+                onChange={(_, newValue) => {
+                  setValues({
+                    employeeId: newValue?.recordId || null,
+                    employeeRef: newValue?.reference || '',
+                    employeeName: newValue?.fullName || ''
+                  })
+                }}
+              />
             </Grid>
           }
         />

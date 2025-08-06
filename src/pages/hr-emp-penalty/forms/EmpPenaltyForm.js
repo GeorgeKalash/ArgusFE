@@ -184,7 +184,7 @@ export default function EmpPenaltyForm({ labels, access, recordId }) {
                 label={labels.date}
                 value={formik.values?.date}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
                 readOnly={isClosed}
@@ -203,7 +203,7 @@ export default function EmpPenaltyForm({ labels, access, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('penaltyId', newValue?.recordId)
+                  formik.setFieldValue('penaltyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.penaltyId && Boolean(formik.errors.penaltyId)}
               />
@@ -248,7 +248,7 @@ export default function EmpPenaltyForm({ labels, access, recordId }) {
                 readOnly={isClosed}
                 required
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('amount', '')}
+                onClear={() => formik.setFieldValue('amount', null)}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
               />
             </Grid>
