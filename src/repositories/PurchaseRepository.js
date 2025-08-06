@@ -148,5 +148,11 @@ export const PurchaseRepository = {
   },
   ItemLastPurchaseInfo: {
     last: service + 'lastIVI'
+  },
+  GenerateQTNPRPack: {
+    generate: service + 'genQTN'
+  },
+  GeneratePOPRPack: {
+    generate: service + 'genPO'
   }
 }
