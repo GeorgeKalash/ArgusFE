@@ -430,7 +430,6 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301,
   CorrespondentDispersalControl: 36137,
   CorrespondentDispersal: 36136,
   Rubber: 48305,
@@ -532,6 +531,7 @@ export const ResourceIds = {
   JobInfos: 71207,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  PurchaseQuotations: 50302,
 
   // GL
   GLSalesInvoice: 51604,
