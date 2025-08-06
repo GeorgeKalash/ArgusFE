@@ -45,7 +45,7 @@ const EmpSettings = () => {
 
       for (const { key, value } of res.list) {
         if (keysToExtract.includes(key)) {
-          myObject[key] = value ? (key === 'nameFormat' ? value : parseInt(value)) : null
+          myObject[key] = value ? parseInt(value) : null
 
           if (key === 'ep_nraId' && parseInt(value)) {
             const itemRes = await getRequest({

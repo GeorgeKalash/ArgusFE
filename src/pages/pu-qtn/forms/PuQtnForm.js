@@ -20,7 +20,6 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useForm } from 'src/hooks/form'
 import WorkFlow from 'src/components/Shared/WorkFlow'
@@ -32,93 +31,76 @@ import {
   DIRTYFIELD_BASE_PRICE,
   DIRTYFIELD_UNIT_PRICE,
   DIRTYFIELD_MDAMOUNT,
-  DIRTYFIELD_UPO,
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_AMOUNT,
   MDTYPE_PCT
 } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { getDiscValues, getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
-import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
-import SalesTrxForm from 'src/components/Shared/SalesTrxForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import TaxDetails from 'src/components/Shared/TaxDetails'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
-import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
-import ChangeClient from 'src/components/Shared/ChangeClient'
+import { DataSets } from 'src/resources/DataSets'
+import TaxDetails from 'src/components/Shared/TaxDetails'
 
-export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
+export default function PuQtnForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
-  const [address, setAddress] = useState({})
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
-  const [defaults, setDefaults] = useState(null)
   const [reCal, setReCal] = useState(false)
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
-    functionId: SystemFunction.SalesQuotation,
-    access: access,
+    functionId: SystemFunction.PurchaseQuotation,
+    access,
     enabled: !recordId
   })
 
   const initialValues = {
-    recordId,
+    recordId: null,
     dtId: null,
-    reference: null,
-    date: new Date(),
-    expiryDate: null,
-    deliveryDate: null,
-    validity: null,
-    plantId: null,
-    clientId: '',
-    bpId: null,
-    bpRef: null,
-    bpName: null,
-    currencyId: parseInt(currency),
-    szId: null,
-    spId: null,
-    siteId: null,
-    description: null,
+    reference: '',
     status: 1,
-    isVattable: false,
-    exWorks: false,
-    taxId: null,
-    shipAddress: '',
+    date: new Date(),
+    plantId,
+    vendorId: null,
+    vendorRef: '',
+    vendorName: '',
+    deliveryMethodId: null,
+    currencyId,
+    vendorDocRef: null,
     subtotal: 0,
+    tdPct: 0,
+    tdAmount: 0,
+    tdType: 2,
+    paymentMethod: null,
     miscAmount: 0,
     amount: 0,
+    description: '',
+    isVattable: false,
     vatAmount: 0,
-    tdAmount: 0,
-    plId: null,
-    ptId: null,
-    shipToAddressId: null,
-    maxDiscount: 0,
-    currentDiscount: 0,
-    exRate: 1,
-    rateCalcMethod: null,
-    tdType: 2,
-    tdPct: 0,
-    baseAmount: 0,
-    volume: 0,
-    weight: 0,
     qty: 0,
-    serializedAddress: null,
+    mdValue: 0,
+    mdPct: 0,
+    deliveryDate: null,
+    weight: 0,
+    volume: 0,
     items: [
       {
         id: 1,
         quotationId: recordId || 0,
         itemId: null,
-        sku: null,
-        itemName: null,
+        sku: '',
+        itemName: '',
         seqNo: 1,
         siteId: null,
         muId: null,
@@ -132,8 +114,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         basePrice: 0,
         mdValue: 0,
         unitPrice: 0,
-        unitCost: 0,
-        overheadId: null,
         vatAmount: 0,
         mdAmount: 0,
         upo: 0,
@@ -149,62 +129,44 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   }
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.SalesQuotations.page
+    endpointId: PurchaseRepository.PurchaseQuotation.page
   })
 
   const conditions = {
     sku: row => row?.sku,
     qty: row => row?.qty > 0
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines, maxAccess, 'items')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     conditionSchema: ['items'],
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(),
-      date: yup.string().required(),
-      clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
-        return this.parent.bpId ? true : !!value
-      }),
+      currencyId: yup.number().required(),
+      vendorId: yup.number().required(),
+      date: yup.date().required(),
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const copy = {
         ...obj,
         date: formatDateToApi(obj.date),
+        deliveryDate: obj.deliveryDate ? formatDateToApi(obj.deliveryDate) : null,
         miscAmount: obj.miscAmount || 0
       }
-
       delete copy.items
-      ;['expiryDate', 'deliveryDate', 'rateCalcMethod'].forEach(field => {
-        if (!obj[field]) delete copy[field]
-      })
 
-      if (copy.serializedAddress) {
-        const addressRes = await postRequest({
-          extension: SaleRepository.Address.set,
-          record: JSON.stringify({
-            clientId: copy.clientId,
-            address
-          })
-        })
-        copy.shipToAddressId = addressRes.recordId
-      }
-
-      const updatedRows = formik.values.items
+      const updatedRows = obj.items
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((itemDetails, index) => {
-          const { physicalProperty, ...rest } = itemDetails
-
           return {
-            ...rest,
+            ...itemDetails,
             seqNo: index + 1,
-            applyVat: obj.isVattable
+            deliveryDate: itemDetails?.deliveryDate ? formatDateToApi(itemDetails.deliveryDate) : null,
+            lastPurchaseDate: itemDetails?.lastPurchaseDate ? formatDateToApi(itemDetails.lastPurchaseDate) : null
           }
         })
 
@@ -213,25 +175,23 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         items: updatedRows
       }
 
-      const sqRes = await postRequest({
-        extension: SaleRepository.SalesQuotations.set2,
+      const qtnRes = await postRequest({
+        extension: PurchaseRepository.PurchaseQuotation.set2,
         record: JSON.stringify(itemsGridData)
       })
-
-      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-      await refetchForm(sqRes.recordId)
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+      await refetchForm(qtnRes.recordId)
       invalidate()
     }
   })
 
   const editMode = !!formik.values.recordId
-  const isRaw = formik.values.status === 1
+  const isRaw = formik.values.status == 1
 
   async function getFilteredMU(itemId, msId = null) {
     if (!itemId) return
-
     const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-    const updatedMsId = currentItemId == 0 ? msId || currentItemId : currentItemId
+    const updatedMsId = !currentItemId ? msId || currentItemId : currentItemId
     const arrayMU = measurements?.filter(item => item.msId == updatedMsId) || []
     filteredMeasurements.current = arrayMU
   }
@@ -264,7 +224,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           { key: 'flName', value: 'FL Name' }
         ],
         displayFieldWidth: 5,
-        filter: { salesItem: true }
+        filter: { purchaseItem: true }
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
@@ -272,7 +232,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -311,26 +270,20 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           volume: parseFloat(itemPhysProp?.volume) || 0,
           weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
           vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-          basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
-          priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount ? parseFloat(formik.values.maxDiscount).toFixed(2) : 0,
+          basePrice: 0,
+          unitPrice: 0,
+          priceType: itemInfo?.priceType || 1,
+          mdAmount: 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: filteredMU?.[0]?.reference,
           muId: filteredMU?.[0]?.recordId,
-          extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          mdType: 1,
-          siteId: formik?.values?.siteId,
-          siteRef: await getSiteRef(formik?.values?.siteId),
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          baseQty: filteredItems?.[0]?.qty * newRow?.qty,
+          applyVat: formik.values.isVattable || false
         })
-
-        formik.setFieldValue('mdAmount', formik.values.currentDiscount ? formik.values.currentDiscount : 0)
       }
     },
     {
@@ -344,7 +297,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     },
     {
       component: 'resourcecombobox',
-      label: labels.measurementUnit,
+      label: labels.mu,
       name: 'muRef',
       props: {
         store: filteredMeasurements?.current,
@@ -357,9 +310,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId == newRow?.muId)
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * filteredItems?.[0]?.qty
         })
       },
       propsReducer({ row, props }) {
@@ -373,11 +326,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         update({
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          ...data,
+          baseQty: filteredItems?.[0]?.qty * newRow?.qty
         })
       }
     },
@@ -411,8 +364,17 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       }
     },
     {
+      component: 'textfield',
+      label: labels.requestRef,
+      name: 'requestRef',
+      flex: 2,
+      props: {
+        readOnly: true
+      }
+    },
+    {
       component: 'numberfield',
-      label: labels.unitPrice,
+      label: labels.unitCost,
       name: 'unitPrice',
       props: {
         decimalScale: 5
@@ -420,16 +382,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
-        update(data)
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.upo,
-      name: 'upo',
-      updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
         update(data)
       }
     },
@@ -446,16 +398,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       name: 'taxDetailsButton',
       props: {
         onCondition: row => {
-          if (row.itemId && row.taxId) {
-            return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
-              hidden: false
-            }
-          } else {
-            return {
-              imgSrc: '',
-              hidden: true
-            }
+          return {
+            imgSrc: row.itemId && row.taxId ? '/images/buttonsIcons/tax-icon.png' : '',
+            hidden: !(row.itemId && row.taxId)
           }
         }
       },
@@ -485,30 +430,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
         update(data)
-        checkMdAmountPct(newRow, update)
-      }
-    },
-    {
-      component: 'button',
-      name: 'saTrx',
-      label: labels.salesTrx,
-      props: {
-        onCondition: row => {
-          return {
-            disabled: !row.itemId
-          }
-        }
-      },
-      onClick: (e, row, update, newRow) => {
-        stack({
-          Component: SalesTrxForm,
-          props: {
-            recordId: 0,
-            functionId: SystemFunction.SalesInvoice,
-            itemId: row?.itemId,
-            clientId: formik?.values?.clientId
-          }
-        })
       }
     },
     {
@@ -525,6 +446,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       component: 'textfield',
       label: labels.notes,
       name: 'notes',
+      flex: 2
+    },
+    {
+      component: 'date',
+      label: labels.deliveryDate,
+      name: 'deliveryDate',
       flex: 2
     }
   ]
@@ -545,49 +472,14 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     updateRow({ id: data.id, changes: newRow, commitOnBlur: true })
   }
 
-  async function toInvoice() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
-
-    await postRequest({
-      extension: SaleRepository.SalesQuotations.postToInvTrx,
-      record: JSON.stringify(copy)
-    })
-
-    toast.success(platformLabels.Invoice)
-    invalidate()
-    window.close()
-  }
-
-  async function toConsignments() {
-    const copy = { ...formik.values }
-    delete copy.items
-    copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
-
-    await postRequest({
-      extension: SaleRepository.SalesQuotations.postToCons,
-      record: JSON.stringify(copy)
-    })
-
-    toast.success(platformLabels.Consignments)
-    invalidate()
-    window.close()
-  }
-
   async function toOrder() {
     const copy = { ...formik.values }
     delete copy.items
     copy.date = formatDateToApi(copy.date)
-    copy.deliveryDate = copy.deliveryDate && formatDateToApi(copy.deliveryDate)
-    copy.expiryDate = copy.expiryDate && formatDateToApi(copy.expiryDate)
+    copy.deliveryDate = copy.deliveryDate ? formatDateToApi(copy.deliveryDate) : null
 
     await postRequest({
-      extension: SaleRepository.SalesQuotations.postQuotTrx,
+      extension: PurchaseRepository.PurchaseQuotation.toOrder,
       record: JSON.stringify(copy)
     })
 
@@ -600,7 +492,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     stack({
       Component: WorkFlow,
       props: {
-        functionId: SystemFunction.SalesQuotation,
+        functionId: SystemFunction.PurchaseQuotation,
         recordId: formik.values.recordId
       }
     })
@@ -620,37 +512,29 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       disabled: !editMode
     },
     {
-      key: 'Invoice',
-      condition: true,
-      onClick: toInvoice,
-      disabled: !(editMode && isRaw)
-    },
-    {
       key: 'Order',
       condition: true,
       onClick: toOrder,
       disabled: !(editMode && isRaw)
     },
     {
-      key: 'Consignments',
+      key: 'Attachment',
       condition: true,
-      onClick: toConsignments,
-      disabled: !(editMode && isRaw)
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
-  async function fillForm(sqHeader, sqItems, clientDiscount) {
-    const shipAdd = await getAddress(sqHeader?.record?.shipToAddressId)
-
-    sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
+  async function fillForm(qtnHeader, qtnItems) {
+    qtnHeader?.record?.tdType == 1 || qtnHeader?.record?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
     const modifiedList =
-      sqItems?.list.length != 0
+      qtnItems?.list.length != 0
         ? await Promise.all(
-            sqItems.list?.map(async (item, index) => {
-              const taxDetailsResponse = sqHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+            qtnItems.list?.map(async (item, index) => {
+              const taxDetailsResponse = qtnHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
 
               return {
                 ...item,
@@ -660,6 +544,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+                lastPurchaseDate: item?.lastPurchaseDate ? formatDateFromApi(item.lastPurchaseDate) : null,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -667,83 +553,46 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         : formik.values.items
 
     formik.setValues({
-      ...sqHeader.record,
+      ...qtnHeader.record,
       currentDiscount:
-        sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
-          ? sqHeader?.record?.tdAmount
-          : sqHeader?.record?.tdPct,
-      amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
-      maxDiscount: clientDiscount?.record?.tdPct || 0,
-      shipAddress: shipAdd,
+        qtnHeader?.record?.tdType == 1 || qtnHeader?.record?.tdType == null
+          ? qtnHeader?.record?.tdAmount
+          : qtnHeader?.record?.tdPct,
+      amount: parseFloat(qtnHeader?.record?.amount).toFixed(2),
       items: modifiedList
     })
   }
 
-  async function getSalesQuotation(sqId) {
+  async function getPurchaseQuotation(qtnId) {
     const res = await getRequest({
-      extension: SaleRepository.SalesQuotations.get,
-      parameters: `_recordId=${sqId}`
+      extension: PurchaseRepository.PurchaseQuotation.get,
+      parameters: `_recordId=${qtnId}`
     })
 
     res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.expiryDate = formatDateFromApi(res?.record?.expiryDate)
     res.record.deliveryDate = formatDateFromApi(res?.record?.deliveryDate)
 
     return res
   }
 
-  async function getSalesQuotationItems(sqId) {
+  async function getPurchaseQuotationItems(qtnId) {
     return await getRequest({
-      extension: SaleRepository.QuotationItem.qry,
-      parameters: `_params=1|${sqId}&_startAt=0&_pageSize=3000&_sortBy=seqno`
+      extension: PurchaseRepository.QuotationItem.qry,
+      parameters: `_quotationId=${qtnId}`
     })
   }
 
-  async function getAddress(addressId) {
-    if (!addressId) return
-
-    const res = await getRequest({
-      extension: SystemRepository.Address.format,
-      parameters: `_addressId=${addressId}`
-    })
-
-    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
-  }
-  async function getClientInfo(clientId) {
-    const res = await getRequest({
-      extension: SaleRepository.Client.get,
-      parameters: `_recordId=${clientId}`
-    })
-
-    return res
+  async function fillVendorData(values) {
+    formik.setFieldValue('isVattable', values?.isTaxable || false)
+    formik.setFieldValue('tdAmount', values?.tradeDiscount || 0)
+    formik.setFieldValue('currentDiscount', values?.tradeDiscount || 0)
+    formik.setFieldValue('tdType', values?.tradeDiscount ? 2 : formik.values.tdType)
+    formik.setFieldValue('taxId', values?.taxId || null)
+    formik.setFieldValue('vendorName', values?.name || '')
+    formik.setFieldValue('vendorRef', values?.reference || '')
+    formik.setFieldValue('vendorId', values?.recordId || null)
   }
 
-  async function fillClientData(clientId) {
-    if (!clientId) return
-
-    const res = await getClientInfo(clientId)
-
-    formik.setFieldValue('ptId', res?.record?.ptId)
-    formik.setFieldValue('plId', res?.record?.plId || formik.values?.plId || 0)
-    formik.setFieldValue('szId', res?.record?.szId)
-    formik.setFieldValue('currencyId', res?.record?.currencyId)
-    formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
-    formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId || null)
-    const shipAdd = await getAddress(res?.record?.shipAddressId)
-    formik.setFieldValue('shipAddress', shipAdd || '')
-  }
-  async function fillShipment(recordId) {
-    if (!recordId) return
-
-    const res = await getRequest({
-      extension: BusinessPartnerRepository.BPAddress.qry,
-      parameters: `_bpId=${recordId}&_filter=`
-    })
-
-    const shipId = res?.list[0].addressId
-    const shipAdd = await getAddress(shipId)
-    formik.setFieldValue('shipAddress', shipAdd || '')
-  }
   async function getItemPhysProp(itemId) {
     const res = await getRequest({
       extension: InventoryRepository.ItemPhysProp.get,
@@ -771,29 +620,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
 
     return res?.list
-  }
-
-  async function getItemConvertPrice(itemId, update) {
-    if (!formik.values.currencyId) {
-      update({
-        itemId: null,
-        itemName: null,
-        sku: null
-      })
-
-      stackError({
-        message: labels.noCurrency
-      })
-
-      return
-    }
-
-    const res = await getRequest({
-      extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
-    })
-
-    return res?.record
   }
 
   const handleDiscountButtonClick = () => {
@@ -856,7 +682,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount,
+      mdAmount: mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
@@ -867,9 +693,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
+      weight: parseFloat(itemPriceRow?.weight),
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
-      weight: itemPriceRow?.weight,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
@@ -881,7 +707,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       ...newRow,
       id: newRow?.id,
       qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
-      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
+      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(4) : 0,
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
       unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
@@ -948,20 +774,20 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
   }
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
+        weight: parseFloat(item?.weight),
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
-        weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
-        tdPct: tdPct,
+        tdPct,
         taxDetails: item.taxDetails
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
@@ -972,84 +798,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
     recalcNewVat(tdPct)
   }
-
-  function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
-    if (parseFloat(rowData.mdAmount) > clientMaxDiscount) {
-      formik.setFieldValue('mdAmount', clientMaxDiscount)
-      rowData.mdAmount = clientMaxDiscount
-      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
-      update(data)
-      stackError({
-        message: labels.clientMaxPctDiscount + ' ' + clientMaxDiscount + '%'
-      })
-    }
-  }
-
-  function ShowMdAmountErrorMessage(actualDiscountAmount, clientMaxDiscountValue, rowData, update) {
-    if (actualDiscountAmount > clientMaxDiscountValue) {
-      formik.setFieldValue('mdType', 2)
-      formik.setFieldValue('mdAmount', clientMaxDiscountValue)
-      rowData.mdType = 2
-      rowData.mdAmount = clientMaxDiscountValue
-      const data = getItemPriceRow(rowData, DIRTYFIELD_MDAMOUNT)
-      update(data)
-      stackError({
-        message: labels.clientMaxDiscount + ' ' + clientMaxDiscountValue
-      })
-    }
-  }
-
-  function checkMdAmountPct(rowData, update) {
-    const maxClientAmountDiscount = rowData.unitPrice * (formik.values.maxDiscount / 100)
-    if (!formik.values.maxDiscount) return
-    if (rowData.mdType == 1) {
-      if (rowData.mdAmount > formik.values.maxDiscount) {
-        ShowMdValueErrorMessage(formik.values.maxDiscount, rowData, update)
-
-        return false
-      }
-    } else {
-      if (rowData.mdAmount > maxClientAmountDiscount) {
-        ShowMdAmountErrorMessage(rowData.mdAmount, maxClientAmountDiscount, rowData, update)
-
-        return false
-      }
-    }
-  }
-
   async function refetchForm(recordId) {
-    const sqHeader = await getSalesQuotation(recordId)
-    const sqItems = await getSalesQuotationItems(recordId)
-    const clientDiscount = await getClientInfo(sqHeader.record.clientId)
-    await fillForm(sqHeader, sqItems, clientDiscount)
-  }
-  function setAddressValues(obj) {
-    Object.entries(obj).forEach(([key, value]) => {
-      formik.setFieldValue(key, value)
-    })
-  }
-  function openAddressFilterForm() {
-    stack({
-      Component: AddressFilterForm,
-      props: {
-        maxAccess,
-        labels,
-        shipment: true,
-        checkedAddressId: formik.values?.shipToAddressId,
-        form: formik.values,
-        handleAddressValues: setAddressValues
-      }
-    })
-  }
-  function openAddressForm() {
-    stack({
-      Component: AddressForm,
-      props: {
-        address: address,
-        setAddress: setAddress,
-        isCleared: false
-      }
-    })
+    const qtnHeader = await getPurchaseQuotation(recordId)
+    const qtnItems = await getPurchaseQuotationItems(recordId)
+    await fillForm(qtnHeader, qtnItems)
   }
 
   const getMeasurementUnits = async () => {
@@ -1059,79 +811,113 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
   }
 
-  async function getSiteRef(siteId) {
-    if (!siteId) return
+  async function importPuItems() {
+    const requestItems = await getRequisitionItem(formik.values?.requestId)
+    if (requestItems?.list?.length == 0) {
+      stackError({
+        message: labels.noItemsToImport
+      })
 
-    const res = await getRequest({
-      extension: InventoryRepository.Site.get,
-      parameters: `_recordId=${siteId}`
-    })
+      return
+    }
 
-    return res?.record?.reference
+    const allItemsImported = requestItems?.list?.every(item =>
+      formik.values.items?.some(
+        existingItem => existingItem.requestId === item?.trxId && existingItem.requestSeqNo === item?.seqNo
+      )
+    )
+    if (allItemsImported) {
+      stackError({
+        message: labels.allItemsImported
+      })
+
+      return
+    }
+
+    const modifiedItemsList = await Promise.all(
+      requestItems?.list
+        ?.filter(
+          item =>
+            !formik.values.items?.some(
+              existingItem => existingItem.requestId === item?.trxId && existingItem.requestSeqNo === item?.seqNo
+            )
+        )
+        .map(async ({ unitCost, ...item }) => {
+          const getItem = await constructItem({
+            ...item,
+            deliveryDate: item?.deliveryDate ? formatDateFromApi(item.deliveryDate) : null,
+            lastPurchaseDate: item?.lastPurchaseDate ? formatDateFromApi(item.lastPurchaseDate) : null,
+            requestId: item?.trxId,
+            requestSeqNo: item?.seqNo,
+            requestRef: formik.values.requestRef,
+            mdType: 1,
+            qty: parseFloat(item?.qty || 0).toFixed(2),
+            notes: item?.justification
+          })
+
+          const vatCalc = getVatCalc({
+            priceType: getItem?.priceType,
+            weight: parseFloat(getItem?.weight),
+            basePrice: parseFloat(getItem?.basePrice),
+            qty: getItem?.qty,
+            extendedPrice: parseFloat(getItem?.extendedPrice),
+            baseLaborPrice: parseFloat(getItem?.baseLaborPrice),
+            vatAmount: parseFloat(getItem?.vatAmount),
+            tdPct: formik.values.tdPct || 0,
+            taxDetails: getItem?.taxDetails || []
+          })
+
+          return { ...getItem, vatAmount: parseFloat(vatCalc?.vatAmount || 0).toFixed(2) }
+        })
+    )
+
+    const oldItems = formik.values.items || null
+
+    const combinedItems = [...oldItems, ...modifiedItemsList]
+      .filter(item => item?.itemId)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
+    formik.setFieldValue('items', combinedItems)
+    setReCal(true)
   }
-  async function getDefaultData() {
-    const systemKeys = ['siteId', 'salesTD', 'plId']
-    const userKeys = ['plantId', 'siteId', 'spId']
-
-    const systemObject = (defaultsData?.list || []).reduce((acc, { key, value }) => {
-      if (systemKeys.includes(key)) {
-        acc[key] = value === 'True' || value === 'False' ? value : value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    const userObject = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
-      if (userKeys.includes(key)) {
-        acc[key] = value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    setDefaults({
-      userDefaultsList: userObject,
-      systemDefaultsList: systemObject
-    })
+  async function constructItem(item) {
+    const [itemInfo, itemPhysProp] = await Promise.all([getItem(item?.itemId), getItemPhysProp(item?.itemId)])
+    const taxDetails = formik.values.isVattable ? await getTaxDetails(itemInfo?.taxId) : null
 
     return {
-      userDefaultsList: userObject,
-      systemDefaultsList: systemObject
+      ...item,
+      volume: itemPhysProp?.volume || 0,
+      weight: itemPhysProp?.weight || 0,
+      priceType: itemPhysProp?.priceType || 1,
+      vatPct: itemPhysProp?.vatpct || 0,
+      basePrice: 0,
+      unitPrice: 0,
+      extendedPrice: 0,
+      mdValue: 0,
+      mdAmount: 0,
+      msId: itemInfo?.msId || null,
+      taxId: itemInfo?.taxId || null,
+      baseQty: parseFloat(item?.baseQty || item?.qty).toFixed(2),
+      taxDetails
     }
   }
 
-  async function updateValues(fields) {
-    Object.entries(fields).forEach(([key, val]) => {
-      formik.setFieldValue(key, val)
+  async function getRequisitionItem(requestId) {
+    if (!requestId) return
+
+    const response = await getRequest({
+      extension: PurchaseRepository.RequisitionDetail.qry,
+      parameters: `_trxId=${requestId}`
     })
+
+    return response
   }
-
-  async function onChangeDtId(dtId) {
-    if (!dtId) return
-
-    const res = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
-    formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
-  }
-  useEffect(() => {
-    let shipAdd = ''
-    const { name, street1, street2, city, phone, phone2, email1 } = address
-    if (name || street1 || street2 || city || phone || phone2 || email1) {
-      shipAdd = `${name || ''}\n${street1 || ''}\n${street2 || ''}\n${city || ''}\n${phone || ''}\n${phone2 || ''}\n${
-        email1 || ''
-      }`
-    }
-    formik.setFieldValue('shipAddress', shipAdd)
-    formik.setFieldValue('serializedAddress', shipAdd)
-  }, [address])
-
   useEffect(() => {
     formik.setFieldValue('qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('amount', parseFloat(amount).toFixed(2))
-    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(2))
+    formik.setFieldValue('volume', parseFloat(totalVolume).toFixed(4))
     formik.setFieldValue('weight', parseFloat(totalWeight).toFixed(2))
     formik.setFieldValue('subtotal', parseFloat(subtotal).toFixed(2))
     formik.setFieldValue('vatAmount', parseFloat(vatAmount).toFixed(2))
@@ -1143,218 +929,198 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       recalcGridVat(formik.values.tdType, formik.values.tdPct, currentTdAmount, formik.values.currentDiscount)
     }
   }, [subtotal])
-  useEffect(() => {
-    if (formik.values?.dtId && !recordId) onChangeDtId(formik.values?.dtId)
-  }, [formik.values?.dtId])
 
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
-      const defaultValues = await getDefaultData()
       if (recordId) await refetchForm(recordId)
-      else {
-        const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
-        if (defaultSalesTD) {
-          setCycleButtonState({ text: '%', value: 2 })
-          formik.setFieldValue('tdType', 2)
-        } else {
-          setCycleButtonState({ text: '123', value: 1 })
-          formik.setFieldValue('tdType', 1)
-        }
-        const userDefaultSite = defaultValues.userDefaultsList.siteId
-        const userDefaultSASite = defaultValues.systemDefaultsList.siteId
-        const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
-        const plant = defaultValues.userDefaultsList.plantId
-        const salesPerson = defaultValues.userDefaultsList.spId
-        formik.setFieldValue('siteId', parseInt(siteId))
-        formik.setFieldValue('spId', parseInt(salesPerson))
-        formik.setFieldValue('plantId', parseInt(plant))
-        formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
-      }
     })()
   }, [])
 
-  async function previewBtnClicked() {
-    const data = { printStatus: 2, recordId: formik.values.recordId }
-
-    await postRequest({
-      extension: SaleRepository.PrintedSA.printed,
-      record: JSON.stringify(data)
-    })
-
-    invalidate()
-  }
-
   return (
     <FormShell
-      resourceId={ResourceIds.SalesQuotations}
-      functionId={SystemFunction.SalesQuotation}
+      resourceId={ResourceIds.PurchaseQuotations}
+      functionId={SystemFunction.PurchaseQuotation}
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      previewBtnClicked={previewBtnClicked}
       actions={actions}
       editMode={editMode}
       disabledSubmit={!isRaw}
-      disabledSavedClear={!isRaw}
     >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesQuotation}`}
-                    name='dtId'
-                    label={labels.documentType}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    readOnly={editMode}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId)
-                      changeDT(newValue)
-                    }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                  />
+            <Grid container spacing={2} xs={6} sx={{ pt: 2 }}>
+              <Grid item xs={6}>
+                <Grid container direction='column' spacing={2}>
+                  <Grid item>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.DocumentType.qry}
+                      parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.PurchaseQuotation}`}
+                      name='dtId'
+                      label={labels.documentType}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      readOnly={editMode}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      values={formik.values}
+                      maxAccess={maxAccess}
+                      onChange={async (event, newValue) => {
+                        await changeDT(newValue)
+                        formik.setFieldValue('dtId', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <CustomTextField
+                      name='reference'
+                      label={labels.reference}
+                      value={formik?.values?.reference}
+                      maxAccess={!editMode && maxAccess}
+                      readOnly={editMode}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('reference', null)}
+                      error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='reference'
-                    label={labels.reference}
-                    value={formik?.values?.reference}
-                    maxAccess={!editMode && maxAccess}
-                    readOnly={editMode}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', null)}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
-                  />
+              </Grid>
+              <Grid item xs={6}>
+                <Grid container direction='column' spacing={2}>
+                  <Grid item>
+                    <CustomDatePicker
+                      name='date'
+                      required
+                      label={labels.date}
+                      value={formik?.values?.date}
+                      onChange={formik.setFieldValue}
+                      readOnly={!isRaw}
+                      max={new Date()}
+                      maxAccess={maxAccess}
+                      onClear={() => formik.setFieldValue('date', null)}
+                      error={formik.touched.date && Boolean(formik.errors.date)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Currency.qry}
+                      name='currencyId'
+                      label={labels.currency}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      required
+                      readOnly={formik?.values?.items?.some(item => item.itemId)}
+                      values={formik.values}
+                      maxAccess={maxAccess}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('items', formik.initialValues.items)
+                        formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      }}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item xs={10}>
-                  <ResourceLookup
-                    endpointId={SaleRepository.Client.snapshot}
-                    valueField='reference'
-                    displayField='name'
-                    secondFieldLabel={labels.name}
-                    name='clientId'
-                    label={labels.client}
-                    form={formik}
-                    readOnly={formik?.values?.bpId || formik?.values?.items?.some(item => item.itemId)}
-                    displayFieldWidth={4}
-                    valueShow='clientRef'
-                    secondValueShow='clientName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    required={!formik.values.dpId}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId)
-                      formik.setFieldValue('clientName', newValue?.name)
-                      formik.setFieldValue('clientRef', newValue?.reference)
-                      formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
-                      formik.setFieldValue('taxId', newValue?.taxId)
-                      formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
-                      fillClientData(newValue?.recordId)
-                    }}
-                    errorCheck={'clientId'}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <CustomButton
-                    onClick={() => {
-                      stack({
-                        Component: ChangeClient,
-                        props: {
-                          formValues: formik.values,
-                          onSubmit: fields => updateValues(fields)
-                        }
-                      })
-                    }}
-                    image='popup.png'
-                    disabled={!(editMode && isRaw && formik.values.clientId)}
-                    tooltipText={platformLabels.editClient}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={BusinessPartnerRepository.MasterData.qry2}
-                    parameters={{
-                      _functionId: SystemFunction.SalesQuotation,
-                      _startAt: 0,
-                      _pageSize: 1000,
-                      _sortBy: 'reference desc'
-                    }}
-                    valueField='reference'
-                    displayField='name'
-                    name='bpId'
-                    label={labels.lead}
-                    form={formik}
-                    readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId)}
-                    displayFieldWidth={3}
-                    valueShow='bpRef'
-                    secondValueShow='bpName'
-                    maxAccess={maxAccess}
-                    editMode={editMode}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('bpId', newValue?.recordId)
-                      formik.setFieldValue('bpName', newValue?.name)
-                      formik.setFieldValue('bpRef', newValue?.reference)
-                      fillShipment(newValue?.recordId)
-                    }}
-                    errorCheck={'bpId'}
-                  />
-                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceLookup
+                  endpointId={PurchaseRepository.Vendor.snapshot}
+                  valueField='reference'
+                  displayField='name'
+                  secondFieldLabel={labels.name}
+                  name='vendorId'
+                  label={labels.vendor}
+                  form={formik}
+                  readOnly={formik?.values?.items?.some(item => item.itemId)}
+                  displayFieldWidth={2}
+                  valueShow='vendorRef'
+                  secondValueShow='vendorName'
+                  maxAccess={maxAccess}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' },
+                    { key: 'flName', value: 'FL Name' }
+                  ]}
+                  onChange={(event, newValue) => {
+                    fillVendorData(newValue)
+                  }}
+                  errorCheck={'vendorId'}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <ResourceLookup
+                  endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
+                  filter={{ status: 4 }}
+                  valueField='reference'
+                  displayField='reference'
+                  name='requestRef'
+                  label={labels.request}
+                  form={formik}
+                  readOnly={!isRaw}
+                  secondDisplayField={false}
+                  maxAccess={maxAccess}
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('requestRef', newValue?.reference)
+                    formik.setFieldValue('requestId', newValue?.recordId)
+                  }}
+                  errorCheck={'requestId'}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <CustomButton
+                  onClick={() => importPuItems()}
+                  tooltipText={platformLabels.import}
+                  image={'import.png'}
+                  disabled={!isRaw || !formik.values.requestId || !formik.values.currencyId || !formik.values.vendorId}
+                />
               </Grid>
             </Grid>
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
-                    name='spId'
-                    label={labels.salesPerson}
+                    endpointId={SystemRepository.Plant.qry}
+                    name='plantId'
+                    label={labels.plant}
+                    readOnly={!isRaw}
                     columnsInDropDown={[
-                      { key: 'spRef', value: 'Reference' },
+                      { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={!isRaw}
-                    valueField='recordId'
-                    displayField='name'
                     values={formik.values}
-                    displayFieldWidth={1.5}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('spId', newValue?.recordId)
+                      formik.setFieldValue('plantId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.spId && Boolean(formik.errors.spId)}
+                    displayFieldWidth={2}
+                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='date'
-                    required
-                    label={labels.date}
-                    value={formik?.values?.date}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
+                  <ResourceComboBox
+                    datasetId={DataSets.PAYMENT_METHOD}
+                    name='paymentMethod'
                     readOnly={!isRaw}
+                    label={labels.paymentMethod}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('paymentMethod', newValue?.key || null)
+                    }}
+                    error={formik.touched?.paymentMethod && Boolean(formik.errors?.paymentMethod)}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1371,27 +1137,23 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     readOnly
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('taxId', newValue?.recordId || null)
                     }}
                     error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
-                    name='szId'
-                    label={labels.saleZone}
-                    valueField='recordId'
-                    displayField='name'
+                  <CustomTextField
+                    name='vendorDocRef'
+                    label={labels.vendorDocRef}
+                    value={formik?.values?.vendorDocRef}
+                    maxAccess={maxAccess}
                     readOnly={!isRaw}
-                    values={formik.values}
-                    displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('szId', newValue?.recordId)
-                    }}
-                    error={formik.touched.szId && Boolean(formik.errors.szId)}
+                    maxLength='15'
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('vendorDocRef', '')}
+                    error={formik.touched.vendorDocRef && Boolean(formik.errors.vendorDocRef)}
                   />
                 </Grid>
               </Grid>
@@ -1399,70 +1161,31 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    required
-                    readOnly={formik?.values?.items?.some(item => item.itemId)}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
-                      formik.setFieldValue('items', [{ id: 1 }])
-                    }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
-                    name='plantId'
-                    label={labels.plant}
+                  <CustomDatePicker
+                    name='deliveryDate'
+                    label={labels.deliveryDate}
+                    value={formik?.values?.deliveryDate}
+                    onChange={formik.setFieldValue}
                     readOnly={!isRaw}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('plantId', newValue?.recordId)
-                    }}
-                    displayFieldWidth={2}
-                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    onClear={() => formik.setFieldValue('deliveryDate', null)}
+                    error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    endpointId={PurchaseRepository.DeliveryMethods.qry}
+                    name='deliveryMethodId'
+                    label={labels.deliveryMethod}
                     readOnly={!isRaw}
-                    label={labels.site}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
                     valueField='recordId'
-                    displayField={['reference', 'name']}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={2}
+                    displayField='name'
+                    values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
-                      formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
-                      formik.setFieldValue('siteName', newValue ? newValue.name : null)
+                      formik.setFieldValue('deliveryMethodId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    error={formik.touched?.deliveryMethodId && Boolean(formik.errors?.deliveryMethodId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1473,63 +1196,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     label={labels.VAT}
                     disabled
                     maxAccess={maxAccess}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='shipAddress'
-                    label={labels.shipTo}
-                    value={formik.values.shipAddress}
-                    rows={2.5}
-                    maxLength='100'
-                    readOnly
-                    disabled={formik.values.exWorks}
-                    maxAccess={maxAccess}
-                    viewDropDown={formik.values.clientId || formik.values.bpId}
-                    viewAdd={(formik.values.clientId || formik.values.bpId) && !editMode}
-                    onChange={e => formik.setFieldValue('shipAddress', e.target.value)}
-                    onClear={() => formik.setFieldValue('shipAddress', null)}
-                    onDropDown={() => openAddressFilterForm()}
-                    handleAddAction={() => openAddressForm()}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='validity'
-                    label={labels.validity}
-                    value={formik?.values?.validity}
-                    maxAccess={maxAccess}
-                    readOnly={!isRaw}
-                    onChange={e => {
-                      formik.handleChange(e)
-                      if (e.target.value) {
-                        const date = new Date(formik.values.date)
-                        date.setDate(date.getDate() + Number(e.target.value))
-                        formik.setFieldValue('expiryDate', date)
-                      } else formik.setFieldValue('expiryDate', null)
-                    }}
-                    onClear={() => {
-                      formik.setFieldValue('validity', 0)
-                      formik.setFieldValue('expiryDate', null)
-                    }}
-                    error={formik.touched.validity && Boolean(formik.errors.validity)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='expiryDate'
-                    label={labels.expiryDate}
-                    value={formik?.values?.expiryDate}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
-                    readOnly
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('expiryDate', null)}
-                    error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
                   />
                 </Grid>
               </Grid>
@@ -1551,7 +1217,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={!formik.values.clientId || !isRaw}
+            disabled={!formik.values.vendorId || !formik.values.currencyId || !isRaw}
             allowDelete={isRaw}
           />
         </Grow>
@@ -1564,7 +1230,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   label={labels.description}
                   value={formik.values.description}
                   rows={3}
-                  editMode={editMode}
                   readOnly={!isRaw}
                   maxAccess={maxAccess}
                   onChange={e => formik.setFieldValue('description', e.target.value)}
@@ -1576,22 +1241,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             <Grid item xs={3}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='deliveryDate'
-                    label={labels.deliveryDate}
-                    value={formik?.values?.deliveryDate}
-                    onChange={formik.setFieldValue}
-                    editMode={editMode}
-                    readOnly={!isRaw}
-                    maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('deliveryDate', null)}
-                    error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
-                </Grid>
-                <Grid item xs={12}>
                   <CustomNumberField
                     name='totalVolume'
                     maxAccess={maxAccess}
@@ -1601,13 +1250,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='totalWeight'
-                    maxAccess={maxAccess}
-                    label={labels.totWeight}
-                    value={totalWeight}
-                    readOnly
-                  />
+                  <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
               </Grid>
             </Grid>

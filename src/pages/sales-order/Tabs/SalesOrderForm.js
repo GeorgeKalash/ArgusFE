@@ -309,7 +309,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
-
           return
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
@@ -345,6 +344,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         }
 
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
         getFilteredMU(newRow?.itemId)
 
         update({
@@ -358,8 +359,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           mdAmount: formik.values.tdPct ? parseFloat(formik.values.tdPct).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: filteredMeasurements?.[0]?.reference,
-          muId: filteredMeasurements?.[0]?.recordId,
+          muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
+          muId: defaultMu?.recordId || filteredMeasurements?.[0]?.recordId,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -430,7 +431,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        getFilteredMU(newRow.itemId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)?.[0]
+        update({ ...data, baseQty: newRow?.qty * filteredItems?.qty })
       }
     },
     {
@@ -900,8 +903,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
@@ -986,8 +991,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
+        weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
