@@ -296,9 +296,8 @@ export default function JobOrderForm({
         addLockedScreen({
           resourceId: ResourceIds.MFJobOrders,
           recordId,
-          reference
+          reference: formik.values.reference,
         })
-        refetchForm(res.recordId)
       },
       isAlreadyLocked: name => {
         window.close()
