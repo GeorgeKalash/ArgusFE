@@ -531,6 +531,7 @@ export const ResourceIds = {
   GeneralSettings: 20600,
   JobInfos: 71207,
   RebuildAC: 41509,
+  ShiftLeave: 72210,
   EmployeePenalties: 71217,
 
   // GL

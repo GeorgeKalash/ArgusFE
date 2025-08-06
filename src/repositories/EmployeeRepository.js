@@ -81,6 +81,9 @@ export const EmployeeRepository = {
     set: service + 'setJI',
     del: service + 'delJI'
   },
+  QuickView: {
+    get: service + 'getQV'
+  },
   EmployeePenalty: {
     page: service + 'pagePE',
     close: service + 'closePE',
