@@ -104,7 +104,7 @@ const ResourceDowntime = () => {
         maxAccess
       },
       width: 700,
-      height: 500,
+      height: 550,
       title: labels.resourceDowntime
     })
   }
