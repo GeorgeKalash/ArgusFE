@@ -8,10 +8,10 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import * as yup from 'yup'
 
 const SyAlerts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,10 +23,16 @@ const SyAlerts = () => {
       parameters: `_filter=`
     })
 
-    // formik.setValues(rows)
+    formik.setValues({
+      rows: rows.list.map(({ activeStatus, ...item }, index) => ({
+        id: index + 1,
+        activeStatus: activeStatus == 1 ? true : false,
+        ...item
+      }))
+    })
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, maxAccess } = useResourceQuery({
     endpointId: SystemRepository.SystemAlerts.qry,
     queryFn: getGridData,
     datasetId: ResourceIds.SystemAlerts
@@ -39,67 +45,57 @@ const SyAlerts = () => {
       rows: [
         {
           id: 1,
-          functionId: '',
-          sfName: '',
-          ilId: '',
-          name: ''
+          alertId: null,
+          days: null,
+          name: '',
+          activeStatus: false
         }
       ]
     },
-    onSubmit: async values => {
-      try {
-        const filteredRows = values.rows
-          .filter(row => row.ilId && row.ilId !== '')
-          .map(({ functionId, ilId, name }) => ({
-            functionId,
-            ilId,
-            name
-          }))
-
-        const resultObject = {
-          items: filteredRows
-        }
-
-        await postRequest({
-          extension: GeneralLedgerRepository.IntegrationSystemFunction.set2,
-          record: JSON.stringify(resultObject)
+    validationSchema: yup.object().shape({
+      rows: yup.array().of(
+        yup.object().shape({
+          days: yup.number().required().max(32767)
         })
-        toast.success(platformLabels.Updated)
-        await getGridData()
-      } catch (error) {}
+      )
+    }),
+    onSubmit: async values => {
+      const rows = values.rows.map(({ id, name, activeStatus, ...item }) => ({
+        activeStatus: activeStatus ? 1 : -1,
+        ...item
+      }))
+
+      await postRequest({
+        extension: SystemRepository.SystemAlerts.arr,
+        record: JSON.stringify(rows)
+      })
+      toast.success(platformLabels.Updated)
     }
   })
 
   const columns = [
     {
-      component: 'textfield',
-      label: labels.functionId,
-      name: 'functionId',
-      props: {
-        readOnly: true,
-        type: 'number'
-      }
+      component: 'checkbox',
+      name: 'activeStatus',
+      label: labels.active,
+      flex: 0.1
     },
     {
       component: 'textfield',
-      label: labels.functionName,
-      name: 'sfName',
+      label: labels.name,
+      name: 'name',
       props: {
         readOnly: true
       }
     },
     {
-      component: 'resourcecombobox',
-      label: labels.integrationLogic,
-      name: 'ilId',
+      component: 'numberfield',
+      label: labels.days,
+      name: 'days',
       props: {
-        endpointId: GeneralLedgerRepository.IntegrationLogic.qry,
-        displayField: 'name',
-        mapping: [
-          { from: 'name', to: 'name' },
-          { from: 'recordId', to: 'ilId' }
-        ]
-      }
+        decimalScale: 0
+      },
+      flex: 0.2
     }
   ]
 

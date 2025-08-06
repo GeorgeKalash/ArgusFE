@@ -269,6 +269,7 @@ export const SystemRepository = {
     page: service + 'pageTLP'
   },
   SystemAlerts: {
-    qry: service + 'qryAA'
+    qry: service + 'qryAA',
+    arr: service + 'arrAA'
   }
 }

@@ -63,7 +63,7 @@ const CustomNumberField = ({
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
-    
+
     if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) return val.toString()
 
     if (val?.endsWith('.') && !blur) {
