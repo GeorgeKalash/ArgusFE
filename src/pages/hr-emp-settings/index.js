@@ -87,7 +87,7 @@ const EmpSettings = () => {
         .transform((value, originalValue) => {
           return originalValue === '' || originalValue == null ? null : value
         }),
-      employeeRefSize: yup.number().required().notOneOf([1, 2]).max(10)
+      employeeRefSize: yup.number().required().min(0).notOneOf([1, 2]).max(10)
     }),
     onSubmit: async obj => {
       const data = Object.entries(obj)
