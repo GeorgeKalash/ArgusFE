@@ -384,12 +384,13 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    const modifiedList =
-      res?.record?.items?.map((item, index) => ({
-        ...item,
-        deliveryDate: formatDateFromApi(item.deliveryDate),
-        id: index + 1
-      })) || formik.initialValues.items
+    const modifiedList = res?.record?.items?.length
+      ? res?.record?.items?.map((item, index) => ({
+          ...item,
+          deliveryDate: formatDateFromApi(item.deliveryDate),
+          id: index + 1
+        }))
+      : formik.initialValues.rows
 
     formik.setValues({
       ...res?.record?.header,
