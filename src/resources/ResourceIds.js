@@ -530,8 +530,11 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  EmployeePenalties: 71217,
+  DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
 
   // GL
