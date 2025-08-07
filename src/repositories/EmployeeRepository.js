@@ -91,5 +91,11 @@ export const EmployeeRepository = {
     get: service + 'getPE',
     set: service + 'setPE',
     del: service + 'delPE'
+  },
+  EmployeeDeduction: {
+    qry: service + 'qryED'
+  },
+  FullName: {
+    sync: service + 'syncFullName'
   }
 }
