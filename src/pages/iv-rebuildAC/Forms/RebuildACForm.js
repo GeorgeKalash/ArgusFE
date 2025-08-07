@@ -38,7 +38,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
         .nullable()
         .test('start-before-end', 'Start date must be before end date', function (startDate) {
           const { endDate } = this.parent
-          if (!startDate || !endDate) return true 
+          if (!startDate || !endDate) return true
 
           return startDate.getTime() <= endDate.getTime()
         }),
@@ -47,7 +47,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
         .nullable()
         .test('end-after-start', 'End date must be after start date', function (endDate) {
           const { startDate } = this.parent
-          if (!startDate || !endDate) return true 
+          if (!startDate || !endDate) return true
 
           return endDate.getTime() >= startDate.getTime()
         }),
