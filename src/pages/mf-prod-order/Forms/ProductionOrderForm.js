@@ -120,8 +120,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     }
   })
 
-  console.log(formik.values)
-
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
