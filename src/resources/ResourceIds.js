@@ -537,6 +537,7 @@ export const ResourceIds = {
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
   RebuildAC: 41509,
+  MetalSmelting: 47314,
 
   // GL
   GLSalesInvoice: 51604,
@@ -583,6 +584,7 @@ export const ResourceIds = {
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
+  GLTransactionItem: 47600,
 
   //MCR
   MCRSalesInvoice: 51607,

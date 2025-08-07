@@ -66,5 +66,18 @@ export const FoundryRepository = {
   CastingJob: {
     qry: service + 'qryCAJ',
     set2: service + 'set2CAJ'
+  },
+  MetalSmelting: {
+    get: service + 'getTRX',
+    del: service + 'delTRX',
+    set2: service + 'set2TRX',
+    page: service + 'pageTRX',
+    snapshot: service + 'snapshotTRX',
+    post: service + 'postTRX',
+    unpost: service + 'unpostTRX',
+    verify: service + 'verifyTRX'
+  },
+  TransactionItems: {
+    qry: service + 'qryTRI'
   }
 }
