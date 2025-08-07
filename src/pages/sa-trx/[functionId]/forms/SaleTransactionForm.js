@@ -2034,7 +2034,15 @@ export default function SaleTransactionForm({
                   })
                 }}
                 image='popup.png'
-                disabled={!(editMode && !isPosted && formik.values.header.clientId)}
+                disabled={
+                  !(
+                    (editMode && !isPosted && formik.values.header.clientId) ||
+                    (!editMode &&
+                      formik.values.header.clientId &&
+                      formik.values.items?.length > 0 &&
+                      formik.values.items?.some(item => item?.itemId))
+                  )
+                }
                 tooltipText={platformLabels.editClient}
               />
             </Grid>
