@@ -268,6 +268,12 @@ export const SystemRepository = {
   ResourcePerformance: {
     page: service + 'pageTLP'
   },
+  DocumentReverseReasons: {
+    page: service + 'pageRER',
+    get: service + 'getRER',
+    set: service + 'setRER',
+    del: service + 'delRER'
+  },
   SystemAlerts: {
     qry: service + 'qryAA',
     arr: service + 'arrAA'
