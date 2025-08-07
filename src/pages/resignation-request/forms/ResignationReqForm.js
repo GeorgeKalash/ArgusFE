@@ -116,7 +116,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
         formik.setFieldValue('position', employeeRes?.record?.positionName || null)
         formik.setFieldValue('branch', employeeRes?.record?.branchName || null)
         formik.setFieldValue('serviceDuration', employeeRes?.record?.serviceDuration || null)
-        formik.setFieldValue('netSalary', employeeRes?.record?.salary || null)
+        formik.setFieldValue('netSalary', employeeRes?.record?.salary || 0)
       })
     } else {
       formik.setFieldValue('hireDate', null)
