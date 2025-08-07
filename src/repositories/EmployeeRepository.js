@@ -83,5 +83,13 @@ export const EmployeeRepository = {
   },
   QuickView: {
     get: service + 'getQV'
+  },
+  EmployeePenalty: {
+    page: service + 'pagePE',
+    close: service + 'closePE',
+    reopen: service + 'reopenPE',
+    get: service + 'getPE',
+    set: service + 'setPE',
+    del: service + 'delPE'
   }
 }
