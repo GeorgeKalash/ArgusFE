@@ -118,6 +118,13 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   })
 
+  const originalSetFieldValue = formik.setFieldValue
+  formik.setFieldValue = async (field, value, shouldValidate) => {
+    await originalSetFieldValue(field, value, shouldValidate)
+
+    if (value) await formik.setFieldTouched(field, false) //: await formik.setFieldTouched(field, true)
+  }
+
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
   const { key, value, reference } = documentType

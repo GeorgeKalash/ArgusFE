@@ -737,9 +737,12 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
       formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
+      formik.setFieldValue('header.dtId', recordId)
+      //formik.setTouched({ plantId: false, siteId: false })
     } else {
       formik.setFieldValue('header.plantId', null)
       formik.setFieldValue('header.siteId', null)
+      formik.setFieldValue('header.dtId', null)
     }
   }
 
@@ -945,7 +948,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     onChange={async (event, newValue) => {
                       await onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
-                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
@@ -1095,6 +1097,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
                 onChange={async (event, newValue) => {
+                  formik.setFieldValue('header.vendorId', newValue?.recordId || null)
                   formik.setFieldValue('header.vendorName', newValue?.name || '')
                   formik.setFieldValue('header.vendorRef', newValue?.reference || '')
 
@@ -1103,7 +1106,6 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.taxId', newValue?.taxId || null)
                   formik.setFieldValue('header.invoiceId', null)
                   formik.setFieldValue('header.invoiceRef', '')
-                  formik.setFieldValue('header.vendorId', newValue?.recordId || null)
                 }}
                 errorCheck={'header.vendorId'}
               />
