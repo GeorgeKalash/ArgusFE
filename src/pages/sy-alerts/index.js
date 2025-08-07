@@ -26,7 +26,7 @@ const SyAlerts = () => {
     formik.setValues({
       rows: rows.list.map(({ activeStatus, ...item }, index) => ({
         id: index + 1,
-        activeStatus: activeStatus == 1 ? true : false,
+        activeStatus: activeStatus == 1,
         ...item
       }))
     })
@@ -93,7 +93,8 @@ const SyAlerts = () => {
       label: labels.days,
       name: 'days',
       props: {
-        decimalScale: 0
+        decimalScale: 0,
+        allowNegative: false
       },
       flex: 0.2
     }
