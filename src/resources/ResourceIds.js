@@ -15,6 +15,7 @@ export const ResourceIds = {
   GlobalSalesYTD: 60112,
   SalesTeamOrdersSummary: 60113,
   JoDTd: 42607,
+  EmpSettings: 71100,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -535,6 +536,7 @@ export const ResourceIds = {
   EmployeePenalties: 71217,
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
+  RebuildAC: 41509,
 
   // GL
   GLSalesInvoice: 51604,
