@@ -2040,7 +2040,7 @@ export default function SaleTransactionForm({
                     (!editMode &&
                       formik.values.header.clientId &&
                       formik.values.items?.length > 0 &&
-                      formik.values.items[0]?.itemId)
+                      formik.values.items?.some(item => item?.itemId))
                   )
                 }
                 tooltipText={platformLabels.editClient}
