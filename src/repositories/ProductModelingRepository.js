@@ -88,5 +88,15 @@ export const ProductModelingRepository = {
     get: service + 'getDTD',
     set: service + 'setDTD',
     del: service + 'delDTD'
+  },
+  Samples: {
+    page: service + 'pageSPL',
+    get2: service + 'get2SPL',
+    set: service + 'setSPL',
+    del: service + 'delSPL',
+    snapshot: service + 'snapshotSPL',
+    set2: service + 'set2SPL',
+    close: service + 'closeSPL',
+    reopen: service + 'reopen',
   }
 }
