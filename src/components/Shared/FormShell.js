@@ -416,7 +416,8 @@ export default function FormShell({
             return
           }
           if (e.key === 'Enter') {
-            const isDropDownOpen = target.classList.contains('MuiAutocomplete-option')
+            const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+
             const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
 
             if (!isEqual) {

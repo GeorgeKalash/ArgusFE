@@ -125,18 +125,19 @@ const Window = React.memo(
             } else {
               const target = e.target
               const role = target.getAttribute('role') || ''
-
-              if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-                e.preventDefault()
-                actionRef.current?.submit()
-              }
-              if (e.key === 'Enter') {
-                const isDropDownOpen = target.classList.contains('MuiAutocomplete-option')
-                const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
-
-                if (!isEqual) {
+              if (actionRef.current?.submit) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
                   e.preventDefault()
                   actionRef.current?.submit()
+                }
+                if (e.key === 'Enter') {
+                  const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+                  const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+                  if (!isEqual) {
+                    e.preventDefault()
+                    actionRef.current?.submit()
+                  }
                 }
               }
             }
