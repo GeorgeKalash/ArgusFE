@@ -45,7 +45,7 @@ const PageError = ({ onClose, message, height = '' }) => {
             pl: 2
           }}
         >
-          <Button variant='contained' onClick={onClose} color='primary'>
+          <Button variant='contained' onClick={onClose} color='primary' autoFocus>
             Ok
           </Button>
         </Box>
