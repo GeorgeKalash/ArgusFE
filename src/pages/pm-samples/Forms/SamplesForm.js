@@ -228,6 +228,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
       : formik.initialValues.rows
 
     formik.setValues({
+      recordId: res?.record?.header?.recordId,
       header: {
         ...res?.record?.header,
         date: formatDateFromApi(res?.record?.header?.date)
@@ -285,7 +286,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
     },
     {
       key: 'Close',
-      condition: true,
+      condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
     },

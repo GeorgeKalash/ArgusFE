@@ -98,5 +98,6 @@ export const ProductModelingRepository = {
     set2: service + 'set2SPL',
     close: service + 'closeSPL',
     reopen: service + 'reopenSPL',
+    post: service + 'postSPL'
   }
 }
