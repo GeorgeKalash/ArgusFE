@@ -25,7 +25,7 @@ const getFormattedNumber = (value, decimal, round = false) => {
 
   let formattedDecimalPart = ''
 
-  if (decimalPart !== undefined) {
+  if (decimalPart !== undefined && decimal > 0) {
     if (decimal !== undefined) {
       !round
         ? (formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`)
