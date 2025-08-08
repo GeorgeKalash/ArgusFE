@@ -63,6 +63,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       headerName: labels.netCost,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'isMetal',
+      headerName: labels.isMetal,
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 
@@ -83,7 +89,8 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
 
     res.list = res?.list?.map(item => ({
       ...item,
-      netCost: parseFloat(item?.qty * item?.unitCost).toFixed(2)
+      netCost: parseFloat(item?.qty * item?.unitCost).toFixed(2),
+      isMetal: item?.isMetal === null ? false : item?.isMetal
     }))
 
     return res
