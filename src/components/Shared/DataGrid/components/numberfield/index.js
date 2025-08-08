@@ -20,9 +20,11 @@ export function View({ value, data, ...props }) {
       .replace(/(\.\d*?[1-9])0+$/, '$1')
   }
 
+  const decimal = props.column?.props?.decimalScale || undefined
+
   const formattedValue = viewDecimals
-    ? getFormattedNumber(formatValue(value), props.column?.props?.decimalScale, !!props.column?.props?.decimalScale)
-    : getFormattedNumber(value, props.column?.props?.decimalScale, !!props.column?.props?.decimalScale)
+    ? getFormattedNumber(formatValue(value), decimal, !!decimal)
+    : getFormattedNumber(value, decimal, !!decimal)
   const icon = symbol && iconMapView[symbol]
 
   return (

@@ -14,7 +14,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
   }
 
   const formatValue = val => {
-    if (!val) return ''
+    if (!val && val !== 0) return ''
     if (typeof val === 'string') {
       val = val.replace(/,/g, '')
     }
