@@ -15,6 +15,7 @@ export const ResourceIds = {
   GlobalSalesYTD: 60112,
   SalesTeamOrdersSummary: 60113,
   JoDTd: 42607,
+  EmpSettings: 71100,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -430,7 +431,6 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301,
   CorrespondentDispersalControl: 36137,
   CorrespondentDispersal: 36136,
   Rubber: 48305,
@@ -530,8 +530,13 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  EmployeePenalties: 71217,
+  DocumentReverseReasons: 20111,
+  PurchaseQuotations: 50302,
+  RebuildAC: 41509,
   GenerateTransfers: 46600,
 
   // GL
