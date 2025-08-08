@@ -97,6 +97,6 @@ export const ProductModelingRepository = {
     snapshot: service + 'snapshotSPL',
     set2: service + 'set2SPL',
     close: service + 'closeSPL',
-    reopen: service + 'reopen',
+    reopen: service + 'reopenSPL',
   }
 }
