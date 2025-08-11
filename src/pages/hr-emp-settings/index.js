@@ -58,9 +58,8 @@ const EmpSettings = () => {
           }
         }
       }
-      formik.setFieldValue('firstNameFormat', myObject?.nameFormat)
 
-      formik.setValues(myObject)
+      formik.setValues({ ...myObject, firstNameFormat: myObject?.nameFormat })
     })()
   }, [])
 
