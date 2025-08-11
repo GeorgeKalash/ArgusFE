@@ -67,7 +67,7 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
     {
       field: 'isMetal',
       headerName: labels.isMetal,
-      flex: 1,
+      flex: 0.6,
       type: 'checkbox'
     }
   ]
