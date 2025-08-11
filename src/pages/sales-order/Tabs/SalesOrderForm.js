@@ -898,8 +898,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       dirtyField: dirtyField
     })
 
-    console.log(itemPriceRow)
-
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -911,8 +909,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
-    console.log(vatCalcRow?.vatAmount)
-
+    
     let commonData = {
       ...newRow,
       id: newRow?.id,
