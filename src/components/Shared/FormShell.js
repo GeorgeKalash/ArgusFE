@@ -408,6 +408,7 @@ export default function FormShell({
         onKeyDown={e => {
           const target = e.target
           const role = target.getAttribute('role') || ''
+          const isSearchField = target.getAttribute('data-search') === 'true'
 
           if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
             e.preventDefault()
@@ -416,6 +417,9 @@ export default function FormShell({
             return
           }
           if (e.key === 'Enter') {
+            if (isSearchField) {
+              return
+            }
             const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
 
             const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
