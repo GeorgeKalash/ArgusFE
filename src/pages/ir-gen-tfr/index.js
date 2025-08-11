@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Grid } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -21,16 +21,19 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import { useError } from 'src/error'
 
 export default function PhysicalCountItemDe() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
-  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value
+  const siteId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess: access,
@@ -43,12 +46,19 @@ export default function PhysicalCountItemDe() {
       items: [
         {
           id: 1,
+          isChecked: false,
           sku: '',
           itemId: null,
           itemName: '',
-          countedQty: 0,
-          weight: 0,
-          metalPurity: 0
+          requestRef: '',
+          requestDate: null,
+          siteRef: '',
+          siteName: '',
+          onHandSite: 0,
+          onHandGlobal: 0,
+          qty: 0,
+          deliveredQty: 0,
+          balance: 0
         }
       ]
     },
@@ -60,27 +70,41 @@ export default function PhysicalCountItemDe() {
     onSubmit: async obj => {}
   })
 
-  async function fetchGridData() {
-    if (!formik.values.toSiteId) return
+  async function fetchGridData(toSiteId = formik.values.toSiteId, reference = formik.values.reference) {
+    if (!formik.values.fromSiteId) {
+      stackError({
+        message: 'hello'
+      })
+
+      return
+    }
 
     const res = await getRequest({
       extension: IVReplenishementRepository.OrderItem.open,
-      parameters: `_reference=${formik.values.reference || ''}&_siteId=${formik.values.toSiteId}&_fromSiteId=${
-        formik.values.fromSiteId
-      }`
+      parameters: `_reference=${reference || ''}&_siteId=${toSiteId || 0}&_fromSiteId=${formik.values.fromSiteId || 0}`
     })
+    res.list = res?.list?.map((item, index) => {
+      return {
+        ...item,
+        id: index + 1,
+        requestDate: item.requestDate ? formatDateFromApi(item.requestDate) : null,
+        balance: item.qty || 0 - item.deliveredQty || 0,
+        onHandGlobal: item?.ohandGlobal || 0,
+        onHandSite: item?.onhandSite || 0,
+        transferNow: 0
+      }
+    })
+    formik.setFieldValue('items', res.list)
   }
-
-  const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
 
   const columns = [
     {
       component: 'checkbox',
       name: 'isChecked',
+      label: ' ',
       flex: 0.3,
       checkAll: {
-        value: isCheckedAll,
-        visible: true,
+        visible: false,
         onChange({ checked }) {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
@@ -124,7 +148,7 @@ export default function PhysicalCountItemDe() {
     },
     {
       component: 'date',
-      name: 'date',
+      name: 'requestDate',
       flex: 1,
       label: labels?.date,
       props: {
@@ -178,7 +202,7 @@ export default function PhysicalCountItemDe() {
     },
     {
       component: 'numberfield',
-      name: 'delivered',
+      name: 'deliveredQty',
       label: labels.delivered,
       flex: 1,
       props: {
@@ -213,8 +237,12 @@ export default function PhysicalCountItemDe() {
   ]
 
   useEffect(() => {
-    if (siteId) formik.setFieldValue('fromSiteId', parseInt(siteId))
+    if (siteId) formik.setFieldValue('fromSiteId', siteId)
   }, [siteId])
+
+  useEffect(() => {
+    fetchGridData()
+  }, [formik.values.toSiteId, formik.values.fromSiteId, formik.values.reference])
 
   return (
     <FormShell
@@ -298,7 +326,7 @@ export default function PhysicalCountItemDe() {
                 displayFieldWidth={2}
                 required
                 onChange={(event, newValue) => {
-                  fetchGridData(newValue?.recordId, formik.values.reference)
+                  fetchGridData(siteId, newValue?.recordId, formik.values.reference)
                   formik.setFieldValue('toSiteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
@@ -314,7 +342,7 @@ export default function PhysicalCountItemDe() {
                   const currentValue = e.target.value
                   formik.setFieldValue('reference', currentValue)
 
-                  // fetchGridData(currentValue, formik.values.toSiteId)
+                  // fetchGridData( siteId,formik.values.toSiteId,currentValue)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
