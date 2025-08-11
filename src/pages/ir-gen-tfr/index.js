@@ -1,6 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -19,26 +19,27 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 
 export default function PhysicalCountItemDe() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
+  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value
 
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      stockCountId: null,
+      dtId: null,
       fromSiteId: null,
-      controllerId: null,
-      status: 1,
-      SCStatus: null,
-      SCWIP: null,
-      EndofSiteStatus: null,
+      toSiteId: null,
+      date: new Date(),
+      reference: '',
       items: [
         {
           id: 1,
@@ -53,15 +54,23 @@ export default function PhysicalCountItemDe() {
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      stockCountId: yup.string().required(),
-      fromSiteId: yup.string().required(),
-      controllerId: yup.string().required(),
-      items: yup.array().of(yup.object().shape({})).required()
+      toSiteId: yup.string().required(),
+      date: yup.date().required()
     }),
     onSubmit: async obj => {}
   })
 
-  async function fetchGridData() {}
+  async function fetchGridData() {
+    if (!formik.values.toSiteId) return
+
+    const res = await getRequest({
+      extension: IVReplenishementRepository.OrderItem.open,
+      parameters: `_reference=${formik.values.reference || ''}&_siteId=${formik.values.toSiteId}&_fromSiteId=${
+        formik.values.fromSiteId
+      }`
+    })
+  }
+
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
 
   const columns = [
@@ -193,7 +202,19 @@ export default function PhysicalCountItemDe() {
     }
   ]
 
-  const actions = []
+  const actions = [
+    {
+      key: 'GenerateJob',
+      condition: true,
+      onClick: () => {
+        formik.handleSubmit()
+      }
+    }
+  ]
+
+  useEffect(() => {
+    if (siteId) formik.setFieldValue('fromSiteId', parseInt(siteId))
+  }, [siteId])
 
   return (
     <FormShell
@@ -223,7 +244,6 @@ export default function PhysicalCountItemDe() {
                 values={formik.values}
                 maxAccess={access}
                 onChange={async (event, newValue) => {
-                  await changeDT(newValue)
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -236,6 +256,7 @@ export default function PhysicalCountItemDe() {
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 readOnly
+                required
                 maxAccess={access}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -275,7 +296,9 @@ export default function PhysicalCountItemDe() {
                 displayField={['reference', 'name']}
                 maxAccess={access}
                 displayFieldWidth={2}
+                required
                 onChange={(event, newValue) => {
+                  fetchGridData(newValue?.recordId, formik.values.reference)
                   formik.setFieldValue('toSiteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
@@ -287,7 +310,12 @@ export default function PhysicalCountItemDe() {
                 label={labels.reference}
                 value={formik?.values?.reference}
                 maxAccess={access}
-                onChange={formik.handleChange}
+                onChange={e => {
+                  const currentValue = e.target.value
+                  formik.setFieldValue('reference', currentValue)
+
+                  // fetchGridData(currentValue, formik.values.toSiteId)
+                }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
