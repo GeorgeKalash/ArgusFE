@@ -40,7 +40,7 @@ const PMSamples = () => {
   const columns = [
     {
       field: 'reference',
-      headerName: labels.refernce,
+      headerName: labels.reference,
       flex: 1
     },
     {

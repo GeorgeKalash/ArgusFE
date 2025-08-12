@@ -307,7 +307,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
       actions={actions}
       editMode={editMode}
       previewReport={editMode}
-      disabledSubmit={isPosted || isClosed}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -353,7 +353,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                   <CustomDatePicker
                     name='header.date'
                     label={labels.date}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     value={formik?.values?.header.date}
                     onChange={formik.setFieldValue}
                     required
@@ -375,7 +375,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.siteId', newValue?.recordId || null)
                     }}
@@ -402,7 +402,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                       { key: 'name', value: 'Name' }
                     ]}
                     required
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.productionLineId', newValue?.recordId || null)
@@ -419,7 +419,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField='reference'
                     required
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.productionStandardId', newValue?.recordId || '')
@@ -437,7 +437,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     name='header.productionClassId'
                     label={labels.productionClass}
                     valueField='recordId'
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     displayField='name'
                     maxAccess={maxAccess}
                     required
@@ -451,13 +451,13 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='header?weight'
+                    name='header.weight'
                     maxAccess={maxAccess}
                     label={labels.weight}
                     value={formik.values.header.weight}
                     maxLength={10}
                     decimalScale={2}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     required
                     onChange={e => formik.setFieldValue('header.weight', e.target.value)}
                     onClear={() => {
@@ -474,7 +474,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField={'name'}
                     values={formik.values.header}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.designFamilyId', newValue?.recordId || null)
                     }}
@@ -495,7 +495,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     secondDisplayField={false}
                     name='header.jobId'
                     label={labels.jobOrder}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     formObject={formik.values.header}
                     form={formik}
                     required
@@ -522,7 +522,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     valueField='sku'
                     displayFieldWidth={2}
                     displayField='name'
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     valueShow='sku'
                     secondValueShow='itemName'
                     formObject={formik.values.header}
@@ -559,7 +559,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     ]}
                     valueShow='threeDDRef'
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('header.threeDDId', newValue?.recordId || null)
@@ -581,10 +581,10 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     ]}
                     required
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     values={formik.values.header}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.collectionId', newValue?.recordId)
+                      formik.setFieldValue('header.collectionId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.collectionId && Boolean(formik?.errors?.header?.collectionId)}
                   />
@@ -598,7 +598,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                     valueField='recordId'
                     displayField={'name'}
                     values={formik.values.header}
-                    readOnly={isPosted || isClosed}
+                    readOnly={isClosed}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('header.designGroupId', newValue?.recordId || null)
                     }}
@@ -613,6 +613,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                 ref={imageUploadRef}
                 resourceId={ResourceIds.Samples}
                 seqNo={0}
+                disabled={isClosed}
                 recordId={recordId}
                 width={250}
                 height={200}
@@ -628,9 +629,9 @@ export default function SamplesForm({ labels, access, recordId, window }) {
             name='rows'
             maxAccess={maxAccess}
             columns={columns}
-            allowAddNewLine={!isPosted && !isClosed}
-            allowDelete={!isPosted && !isClosed}
-            disabled={isPosted || isClosed}
+            allowAddNewLine={!isClosed}
+            allowDelete={!isClosed}
+            disabled={isClosed}
           />
         </Grow>
         <Fixed>
@@ -650,7 +651,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                 label={labels.notes}
                 value={formik?.values.header?.notes}
                 rows={2.5}
-                readOnly={isPosted || isClosed}
+                readOnly={isClosed}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
                 onClear={() => formik.setFieldValue('header.notes', '')}
