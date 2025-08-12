@@ -64,16 +64,22 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
   }
 
   function isValidClient(values) {
-    if (normalize(formValues?.plId) != normalize(values?.plId)) {
-      stackError({ message: labels.mismatchPrice })
+    if (formValues?.plId != values?.plId) {
+      stackError({
+        message: labels.mismatchPrice
+      })
 
       return false
-    } else if (normalize(formValues?.isVattable) != normalize(values?.isSubjectToVAT)) {
-      stackError({ message: labels.mismatchVat })
+    } else if (formValues?.isVattable != values?.isSubjectToVAT) {
+      stackError({
+        message: labels.mismatchVat
+      })
 
       return false
-    } else if (normalize(formValues?.taxId) != normalize(values?.taxId)) {
-      stackError({ message: labels.mismatchTax })
+    } else if (formValues?.taxId != values?.taxId) {
+      stackError({
+        message: labels.mismatchTax
+      })
 
       return false
     } else if (normalize(formValues?.maxDiscount) < normalize(values?.maxDiscount)) {
