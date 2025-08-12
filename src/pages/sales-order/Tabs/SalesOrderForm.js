@@ -116,6 +116,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     rateCalcMethod: '',
     tdType: 2,
     tdPct: 0,
+    initialTdPct: 0,
     baseAmount: 0,
     volume: '',
     weight: '',
@@ -356,7 +357,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
           upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.tdPct ? parseFloat(formik.values.tdPct).toFixed(2) : 0,
+          mdAmount: formik.values.initialTdPct ? parseFloat(formik.values.initialTdPct).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
@@ -703,7 +704,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems) {
+  async function fillForm(soHeader, soItems, clientInfo) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -740,6 +741,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
+      tdPct: clientInfo?.record?.tdPct || 0,
+      initialTdPct: clientInfo?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -773,13 +776,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
-  async function fillClientData(clientId) {
+  const getClient = async (clientId) => {
     if (!clientId) return
 
-    const res = await getRequest({
+    return await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
     })
+  }
+  async function fillClientData(clientId) {
+    if (!clientId) return
+
+    const res = await getClient(clientId)
     formik.setFieldValue('currencyId', res?.record?.currencyId)
     formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
@@ -913,7 +921,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
-
+    
     let commonData = {
       ...newRow,
       id: newRow?.id,
@@ -985,7 +993,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
+
+    return _discountObj?.hiddenTdPct || 0
   }
 
   function recalcNewVat(tdPct) {
@@ -1006,8 +1016,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
-    checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
-    recalcNewVat(tdPct)
+    const currentHiddenTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+    recalcNewVat(currentHiddenTdPct)
   }
 
   function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
@@ -1058,7 +1068,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    await fillForm(soHeader, soItems)
+    const clientInfo = await getClient(soHeader?.record?.clientId)
+    fillForm(soHeader, soItems, clientInfo)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1183,9 +1194,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       setMeasurements(muList?.list)
       const defaultValues = await getDefaultData()
       if (recordId) {
-        const soItems = await getSalesOrderItems(recordId)
-        const soHeader = await getSalesOrder(recordId)
-        await fillForm(soHeader, soItems)
+        refetchForm(recordId)
       } else {
         const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
         if (defaultSalesTD) {
@@ -1416,6 +1425,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('tdPct', newValue?.tdPct)
+                  formik.setFieldValue('initialTdPct', newValue?.tdPct)
                   formik.setFieldValue('taxId', newValue?.taxId)
                   setAddress({})
                   fillClientData(newValue?.recordId)
