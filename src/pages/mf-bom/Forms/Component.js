@@ -82,7 +82,7 @@ const ComponentBOM = ({ store, labels }) => {
     endpointId: ManufacturingRepository.Component.qry
   })
 
-  const totalQty = data?.list.reduce((qtySum, row) => {
+  const totalQty = data?.list?.reduce((qtySum, row) => {
     const qtyValue = parseFloat(row.baseQty) || 0
 
     return qtySum + qtyValue
@@ -96,7 +96,7 @@ const ComponentBOM = ({ store, labels }) => {
     openForm(obj)
   }
 
-  const maxSeqNo = data ? data.list.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
+  const maxSeqNo = data ? data?.list?.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   function openForm(obj) {
     stack({
@@ -108,7 +108,10 @@ const ComponentBOM = ({ store, labels }) => {
         muId: obj?.muId,
         access,
         seqNo: obj?.seqNo ?? maxSeqNo,
-        store
+        store,
+        components: data?.list,
+        invalidate,
+        calculateCostPct
       },
       width: 750,
       height: 500,
@@ -117,12 +120,38 @@ const ComponentBOM = ({ store, labels }) => {
   }
 
   const del = async obj => {
+    const updatedData = data?.list?.filter(row => row.seqNo !== obj.seqNo)
+
+    data.list = calculateCostPct(updatedData)
+
     await postRequest({
-      extension: ManufacturingRepository.Component.del,
-      record: JSON.stringify(obj)
+      extension: ManufacturingRepository.Component.set2,
+      record: JSON.stringify({ components: data?.list, bomId: recordId })
     })
+
     invalidate()
     toast.success(platformLabels.Deleted)
+  }
+
+  const calculateCostPct = billItems => {
+    const totalCost = billItems?.reduce((sum, row) => {
+      const currentCost = row.currentCost == null ? 0 : parseFloat(row.currentCost)
+      const baseQty = row.baseQty == null ? 0 : parseFloat(row.baseQty)
+
+      return sum + currentCost * baseQty
+    }, 0)
+
+    billItems = billItems?.map(billItem => {
+      const currentCost = billItem.currentCost == null ? 0 : parseFloat(billItem.currentCost)
+      const baseQty = billItem.baseQty == null ? 0 : parseFloat(billItem.baseQty)
+
+      return {
+        ...billItem,
+        costPct: totalCost === 0 ? 0 : (currentCost * baseQty * 100) / totalCost
+      }
+    })
+
+    return billItems
   }
 
   const handleSubmit = async () => {
