@@ -1065,7 +1065,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
     const clientInfo = await getClient(soHeader?.record?.clientId)
-    await fillForm(soHeader, soItems, clientInfo)
+    fillForm(soHeader, soItems, clientInfo)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
