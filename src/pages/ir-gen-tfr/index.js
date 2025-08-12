@@ -65,6 +65,7 @@ export default function PhysicalCountItemDe() {
     validateOnChange: true,
     validationSchema: yup.object({
       toSiteId: yup.string().required(),
+      fromSiteId: yup.string().required(),
       date: yup.date().required()
     }),
     onSubmit: async obj => {}
@@ -295,6 +296,7 @@ export default function PhysicalCountItemDe() {
                 endpointId={InventoryRepository.Site.qry}
                 name='fromSiteId'
                 readOnly
+                required
                 label={labels.fromSite}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
