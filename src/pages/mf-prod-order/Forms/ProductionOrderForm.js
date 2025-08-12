@@ -28,6 +28,7 @@ import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ImportForm from 'src/components/Shared/ImportForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import WorkFlow from 'src/components/Shared/WorkFlow'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -467,11 +468,27 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     invalidate()
   }
 
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.ProductionOrder,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
       disabled: !editMode
     },
     {
@@ -515,10 +532,18 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
   async function generateJob() {
     await postRequest({
       extension: ManufacturingRepository.JobOrder.gen,
-      record: JSON.stringify({
-        joId: formik.values.recordId
-      })
+      record: JSON.stringify({ recordId: formik.values.recordId })
     })
+
+    toast.success(platformLabels.Generated)
+  }
+
+  async function sync() {
+    await postRequest({
+      extension: ManufacturingRepository.JobOrder.gen,
+      record: JSON.stringify(formik.values)
+    })
+
     toast.success(platformLabels.Generated)
   }
 

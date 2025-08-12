@@ -383,5 +383,8 @@ export const ManufacturingRepository = {
   },
   JobOrder: {
     gen: service + 'genORD'
+  },
+  ProductionOrder: {
+    refresh: service + 'refreshPOI'
   }
 }
