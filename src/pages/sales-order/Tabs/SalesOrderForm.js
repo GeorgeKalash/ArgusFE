@@ -413,7 +413,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         update({
           baseQty: newRow?.qty * filteredItems?.qty
         })
@@ -428,6 +428,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        update({
+          baseQty: newRow?.qty * filteredItems?.qty
+        })
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
       }
