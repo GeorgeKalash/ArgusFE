@@ -64,5 +64,8 @@ export const IVReplenishementRepository = {
   },
   materialPlaning: {
     preview: service + 'previewMRP'
+  },
+  Transfer: {
+    generate2: service + 'generate2TFR'
   }
 }

@@ -20,7 +20,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
 
 export default function PhysicalCountItemDe() {
@@ -67,7 +67,34 @@ export default function PhysicalCountItemDe() {
       fromSiteId: yup.string().required(),
       date: yup.date().required()
     }),
-    onSubmit: async obj => {}
+    onSubmit: async obj => {
+      const updatedItems = obj.items
+        .filter(row => row.isChecked)
+        ?.map(itemDetails => {
+          return {
+            requestId: itemDetails.requestId,
+            requestSeqNo: itemDetails.seqNo,
+            itemId: itemDetails.itemId,
+            qty: itemDetails.transferNow
+          }
+        })
+
+      const payload = {
+        dtId: obj?.dtId || null,
+        fromSiteId: obj?.fromSiteId,
+        toSiteId: obj?.toSiteId,
+        date: formatDateToApi(obj?.date),
+        items: updatedItems
+      }
+
+      await postRequest({
+        extension: IVReplenishementRepository.Transfer.generate2,
+        record: JSON.stringify(payload)
+      })
+
+      toast.success(platformLabels.Edited)
+      fetchGridData()
+    }
   })
 
   async function fetchGridData(toSiteId = formik.values.toSiteId, reference = formik.values.reference) {
@@ -218,7 +245,16 @@ export default function PhysicalCountItemDe() {
       component: 'numberfield',
       name: 'transferNow',
       label: labels.transferNow,
-      flex: 1
+      flex: 1,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row?.isChecked }
+      },
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        update({
+          transferNow: newRow?.transferNow && newRow?.transferNow > newRow?.qty ? newRow?.qty : newRow?.transferNow
+        })
+      }
     }
   ]
 
