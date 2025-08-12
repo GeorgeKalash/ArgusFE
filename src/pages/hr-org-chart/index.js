@@ -32,7 +32,7 @@ const HROrgChart = () => {
     onSubmit: async obj => {
       const data = await getRequest({
         extension: companyStructureRepository.DepartmentFilters.qry,
-        parameters: `_filter=&_size=1000&_startAt=0&_type=${obj.type}&_activeStatus=1&_sortBy=recordId`
+        parameters: `_filter=&_size=1000&_startAt=0&_type=${obj?.type}&_activeStatus=1&_sortBy=recordId`
       })
 
       const transformed = transformToOrgChartData(data.list || [])
@@ -54,7 +54,7 @@ const HROrgChart = () => {
     return records?.map(record => {
       const id = String(record?.recordId)
       const displayName = record?.name
-
+  
       let parent = ''
 
       if (record?.parentId != null && idToName[record?.parentId]) {
