@@ -46,18 +46,18 @@ const HROrgChart = () => {
     const idToName = {}
     const idToRecord = {}
 
-    records.forEach(record => {
+    records?.forEach(record => {
       idToName[record.recordId] = record.name
       idToRecord[record.recordId] = record
     })
 
-    return records.map(record => {
-      const id = String(record.recordId)
-      const displayName = record.name
+    return records?.map(record => {
+      const id = String(record?.recordId)
+      const displayName = record?.name
 
       let parent = ''
 
-      if (record.parentId != null && idToName[record.parentId]) {
+      if (record?.parentId != null && idToName[record?.parentId]) {
         parent = String(record.parentId)
       } else if (record.parentName) {
         parent = record.parentName
