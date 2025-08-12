@@ -345,6 +345,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       })
     }
   }
+
+  useEffect(() => {
+    setDefaults(formik.values?.header?.dtId)
+  }, [formik.values.header.dtId])
+
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
@@ -360,10 +365,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       if (recordId) refetchForm(recordId)
     })()
   }, [])
-
-  useEffect(() => {
-    setDefaults(formik.values?.header?.dtId)
-  }, [formik.values.header.dtId])
 
   return (
     <FormShell
