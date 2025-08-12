@@ -75,7 +75,9 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           pcs: null,
           designId: null,
           notes: '',
-          seqNo: ''
+          seqNo: '',
+          lineId: null,
+          lineRef: ''
         }
       ]
     },
@@ -119,6 +121,8 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       refetchForm(res?.recordId)
     }
   })
+
+  console.log(formik)
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
@@ -193,28 +197,13 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         valueField: 'recordId',
         displayField: 'reference',
-        readOnly: isPosted || isClosed,
+        readOnly: true,
         displayFieldWidth: 2,
         endpointId: ManufacturingRepository.Design.snapshot,
         mapping: [
           { from: 'recordId', to: 'designId' },
-          { from: 'reference', to: 'designRef' },
-          { from: 'name', to: 'designName' },
-          { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'itemName', to: 'itemName' },
-          { from: 'routingId', to: 'routingId' },
-          { from: 'routingName', to: 'routingName' },
-          { from: 'routingRef', to: 'routingRef' },
-          { from: 'stdWeight', to: 'itemWeight' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
+          { from: 'reference', to: 'designRef' }
         ]
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -236,6 +225,34 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        let result
+        let result1
+
+        if (newRow?.itemId) {
+          const res = await getRequest({
+            extension: InventoryRepository.ItemProduction.get,
+            parameters: `_recordId=${newRow.itemId}`
+          })
+          result = res?.record
+
+          if (result?.designId) {
+            const res1 = await getRequest({
+              extension: ManufacturingRepository.Design.get,
+              parameters: `_recordId=${res.record?.designId}`
+            })
+            result1 = res1?.record
+          }
+        }
+
+        update({
+          designId: result?.designId || null,
+          designRef: result?.designRef || '',
+          lineId: result?.lineId || null,
+          lineRef: result?.lineRef || '',
+          itemWeight: result1?.stdWeight || null
+        })
       }
     },
     {
@@ -246,6 +263,27 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.prodLine,
+      name: 'lineId',
+      props: {
+        endpointId: ManufacturingRepository.ProductionLine.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
+        displayFieldWidth: 2,
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'reference', to: 'lineRef' },
+          { from: 'recordId', to: 'lineId' },
+          { from: 'name', to: 'lineName' }
+        ]
+      },
+      width: 150
     },
     {
       component: 'date',
@@ -461,12 +499,28 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: !editMode
     },
     {
+      key: 'GenerateJob',
+      condition: true,
+      onClick: generateJob,
+      disabled: isPosted
+    },
+    {
       key: 'Import',
       condition: true,
       onClick: onImportClick,
       disabled: !editMode || isPosted || isClosed
     }
   ]
+
+  async function generateJob() {
+    await postRequest({
+      extension: ManufacturingRepository.JobOrder.gen,
+      record: JSON.stringify({
+        joId: formik.values.recordId
+      })
+    })
+    toast.success(platformLabels.Generated)
+  }
 
   return (
     <FormShell
