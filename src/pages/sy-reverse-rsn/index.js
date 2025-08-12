@@ -3,44 +3,43 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
-import ResourceDowntimeForm from './forms/ResourceDowntimeForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import DocumentReverseReasonsForm from './Forms/DtReverseReasonsForm'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-const ResourceDowntime = () => {
+const DtReverseReasons = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: AccessControlRepository.ResourceDowntime.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: SystemRepository.DocumentReverseReasons.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  const { stack } = useWindow()
-
   const {
     query: { data },
     labels,
-    paginationParameters,
+    invalidate,
     refetch,
-    access: maxAccess,
-    invalidate
+    access,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.ResourceDowntime.page,
-    datasetId: ResourceIds.ResourceDowntime
+    endpointId: SystemRepository.DocumentReverseReasons.page,
+    datasetId: ResourceIds.DocumentReverseReasons
   })
 
   const columns = [
@@ -48,33 +47,6 @@ const ResourceDowntime = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
-    },
-    {
-      field: 'moduleName',
-      headerName: labels.module,
-      flex: 1
-    },
-    {
-      field: 'resourceName',
-      headerName: labels.resource,
-      flex: 1
-    },
-    {
-      field: 'sgName',
-      headerName: labels.SecurityGroup,
-      flex: 1
-    },
-    {
-      field: 'timeFrom',
-      headerName: labels.timeFrom,
-      flex: 1,
-      type: 'time'
-    },
-    {
-      field: 'timeTo',
-      headerName: labels.timeTo,
-      flex: 1,
-      type: 'time'
     }
   ]
 
@@ -82,37 +54,37 @@ const ResourceDowntime = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.ResourceDowntime.del,
+      extension: SystemRepository.DocumentReverseReasons.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
+  function openForm(record) {
     stack({
-      Component: ResourceDowntimeForm,
+      Component: DocumentReverseReasonsForm,
       props: {
         labels,
-        recordId,
-        maxAccess
+        recordId: record?.recordId,
+        maxAccess: access
       },
-      width: 700,
-      height: 550,
-      title: labels.resourceDowntime
+      width: 500,
+      height: 300,
+      title: labels.dtReverseRs
     })
+  }
+
+  const edit = obj => {
+    openForm(obj)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -123,14 +95,14 @@ const ResourceDowntime = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
+          refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
-          refetch={refetch}
-          maxAccess={maxAccess}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default ResourceDowntime
+export default DtReverseReasons
