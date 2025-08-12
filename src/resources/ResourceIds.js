@@ -536,6 +536,7 @@ export const ResourceIds = {
   EmployeePenalties: 71217,
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
+  RebuildAC: 41509,
 
   // GL
   GLSalesInvoice: 51604,

@@ -63,6 +63,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
       headerName: labels.netCost,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'isMetal',
+      headerName: labels.isMetal,
+      flex: 0.6,
+      type: 'checkbox'
     }
   ]
 
