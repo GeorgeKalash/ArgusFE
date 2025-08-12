@@ -59,29 +59,25 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
     }
   })
 
+  function normalize(val) {
+    return val == null ? 0 : val
+  }
+
   function isValidClient(values) {
-    if (formValues?.plId != values?.plId) {
-      stackError({
-        message: labels.mismatchPrice
-      })
+    if (normalize(formValues?.plId) != normalize(values?.plId)) {
+      stackError({ message: labels.mismatchPrice })
 
       return false
-    } else if (formValues?.isVattable != values?.isSubjectToVAT) {
-      stackError({
-        message: labels.mismatchVat
-      })
+    } else if (normalize(formValues?.isVattable) != normalize(values?.isSubjectToVAT)) {
+      stackError({ message: labels.mismatchVat })
 
       return false
-    } else if (formValues?.taxId != values?.taxId) {
-      stackError({
-        message: labels.mismatchTax
-      })
+    } else if (normalize(formValues?.taxId) != normalize(values?.taxId)) {
+      stackError({ message: labels.mismatchTax })
 
       return false
-    } else if (formValues?.maxDiscount <= values?.maxDiscount) {
-      stackError({
-        message: labels.mismatchDiscount
-      })
+    } else if (normalize(formValues?.maxDiscount) < normalize(values?.maxDiscount)) {
+      stackError({ message: labels.mismatchDiscount })
 
       return false
     }
