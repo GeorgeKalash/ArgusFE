@@ -464,7 +464,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                readOnly={isPosted}
+                readOnly={editMode}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.siteId', newValue?.recordId || null)
                 }}
