@@ -89,7 +89,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .of(
           yup.object().shape({
             metalId: yup.string().required(),
-            qty: yup.number().required(),
+            qty: yup.number().required().moreThan(0),
             purity: yup.number().required(),
             sku: yup.string().required()
           })
