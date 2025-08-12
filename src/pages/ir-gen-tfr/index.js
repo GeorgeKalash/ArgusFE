@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { Grid, Stack, Typography } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -19,7 +19,6 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
@@ -33,7 +32,7 @@ export default function PhysicalCountItemDe() {
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
-  const siteId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value)
+  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess: access,
@@ -72,11 +71,7 @@ export default function PhysicalCountItemDe() {
   })
 
   async function fetchGridData(toSiteId = formik.values.toSiteId, reference = formik.values.reference) {
-    if (!formik.values.fromSiteId) {
-      stackError({
-        message: 'hello'
-      })
-
+    if (!siteId) {
       return
     }
 
@@ -287,7 +282,7 @@ export default function PhysicalCountItemDe() {
                 readOnly
                 required
                 maxAccess={access}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
@@ -328,6 +323,14 @@ export default function PhysicalCountItemDe() {
                 displayFieldWidth={2}
                 required
                 onChange={(event, newValue) => {
+                  if (!siteId) {
+                    stackError({
+                      message: labels.selectFromSite
+                    })
+
+                    return
+                  }
+
                   fetchGridData(siteId, newValue?.recordId, formik.values.reference)
                   formik.setFieldValue('toSiteId', newValue?.recordId || null)
                 }}
@@ -341,10 +344,16 @@ export default function PhysicalCountItemDe() {
                 value={formik?.values?.reference}
                 maxAccess={access}
                 onChange={e => {
+                  if (!siteId) {
+                    stackError({
+                      message: labels.selectFromSite
+                    })
+
+                    return
+                  }
+
                   const currentValue = e.target.value
                   formik.setFieldValue('reference', currentValue)
-
-                  // fetchGridData( siteId,formik.values.toSiteId,currentValue)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
