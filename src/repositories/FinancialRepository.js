@@ -188,10 +188,12 @@ export const FinancialRepository = {
   },
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
-    qry: service + 'qryMTI'
+    qry: service + 'qryMTI',
+    unpost: service + 'unpostMRV'
   },
   MetalPaymentVoucher: {
-    set2: service + 'set2MPV'
+    set2: service + 'set2MPV',
+    unpost: service + 'unpostMPV'
   },
   MetalTrx: {
     get: service + 'getMTX',
@@ -206,7 +208,7 @@ export const FinancialRepository = {
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
     rebuild: service + 'rebuildAGD',
-    qry: service + 'qryAGD',
+    qry: service + 'qryAGD'
   },
   BalanceTransferMultiAccounts: {
     page: service + 'pageTMA',
