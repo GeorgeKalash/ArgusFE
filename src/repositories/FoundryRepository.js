@@ -74,8 +74,7 @@ export const FoundryRepository = {
     page: service + 'pageTRX',
     snapshot: service + 'snapshotTRX',
     post: service + 'postTRX',
-    unpost: service + 'unpostTRX',
-    verify: service + 'verifyTRX'
+    unpost: service + 'unpostTRX'
   },
   TransactionItems: {
     qry: service + 'qryTRI'

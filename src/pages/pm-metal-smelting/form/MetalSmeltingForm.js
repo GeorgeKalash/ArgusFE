@@ -27,7 +27,6 @@ import { FoundryRepository } from 'src/repositories/FoundryRepository'
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
   const metalRef = useRef({})
@@ -90,8 +89,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .of(
           yup.object().shape({
             metalId: yup.string().required(),
-            qty: yup.number().required().typeError().positive(),
-            purity: yup.number().required().typeError().positive(),
+            qty: yup.number().required(),
+            purity: yup.number().required(),
             sku: yup.string().required()
           })
         )
@@ -159,13 +158,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         parameters: `_dtId=${dtId}`
       })
 
-      const siteIdValue = record?.siteId
-      const plantIdValue = record?.plantId
-
-      if (siteIdValue && plantIdValue) {
-        formik.setFieldValue('header.siteId', siteIdValue)
-        formik.setFieldValue('header.plantId', plantIdValue)
-      }
+      formik.setFieldValue('header.siteId', record?.siteId || null)
+      formik.setFieldValue('header.plantId', record?.plantId || null)
     }
   }
 
@@ -201,19 +195,13 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     const modifiedList = list?.map((item, index) => ({
       ...item,
       id: index + 1,
-      seqNo: index + 1,
       purity: item.purity * 1000,
       metalValue: metal ? ((item.qty * item.purity) / metal?.purity).toFixed(2) : null
     }))
     formik.setValues({
       recordId: record?.recordId,
       header: {
-        recordId: record?.recordId,
-        dtId: record?.dtId,
-        plantId: record?.plantId,
-        reference: record?.reference,
-        siteId: record?.siteId,
-        status: record?.status,
+        ...record,
         date: formatDateFromApi(record.date)
       },
       items: modifiedList?.length > 0 ? modifiedList : formik.values.items
@@ -289,13 +277,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
+      props: { allowNegative: false },
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
-
-        if (metalRef.current) {
-          const metalValue = baseSalesMetalValue.toFixed(2)
-          update({ metalValue: metalValue })
-        }
+        update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
       }
     },
     {
@@ -304,10 +289,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.qty,
       props: { allowNegative: false },
       onChange: ({ row: { update, newRow } }) => {
-        if (metalRef.current) {
-          const metalValue = ((newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)).toFixed(2)
-          update({ metalValue: metalValue })
-        }
+        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
+        update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
       }
     },
     {
@@ -449,7 +432,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.plantId', newValue?.recordId)
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
                   />
@@ -462,7 +445,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     label={labels.date}
                     value={formik.values.header.date}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('header.date', '')}
+                    onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                   />
                 </Grid>

@@ -25,7 +25,7 @@ export default function MetalSmelting() {
 
     const response = await getRequest({
       extension: FoundryRepository.MetalSmelting.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_sortBy=reference&_functionId=${SystemFunction.MetalSmelting}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -52,7 +52,7 @@ export default function MetalSmelting() {
     if (filters?.qry) {
       return await getRequest({
         extension: FoundryRepository.MetalSmelting.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.MetalSmelting}`
+        parameters: `_filter=${filters.qry}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -149,7 +149,6 @@ export default function MetalSmelting() {
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           refetch={refetch}
