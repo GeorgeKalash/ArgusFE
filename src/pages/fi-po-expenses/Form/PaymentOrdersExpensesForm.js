@@ -17,7 +17,6 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataSets } from 'src/resources/DataSets'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
@@ -29,17 +28,26 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import ExpensesCostCenters from 'src/components/Shared/ExpensesCostCenters'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, recordId }) {
+export default function PaymentOrdersExpensesForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PaymentOrderExpenses,
+    editMode: !!recordId
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentOrder,
     access,
     enabled: !recordId
   })
+
+  useSetWindow({ title: labels.PaymentOrderExpenses, window })
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.PaymentOrders.page3
@@ -789,3 +797,6 @@ export default function PaymentOrdersExpensesForm({ labels, maxAccess: access, r
     </FormShell>
   )
 }
+
+PaymentOrdersExpensesForm.width = 1300
+PaymentOrdersExpensesForm.height = 700

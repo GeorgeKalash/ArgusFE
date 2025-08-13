@@ -30,17 +30,26 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { RateDivision } from 'src/resources/RateDivision'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function PaymentOrdersForm({ labels, maxAccess: access, recordId, window }) {
+export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PaymentOrder,
+    editMode: !!recordId
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentOrder,
     access,
     enabled: !recordId
   })
+
+  useSetWindow({ title: labels.PaymentOrder, window })
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.PaymentOrders.page2
@@ -610,3 +619,6 @@ export default function PaymentOrdersForm({ labels, maxAccess: access, recordId,
     </FormShell>
   )
 }
+
+PaymentOrdersForm.width = 950
+PaymentOrdersForm.height = 450

@@ -30,19 +30,28 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access, recordId, plantId, window }) {
+export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
   const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PaymentVoucherExpenses,
+    editMode: !!recordId
+  })
+  
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
     access,
     enabled: !recordId
   })
+
+   useSetWindow({ title: labels.paymentVoucherExpenses, window })
 
   const initialValues = {
     recordId: null,
@@ -915,3 +924,6 @@ export default function FiPaymentVoucherExpensesForm({ labels, maxAccess: access
     </FormShell>
   )
 }
+
+FiPaymentVoucherExpensesForm.width = 1300
+FiPaymentVoucherExpensesForm.height = 700
