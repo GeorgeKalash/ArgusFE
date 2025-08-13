@@ -123,8 +123,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     }
   })
 
-  console.log(formik)
-
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
@@ -191,20 +189,12 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   const columns = [
     {
-      component: 'resourcelookup',
+      component: 'textfield',
       label: labels.design,
-      name: 'designId',
-      width: 150,
+      name: 'designRef',
+      width: 200,
       props: {
-        valueField: 'recordId',
-        displayField: 'reference',
-        readOnly: true,
-        displayFieldWidth: 2,
-        endpointId: ManufacturingRepository.Design.snapshot,
-        mapping: [
-          { from: 'recordId', to: 'designId' },
-          { from: 'reference', to: 'designRef' }
-        ]
+        readOnly: true
       }
     },
     {
@@ -519,7 +509,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       key: 'GenerateJob',
       condition: true,
       onClick: generateJob,
-      disabled: isPosted
+      disabled: !isPosted
     },
     {
       key: 'Import',
@@ -530,14 +520,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     {
       key: 'Refresh',
       condition: true,
-      onClick: sync
+      onClick: sync,
+      disabled: !editMode
     }
   ]
 
   async function generateJob() {
+    const { rows, rsName, statusName, wipName, batchId, date, plantRef, plantName, isVerified, ...rest } = formik.values
     await postRequest({
       extension: ManufacturingRepository.JobOrder.gen,
-      record: JSON.stringify({ recordId: formik.values.recordId })
+      record: JSON.stringify({ ...rest, date: formatDateToApi(date) })
     })
 
     toast.success(platformLabels.Generated)
