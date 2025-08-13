@@ -1,8 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -14,31 +12,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useForm } from 'src/hooks/form'
 
 const GLSettings = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
-  const [setFocus] = useState()
-  const handleBlur = () => setFocus(undefined)
-
-  const [initialValues, setInitialValues] = useState({
-    GLACSegments: null,
-    GLACSeg0: null,
-    GLACSeg1: null,
-    GLACSeg2: null,
-    GLACSeg3: null,
-    GLACSeg4: null,
-    GLACSegName0: null,
-    GLACSegName1: null,
-    GLACSegName2: null,
-    GLACSegName3: null,
-    GLACSegName4: null
-  })
 
   useEffect(() => {
     getDataResult()
-  }, [])
+  }, [defaultsData])
 
   const getDataResult = () => {
     const myObject = {}
@@ -58,35 +41,39 @@ const GLSettings = () => {
         obj.key === 'GLACSegName4'
       )
     })
+    const numericKeys = ['GLACSegments', 'GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4']
 
     filteredList?.forEach(obj => {
-      myObject[obj.key] =
-        obj.key === 'GLACSegments' ||
-        obj.key === 'GLACSeg0' ||
-        obj.key === 'GLACSeg1' ||
-        obj.key === 'GLACSeg2' ||
-        obj.key === 'GLACSeg3' ||
-        obj.key === 'GLACSeg4'
-          ? obj.value
-            ? parseInt(obj.value)
-            : null
-          : obj.value
-          ? obj.value
-          : null
+      if (numericKeys.includes(obj.key)) {
+        myObject[obj.key] = obj.value !== null ? Number(obj.value) : null
+      } else {
+        myObject[obj.key] = obj.value
+      }
     })
 
-    setInitialValues(myObject)
+    formik.setValues(myObject)
   }
 
-  const { labels: _labels, access } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GLSettings
   })
 
-  const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: {
+      GLACSegments: null,
+      GLACSeg0: null,
+      GLACSeg1: null,
+      GLACSeg2: null,
+      GLACSeg3: null,
+      GLACSeg4: null,
+      GLACSegName0: '',
+      GLACSegName1: '',
+      GLACSegName2: '',
+      GLACSegName3: '',
+      GLACSegName4: ''
+    },
     validateOnChange: true,
-
     validationSchema: yup.object({
       GLACSegments: yup.number().nullable().required().min(2).max(5),
       GLACSeg0: yup.number().nullable().required().min(1).max(8),
@@ -98,7 +85,7 @@ const GLSettings = () => {
         .nullable()
         .min(1)
         .max(8)
-        .test('is-glacseg2-required', 'Segment 3 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 3 ? value != null && value >= 1 && value <= 8 : true
@@ -106,7 +93,7 @@ const GLSettings = () => {
       GLACSegName2: yup
         .string()
         .nullable()
-        .test('is-glacsegname2-required', 'GLACSegName2 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 3 ? value != null && value.trim() !== '' : true
@@ -116,7 +103,7 @@ const GLSettings = () => {
         .nullable()
         .min(1)
         .max(8)
-        .test('is-glacseg3-required', 'Segment 4 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 4 ? value != null && value >= 1 && value <= 8 : true
@@ -124,7 +111,7 @@ const GLSettings = () => {
       GLACSegName3: yup
         .string()
         .nullable()
-        .test('is-glacsegname3-required', 'GLACSegName3 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 4 ? value != null && value.trim() !== '' : true
@@ -134,7 +121,7 @@ const GLSettings = () => {
         .nullable()
         .min(1)
         .max(8)
-        .test('is-glacseg4-required', 'Segment 5 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 5 ? value != null && value >= 1 && value <= 8 : true
@@ -142,7 +129,7 @@ const GLSettings = () => {
       GLACSegName4: yup
         .string()
         .nullable()
-        .test('is-glacsegname4-required', 'GLACSegName4 is required', function (value) {
+        .test(function (value) {
           const { GLACSegments } = this.parent
 
           return GLACSegments >= 5 ? value != null && value.trim() !== '' : true
@@ -186,68 +173,59 @@ const GLSettings = () => {
 
   const segName = ['GLACSegName0', 'GLACSegName1', 'GLACSegName2', 'GLACSegName3', 'GLACSegName4']
 
-  useEffect(() => {
-    const segmentsNum = formik.values.GLACSegments
+  const onChangeGLACSegments = value => {
+    if (value >= 2) {
+      formik.setValues(prev => {
+        const next = { ...prev, GLACSegments: value }
 
-    segNumb.forEach((seg, idx) => {
-      if (idx >= segmentsNum) {
-        formik.setFieldValue(seg, null)
-      }
-    })
-    segName.forEach((seg, idx) => {
-      if (idx >= segmentsNum) {
-        formik.setFieldValue(seg, null)
-      }
-    })
-  }, [formik.values.GLACSegments])
+        segNumb.forEach((key, idx) => {
+          next[key] = idx < value ? (prev[key] === '' || prev[key] == null ? null : Number(prev[key])) : null
+        })
+
+        segName.forEach((key, idx) => {
+          next[key] = idx < value ? prev[key] ?? '' : ''
+        })
+
+        return next
+      })
+    } else {
+      formik.setFieldValue('GLACSegments', value)
+    }
+  }
 
   return (
     <VertLayout>
       <Grow>
         <Grid container sx={{ padding: 3 }} spacing={2}>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomNumberField
               name='GLACSegments'
-              label={_labels.segments}
+              label={labels.segments}
               value={formik.values.GLACSegments}
-              onChange={formik.handleChange}
-              type='number'
-              numberField={true}
-              onBlur={formik.handleChange}
-              onClear={() => formik.setFieldValue('GLACSegments', '')}
-              error={formik.touched.GLACSegments && Boolean(formik.errors.GLACSegments)}
-              inputProps={{
-                min: 2,
-                max: 5,
-                maxLength: 1,
-                inputMode: 'numeric',
-                pattern: '[2-5]*'
-              }}
-              helperText={formik.touched.GLACSegments && formik.errors.GLACSegments}
+              onChange={(_, value) => onChangeGLACSegments(value)}
+              onClear={() => formik.setFieldValue('GLACSegments', null)}
+              min={2}
+              max={5}
+              arrow={true}
+              error={Boolean(formik.errors.GLACSegments)}
             />
           </Grid>
 
           <Grid item xs={12} lg={6}>
             {segNumb.map((name, idx) => (
               <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
-                <CustomTextField
+                <CustomNumberField
                   name={name}
-                  label={_labels['segment' + idx]}
+                  label={labels['segment' + idx]}
                   value={formik.values[name]}
                   onClear={() => formik.setFieldValue(name, '')}
-                  type='number'
                   numberField={true}
-                  onChange={formik.handleChange}
+                  onChange={(_, value) => formik.setFieldValue(name, value)}
                   error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
-                  inputProps={{
-                    min: 1,
-                    max: 8,
-                    readOnly: formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null',
-                    maxLength: 1,
-                    inputMode: 'numeric',
-                    pattern: '[1-8]*'
-                  }}
-                  helperText={formik.touched[name] && formik.errors[name]}
+                  readOnly={formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null'}
+                  min={1}
+                  max={5}
+                  arrow={true}
                 />
               </Grid>
             ))}
@@ -257,19 +235,13 @@ const GLSettings = () => {
               <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
                 <CustomTextField
                   name={name}
-                  label={_labels['segName' + idx]}
-                  onBlur={handleBlur}
-                  onFocus={e => setFocus(e.target.name)}
-                  value={formik.values[name]}
+                  label={labels['segName' + idx]}
+                  value={formik.values?.[name] || ''}
                   onClear={() => formik.setFieldValue(name, '')}
-                  numberField={true}
                   onChange={formik.handleChange}
                   error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
-                  inputProps={{
-                    maxLength: '20',
-                    style: { textAlign: 'left' },
-                    readOnly: formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null'
-                  }}
+                  readOnly={formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null'}
+                  maxLength={20}
                 />
               </Grid>
             ))}
@@ -279,8 +251,6 @@ const GLSettings = () => {
       <Fixed>
         <WindowToolbar onSave={handleSubmit} isSaved={true} />
       </Fixed>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
