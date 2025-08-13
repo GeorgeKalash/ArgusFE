@@ -39,7 +39,12 @@ const MaterialsAdjustment = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    if (filters.qry)
+      return await getRequest({
+        extension: InventoryRepository.MaterialsAdjustment.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -148,7 +153,7 @@ const MaterialsAdjustment = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onAdd={add} filterBy={filterBy} reportName={'IVADJ'} />
+        <RPBGridToolbar maxAccess={access} onAdd={add} filterBy={filterBy} reportName={'IVADJ'} />
       </Fixed>
       <Grow>
         <Table
