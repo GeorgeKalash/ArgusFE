@@ -537,6 +537,7 @@ export const ResourceIds = {
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
   RebuildAC: 41509,
+  Samples: 48323,
   GenerateTransfers: 46600,
 
   // GL
