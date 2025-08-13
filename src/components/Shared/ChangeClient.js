@@ -59,10 +59,6 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
     }
   })
 
-  function normalize(val) {
-    return val == null ? 0 : val
-  }
-
   function isValidClient(values) {
     if (formValues?.plId != values?.plId) {
       stackError({
@@ -82,7 +78,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
       })
 
       return false
-    } else if (normalize(formValues?.maxDiscount) < normalize(values?.maxDiscount)) {
+    } else if ((formValues?.maxDiscount || 0) < (values?.maxDiscount || 0)) {
       stackError({ message: labels.mismatchDiscount })
 
       return false
