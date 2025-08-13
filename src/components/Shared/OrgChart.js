@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const OrgChart = ({ dataArray }) => {
+const OrgChart = ({ data }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -18,19 +18,19 @@ const OrgChart = ({ dataArray }) => {
     const drawChart = () => {
       window.google.charts.load('current', { packages: ['orgchart'] });
       window.google.charts.setOnLoadCallback(() => {
-        const data = new window.google.visualization.DataTable();
-        data.addColumn('string', 'Name');
-        data.addColumn('string', 'Manager');
+        const dataTable = new window.google.visualization.DataTable();
+        dataTable.addColumn('string', 'Name');
+        dataTable.addColumn('string', 'Manager');
 
-        data.addRows(dataArray);
+        dataTable.addRows(data);
 
         const chart = new window.google.visualization.OrgChart(chartRef.current);
-        chart.draw(data, { allowHtml: true });
+        chart.draw(dataTable, { allowHtml: true });
       });
     };
 
     loadGoogleCharts();
-  }, [dataArray]);
+  }, [data]);
 
   return <div ref={chartRef}></div>;
 };

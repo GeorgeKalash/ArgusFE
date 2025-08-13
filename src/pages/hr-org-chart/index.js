@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -17,16 +17,15 @@ import OrgChart from 'src/components/Shared/OrgChart'
 const HROrgChart = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [showChart, setShowChart] = useState(false)
-  const [orgData, setOrgData] = useState(false)
 
-  const { labels, access: maxAccess } = useResourceParams({
+  const { labels, access } = useResourceParams({
     datasetId: ResourceIds.OrganizationChart
   })
 
   const { formik } = useForm({
     initialValues: {
-      type: 0
+      type: 0,
+      orgData: []
     },
     validateOnChange: true,
     onSubmit: async obj => {
@@ -37,8 +36,7 @@ const HROrgChart = () => {
 
       const transformed = transformToOrgChartData(data.list || [])
 
-      setOrgData(transformed)
-      setShowChart(true)
+      formik.setFieldValue('orgData', transformed)
     }
   })
 
@@ -81,7 +79,7 @@ const HROrgChart = () => {
                   label={labels.type}
                   valueField='key'
                   displayField='value'
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   values={formik.values}
                   onChange={(_, newValue) => {
                     formik.setFieldValue('type', newValue?.key || 0)
@@ -98,7 +96,7 @@ const HROrgChart = () => {
             </Grid>
           }
         />
-        {showChart && <OrgChart dataArray={orgData} />}
+        {formik.values.orgData && <OrgChart data={formik.values.orgData} />}
       </Fixed>
     </VertLayout>
   )
