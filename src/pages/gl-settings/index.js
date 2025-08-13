@@ -44,11 +44,7 @@ const GLSettings = () => {
     const numericKeys = ['GLACSegments', 'GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4']
 
     filteredList?.forEach(obj => {
-      if (numericKeys.includes(obj.key)) {
-        myObject[obj.key] = obj.value !== null ? Number(obj.value) : null
-      } else {
-        myObject[obj.key] = obj.value
-      }
+      myObject[obj.key] = numericKeys.includes(obj.key) ? Number(obj?.value) || null : obj.value
     })
 
     formik.setValues(myObject)
@@ -179,7 +175,7 @@ const GLSettings = () => {
         const next = { ...prev, GLACSegments: value }
 
         segNumb.forEach((key, idx) => {
-          next[key] = idx < value ? (prev[key] === '' || prev[key] == null ? null : Number(prev[key])) : null
+          next[key] = idx < value && !(prev[key] === '' || prev[key] == null) ? Number(prev[key]) : null
         })
 
         segName.forEach((key, idx) => {
@@ -193,10 +189,12 @@ const GLSettings = () => {
     }
   }
 
+  const rows = [0, 1, 2, 3, 4]
+
   return (
     <VertLayout>
       <Grow>
-        <Grid container sx={{ padding: 3 }} spacing={2}>
+        <Grid container sx={{ p: 3 }} spacing={2}>
           <Grid item xs={12}>
             <CustomNumberField
               name='GLACSegments'
@@ -206,50 +204,57 @@ const GLSettings = () => {
               onClear={() => formik.setFieldValue('GLACSegments', null)}
               min={2}
               max={5}
-              arrow={true}
+              arrow
               error={Boolean(formik.errors.GLACSegments)}
+              maxAccess={access}
             />
           </Grid>
 
-          <Grid item xs={12} lg={6}>
-            {segNumb.map((name, idx) => (
-              <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
-                <CustomNumberField
-                  name={name}
-                  label={labels['segment' + idx]}
-                  value={formik.values[name]}
-                  onClear={() => formik.setFieldValue(name, '')}
-                  numberField={true}
-                  onChange={(_, value) => formik.setFieldValue(name, value)}
-                  error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
-                  readOnly={formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null'}
-                  min={1}
-                  max={5}
-                  arrow={true}
-                />
+          {rows.map(idx => {
+            const segKey = `GLACSeg${idx}`
+            const nameKey = `GLACSegName${idx}`
+            const isActive = (formik.values.GLACSegments ?? 0) > idx
+
+            return (
+              <Grid key={idx} container item xs={12} columnSpacing={2} rowSpacing={1} alignItems='flex-start'>
+                <Grid item xs={12} lg={6}>
+                  <CustomNumberField
+                    name={segKey}
+                    label={labels['segment' + idx]}
+                    value={formik.values[segKey]}
+                    onClear={() => formik.setFieldValue(segKey, null)}
+                    numberField
+                    onChange={(_, value) => formik.setFieldValue(segKey, value)}
+                    error={isActive && Boolean(formik.errors[segKey])}
+                    readOnly={!isActive}
+                    min={1}
+                    max={8}
+                    arrow
+                    maxAccess={access}
+                  />
+                </Grid>
+
+                <Grid item xs={12} lg={6}>
+                  <CustomTextField
+                    name={nameKey}
+                    label={labels['segName' + idx]}
+                    value={formik.values?.[nameKey] || ''}
+                    onClear={() => formik.setFieldValue(nameKey, '')}
+                    onChange={formik.handleChange}
+                    error={isActive && Boolean(formik.errors[nameKey])}
+                    readOnly={!isActive}
+                    maxLength={20}
+                    maxAccess={access}
+                  />
+                </Grid>
               </Grid>
-            ))}
-          </Grid>
-          <Grid item xs={12} lg={6}>
-            {segName.map((name, idx) => (
-              <Grid key={name} item xs={12} sx={{ marginTop: '7px' }}>
-                <CustomTextField
-                  name={name}
-                  label={labels['segName' + idx]}
-                  value={formik.values?.[name] || ''}
-                  onClear={() => formik.setFieldValue(name, '')}
-                  onChange={formik.handleChange}
-                  error={formik.values.GLACSegments > idx && Boolean(formik.errors[name])}
-                  readOnly={formik.values.GLACSegments <= idx || formik.values.GLACSegments == 'null'}
-                  maxLength={20}
-                />
-              </Grid>
-            ))}
-          </Grid>
+            )
+          })}
         </Grid>
       </Grow>
+
       <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
+        <WindowToolbar onSave={handleSubmit} isSaved />
       </Fixed>
     </VertLayout>
   )
