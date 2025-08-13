@@ -526,6 +526,11 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       condition: true,
       onClick: onImportClick,
       disabled: !editMode || isPosted || isClosed
+    },
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: sync
     }
   ]
 
@@ -540,11 +545,11 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   async function sync() {
     await postRequest({
-      extension: ManufacturingRepository.JobOrder.gen,
+      extension: ManufacturingRepository.RefreshPoItem.refresh,
       record: JSON.stringify(formik.values)
     })
-
-    toast.success(platformLabels.Generated)
+    toast.success(platformLabels.Refresh)
+    refetchForm(formik.values.recordId)
   }
 
   return (
