@@ -101,7 +101,8 @@ export default function SamplesForm({ labels, access, recordId, window }) {
         collectionId: yup.number().required(),
         jobId: yup.number().required(),
         threeDDId: yup.number().required(),
-        productionLineId: yup.number().required()
+        productionLineId: yup.number().required(),
+        date: yup.date().required(),
       }),
       rows: yup.array().of(schema)
     }),
@@ -294,7 +295,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isPosted
     }
   ]
 
