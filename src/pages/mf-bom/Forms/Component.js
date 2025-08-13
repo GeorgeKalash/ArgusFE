@@ -110,7 +110,6 @@ const ComponentBOM = ({ store, labels }) => {
         seqNo: obj?.seqNo ?? maxSeqNo,
         store,
         components: data?.list,
-        invalidate,
         calculateCostPct
       },
       width: 750,

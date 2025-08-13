@@ -14,6 +14,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
 export default function ComponentForm({
   labels,
@@ -23,12 +24,13 @@ export default function ComponentForm({
   bomId,
   msId,
   components,
-  invalidate,
   calculateCostPct,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({ endpointId: ManufacturingRepository.Component.qry })
 
   const { formik } = useForm({
     maxAccess,
