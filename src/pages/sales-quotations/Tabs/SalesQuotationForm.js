@@ -357,9 +357,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * muQty
         })
       },
       propsReducer({ row, props }) {
@@ -373,11 +375,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+
+        const muQty = newRow?.muQty ?? filteredItems?.qty
         update({
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          ...data,
+          baseQty: newRow?.qty * muQty
         })
       }
     },
