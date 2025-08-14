@@ -22,7 +22,7 @@ const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
   const {
@@ -135,6 +135,7 @@ const JobInProcess = () => {
         labels: _labels,
         access: maxAccess,
         recordId,
+        lockRecord,
         invalidate
       },
       width: 1150,
