@@ -56,8 +56,10 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import { useError } from 'src/error'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { createConditionalSchema } from 'src/lib/validation'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function PurchaseOrderForm({ labels, access, recordId }) {
+export default function PurchaseOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -66,6 +68,13 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
   const [reCal, setReCal] = useState(false)
   const functionId = SystemFunction.PurchaseOrder
   const { stack: stackError } = useError()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PurchaseTransactions,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.purchaseOrder, window })
 
   const defPlId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
@@ -1710,3 +1719,6 @@ export default function PurchaseOrderForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+PurchaseOrderForm.width = 1330
+PurchaseOrderForm.height = 720
