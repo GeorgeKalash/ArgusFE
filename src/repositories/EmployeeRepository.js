@@ -104,5 +104,8 @@ export const EmployeeRepository = {
     get: service + 'getED',
     set: service + 'setED',
     snapshot: service + 'snapshotED',
+  },
+  EmployeeChart: {
+    qry: service + 'qryES'
   }
 }

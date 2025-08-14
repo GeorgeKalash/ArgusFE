@@ -533,12 +533,14 @@ export const ResourceIds = {
   ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
+  OrganizationChart: 70113,
   EmployeePenalties: 71217,
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
   RebuildAC: 41509,
   Samples: 48323,
   EntitlementDeduction: 71106,
+  EmployeeChart: 71201,
 
   // GL
   GLSalesInvoice: 51604,
