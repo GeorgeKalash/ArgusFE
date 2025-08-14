@@ -87,7 +87,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
 
   function refetchFormJob(res) {
     getRequest({
-      extension: EmployeeRepository.EmployeeQuickView.get,
+      extension: EmployeeRepository.QuickView.get,
       parameters: `_recordId=${res?.employeeId}&_asOfDate=${formatDateForGetApI(formatDateFromApi(res?.date))}`
     }).then(employeeRes => {
       formik.setValues({
@@ -108,7 +108,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
   async function fillJob(employeeId) {
     if (employeeId) {
       await getRequest({
-        extension: EmployeeRepository.EmployeeQuickView.get,
+        extension: EmployeeRepository.QuickView.get,
         parameters: `_recordId=${employeeId}&_asOfDate=${formatDateForGetApI(formik?.values?.date)}`
       }).then(employeeRes => {
         formik.setFieldValue('hireDate', formatDateFromApi(employeeRes?.record?.hireDate) || null)
@@ -354,7 +354,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={EmployeeRepository.TerminationReason.qry}
+                endpointId={EmployeeRepository.TerminationReasons.qry}
                 name='reasonId'
                 label={labels.reason}
                 valueField='recordId'
