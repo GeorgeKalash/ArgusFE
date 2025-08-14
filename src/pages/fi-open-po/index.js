@@ -193,11 +193,7 @@ const OpenPaymentOrder = () => {
           rowId={['recordId']}
           rowSelection='single'
           handleCheckboxChange={(data, checked) => {
-            if (checked) {
-              setRecord(data)
-            } else {
-              setRecord({})
-            }
+            setRecord(checked ? data : {})
           }}
           onEdit={edit}
           pagination={false}
