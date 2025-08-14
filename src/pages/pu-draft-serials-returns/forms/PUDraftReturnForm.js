@@ -150,7 +150,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       )
     }),
     onSubmit: async obj => {
-      const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = obj.header
+      const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = obj.header
 
       const DraftReturnPack = {
         header: {
@@ -339,7 +339,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   async function saveHeader(lastLine, type) {
-    const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
 
     const DraftReturnPack = {
       header: {
@@ -571,7 +571,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
   }
 
   const onPost = async () => {
-    const { invoiceId, invoiceRef, taxId, disSkuLookup, search, date, ...rest } = formik?.values?.header
+    const { invoiceId, invoiceRef, disSkuLookup, search, date, ...rest } = formik?.values?.header
 
     await postRequest({
       extension: PurchaseRepository.PUDraftReturn.post,
@@ -1070,7 +1070,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}
-                filter={{ isInactive: false }}
+                filter={{ isInactive: val => val !== true }}
                 valueField='reference'
                 displayField='name'
                 secondFieldLabel={labels.name}
@@ -1114,7 +1114,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
-                displayField={['reference', 'name']}
+                displayField={['name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
