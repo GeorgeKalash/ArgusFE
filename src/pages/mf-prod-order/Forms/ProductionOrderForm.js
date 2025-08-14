@@ -27,6 +27,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ImportForm from 'src/components/Shared/ImportForm'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function ProductionOrderForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,9 +46,17 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     endpointId: ManufacturingRepository.ProductionOrder.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    qty: row => row?.qty != null,
+    itemName: row => row?.itemName
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['rows'],
     initialValues: {
       recordId,
       dtId: null,
@@ -73,16 +82,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      rows: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().required(),
-            qty: yup.number().required(),
-            itemName: yup.string().required()
-          })
-        )
-        .required()
+      rows: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { rows, date, ...rest } = obj
@@ -92,14 +92,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         date: formatDateToApi(date)
       }
 
-      const updatedRows = formik.values.rows.map((prodDetails, index) => {
-        return {
-          ...prodDetails,
-          poId: recordId ?? 0,
-          deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
-          seqNo: index + 1
-        }
-      })
+      const updatedRows = rows
+        ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((prodDetails, index) => {
+          return {
+            ...prodDetails,
+            poId: recordId ?? 0,
+            deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
+            seqNo: index + 1
+          }
+        })
 
       const resultObject = {
         header,
@@ -203,12 +205,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           { from: 'itemName', to: 'itemName' },
           { from: 'routingId', to: 'routingId' },
           { from: 'routingName', to: 'routingName' },
-          { from: 'routingRef', to: 'routingRef' }
+          { from: 'routingRef', to: 'routingRef' },
+          { from: 'stdWeight', to: 'itemWeight' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -275,12 +281,11 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       width: 100,
       props: {
         maxLength: 12,
-        decimalScale: 3
+        decimalScale: 3,
+        readOnly: true
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
-        }
+        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -293,9 +298,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         decimalScale: 0
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
-        }
+        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -381,12 +384,13 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    const modifiedList =
-      res?.record?.items?.map((item, index) => ({
-        ...item,
-        deliveryDate: formatDateFromApi(item.deliveryDate),
-        id: index + 1
-      })) || formik.initialValues.items
+    const modifiedList = res?.record?.items?.length
+      ? res?.record?.items?.map((item, index) => ({
+          ...item,
+          deliveryDate: formatDateFromApi(item.deliveryDate),
+          id: index + 1
+        }))
+      : formik.initialValues.rows
 
     formik.setValues({
       ...res?.record?.header,

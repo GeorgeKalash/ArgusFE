@@ -116,8 +116,6 @@ const CustomLookup = ({
 
             onChange(name, newValue)
             setAutoFocus(true)
-
-            valueHighlightedOption.current = ''
           }}
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
@@ -237,6 +235,7 @@ const CustomLookup = ({
                 if (selectFirstValue.current !== 'click') {
                   onBlur(e, valueHighlightedOption?.current)
                 }
+                valueHighlightedOption.current = ''
               }}
               onFocus={e => {
                 setStore([]), setFreeSolo(true)
@@ -248,7 +247,8 @@ const CustomLookup = ({
               label={label}
               required={_required}
               onKeyUp={e => {
-                onKeyUp(e)
+                onKeyUp(e, valueHighlightedOption?.current)
+
                 if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{

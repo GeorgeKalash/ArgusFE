@@ -136,7 +136,8 @@ export const PurchaseRepository = {
     del: service + 'delREI'
   },
   QuotationItem: {
-    preview: service + 'previewQTI'
+    preview: service + 'previewQTI',
+    qry: service + 'qryQTI'
   },
   OrderItem: {
     qry: service + 'qryORI',
@@ -148,6 +149,14 @@ export const PurchaseRepository = {
   },
   ItemLastPurchaseInfo: {
     last: service + 'lastIVI'
+  },
+  PurchaseQuotation: {
+    page: service + 'pageQTN',
+    set2: service + 'set2QTN',
+    get: service + 'getQTN',
+    del: service + 'delQTN',
+    snapshot: service + 'snapshotQTN',
+    toOrder: service + 'gen2PO'
   },
   GenerateQTNPRPack: {
     generate: service + 'genQTN'
