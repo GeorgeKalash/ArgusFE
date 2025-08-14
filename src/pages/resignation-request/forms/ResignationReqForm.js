@@ -1,5 +1,5 @@
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi, formatDateForGetApI, formatDateToISO } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
@@ -65,8 +65,8 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
         extension: EmployeeRepository.ResignationRequest.set,
         record: JSON.stringify({
           ...rest,
-          date: formatDateToApi(obj.date),
-          effectiveDate: formatDateToApi(obj.effectiveDate)
+          date: formatDateToISO(new Date(obj.date)),
+          effectiveDate: formatDateToISO(new Date(obj.effectiveDate))
         })
       }).then(async res => {
         toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
@@ -138,8 +138,8 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
       extension: EmployeeRepository.ResignationRequest.close,
       record: JSON.stringify({
         ...rest,
-        date: formatDateToApi(formik?.values?.date),
-        effectiveDate: formatDateToApi(formik?.values?.effectiveDate)
+        date: formatDateToISO(new Date(formik?.values?.date)),
+        effectiveDate: formatDateToISO(new Date(formik?.values?.effectiveDate))
       })
     }).then(() => {
       toast.success(platformLabels.Closed)
@@ -172,8 +172,8 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
       extension: EmployeeRepository.ResignationRequest.reopen,
       record: JSON.stringify({
         ...rest,
-        date: formatDateToApi(formik?.values?.date),
-        effectiveDate: formatDateToApi(formik?.values?.effectiveDate)
+        date: formatDateToISO(new Date(formik?.values?.date)),
+        effectiveDate: formatDateToISO(new Date(formik?.values?.effectiveDate))
       })
     }).then(() => {
       toast.success(platformLabels.Reopened)
