@@ -62,6 +62,9 @@ import AccountSummary from 'src/components/Shared/AccountSummary'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import ChangeClient from 'src/components/Shared/ChangeClient'
 
 export default function SaleTransactionForm({
   labels,
@@ -74,6 +77,7 @@ export default function SaleTransactionForm({
   getGLResource
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
@@ -355,12 +359,13 @@ export default function SaleTransactionForm({
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
+    const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
 
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-    const TotPricePerG = basePriceValue
+    const TotPricePerG = basePriceValue + baseLaborPrice
 
     const unitPrice =
       ItemConvertPrice?.priceType === 3
@@ -435,7 +440,7 @@ export default function SaleTransactionForm({
           : metalPurity > 0
           ? basePriceValue
           : 0,
-      baseLaborPrice: 0,
+      baseLaborPrice,
       TotPricePerG,
       unitPrice,
       upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
@@ -917,6 +922,11 @@ export default function SaleTransactionForm({
         reference: formik.values.header.reference,
         resourceId: getResourceId(parseInt(functionId)),
         onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId,
+            reference: formik.values.header.reference
+          })
           refetchForm(res.recordId)
         },
         isAlreadyLocked: name => {
@@ -1106,7 +1116,9 @@ export default function SaleTransactionForm({
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
         accountId: res?.record?.accountId,
-        commitItems: dtInfo?.record?.commitItems
+        commitItems: dtInfo?.record?.commitItems,
+        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
+        maxDiscount: res?.record?.maxDiscount || 0
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1116,7 +1128,14 @@ export default function SaleTransactionForm({
       lockRecord({
         recordId: saTrxHeader.recordId,
         reference: saTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId))
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId: saTrxHeader.recordId,
+            reference: saTrxHeader.reference
+          })
+        }
       })
   }
 
@@ -1366,9 +1385,11 @@ export default function SaleTransactionForm({
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
       qty: parseFloat(itemPriceRow?.qty),
+      weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
@@ -1466,8 +1487,10 @@ export default function SaleTransactionForm({
       if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
 
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: parseFloat(item?.qty),
+        weight: parseFloat(item?.weight),
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
@@ -1749,6 +1772,12 @@ export default function SaleTransactionForm({
     invalidate()
   }
 
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(`header.${key}`, val)
+    })
+  }
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1955,7 +1984,7 @@ export default function SaleTransactionForm({
                 error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
                 name='header.clientId'
@@ -1991,6 +2020,30 @@ export default function SaleTransactionForm({
                 displayFieldWidth={5}
                 editMode={editMode}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={() => {
+                  stack({
+                    Component: ChangeClient,
+                    props: {
+                      formValues: formik.values.header,
+                      onSubmit: fields => updateValues(fields)
+                    }
+                  })
+                }}
+                image='popup.png'
+                disabled={
+                  !(
+                    (editMode && !isPosted && formik.values.header.clientId) ||
+                    (!editMode &&
+                      formik.values.header.clientId &&
+                      formik.values.items?.length > 0 &&
+                      formik.values.items?.some(item => item?.itemId))
+                  )
+                }
+                tooltipText={platformLabels.editClient}
               />
             </Grid>
             <Grid item xs={1}>

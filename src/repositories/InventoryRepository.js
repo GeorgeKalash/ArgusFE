@@ -72,7 +72,9 @@ export const InventoryRepository = {
     post: service + 'postADJ',
     unpost: service + 'unpostADJ',
     del: service + 'delADJ',
-    page: service + 'pageADJ'
+    page: service + 'pageADJ',
+    verify: service + 'verifyADJ',
+    snapshot: service + 'snapshotADJ'
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
@@ -339,5 +341,8 @@ export const InventoryRepository = {
   },
   Materials: {
     snapshot: service + 'snapshotUF'
+  },
+  RebuildAC: {
+    rebuild: service + 'rebuildAC'
   }
 }

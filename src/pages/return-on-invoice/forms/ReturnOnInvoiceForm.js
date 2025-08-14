@@ -855,6 +855,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       commitItems: dtInfo?.commitItems,
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
+      maxDiscount: clientDiscount.tdPct || 0,
       items: modifiedList
     })
   }
@@ -986,8 +987,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
@@ -1069,8 +1072,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
+        weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
@@ -1231,6 +1236,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         formik.setTouched(touchedFields, true)
       }
     }
+  }
+
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(key, val)
+    })
   }
 
   useEffect(() => {
@@ -1460,12 +1471,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       stack({
                         Component: ChangeClient,
                         props: {
-                          form: formik
+                          formValues: formik.values,
+                          onSubmit: fields => updateValues(fields)
                         }
                       })
                     }}
                     image='popup.png'
-                    disabled={isPosted || !formik.values.clientId}
+                    disabled={!(editMode && !isPosted && formik.values.clientId)}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>

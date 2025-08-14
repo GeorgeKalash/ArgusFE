@@ -14,6 +14,8 @@ export const ResourceIds = {
   TodaySalesOrders: 60111,
   GlobalSalesYTD: 60112,
   SalesTeamOrdersSummary: 60113,
+  JoDTd: 42607,
+  EmpSettings: 71100,
 
   // inventory
   InventoryBelowMinimum: 60200,
@@ -27,9 +29,13 @@ export const ResourceIds = {
   BranchAvailability: 60306,
   Alerts: 60307,
   PendingPunches: 60308,
+  BalanceAdjustment: 73204,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
+
+  // AU
+  ResourceDowntime: 23109,
 
   // self service
   MyYearlySalesPerformance: 60500,
@@ -425,7 +431,6 @@ export const ResourceIds = {
   ThreeDDesign: 48301,
   Casting: 48303,
   Printing: 48302,
-  SalesQuotations: 51301,
   CorrespondentDispersalControl: 36137,
   CorrespondentDispersal: 36136,
   Rubber: 48305,
@@ -518,8 +523,24 @@ export const ResourceIds = {
   LMOpeningBalances: 73104,
   OvertimeProfiles: 72109,
   PurchaseRequisition: 50301,
+  LoanTypes: 74101,
+  HRPendingPunches: 72207,
   BiometricDevices: 72101,
   ResignationRequest: 71221,
+  DSLReasons: 72107,
+  TerminationReasons: 71110,
+  GeneralSettings: 20600,
+  JobInfos: 71207,
+  ResetTimeVariation: 72203,
+  RebuildAC: 41509,
+  ShiftLeave: 72210,
+  OrganizationChart: 70113,
+  EmployeePenalties: 71217,
+  DocumentReverseReasons: 20111,
+  PurchaseQuotations: 50302,
+  RebuildAC: 41509,
+  Samples: 48323,
+  EmployeeChart: 71201,
 
   // GL
   GLSalesInvoice: 51604,
@@ -565,6 +586,7 @@ export const ResourceIds = {
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
+  GLMaterialAdjustment: 41606,
 
   //MCR
   MCRSalesInvoice: 51607,
