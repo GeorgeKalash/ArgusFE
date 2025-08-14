@@ -123,6 +123,7 @@ export const SystemFunction = {
   BalanceTransferPurchase: Module.Financials * 100 + 10,
   BalanceTransferSales: Module.Financials * 100 + 11,
   BalanceAdjustment: Module.LeaveReq * 100 + 4,
+  Samples: Module.ProductModeling * 100 + 7,
   MetalSmelting: Module.Foundry * 100 + 5
 }
 

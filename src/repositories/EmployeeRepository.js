@@ -97,5 +97,8 @@ export const EmployeeRepository = {
   },
   FullName: {
     sync: service + 'syncFullName'
+  },
+  EmployeeChart: {
+    qry: service + 'qryES'
   }
 }
