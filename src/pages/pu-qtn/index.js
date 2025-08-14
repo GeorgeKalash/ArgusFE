@@ -126,13 +126,8 @@ export default function PurchaseQuotations() {
     stack({
       Component: PuQtnForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.quotations
+      }
     })
   }
 

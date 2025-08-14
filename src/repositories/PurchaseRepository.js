@@ -157,5 +157,11 @@ export const PurchaseRepository = {
     del: service + 'delQTN',
     snapshot: service + 'snapshotQTN',
     toOrder: service + 'gen2PO'
+  },
+  GenerateQTNPRPack: {
+    generate: service + 'genQTN'
+  },
+  GeneratePOPRPack: {
+    generate: service + 'genPO'
   }
 }

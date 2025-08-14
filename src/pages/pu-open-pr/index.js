@@ -14,25 +14,26 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import CustomButton from 'src/components/Inputs/CustomButton'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ReportPuGeneratorRepository } from 'src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
+import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import PuQtnForm from '../pu-qtn/forms/PuQtnForm'
 
-const OpenPurchaseOrder = () => {
+const OpenPurchaseRequisition = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
   const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.OpenPOs
+    datasetId: ResourceIds.OpenPRs
   })
 
   const { labels: _labels, access: maxAccess } = useResourceQuery({
@@ -47,14 +48,14 @@ const OpenPurchaseOrder = () => {
       recordId: null,
       dtId: null,
       groupId: 0,
-      plantId: 0,
+      departmentId: 0,
       siteId: 0,
       categoryId: 0,
       vendorId: 0,
       clientRef: '',
       clientName: '',
       itemId: 0,
-      poId: 0,
+      prId: 0,
       items: [],
       marginDefault: defaultVat?.value
     },
@@ -63,30 +64,35 @@ const OpenPurchaseOrder = () => {
     }),
     validateOnChange: true,
     onSubmit: async obj => {
-      const { vendorId, siteId, items, dtId, plantId } = obj
+      const { vendorId, currencyId, items, taxId } = obj
 
       const itemValues = items
-        .filter(item => item.isChecked)
+        .filter(item => item?.isChecked)
         .map(({ scheduledDate, functionId, id, isChecked, ...item }) => item)
 
-      if (itemValues?.length < 1) {
-        stackError({
-          message: labels.checkItemsBeforeAppend
-        })
+      // if (itemValues?.length < 1) {
+      //   stackError({
+      //     message: labels.checkItemsBeforeAppend
+      //   })
 
-        return
-      }
+      //   return
+      // }
 
       const res = await postRequest({
-        extension: PurchaseRepository.Shipment.gen,
-        record: JSON.stringify({ vendorId, siteId, dtId, plantId: plantId === 0 ? null : plantId, items: itemValues })
+        extension: PurchaseRepository.GeneratePOPRPack.generate,
+        record: JSON.stringify({
+          vendorId,
+          currencyId,
+          taxId,
+          items: itemValues
+        })
       })
 
       if (res.recordId) {
         const items = obj.items.map(({ isChecked, ...item }) => ({
           ...item,
           isChecked: false,
-          receiveNow: 0
+          orderNow: 0
         }))
 
         formik.setFieldValue('items', items)
@@ -95,10 +101,12 @@ const OpenPurchaseOrder = () => {
           Component: ShipmentsForm,
           props: {
             recordId: res.recordId,
-            plantId,
-            siteId,
-            dtId
-          }
+            currencyId,
+            taxId
+          },
+          width: 1300,
+          height: 700,
+          title: _labels.shipment
         })
 
         toast.success(platformLabels.Generated)
@@ -107,23 +115,23 @@ const OpenPurchaseOrder = () => {
     }
   })
 
-  const { groupId, plantId, siteId, categoryId, vendorId, itemId, marginDefault, poId } = formik.values
+  const { groupId, departmentId, categoryId, vendorId, currencyId, itemId, marginDefault, prId } = formik.values
 
   useEffect(() => {
     getData()
-  }, [vendorId, categoryId, groupId, poId, itemId])
+  }, [categoryId, groupId, prId, itemId, departmentId])
 
   async function getData() {
     const result = await getRequest({
-      extension: ReportPuGeneratorRepository.OpenPurchaseOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_vendorId=${vendorId}&_itemId=${itemId}&_plantId=${plantId}&_poId=${poId}`
+      extension: ReportPuGeneratorRepository.OpenPurchaseRequisition.open,
+      parameters: `_categoryId=${categoryId}&_groupId=${groupId}&_itemId=${itemId}&_departmentId=${departmentId}&_prId=${prId}`
     })
 
     const res = result?.list?.map((item, index) => ({
       ...item,
       id: index + 1,
       date: formatDateFromApi(item.date),
-      balance: item.qty - item.receivedQty
+      balance: item.qty - item.orderedQty
     }))
 
     formik.setFieldValue('items', res)
@@ -143,7 +151,7 @@ const OpenPurchaseOrder = () => {
           const items = formik.values.items.map(({ isChecked, ...item }) => ({
             ...item,
             isChecked: checked,
-            receiveNow: checked ? item.balance : 0
+            orderNow: checked ? item.balance : 0
           }))
 
           formik.setFieldValue('items', items)
@@ -151,7 +159,7 @@ const OpenPurchaseOrder = () => {
       },
 
       async onChange({ row: { update, newRow } }) {
-        update({ receiveNow: newRow.isChecked ? newRow.balance : 0 })
+        update({ orderNow: newRow.isChecked ? newRow.balance : 0 })
       }
     },
     {
@@ -180,14 +188,8 @@ const OpenPurchaseOrder = () => {
     },
     {
       component: 'textfield',
-      label: labels.vendor,
-      name: 'vendorRef',
-      props: { readOnly: true }
-    },
-    {
-      component: 'textfield',
-      label: labels.vendorName,
-      name: 'vendorName',
+      label: labels.department,
+      name: 'departmentName',
       props: { readOnly: true }
     },
     {
@@ -204,8 +206,8 @@ const OpenPurchaseOrder = () => {
     },
     {
       component: 'numberfield',
-      label: labels.received,
-      name: 'receivedQty',
+      label: labels.ordered,
+      name: 'orderedQty',
       props: { readOnly: true }
     },
     {
@@ -217,39 +219,39 @@ const OpenPurchaseOrder = () => {
     {
       component: 'numberfield',
       label: labels.genQty,
-      name: 'receiveNow',
+      name: 'orderNow',
       updateOn: 'blur',
       defaultValue: 0,
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
       async onChange({ row: { update, newRow } }) {
-        const { receiveNow, balance, qty } = newRow
-        let value = receiveNow
-        const maxValue = balance
+        const { orderNow, balance } = newRow
+        let value = orderNow <= balance ? orderNow : balance
 
-        if (value > maxValue) {
-          const margin = (100 * (value - balance)) / qty
-
-          if (marginDefault == 0 || marginDefault == null) {
-            value = maxValue
-          } else {
-            if (margin < marginDefault) {
-              value = receiveNow
-            } else {
-              value = maxValue
-            }
-          }
-        } else if (value < 0) {
-          value = 0
-        } else {
-          value = receiveNow
-        }
-
-        update({ receiveNow: value || 0 })
+        update({ orderNow: value })
       }
     }
   ]
+
+  const onGenerate = async () => {
+    setTimeout(async () => {
+      const response = await postRequest({
+        extension: PurchaseRepository.GenerateQTNPRPack.generate,
+        record: JSON.stringify({ ...formik.values, items: formik.values.items?.filter(item => item?.isChecked) })
+      })
+
+      toast.success(platformLabels.Generated)
+
+      if (response.recordId)
+        stack({
+          Component: PuQtnForm,
+          props: {
+            recordId: response.recordId
+          }
+        })
+    }, 5)
+  }
 
   const handleSubmit = e => {
     setTimeout(() => {
@@ -259,10 +261,16 @@ const OpenPurchaseOrder = () => {
 
   const actions = [
     {
+      key: 'generate',
+      condition: true,
+      onClick: onGenerate,
+      disabled: !vendorId || !currencyId
+    },
+    {
       key: 'SHP',
       condition: true,
       onClick: handleSubmit,
-      disabled: !vendorId || !siteId
+      disabled: !vendorId || !currencyId
     }
   ]
 
@@ -272,22 +280,6 @@ const OpenPurchaseOrder = () => {
         <Grid container spacing={2} padding={2}>
           <Grid item xs={4}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.DocumentType.qry}
-                  parameters={`_dgId=${SystemFunction.Shipment}&_startAt=${0}&_pageSize=${1000}`}
-                  name='dtId'
-                  label={labels.documentType}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('dtId', newValue?.recordId || null)
-                  }}
-                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                  maxAccess={access}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={InventoryRepository.Category.qry}
@@ -341,7 +333,7 @@ const OpenPurchaseOrder = () => {
                   displayFieldWidth={2}
                   valueShow='vendorRef'
                   secondValueShow='vendorName'
-                  maxAccess={access}
+                  maxAccess={maxAccess}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' },
@@ -357,47 +349,86 @@ const OpenPurchaseOrder = () => {
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={InventoryRepository.Site.qry}
-                  name='siteId'
-                  label={labels.site}
+                  endpointId={SystemRepository.Currency.qry}
+                  name='currencyId'
+                  label={labels.currency}
                   valueField='recordId'
                   displayField={['reference', 'name']}
-                  maxAccess={access}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  required
                   values={formik.values}
+                  required
+                  maxAccess={maxAccess}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    formik.setFieldValue('currencyId', newValue?.recordId || 0)
                   }}
-                  error={formik.touched.sitId && Boolean(formik.errors.sitId)}
+                  error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                 />
               </Grid>
               <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Plant.qry}
-                  name='plantId'
-                  label={labels.plant}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
+                <ResourceLookup
+                  endpointId={PurchaseRepository.UnpostedOrderPack.snapshot}
+                  valueField='reference'
+                  displayField='name'
+                  name='prId'
+                  label={labels.ref}
+                  form={formik}
+                  secondDisplayField={false}
+                  displayFieldWidth={2}
+                  valueShow='poRef'
+                  maxAccess={maxAccess}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || 0)
+                  onChange={async (event, newValue) => {
+                    formik.setFieldValue('poName', newValue?.name || '')
+                    formik.setFieldValue('poRef', newValue?.reference || '')
+                    formik.setFieldValue('prId', newValue?.recordId || 0)
                   }}
-                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                  maxAccess={access}
+                  errorCheck={'prId'}
                 />
               </Grid>
             </Grid>
           </Grid>
           <Grid item xs={4}>
             <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={companyStructureRepository.DepartmentFilters.qry}
+                  parameters={`_filter=&_size=1000&_startAt=0&_type=0&_activeStatus=0&_sortBy=recordId`}
+                  name='departmentId'
+                  label={labels.department}
+                  values={formik.values}
+                  displayField='name'
+                  maxAccess={maxAccess}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('departmentId', newValue?.recordId || null)
+                  }}
+                  error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={FinancialRepository.TaxSchedules.qry}
+                  name='taxId'
+                  label={labels.tax}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  onChange={(event, newValue) => {
+                    formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                  }}
+                  error={formik.touched.taxId && Boolean(formik.errors.taxId)}
+                  maxAccess={maxAccess}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={InventoryRepository.Item.snapshot}
@@ -420,39 +451,6 @@ const OpenPurchaseOrder = () => {
                   }}
                   displayFieldWidth={2}
                   maxAccess={access}
-                />
-              </Grid>
-              <Grid item xs={10}>
-                <ResourceLookup
-                  endpointId={PurchaseRepository.UnpostedOrderPack.snapshot}
-                  valueField='reference'
-                  displayField='name'
-                  name='poId'
-                  label={labels.ref}
-                  form={formik}
-                  secondDisplayField={false}
-                  displayFieldWidth={2}
-                  valueShow='poRef'
-                  maxAccess={access}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('poName', newValue?.name || '')
-                    formik.setFieldValue('poRef', newValue?.reference || '')
-                    formik.setFieldValue('poId', newValue?.recordId || 0)
-                  }}
-                  errorCheck={'poId'}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <CustomButton
-                  variant='contained'
-                  image={'preview.png'}
-                  label={platformLabels.Preview}
-                  onClick={() => getData()}
-                  color='#231f20'
                 />
               </Grid>
             </Grid>
@@ -478,4 +476,4 @@ const OpenPurchaseOrder = () => {
   )
 }
 
-export default OpenPurchaseOrder
+export default OpenPurchaseRequisition
