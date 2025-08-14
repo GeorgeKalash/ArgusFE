@@ -359,6 +359,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           msId: itemInfo?.msId,
           muRef: filteredMeasurements?.[0]?.reference,
           muId: filteredMeasurements?.[0]?.recordId,
+          muQty: filteredMeasurements?.[0]?.qty,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -414,8 +415,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * muQty
         })
       },
       propsReducer({ row, props }) {
@@ -429,11 +432,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
-        update({
-          baseQty: newRow?.qty * filteredItems?.qty
-        })
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
+        update({
+          ...data,
+          baseQty: newRow?.qty * muQty
+        })
       }
     },
     {
