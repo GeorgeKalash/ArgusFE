@@ -97,5 +97,12 @@ export const EmployeeRepository = {
   },
   FullName: {
     sync: service + 'syncFullName'
+  },
+  EntitlementDeduction: {
+    page: service + 'pageED',
+    del: service + 'delED',
+    get: service + 'getED',
+    set: service + 'setED',
+    snapshot: service + 'snapshotED',
   }
 }
