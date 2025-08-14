@@ -94,16 +94,11 @@ const OpenPurchaseOrder = () => {
         stack({
           Component: ShipmentsForm,
           props: {
-            labels: _labels,
             recordId: res.recordId,
-            maxAccess,
             plantId,
             siteId,
             dtId
-          },
-          width: 1300,
-          height: 700,
-          title: _labels.shipment
+          }
         })
 
         toast.success(platformLabels.Generated)
