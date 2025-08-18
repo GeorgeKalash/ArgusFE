@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const OrgChart = ({ data }) => {
+const OrgChart = ({ data, allowCollapse = false }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const OrgChart = ({ data }) => {
         dataTable.addRows(data);
 
         const chart = new window.google.visualization.OrgChart(chartRef.current);
-        chart.draw(dataTable, { allowHtml: true });
+        chart.draw(dataTable, { allowHtml: true, allowCollapse });
       });
     };
 
