@@ -35,7 +35,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
+      recordId: recordId || null,
       reference: '',
       date: new Date(),
       effectiveDate: null,
@@ -70,6 +70,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
         })
       }).then(async res => {
         toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
+        formik.setFieldValue('recordId', res.recordId)
         await refetchForm(res.recordId)
         invalidate()
       })
@@ -217,6 +218,7 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
       maxAccess={maxAccess}
       actions={actions}
       editMode={editMode}
+      isClosed={isClosed}
       disabledSubmit={isClosed}
     >
       <VertLayout>
