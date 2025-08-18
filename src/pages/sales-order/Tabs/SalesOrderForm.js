@@ -437,9 +437,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         getFilteredMU(newRow.itemId)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
-        update({ ...data, baseQty: newRow?.qty * muQty })
+        
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({ ...data, baseQty: newRow?.qty * muQty })
       }
     },
     {
