@@ -1,4 +1,4 @@
-import { Grid, Checkbox, FormControlLabel } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -363,6 +363,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'qty', to: 'qty' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
+          { from: 'muName', to: 'muName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'recordId', to: 'mwId' },
           { from: 'dropDownQty', to: 'deliveredNowQty' },
@@ -415,6 +416,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           }
         }
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.mu,
+      name: 'muName',
+      props: { readOnly: true }
     },
     {
       component: 'resourcecombobox',
