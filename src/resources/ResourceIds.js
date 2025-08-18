@@ -502,6 +502,7 @@ export const ResourceIds = {
   PaymentOrderExpenses: 31614,
   Moulds: 47200,
   FoCastings: 47301,
+  PUDraftSerialReturns: 50328,
   RequisitionDocumentTypeDefaults: 50612,
   PUFinancialIntegrators: 50102,
   IRMaterialDocTypeDefaults: 46101,
@@ -526,10 +527,12 @@ export const ResourceIds = {
   LoanTypes: 74101,
   HRPendingPunches: 72207,
   BiometricDevices: 72101,
+  ResignationRequest: 71221,
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  OpenPaymentOrder: 31334,
   ResetTimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
@@ -541,6 +544,7 @@ export const ResourceIds = {
   Samples: 48323,
   EmployeeChart: 71201,
   Catalogue: 41218,
+  MetalSmelting: 47314,
 
   // GL
   GLSalesInvoice: 51604,
@@ -587,6 +591,7 @@ export const ResourceIds = {
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
+  GLTransactionItem: 47600,
 
   //MCR
   MCRSalesInvoice: 51607,
