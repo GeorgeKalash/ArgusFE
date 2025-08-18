@@ -363,7 +363,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'qty', to: 'qty' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
-          { from: 'muName', to: 'muName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'recordId', to: 'mwId' },
           { from: 'dropDownQty', to: 'deliveredNowQty' },
