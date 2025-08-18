@@ -45,6 +45,7 @@ export const SystemFunction = {
   SubsequentPurchaseDebit: Module.Purchase * 100 + 6,
   SubsequentPurchaseCredit: Module.Purchase * 100 + 7,
   ShipmentReturn: Module.Purchase * 100 + 8,
+  PUDraftSerialReturn: Module.Purchase * 100 + 9,
   SalesQuotation: Module.Sales * 100 + 0,
   SalesOrder: Module.Sales * 100 + 1,
   SalesInvoice: Module.Sales * 100 + 2,
