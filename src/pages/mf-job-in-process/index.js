@@ -17,10 +17,13 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { stack, lockRecord } = useWindow()
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
@@ -128,12 +131,13 @@ const JobInProcess = () => {
       flex: 1
     }
   ]
-  function openForm(recordId) {
+  function openStack(recordId, reference) {
     stack({
       Component: JobOrderWindow,
       props: {
         labels: _labels,
         access: maxAccess,
+        jobReference: reference,
         recordId,
         lockRecord,
         invalidate
@@ -144,8 +148,40 @@ const JobInProcess = () => {
     })
   }
 
+  async function openForm(recordId, reference, status) {
+    console.log(recordId, reference, status)
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.MFJobOrders,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.MFJobOrders,
+            recordId,
+            reference
+          })
+          openStack(recordId, reference)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId, reference)
+    }
+  }
+
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   return (
