@@ -540,6 +540,7 @@ export const ResourceIds = {
   RebuildAC: 41509,
   Samples: 48323,
   EmployeeChart: 71201,
+  Catalogue: 41218,
 
   // GL
   GLSalesInvoice: 51604,

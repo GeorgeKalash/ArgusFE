@@ -344,5 +344,9 @@ export const InventoryRepository = {
   },
   RebuildAC: {
     rebuild: service + 'rebuildAC'
+  },
+  Catalogue: {
+    page: service + 'pageCTG',
+    snapshot: service + 'snapshotCTG'
   }
 }
