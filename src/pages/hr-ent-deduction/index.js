@@ -22,14 +22,14 @@ const EntDeduction = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     return await getRequest({
-      extension: EmployeeRepository.EntitlementDeduction.page,
+      extension: EmployeeRepository.EmployeeDeduction.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
   }
 
   async function fetchWithSearch({ qry }) {
     const response = await getRequest({
-      extension: EmployeeRepository.EntitlementDeduction.snapshot,
+      extension: EmployeeRepository.EmployeeDeduction.snapshot,
       parameters: `_filter=${qry}`
     })
 
@@ -47,7 +47,7 @@ const EntDeduction = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.EntitlementDeduction.page,
+    endpointId: EmployeeRepository.EmployeeDeduction.page,
     datasetId: ResourceIds.EntitlementDeduction,
     search: {
       searchFn: fetchWithSearch
@@ -96,7 +96,7 @@ const EntDeduction = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: EmployeeRepository.EntitlementDeduction.del,
+      extension: EmployeeRepository.EmployeeDeduction.del,
       record: JSON.stringify(obj)
     })
     invalidate()

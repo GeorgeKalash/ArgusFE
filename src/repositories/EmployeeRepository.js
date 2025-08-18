@@ -93,17 +93,15 @@ export const EmployeeRepository = {
     del: service + 'delPE'
   },
   EmployeeDeduction: {
-    qry: service + 'qryED'
-  },
-  FullName: {
-    sync: service + 'syncFullName'
-  },
-  EntitlementDeduction: {
+    qry: service + 'qryED',
     page: service + 'pageED',
     del: service + 'delED',
     get: service + 'getED',
     set: service + 'setED',
     snapshot: service + 'snapshotED',
+  },
+  FullName: {
+    sync: service + 'syncFullName'
   },
   EmployeeChart: {
     qry: service + 'qryES'

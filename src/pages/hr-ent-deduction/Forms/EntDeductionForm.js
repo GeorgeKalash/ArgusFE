@@ -24,14 +24,14 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.EntitlementDeduction.page
+    endpointId: EmployeeRepository.EmployeeDeduction.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId,
       name: '',
-      type: '',
+      type: null,
       reference: '',
       paycodeRef: '',
       expressionId: null
@@ -41,12 +41,12 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required(),
-      type: yup.string().required(),
+      type: yup.number().required(),
       paycodeRef: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: EmployeeRepository.EntitlementDeduction.set,
+        extension: EmployeeRepository.EmployeeDeduction.set,
         record: JSON.stringify(obj)
       })
 
@@ -64,7 +64,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: EmployeeRepository.EntitlementDeduction.get,
+          extension: EmployeeRepository.EmployeeDeduction.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -132,7 +132,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess, window }
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key || '')
+                  formik.setFieldValue('type', newValue?.key || null)
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
               />
