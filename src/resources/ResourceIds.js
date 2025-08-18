@@ -540,6 +540,7 @@ export const ResourceIds = {
   RebuildAC: 41509,
   Samples: 48323,
   EmployeeChart: 71201,
+  MetalSmelting: 47314,
   GenerateTransfers: 46600,
 
   // GL
@@ -587,6 +588,7 @@ export const ResourceIds = {
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
+  GLTransactionItem: 47600,
 
   //MCR
   MCRSalesInvoice: 51607,
