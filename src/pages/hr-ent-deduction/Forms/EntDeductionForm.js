@@ -19,7 +19,7 @@ import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { MathExpressionRepository } from 'src/repositories/MathExpressionRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 
-export default function EntDeductionForm({ labels, recordId, maxAccess }) {
+export default function EntDeductionForm({ labels, recordId, maxAccess, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -54,6 +54,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess }) {
       formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
+      window.close()
     }
   })
 
@@ -93,7 +94,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'
@@ -131,7 +132,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key || null)
+                  formik.setFieldValue('type', newValue?.key || '')
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
               />
@@ -147,7 +148,7 @@ export default function EntDeductionForm({ labels, recordId, maxAccess }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('paycodeRef', newValue?.payCode || null)
+                  formik.setFieldValue('paycodeRef', newValue?.payCode || '')
                 }}
                 error={formik.touched.paycodeRef && Boolean(formik.errors.paycodeRef)}
               />
