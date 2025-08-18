@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -9,15 +8,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { formatDateDefault } from 'src/lib/date-helper'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { Router } from 'src/lib/useRouter'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,12 +22,10 @@ const Financial = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    console.log('fetching')
 
     const response = await getRequest({
       extension: FinancialRepository.FiMemo.page,
@@ -42,19 +37,34 @@ const Financial = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.CreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.DebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.ServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.ServiceInvoice
+      default:
+        return null
+    }
+  }
+
   const {
     query: { data },
     refetch,
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     invalidate
   } = useResourceQuery({
     endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
-
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
+    queryFn: fetchGridData,
     filter: {
       filterFn: fetchWithSearch,
       default: { functionId }
@@ -167,6 +177,22 @@ const Financial = () => {
     }
   }
 
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.GLCreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.GLDebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.GLServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.GLServiceInvoice
+      default:
+        return null
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: MemosForm,
@@ -175,9 +201,10 @@ const Financial = () => {
         recordId: recordId,
         access,
         functionId: functionId,
-        getEndpoint
+        getEndpoint,
+        getGLResourceId
       },
-      width: 900,
+      width: 1200,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
@@ -193,49 +220,22 @@ const Financial = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: getEndpoint(parseInt(functionId)).del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
+    await postRequest({
+      extension: getEndpoint(parseInt(functionId)).del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIMEM'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIMEM'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

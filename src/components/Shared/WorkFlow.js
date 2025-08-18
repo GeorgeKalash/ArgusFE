@@ -3,23 +3,27 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { Box } from '@mui/material'
 import { AuthContext } from 'src/providers/AuthContext'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const WorkFlow = ({ functionId, recordId }) => {
+const WorkFlow = ({ functionId, recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { languageId } = useContext(AuthContext)
-  const pageName = functionId
+  const { platformLabels } = useContext(ControlContext)
+
   const id = recordId + '-' + functionId
+
+  useSetWindow({ title: platformLabels.WorkFlow, window })
 
   const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
-    try {
-      const result = await getRequest({
-        extension: SaleRepository.WorkFlow.graph,
-        parameters: parameters
-      })
 
-      return result?.record
-    } catch (error) {}
+    const result = await getRequest({
+      extension: SaleRepository.WorkFlow.graph,
+      parameters: parameters
+    })
+
+    return result?.record
   }
 
   const getDeptsJson = graph => {
@@ -30,12 +34,10 @@ const WorkFlow = ({ functionId, recordId }) => {
     let parentId = -1
     let childId = -1
 
-    // Iterate over objects
     graph.objects.forEach(item => {
       result.push({ functionName: item.functionName, reference: item.reference, date: item.date })
     })
 
-    // Iterate over workflow
     graph.workflow.forEach(item => {
       graph.objects.forEach(item2 => {
         let functionLines = item2.functionName.split(' ')
@@ -128,5 +130,7 @@ const WorkFlow = ({ functionId, recordId }) => {
     </Box>
   )
 }
+
+WorkFlow.width = 950
 
 export default WorkFlow

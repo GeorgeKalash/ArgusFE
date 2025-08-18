@@ -32,15 +32,13 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
       codeId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        await postRequest({
-          extension: AccessControlRepository.SGReleaseCode.set,
-          record: JSON.stringify(obj)
-        })
-        toast.success('Record Added Successfully')
-        invalidate()
-        window.close()
-      } catch (error) {}
+      await postRequest({
+        extension: AccessControlRepository.SGReleaseCode.set,
+        record: JSON.stringify(obj)
+      })
+      toast.success('Record Added Successfully')
+      invalidate()
+      window.close()
     }
   })
 

@@ -2,11 +2,24 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import useResourceParams from './useResourceParams'
 import { useState } from 'react'
 
-export function useResourceQuery({ endpointId, filter, datasetId, queryFn, search, enabled = true }) {
+export function useResourceQuery({
+  endpointId,
+  filter,
+  datasetId,
+  DatasetIdAccess,
+  queryFn,
+  search,
+  enabled = true,
+  enabledOnApplyOnly = false,
+  defaultLoad = true,
+  params
+}) {
   const [searchValue, setSearchValue] = useState('')
   const [filters, setFilters] = useState(filter?.default || {})
   const [apiOption, setApiOption] = useState('')
   const isSearchMode = !!searchValue
+  const [isdisabled, setIsDisabled] = useState(enabledOnApplyOnly)
+  const [autoLoad, setAutoload] = useState(defaultLoad)
 
   const isFilterMode =
     Object.keys(filters).length > 0 &&
@@ -15,9 +28,13 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     )
 
   const { access, labels } = useResourceParams({
-    datasetId
+    datasetId,
+    DatasetIdAccess,
+    cacheOnlyMode: params?.disabledReqParams
   })
   const queryClient = useQueryClient()
+
+  const accessValue = access || params?.maxAccess
 
   const query = useQuery({
     retry: false,
@@ -33,10 +50,8 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
             filters,
             pagination: apiOption
           })
-      : apiOption
-      ? () => queryFn(apiOption)
-      : () => queryFn(),
-    enabled: access?.record?.maxAccess > 0 && enabled
+      : autoLoad && (apiOption ? () => queryFn(apiOption) : () => queryFn()),
+    enabled: accessValue?.record?.maxAccess > 0 && enabled && !isdisabled
   })
 
   return {
@@ -44,13 +59,27 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
     labels,
     query: query,
     search(value) {
-      setSearchValue(value)
+      if (value === searchValue) {
+        query.refetch()
+      } else {
+        setSearchValue(value)
+      }
     },
-    filterBy(name, value) {
-      setFilters({
-        ...filters,
-        [name]: value
-      })
+    filterBy(name, value, report) {
+      !autoLoad && setAutoload(true)
+      if (value === filters[name]) {
+        query.refetch()
+      } else if (report || name === 'params') {
+        setFilters({
+          [name]: value
+        })
+      } else {
+        setFilters({
+          ...filters,
+          [name]: value
+        })
+      }
+      if (isdisabled) setIsDisabled(false)
     },
     clearFilter(name) {
       setFilters(filters => {
@@ -72,7 +101,9 @@ export function useResourceQuery({ endpointId, filter, datasetId, queryFn, searc
       query.refetch()
     },
     invalidate: () => {
-      queryClient.invalidateQueries([endpointId])
+      queryClient.invalidateQueries({
+        queryKey: [endpointId]
+      })
     }
   }
 }

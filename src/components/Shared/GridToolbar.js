@@ -1,9 +1,13 @@
-import { Box, Button, Grid, Tooltip, DialogActions } from '@mui/material'
+import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
-import { useState, useContext } from 'react'
-import { TrxType } from 'src/resources/AccessLevels'
+import { useState, useContext, useEffect } from 'react'
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
 import { getButtons } from './Buttons'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import ReportGenerator from './ReportGenerator'
+import CustomButton from '../Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,
@@ -15,86 +19,88 @@ const GridToolbar = ({
   onSearch,
   onSearchClear,
   onSearchChange,
+  disableAdd = false,
   actions = [],
+  previewReport,
   ...props
 }) => {
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-  const addBtnVisible = onAdd && maxAccess > TrxType.GET
+  const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
+  const addBtnVisible = onAdd && maxAccess && maxAccess[accessMap[TrxType.ADD]]
+
+  const { getRequest } = useContext(RequestsContext)
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
-  const [tooltip, setTooltip] = useState('')
+  const [reportStore, setReportStore] = useState([])
+  const [zoomSpacing, setZoomSpacing] = useState(2)
 
-  function clear() {
+  useEffect(() => {
+    const updateZoomSpacing = () => {
+      const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
+      setZoomSpacing(zoom === 1 ? 2 : 5)
+    }
+
+    updateZoomSpacing()
+    window.addEventListener('resize', updateZoomSpacing)
+
+    return () => window.removeEventListener('resize', updateZoomSpacing)
+  }, [])
+
+  const clear = () => {
     setSearchValue('')
     onSearch('')
     if (onSearchClear) onSearchClear()
   }
 
-  const handleButtonMouseEnter = text => {
-    setTooltip(text)
-  }
+  const getReportLayout = async setReport => {
+    setReportStore([])
 
-  const handleButtonMouseLeave = () => {
-    setTooltip(null)
+    await getRequest({
+      extension: SystemRepository.ReportLayout,
+      parameters: `_resourceId=${previewReport}`
+    }).then(res => {
+      if (res?.list) {
+        const formattedReports = res.list.map(item => ({
+          api_url:
+            item.api.includes('_params=') && props?.reportParams
+              ? item.api.replace('_params=', `_params=${props.reportParams}`)
+              : item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+        setReportStore(formattedReports)
+        if (formattedReports.length > 0) {
+          setReport(prev => ({
+            ...prev,
+            selectedReport: formattedReports[0]
+          }))
+        }
+      }
+    })
   }
 
   const buttons = getButtons(platformLabels)
 
   return (
     <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
-      <style>
-        {`
-          .button-container {
-            position: relative;
-            display: inline-block;
-          }
-          .toast {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333333ad;
-            color: white;
-            padding: 3px 7px;
-            border-radius: 7px;
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
-            z-index: 1;
-          }
-          .button-container:hover .toast {
-            opacity: 1;
-            top: -40px;
-          }
-        `}
-      </style>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
-        <Grid item>
-          <Grid container spacing={2}>
-            {leftSection}
+        <Grid item xs={previewReport ? 6 : 9}>
+          <Grid container spacing={zoomSpacing}>
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <Tooltip title={platformLabels.add}>
-                  <Button
-                    onClick={onAdd}
-                    variant='contained'
-                    style={{ backgroundColor: 'transparent', border: '1px solid #4eb558' }}
-                    sx={{
-                      mr: 1,
-                      '&:hover': {
-                        opacity: 0.8
-                      },
-                      width: '20px',
-                      height: '35px',
-                      objectFit: 'contain'
-                    }}
-                  >
-                    <img src='/images/buttonsIcons/add.png' alt={platformLabels.add} />
-                  </Button>
-                </Tooltip>
+                <CustomButton
+                  onClick={onAdd}
+                  style={{ border: '1px solid #4eb558' }}
+                  color={'transparent'}
+                  disabled={disableAdd}
+                  image={'add.png'}
+                />
               </Grid>
             )}
+            {leftSection}
             {inputSearch && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', mt: '1px !important' }}>
                 <CustomTextField
                   name='search'
                   value={searchValue}
@@ -106,7 +112,6 @@ const GridToolbar = ({
                   }}
                   onSearch={onSearch}
                   search={true}
-                  height={35}
                 />
               </Grid>
             )}
@@ -122,44 +127,31 @@ const GridToolbar = ({
 
                   return (
                     isVisible && (
-                      <div
-                        className='button-container'
-                        onMouseEnter={() => (isDisabled ? null : handleButtonMouseEnter(button.label))}
-                        onMouseLeave={handleButtonMouseLeave}
-                        key={index}
-                      >
-                        <Button
-                          onClick={handleClick}
-                          variant='contained'
-                          sx={{
-                            mr: 1,
-                            backgroundColor: button.color,
-                            '&:hover': {
-                              backgroundColor: button.color,
-                              opacity: 0.8
-                            },
-                            border: button.border,
-                            width: 'auto',
-                            height: '35px',
-                            objectFit: 'contain'
-                          }}
-                          disabled={isDisabled}
-                        >
-                          {button.image ? (
-                            <img src={`/images/buttonsIcons/${button.image}`} alt={button.key} />
-                          ) : (
-                            button.label
-                          )}
-                        </Button>
-                        {button.image ? tooltip && <div className='toast'>{tooltip}</div> : null}
-                      </div>
+                      <CustomButton
+                        key={button.key || index}
+                        onClick={handleClick}
+                        image={button.image}
+                        tooltip={button.label}
+                        label={button.label}
+                        disabled={isDisabled}
+                      />
                     )
                   )
                 })}
             </Grid>
           </Grid>
         </Grid>
-        <Grid item>{rightSection}</Grid>
+        {previewReport && (
+          <ReportGenerator
+            getReportLayout={getReportLayout}
+            previewReport={previewReport}
+            condition={props?.reportParams}
+            reportStore={reportStore}
+          />
+        )}
+        <Grid item xs={3}>
+          {rightSection}
+        </Grid>
       </Grid>
       {bottomSection}
     </DialogActions>

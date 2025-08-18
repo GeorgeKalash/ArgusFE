@@ -22,13 +22,13 @@ export function useDocumentTypeProxy({ functionId, action, hasDT }) {
   }
 }
 
-export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
+export function useDocumentType({ functionId, access, hasDT, enabled = true, objectName = '' }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [nraId, setNraId] = useState()
 
   const queryFn = async nraId => {
-    const result = await documentType(getRequest, functionId, access, nraId, hasDT)
+    const result = await documentType(getRequest, functionId, access, nraId, hasDT, objectName)
     if (result.errorMessage) {
       stackError({ message: result?.errorMessage })
 
@@ -42,13 +42,13 @@ export function useDocumentType({ functionId, access, hasDT, enabled = true }) {
     retry: false,
     staleTime: 0,
     enabled: [!!functionId, functionId == undefined] && enabled,
-    queryKey: [functionId, nraId, !!access],
+    queryKey: [functionId, nraId, !!access, enabled],
     queryFn: nraId || nraId === 'nraId' ? () => queryFn(nraId) : () => queryFn()
   })
 
   return {
     documentType: query.data,
-    maxAccess: query?.data?.maxAccess || access,
+    maxAccess: enabled ? query?.data?.maxAccess : access,
     changeDT(value) {
       setNraId(value?.nraId || 'nraId')
     }

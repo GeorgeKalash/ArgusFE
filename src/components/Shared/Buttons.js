@@ -1,3 +1,5 @@
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
+
 export const getButtons = platformLabels => [
   {
     key: 'Clear',
@@ -7,6 +9,13 @@ export const getButtons = platformLabels => [
     color: '#f44336',
     image: 'clear.png',
     main: true
+  },
+  {
+    key: 'Rebuild',
+    color: '#231F20',
+    label: platformLabels.RebuildButton,
+    image: 'rebuild.png',
+    main: false
   },
   {
     key: 'Info',
@@ -39,17 +48,17 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
-    key: 'Post',
-    label: platformLabels.Post,
-    color: '#231f20',
-    image: 'lock.png',
+    key: 'ClearGrid',
+    label: platformLabels.clearGrid,
+    color: '#f44336',
+    image: 'clear.png',
     main: false
   },
   {
-    key: 'Unpost',
-    label: platformLabels.Unpost,
-    color: '#231f20',
-    image: 'unlock.png',
+    key: 'ClearHG', //HeaderGrid
+    label: platformLabels.clearAll,
+    color: '#4682B4',
+    image: 'clear.png',
     main: false
   },
   {
@@ -57,6 +66,41 @@ export const getButtons = platformLabels => [
     label: platformLabels.Bulk,
     color: '#09235C',
     image: 'Bulk.png',
+    main: false
+  },
+  {
+    key: 'Sample',
+    label: platformLabels.Sample,
+    color: '#231f20',
+    image: 'sample.png',
+    main: false
+  },
+  {
+    key: 'SerialsLots',
+    label: platformLabels.SerialsLots,
+    color: '#D3D3D3',
+    image: 'serials-lots.png',
+    main: false
+  },
+  {
+    key: 'Start',
+    label: platformLabels.Start,
+    color: '#4eb558',
+    image: 'play.png',
+    main: false
+  },
+  {
+    key: 'Stop',
+    label: platformLabels.Stop,
+    color: '#D3D3D3',
+    image: 'stop.png',
+    main: false
+  },
+  {
+    key: 'Received',
+    label: platformLabels.Received,
+    color: '#D3D3D3',
+    image: 'received.png',
     main: false
   },
   {
@@ -71,6 +115,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Terminate,
     color: '#FF0000',
     image: 'cancelWhite.png',
+    main: false
+  },
+  {
+    key: 'AccountSummary',
+    label: platformLabels.AccountSummary,
+    color: '#90278e',
+    image: 'accountBalanceWhite.png',
     main: false
   },
   {
@@ -93,7 +144,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'close.png',
     border: '1px solid #01a437',
-    main: false
+    main: false,
+    access: accessMap[TrxType.CLOSE]
   },
   {
     key: 'Reopen',
@@ -101,7 +153,8 @@ export const getButtons = platformLabels => [
     color: 'transparent',
     image: 'reopen.png',
     border: '1px solid #000000',
-    main: false
+    main: false,
+    access: accessMap[TrxType.REOPEN]
   },
   {
     key: 'Approval',
@@ -167,6 +220,20 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Order',
+    label: platformLabels.Order,
+    color: '#231f20',
+    image: 'order.png',
+    main: false
+  },
+  {
+    key: 'Consignments',
+    label: platformLabels.Consignments,
+    color: '#231f20',
+    image: 'consignment.png',
+    main: false
+  },
+  {
     key: 'Receipt Voucher',
     label: platformLabels.ReceiptVoucher,
     color: '#231f20',
@@ -206,6 +273,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.addClientRelation,
     color: '#4eb558',
     image: 'clientRelations.png',
+    main: false
+  },
+  {
+    key: 'Lots',
+    label: platformLabels.Lot,
+    color: '#D3D3D3',
+    image: 'lot.png',
     main: false
   },
   {
@@ -258,8 +332,9 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Rebuild',
+    key: 'Run',
     color: '#231F20',
+    label: platformLabels.Run,
     image: 'rebuild.png',
     main: false
   },
@@ -300,12 +375,9 @@ export const getButtons = platformLabels => [
   {
     key: 'generate',
     label: platformLabels.Generate,
-    condition: 'isGenerated',
-    onClick: 'onGenerate',
-    disabled: '!editMode',
     color: 'black',
     image: 'generate.png',
-    main: true
+    main: false
   },
   {
     key: 'Audit',
@@ -316,23 +388,16 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Import',
-    label: platformLabels.Import,
+    label: platformLabels.import,
     color: '#000',
     image: 'import.png',
     main: false
   },
   {
-    key: 'Lock',
-    label: platformLabels.Lock,
-    color: '#231f20',
-    image: 'lock.png',
-    main: false
-  },
-  {
-    key: 'Unlock',
-    label: platformLabels.Unlock,
-    color: '#231f20',
-    image: 'unlock.png',
+    key: 'ImportAll',
+    label: platformLabels.importAll,
+    color: '#000',
+    image: 'importAll.png',
     main: false
   },
   {
@@ -361,6 +426,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Metals,
     color: '#ADD8E6',
     image: 'metals-icon.png',
+    main: false
+  },
+  {
+    key: 'Verify',
+    label: platformLabels.Verify,
+    color: '#047DFA',
+    image: 'checkmark-icon.png',
+    main: false
+  },
+  {
+    key: 'Unverify',
+    label: platformLabels.Unverify,
+    color: '#047DFA',
+    image: 'unverify-icon.png',
     main: false
   },
   {
@@ -409,13 +488,123 @@ export const getButtons = platformLabels => [
     label: platformLabels.Locked,
     color: '#231f20',
     image: 'lock.png',
-    main: false
+    main: false,
+    access: accessMap[TrxType.UNPOST]
   },
   {
     key: 'Unlocked',
     label: platformLabels.Unlocked,
     color: '#231f20',
     image: 'unlock.png',
+    main: false,
+    access: accessMap[TrxType.POST]
+  },
+  {
+    key: 'Ok',
+    label: platformLabels.OK,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'ItemPromotion',
+    label: platformLabels.ItemPromotion,
+    color: '#231f43',
+    image: 'popup-window.png',
+    main: false
+  },
+  { key: 'Attachment', label: platformLabels.Attachment, color: '#9B1944', image: 'attachment.png', main: false },
+  {
+    key: 'Production',
+    label: platformLabels.Production,
+    color: '#d3d3d3',
+    image: 'production.png',
+    main: false
+  },
+  {
+    key: 'DefaultBilling',
+    label: platformLabels.DefaultBilling,
+    color: '#231f20',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'DefaultShipping',
+    label: platformLabels.DefaultShipping,
+    color: '#231f20',
+    image: 'shipment.png',
+    main: false
+  },
+  {
+    key: 'Damage',
+    label: platformLabels.Damage,
+    color: '#C91E1E',
+    image: 'popup-window.png'
+  },
+  {
+    key: 'Sketch',
+    label: platformLabels.Sketch,
+    color: '#048693',
+    image: 'sketch.png',
+    main: false
+  },
+  { key: 'Copy', label: platformLabels.Copy, color: '#CD5C5C', image: 'copy.png', main: false },
+  {
+    key: 'GenerateJob',
+    label: platformLabels.Generate,
+    color: '#D3D3D3',
+    image: 'generate2.png',
+    main: false
+  },
+  {
+    key: 'GenerateSerialsLots',
+    label: platformLabels.GenerateSerials,
+    color: '#D3D3D3',
+    image: 'generate2.png',
+    main: false
+  },
+  {
+    key: 'threeDPrinting',
+    label: platformLabels.threeDPrinting,
+    color: '#067851',
+    image: '3d-printer.png',
+    main: false
+  },
+  {
+    key: 'threeDDesign',
+    label: platformLabels.threeDDesign,
+    color: '#1f78b4',
+    image: '3d-printer.png',
+    main: false
+  },
+  {
+    key: 'ORD',
+    label: platformLabels.ord,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'add',
+    label: platformLabels.add,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'SHP',
+    label: platformLabels.shp,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Reset',
+    label: platformLabels.Reset,
+    image: 'undo-arrow-icon.png',
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'PV',
+    label: platformLabels.PV,
+    color: '#231f20',
     main: false
   }
 ]

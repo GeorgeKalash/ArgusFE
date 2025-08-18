@@ -9,12 +9,18 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import useResourceParams from 'src/hooks/useResourceParams'
 import FormShell from './FormShell'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export const ClientBalance = ({ recordId }) => {
+export const ClientBalance = ({ recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ClientBalance, window })
 
   const { labels: _labels, access } = useResourceParams({
-    datasetId: ResourceIds.ClientBalance
+    datasetId: ResourceIds.ClientBalance,
+    editMode: !!recordId
   })
 
   const { formik } = useForm({
@@ -30,31 +36,28 @@ export const ClientBalance = ({ recordId }) => {
     validateOnChange: true
   })
 
-
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RTCLRepository.ClientBalance.get,
-            parameters: `_clientId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: RTCLRepository.ClientBalance.get,
+          parameters: `_clientId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
   return (
-    <FormShell 
-        resourceId={ResourceIds.ClientBalance} 
-        form={formik} 
-        maxAccess={access} 
-        isSavedClear={false}
-        isCleared={false}
-        isSaved={false}
-        isInfo={false}
+    <FormShell
+      resourceId={ResourceIds.ClientBalance}
+      form={formik}
+      maxAccess={access}
+      isSavedClear={false}
+      isCleared={false}
+      isSaved={false}
+      isInfo={false}
     >
       <VertLayout>
         <Grow>
@@ -101,3 +104,6 @@ export const ClientBalance = ({ recordId }) => {
     </FormShell>
   )
 }
+
+ClientBalance.width = 500
+ClientBalance.height = 350

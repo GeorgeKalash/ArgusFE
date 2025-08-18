@@ -19,7 +19,6 @@ const LockedRecords = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     invalidate,
     access,
@@ -87,45 +86,18 @@ const LockedRecords = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: AccessControlRepository.LockedRecords.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
+    await postRequest({
+      extension: AccessControlRepository.LockedRecords.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'AULOK'}
-        />
+        <RPBGridToolbar maxAccess={access} reportName={'AULOK'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

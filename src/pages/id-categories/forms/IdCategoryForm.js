@@ -13,6 +13,7 @@ import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepos
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function IdCategoryForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -94,55 +95,39 @@ export default function IdCategoryForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='org'
-                    checked={formik.values.org}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='org'
+                value={formik.values?.org}
+                onChange={event => formik.setFieldValue('org', event.target.checked)}
                 label={labels.organization}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='person'
-                    checked={formik.values.person}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='person'
+                value={formik.values?.person}
+                onChange={event => formik.setFieldValue('person', event.target.checked)}
                 label={labels.person}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='group'
-                    checked={formik.values.group}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='group'
+                value={formik.values?.group}
+                onChange={event => formik.setFieldValue('group', event.target.checked)}
                 label={labels.group}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isUnique'
-                    checked={formik.values.isUnique}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isUnique'
+                value={formik.values?.isUnique}
+                onChange={event => formik.setFieldValue('isUnique', event.target.checked)}
                 label={labels.unique}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

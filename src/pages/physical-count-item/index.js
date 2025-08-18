@@ -14,19 +14,20 @@ import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
+import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
+import { useWindow } from 'src/windows'
 
 const PhysicalCountItem = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
-  const [editMode, setEditMode] = useState(false)
+  const { stack } = useWindow()
 
   const {
     labels: _labels,
     refetch,
-    maxAccess
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SCRepository.StockCountItem.qry,
@@ -40,7 +41,7 @@ const PhysicalCountItem = () => {
       totalCostPrice: '',
       totalWeight: ''
     },
-    maxAccess,
+    maxAccess: access,
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -67,11 +68,10 @@ const PhysicalCountItem = () => {
 
     formik.setFieldValue('totalCostPrice', sumCost)
     formik.setFieldValue('totalWeight', sumWeight)
-
-    setData(res ?? { list: [] })
-
-    handleClick(res.list)
+    setData(res || { list: [] })
   }
+
+  const editMode = data?.list?.length > 0
 
   const fillSiteStore = stockCountId => {
     setSiteStore([])
@@ -80,7 +80,7 @@ const PhysicalCountItem = () => {
       extension: SCRepository.Sites.qry,
       parameters: parameters
     }).then(res => {
-      setSiteStore(res.list)
+      setSiteStore(res.list.filter(site => site.isChecked == true))
     })
   }
 
@@ -128,39 +128,43 @@ const PhysicalCountItem = () => {
     })()
   }, [formik.values.stockCountId, formik.values.siteId])
 
-  const clearGrid = () => {
-    formik.resetForm({
-      values: formik.initialValues
+  function openClear() {
+    stack({
+      Component: ClearGridConfirmation,
+      props: {
+        open: { flag: true },
+        fullScreen: false,
+        dialogText: platformLabels.ClearFormGrid,
+        onConfirm: () => {
+          formik.resetForm()
+          setData({ list: [] })
+          setSiteStore([])
+        }
+      }
     })
-
-    setData({ list: [] })
-    setSiteStore([])
-    setFilteredItems([])
-    setEditMode(false)
   }
 
-  const handleClick = async dataList => {
-    setFilteredItems([])
-
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+  const handleMetalClick = async () => {
+    const metalItemsList = data?.list
+      ?.filter(item => item.metalId)
       .map(item => ({
         qty: item.countedQty,
-        metalRef: null,
+        metalRef: '',
         metalId: item.metalId,
         metalPurity: item.metalPurity,
         weight: item.weight,
         priceType: item.priceType
       }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
+
+    return metalItemsList || []
   }
 
   const actions = [
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      handleMetalClick
     }
   ]
 
@@ -172,9 +176,8 @@ const PhysicalCountItem = () => {
       isCleared={false}
       isSavedClear={false}
       actions={actions}
-      maxAccess={maxAccess}
+      maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItem}
-      filteredItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>
@@ -191,15 +194,13 @@ const PhysicalCountItem = () => {
                 values={formik.values}
                 required
                 readOnly={formik.values.siteId}
-                maxAccess={maxAccess}
+                maxAccess={access}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
                   formik.setFieldValue('siteId', '')
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
-                    clearGrid()
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }
@@ -225,12 +226,12 @@ const PhysicalCountItem = () => {
                   formik.setFieldValue('siteId', newValue?.siteId)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                maxAccess={maxAccess}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={2}>
               <Button
-                onClick={clearGrid}
+                onClick={openClear}
                 sx={{
                   backgroundColor: '#f44336',
                   '&:hover': {
@@ -251,13 +252,12 @@ const PhysicalCountItem = () => {
             columns={columns}
             gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            setData={setData}
             isLoading={false}
             pageSize={50}
             refetch={refetch}
             paginationType='api'
             pagination={false}
-            maxAccess={maxAccess}
+            maxAccess={access}
             textTransform={true}
           />
         </Grow>
@@ -270,6 +270,7 @@ const PhysicalCountItem = () => {
                 value={formik.values.totalCostPrice}
                 readOnly={true}
                 hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={2}>
@@ -279,6 +280,7 @@ const PhysicalCountItem = () => {
                 value={formik.values.totalWeight}
                 readOnly={true}
                 hidden={!(formik.values.stockCountId && formik.values.siteId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>

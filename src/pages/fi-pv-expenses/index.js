@@ -10,23 +10,21 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
-import { getStorageData } from 'src/storage/storage'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
+      extension: FinancialRepository.PaymentVouchers.page2,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
@@ -55,14 +53,13 @@ const FiPaymentVouchers = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
+    endpointId: FinancialRepository.PaymentVouchers.page2,
     datasetId: ResourceIds.PaymentVoucherExpenses,
     filter: {
       filterFn: fetchWithFilter
@@ -71,10 +68,9 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
-      field: 'date',
-      headerName: _labels.date,
-      flex: 1,
-      type: 'date'
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
     },
     {
       field: 'reference',
@@ -82,23 +78,19 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'currencyRef',
+      headerName: _labels.currency,
       flex: 1
     },
     {
-      field: 'accountRef',
-      headerName: _labels.account,
-      flex: 1
-    },
-    {
-      field: 'accountName',
-      headerName: _labels.accountName,
-      flex: 1
-    },
-    {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      field: 'paymentMethodName',
+      headerName: _labels.paymentMethod,
       flex: 1
     },
     {
@@ -108,8 +100,8 @@ const FiPaymentVouchers = () => {
       type: 'number'
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'cashAccountName',
+      headerName: _labels.cashAccount,
       flex: 1
     },
     {
@@ -118,14 +110,14 @@ const FiPaymentVouchers = () => {
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: _labels.status,
-      flex: 1
-    },
-    {
       field: 'isVerified',
       headerName: _labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
     }
   ]
 
@@ -137,42 +129,14 @@ const FiPaymentVouchers = () => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userId = getStorageData('userData').userId
-
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: `_userId=${userId}&_key=plantId`
-      })
-
-      return res.record.value
-    } catch (e) {}
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openForm(recordId) {
     stack({
       Component: FiPaymentVoucherExpensesForm,
       props: {
-        labels: _labels,
         recordId,
-        plantId,
-        maxAccess: access
+        plantId
       },
-      width: 1300,
-      height: 700,
-      title: _labels.paymentVoucherExpenses
     })
-  }
-
-  async function openForm(recordId) {
-    const plantId = await getPlantId()
-
-    plantId !== ''
-      ? openOutWardsWindow(plantId, recordId)
-      : stackError({
-          message: platformLabels.noDefaultPlant
-        })
   }
 
   const del = async obj => {
@@ -186,37 +150,10 @@ const FiPaymentVouchers = () => {
     } catch (error) {}
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'FIPV'}
-        />
+        <RPBGridToolbar labels={_labels} onAdd={add} maxAccess={access} reportName={'FIPVb'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -227,6 +164,7 @@ const FiPaymentVouchers = () => {
           onDelete={del}
           isLoading={false}
           pageSize={50}
+          deleteConfirmationType={'strict'}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}

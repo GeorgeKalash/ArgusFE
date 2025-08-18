@@ -47,8 +47,10 @@ const LoginPage = () => {
     onSubmit: values => {
       auth.login({ ...values }, error => {
         const { loggedUser } = error
-
-        if (error?.getUS2?.umcpnl) {
+        if (error?.signIn3?.forcePasswordReset) {
+          const onClose = async () => {}
+          openForm(error.username, loggedUser, onClose)
+        } else if (error?.getUS2?.umcpnl) {
           const onClose = async () => {
             await updateUmcpnl(loggedUser, error?.getUS2)
           }
@@ -69,10 +71,7 @@ const LoginPage = () => {
         onClose: () => auth.EnableLogin(loggedUser)
       },
       expandable: false,
-      width: 400,
-      height: 400,
-      spacing: false,
-      title: platformLabels.OTPVerification
+      spacing: false
     })
   }
 
@@ -95,10 +94,7 @@ const LoginPage = () => {
       expandable: false,
       closable: false,
       draggable: false,
-      width: 600,
-      height: 400,
-      spacing: false,
-      title: platformLabels.ChangePassword
+      spacing: false
     })
   }
 

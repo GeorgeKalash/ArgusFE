@@ -6,13 +6,13 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { FormControlLabel, Checkbox } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,8 +35,8 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -58,20 +58,18 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId;
+  const editMode = !!formik.values.recordId || !!recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: BusinessPartnerRepository.RoleCategory.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: BusinessPartnerRepository.RoleCategory.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -105,50 +103,35 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                    <Checkbox 
-                        name='org' 
-                        checked={formik.values.org} 
-                        onChange={formik.handleChange} 
-                        maxAccess={maxAccess} 
-                    />
-                }
+              <CustomCheckBox
+                name='org'
+                value={formik.values.org}
+                onChange={event => formik.setFieldValue('org', event.target.checked)}
                 label={labels.organization}
+                maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='person'
-                    checked={formik.values.person}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='person'
+                value={formik.values.person}
+                onChange={event => formik.setFieldValue('person', event.target.checked)}
                 label={labels.person}
+                maxAccess={maxAccess}
               />
             </Grid>
-
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='group'
-                    checked={formik.values.group}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='group'
+                value={formik.values.group}
+                onChange={event => formik.setFieldValue('group', event.target.checked)}
                 label={labels.group}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
         </Grow>
       </VertLayout>
-      
     </FormShell>
   )
 }

@@ -1,92 +1,140 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import WorkCentersWindow from './window/WorkCentersWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useWindow } from 'src/windows'
+import WorkCentersForm from './forms/WorkCentersForm'
 
 const WorkCenter = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: ManufacturingRepository.WorkCenter.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=${params || ''}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
-    access
+    filterBy,
+    labels,
+    access,
+    paginationParameters,
+    refetch,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.WorkCenter.page,
-    datasetId: ResourceIds.WorkCenters
+    datasetId: ResourceIds.WorkCenters,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.WorkCenter.page
-  })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.WorkCenter.snapshot,
+        parameters: `_filter=${filters.qry}&_status=0`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'siteName',
-      headerName: _labels.sitename,
+      headerName: labels.sitename,
       flex: 1
     },
     {
       field: 'siteRef',
-      headerName: _labels.siteRef,
+      headerName: labels.siteRef,
       flex: 1
     },
     {
       field: 'plantName',
-      headerName: _labels.plantName,
+      headerName: labels.plantName,
       flex: 1
     },
     {
       field: 'supervisorName',
-      headerName: _labels.supervisor,
+      headerName: labels.supervisor,
       flex: 1
     },
     {
       field: 'lineRef',
-      headerName: _labels.productionLine,
+      headerName: labels.productionLine,
       flex: 1
+    },
+    {
+      field: 'lineName',
+      headerName: labels.productionLine,
+      flex: 1
+    },
+    {
+      field: 'costCenterName',
+      headerName: labels.costCenter,
+      flex: 1
+    },
+    {
+      field: 'isSerialCreator',
+      headerName: labels.isSerialCreator,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'isInactive',
+      headerName: labels.inactive,
+      flex: 1,
+      type: 'checkbox'
     }
   ]
 
   const add = () => {
-    setWindowOpen(true)
+    openForm()
+  }
+
+  function openForm(record) {
+    stack({
+      Component: WorkCentersForm,
+      props: {
+        labels,
+        recordId: record?.recordId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 550,
+      title: labels.workCenter
+    })
   }
 
   const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
+    openForm(obj)
   }
 
   const del = async obj => {
@@ -95,40 +143,28 @@ const WorkCenter = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFWCT'} />
       </Fixed>
       <Grow>
         <Table
           columns={columns}
           gridData={data}
           rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <WorkCentersWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

@@ -73,7 +73,7 @@ const RelationTypes = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 400,
       title: _labels.RelationTypes
     })
   }

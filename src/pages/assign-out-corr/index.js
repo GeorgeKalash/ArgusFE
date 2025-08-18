@@ -249,7 +249,6 @@ const OutwardsCorrespondent = () => {
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
-
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={RemittanceOutwardsRepository.UnassignedDispersalType.unassigned}
@@ -268,7 +267,6 @@ const OutwardsCorrespondent = () => {
                     }}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='fromAmount'
@@ -279,7 +277,6 @@ const OutwardsCorrespondent = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomNumberField
                     name='toAmount'
@@ -290,7 +287,6 @@ const OutwardsCorrespondent = () => {
                     decimalScale={2}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='fromDate'
@@ -302,7 +298,6 @@ const OutwardsCorrespondent = () => {
                     error={false}
                   />
                 </Grid>
-
                 <Grid item xs={3}>
                   <CustomDatePicker
                     name='toDate'
@@ -318,12 +313,10 @@ const OutwardsCorrespondent = () => {
             </Grid>
           </Grid>
         </Fixed>
-
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={data ?? { list: [] }}
-            setData={setData}
+            gridData={data}
             rowId={['recordId']}
             isLoading={false}
             refetch={refetch}

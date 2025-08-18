@@ -14,6 +14,9 @@ import { formatDateDefault, formatDateTimeDefault } from 'src/lib/date-helper'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useError } from 'src/error'
 import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
+import CustomNumberField from '../Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -40,33 +43,37 @@ const formatDateFrom = value => {
   return timestamp
 }
 
-const convertDateToCompactFormat = (input) => {
-  let date;
+const convertDateToCompactFormat = input => {
+  if (!input) return
+
+  let date
 
   if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
-    date = new Date(Number(input));
+    date = new Date(Number(input))
   } else if (input instanceof Date) {
-    date = input;
+    date = input
   }
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hour = String(date.getHours()).padStart(2, '0')
+  const minute = String(date.getMinutes()).padStart(2, '0')
 
-  return `${year}${month}${day}${hour}${minute}`;
-};
+  return `${year}${month}${day}${hour}${minute}`
+}
 
-const convertCompactFormatToDate = (compactDate) => {
-  const year = parseInt(compactDate.slice(0, 4), 10);
-  const month = parseInt(compactDate.slice(4, 6), 10) - 1;
-  const day = parseInt(compactDate.slice(6, 8), 10);
-  const hour = parseInt(compactDate.slice(8, 10), 10);
-  const minute = parseInt(compactDate.slice(10, 12), 10);
+const convertCompactFormatToDate = compactDate => {
+  if (!compactDate) return
 
-  return new Date(year, month, day, hour, minute);
-};
+  const year = parseInt(compactDate.slice(0, 4), 10)
+  const month = parseInt(compactDate.slice(4, 6), 10) - 1
+  const day = parseInt(compactDate.slice(6, 8), 10)
+  const hour = parseInt(compactDate.slice(8, 10), 10)
+  const minute = parseInt(compactDate.slice(10, 12), 10)
+
+  return new Date(year, month, day, hour, minute)
+}
 
 const GetLookup = ({ field, formik }) => {
   const apiDetails = field.apiDetails
@@ -132,12 +139,14 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
-  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
-    newParams += `&_dgId=${field?.data}`
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
+    newParams += `&_functionIds=${field?.data}`
   } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
     newParams = `_dimension=${field?.data}`
   } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
     newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === SystemRepository.Currency.qry2) {
+    newParams += `_currencyType=${field?.data}`
   }
 
   return (
@@ -247,7 +256,39 @@ const GetDate = ({ field, formik, rpbParams }) => {
 
 const GetDateTimePicker = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+    const currentValue = formik.values?.parameters?.[field.id]?.value
+
+    if (currentValue !== undefined && currentValue !== null) return
+
+    if (field.defaultValue) {
+      let defVal
+      switch (field.defaultValue) {
+        case 'today':
+          defVal = new Date()
+          break
+        case 'yesterday':
+          defVal = new Date()
+          defVal.setDate(defVal.getDate() - 1)
+          break
+        case 'boy':
+          defVal = new Date(new Date().getFullYear(), 0, 1)
+          break
+        default:
+          defVal = null
+      }
+
+      if (defVal) {
+        formik.setFieldValue(`parameters[${field.id}]`, {
+          fieldId: field.id,
+          fieldKey: field.key,
+          defaultValue: field.defaultValue,
+          value: defVal,
+          controlType: field?.controlType,
+          caption: field.caption,
+          display: formatDateTimeDefault(defVal)
+        })
+      }
+    } else if (field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -265,7 +306,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
       <CustomDateTimePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
         onChange={(name, newValue) => {
@@ -284,7 +325,6 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
     </Grid>
   )
 }
-
 
 const GetTextField = ({ field, formik }) => {
   return (
@@ -312,11 +352,41 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
+const GetNumberField = ({ field, formik }) => {
+  return (
+    <Grid item xs={12} key={field.id}>
+      <CustomNumberField
+        name={`parameters[${field.id}`}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value}
+        required={field.mandatory}
+        decimalScale={2}
+        onChange={e => {
+          e.target.value != ''
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, '')
+        }}
+        error={Boolean(formik.errors?.parameters?.[field.id])}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, null)}
+      />
+    </Grid>
+  )
+}
+
 const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
   const getParameterDefinition = reportName => {
     const parameters = `_reportName=${reportName}`
@@ -324,11 +394,9 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     getRequest({
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
+    }).then(res => {
+      if (res?.list) setParameters(res.list)
     })
-      .then(res => {
-        setParameters(res.list)
-      })
-      .catch(e => {})
   }
 
   const fetchData = async field => {
@@ -371,11 +439,12 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
         acc[id] = {
           ...param,
           defaultValue: item?.defaultValue,
-          value: param?.controlType === 4
-          ? formatDateTo(param?.value) 
-          : param?.controlType === 7
-          ? convertDateToCompactFormat(param?.value)
-          : param?.value
+          value:
+            param?.controlType === 4
+              ? formatDateTo(param?.value)
+              : param?.controlType === 7
+              ? convertDateToCompactFormat(param?.value)
+              : param?.value
         }
 
         return acc
@@ -417,11 +486,12 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       acc[item?.fieldId] = {
         ...item,
         defaultValue: item?.defaultValue,
-        value: item?.controlType === 4
-          ? formatDateFrom(item.value) 
-          : item?.controlType === 7
-          ? convertCompactFormatToDate(item?.value)
-          : item.value
+        value:
+          item?.controlType === 4
+            ? formatDateFrom(item.value)
+            : item?.controlType === 7
+            ? convertCompactFormatToDate(item?.value)
+            : item.value
       }
 
       return acc
@@ -446,6 +516,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
             return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
+          } else if (item.controlType === 2) {
+            return <GetNumberField key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 7) {
             return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           }
@@ -454,5 +526,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     </FormShell>
   )
 }
+
+ReportParameterBrowser.width = 700
+ReportParameterBrowser.height = 500
 
 export default ReportParameterBrowser

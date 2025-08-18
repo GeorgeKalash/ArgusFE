@@ -92,6 +92,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       key: 'Integration Account',
       condition: true,
       onClick: 'onClickGIA',
+      masterSource: MasterSource.CashAccount,
       disabled: !editMode
     },
     {
@@ -115,7 +116,6 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
       maxAccess={maxAccess}
       editMode={editMode}
       actions={actions}
-      masterSource={MasterSource.CashAccount}
     >
       <VertLayout>
         <Grow>

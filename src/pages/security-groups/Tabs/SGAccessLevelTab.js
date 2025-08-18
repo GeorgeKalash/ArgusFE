@@ -42,7 +42,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
 
     const moduleRes = await getRequest({
       extension: AccessControlRepository.ModuleClass.qry,
-      parameters: `_sgId=${storeRecordId}&_filter=&_moduleId=${filters?.moduleId ?? 10}`
+      parameters: `_sgId=${storeRecordId}&_filter=&_moduleId=${filters?.moduleId ?? 10}&_resourceId=0`
     })
 
     const mergedModules = moduleRes.list.map(moduleItem => {
@@ -100,10 +100,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         moduleId: filters.moduleId,
         invalidate,
         resourceId: ResourceIds.SecurityGroup
-      },
-      width: 450,
-      height: 200,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -114,12 +111,8 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         labels: labels,
         maxAccess,
         row: row.data,
-        invalidate,
         resourceId: ResourceIds.SecurityGroup
-      },
-      width: 450,
-      height: 300,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -133,8 +126,6 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
         invalidate,
         resourceId: ResourceIds.SecurityGroup
       },
-      width: 500,
-      height: 480,
       title: labels.controlAccessLevel
     })
   }
@@ -195,6 +186,7 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
       </Fixed>
       <Grow>
         <Table
+          name='accessLevel'
           columns={[
             {
               field: 'resourceId',
@@ -204,21 +196,16 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
             {
               field: 'resourceName',
               headerName: labels.className,
-              flex: 1
+              flex: 2
             },
             {
-              field: 'accessLevelString',
-              headerName: labels.accessLevel,
-              flex: 1
-            },
-            {
-              field: '',
+              field: 'resourceGlobal',
               headerName: labels.resourceGlobal,
-              width: 200,
+              flex: 1,
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openResourceGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
                   </IconButton>
                 </Box>
               )
@@ -226,11 +213,11 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
             {
               field: 'Control Access',
               headerName: labels.controlAccess,
-              width: 200,
+              flex: 1,
               cellRenderer: row => (
                 <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
                   <IconButton size='small' onClick={() => openFieldGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' fontSize={18} />
+                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
                   </IconButton>
                 </Box>
               )

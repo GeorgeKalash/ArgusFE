@@ -14,7 +14,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 
-const BarcodeForm = ({ store, labels, maxAccess }) => {
+const BarcodeForm = ({ store, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -59,9 +59,10 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
     refetch,
     invalidate,
     search,
+    access
   } = useResourceQuery({
     enabled: !!recordId,
-    datasetId: ResourceIds.Items,
+    datasetId: ResourceIds.Barcodes,
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Barcode.qry,
     search: {
@@ -85,7 +86,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
         labels: _labels,
         recordId: obj?.recordId,
         barcode: obj?.barcode,
-        access: maxAccess,
+        access: access,
         store,
         msId: store?._msId
       },
@@ -121,7 +122,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
       <Fixed>
         <GridToolbar 
           onAdd={add} 
-          maxAccess={maxAccess} 
+          maxAccess={access} 
           onSearch={search}
           inputSearch={true} 
         />
@@ -137,7 +138,7 @@ const BarcodeForm = ({ store, labels, maxAccess }) => {
           isLoading={false}
           pageSize={50}
           pagination={false}
-          maxAccess={maxAccess}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>

@@ -16,6 +16,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function SitesForm({ labels, recordId, maxAccess }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -193,29 +194,21 @@ export default function SitesForm({ labels, recordId, maxAccess }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='allowNegativeQty'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.allowNegativeQty}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='allowNegativeQty'
+                value={formik.values?.allowNegativeQty}
+                onChange={event => formik.setFieldValue('allowNegativeQty', event.target.checked)}
                 label={labels.anq}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    maxAccess={maxAccess}
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

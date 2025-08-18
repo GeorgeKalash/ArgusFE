@@ -42,43 +42,45 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
       classId: ResourceIds.DocumentTypes
     },
     onSubmit: async () => {
-      for (const item of data?.list) {
-        item.hasAccess = item.checked
+      const updatedRows = data.list
+        .filter(obj => obj.checked)
+        .map(row => ({
+          recordId: row.recordId,
+          sgId: recordId,
+          resourceId: parseInt(formik.values.classId)
+        }))
 
-        if (item.checked) {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.set,
-            record: JSON.stringify(item)
-          })
-        } else {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.del,
-            record: JSON.stringify(item)
-          })
-        }
+      const resultObject = {
+        sgId: recordId,
+        resourceId: parseInt(formik.values.classId),
+        items: updatedRows
       }
+
+      await postRequest({
+        extension: AccessControlRepository.DataAccessItem.set2,
+        record: JSON.stringify(resultObject)
+      })
+
       toast.success(platformLabels.Updated)
     }
   })
 
   async function fetchGridData(resourceId) {
-    try {
-      const classId = resourceId ?? ResourceIds.DocumentTypes
+    const classId = resourceId ?? ResourceIds.DocumentTypes
 
-      const moduleRes = await getRequest({
-        extension: AccessControlRepository.DataAccessItem.qry,
-        parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
-      })
-      moduleRes.list = moduleRes.list.map(item => {
-        if (item.hasAccess) {
-          item.checked = true
-        }
+    const moduleRes = await getRequest({
+      extension: AccessControlRepository.DataAccessItem.qry,
+      parameters: `_sgId=${recordId}&_filter=&_resourceId=${classId}`
+    })
+    moduleRes.list = moduleRes.list.map(item => {
+      if (item.hasAccess) {
+        item.checked = true
+      }
 
-        return item
-      })
+      return item
+    })
 
-      setData(moduleRes)
-    } catch (error) {}
+    setData(moduleRes)
   }
 
   const filtered = useMemo(
@@ -100,9 +102,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) await fetchGridData()
-      } catch (error) {}
+      if (recordId) await fetchGridData()
     })()
   }, [recordId])
 
@@ -149,6 +149,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
         </Fixed>
         <Grow>
           <Table
+            name='rowAccess'
             columns={rowColumns}
             gridData={filtered}
             rowId={['recordId']}

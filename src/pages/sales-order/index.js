@@ -26,8 +26,7 @@ const SalesOrder = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -134,7 +133,7 @@ const SalesOrder = () => {
   async function getDefaultSalesCurrency() {
     const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
 
-    return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
+    return parseInt(defaultCurrency?.value)
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -146,8 +145,7 @@ const SalesOrder = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const add = async () => {
@@ -155,7 +153,7 @@ const SalesOrder = () => {
   }
 
   const editSO = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
@@ -163,14 +161,9 @@ const SalesOrder = () => {
     stack({
       Component: SalesOrderForm,
       props: {
-        labels,
-        access,
         currency,
         recordId
-      },
-      width: 1300,
-      height: 730,
-      title: labels.salesOrder
+      }
     })
   }
 
@@ -183,39 +176,14 @@ const SalesOrder = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SAORD'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SAORD'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -8,7 +8,9 @@ const ConfirmationDialog = ({
   DialogText,
   okButtonAction,
   fullScreen = true,
-  window
+  window,
+  height = '120px',
+  ...props
 }) => {
   const { platformLabels } = useContext(ControlContext)
 
@@ -17,14 +19,14 @@ const ConfirmationDialog = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '120px',
+        height: height,
         zIndex: 2
       }}
     >
       <Box
         sx={{
           flex: '1',
-          overflow: 'auto',
+          overflow: 'hidden',
           p: 5
         }}
       >
@@ -42,6 +44,7 @@ const ConfirmationDialog = ({
         <Button
           onClick={() => {
             okButtonAction(window)
+            if (props?.close) window.close()
           }}
           color='primary'
         >

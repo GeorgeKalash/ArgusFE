@@ -94,20 +94,18 @@ const Checkbook = () => {
         maxAccess: access
       },
       width: 500,
-      height: 500,
+      height: 450,
       title: _labels.checkbook
     })
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CashBankRepository.CACheckbook.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: CashBankRepository.CACheckbook.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

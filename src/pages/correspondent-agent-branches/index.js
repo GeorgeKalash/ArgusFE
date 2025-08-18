@@ -10,7 +10,6 @@ import toast from 'react-hot-toast'
 import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useInvalidate } from 'src/hooks/resource'
-
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -89,8 +88,8 @@ const Agent = () => {
         labels: _labels,
         recordId: recordId ? recordId : null
       },
-      width: 800,
-      height: 400,
+      width: 700,
+      height: 500,
       title: _labels.agentBranch
     })
   }

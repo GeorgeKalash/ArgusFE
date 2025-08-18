@@ -17,12 +17,10 @@ const ProductionRequestLog = () => {
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
+    return await getRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.snapshot,
-      parameters: `_filter=${qry}`
+      parameters: `_filter=${qry}&_status=1`
     })
-
-    return response
   }
 
   const {
@@ -61,12 +59,13 @@ const ProductionRequestLog = () => {
     {
       field: 'reference',
       headerName: _labels.reference,
-      flex: .6
+      flex: 0.6
     },
     {
       field: 'qty',
       headerName: _labels.qty,
-      flex: .4
+      flex: 0.4,
+      type: 'number'
     },
     {
       field: 'checked',
@@ -87,9 +86,9 @@ const ProductionRequestLog = () => {
     {
       field: 'date',
       headerName: _labels.date,
-      flex: .7,
+      flex: 0.7,
       type: 'date'
-    },
+    }
   ]
 
   const calculateLeans = async () => {
@@ -98,13 +97,11 @@ const ProductionRequestLog = () => {
       obj.status = 2
     })
 
-    const resultObject = {
-      leanProductions: checkedObjects
-    }
-
     await postRequest({
       extension: ManufacturingRepository.LeanProductionPlanning.update,
-      record: JSON.stringify(resultObject)
+      record: JSON.stringify({
+        leanProductions: checkedObjects
+      })
     })
 
     toast.success(platformLabels.Updated)
@@ -120,19 +117,10 @@ const ProductionRequestLog = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const actions = [
-    {
-      key: 'Refresh',
-      condition: true,
-      onClick: () => refetch(),
-      disabled: false
-    }
-  ]
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true}/>
+        <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
@@ -142,7 +130,8 @@ const ProductionRequestLog = () => {
           onDelete={del}
           isLoading={false}
           maxAccess={access}
-          pagination={false}
+          pageSize={2000}
+          paginationType='client'
           refetch={refetch}
         />
       </Grow>

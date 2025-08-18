@@ -16,6 +16,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -347,16 +348,12 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isInactive'
-                      maxAccess={maxAccess}
-                      checked={formik.values?.isInactive}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='isInactive'
+                  value={formik.values?.isInactive}
+                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={labels.isInactive}
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

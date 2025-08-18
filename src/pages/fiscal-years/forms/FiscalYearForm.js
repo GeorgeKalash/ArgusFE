@@ -19,7 +19,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 import Typography from '@mui/material/Typography'
 
-export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
+export default function FiscalYearForm({ labels, maxAccess, setStore, store, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -32,8 +32,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
     initialValues: {
       recordId: null,
       fiscalYear: '',
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       periods: '',
       status: ''
     },
@@ -74,6 +74,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
       } else toast.success(platformLabels.Edited)
 
       invalidate()
+
+      window.close()
     }
   })
 
@@ -81,24 +83,35 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.FiscalYears.get,
-            parameters: `_fiscalYear=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.FiscalYears.get,
+          parameters: `_fiscalYear=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
+        formik.setValues({
+          ...res.record,
 
-            startDate: formatDateFromApi(res.record.startDate),
-            endDate: formatDateFromApi(res.record.endDate),
-            recordId: res.record.fiscalYear
-          })
-        }
-      } catch (exception) {}
+          startDate: formatDateFromApi(res.record.startDate),
+          endDate: formatDateFromApi(res.record.endDate),
+          recordId: res.record.fiscalYear
+        })
+      }
     })()
   }, [])
+
+  useEffect(() => {
+    if (formik.values.fiscalYear) {
+      const year = parseInt(formik.values.fiscalYear, 10)
+      if (year) {
+        formik.setFieldValue('startDate', new Date(Date.UTC(year, 0, 1)))
+        formik.setFieldValue('endDate', new Date(Date.UTC(year, 11, 31, 0, 0, 0, 0)))
+      }
+    } else {
+      formik.setFieldValue('startDate', null)
+      formik.setFieldValue('endDate', null)
+    }
+  }, [formik.values.fiscalYear])
 
   return (
     <FormShell resourceId={ResourceIds.FiscalYears} form={formik} maxAccess={maxAccess} editMode={editMode}>

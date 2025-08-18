@@ -19,5 +19,49 @@ export const IVReplenishementRepository = {
   },
   GenerateIvReplenishements: {
     generate: service + 'generateTFR'
+  },
+  MaterialReplenishment: {
+    page: service + 'pageREQ',
+    del: service + 'delREQ',
+    get: service + 'getREQ',
+    set2: service + 'set2REQ',
+    snapshot: service + 'snapshotREQ',
+    close: service + 'closeREQ',
+    reopen: service + 'reopenREQ',
+    cancel: service + 'cancelREQ',
+    print: service + 'printREQ'
+  },
+  OrderItem: {
+    qry: service + 'qryREI'
+  },
+  MatPlanning: {
+    page: service + 'pageMPL',
+    del: service + 'delMPL',
+    get: service + 'getMPL',
+    set2: service + 'set2MPL',
+    reopen: service + 'reopenMPL',
+    close: service + 'closeMPL',
+    qry: service + 'qryMPL'
+  },
+  MatPlanningItem: {
+    qry: service + 'qryMPI',
+    append: service + 'appendMPI'
+  },
+  PurchaseRequest: {
+    generate: service + 'generatePR'
+  },
+  PlantSettings: {
+    get: service + 'getPLT',
+    set: service + 'setPLT',
+    del: service + 'delPLT'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD',
+    set: service + 'setDTD',
+    del: service + 'delDTD',
+    page: service + 'pageDTD'
+  },
+  materialPlaning: {
+    preview: service + 'previewMRP'
   }
 }

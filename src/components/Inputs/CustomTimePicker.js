@@ -1,24 +1,21 @@
 import { useState } from 'react'
-
 import { InputAdornment, IconButton } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ClearIcon from '@mui/icons-material/Clear'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { checkAccess } from 'src/lib/maxAccess'
 
 const CustomTimePicker = ({
   name,
   label,
   value,
   onChange,
-  error,
+  error = false,
+  helperText = '',
   disabledRangeTime = {},
   variant = 'outlined',
   size = 'small',
@@ -31,19 +28,15 @@ const CustomTimePicker = ({
   editMode = false,
   hasBorder = true,
   hidden = false,
+  use24Hour = false,
+  min = null,
+  max = null,
   ...props
 }) => {
   const [openTimePicker, setOpenTimePicker] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
-  const maxAccess = props.maxAccess && props.maxAccess.record.maxAccess
-
-  const { accessLevel } = (props?.maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
-
-  const _readOnly = editMode ? editMode && maxAccess < TrxType.EDIT : accessLevel > DISABLED ? false : readOnly
-
-  const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
-
-  const isRequired = required || accessLevel === MANDATORY
+  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   return _hidden ? (
     <></>
@@ -55,11 +48,27 @@ const CustomTimePicker = ({
         value={value}
         label={label}
         fullWidth={fullWidth}
+        ampm={!use24Hour}
+        minTime={min}
+        maxTime={max}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         sx={{
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              border: !hasBorder && 'none'
-            }
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: '33px !important'
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem',
+            color: 'black'
           }
         }}
         autoFocus={autoFocus}
@@ -71,15 +80,16 @@ const CustomTimePicker = ({
         clearable
         slotProps={{
           textField: {
-            required: isRequired,
-            size: size,
-            fullWidth: fullWidth,
-            error: error,
+            required: _required,
+            size,
+            fullWidth,
+            error: !!error,
+            helperText: typeof error === 'string' ? error : helperText,
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -2 }}>
+                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
                       <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
                     </IconButton>
                   )}
@@ -98,6 +108,7 @@ const CustomTimePicker = ({
           actionBar: props => <PickersActionBar {...props} actions={['accept']} />,
           popper: PopperComponent
         }}
+        {...props}
       />
     </LocalizationProvider>
   )

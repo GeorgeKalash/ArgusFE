@@ -46,20 +46,18 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     await postRequest({
       extension: DocumentReleaseRepository.Class.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      if (!recordId) {
+        setEditMode(true)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+        formik.setFieldValue('recordId', res.recordId)
+        toast.success('Record Added Successfully')
+      } else toast.success('Record Edited Successfully')
+      invalidate()
     })
-      .then(res => {
-        if (!recordId) {
-          setEditMode(true)
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res.recordId
-          }))
-          formik.setFieldValue('recordId', res.recordId)
-          toast.success('Record Added Successfully')
-        } else toast.success('Record Edited Successfully')
-        invalidate()
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {

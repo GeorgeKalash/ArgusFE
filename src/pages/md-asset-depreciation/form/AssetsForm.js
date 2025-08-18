@@ -47,13 +47,14 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
       date: new Date(),
       notes: '',
       status: 1,
-      dtId: documentType?.dtId,
+      dtId: null,
       plantId: '',
       asset: []
     },
@@ -181,20 +182,28 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       flex: 1
     }
   ]
-  const isStatusNotOne = formik.values.status !== 1
+  const isPosted = formik.values.status === 3
 
   const actions = [
     {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLDepreciation,
       disabled: !editMode
     },
+
     {
-      key: 'Post',
-      condition: true,
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      disabled: true
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || isStatusNotOne
+      disabled: !editMode
     },
     {
       key: 'PR',
@@ -213,8 +222,6 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       maxAccess={maxAccess}
       functionId={SystemFunction.AssetsDepreciation}
       previewReport={true}
-      disabledSubmit={isStatusNotOne}
-      isCleared={!isStatusNotOne}
     >
       <VertLayout>
         <Fixed>
@@ -307,6 +314,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
         <Grow>
           <Table
+            name='assets'
             columns={columns}
             gridData={formik.values.asset}
             rowId={['recordId']}

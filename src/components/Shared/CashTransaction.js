@@ -3,14 +3,18 @@ import Table from './Table'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { useResourceQuery } from 'src/hooks/resource'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const CashTransaction = props => {
-  const { recordId, functionId } = props
+  const { recordId, functionId, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.CashTransaction, window })
 
   const {
     query: { data },
@@ -84,5 +88,8 @@ const CashTransaction = props => {
     </VertLayout>
   )
 }
+
+CashTransaction.width = 1200
+CashTransaction.height = 670
 
 export default CashTransaction

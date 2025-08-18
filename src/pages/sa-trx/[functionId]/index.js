@@ -1,6 +1,6 @@
 import { Grow } from '@mui/material'
 import { useRouter } from 'next/router'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
@@ -16,14 +16,33 @@ import SaleTransactionForm from './forms/SaleTransactionForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
+import NormalDialog from 'src/components/Shared/NormalDialog'
+import { Router } from 'src/lib/useRouter'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
-  const router = useRouter()
-  const { functionId } = router.query
+  const { addLockedScreen } = useContext(LockedScreensContext)
+
+  const { functionId } = Router()
+
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.SalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.SaleReturn
+      case SystemFunction.ConsignmentIn:
+        return ResourceIds.ClientGOCIn
+      case SystemFunction.ConsignmentOut:
+        return ResourceIds.ClientGOCOut
+      default:
+        return null
+    }
+  }
 
   const {
     query: { data },
@@ -38,6 +57,7 @@ const SaTrx = () => {
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesTransaction.qry,
     datasetId: ResourceIds.SalesInvoice,
+    DatasetIdAccess: getResourceId(parseInt(functionId)),
     filter: {
       filterFn: fetchWithFilter,
       default: { functionId }
@@ -46,13 +66,13 @@ const SaTrx = () => {
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'plantName',
+      headerName: labels.plant,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'reference',
+      headerName: labels.reference,
       flex: 1
     },
     {
@@ -62,23 +82,24 @@ const SaTrx = () => {
       type: 'date'
     },
     {
+      field: 'clientRef',
+      headerName: labels.clientRef,
+      flex: 1
+    },
+    {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
     },
     {
-      field: 'spRef',
-      headerName: labels.salesPerson,
-      flex: 1
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
     },
     {
-      field: 'szName',
-      headerName: labels.saleZone,
-      flex: 1
-    },
-    {
-      field: 'plantName',
-      headerName: labels.plant,
+      field: 'qty',
+      headerName: labels.qty,
       flex: 1
     },
     {
@@ -91,17 +112,16 @@ const SaTrx = () => {
       field: 'amount',
       headerName: labels.net,
       flex: 1,
-      type: 'number'
+      type: { field: 'number', decimal: 2 }
     },
     {
-      field: 'pcs',
-      headerName: labels.pcs,
-      flex: 1,
-      type: 'number'
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
     },
     {
-      field: 'qty',
-      headerName: labels.qty,
+      field: 'szName',
+      headerName: labels.saleZone,
       flex: 1
     },
     {
@@ -118,6 +138,11 @@ const SaTrx = () => {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
@@ -156,12 +181,11 @@ const SaTrx = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   const getCorrectLabel = functionId => {
@@ -178,19 +202,63 @@ const SaTrx = () => {
     }
   }
 
-  async function openForm(recordId) {
+  const getGLResource = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.SalesInvoice:
+        return ResourceIds.GLSalesInvoice
+      case SystemFunction.SalesReturn:
+        return ResourceIds.GLSalesReturn
+      default:
+        return null
+    }
+  }
+
+  function openStack(recordId) {
     stack({
       Component: SaleTransactionForm,
       props: {
-        labels: labels,
-        recordId: recordId,
+        labels,
+        recordId,
         access,
-        functionId: functionId
+        functionId,
+        lockRecord,
+        getResourceId,
+        getGLResource
       },
       width: 1330,
       height: 720,
       title: getCorrectLabel(parseInt(functionId))
     })
+  }
+
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: getResourceId(parseInt(functionId)),
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
   }
 
   const add = async () => {
@@ -206,39 +274,14 @@ const SaTrx = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SATR'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SATR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

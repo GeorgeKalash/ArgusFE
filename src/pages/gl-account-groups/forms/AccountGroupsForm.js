@@ -50,16 +50,14 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.GLAccountGroups.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.GLAccountGroups.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

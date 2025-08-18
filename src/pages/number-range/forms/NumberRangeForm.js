@@ -16,6 +16,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function NumberRangeForm({ labels, maxAccess, recordId }) {
   const [dateRanges, setDateRange] = useState(false)
@@ -179,28 +180,28 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
             </Grid>
 
             <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox name='external' checked={formik.values?.external} onChange={formik.handleChange} />}
+              <CustomCheckBox
+                name='external'
+                value={formik.values?.external}
+                onChange={event => formik.setFieldValue('external', event.target.checked)}
                 label={labels.external}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='dateRange'
-                    checked={formik.values?.dateRange}
-                    onChange={(e, newValue) => {
-                      formik.setFieldValue('dateRange', newValue)
+              <CustomCheckBox
+                name='dateRange'
+                value={formik.values?.dateRange}
+                onChange={(e, newValue) => {
+                  formik.setFieldValue('dateRange', newValue)
 
-                      formik.setFieldValue('startDate', null)
-                      formik.setFieldValue('endDate', null)
-                      setDateRange(newValue)
-                      formik.handleChange(e)
-                    }}
-                  />
-                }
+                  formik.setFieldValue('startDate', null)
+                  formik.setFieldValue('endDate', null)
+                  setDateRange(newValue)
+                  formik.handleChange(e)
+                }}
                 label={labels.dateRange}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid

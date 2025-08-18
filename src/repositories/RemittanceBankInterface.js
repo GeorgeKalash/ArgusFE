@@ -2,7 +2,10 @@ const service = 'RTBI.asmx/'
 
 export const RemittanceBankInterface = {
   Combos: {
-    qry: service + 'qryCBX'
+    qryCBX: service + 'qryCBX',
+    qryTerrapayCBX: service + 'qryTerrapayCBX',
+    qryTerrapyBanks: service + 'qryTerrapyBanks',
+    terrapayAccountStatus: service + 'terrapayAccountStatus'
   },
   ReceivingCountries: {
     qry: service + 'qryRVC'
@@ -14,6 +17,25 @@ export const RemittanceBankInterface = {
     snapshot: service + 'snapshotBank'
   },
   InstantCashRates: {
-    qry: service + 'qryICRates'
-  }
+    qry: service + 'qryICFees',
+    get: service + 'getICFees'
+  },
+  exchange: {
+    get: service + 'getICExchangeRates'
+  },
+  Agents: {
+    qry: service + 'qryAgents'
+  },
+  Currencies: {
+    qry: service + 'qryBICurrencies'
+  },
+  Countries: {
+    qry: service + 'qryBICountries'
+  },
+  DeliveryMode: {
+    qry: service + 'qryBIDVRow'
+  },
+  ATPExchangeRate: {
+    get2: service + 'getATPExchangeRate2'
+  },
 }

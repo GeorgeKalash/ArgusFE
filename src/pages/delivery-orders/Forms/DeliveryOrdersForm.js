@@ -29,8 +29,9 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import WorkFlow from 'src/components/Shared/WorkFlow'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId }) {
+export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -42,24 +43,14 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     enabled: !recordId
   })
 
-  async function getDefaultData() {
-    const userKeys = ['plantId', 'siteId']
+  const defPId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
-    const userDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
-      if (userKeys.includes(key)) {
-        acc[key] = value ? parseInt(value) : null
-      }
-
-      return acc
-    }, {})
-
-    formik.setFieldValue('plantId', parseInt(userDefault?.plantId))
-    formik.setFieldValue('siteId', parseInt(userDefault?.siteId))
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: DeliveryRepository.DeliveriesOrders.qry
-  })
+  const invalidate = useInvalidate(
+    refresh && {
+      endpointId: DeliveryRepository.DeliveriesOrders.qry
+    }
+  )
 
   const ordersInitialValues = [
     {
@@ -77,7 +68,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       qty: null,
       pendingQty: null,
       placeHolder: null,
-      soRef: null,
       siteId: null,
       siteName: '',
       isEditMode: false,
@@ -91,10 +81,11 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
   ]
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
-      plantId: null,
+      plantId: defPId,
       saleOrderId: null,
       clientRef: '',
       clientName: '',
@@ -103,7 +94,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       driverId: null,
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -121,7 +112,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       spId: null,
       volume: null,
       qty: null,
-      siteId: null,
+      siteId: defSiteId,
       address: '',
       orders: ordersInitialValues
     },
@@ -200,7 +191,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     if (!addressId) return null
 
     const res = await getRequest({
-      extension: SystemRepository.FormattedAddress.get,
+      extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
 
@@ -233,6 +224,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
     formik.setValues({
       ...doHeader?.record,
+      plantId: props.plantId || doHeader?.record.plantId,
+      dtId: props.dtId || doHeader?.record.dtId,
       address: address,
       orders: ordersList
     })
@@ -276,7 +269,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
 
   useEffect(() => {
     ;(async function () {
-      getDefaultData()
       if (recordId) {
         await refetchForm(recordId)
       }
@@ -289,9 +281,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       props: {
         functionId: SystemFunction.DeliveryOrder,
         recordId: formik.values.recordId
-      },
-      width: 950,
-      title: labels.WorkFlow
+      }
     })
   }
 
@@ -454,10 +444,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     invalidate()
   }
 
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
-
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
@@ -474,10 +460,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
         form: formik.values,
         handleAddressValues: setAddressValues,
         checkedAddressId: formik.values.addressId
-      },
-      width: 950,
-      height: 600,
-      title: labels.AddressFilter
+      }
     })
   }
 
@@ -535,6 +518,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                     required
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -589,6 +573,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     onChange={(event, newValue) => {
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
+                    maxAccess={maxAccess}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
                   />
                 </Grid>
@@ -634,6 +619,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     valueField='recordId'
                     readOnly={isPosted || isCancelled}
                     displayField='name'
+                    maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
@@ -642,18 +628,14 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                   />
                 </Grid>
                 <Grid item xs={8}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='exWorks'
-                        readOnly
-                        disabled={true}
-                        checked={formik.values?.exWorks}
-                        onChange={formik.handleChange}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='exWorks'
+                    value={formik.values?.exWorks}
+                    onChange={event => formik.setFieldValue('exWorks', event.target.checked)}
                     label={labels.exWorks}
+                    maxAccess={maxAccess}
+                    readOnly
+                    disabled={true}
                   />
                 </Grid>
                 <Grid item xs={4}>
@@ -666,6 +648,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('szId', newValue ? newValue.recordId : null)
                     }}
@@ -725,6 +708,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
             value={formik?.values?.orders}
             error={formik?.errors?.orders}
             columns={columns}
+            maxAccess={maxAccess}
+            name='orders'
             allowDelete={!isPosted && !isCancelled}
             allowAddNewLine={!isPosted && !isCancelled}
           />

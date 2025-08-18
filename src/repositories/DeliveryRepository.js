@@ -25,7 +25,11 @@ export const DeliveryRepository = {
     reopen: service + 'reopenTRP',
     post: service + 'postTRP',
     unpost: service + 'unpostTRP',
-    close: service + 'closeTRP'
+    close: service + 'closeTRP',
+    generate: service + 'generateTRP',
+    setTRP2: service + 'setTRP2',
+    assign: service + 'assignTRP',
+    unassign: service + 'unassignedTRP'
   },
   TripOrderPack2: {
     set2: service + 'set2TRO'
@@ -50,12 +54,17 @@ export const DeliveryRepository = {
     get: service + 'getORD',
     snapshot: service + 'snapshotORD',
     unpost: service + 'unpostORD',
+    gen: service + 'genORD',
     post: service + 'postORD',
     del: service + 'delORD',
     cancel: service + 'cancelORD',
     flag: service + 'flagORD',
-    set2: service + 'set2ORD',
-    generate: service + 'generateIVC2'
+    set2: service + 'set2ORD'
+  },
+  Invoice: {
+    generate: service + 'generateIVC2',
+    generateInv: service + 'generateIVC',
+    preview: service + 'previewIVC'
   },
   OrderItem: {
     qry: service + 'qryORI',
@@ -63,5 +72,23 @@ export const DeliveryRepository = {
   },
   MW: {
     qry: service + 'qryMW2'
+  },
+  GenerateTrip: {
+    root: service + 'rootSZ',
+    firstLevel: service + 'firstLevelSZ',
+    undelivered2: service + 'undeliveredSO2',
+    previewTRP: service + 'previewTRP'
+  },
+  DeliveryLeadTime: {
+    get: service + 'getLDT',
+    page: service + 'pageLDT',
+    set: service + 'setLDT',
+    del: service + 'delLDT'
+  },
+  Volume: {
+    vol: service + 'volZO'
+  },
+  AllocatedVolume: {
+    qry: service + 'qryVEH2'
   }
 }

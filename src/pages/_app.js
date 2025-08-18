@@ -30,6 +30,10 @@ import ThemeComponent from 'src/@core/theme/ThemeComponent'
 import AuthGuard from 'src/@core/components/auth/AuthGuard'
 import GuestGuard from 'src/@core/components/auth/GuestGuard'
 
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+import 'ag-grid-community'
+
 // ** Spinner Import
 import Spinner from 'src/@core/components/spinner'
 
@@ -70,6 +74,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
 import { useContext } from 'react'
+import { LabelsAccessContextProvider } from 'src/providers/LabelsAccessContext'
+import { LockedScreensProvider } from 'src/providers/LockedScreensContext'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -135,66 +141,83 @@ const App = props => {
           <meta name='description' content={`Argus ERP`} />
           <meta name='keywords' content='Argus, ERP, ArgusERP' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />
+          <meta name='google' content='notranslate' />
         </Head>
         <AuthProvider>
           <GuestGuard fallback={<Spinner />}>
             <RequestsProvider>
               <ErrorProvider>
                 <WindowProvider>
-                  <QueryClientProvider client={queryClient}>
-                    <RequestsProvider>
-                      <ControlProvider>
-                        <CommonProvider>
-                          <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-                            <SettingsConsumer>
-                              {({ settings }) => {
-                                return (
-                                  <ThemeComponent settings={settings}>
-                                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                                      <AclGuard
-                                        aclAbilities={aclAbilities}
-                                        guestGuard={guestGuard}
-                                        authGuard={authGuard}
-                                      >
-                                        <PrimeReactProvider>
-                                          {getLayout(
-                                            <ErrorProvider
-                                              key={typeof window !== 'undefined' ? window.location.pathname : ''}
-                                            >
-                                              <RequestsProvider
-                                                showLoading
-                                                key={typeof window !== 'undefined' ? window.location.pathname : ''}
-                                              >
-                                                <CommonProvider
+                  <LockedScreensProvider>
+                    <QueryClientProvider client={queryClient}>
+                      <LabelsAccessContextProvider>
+                        <RequestsProvider>
+                          <ControlProvider>
+                            <CommonProvider>
+                              <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+                                <SettingsConsumer>
+                                  {({ settings }) => {
+                                    return (
+                                      <ThemeComponent settings={settings}>
+                                        <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                                          <AclGuard
+                                            aclAbilities={aclAbilities}
+                                            guestGuard={guestGuard}
+                                            authGuard={authGuard}
+                                          >
+                                            <PrimeReactProvider>
+                                              {getLayout(
+                                                <ErrorProvider
                                                   key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                                 >
-                                                  <WindowProvider
+                                                  <RequestsProvider
+                                                    showLoading
                                                     key={typeof window !== 'undefined' ? window.location.pathname : ''}
                                                   >
-                                                    <Component {...pageProps} />
-                                                  </WindowProvider>
-                                                </CommonProvider>
-                                              </RequestsProvider>
-                                            </ErrorProvider>
-                                          )}
-                                        </PrimeReactProvider>
-                                      </AclGuard>
-                                    </Guard>
-                                    <ReactHotToast>
-                                      <Toaster
-                                        position={settings.toastPosition}
-                                        toastOptions={{ className: 'react-hot-toast' }}
-                                      />
-                                    </ReactHotToast>
-                                  </ThemeComponent>
-                                )
-                              }}
-                            </SettingsConsumer>
-                          </SettingsProvider>
-                        </CommonProvider>
-                      </ControlProvider>
-                    </RequestsProvider>
-                  </QueryClientProvider>
+                                                    <CommonProvider
+                                                      key={
+                                                        typeof window !== 'undefined' ? window.location.pathname : ''
+                                                      }
+                                                    >
+                                                      <ControlProvider
+                                                        key={
+                                                          typeof window !== 'undefined' ? window.location.pathname : ''
+                                                        }
+                                                      >
+                                                        <WindowProvider
+                                                          key={
+                                                            typeof window !== 'undefined'
+                                                              ? window.location.pathname
+                                                              : ''
+                                                          }
+                                                        >
+                                                          <Component {...pageProps} />
+                                                        </WindowProvider>
+                                                      </ControlProvider>
+                                                    </CommonProvider>
+                                                  </RequestsProvider>
+                                                </ErrorProvider>
+                                              )}
+                                            </PrimeReactProvider>
+                                          </AclGuard>
+                                        </Guard>
+                                        <ReactHotToast>
+                                          <Toaster
+                                            position={settings.toastPosition}
+                                            toastOptions={{ className: 'react-hot-toast' }}
+                                          />
+                                        </ReactHotToast>
+                                      </ThemeComponent>
+                                    )
+                                  }}
+                                </SettingsConsumer>
+                              </SettingsProvider>
+                            </CommonProvider>
+                          </ControlProvider>
+                        </RequestsProvider>
+                      </LabelsAccessContextProvider>
+                    </QueryClientProvider>
+                  </LockedScreensProvider>
                 </WindowProvider>
               </ErrorProvider>
             </RequestsProvider>

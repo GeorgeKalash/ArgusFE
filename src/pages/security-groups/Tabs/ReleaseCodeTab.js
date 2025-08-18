@@ -47,14 +47,12 @@ const ReleaseCodeTab = ({ labels, maxAccess, recordId }) => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: AccessControlRepository.SGReleaseCode.del,
-        record: JSON.stringify(obj)
-      })
-      toast.success(platformLabels.Deleted)
-      invalidate()
-    } catch (error) {}
+    await postRequest({
+      extension: AccessControlRepository.SGReleaseCode.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
   }
 
   const add = () => {
@@ -76,6 +74,7 @@ const ReleaseCodeTab = ({ labels, maxAccess, recordId }) => {
       <Grow>
         <GridToolbar onAdd={add} maxAccess={maxAccess} />
         <Table
+          name='release'
           columns={columns}
           gridData={data}
           rowId={['codeId']}

@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from 'react'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { useEffect, useContext } from 'react'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
@@ -14,14 +14,17 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const SystemDefaults = () => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   useEffect(() => {
+    if (!defaultsData?.list?.length) return
     getDataResult()
-  }, [])
+  }, [defaultsData])
 
   const getDataResult = () => {
     const myObject = {}
@@ -36,11 +39,12 @@ const SystemDefaults = () => {
         obj.key === 'backofficeEmail' ||
         obj.key === 'dateFormat' ||
         obj.key === 'ActivityBlankQryDaysBack' ||
-        obj.key === 'extentionsPath'
+        obj.key === 'extentionsPath' ||
+        obj.key === 'passwordExpiryDays'
       )
     })
     filteredList?.forEach(obj => {
-      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail') {
+      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail' || obj.key === 'enableHijri') {
         myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
@@ -54,7 +58,6 @@ const SystemDefaults = () => {
   })
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       extentionsPath: '',
@@ -65,7 +68,8 @@ const SystemDefaults = () => {
       dateFormat: null,
       timeZone: null,
       backofficeEmail: '',
-      enableHijri: false
+      enableHijri: false,
+      passwordExpiryDays: null
     },
     validationSchema: yup.object({
       baseCurrencyId: yup.string().required(' '),
@@ -224,18 +228,24 @@ const SystemDefaults = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='enableHijri'
-                    maxAccess={access}
-                    checked={formik.values?.enableHijri}
-                    onChange={event => {
-                      formik.setFieldValue('enableHijri', event.target.checked)
-                    }}
-                  />
-                }
+              <CustomCheckBox
+                name='enableHijri'
+                value={formik.values?.enableHijri}
+                onChange={event => formik.setFieldValue('enableHijri', event.target.checked)}
                 label={_labels.enableHijri}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='passwordExpiryDays'
+                label={_labels.passwordExpiryDays}
+                value={formik.values?.passwordExpiryDays}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                decimalScale={0}
+                maxLength={4}
+                onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
               />
             </Grid>
           </Grid>

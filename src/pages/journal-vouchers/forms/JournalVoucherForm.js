@@ -35,13 +35,14 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
   })
 
   const { formik } = useForm({
+    documentType: { key: 'dtId', value: documentType?.dtId },
     maxAccess,
     initialValues: {
       recordId: null,
       reference: '',
       date: new Date(),
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1
     },
     validateOnChange: true,
@@ -117,10 +118,11 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLJournalVoucher,
       disabled: !editMode
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isRaw || !editMode
@@ -157,7 +159,7 @@ export default function JournalVoucherForm({ labels, access, recordId }) {
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={maxAccess}
+                maxAccess={!editMode && maxAccess}
               />
             </Grid>
             <Grid item xs={12}>

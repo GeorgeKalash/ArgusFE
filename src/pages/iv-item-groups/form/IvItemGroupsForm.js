@@ -71,13 +71,23 @@ export default function IvItemGroupsForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.ItemGroup,
+      disabled: !editMode
+    }
+  ]
+
   return (
     <FormShell
       resourceId={ResourceIds.InventoryGroup}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      masterSource={MasterSource.ItemGroup}
+      actions={actions}
     >
       <VertLayout>
         <Grow>

@@ -1,231 +1,258 @@
-import { Box, Grid, Typography } from '@mui/material'
+import { Grid, FormControlLabel, RadioGroup, Radio } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import axios from 'axios'
+import { useWindow } from 'src/windows'
+import PopupDialog from 'src/components/Shared/PopupDialog'
+import * as yup from 'yup'
+import { useError } from 'src/error'
 
-export default function POSForm({ labels, formik }) {
-  const { getRequest } = useContext(RequestsContext)
-  const [owiFields, setowiFieldsIFields] = useState({})
-  const [baseCurSymbol, setBaseCurSymbol] = useState('')
-  const [corCurSymbol, setCorCurSymbol] = useState('')
+export default function POSForm({ labels, data, maxAccess, amount }) {
+  const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
+  const { userDefaultsData } = useContext(ControlContext)
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const [isSubmitting, setSubmitting] = useState(false)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
-  async function getDefaultBaseCurrency() {
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: `_filter=&_key=baseCurrencyId`
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      msgid: null,
+      ecrno: process.env.NEXT_PUBLIC_ECRNO,
+      ecR_RCPT: data?.reference,
+      amount: (amount * 100).toString(),
+      a1: 'E',
+      a2: '',
+      a3: '',
+      a4: '',
+      a5: '',
+      ipaddressOrPort: process.env.NEXT_PUBLIC_POS_PORT,
+      log: 1,
+      posSelected: 1,
+      cashAccountId: null,
+      cashAccountRef: null,
+      cashAccountName: null
+    },
+    validateOnChange: true,
+    validationSchema: yup.object({
+      cashAccountId: yup.number().required(),
+      posRef: yup.string().required()
     })
+  })
 
-    return res?.record?.value
+  const actions = [
+    {
+      key: 'Received',
+      condition: true,
+      onClick: onReceived,
+      viewLoader: isSubmitting,
+      disabled: data?.viewPosButtons
+    },
+    {
+      key: 'Cancel',
+      condition: true,
+      onClick: onCancel,
+      disabled: data?.viewPosButtons
+    }
+  ]
+  async function onReceived() {
+    try {
+      const errors = await formik.validateForm()
+      formik.setTouched({ cashAccountId: true, posRef: true })
+      if (Object.keys(errors).length > 0) {
+        return
+      }
+      setSubmitting(true)
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
+      if (res.data) {
+        setSubmitting(false)
+
+        const formattedText = res.data.replace(/ /g, '\n')
+
+        stack({
+          Component: PopupDialog,
+          props: {
+            DialogText: formattedText
+          },
+          expandable: false,
+          closable: false
+        })
+      }
+    } catch (error) {
+      setSubmitting(false)
+      stackError({
+        message: error?.message
+      })
+    }
   }
-  async function getCurrencySymbol(currencyId) {
+  async function onCancel() {
+    try {
+      const errors = await formik.validateForm()
+      formik.setTouched({ cashAccountId: true, posRef: true })
+      if (Object.keys(errors).length > 0) {
+        return
+      }
+      setSubmitting(false)
+      await axios.get(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/cancelTransaction`)
+    } catch (error) {
+      stackError({
+        message: error?.message
+      })
+    }
+  }
+
+  async function fillCashAccount() {
+    if (!cashAccountId) return
+
     const res = await getRequest({
-      extension: SystemRepository.Currency.get,
-      parameters: `_recordId=${currencyId}`
+      extension: CashBankRepository.CashAccount.get,
+      parameters: `_recordId=${cashAccountId}`
     })
+    formik.setFieldValue('cashAccountId', cashAccountId)
+    formik.setFieldValue('cashAccountRef', res?.record?.reference)
+    formik.setFieldValue('cashAccountName', res?.record?.name)
+  }
 
-    return res?.record?.symbol
-  }
-  async function getBaseCurrencySymbol() {
-    const getBaseCurId = await getDefaultBaseCurrency()
-    const symbol = await getCurrencySymbol(getBaseCurId)
-    setBaseCurSymbol(symbol)
-  }
-  async function getCorCurrencySymbol() {
-    const symbol = await getCurrencySymbol(formik.values.corCurrencyId)
-    setCorCurSymbol(symbol)
-  }
+  useEffect(() => {
+    ;(async function () {
+      await fillCashAccount()
+
+      const response = await getRequestFullEndPoint({
+        endPoint: `${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/checkDevice?_port=${process.env.NEXT_PUBLIC_POS_PORT}`
+      })
+      formik.setFieldValue('posSelected', response?.data ? 2 : 1)
+    })()
+  }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.OutwardsOrder} form={formik} isCleared={false} isInfo={false} isSaved={false}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sx={{ mx: 5, mt: 2 }}>
-          <CustomTextField
-            name='corCurrencyRef'
-            readOnly
-            label={labels.corCurrency}
-            value={owiFields?.corCurrencyRef}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
-            name='corExRate'
-            readOnly
-            label={labels.corCurrencyRate}
-            value={owiFields?.corExRate}
-            decimalScale={5}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corEvalExRate'
-            readOnly
-            label={labels.corCurrencyEval}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corEvalExRate}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField name='taxPercent' readOnly label={labels.TaxPct} value={owiFields?.taxPercent} />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corAmount'
-            readOnly
-            label={labels.corAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
+    <FormShell
+      resourceId={ResourceIds.POSPayment}
+      form={formik}
+      isCleared={false}
+      isInfo={false}
+      isSaved={false}
+      actions={actions}
+    >
+      <Grow>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='reference'
+              readOnly
+              label={labels?.reference}
+              maxAccess={maxAccess}
+              value={data?.reference}
+            />
+          </Grid>
+          <Grid item container spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='clientName'
+                readOnly
+                label={labels?.client}
+                value={data?.clientName}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='beneficiaryName'
+                readOnly
+                label={labels?.beneficiary}
+                value={data?.beneficiaryName}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+          </Grid>
 
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corComission'
-            readOnly
-            label={labels.corComission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
+          <Grid item xs={12}>
+            <RadioGroup row value={formik.values.posSelected} defaultValue={1}>
+              <FormControlLabel
+                value={1}
+                control={<Radio />}
+                label={labels.manualPOS}
+                disabled={formik.values.posSelected == 2}
+              />
+              <FormControlLabel
+                value={2}
+                control={<Radio />}
+                label={labels.apiPOS}
+                disabled={formik.values.posSelected == 1}
+              />
+            </RadioGroup>
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceLookup
+              endpointId={CashBankRepository.CashAccount.snapshot}
+              parameters={{
+                _type: 2
+              }}
+              valueField='reference'
+              displayField='name'
+              name='cashAccountId'
+              label={labels.posAccount}
+              form={formik}
+              readOnly={formik.values.posSelected == 2}
+              displayFieldWidth={2}
+              valueShow='cashAccountRef'
+              secondValueShow='cashAccountName'
+              editMode={true}
+              maxAccess={maxAccess}
+              errorCheck={'cashAccountId'}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('cashAccountRef', newValue?.reference)
+                formik.setFieldValue('cashAccountName', newValue?.name)
+                formik.setFieldValue('cashAccountId', newValue?.recordId || null)
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='amount'
+              label={labels.amount}
+              value={formik?.values?.amount}
+              maxAccess={maxAccess}
+              readOnly
+              error={formik.touched?.amount && Boolean(formik.errors?.amount)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='posRef'
+              label={labels?.posRef}
+              value={formik?.posRef}
+              maxAccess={maxAccess}
+              readOnly={formik.values.posSelected == 2}
+              onChange={formik.handleChange}
+              error={formik.touched.posRef && Boolean(formik.errors.posRef)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='remarks'
+              label={labels.remarks}
+              value={formik.values.remarks}
+              rows={3}
+              maxAccess={maxAccess}
+              editMode={true}
+              onChange={e => formik.setFieldValue('remarks', e.target.value)}
+              onClear={() => formik.setFieldValue('remarks', '')}
+              error={formik.touched?.remarks && Boolean(formik.errors.remarks)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corBaseAmount'
-            readOnly
-            label={labels.corBaseAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.corBaseAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='grossProfitFromExRate'
-            readOnly
-            label={labels.grossProfit}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.grossProfit}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='netCommssionCost'
-            readOnly
-            label={labels.netCommission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.baseCorCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='netCommissionRevenue'
-            readOnly
-            label={labels.netCommissionRevenue}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{owiFields?.netCommissionRevenue}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-      </Grid>
+      </Grow>
     </FormShell>
   )
 }

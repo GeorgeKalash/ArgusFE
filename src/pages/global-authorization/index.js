@@ -67,10 +67,7 @@ const GlobalAuthorization = () => {
         moduleId: filters.moduleId,
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
-      },
-      width: 450,
-      height: 200,
-      title: labels.accessLevel
+      }
     })
   }
 
@@ -81,12 +78,8 @@ const GlobalAuthorization = () => {
         labels: labels,
         maxAccess: access,
         row: { resourceId: row.data.key, resourceName: row.data.value, moduleId: filters.moduleId },
-        invalidate,
         resourceId: ResourceIds.GlobalAuthorization
-      },
-      width: 450,
-      height: 300,
-      title: labels.resourceGlobal
+      }
     })
   }
 
@@ -100,8 +93,6 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.GlobalAuthorization
       },
-      width: 500,
-      height: 480,
       title: labels.fieldGlobal
     })
   }
@@ -124,42 +115,44 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <>
-              <Grid item sx={{ width: '350px' }}>
-                <ResourceComboBox
-                  datasetId={DataSets.MODULE}
-                  name='moduleId'
-                  values={{
-                    moduleId: filters.moduleId
-                  }}
-                  valueField='key'
-                  displayField='value'
-                  onChange={(event, newValue) => {
-                    onChange(newValue?.key)
-                  }}
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  variant='contained'
-                  sx={{
-                    ml: 2,
-                    backgroundColor: '#231F20',
-                    '&:hover': {
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={9}>
+                  <ResourceComboBox
+                    datasetId={DataSets.MODULE}
+                    name='moduleId'
+                    values={{
+                      moduleId: filters.moduleId
+                    }}
+                    valueField='key'
+                    displayField='value'
+                    onChange={(event, newValue) => {
+                      onChange(newValue?.key)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={3}>
+                  <Button
+                    variant='contained'
+                    sx={{
+                      ml: 2,
                       backgroundColor: '#231F20',
-                      opacity: 0.8
-                    },
-                    width: 'auto',
-                    height: '35px',
-                    objectFit: 'contain'
-                  }}
-                  onClick={() => openApplyModuleLevel()}
-                  disabled={!filters.moduleId}
-                >
-                  <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-                </Button>
+                      '&:hover': {
+                        backgroundColor: '#231F20',
+                        opacity: 0.8
+                      },
+                      width: 'auto',
+                      height: '35px',
+                      objectFit: 'contain'
+                    }}
+                    onClick={() => openApplyModuleLevel()}
+                    disabled={!filters.moduleId}
+                  >
+                    <Icon icon='mdi:arrow-expand-right' fontSize={20} />
+                  </Button>
+                </Grid>
               </Grid>
-            </>
+            </Grid>
           }
         />
       </Fixed>

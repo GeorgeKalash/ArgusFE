@@ -68,14 +68,12 @@ const AccountGroups = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.Group.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: FinancialRepository.Group.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -87,7 +85,7 @@ const AccountGroups = () => {
         maxAccess: access
       },
       width: 600,
-      height: 600,
+      height: 400,
       title: _labels.accountGroups
     })
   }

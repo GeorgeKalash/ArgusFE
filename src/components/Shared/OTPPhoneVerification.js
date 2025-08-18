@@ -7,11 +7,13 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Box } from '@mui/material'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData } = useContext(ControlContext)
+  const { defaultsData, platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.OTPVerification, window })
 
   const { labels: labels } = useResourceParams({
     datasetId: ResourceIds.OTPVerify
@@ -19,8 +21,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [timer, setTimer] = useState(null)
   const [sent, setSent] = useState(false)
-
-  const [error, setError] = useState('')
   const [disabled, setDisabled] = useState(0)
 
   useEffect(() => {
@@ -33,7 +33,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
         }, 1000)
       } else {
         clearInterval(interval)
-        setError(labels.OTPTimeNotSet)
       }
     }
 
@@ -51,8 +50,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     postRequest({
       extension: CTCLRepository.OTPRepository.sms,
       record: JSON.stringify(data)
-    }).then(res => {
-      setError(res.error)
     })
   }
 
@@ -75,8 +72,6 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
         if (getData) getData(values.clientId)
         window.close()
       })
-    } else {
-      setError('All Fields Required')
     }
   }
 
@@ -92,6 +87,11 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
       if (index < otp.length - 1 && value !== '') {
         document.getElementById(`otp-input-${index + 1}`).focus()
         document.getElementById(`otp-input-${index + 1}`).select()
+      } else if (index === otp.length - 1) {
+        const isOtpComplete = newOtp.every(digit => digit !== '')
+        if (isOtpComplete) {
+          handleVerifyOtp(newOtp)
+        }
       }
     } else if (e.nativeEvent.inputType === 'deleteContentBackward') {
       newOtp[index] = ''
@@ -133,6 +133,11 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     }
   }
 
+  const handleVerifyOtp = newOtp => {
+    const enteredOtp = newOtp ? newOtp.join('') : otp.join('')
+    checkSMS(enteredOtp)
+  }
+
   const handleResendOtp = () => {
     setSent(true)
     const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
@@ -140,15 +145,9 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     if (!isNaN(expiryTime)) {
       setTimer(expiryTime)
     }
-    setError('')
     setOtp(['', '', '', '', '', ''])
     document.getElementById('otp-input-0').focus()
     otpSMS()
-  }
-
-  const handleVerifyOtp = () => {
-    const enteredOtp = otp.join('')
-    checkSMS(enteredOtp)
   }
 
   return (
@@ -193,5 +192,8 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
     </div>
   )
 }
+
+OTPPhoneVerification.width = 400
+OTPPhoneVerification.height = 400
 
 export default OTPPhoneVerification

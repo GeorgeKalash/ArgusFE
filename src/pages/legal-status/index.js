@@ -77,14 +77,12 @@ const LegalStatus = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: BusinessPartnerRepository.LegalStatus.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: BusinessPartnerRepository.LegalStatus.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

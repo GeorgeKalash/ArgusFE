@@ -19,6 +19,9 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -47,6 +50,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       metalId: '',
       priceType: '',
       taxId: '',
+      returnPolicyId: null,
       applyVAT: false,
       allowNegativeQty: false,
       isInactive: false
@@ -148,8 +152,24 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.ItemCategory,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Category} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Category}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grid container gap={2}>
           <Grid item xs={7}>
@@ -314,6 +334,25 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     maxAccess={maxAccess}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.ReturnPolicy.qry}
+                    name='returnPolicyId'
+                    label={labels.returnPolicy}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('returnPolicyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.returnPolicyId && Boolean(formik.errors.returnPolicyId)}
+                  />
+                </Grid>
               </Grid>
             </Grow>
           </Grid>
@@ -321,21 +360,17 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
             <Grow>
               <Grid container gap={2}>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='applyVAT'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.applyVAT}
-                        onChange={e => {
-                          formik.setFieldValue('applyVAT', e.target.checked)
-                          if (e.target.checked == false) {
-                            formik.setFieldValue('taxId', '')
-                          }
-                        }}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='applyVAT'
+                    value={formik.values?.applyVAT}
+                    onChange={e => {
+                      formik.setFieldValue('applyVAT', e.target.checked)
+                      if (e.target.checked == false) {
+                        formik.setFieldValue('taxId', '')
+                      }
+                    }}
                     label={labels.applyVat}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -379,7 +414,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 {(formik.values.trackBy === '1' || formik.values.trackBy === 1) && (
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={InventoryRepository.SerialNumber.qry}
+                      endpointId={InventoryRepository.SerialsProfile.qry}
                       name='spfId'
                       required={formik.values.trackBy === '1' || formik.values.trackBy === 1}
                       label={labels.spf}
@@ -431,22 +466,18 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 )}
 
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isMetal'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.isMetal}
-                        onChange={e => {
-                          formik.setFieldValue('isMetal', e.target.checked)
-                          if (e.target.checked == false) {
-                            formik.setFieldValue('metalId', '')
-                            formik.setFieldValue('metalPurity', '')
-                          }
-                        }}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isMetal'
+                    value={formik.values?.isMetal}
+                    onChange={e => {
+                      formik.setFieldValue('isMetal', e.target.checked)
+                      if (e.target.checked == false) {
+                        formik.setFieldValue('metalId', '')
+                        formik.setFieldValue('metalPurity', '')
+                      }
+                    }}
                     label={labels.isMetal}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -476,33 +507,21 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='allowNegativeQty'
-                        maxAccess={maxAccess}
-                        checked={formik.values?.allowNegativeQty}
-                        onChange={e => {
-                          formik.setFieldValue('allowNegativeQty', e.target.checked)
-                        }}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='allowNegativeQty'
+                    value={formik.values?.allowNegativeQty}
+                    onChange={event => formik.setFieldValue('allowNegativeQty', event.target.checked)}
                     label={labels.allowNegativeQty}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        name='isInactive'
-                        checked={formik.values?.isInactive}
-                        onChange={e => {
-                          formik.setFieldValue('isInactive', e.target.checked)
-                        }}
-                        maxAccess={maxAccess}
-                      />
-                    }
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values?.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                     label={labels.isInactive}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>

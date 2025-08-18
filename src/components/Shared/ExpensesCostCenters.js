@@ -6,13 +6,24 @@ import { useForm } from 'src/hooks/form.js'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import CustomTextField from '../Inputs/CustomTextField'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import CustomNumberField from '../Inputs/CustomNumberField'
+import { useContext } from 'react'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { useResourceQuery } from 'src/hooks/resource'
 
-export default function ExpensesCostCenters({ labels, maxAccess, row, window, updateRow, recordId, readOnly }) {
+export default function ExpensesCostCenters({ row, window, updateRow, recordId, readOnly }) {
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.CostCenter, window })
+
+  const { labels, access: maxAccess } = useResourceQuery({
+    datasetId: ResourceIds.CostCenter
+  })
+
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       costCenters: row.costCenters || [
@@ -27,53 +38,63 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
       ]
     },
     onSubmit: async obj => {
-      try {
-        const costCenters = obj.costCenters.map((costCenter, index) => ({
-          ...costCenter,
-          id:  index + 1,
-          ccSeqNo: index + 1,
-          seqNo:  row.id,
-          pvId: recordId
-        }))
+      const costCenters = obj.costCenters.map((costCenter, index) => ({
+        ...costCenter,
+        id: index + 1,
+        ccSeqNo: index + 1,
+        seqNo: row.id,
+        pvId: recordId
+      }))
 
-        updateRow({ changes: { costCenters } })
-        window.close()
-      } catch (error) {}
+      updateRow({ changes: { costCenters } })
+      window.close()
     }
   })
 
   const columns = [
     {
-      component: 'resourcelookup',
+      component: 'resourcecombobox',
       label: labels.costCenter,
-      name: 'reference',
+      name: 'ccId',
       props: {
-        valueField: 'reference',
+        endpointId: GeneralLedgerRepository.CostCenter.qry,
+        parameters: `_params=&_startAt=0&_pageSize=1000&`,
+        valueField: 'recordId',
         displayField: 'reference',
-        displayFieldWidth: 2,
-        endpointId: GeneralLedgerRepository.CostCenter.snapshot,
+        displayFieldWidth: 3,
+        readOnly,
         mapping: [
           { from: 'recordId', to: 'ccId' },
           { from: 'name', to: 'ccName' },
-          { from: 'reference', to: 'ccRef' }
+          { from: 'reference', to: 'ccRef' },
+          { from: 'ccgName', to: 'ccgName' }
         ],
         columnsInDropDown: [
           { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ],
-        readOnly
+          { key: 'name', value: 'Name', grid: 3 },
+          { key: 'ccgName', value: 'Group Name' }
+        ]
       }
     },
     {
       component: 'textfield',
       label: labels.name,
       name: 'ccName',
+      flex: 2,
       props: {
         readOnly: true
       }
     },
     {
       component: 'textfield',
+      label: labels.group,
+      name: 'ccgName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.amount,
       name: 'amount',
       props: {
@@ -90,11 +111,11 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
 
   const balance = row.amount - totalAmount
 
-  const canSubmit = balance > 0 || balance < 0;
+  const canSubmit = balance > 0 || balance < 0 || readOnly
 
   return (
     <FormShell
-      resourceId={ResourceIds.PaymentVoucherExpenses}
+      resourceId={ResourceIds.CostCenter}
       form={formik}
       maxAccess={maxAccess}
       isCleared={false}
@@ -105,7 +126,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
         <Fixed>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='amount'
                 label={labels.amount}
                 value={row.amount}
@@ -117,7 +138,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='amountAssigned'
                 label={labels.amountAssigned}
                 value={totalAmount}
@@ -126,7 +147,7 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='balance'
                 label={labels.balance}
                 value={balance}
@@ -155,3 +176,6 @@ export default function ExpensesCostCenters({ labels, maxAccess, row, window, up
     </FormShell>
   )
 }
+
+ExpensesCostCenters.width = 700
+ExpensesCostCenters.height = 600

@@ -28,7 +28,7 @@ const CashTransfer = () => {
 
     const response = await getRequest({
       extension: CashBankRepository.CashTransfer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -206,15 +206,11 @@ const CashTransfer = () => {
     stack({
       Component: CashTransferTab,
       props: {
-        plantId: plantId,
-        cashAccountId: cashAccountId,
-        dtId: dtId,
-        access,
-        labels: _labels,
-        recordId: recordId ? recordId : null
-      },
-      width: 950,
-      title: _labels.cashTransfer
+        plantId,
+        cashAccountId,
+        dtId,
+        recordId
+      }
     })
   }
 
@@ -236,6 +232,7 @@ const CashTransfer = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

@@ -19,14 +19,12 @@ const VendorGroups = () => {
   const { stack } = useWindow()
 
   async function fetchGridData() {
-    try {
-      const response = await getRequest({
-        extension: PurchaseRepository.VendorGroups.qry,
-        parameters: `_filter=&_sortField=`
-      })
+    const response = await getRequest({
+      extension: PurchaseRepository.VendorGroups.qry,
+      parameters: `_filter=&_sortField=`
+    })
 
-      return response
-    } catch (error) {}
+    return response
   }
 
   const {
@@ -64,14 +62,12 @@ const VendorGroups = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: PurchaseRepository.VendorGroups.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: PurchaseRepository.VendorGroups.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -83,7 +79,7 @@ const VendorGroups = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 400,
       title: _labels.vendorGroups
     })
   }

@@ -12,6 +12,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
   const [editMode, setEditMode] = useState(!!recordId)
@@ -185,15 +186,12 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='useSameReference'
-                    checked={formik.values?.useSameReference}
-                    onChange={formik.handleChange}
-                  />
-                }
+              <CustomCheckBox
+                name='useSameReference'
+                value={formik.values?.useSameReference}
+                onChange={event => formik.setFieldValue('useSameReference', event.target.checked)}
                 label={labels.useSameRef}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

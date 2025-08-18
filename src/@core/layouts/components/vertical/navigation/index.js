@@ -22,6 +22,8 @@ import IconButton from '@mui/material/IconButton'
 import Icon from 'src/@core/components/icon'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Remove } from '@mui/icons-material'
+import { Tooltip } from '@mui/material'
 
 function ArrowBackIcon() {
   return (
@@ -64,7 +66,9 @@ const Navigation = props => {
 
   const router = useRouter()
   const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
-  const { setLastOpenedPage } = useContext(MenuContext)
+
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex } =
+    useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
   const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([])
@@ -233,6 +237,25 @@ const Navigation = props => {
 
   const ScrollWrapper = hidden ? Box : PerfectScrollbar
 
+  const go = node => {
+    if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
+      setReloadOpenedPage([])
+      setReloadOpenedPage(node)
+    } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
+      const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
+      setCurrentTabIndex(index)
+      window.history.replaceState(null, '', openTabs[index].route)
+    } else {
+      router.push(node.path)
+    }
+
+    setLastOpenedPage(node)
+  }
+
+  const onCollapse = () => {
+    setOpenFolders([])
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Drawer {...props}>
@@ -269,13 +292,23 @@ const Navigation = props => {
             }}
           />
           <TextField sx={{ display: 'none' }} />
+          <Tooltip
+            sx={{
+              backgroundColor: '#231f20',
+              borderRadius: '4px',
+              height: '30px',
+              padding: '3px',
+              marginLeft: '10px'
+            }}
+            title={platformLabels.collapse}
+          >
+            <Remove onClick={onCollapse} width={28} />
+          </Tooltip>
+
           <Dropdown
             Image={<SettingsIcon />}
             TooltipTitle={platformLabels.Gear}
-            onClickAction={GearItem => {
-              router.push(GearItem?.path)
-              setLastOpenedPage(GearItem)
-            }}
+            onClickAction={GearItem => go(GearItem)}
             map={gear.gear}
             navCollapsed={navCollapsed}
           />
@@ -283,10 +316,7 @@ const Navigation = props => {
             <Dropdown
               Image={<GradeIcon style={{ color: 'yellow' }} />}
               TooltipTitle={platformLabels.Favorite}
-              onClickAction={favorite => {
-                router.push(favorite?.path)
-                setLastOpenedPage(favorite)
-              }}
+              onClickAction={favorite => go(favorite)}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
             />

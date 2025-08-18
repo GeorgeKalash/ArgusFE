@@ -7,6 +7,7 @@ export const SystemChecks = {
   ALLOW_NAME_DUPLICATE: Module.System * 100 + 3,
   ALLOW_NO_CHILD_DATA: Module.System * 100 + 4,
   ALLOW_DOCUMENT_UNPOSTING: Module.System * 100 + 5,
+  HIDE_LEADING_ZERO_DECIMALS: Module.System * 100 + 9,
 
   // limit data access
   LIMIT_DATA_ACCESS_SYSTEM_PLANT: Module.System * 100 + 50,
@@ -19,20 +20,32 @@ export const SystemChecks = {
   ENABLE_IVMU_TRX: Module.Inventory * 100 + 3,
   ALLOW_PUIVC_MULTI_SITE: Module.Inventory * 100 + 4,
   ALLOW_SATRX_MULTI_SITE: Module.Inventory * 100 + 5,
+  DEFAULT_QTY_PIECES: Module.Inventory * 100 + 9,
 
   // GL Checks
   ALLOW_GL_TRX_RATE_DISCREPENCY: Module.GeneralLedger * 100 + 1,
 
   // Delivery Orders
   ALLOW_DELIVERY_RETURN_OF_UNKNOWN_SKU: Module.Delivery * 100 + 1,
+  AUTO_POST_GENERATED_DELIVERY_ORDERS_FROM_MIDDLEWARE: Module.Delivery * 100 + 6,
 
   //Purchase
   ENABLE_PURCHASE_TAX: Module.Purchase * 100 + 1,
   ALLOW_ITEM_CREATION_FROM_PURCHASE: Module.Purchase * 100 + 2,
 
+  //Stock Count
+  AUTO_SAVE_CYCLE_COUNT: Module.StockCount * 100 + 1,
+
   //Point of Sales
   POS_JUMP_TO_NEXT_LINE: Module.PointOfSale * 100 + 1,
   SINGLE_CASH_POS: Module.PointOfSale * 100 + 2,
   POS_SKU_DISABLE_LOOKUP: Module.PointOfSale * 100 + 3,
-  ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6
+  AUTO_POST_POS_ACTIVITY_ON_SAVE: Module.PointOfSale * 100 + 5,
+  ENABLE_RETAIL_SCALE_BARCODE: Module.PointOfSale * 100 + 6,
+
+  CT_YAKEEN_INFORMATION: Module.CurrencyTrading * 100 + 5,
+  CT_DISABLE_MOBILE_VERIFICATION: Module.CurrencyTrading * 100 + 4,
+
+  //Sales
+  SRLNO_TEXT_CHECK: Module.Sales * 100 + 2
 }

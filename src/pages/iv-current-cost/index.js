@@ -28,11 +28,10 @@ const CurrentCost = () => {
   const {
     query: { data },
     labels: _labels,
-    paginationParameters,
-    refetch,
     filterBy,
-    clearFilter,
-    access
+    paginationParameters,
+    access,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.CurrentCost.qry,
@@ -67,8 +66,7 @@ const CurrentCost = () => {
     {
       field: 'categoryName',
       headerName: _labels.categoryName,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
       field: 'groupName',
@@ -89,35 +87,10 @@ const CurrentCost = () => {
     }
   ]
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'IVCOS'}
-        />
+        <RPBGridToolbar maxAccess={access} reportName={'IVCOS'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

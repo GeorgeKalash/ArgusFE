@@ -47,33 +47,29 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
     obj.startDate = obj.startDate ? formatDateToApi(obj.startDate) : ''
     obj.endDate = obj.endDate ? formatDateToApi(obj.endDate) : ''
 
-    try {
-      await postRequest({
-        extension: BusinessPartnerRepository.Relation.set,
-        record: JSON.stringify(obj)
-      })
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+    await postRequest({
+      extension: BusinessPartnerRepository.Relation.set,
+      record: JSON.stringify(obj)
+    })
+    if (!recordId) {
+      toast.success(platformLabels.Added)
+    } else {
+      toast.success(platformLabels.Edited)
+    }
 
-      await getRelationGridData(bpId)
-      window.close()
-    } catch (error) {}
+    await getRelationGridData(bpId)
+    window.close()
   }
 
   const getRelationById = async recordId => {
-    try {
-      const res = await getRequest({
-        extension: BusinessPartnerRepository.Relation.get,
-        parameters: `_recordId=${recordId}`
-      })
+    const res = await getRequest({
+      extension: BusinessPartnerRepository.Relation.get,
+      parameters: `_recordId=${recordId}`
+    })
 
-      res.record.startDate = formatDateFromApi(res.record.startDate)
-      res.record.endDate = formatDateFromApi(res.record.endDate)
-      formik.setValues(res.record)
-    } catch (error) {}
+    res.record.startDate = formatDateFromApi(res.record.startDate)
+    res.record.endDate = formatDateFromApi(res.record.endDate)
+    formik.setValues(res.record)
   }
 
   useEffect(() => {
@@ -128,6 +124,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                maxAccess={maxAccess}
                 required
                 onChange={(event, newValue) => {
                   formik && formik.setFieldValue('relationId', newValue?.recordId || '')

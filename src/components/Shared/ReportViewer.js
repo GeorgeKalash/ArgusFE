@@ -1,104 +1,134 @@
 import { useEffect, useState, useContext } from 'react'
-import { Autocomplete, Box, TextField } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
-import { ExportFormat } from 'src/statics/ExportFormat'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
-import PopperComponent from './Popper/PopperComponent'
+import ResourceComboBox from './ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
+import { generateReport } from 'src/utils/ReportUtils'
+import CustomButton from '../Inputs/CustomButton'
+import { CommonContext } from 'src/providers/CommonContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { getAllKvsByDataset } = useContext(CommonContext)
   const [reportStore, setReportStore] = useState([])
-  const [selectedReport, setSelectedReport] = useState(null)
-  const [selectedFormat, setSelectedFormat] = useState(ExportFormat[0])
+  const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)
+  const [exportFormats, setExportFormats] = useState([])
+  const [formatIndex, setFormatIndex] = useState(0)
+
+  const getExportFormats = async () => {
+    await getAllKvsByDataset({
+      _dataset: DataSets.EXPORT_FORMAT,
+      callback: res => {
+        if (res.length > 0) {
+          setExportFormats(res)
+          setFormatIndex(0)
+          setReport(prev => ({
+            ...prev,
+            selectedFormat: res[0]
+          }))
+        }
+      }
+    })
+  }
 
   const getReportLayout = () => {
-    var parameters = `_resourceId=${resourceId}`
     getRequest({
       extension: SystemRepository.ReportLayout,
-      parameters: parameters
-    })
-      .then(res => {
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res.list.map(item => ({
-            api_url: item.api,
-            reportClass: item.instanceName,
-            parameters: item.parameters,
-            layoutName: item.layoutName,
-            assembly: 'ArgusRPT.dll'
-          }))
-        ])
+      parameters: `_resourceId=${resourceId}`
+    }).then(async res => {
+      const inactiveReports = await getRequest({
+        extension: SystemRepository.ReportLayoutObject.qry,
+        parameters: `_resourceId=${resourceId}`
       })
-      .catch(error => {})
+      let newList = res.list || []
+      if (inactiveReports?.list?.length > 0) {
+        const inactiveIds = new Set(inactiveReports.list.map(item => item.id))
+        newList = newList.filter(item => !inactiveIds.has(item.id))
+      }
+      setReportStore(prevReportStore => {
+        const existingIds = new Set(prevReportStore.map(report => report.id))
+        const filteredNewItems = newList.filter(item => !existingIds.has(item.id))
+
+        const newMappedItems = filteredNewItems.map(item => ({
+          id: item.id,
+          api_url: item.api,
+          reportClass: item.instanceName,
+          parameters: item.parameters,
+          layoutName: item.layoutName,
+          assembly: 'ArgusRPT.dll'
+        }))
+
+        return [...prevReportStore, ...newMappedItems]
+      })
+    })
   }
 
   const getReportTemplate = () => {
-    var parameters = `_resourceId=${resourceId}`
+    const parameters = `_resourceId=${resourceId}`
     getRequest({
-      extension: SystemRepository.ReportTemplate,
-      parameters: parameters
+      extension: SystemRepository.ReportTemplate.qry,
+      parameters
+    }).then(res => {
+      setReportStore(prevReportStore => [
+        ...prevReportStore,
+        ...res.list.map(item => ({
+          api_url: item.wsName,
+          reportClass: item.reportName,
+          parameters: item.parameters,
+          layoutName: item.caption,
+          assembly: item.assembly
+        }))
+      ])
     })
-      .then(res => {
-        setReportStore(prevReportStore => [
-          ...prevReportStore,
-          ...res.list.map(item => ({
-            api_url: item.wsName,
-            reportClass: item.reportName,
-            parameters: item.parameters,
-            layoutName: item.caption,
-            assembly: item.assembly
-          }))
-        ])
-      })
-      .catch(error => {})
-  }
-
-  const generateReport = ({ params = '', paramsDict = '' }) => {
-    const obj = {
-      api_url: selectedReport.api_url + '?_params=' + params,
-      assembly: selectedReport.assembly,
-      format: selectedFormat.key,
-      reportClass: selectedReport.reportClass,
-      paramsDict: paramsDict
-    }
-    postRequest({
-      url: process.env.NEXT_PUBLIC_REPORT_URL,
-      extension: DevExpressRepository.generate,
-      record: JSON.stringify(obj)
-    })
-      .then(res => {
-        switch (selectedFormat.key) {
-          case 1:
-            setPDF(res.recordId)
-            break
-
-          default:
-            window.location.href = res.recordId
-            break
-        }
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {
     getReportLayout()
     getReportTemplate()
+    getExportFormats()
   }, [])
 
   useEffect(() => {
-    if (reportStore.length > 0 && !selectedReport)
-      setSelectedReport(() => {
-        return reportStore[0]
-      })
+    if (reportStore.length > 0 && !report.selectedReport)
+      setReport(prevState => ({
+        ...prevState,
+        selectedReport: reportStore[0]
+      }))
   }, [reportStore])
 
-  const onApply = ({ rpbParams, paramsDict }) => {
-    generateReport({ _startAt: 0, _pageSize: 30, params: rpbParams, paramsDict: paramsDict })
+  const onApply = async ({ rpbParams, paramsDict }) => {
+    const result = await generateReport({
+      isReport: true,
+      postRequest,
+      paramsDict: paramsDict,
+      params: rpbParams,
+      resourceId,
+      selectedReport: report.selectedReport,
+      selectedFormat: report.selectedFormat.key
+    })
+    switch (parseInt(report.selectedFormat.key)) {
+      case 1:
+        setPDF(result)
+        break
+
+      default:
+        window.location.href = result
+        break
+    }
+  }
+
+  const cycleFormat = () => {
+    const nextIndex = (formatIndex + 1) % exportFormats.length
+    setFormatIndex(nextIndex)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormats[nextIndex]
+    }))
   }
 
   return (
@@ -107,40 +137,56 @@ const ReportViewer = ({ resourceId }) => {
         <RPBGridToolbar
           onApply={onApply}
           hasSearch={false}
-          reportName={selectedReport?.parameters}
+          reportName={report.selectedReport?.parameters}
           leftSection={
-            <Box sx={{ display: 'flex', padding: 2, justifyContent: 'space-between' }}>
-              <Autocomplete
-                size='small'
-                options={reportStore}
-                value={selectedReport}
-                PopperComponent={PopperComponent}
-                getOptionLabel={option => option.layoutName || option.caption || ''}
-                onChange={(e, newValue) => setSelectedReport(newValue)}
-                renderInput={params => (
-                  <TextField {...params} label='Select a report template' variant='outlined' fullWidth />
-                )}
-                sx={{ width: 300, height: 35 }}
-                disableClearable
-              />
-              <Autocomplete
-                size='small'
-                options={ExportFormat}
-                value={selectedFormat}
-                PopperComponent={PopperComponent}
-                getOptionLabel={option => option.value}
-                onChange={(e, newValue) => setSelectedFormat(newValue)}
-                renderInput={params => <TextField {...params} label='Select Format' variant='outlined' fullWidth />}
-                sx={{ width: 200, pl: 2, height: 35 }}
-                disableClearable
-              />
-            </Box>
+            <Grid item xs={3}>
+              <Grid container spacing={1}>
+                <Grid item xs={10}>
+                  <ResourceComboBox
+                    store={reportStore}
+                    label='Select a report template'
+                    name='selectedReport'
+                    valueField='layoutName'
+                    displayField='layoutName'
+                    values={report}
+                    required
+                    displayFieldWidth={1.5}
+                    defaultIndex={0}
+                    onChange={(e, newValue) =>
+                      setReport(prevState => ({
+                        ...prevState,
+                        selectedReport: newValue
+                      }))
+                    }
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomButton
+                    onClick={cycleFormat}
+                    image={`${report.selectedFormat?.value || 'PDF'}.png`}
+                    disabled={exportFormats.length === 0 || !report.selectedReport}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
           }
         />
       </Fixed>
+
       {pdf && (
-        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2 }}>
-          <iframe title={selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+        <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
+          <iframe title={report.selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          <Box position='absolute' top={20} right={130} zIndex={1}>
+            <CustomButton
+              image='popup.png'
+              color='#231F20'
+              onClick={() => {
+                if (pdf) {
+                  window.open(pdf, '_blank')
+                }
+              }}
+            />
+          </Box>
         </Box>
       )}
     </VertLayout>

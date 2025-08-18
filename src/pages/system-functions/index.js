@@ -12,6 +12,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { DataSets } from 'src/resources/DataSets'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,10 +23,12 @@ const SystemFunction = () => {
       extension: SystemRepository.SystemFunction.qry,
       parameters: `_filter=`
     })
+
     formik.setValues({
       ...formik.values,
-      rows: resSystemFunction.list.map(({ ...rest }, index) => ({
+      rows: resSystemFunction.list.map(({ integrationLevel, ...rest }, index) => ({
         id: index + 1,
+        integrationLevel: integrationLevel ?? '1',
         ...rest
       }))
     })
@@ -49,14 +52,14 @@ const SystemFunction = () => {
           sfName: '',
           nraId: '',
           nraRef: '',
-          batchNRAId: '',
-          batchNRARef: ''
+          integrationLevel: '',
+          integrationLevelName: ''
         }
       ]
     },
-    onSubmit: async values => {
+    onSubmit: async () => {
       const resultObject = {
-        systemFunctionMappings: values.rows
+        systemFunctionMappings: formik.values.rows
       }
 
       await postRequest({
@@ -106,21 +109,16 @@ const SystemFunction = () => {
       }
     },
     {
-      component: 'resourcelookup',
-      label: labels.batchNumberRange,
-      name: 'batchNRARef',
+      component: 'resourcecombobox',
+      name: 'integrationLevel',
+      label: labels.integrationLevel,
       props: {
-        endpointId: SystemRepository.NumberRange.snapshot,
-        displayField: 'reference',
-        valueField: 'recordId',
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'description', value: 'Name' }
-        ],
+        datasetId: DataSets.GLI_INTEGRATION_LEVEL,
+        valueField: 'key',
+        displayField: 'value',
         mapping: [
-          { from: 'recordId', to: 'batchNRAId' },
-          { from: 'reference', to: 'batchNRARef' },
-          { from: 'name', to: 'batchNRAName' }
+          { from: 'key', to: 'integrationLevel' },
+          { from: 'value', to: 'integrationLevelName' }
         ]
       }
     }
@@ -137,6 +135,16 @@ const SystemFunction = () => {
   const handleSearchChange = event => {
     const { value } = event.target
     formik.setFieldValue('search', value)
+  }
+
+  function handleRowsChange(newValues) {
+    const updatedRows = formik.values.rows.map(row => {
+      const newValue = newValues.find(newRow => newRow.id === row.id)
+
+      return newValue ? newValue : row
+    })
+
+    formik.setFieldValue('rows', updatedRows)
   }
 
   return (
@@ -159,9 +167,7 @@ const SystemFunction = () => {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => {
-              formik.setFieldValue('rows', value)
-            }}
+            onChange={value => handleRowsChange(value)}
             value={filteredData}
             error={formik.errors?.rows}
             columns={columns}

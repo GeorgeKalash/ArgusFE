@@ -42,20 +42,26 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     <Box
       ref={popperRef}
       sx={{
-        zIndex: '2 !important',
+        zIndex: '3 !important',
         visibility: open ? 'visible' : 'hidden',
         '& .MuiMultiSectionDigitalClock-root': {
           width: '200px'
         },
+        '& .css-n4sunj-MuiAutocomplete-listbox': {
+          maxHeight: '43vh'
+        },
         '& .MuiMenuItem-root': {
           paddingRight: '10px'
         },
+        '& .MuiDateCalendar-root': {
+          height: 310
+        },
         ...(isDateTimePicker && {
           '& .MuiDateCalendar-root': {
-            height: 300 
+            height: 300
           },
-          '& .MuiMultiSectionDigitalClock-root': { 
-            height: '300px' 
+          '& .MuiMultiSectionDigitalClock-root': {
+            height: '300px'
           }
         })
       }}

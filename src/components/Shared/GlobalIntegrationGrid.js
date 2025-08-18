@@ -10,9 +10,15 @@ import WindowToolbar from './WindowToolbar'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
+const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.IntegrationAccount, window })
 
   const { labels: _labels, access } = useResourceQuery({
     datasetId: ResourceIds.IntegrationAccount
@@ -59,11 +65,9 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
     await postRequest({
       extension: GeneralLedgerRepository.IntegrationAccounts.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success('Record Successfully Saved')
     })
-      .then(res => {
-        toast.success('Record Successfully Saved')
-      })
-      .catch(error => {})
   }
 
   const column = [
@@ -104,42 +108,39 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
   useEffect(() => {
     fetchAndSetData()
   }, [])
-  console.log(masterId, masterSource)
   async function fetchAndSetData() {
-    try {
-      const postTypesResponse = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationPostTypes.qry,
-        parameters: ``
+    const postTypesResponse = await getRequest({
+      extension: GeneralLedgerRepository.IntegrationPostTypes.qry,
+      parameters: ``
+    })
+
+    const integrationsResponse = await getRequest({
+      extension: GeneralLedgerRepository.IntegrationAccounts.qry,
+      parameters: ``
+    })
+
+    if (postTypesResponse.list.length > 0) {
+      const integrations = integrationsResponse.list.filter(
+        rest => rest.masterSource == masterSource && rest.masterId == masterId
+      )
+
+      const postTypes = postTypesResponse.list.map((record, index) => {
+        const integration = integrations.find(int => int.postTypeId === record.recordId)
+
+        return {
+          masterId: masterId,
+          masterSource: masterSource,
+          id: index,
+          postTypeId: record.recordId,
+          ptName: record.name,
+          accountId: integration?.accountId || null,
+          accountRef: integration?.accountRef || null,
+          accountName: integration?.accountName || ''
+        }
       })
 
-      const integrationsResponse = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationAccounts.qry,
-        parameters: ``
-      })
-
-      if (postTypesResponse.list.length > 0) {
-        const integrations = integrationsResponse.list.filter(
-          rest => rest.masterSource == masterSource && rest.masterId == masterId
-        )
-
-        const postTypes = postTypesResponse.list.map((record, index) => {
-          const integration = integrations.find(int => int.postTypeId === record.recordId)
-
-          return {
-            masterId: masterId,
-            masterSource: masterSource,
-            id: index,
-            postTypeId: record.recordId,
-            ptName: record.name,
-            accountId: integration?.accountId || null,
-            accountRef: integration?.accountRef || null,
-            accountName: integration?.accountName || ''
-          }
-        })
-
-        formik.setValues({ Integrations: postTypes })
-      }
-    } catch (error) {}
+      formik.setValues({ Integrations: postTypes })
+    }
   }
 
   return (
@@ -160,5 +161,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId }) => {
     </VertLayout>
   )
 }
+GlobalIntegrationGrid.width = 800
+GlobalIntegrationGrid.height = 500
 
 export default GlobalIntegrationGrid

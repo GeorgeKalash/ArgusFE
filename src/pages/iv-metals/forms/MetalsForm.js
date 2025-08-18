@@ -52,22 +52,20 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
     }),
 
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.Metals.set,
-          record: JSON.stringify(obj)
-        })
-        if (!obj.recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId
-          }))
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      const response = await postRequest({
+        extension: InventoryRepository.Metals.set,
+        record: JSON.stringify(obj)
+      })
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId
+        }))
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (e) {}
+      invalidate()
     }
   })
 
@@ -75,16 +73,14 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Metals.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Metals.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

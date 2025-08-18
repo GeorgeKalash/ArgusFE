@@ -11,7 +11,7 @@ import { Box, Grid, IconButton } from '@mui/material'
 import Image from 'next/image'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import SerialForm from './SerialForm'
+import SerialTable from './SerialTable'
 import LotForm from './LotForm'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
@@ -50,8 +50,15 @@ const AvailabilityList = ({ obj, labels, access }) => {
       headerName: labels.siteName,
       flex: 1
     },
+    {
+      field: 'onhand',
+      headerName: labels.onHand,
+      flex: 1,
+      type: 'number'
+    },
 
     {
+      field: 'S/L',
       flex: 0.5,
       headerName: 'S/L',
       cellRenderer: row => {
@@ -87,10 +94,11 @@ const AvailabilityList = ({ obj, labels, access }) => {
 
   function openSerialForm(obj) {
     stack({
-      Component: SerialForm,
+      Component: SerialTable,
       props: {
         labels,
-        obj
+        obj,
+        access
       },
       width: 600,
       height: 400,
@@ -103,7 +111,8 @@ const AvailabilityList = ({ obj, labels, access }) => {
       Component: LotForm,
       props: {
         labels,
-        obj
+        obj,
+        access
       },
       width: 1150,
       height: 450,
@@ -128,6 +137,7 @@ const AvailabilityList = ({ obj, labels, access }) => {
       </Fixed>
       <Grow>
         <Table
+          name='availabilityList'
           columns={columns}
           gridData={data}
           rowId={['siteRef']}

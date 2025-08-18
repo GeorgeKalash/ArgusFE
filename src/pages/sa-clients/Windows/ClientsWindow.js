@@ -3,7 +3,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import ClientsForm from '../forms/ClientsForm'
 import SalesForm from '../forms/SalesForm'
-import AddressTab from '../forms/AddressTab'
+import ClientsAddressTab from '../forms/ClientsAddressTab'
 import PriceTab from '../forms/PriceTable'
 
 const ClientsWindow = ({ height, recordId, labels, maxAccess }) => {
@@ -28,10 +28,10 @@ const ClientsWindow = ({ height, recordId, labels, maxAccess }) => {
         <ClientsForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab}>
-        <SalesForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+        <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AddressTab store={store} labels={labels} maxAccess={maxAccess} />
+        <ClientsAddressTab store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={3} value={activeTab}>
         <PriceTab store={store} labels={labels} maxAccess={maxAccess} />

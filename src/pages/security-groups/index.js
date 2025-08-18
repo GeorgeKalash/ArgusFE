@@ -31,40 +31,54 @@ const SecurityGroup = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     refetch,
+    search,
+    clear,
     paginationParameters,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: AccessControlRepository.SecurityGroup.qry,
-    datasetId: ResourceIds.SecurityGroup
+    datasetId: ResourceIds.SecurityGroup,
+    search: {
+      endpointId: AccessControlRepository.SecurityGroup.snapshotGRP,
+      searchFn: fetchWithSearch
+    }
   })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: AccessControlRepository.SecurityGroup.snapshotGRP,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   function openForm(recordId) {
     stack({
       Component: GroupInfoWindow,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 900,
       height: 700,
-      title: _labels.securityGroups
+      title: labels.securityGroups
     })
   }
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'description',
-      headerName: _labels.description,
+      headerName: labels.description,
       flex: 1
     }
   ]
@@ -78,20 +92,18 @@ const SecurityGroup = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: AccessControlRepository.SecurityGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: AccessControlRepository.SecurityGroup.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

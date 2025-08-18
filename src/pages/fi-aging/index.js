@@ -133,20 +133,18 @@ const FiAging = () => {
     }
   })
 
-  const onApply = ({ rpbParams }) => {
-    if (!rpbParams) {
-      stackError({
-        message: _labels.noParamsErrorMessage
-      })
-    }
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar labels={_labels} maxAccess={access} onApply={onApply} reportName={'FI04'} hasSearch={false} />
+        <RPBGridToolbar
+          paramsRequired={true}
+          labels={_labels}
+          maxAccess={access}
+          filterBy={filterBy}
+          mandatoryParams={true}
+          reportName={'FI04'}
+          hasSearch={false}
+        />
       </Fixed>
       <Grow>
         <Table

@@ -13,6 +13,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -131,29 +132,22 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isDefault'
-                      required
-                      checked={formik.values?.isDefault}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='isDefault'
+                  value={formik.values?.isDefault}
+                  onChange={event => formik.setFieldValue('isDefault', event.target.checked)}
                   label={labels.isDefault}
+                  maxAccess={maxAccess}
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name='isInactive'
-                      required
-                      checked={formik.values?.isInactive}
-                      onChange={formik.handleChange}
-                    />
-                  }
+                <CustomCheckBox
+                  name='isInactive'
+                  value={formik.values?.isInactive}
+                  onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                   label={labels.isInactive}
+                  required
+                  maxAccess={maxAccess}
                 />
               </Grid>
             </Grid>

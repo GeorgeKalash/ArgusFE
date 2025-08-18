@@ -13,11 +13,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { POSRepository } from 'src/repositories/POSRepository'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -27,9 +28,14 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
 
   const rowColumns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
-      headerName: '',
-      flex: 2
+      headerName: labels.name,
+      flex: 1
     }
   ]
 
@@ -69,12 +75,15 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   })
 
   const fetchGridData = classId => {
+    setData({ list: [] })
     classId = classId || ResourceIds.Plants
 
-    const plantRequestPromise = getRequest({
-      extension: SystemRepository.Plant.qry,
-      parameters: '_filter='
-    })
+    const plantRequestPromise =
+      classId == ResourceIds.Plants &&
+      getRequest({
+        extension: SystemRepository.Plant.qry,
+        parameters: '_filter='
+      })
 
     const cashAccountRequestPromise =
       classId == ResourceIds.CashAccounts &&
@@ -93,8 +102,15 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     const posRequestPromise =
       classId == ResourceIds.PointOfSale &&
       getRequest({
-        extension: POSRepository.PointOfSale.qry,
+        extension: PointofSaleRepository.PointOfSales.qry,
         parameters: '_filter='
+      })
+
+    const costCenterRequestPromise =
+      classId == ResourceIds.CostCenter &&
+      getRequest({
+        extension: GeneralLedgerRepository.CostCenter.qry,
+        parameters: '_params=&_startAt=0&_pageSize=1000'
       })
 
     const rowAccessUserPromise = getRequest({
@@ -102,65 +118,75 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
     })
 
-    let rar = {
-      recordId: null,
-      name: null,
-      hasAccess: false,
-      classId: null
-    }
+    let rar
 
-    Promise.all([cashAccountRequestPromise, plantRequestPromise, salesPersonRequestPromise, rowAccessUserPromise]).then(
-      ([cashAccountRequest, plantRequest, salesPersonRequest, rowAccessUser]) => {
-        if (classId == ResourceIds.Plants || classId === 'undefined') {
-          rar = plantRequest.list?.map(item => {
-            return {
-              recordId: item.recordId,
-              name: item.name,
-              hasAccess: false
-            }
-          })
-        } else if (classId == ResourceIds.CashAccounts) {
-          rar = cashAccountRequest.list?.map(item => {
-            return {
-              recordId: item.recordId,
-              name: item.name,
-              hasAccess: false
-            }
-          })
-        } else if (classId == ResourceIds.SalesPerson) {
-          rar = salesPersonRequest.list?.map(item => {
-            return {
-              recordId: item.recordId,
-              name: item.name,
-              hasAccess: false
-            }
-          })
-        } else if (classId == ResourceIds.PointOfSale) {
-          rar = posRequestPromise.list?.map(item => {
-            return {
-              recordId: item.recordId,
-              name: item.reference,
-              hasAccess: false
-            }
-          })
-        }
-        if (classId !== 'undefined' && rar) {
-          for (let i = 0; i < rar.length; i++) {
-            rowAccessUser.list.forEach(storedItem => {
-              if (storedItem.recordId.toString() == rar[i].recordId) {
-                rar[i].hasAccess = true
-                rar[i].checked = true
-              }
-            })
+    Promise.all([
+      cashAccountRequestPromise,
+      plantRequestPromise,
+      posRequestPromise,
+      salesPersonRequestPromise,
+      rowAccessUserPromise,
+      costCenterRequestPromise
+    ]).then(([cashAccountRequest, plantRequest, posRequest, salesPersonRequest, rowAccessUser, costCenterRequest]) => {
+      if (classId == ResourceIds.Plants || classId === 'undefined') {
+        rar = plantRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.reference,
+            hasAccess: false
           }
-
-          let resultObject = { list: rar }
-          setData(resultObject)
-        } else {
-          setData({ list: [] })
-        }
+        })
+      } else if (classId == ResourceIds.CashAccounts) {
+        rar = cashAccountRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.reference,
+            hasAccess: false
+          }
+        })
+      } else if (classId == ResourceIds.SalesPerson) {
+        rar = salesPersonRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.spRef,
+            hasAccess: false
+          }
+        })
+      } else if (classId == ResourceIds.PointOfSale) {
+        rar = posRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.reference,
+            hasAccess: false
+          }
+        })
+      } else if (classId == ResourceIds.CostCenter) {
+        rar = costCenterRequest.list?.map(item => {
+          return {
+            recordId: item.recordId,
+            name: item.name,
+            reference: item.reference,
+            hasAccess: false
+          }
+        })
       }
-    )
+      if (classId && rar) {
+        for (let i = 0; i < rar.length; i++) {
+          rowAccessUser.list.forEach(storedItem => {
+            if (storedItem.recordId.toString() == rar[i].recordId) {
+              rar[i].hasAccess = true
+              rar[i].checked = true
+            }
+          })
+        }
+
+        setData({ list: rar })
+      }
+    })
   }
 
   const handleSearchChange = event => {
@@ -176,7 +202,11 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
 
   const filteredData = search
     ? {
-        list: data?.list?.filter(item => item?.name && item?.name?.toLowerCase().includes(search.toLowerCase()))
+        list: data?.list?.filter(
+          item =>
+            (item?.name && item?.name?.toLowerCase().includes(search.toLowerCase())) ||
+            (item?.reference && item?.reference?.toLowerCase().includes(search.toLowerCase()))
+        )
       }
     : data
 
@@ -226,9 +256,9 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         </Fixed>
         <Grow>
           <Table
+            name='rowAccess'
             columns={rowColumns}
-            gridData={filteredData ? filteredData : { list: [] }}
-            setData={setData}
+            gridData={filteredData}
             rowId={['recordId']}
             isLoading={false}
             maxAccess={maxAccess}

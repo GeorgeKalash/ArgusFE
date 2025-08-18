@@ -4,7 +4,6 @@ import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
-import { debounce } from 'lodash'
 
 const RequestsContext = createContext()
 
@@ -32,7 +31,7 @@ function LoadingOverlay() {
 const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
-  const [loading, setLoading] = useState(false)
+  const [activeRequests, setActiveRequests] = useState(0)
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -41,16 +40,21 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     if (errorModel) await errorModel.stack(props)
   }
 
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
+  const incrementRequests = () => {
+    setActiveRequests(prev => prev + 1)
+  }
+
+  const decrementRequests = () => {
+    setActiveRequests(prev => prev - 1)
+  }
 
   const getRequest = async body => {
     const accessToken = await getAccessToken()
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       axios({
@@ -63,25 +67,60 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         }
       })
         .then(response => {
-          if (!disableLoading) debouncedCloseLoading()
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+
+          if (throwError) reject(error)
+          else if (error.response?.status) resolve(error)
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
+        })
+    })
+  }
+
+  const getRequestFullEndPoint = async body => {
+    const disableLoading = body.disableLoading || false
+
+    const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
+
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'GET',
+        url: body.endPoint,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+        .then(response => {
+          resolve(response.data)
+        })
+        .catch(error => {
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
         })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
+        })
     })
   }
 
   const getMicroRequest = async body => {
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       return axios({
@@ -89,16 +128,17 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         url: process.env.NEXT_PUBLIC_YAKEEN_URL + body.extension + '?' + body.parameters
       })
         .then(response => {
-          if (!disableLoading) debouncedCloseLoading()
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
           if (throwError) reject(error)
+        })
+        .finally(() => {
+          if (!disableLoading) decrementRequests()
         })
     })
   }
@@ -112,7 +152,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       headers: {
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'multipart/form-data',
-        LanguageId: user.languageId
+        LanguageId: user?.languageId || 1
       }
     })
       .then(res => res.data)
@@ -125,9 +165,46 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       })
   }
 
-  const postRequest = async body => {
-    !loading && setLoading(true)
+  const postIdentityRequest = async body => {
+    const accessToken = await getAccessToken()
+    const token = accessToken ?? body.accessToken
 
+    var bodyFormData = new FormData()
+    bodyFormData.append('record', body.record)
+    body?.file && bodyFormData.append('file', body.file)
+
+    const throwError = body.throwError || false
+
+    return new Promise(async (resolve, reject) => {
+      axios({
+        method: 'POST',
+        url: process.env.NEXT_PUBLIC_AuthURL + body.extension,
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'multipart/form-data',
+          LanguageId: user?.languageId || 1
+        },
+        data: bodyFormData
+      })
+        .then(response => {
+          if (body?.noHandleError) return resolve(response.data)
+          resolve(response.data)
+        })
+        .catch(error => {
+          if (body?.noHandleError) {
+            return resolve(error.response.data)
+          }
+          showError({
+            message: error,
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+          })
+
+          if (throwError) reject(error)
+        })
+    })
+  }
+
+  const postRequest = async body => {
     const accessToken = await getAccessToken()
     const url = body.url ? body.url : apiUrl
 
@@ -135,9 +212,10 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     bodyFormData.append('record', body.record)
     body?.file && bodyFormData.append('file', body.file)
     const disableLoading = body.disableLoading || false
-    !disableLoading && !loading && setLoading(true)
 
     const throwError = body.throwError || false
+
+    if (!disableLoading) incrementRequests()
 
     return new Promise(async (resolve, reject) => {
       axios({
@@ -151,17 +229,22 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         data: bodyFormData
       })
         .then(response => {
-          if (!disableLoading) {
-            debouncedCloseLoading()
-          }
+          if (!disableLoading) decrementRequests()
+
+          if (body?.noHandleError) return resolve(response.data)
           resolve(response.data)
         })
         .catch(error => {
-          debouncedCloseLoading()
+          if (!disableLoading) decrementRequests()
+
+          if (body?.noHandleError) {
+            return resolve(error.response.data)
+          }
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
           })
+
           if (throwError) reject(error)
         })
     })
@@ -255,13 +338,17 @@ const RequestsProvider = ({ showLoading = false, children }) => {
     getRequest,
     postRequest,
     getIdentityRequest,
-    getMicroRequest
+    postIdentityRequest,
+    getMicroRequest,
+    getRequestFullEndPoint,
+    LoadingOverlay,
+    loading: activeRequests
   }
 
   return (
     <>
       <RequestsContext.Provider value={values}>{children}</RequestsContext.Provider>
-      {showLoading && loading && <LoadingOverlay />}
+      {showLoading && Boolean(activeRequests) && <LoadingOverlay />}
     </>
   )
 }

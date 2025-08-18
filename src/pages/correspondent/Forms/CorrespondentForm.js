@@ -19,6 +19,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -303,16 +304,12 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name='isInactive'
-                    checked={formik.values?.isInactive}
-                    onChange={formik.handleChange}
-                    maxAccess={maxAccess}
-                  />
-                }
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
                 label={labels.isInActive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

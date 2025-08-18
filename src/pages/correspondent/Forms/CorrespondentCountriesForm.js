@@ -71,15 +71,13 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
     await postRequest({
       extension: RemittanceSettingsRepository.CorrespondentCountry.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      setStore(prevStore => ({
+        ...prevStore,
+        countries: correspondentCountries
+      }))
+      toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        setStore(prevStore => ({
-          ...prevStore,
-          countries: correspondentCountries
-        }))
-        toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   useEffect(() => {
@@ -89,40 +87,38 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
       getRequest({
         extension: RemittanceSettingsRepository.CorrespondentCountry.qry,
         parameters: parameters
-      })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            const correspondentCountries = res.list
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          const correspondentCountries = res.list
 
-            formik.setValues({
-              countries: correspondentCountries.map(({ ...rest }, index) => ({
-                id: index + 1,
-                ...rest
-              }))
-            })
-            setStore(prevStore => ({
-              ...prevStore,
-              countries: correspondentCountries
+          formik.setValues({
+            countries: correspondentCountries.map(({ ...rest }, index) => ({
+              id: index + 1,
+              ...rest
             }))
-          } else {
-            formik.setValues({
-              countries: [
-                {
-                  id: 1,
-                  corId: '',
-                  countryId: '',
-                  countryRef: '',
-                  countryName: '',
-                  flName: '',
-                  purcRateTypeId: null,
-                  saleRateTypeId: null,
-                  isInactive: false
-                }
-              ]
-            })
-          }
-        })
-        .catch(error => {})
+          })
+          setStore(prevStore => ({
+            ...prevStore,
+            countries: correspondentCountries
+          }))
+        } else {
+          formik.setValues({
+            countries: [
+              {
+                id: 1,
+                corId: '',
+                countryId: '',
+                countryRef: '',
+                countryName: '',
+                flName: '',
+                purcRateTypeId: null,
+                saleRateTypeId: null,
+                isInactive: false
+              }
+            ]
+          })
+        }
+      })
   }, [recordId])
 
   return (

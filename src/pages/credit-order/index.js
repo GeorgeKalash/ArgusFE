@@ -94,15 +94,10 @@ const CreditOrder = () => {
     stack({
       Component: CreditOrderForm,
       props: {
-        labels,
-        access,
         plantId: plantId,
         userData: userData,
         recordId
-      },
-      width: 950,
-      height: 600,
-      title: labels.creditOrder
+      }
     })
   }
 
@@ -137,6 +132,7 @@ const CreditOrder = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={[
             {
               field: 'reference',

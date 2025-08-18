@@ -25,7 +25,8 @@ export const FinancialRepository = {
     set: service + 'setACC',
     del: service + 'delACC',
     page: service + 'pageACC',
-    snapshot: service + 'snapshotACC'
+    snapshot: service + 'snapshotACC',
+    snapshot2: service + 'snapshotACC2'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -90,6 +91,7 @@ export const FinancialRepository = {
     get: service + 'getMEM',
     del: service + 'delMEM',
     post: service + 'postMEM',
+    unpost: service + 'unpostMEM',
     cancel: service + 'cancelMEM',
     snapshot: service + 'snapshotMEM'
   },
@@ -120,7 +122,10 @@ export const FinancialRepository = {
     page: service + 'pageRV',
     snapshot: service + 'snapshotRV',
     cancel: service + 'cancelRV',
-    post: service + 'postRV'
+    post: service + 'postRV',
+    unpost: service + 'unpostRV',
+    verify: service + 'verifyRV',
+    unverify: service + 'unverifyRV'
   },
   Contact: {
     qry: service + 'qryContact'
@@ -142,13 +147,17 @@ export const FinancialRepository = {
   PaymentVouchers: {
     qry: service + 'qryPV',
     page: service + 'pagePV',
+    page2: service + 'pagePV2',
+    page3: service + 'pagePV3',
     get: service + 'getPV',
     set2: service + 'set2PV',
     set: service + 'setPV',
     del: service + 'delPV',
     post: service + 'postPV',
     cancel: service + 'cancelPV',
-    snapshot: service + 'snapshotPV'
+    snapshot: service + 'snapshotPV',
+    unpost: service + 'unpostPV',
+    verify: service + 'verifyPV'
   },
   AgingProfile: {
     qry: service + 'qryAGP',
@@ -169,13 +178,104 @@ export const FinancialRepository = {
   PaymentVoucherCostCenters: {
     qry: service + 'qryPVC'
   },
-  Apply2: {
-    qry: service + 'qryAPL2'
-  },
-  Apply3: {
-    qry: service + 'qryAPL3'
+  Apply: {
+    qry: service + 'qryAPL',
+    qry2: service + 'qryAPL2',
+    qry3: service + 'qryAPL3'
   },
   AgingLeg: {
     qry: service + 'qryAGL'
+  },
+  MetalReceiptVoucher: {
+    set2: service + 'set2MRV',
+    qry: service + 'qryMTI',
+    unpost: service + 'unpostMRV'
+  },
+  MetalPaymentVoucher: {
+    set2: service + 'set2MPV',
+    unpost: service + 'unpostMPV'
+  },
+  MetalTrx: {
+    get: service + 'getMTX',
+    del: service + 'delMTX',
+    post: service + 'postMTX ',
+    unpost: service + 'unpostMTX',
+    qry: service + 'qryMTX',
+    page: service + 'pageMTX',
+    verify: service + 'verifyMTX',
+    snapshot: service + 'snapshotMTX'
+  },
+  AgingDoc: {
+    snapshot: service + 'snapshotAGD',
+    rebuild: service + 'rebuildAGD',
+    qry: service + 'qryAGD'
+  },
+  BalanceTransferMultiAccounts: {
+    page: service + 'pageTMA',
+    get2: service + 'get2TMA',
+    set2: service + 'set2TMA',
+    del: service + 'delTMA',
+    snapshot: service + 'snapshotTMA',
+    post: service + 'postTMA',
+    unpost: service + 'unpostTMA'
+  },
+  BalanceTransfer: {
+    get: service + 'getTFR',
+    del: service + 'delTFR',
+    set: service + 'setTFR',
+    post: service + 'postTFR ',
+    unpost: service + 'unpostTFR',
+    page: service + 'pageTFR',
+    snapshot: service + 'snapshotTFR'
+  },
+  BalanceTransferSales: {
+    set: service + 'setTFS'
+  },
+  BalanceTransferPurchases: {
+    set: service + 'setTFP'
+  },
+  PaymentReasons: {
+    qry: service + 'qryPR',
+    get: service + 'getPR',
+    del: service + 'delPR',
+    set: service + 'setPR',
+    page: service + 'pagePR',
+    snapshot: service + 'snapshotPR'
+  },
+  ResetGLMemo: {
+    reset: service + 'resetGL_Memo'
+  },
+  ResetGL_MTX: {
+    reset: service + 'resetGL_MTX'
+  },
+  ResetGL_PV: {
+    reset: service + 'resetGL_PV'
+  },
+  ResetGL_RV: {
+    reset: service + 'resetGL_RV'
+  },
+  PaymentOrders: {
+    get: service + 'getPO',
+    del: service + 'delPO',
+    set2: service + 'set2PO',
+    page2: service + 'page2PO',
+    page3: service + 'page3PO',
+    snapshot: service + 'snapshotPO',
+    snapshot2: service + 'snapshot2PO',
+    cancel: service + 'cancelPO',
+    close: service + 'closePO',
+    reopen: service + 'reopenPO',
+    open: service + 'openPO',
+    generate: service + 'generatePO2PV'
+  },
+  PaymentOrdersExpenses: {
+    qry2: service + 'qry2POX'
+  },
+  PaymentOrdersCostCenters: {
+    qry: service + 'qryPOC'
+  },
+  ApplyManual: {
+    set2: service + 'set2APLM',
+    qry: service + 'qryAPLM'
   }
 }
