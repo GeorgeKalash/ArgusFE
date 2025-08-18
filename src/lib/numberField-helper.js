@@ -14,7 +14,7 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
   setPosition(newCursorPosition)
 }
 
-const getFormattedNumber = (value, decimal, round = false) => {
+const getFormattedNumber = (value, decimal, round = false, viewDecimal = false) => {
   if (!value && value !== 0) return
 
   const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
@@ -27,9 +27,13 @@ const getFormattedNumber = (value, decimal, round = false) => {
 
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
-      !round
-        ? (formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`)
-        : (formattedDecimalPart = `.${parseFloat(`0.${decimalPart}`).toFixed(decimal).split('.')[1]}`)
+      if (!round) {
+        let sliced = decimalPart.slice(0, decimal)
+        formattedDecimalPart = viewDecimal ? `.${sliced.padEnd(decimal, '0')}` : `.${sliced.replace(/0+$/, '')}`
+      } else {
+        const rounded = parseFloat(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
+        formattedDecimalPart = viewDecimal ? `.${rounded}` : `.${rounded.replace(/0+$/, '')}`
+      }
     } else {
       formattedDecimalPart = `.${decimalPart}`
     }
@@ -37,8 +41,12 @@ const getFormattedNumber = (value, decimal, round = false) => {
 
   let formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
 
-  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.')) {
+  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.') && viewDecimal) {
     formattedValue += '.' + '0'.repeat(decimal)
+  }
+
+  if (formattedValue.endsWith('.')) {
+    formattedValue = formattedValue.slice(0, -1)
   }
 
   return formattedValue

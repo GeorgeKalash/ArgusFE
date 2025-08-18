@@ -22,7 +22,7 @@ export function View({ value, data, ...props }) {
 
   const formattedValue = viewDecimals
     ? getFormattedNumber(formatValue(value), props.column?.props?.decimalScale, !!props.column?.props?.decimalScale)
-    : getFormattedNumber(value, props.column?.props?.decimalScale, !!props.column?.props?.decimalScale)
+    : getFormattedNumber(value, props.column?.props?.decimalScale, !!props.column?.props?.decimalScale, !viewDecimals)
   const icon = symbol && iconMapView[symbol]
 
   return (

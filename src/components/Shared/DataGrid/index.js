@@ -767,7 +767,7 @@ export function DataGrid({
 
     if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
       newValue = newValue.slice(0, -1).replace(/,/g, '')
-      newValue = newValue != '' ? Number(val) : null
+      newValue = newValue != '' ? Number(newValue) : null
       newValue = isNaN(newValue) ? null : newValue
 
       const changes = {
