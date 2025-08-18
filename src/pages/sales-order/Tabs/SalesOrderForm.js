@@ -721,6 +721,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ? await Promise.all(
             soItems.list?.map(async (item, index) => {
               const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+              const itemInfo = await getItem(item?.itemId)
 
               return {
                 ...item,
@@ -730,6 +731,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
               }
             })
