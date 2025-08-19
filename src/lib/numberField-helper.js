@@ -23,30 +23,27 @@ const formatValue = val => {
     .replace(/(\.\d*?[1-9])0+$/, '$1')
 }
 
-const getFormattedNumber = (inputValue, decimal = 2, round = false, hideLeadingZeros = false) => {
+const getFormattedNumber = (inputValue, decimal = 0, round = false, hideLeadingZeros = false) => {
   const rawValue = hideLeadingZeros ? inputValue : formatValue(inputValue)
   if (rawValue === undefined || rawValue === null || rawValue === '') return
-
   const sanitized = rawValue.toString().replace(/[^0-9.-]/g, '')
   let [integerPart = '0', decimalPart = ''] = sanitized.split('.')
-
   const formattedInt = new Intl.NumberFormat('en-US').format(integerPart)
   let formattedDec = ''
 
   if (decimalPart) {
-    if (decimal !== undefined) {
-      if (round) {
-        const rounded = Number(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
-        formattedDec = `.${hideLeadingZeros ? rounded.replace(/0+$/, '') : rounded}`
-      } else {
-        const sliced = decimalPart.slice(0, decimal)
-        formattedDec = `.${hideLeadingZeros ? sliced.replace(/0+$/, '') : sliced.padEnd(decimal, '0')}`
-      }
-    } else formattedDec = `.${decimalPart}`
+    if (round) {
+      const rounded = Number(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
+      formattedDec = `.${hideLeadingZeros ? rounded.replace(/0+$/, '') : rounded}`
+    } else {
+      let sliced = decimal ? decimalPart.slice(0, decimal) : decimalPart
+      if (!hideLeadingZeros) sliced = sliced.padEnd(decimal, '0')
+      formattedDec = sliced ? `.${sliced}` : ''
+      console.log('hideLeadingZeros two', inputValue)
+    }
   }
 
   let result = `${formattedInt}${formattedDec}`
-
   if (decimal && !result.includes('.') && !hideLeadingZeros) result += '.' + '0'.repeat(decimal)
 
   return result.endsWith('.') ? result.slice(0, -1) : result
