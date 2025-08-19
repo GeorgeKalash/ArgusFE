@@ -83,5 +83,8 @@ export const CurrencyTradingSettingsRepository = {
   },
   ScannerImage: {
     set: service + 'saveScannerImage'
+  },
+  MasterDataDTD: {
+    qry: service + 'qryLDT'
   }
 }
