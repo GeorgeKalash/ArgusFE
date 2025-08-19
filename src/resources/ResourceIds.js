@@ -542,6 +542,7 @@ export const ResourceIds = {
   PurchaseQuotations: 50302,
   RebuildAC: 41509,
   Samples: 48323,
+  EntitlementDeduction: 71106,
   EmployeeChart: 71201,
   MetalSmelting: 47314,
 
