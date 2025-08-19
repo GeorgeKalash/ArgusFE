@@ -82,10 +82,10 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
       })
 
       if (listMIN?.length > 0) {
-        const result = listMIN.map(({ ...rest }, index) => ({
+        const result = listMIN.map(({ expiryDate, ...item }, index) => ({
           id: index,
-          expiryDate: rest.expiryDate ? formatDateFromApi(rest.expiryDate) : null,
-          ...rest
+          ...item,
+          expiryDate: expiryDate ? formatDateFromApi(expiryDate) : null
         }))
         formik.setValues({ rows: result })
       } else {
