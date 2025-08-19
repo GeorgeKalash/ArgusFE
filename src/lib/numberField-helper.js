@@ -14,42 +14,42 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
   setPosition(newCursorPosition)
 }
 
-const getFormattedNumber = (value, decimal, round = false, viewDecimal = false) => {
-  if (!value && value !== 0) return
+const formatValue = val => {
+  if (!val && val !== 0) return ''
+  if (isNaN(val)) return val
 
-  const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
+  return String(val)
+    .replace(/\.0+$/, '')
+    .replace(/(\.\d*?[1-9])0+$/, '$1')
+}
 
-  const [integerPart, decimalPart] = sanitizedValue.split('.')
+const getFormattedNumber = (inputValue, decimal = 2, round = false, hideLeadingZeros = false) => {
+  const rawValue = hideLeadingZeros ? inputValue : formatValue(inputValue)
+  if (rawValue === undefined || rawValue === null || rawValue === '') return
 
-  const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+  const sanitized = rawValue.toString().replace(/[^0-9.-]/g, '')
+  let [integerPart = '0', decimalPart = ''] = sanitized.split('.')
 
-  let formattedDecimalPart = ''
+  const formattedInt = new Intl.NumberFormat('en-US').format(integerPart)
+  let formattedDec = ''
 
-  if (decimalPart !== undefined) {
+  if (decimalPart) {
     if (decimal !== undefined) {
-      if (!round) {
-        let sliced = decimalPart.slice(0, decimal)
-        formattedDecimalPart = viewDecimal ? `.${sliced.padEnd(decimal, '0')}` : `.${sliced.replace(/0+$/, '')}`
+      if (round) {
+        const rounded = Number(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
+        formattedDec = `.${hideLeadingZeros ? rounded.replace(/0+$/, '') : rounded}`
       } else {
-        const rounded = parseFloat(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
-        formattedDecimalPart = viewDecimal ? `.${rounded}` : `.${rounded.replace(/0+$/, '')}`
+        const sliced = decimalPart.slice(0, decimal)
+        formattedDec = `.${hideLeadingZeros ? sliced.replace(/0+$/, '') : sliced.padEnd(decimal, '0')}`
       }
-    } else {
-      formattedDecimalPart = `.${decimalPart}`
-    }
+    } else formattedDec = `.${decimalPart}`
   }
 
-  let formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
+  let result = `${formattedInt}${formattedDec}`
 
-  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.') && viewDecimal) {
-    formattedValue += '.' + '0'.repeat(decimal)
-  }
+  if (decimal && !result.includes('.') && !hideLeadingZeros) result += '.' + '0'.repeat(decimal)
 
-  if (formattedValue.endsWith('.')) {
-    formattedValue = formattedValue.slice(0, -1)
-  }
-
-  return formattedValue
+  return result.endsWith('.') ? result.slice(0, -1) : result
 }
 
 function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
