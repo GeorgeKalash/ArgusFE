@@ -527,6 +527,7 @@ export const ResourceIds = {
   LoanTypes: 74101,
   HRPendingPunches: 72207,
   BiometricDevices: 72101,
+  ResignationRequest: 71221,
   DSLReasons: 72107,
   TerminationReasons: 71110,
   GeneralSettings: 20600,
@@ -541,6 +542,7 @@ export const ResourceIds = {
   PurchaseQuotations: 50302,
   RebuildAC: 41509,
   Samples: 48323,
+  EntitlementDeduction: 71106,
   EmployeeChart: 71201,
   MetalSmelting: 47314,
 
