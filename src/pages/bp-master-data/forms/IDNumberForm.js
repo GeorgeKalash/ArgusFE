@@ -41,7 +41,15 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     {
       component: 'textfield',
       label: labels.idNumber,
-      name: 'idNum'
+      name: 'idNum',
+      updateOn: 'blur',
+      async onChange({ row: { update, oldRow, newRow } }) {
+        if (!newRow?.idNum) {
+          update({ ...newRow, expiryDate: null })
+
+          return
+        }
+      }
     },
     {
       component: 'date',
