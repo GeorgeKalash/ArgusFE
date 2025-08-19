@@ -545,6 +545,7 @@ export const ResourceIds = {
   EntitlementDeduction: 71106,
   EmployeeChart: 71201,
   MetalSmelting: 47314,
+  MasterDataDTD: 35120,
 
   // GL
   GLSalesInvoice: 51604,
