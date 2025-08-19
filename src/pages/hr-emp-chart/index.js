@@ -61,7 +61,7 @@ const HREmployeeChart = () => {
 
   return (
     <VertLayout>
-      <Fixed>{orgData.length > 0 && <OrgChart data={orgData} />}</Fixed>
+      <Fixed>{orgData.length > 0 && <OrgChart data={orgData} allowCollapse={true} />}</Fixed>
     </VertLayout>
   )
 }
