@@ -126,13 +126,8 @@ const PaymentOrdersExpenses = () => {
     stack({
       Component: PaymentOrdersExpensesForm,
       props: {
-        labels,
         recordId,
-        maxAccess: access
       },
-      width: 1300,
-      height: 700,
-      title: labels.PaymentOrderExpenses
     })
   }
 

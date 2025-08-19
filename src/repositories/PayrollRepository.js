@@ -9,5 +9,8 @@ export const PayrollRepository = {
   },
   Penalty: {
     qry: service + 'qryPT'
+  },
+  Paycode: {
+    qry: service + 'qryPC'
   }
 }

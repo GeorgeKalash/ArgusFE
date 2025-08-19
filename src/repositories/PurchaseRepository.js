@@ -89,7 +89,9 @@ export const PurchaseRepository = {
     qry: service + 'qryIVIM'
   },
   Serials: {
-    qry: service + 'qrySRL'
+    qry: service + 'qrySRL',
+    import: service + 'importSRL',
+    last: service + 'lastSRL'
   },
   Shipment: {
     get: service + 'getSHP',
@@ -143,9 +145,27 @@ export const PurchaseRepository = {
     qry: service + 'qryORI',
     set2: service + 'set2ORI'
   },
+  PUDraftReturn: {
+    set2: service + 'set2DRE',
+    get: service + 'getDRE',
+    page: service + 'pageDRE',
+    snapshot: service + 'snapshotDRE',
+    del: service + 'delDRE',
+    post: service + 'postDRE'
+  },
+  PUDraftReturnSerial: {
+    get2: service + 'get2DRS',
+    qry: service + 'qryDRS',
+    del: service + 'delDRS',
+    append: service + 'appendDRS',
+    batch: service + 'batchDRS'
+  },
   FinancialGroup: {
     qry: service + 'qryFII',
     set2: service + 'set2FII'
+  },
+  PUInvoiceRetBalance: {
+    balance: service + 'balanceRET'
   },
   ItemLastPurchaseInfo: {
     last: service + 'lastIVI'
