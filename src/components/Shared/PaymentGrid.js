@@ -19,7 +19,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const initialValuePayment = [
     {
       id: 1,
-      seqNo: 0,
+      seqNo: 1,
       cashAccountId: null,
       cashAccount: '',
       posStatus: 1,
@@ -233,7 +233,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         onCondition
       },
       label: labels.pos,
-      onClick: (e, row, update, updateRow) => {
+      onClick: (e, row) => {
         stack({
           Component: POSForm,
           props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },

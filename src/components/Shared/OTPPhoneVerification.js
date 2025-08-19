@@ -153,7 +153,8 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <h2>{labels.OTPVerification}</h2>
+        <h3>{labels.sentOTP}</h3>
+        <h3>{values.cellPhone}</h3>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
