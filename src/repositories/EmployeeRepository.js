@@ -66,7 +66,16 @@ export const EmployeeRepository = {
     del: service + 'delUP',
     page: service + 'pageUP'
   },
+  ResignationRequest: {
+    get: service + 'getRR',
+    set: service + 'setRR',
+    del: service + 'delRR',
+    page: service + 'pageRR',
+    close: service + 'closeRR',
+    reopen: service + 'reopenRR'
+  },
   TerminationReasons: {
+    qry: service + 'qryTR',
     get: service + 'getTR',
     set: service + 'setTR',
     del: service + 'delTR',
@@ -93,7 +102,12 @@ export const EmployeeRepository = {
     del: service + 'delPE'
   },
   EmployeeDeduction: {
-    qry: service + 'qryED'
+    qry: service + 'qryED',
+    page: service + 'pageED',
+    del: service + 'delED',
+    get: service + 'getED',
+    set: service + 'setED',
+    snapshot: service + 'snapshotED',
   },
   FullName: {
     sync: service + 'syncFullName'
