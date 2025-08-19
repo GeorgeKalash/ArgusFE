@@ -187,9 +187,9 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
             </Grid>
             <Grid item xs={12}>
               <CustomCheckBox
-                name='otp'
-                value={formik.values?.otp}
-                onChange={event => formik.setFieldValue('otp', event.target.checked)}
+                name='otpVerified'
+                value={formik.values.otpVerified}
+                onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                 label={_labels.otp}
                 maxAccess={access}
                 disabled={true}

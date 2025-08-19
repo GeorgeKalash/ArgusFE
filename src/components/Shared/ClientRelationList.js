@@ -66,11 +66,15 @@ export const ClientRelationList = ({ recordId, name, reference, category, window
       headerName: _labels.expiryDate,
       type: 'date'
     },
-
     {
       field: 'activationDate',
       headerName: _labels.activationDate,
       type: 'date'
+    },
+    {
+      field: 'otpVerified',
+      headerName: _labels.otpVerified,
+      type: 'checkbox'
     }
   ]
 

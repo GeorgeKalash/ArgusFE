@@ -9,6 +9,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -41,6 +42,11 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
       component: 'textfield',
       label: labels.idNumber,
       name: 'idNum'
+    },
+    {
+      component: 'date',
+      name: 'expiryDate',
+      label: labels?.expiryDate
     }
   ]
 
@@ -50,7 +56,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
 
       return await postRequest({
         extension: BusinessPartnerRepository.MasterIDNum.set,
-        record: JSON.stringify(value)
+        record: JSON.stringify({ ...value, expiryDate: value.expiryDate ? formatDateToApi(value.expiryDate) : null })
       })
     })
 
@@ -78,6 +84,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
       if (listMIN?.length > 0) {
         const result = listMIN.map(({ ...rest }, index) => ({
           id: index,
+          expiryDate: rest.expiryDate ? formatDateFromApi(rest.expiryDate) : null,
           ...rest
         }))
         formik.setValues({ rows: result })
