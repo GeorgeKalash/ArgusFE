@@ -93,6 +93,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
           props: {
             clientId: formValidation.values.recordId,
             recordId: formValidation.values.recordId,
+            deviceId: values.deviceId,
             values: formValidation.values,
             functionId: SystemFunction.ClientRelation,
             onSuccess: verified
@@ -127,9 +128,10 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
                 secondValueShow='parentName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('parentId', newValue ? newValue.recordId : 0)
-                  formik.setFieldValue('parentRef', newValue ? newValue.reference : '')
-                  formik.setFieldValue('parentName', newValue ? newValue.name : '')
+                  formik.setFieldValue('parentId', newValue?.recordId || 0)
+                  formik.setFieldValue('parentRef', newValue?.reference || '')
+                  formik.setFieldValue('parentName', newValue?.name || '')
+                  formik.setFieldValue('deviceId', newValue?.cellPhone || '')
                 }}
                 maxAccess={access}
                 readOnly={editMode}
