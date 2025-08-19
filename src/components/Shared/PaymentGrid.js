@@ -257,6 +257,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       }}
       value={value}
       initialValues={initialValuePayment[0]}
+      allowDelete={!rest.disabled}
     />
   )
 }

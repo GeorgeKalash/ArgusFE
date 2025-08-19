@@ -53,7 +53,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
@@ -907,12 +907,13 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                       datasetId={DataSets.NATIONALITY}
                       name='nationalityType'
                       label={labels.nationalityType}
+                      readOnly={editMode || isClosed || idInfoAutoFilled}
                       valueField='key'
                       displayField='value'
                       values={formik.values}
                       required
                       onChange={(event, newValue) => {
-                        formik && formik.setFieldValue('nationalityType', newValue?.key)
+                        formik && formik.setFieldValue('nationalityType', newValue?.key || null)
                       }}
                       maxAccess={maxAccess}
                       error={formik.touched.nationalityType && Boolean(formik.errors.nationalityType)}
@@ -1300,6 +1301,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                   height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
+                  allowDelete={!editMode}
                   name='operations'
                   bg={
                     formik.values.functionId &&
@@ -1495,7 +1497,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         viewPosButtons: formik.values.wip === 2
                       }}
                       amount={total}
-                      disabled={isClosed}
+                      disabled={editMode || isClosed}
                     />
                   </Grid>
                   <Grid item xs={3}>
