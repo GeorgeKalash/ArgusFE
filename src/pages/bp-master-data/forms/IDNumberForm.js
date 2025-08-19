@@ -46,7 +46,10 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     {
       component: 'date',
       name: 'expiryDate',
-      label: labels?.expiryDate
+      label: labels?.expiryDate,
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.idNum }
+      }
     }
   ]
 
