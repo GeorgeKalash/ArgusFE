@@ -677,7 +677,7 @@ export function DataGrid({
                 sx={{
                   width: '20%',
                   height: '20%',
-                  marginLeft: '0px !important'
+                  marginLeft: '50px !important'
                 }}
                 disabled={column.checkAll?.disabled}
               />
