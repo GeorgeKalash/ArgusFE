@@ -6,14 +6,20 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const ClientSalesTransaction = ({ functionId, clientId }) => {
+const ClientSalesTransaction = ({ functionId, clientId, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState([])
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ClientSalesTransaction, window })
+
   async function fetchGridData() {
     const response = await getRequest({
-      extension: SaleRepository.SATrx.qry2,
-      parameters: `_functionId=${functionId}&_recordId=${0}&_clientId=${clientId}`
+      extension: SaleRepository.SATrx.page,
+      parameters: `_functionId=${functionId}&_recordId=${0}&_clientId=${clientId}&_startAt=0&_pageSize=30`
     })
     setData(response || [])
   }
@@ -23,7 +29,7 @@ const ClientSalesTransaction = ({ functionId, clientId }) => {
   }, [])
 
   const { labels: _labels, access } = useResourceQuery({
-    endpointId: SaleRepository.SATrx.qry2,
+    endpointId: SaleRepository.SATrx.page,
 
     filter: {
       filterFn: fetchGridData,
@@ -73,5 +79,8 @@ const ClientSalesTransaction = ({ functionId, clientId }) => {
     </VertLayout>
   )
 }
+
+ClientSalesTransaction.width = 600
+ClientSalesTransaction.height = 450
 
 export default ClientSalesTransaction

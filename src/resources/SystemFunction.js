@@ -45,6 +45,7 @@ export const SystemFunction = {
   SubsequentPurchaseDebit: Module.Purchase * 100 + 6,
   SubsequentPurchaseCredit: Module.Purchase * 100 + 7,
   ShipmentReturn: Module.Purchase * 100 + 8,
+  PUDraftSerialReturn: Module.Purchase * 100 + 9,
   SalesQuotation: Module.Sales * 100 + 0,
   SalesOrder: Module.Sales * 100 + 1,
   SalesInvoice: Module.Sales * 100 + 2,
@@ -56,7 +57,7 @@ export const SystemFunction = {
   DraftSerialsIn: Module.Sales * 100 + 8,
   DraftInvoiceReturn: Module.Sales * 100 + 9, //draft serial return
   Clients: Module.Sales * 100 + 40,
-  ReurnOnInvoice: Module.Sales * 100 + 41,
+  ReturnOnInvoice: Module.Sales * 100 + 41,
   DeliveryOrder: Module.Delivery * 100 + 0,
   DeliveryReturn: Module.Delivery * 100 + 1,
   DeliveryTrip: Module.Delivery * 100 + 2,
@@ -68,6 +69,7 @@ export const SystemFunction = {
   RetailInvoice: Module.PointOfSale * 100 + 0,
   RetailReturn: Module.PointOfSale * 100 + 1,
   RetailPurchase: Module.PointOfSale * 100 + 2,
+  RetailPurchaseReturn: Module.PointOfSale * 100 + 3,
   ChartOfAccounts: Module.GeneralLedger * 100 + 2,
   Assets: Module.FixedAssets * 100 + 0,
   AssetsDepreciation: Module.FixedAssets * 100 + 2,
@@ -107,7 +109,23 @@ export const SystemFunction = {
   RemittanceReceiptVoucher: Module.Remittance * 100 + 7,
   OutwardsTransfer: Module.Remittance * 100 + 8,
   ProductionSheet: Module.Manufacturing * 100 + 12,
-  OutwardReturnSettlement: Module.Remittance * 100 + 9
+  OutwardReturnSettlement: Module.Remittance * 100 + 9,
+  DraftSerialsInvoice: Module.Sales * 100 + 8,
+  CashTransfers: Module.Cash * 100 + 3,
+  ThreeDDesign: Module.ProductModeling * 100 + 2,
+  ModelMaker: Module.ProductModeling * 100 + 5,
+  ThreeDPrint: Module.ProductModeling * 100 + 3,
+  ModellingCasting: Module.ProductModeling * 100 + 4,
+  Sketch: Module.ProductModeling * 100 + 1,
+  Rubber: Module.ProductModeling * 100 + 6,
+  DamageReturn: Module.Manufacturing * 100 + 13,
+  JobOrderWizard: Module.Manufacturing * 100 + 14,
+  BalanceTransferMultiAccount: Module.Financials * 100 + 13,
+  BalanceTransferPurchase: Module.Financials * 100 + 10,
+  BalanceTransferSales: Module.Financials * 100 + 11,
+  BalanceAdjustment: Module.LeaveReq * 100 + 4,
+  Samples: Module.ProductModeling * 100 + 7,
+  MetalSmelting: Module.Foundry * 100 + 5
 }
 
 export const getSystemFunctionModule = functionId => {

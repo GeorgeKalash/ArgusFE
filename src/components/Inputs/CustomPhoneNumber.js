@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/material.css'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -10,6 +10,8 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
   const prefix = '+'
 
   const { defaultsData } = useContext(ControlContext)
+
+  const [code, seCode] = useState('')
 
   const { _readOnly, _required, _hidden } = checkAccess(
     name,
@@ -27,6 +29,8 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
 
   const handlePhoneChange = (fullValue, countryData, event) => {
     const value = replaceLeadingZeros(prefix + fullValue)
+
+    seCode(prefix + countryData.dialCode)
 
     if (onChange) onChange(value, countryData, event)
   }
@@ -74,6 +78,7 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
         disableAreaCodes={true}
         onChange={handlePhoneChange}
         onBlur={handlePhoneBlur}
+        disableDropdown={_readOnly}
         inputProps={{
           name: name,
           onPaste: props.onPaste,
@@ -97,7 +102,7 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
         <IconButton
           tabIndex={-1}
           edge='end'
-          onClick={props.onClear}
+          onClick={() => props.onClear(code)}
           aria-label='clear input'
           sx={{
             position: 'absolute',

@@ -14,8 +14,8 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function SalesForm({ labels, maxAccess, recordId, store }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function SalesForm({ labels, maxAccess, store }) {
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
@@ -45,7 +45,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
         .transform((value, originalValue) => (originalValue === '' ? null : value))
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.Client.set,
         record: JSON.stringify(obj)
       })
@@ -53,20 +53,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
       toast.success(platformLabels.Saved)
     }
   })
-  const editMode = !!formik.values.recordId
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: SaleRepository.ClientGroups.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues(res.record)
-      }
-    })()
-  }, [])
+  const editMode = !!formik?.values?.recordId
 
   return (
     <FormShell resourceId={ResourceIds.ClientGroups} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -131,7 +118,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
               <CustomNumberField
                 name='tdPct'
                 label={labels.discount + ' %'}
-                value={formik.values.tdPct}
+                value={formik.values?.tdPct}
                 maxAccess={maxAccess}
                 onChange={e => {
                   formik.handleChange(e)
@@ -149,7 +136,7 @@ export default function SalesForm({ labels, maxAccess, recordId, store }) {
               <CustomNumberField
                 name='maxDiscount'
                 label={labels.maxDiscount}
-                value={formik.values.maxDiscount}
+                value={formik.values?.maxDiscount}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('maxDiscount', '')}

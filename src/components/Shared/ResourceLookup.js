@@ -7,7 +7,6 @@ export const ResourceLookup = ({
   parameters,
   form,
   formObject = null,
-  name,
   firstValue,
   secondValue,
   valueShow,
@@ -24,33 +23,48 @@ export const ResourceLookup = ({
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
 
-  const onLookup = searchQry => {
+  const onLookup = async searchQry => {
     setStore([])
     setRenderOption(false)
-    if (searchQry?.length >= minChars) {
-      setIsLoading(true)
-      getRequest({
-        extension: endpointId,
-        parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
-        disableLoading: true
-      })
-        .then(res => {
-          if (filter) {
-            res.list = res.list.filter(item => {
-              return Object.keys(filter).every(key => {
-                return parseInt(item[key]) == parseInt(filter[key]) || item[key] == filter[key]
+    if (!endpointId) {
+      if (rest.onLookup) {
+        const res = await rest?.onLookup(searchQry)
+        setStore(res)
+        setRenderOption(true)
+      }
+    } else {
+      if (searchQry?.length >= minChars) {
+        setIsLoading(true)
+        getRequest({
+          extension: endpointId,
+          parameters: new URLSearchParams({ ...parameters, _filter: searchQry }),
+          disableLoading: true
+        })
+          .then(res => {
+            if (filter) {
+              res.list = res?.list?.filter(item => {
+                return Object.entries(filter).every(([key, value]) => {
+                  if (typeof value === 'function') {
+                    return value(item[key])
+                  }
+
+                  return parseInt(item[key]) == parseInt(value) || item[key] == value
+                })
               })
-            })
-          }
-          setStore(res.list)
-          setRenderOption(true)
-        })
-        .finally(() => {
-          setIsLoading(false)
-          setRenderOption(true)
-        })
+            }
+            setStore(res.list)
+            setRenderOption(true)
+          })
+          .finally(() => {
+            setIsLoading(false)
+            setRenderOption(true)
+          })
+      }
     }
   }
+  const fieldPath = rest?.name?.split('.')
+  const [parent, child] = fieldPath
+  const name = child || rest?.name
 
   const _firstValue =
     firstValue ||
@@ -78,7 +92,7 @@ export const ResourceLookup = ({
     if (fieldPath.length > 1) {
       const [parent, child] = fieldPath
 
-      return (form.touched?.[parent]?.[child] || true) && Boolean(form.errors?.[parent]?.[child])
+      return form.touched?.[parent]?.[child] && Boolean(form.errors?.[parent]?.[child])
     }
 
     return form.touched?.[errorCheck] && Boolean(form.errors?.[errorCheck])
@@ -90,8 +104,8 @@ export const ResourceLookup = ({
     setStore([])
   }, [_firstValue])
 
-  const onKeyUp = e => {
-    if (e.key === 'Enter') {
+  const onKeyUp = (e, HighlightedOption) => {
+    if (e.key === 'Enter' && !HighlightedOption) {
       selectFirstOption()
     }
   }
@@ -114,7 +128,6 @@ export const ResourceLookup = ({
     <>
       <CustomLookup
         {...{
-          onLookup,
           store,
           setStore,
           firstValue: _firstValue,
@@ -124,10 +137,12 @@ export const ResourceLookup = ({
           onFocus,
           onBlur,
           name,
+          fullName: rest.name,
           isLoading,
           renderOption,
           minChars,
-          ...rest
+          ...rest,
+          onLookup
         }}
       />
     </>

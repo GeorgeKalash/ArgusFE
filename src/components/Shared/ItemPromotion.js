@@ -6,10 +6,15 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const ItemPromotion = props => {
-  const { invoiceId } = props
+  const { invoiceId, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ItemPromotion, window })
 
   const {
     query: { data },
@@ -104,5 +109,8 @@ const ItemPromotion = props => {
     </VertLayout>
   )
 }
+
+ItemPromotion.width = 1330
+ItemPromotion.height = 720
 
 export default ItemPromotion

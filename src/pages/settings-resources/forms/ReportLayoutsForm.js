@@ -125,8 +125,8 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
       flex: 1
     },
     {
-      width: 100,
-
+      flex: 0.5,
+      field: 'post',
       cellRenderer: row => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>

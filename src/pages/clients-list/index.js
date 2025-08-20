@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
@@ -12,11 +11,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ClientsList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const {
     query: { data },
@@ -34,7 +36,7 @@ const ClientsList = () => {
       default: { category: 1 }
     }
   })
-  async function fetchWithSearch({ options = {}, filters }) {
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -103,42 +105,20 @@ const ClientsList = () => {
     stack({
       Component: ClientTemplateForm,
       props: {
-        labels: labels,
-        maxAccess: access,
-        recordId: recordId ? recordId : null,
-        plantId: _plantId,
-        maxAccess: access
-      },
-      width: 1100,
-      title: labels.pageTitle
+        recordId,
+        plantId: _plantId
+      }
     })
   }
 
   const addClient = async () => {
-    try {
-      const plantId = await getPlantId()
-      if (plantId) {
-        openForm('', plantId)
-      } else {
-        stackError({
-          message: 'The user does not have a default plant'
-        })
-      }
-    } catch (error) {}
-  }
-
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    })
-
-    return res?.record?.value
+    if (plantId) {
+      openForm('', plantId)
+    } else {
+      stackError({
+        message: platformLabels.noDefaultPlant
+      })
+    }
   }
 
   const editClient = obj => {

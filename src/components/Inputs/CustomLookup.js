@@ -5,17 +5,18 @@ import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomLookup = ({
   type = 'text',
   name,
+  fullName,
   label,
   firstValue,
   secondValue,
   secondDisplayField = true,
   columnsInDropDown,
-  onSecondValueChange,
-  secondFieldName = '',
+  secondField = { name: '', editable: false, onChange: () => {} },
   store = [],
   setStore,
   onKeyUp,
@@ -26,7 +27,7 @@ const CustomLookup = ({
   onChange,
   onKeyDown,
   error,
-  firstFieldWidth = secondDisplayField ? '50%' : '100%',
+  firstFieldWidth = secondDisplayField ? 6 : 12,
   displayFieldWidth = 1,
   helperText,
   variant = 'outlined',
@@ -44,7 +45,7 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(fullName, props.maxAccess, required, readOnly, hidden)
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
@@ -82,7 +83,7 @@ const CustomLookup = ({
     <></>
   ) : (
     <Grid container spacing={0} sx={{ width: '100%' }}>
-      <Grid item xs={secondDisplayField ? 6 : 12}>
+      <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
           onFocus={() => setIsFocused(true)}
@@ -112,6 +113,7 @@ const CustomLookup = ({
           }}
           onChange={(event, newValue) => {
             setInputValue(newValue ? newValue[valueField] : '')
+
             onChange(name, newValue)
             setAutoFocus(true)
           }}
@@ -123,46 +125,61 @@ const CustomLookup = ({
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
           renderOption={(props, option) => {
-            if (columnsInDropDown && columnsInDropDown.length > 0) {
+            if (columnsInDropDown?.length > 0) {
+              const columnsWithGrid = columnsInDropDown.map(col => ({
+                ...col,
+                grid: col.grid ?? 2
+              }))
+
+              const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
+
               return (
                 <Box>
                   {props.id.endsWith('-0') && (
                     <li className={props.className}>
-                      {columnsInDropDown.map(
-                        (header, i) =>
-                          columnsInDropDown.length > 1 && (
-                            <Box
-                              key={i}
-                              sx={{
-                                flex: 1,
-                                fontWeight: 'bold',
-                                width: header.width || 'auto',
-                                fontSize: '0.7rem',
-                                height: '15px',
-                                display: 'flex'
-                              }}
-                            >
-                              {header.value.toUpperCase()}
-                            </Box>
-                          )
-                      )}
+                      {columnsWithGrid.map((header, i) => {
+                        const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
+                        return (
+                          <Box
+                            key={i}
+                            sx={{
+                              fontWeight: 'bold',
+                              width: widthPercent,
+                              fontSize: '0.7rem',
+                              height: '15px',
+                              display: 'flex'
+                            }}
+                          >
+                            {header.value.toUpperCase()}
+                          </Box>
+                        )
+                      })}
                     </li>
                   )}
                   <li {...props}>
-                    {columnsInDropDown.map((header, i) => (
-                      <Box
-                        key={i}
-                        sx={{
-                          flex: 1,
-                          width: header.width || 'auto',
-                          fontSize: '0.88rem',
-                          height: '20px',
-                          display: 'flex'
-                        }}
-                      >
-                        {option[header.key]}
-                      </Box>
-                    ))}
+                    {columnsWithGrid.map((header, i) => {
+                      let displayValue = option[header.key]
+
+                      if (header?.type && header?.type === 'date' && displayValue) {
+                        displayValue = formatDateDefault(displayValue)
+                      }
+                      const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
+                      return (
+                        <Box
+                          key={i}
+                          sx={{
+                            width: widthPercent,
+                            fontSize: '0.88rem',
+                            height: '20px',
+                            display: 'flex'
+                          }}
+                        >
+                          {displayValue}
+                        </Box>
+                      )
+                    })}
                   </li>
                 </Box>
               )
@@ -218,6 +235,7 @@ const CustomLookup = ({
                 if (selectFirstValue.current !== 'click') {
                   onBlur(e, valueHighlightedOption?.current)
                 }
+                valueHighlightedOption.current = ''
               }}
               onFocus={e => {
                 setStore([]), setFreeSolo(true)
@@ -229,8 +247,9 @@ const CustomLookup = ({
               label={label}
               required={_required}
               onKeyUp={e => {
-                onKeyUp(e)
-                if (e.key !== 'Enter') e.target?.value?.length >= minChars ? setFreeSolo(false) : setFreeSolo(true)
+                onKeyUp(e, valueHighlightedOption?.current)
+
+                if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{
                 ...params.inputProps,
@@ -321,7 +340,7 @@ const CustomLookup = ({
         />
       </Grid>
       {secondDisplayField && (
-        <Grid item xs={6}>
+        <Grid item xs={12 - firstFieldWidth}>
           <TextField
             size={size}
             variant={variant}
@@ -329,15 +348,15 @@ const CustomLookup = ({
             value={secondValue ? secondValue : ''}
             required={_required}
             onChange={e => {
-              if (onSecondValueChange && secondFieldName) {
-                onSecondValueChange(secondFieldName, e.target.value)
+              if (secondField?.onChange && secondField?.name) {
+                secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
             InputProps={{
               inputProps: {
-                tabIndex: _readOnly || secondFieldName === '' ? -1 : 0 // Prevent focus on the input field
+                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0 // Prevent focus on the input field
               },
-              readOnly: !!secondFieldName && !_readOnly ? false : true
+              readOnly: secondField ? !secondField?.editable : _readOnly
             }}
             error={error}
             helperText={helperText}

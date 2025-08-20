@@ -24,13 +24,18 @@ import { getStorageData } from 'src/storage/storage'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import FormGrid from 'src/components/form/layout/FormGrid'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateFromApi } from 'src/lib/date-helper'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
   const editMode = !!storeRecordId
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const passwordExpiryDays = defaultsData?.list?.find(({ key }) => key === 'passwordExpiryDays')?.value
+  const userData = getStorageData('userData')
 
   const { formik } = useForm({
     maxAccess,
@@ -54,9 +59,12 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       platform: '',
       dashboardId: null,
       umcpnl: false,
-      is2FAEnabled: false
+      is2FAEnabled: false,
+      passwordLastSet: null,
+      passwordExpiresAt: null,
+      forcePasswordReset: false,
+      passwordExpiryDays: null
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fullName: yup.string().required(),
@@ -101,6 +109,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
               spId: user.spId,
               userName: copy.username,
               password: copy.password,
+              passwordExpiryDays: copy.passwordExpiryDays,
               userId: copy.recordId
             })
           },
@@ -159,10 +168,30 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
       })
       setEmailPresent(false)
       setPasswordState(false)
+      formik.setFieldValue('passwordExpiryDays', passwordExpiryDays)
+      formik.setFieldValue('passwordLastSet', null)
+      formik.setFieldValue('passwordExpiresAt', null)
+      formik.setFieldValue('forcePasswordReset', false)
     } catch (error) {
       if (error.response && error.response.status === 303) {
         setEmailPresent(true)
         setPasswordState(true)
+
+        const resID = await getIdentityRequest({
+          extension: AccountRepository.Identity.get,
+          parameters: `_email=${email}`
+        })
+
+        formik.setFieldValue('passwordExpiryDays', resID?.record?.passwordExpiryDays)
+        formik.setFieldValue(
+          'passwordLastSet',
+          resID?.record?.passwordLastSet ? formatDateFromApi(resID?.record?.passwordLastSet) : null
+        )
+        formik.setFieldValue(
+          'passwordExpiresAt',
+          resID?.record?.passwordExpiresAt ? formatDateFromApi(resID?.record?.passwordExpiresAt) : null
+        )
+        formik.setFieldValue('forcePasswordReset', resID?.record?.forcePasswordReset)
         formik.validateForm()
       } else {
         setEmailPresent(false)
@@ -178,7 +207,22 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
           extension: SystemRepository.Users.get,
           parameters: `_recordId=${storeRecordId}`
         })
-        formik.setValues(res.record)
+
+        const resID = await getIdentityRequest({
+          extension: AccountRepository.Identity.get,
+          parameters: `_email=${res?.record?.username}`
+        })
+
+        const updateUser = {
+          ...res.record,
+          passwordLastSet: resID?.record?.passwordLastSet ? formatDateFromApi(resID?.record?.passwordLastSet) : null,
+          passwordExpiresAt: resID?.record?.passwordExpiresAt
+            ? formatDateFromApi(resID?.record?.passwordExpiresAt)
+            : null,
+          forcePasswordReset: resID?.record?.forcePasswordReset,
+          passwordExpiryDays: resID?.record?.passwordExpiryDays
+        }
+        formik.setValues(updateUser)
         setPasswordState(true)
       }
     })()
@@ -323,30 +367,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     error={formik.touched.platform && Boolean(formik.errors.platform)}
                   />
                 </FormGrid>
-              </Grid>
-            </Grid>
-            <Grid item xs={6}>
-              <Grid container spacing={3}>
-                <FormGrid item hideonempty xs={12}>
-                  <ResourceComboBox
-                    endpointId={AccessControlRepository.NotificationGroup.qry}
-                    parameters='filter='
-                    name='notificationGroupId'
-                    label={labels.notificationGroup}
-                    valueField='recordId'
-                    displayField='name'
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('notificationGroupId', newValue ? newValue.recordId : '')
-                    }}
-                    error={formik.touched.notificationGroupId && Boolean(formik.errors.notificationGroupId)}
-                  />
-                </FormGrid>
                 <FormGrid item hideonempty xs={12}>
                   <ResourceLookup
                     endpointId={EmployeeRepository.Employee.snapshot}
@@ -397,35 +417,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     maxAccess={maxAccess}
                   />
                 </FormGrid>
-                <FormGrid item hideonempty xs={12}>
-                  <CustomTextField
-                    name='password'
-                    label={labels.password}
-                    value={formik.values.password}
-                    required
-                    hidden={editMode || passwordState}
-                    readOnly={passwordState}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('password', '')}
-                    error={formik.touched.password && Boolean(formik.errors.password)}
-                  />
-                </FormGrid>
-                <FormGrid item hideonempty xs={12}>
-                  <CustomTextField
-                    name='confirmPassword'
-                    label={labels.confirmPassword}
-                    value={formik.values.confirmPassword}
-                    required
-                    hidden={editMode || passwordState}
-                    readOnly={passwordState}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    onClear={() => formik.setFieldValue('confirmPassword', '')}
-                    error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-                  />
-                </FormGrid>
+
                 <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     name='dashboardId'
@@ -441,6 +433,106 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                     error={formik.touched.dashboardId && Boolean(formik.errors.dashboardId)}
                   />
                 </FormGrid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <FormGrid item hideonempty xs={12}>
+                  <ResourceComboBox
+                    endpointId={AccessControlRepository.NotificationGroup.qry}
+                    parameters='filter='
+                    name='notificationGroupId'
+                    label={labels.notificationGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('notificationGroupId', newValue ? newValue.recordId : '')
+                    }}
+                    error={formik.touched.notificationGroupId && Boolean(formik.errors.notificationGroupId)}
+                  />
+                </FormGrid>
+
+                {!(editMode || passwordState) && (
+                  <FormGrid item hideonempty xs={12}>
+                    <CustomTextField
+                      name='password'
+                      label={labels.password}
+                      value={formik.values.password}
+                      required
+                      readOnly={passwordState}
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('password', '')}
+                      error={formik.touched.password && Boolean(formik.errors.password)}
+                    />
+                  </FormGrid>
+                )}
+                {!(editMode || passwordState) && (
+                  <FormGrid item hideonempty xs={12}>
+                    <CustomTextField
+                      name='confirmPassword'
+                      label={labels.confirmPassword}
+                      value={formik.values.confirmPassword}
+                      required
+                      readOnly={passwordState}
+                      maxAccess={maxAccess}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      onClear={() => formik.setFieldValue('confirmPassword', '')}
+                      error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+                    />
+                  </FormGrid>
+                )}
+                <FormGrid item xs={12}>
+                  <CustomNumberField
+                    name='passwordExpiryDays'
+                    label={labels.passwordExpiryDays}
+                    value={formik.values?.passwordExpiryDays}
+                    maxAccess={maxAccess}
+                    readOnly={passwordState}
+                    onChange={formik.handleChange}
+                    decimalScale={0}
+                    maxLength={4}
+                    onClear={() => formik.setFieldValue('passwordExpiryDays', null)}
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomDatePicker
+                    name='passwordLastSet'
+                    label={labels.passwordLastSet}
+                    value={formik.values?.passwordLastSet}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomDatePicker
+                    name='passwordExpiresAt'
+                    label={labels.passwordExpiresAt}
+                    value={formik.values.passwordExpiresAt}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+
+                <FormGrid item xs={12}>
+                  <CustomCheckBox
+                    name='forcePasswordReset'
+                    value={formik.values.forcePasswordReset}
+                    label={labels.forcePasswordReset}
+                    readOnly
+                    maxAccess={maxAccess}
+                  />
+                </FormGrid>
+
                 <FormGrid item hideonempty xs={12}>
                   <CustomCheckBox
                     name='umcpnl'

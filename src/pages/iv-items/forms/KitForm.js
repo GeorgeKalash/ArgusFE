@@ -111,7 +111,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
           _size: 50
         },
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         mapping: [
           { from: 'recordId', to: 'componentId' },
           { from: 'sku', to: 'componentSKU' },

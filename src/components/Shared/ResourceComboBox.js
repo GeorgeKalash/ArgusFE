@@ -3,17 +3,19 @@ import { useContext, useEffect, useState, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useCacheDataContext } from 'src/providers/CacheDataContext'
+import { useCacheStoreContext } from 'src/providers/CacheStoreContext'
 
 export default function ResourceComboBox({
   endpointId,
   datasetId,
-  name,
   valueField = 'recordId',
   values = {},
   parameters = '_filter=',
+  dynamicParams,
   filter = () => true,
   dataGrid,
   value,
+  defaultIndex,
   reducer = res => res?.list,
   refresh,
   setData,
@@ -23,6 +25,8 @@ export default function ResourceComboBox({
 
   const { getRequest } = useContext(RequestsContext)
   const { updateStore, fetchWithCache } = useCacheDataContext() || {}
+  const { cacheStore = {}, updateCacheStore = () => {} } = useCacheStoreContext() || {}
+
   const cacheAvailable = !!updateStore
   const { getAllKvsByDataset } = useContext(CommonContext)
 
@@ -30,12 +34,17 @@ export default function ResourceComboBox({
   const [isLoading, setIsLoading] = useState(false)
   const finalItemsListRef = useRef([])
 
-  function fetch({ datasetId, endpointId, parameters }) {
+  const key = endpointId || datasetId
+  const noCache = Boolean(dynamicParams)
+
+  function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
+      const fullParameters = dynamicParams ? parameters + '&' + dynamicParams : parameters
+
       return getRequest({
         extension: endpointId,
-        parameters,
-        disableLoading: true
+        parameters: fullParameters,
+        disableLoading: refresh
       })
     } else if (datasetId) {
       return new Promise(resolve => {
@@ -49,35 +58,42 @@ export default function ResourceComboBox({
 
   useEffect(() => {
     const fetchDataAsync = async () => {
-      await fetchData()
+      await fetchData(false)
     }
 
     fetchDataAsync()
   }, [parameters])
 
-  const fetchData = async () => {
+  const fetchData = async (refresh = true) => {
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
-      const data = cacheAvailable
-        ? await fetchWithCache({
-            queryKey: [datasetId || endpointId, parameters],
-            queryFn: () => fetch({ datasetId, endpointId, parameters })
-          })
-        : await fetch({ datasetId, endpointId, parameters })
+      const data =
+        !noCache && cacheStore?.[key] && !refresh
+          ? cacheStore?.[key]
+          : cacheAvailable && !noCache
+          ? await fetchWithCache({
+              queryKey: [datasetId || endpointId, parameters],
+              queryFn: () => fetch({ datasetId, endpointId, parameters, refresh })
+            })
+          : await fetch({ datasetId, endpointId, parameters, refresh })
+
       setApiResponse(!!datasetId ? { list: data } : data)
+
+      if (!cacheStore?.[key] || noCache) {
+        endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
+      }
       if (typeof setData == 'function') setData(!!datasetId ? { list: data } : data)
       setIsLoading(false)
-
-      if (!values[name]) {
-        selectFirstOption()
-      }
     }
   }
-
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
+  finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
   finalItemsListRef.current = finalItemsList || []
+  const fieldPath = rest?.name?.split('.')
+  const [parent, child] = fieldPath
+  const name = child || rest?.name
 
   const _value =
     (typeof values[name] === 'object'
@@ -88,12 +104,14 @@ export default function ResourceComboBox({
     value ||
     ''
 
-
-  const onBlur = (e, HighlightedOption) => {
-    if (HighlightedOption) {
-      rest.onChange('', HighlightedOption)
-    } else if (!values[name] && finalItemsListRef.current?.[0]) {
-      selectFirstOption()
+  const onBlur = (e, HighlightedOption, options, allowSelect) => {
+    if (allowSelect) {
+      finalItemsListRef.current = options || finalItemsListRef.current
+      if (HighlightedOption) {
+        rest.onChange('', HighlightedOption)
+      } else if (finalItemsListRef.current?.[0]) {
+        selectFirstOption()
+      }
     }
   }
 
@@ -103,6 +121,12 @@ export default function ResourceComboBox({
     }
   }
 
+  useEffect(() => {
+    if (finalItemsListRef.current.length > 0 && typeof defaultIndex === 'number') {
+      rest.onChange('', finalItemsListRef.current[defaultIndex])
+    }
+  }, [defaultIndex, finalItemsListRef.current.length])
+
   return (
     <CustomComboBox
       {...{
@@ -110,6 +134,7 @@ export default function ResourceComboBox({
         refresh,
         fetchData,
         name,
+        fullName: rest.name,
         store: finalItemsList,
         valueField,
         value: _value,

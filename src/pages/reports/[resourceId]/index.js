@@ -1,13 +1,8 @@
-// ** NEXT IMPORTS
-import { useRouter } from 'next/router'
-
-// ** COMPONENTS IMPORTS
 import ReportViewer from 'src/components/Shared/ReportViewer'
+import { Router } from 'src/lib/useRouter'
 
 const Reports = () => {
-  const router = useRouter()
-
-  const { resourceId } = router.query
+  const { resourceId } = Router()
 
   return <ReportViewer resourceId={resourceId} />
 }

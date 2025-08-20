@@ -2,24 +2,26 @@ import React, { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import { useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { formatDateDefault } from 'src/lib/date-helper'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useWindow } from 'src/windows'
-import ClientTemplateForm from './forms/ClientTemplateForm'
+import ClientCorporateForm from './forms/ClientCorporateForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useError } from 'src/error'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(null)
+
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const {
     query: { data },
@@ -36,7 +38,7 @@ const ClientsCorporateList = () => {
     }
   })
 
-  async function fetchWithSearch({ options = {}, filters }) {
+  async function fetchWithSearch({ filters }) {
     return (
       filters.qry &&
       (await getRequest({
@@ -93,42 +95,11 @@ const ClientsCorporateList = () => {
     }
   ]
 
-  const addClient = async obj => {
-    try {
-      const plantId = await getPlantId()
-      if (plantId !== '') {
-        setEditMode(false)
-        openForm('')
-      } else {
-        stackError({ message: 'The user does not have a default plant' })
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    try {
-      const res = await getRequest({
-        extension: SystemRepository.UserDefaults.get,
-        parameters: parameters
-      })
-
-      if (res.record.value) {
-        return res.record.value
-      }
-
-      return ''
-    } catch (error) {
-      // Handle errors if needed
-      stackError(error)
-
-      return ''
+  const addClient = async () => {
+    if (plantId !== '') {
+      openForm('')
+    } else {
+      stackError({ message: platformLabels.noDefaultPlant })
     }
   }
 
@@ -140,14 +111,13 @@ const ClientsCorporateList = () => {
 
   function openForm(recordId) {
     stack({
-      Component: ClientTemplateForm,
+      Component: ClientCorporateForm,
       props: {
         _labels: _labels,
         maxAccess: access,
         editMode: editMode,
         recordId: recordId ? recordId : null
       },
-      width: 1100,
       title: _labels.clientCorporate
     })
   }

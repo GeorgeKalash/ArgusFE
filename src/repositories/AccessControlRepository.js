@@ -56,7 +56,9 @@ export const AccessControlRepository = {
   },
   ModuleClass: {
     qry: service + 'qryRES',
+    get: service + 'getRES',
     qry0: service + 'qryRES0',
+    qry2: service + 'qryRES2',
     set: service + 'setRES',
     set2: service + 'set2RES'
   },
@@ -69,6 +71,7 @@ export const AccessControlRepository = {
     set2: service + 'set2USI'
   },
   NotificationLabel: {
+    page: service + 'pageNLB',
     qry: service + 'qryNLB',
     get: service + 'getNLB',
     set: service + 'setNLB',
@@ -81,8 +84,7 @@ export const AccessControlRepository = {
   },
   DataAccessItem: {
     qry: service + 'qryROW',
-    set: service + 'setROW',
-    del: service + 'delROW'
+    set2: service + 'set2ROW'
   },
   Notification: {
     qry: service + 'qryNTX',
@@ -104,5 +106,11 @@ export const AccessControlRepository = {
     qry: service + 'qryPLS',
     set2: service + 'set2PLS',
     verify: service + 'verifyPLS'
+  },
+  ResourceDowntime: {
+    page: service + 'pageRDT',
+    get2: service + 'get2RDT',
+    set2: service + 'set2RDT',
+    del: service + 'delRDT'
   }
 }

@@ -102,7 +102,7 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
                 onClear={() => formik.setFieldValue('reference', '')}
                 maxAccess={maxAccess}
                 editMode={editMode}
-                maxLength={6}
+                maxLength={10}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>

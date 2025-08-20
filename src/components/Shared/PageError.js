@@ -15,7 +15,16 @@ const PageError = ({ onClose, message, height = '' }) => {
       : message?.response?.data
 
   return (
-    <Window Title='Error' width={450} height={height} onClose={onClose} expandable={false} controlled={true}>
+    <Window
+      Title='Error'
+      width={450}
+      height={height}
+      onClose={onClose}
+      expandable={false}
+      controlled={true}
+      isLoading={false}
+      refresh={false}
+    >
       <DialogContent>
         <Box
           sx={{
@@ -36,7 +45,7 @@ const PageError = ({ onClose, message, height = '' }) => {
             pl: 2
           }}
         >
-          <Button variant='contained' onClick={onClose} color='primary'>
+          <Button variant='contained' onClick={onClose} color='primary' autoFocus>
             Ok
           </Button>
         </Box>

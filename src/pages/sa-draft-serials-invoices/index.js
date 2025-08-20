@@ -24,7 +24,6 @@ const DraftSerialsInvoices = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels,
     access,
     paginationParameters,
@@ -39,6 +38,11 @@ const DraftSerialsInvoices = () => {
   })
 
   const columns = [
+    {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
     {
       field: 'reference',
       headerName: labels.reference,
@@ -57,14 +61,8 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'clientName',
-      headerName: labels.client,
+      headerName: labels.clientName,
       flex: 1
-    },
-    {
-      field: 'amount',
-      headerName: labels.amount,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'pcs',
@@ -74,9 +72,20 @@ const DraftSerialsInvoices = () => {
     },
     {
       field: 'weight',
-      headerName: labels.totalWeight,
+      headerName: labels.weight,
       flex: 1,
       type: 'number'
+    },
+    {
+      field: 'amount',
+      headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'spName',
+      headerName: labels.salesPerson,
+      flex: 1
     },
     {
       field: 'description',
@@ -84,13 +93,13 @@ const DraftSerialsInvoices = () => {
       flex: 1
     },
     {
-      field: 'wipName',
-      headerName: labels.wip,
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     },
     {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'wipName',
+      headerName: labels.wip,
       flex: 1
     }
   ]
@@ -117,8 +126,7 @@ const DraftSerialsInvoices = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.DraftSerialsIn,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -135,10 +143,9 @@ const DraftSerialsInvoices = () => {
       props: {
         labels,
         access,
-        recordId
+        recordId,
+        invalidate
       },
-      width: 1300,
-      height: 750,
       title: labels.draftSerInv
     })
   }
@@ -152,36 +159,10 @@ const DraftSerialsInvoices = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'SADFT'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SADFT'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

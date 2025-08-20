@@ -3,92 +3,66 @@ import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
+import { Fixed } from './Layouts/Fixed'
+import * as yup from 'yup'
 
 export const AddressFormShell = ({
   setAddress,
   address,
-  maxAccess,
   editMode,
   window,
   readOnly,
-  allowPost,
+  allowPost = true,
   optional = false,
   onSubmit,
   isSavedClear = true,
   isCleared = true,
+  changeClear = false,
+  actions = [],
   ...props
 }) => {
   const [required, setRequired] = useState(!optional)
-
-  const initialValues = {
-    recordId: address?.recordId || null,
-    name: address?.name || '',
-    countryId: address?.countryId || '',
-    countryName: address?.countryName || '',
-    stateId: address?.stateId || '',
-    stateName: address?.stateName || '',
-    cityId: address?.cityId || '',
-    city: address?.city || '',
-    street1: address?.street1 || '',
-    street2: address?.street2 || '',
-    email1: address?.email1 || '',
-    email2: address?.email2 || '',
-    phone: address?.phone || '',
-    phone2: address?.phone2 || '',
-    phone3: address?.phone3 || '',
-    addressId: address?.addressId || '',
-    postalCode: address?.postalCode || '',
-    cityDistrictId: address?.cityDistrictId || '',
-    cityDistrict: address?.cityDistrict || '',
-    bldgNo: address?.bldgNo || '',
-    unitNo: address?.unitNo || '',
-    subNo: address?.subNo || '',
-    poBox: address?.poBox || ''
-  }
+  const [formikSettings, setFormik] = useState({})
 
   const { formik } = useForm({
-    maxAccess,
-    enableReinitialize: true,
+    maxAccess: formikSettings.maxAccess,
+    initialValues: {
+      recordId: null,
+      name: '',
+      countryId: null,
+      countryName: '',
+      stateId: null,
+      stateName: '',
+      cityId: null,
+      city: '',
+      street1: '',
+      street2: '',
+      email1: '',
+      email2: '',
+      phone: '',
+      phone2: '',
+      phone3: '',
+      addressId: null,
+      postalCode: '',
+      cityDistrictId: null,
+      cityDistrict: '',
+      bldgNo: '',
+      unitNo: '',
+      subNo: '',
+      poBox: ''
+    },
     validateOnChange: true,
     validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (
-        ((values.name || values.cityId || values.phone || values.countryId || values.street1) && optional) ||
-        !optional
-      ) {
-        // if (!values.name) {
-        //   errors.name = ' '
-        // }
-        if (!values.street1) {
-          errors.street1 = ' '
-        }
-        if (!values.countryId) {
-          errors.countryId = ' '
-        }
-        if (!values.cityId) {
-          errors.cityId = ' '
-        }
-      }
-      if (values.email1 && !emailRegex?.test(values?.email1)) {
-        errors.email1 = 'Invalid email format'
-      }
-
-      if (values.email2 && !emailRegex?.test(values?.email2)) {
-        errors.email2 = 'Invalid email format'
-      }
-
-      return errors
-    },
-    initialValues,
+    validationSchema: yup.object({
+      ...formikSettings.validate
+    }),
     onSubmit: values => {
       setAddress(values)
       if (allowPost) {
-        onSubmit(values)
+        onSubmit(values, window)
+      } else {
+        window.close()
       }
-      window.close()
     }
   })
 
@@ -110,18 +84,35 @@ export const AddressFormShell = ({
   return (
     <FormShell
       form={formik}
-      maxAccess={maxAccess}
+      maxAccess={formikSettings.maxAccess}
       infoVisible={false}
       disabledSubmit={readOnly}
       editMode={editMode}
       isSavedClear={isSavedClear}
       isCleared={isCleared}
+      onClear={
+        changeClear
+          ? () => {
+              formik.resetForm({
+                values: formik.initialValues
+              })
+            }
+          : undefined
+      }
+      actions={actions}
       {...props}
     >
       <VertLayout>
-        <Grow>
-          <AddressTab addressValidation={formik} readOnly={readOnly} required={required} {...props} />
-        </Grow>
+        <Fixed>
+          <AddressTab
+            addressValidation={formik}
+            readOnly={readOnly}
+            required={required}
+            setFormik={setFormik}
+            address={address}
+            {...props}
+          />
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

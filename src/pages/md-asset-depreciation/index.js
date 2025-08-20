@@ -35,7 +35,6 @@ const AssetsDescription = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: _labels,
     access,
     paginationParameters,
@@ -130,40 +129,10 @@ const AssetsDescription = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    if (rpbParams) {
-      setParams(rpbParams)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    onApply({ search: '', rpbParams: params })
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FADEP'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FADEP'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

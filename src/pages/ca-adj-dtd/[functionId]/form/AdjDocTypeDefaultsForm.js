@@ -27,10 +27,10 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
     initialValues: {
       dtId: '',
       plantId: '',
-      recordId: recordId || ''
+      recordId: recordId || '',
+      cashAccountId: null,
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required()
@@ -112,26 +112,23 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={CashBankRepository.CashAccount.snapshot}
-                parameters={{
-                  _type: 0
-                }}
-                valueField='reference'
-                displayField='name'
+              <ResourceComboBox
+                endpointId={CashBankRepository.CashAccount.qry}
+                parameters={`_type=0`}
                 name='cashAccountId'
-                displayFieldWidth={2}
                 label={labels.cashAccount}
-                form={formik}
-                valueShow='cashAccountRef'
-                secondValueShow='cashAccountName'
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('cashAccountId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('cashAccountRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('cashAccountName', newValue ? newValue.name : null)
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('cashAccountId', newValue?.recordId || null)
                 }}
                 error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -40,10 +40,10 @@ const VerticalNavSectionTitle = props => {
         sx={{
           ...(navCollapsed
             ? {
-              py: 3.5,
-              pr: (collapsedNavWidth - navigationBorderWidth - 24) / 8 - 1,
-              pl: (collapsedNavWidth - navigationBorderWidth - 24) / 8 + 0.25
-            }
+                py: 3.5,
+                pr: (collapsedNavWidth - navigationBorderWidth - 24) / 8 - 1,
+                pl: (collapsedNavWidth - navigationBorderWidth - 24) / 8 + 0.25
+              }
             : { px: 0, py: 1.75 })
         }}
       >
@@ -54,15 +54,15 @@ const VerticalNavSectionTitle = props => {
             lineHeight: 'normal',
             ...(navCollapsed
               ? {
-                width: 22,
-                borderColor: theme => `rgba(${theme.palette.customColors.main}, 0.3)`
-              }
+                  width: 22,
+                  borderColor: theme => `rgba(${theme.palette.customColors.main}, 0.3)`
+                }
               : {
-                width: '100%',
-                textTransform: 'uppercase',
-                '&:before, &:after': { top: 7, transform: 'none' },
-                '& .MuiDivider-wrapper': { px: 2.5, fontSize: '0.75rem', letterSpacing: '0.21px' }
-              })
+                  width: '100%',
+                  textTransform: 'uppercase',
+                  '&:before, &:after': { top: 7, transform: 'none' },
+                  '& .MuiDivider-wrapper': { px: 2.5, fontSize: '0.75rem', letterSpacing: '0.21px' }
+                })
           }}
         >
           {navCollapsed ? null : (

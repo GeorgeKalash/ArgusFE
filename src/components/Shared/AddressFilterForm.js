@@ -13,6 +13,8 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 export default function AddressFilterForm({
   labels,
@@ -26,6 +28,9 @@ export default function AddressFilterForm({
 }) {
   const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.AddressFilter, window })
 
   const { formik } = useForm({
     initialValues: { search: '', cityId: null, countryId: null },
@@ -33,7 +38,7 @@ export default function AddressFilterForm({
     validateOnChange: true,
     onSubmit: async obj => {
       const checkedADD = data?.list?.find(obj => obj.checked)
-      if (!checkedADD.addressId) {
+      if (!checkedADD?.addressId) {
         handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
         window.close()
 
@@ -41,25 +46,25 @@ export default function AddressFilterForm({
       }
 
       if (shipment || bill || deliveryOrder) {
-        const address = await getAddress(checkedADD.addressId)
+        const address = await getAddress(checkedADD?.addressId)
         if (shipment)
           handleAddressValues({
             shipAddress: address,
-            shipAddressId: checkedADD.addressId,
-            shipToAddressId: checkedADD.addressId
+            shipAddressId: checkedADD?.addressId,
+            shipToAddressId: checkedADD?.addressId
           })
 
         if (bill)
           handleAddressValues({
             billAddress: address,
-            billAddressId: checkedADD.addressId,
-            billToAddressId: checkedADD.addressId
+            billAddressId: checkedADD?.addressId,
+            billToAddressId: checkedADD?.addressId
           })
 
         if (deliveryOrder) {
           handleAddressValues({
             address: address,
-            addressId: checkedADD.addressId
+            addressId: checkedADD?.addressId
           })
         }
       }
@@ -232,7 +237,6 @@ export default function AddressFilterForm({
           <Table
             columns={rowColumns}
             gridData={data}
-            setData={setData}
             rowId={['recordId']}
             isLoading={false}
             pagination={false}
@@ -247,3 +251,6 @@ export default function AddressFilterForm({
     </FormShell>
   )
 }
+
+AddressFilterForm.width = 950
+AddressFilterForm.height = 600

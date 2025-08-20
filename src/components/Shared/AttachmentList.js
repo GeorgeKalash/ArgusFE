@@ -13,12 +13,15 @@ import GridToolbar from './GridToolbar'
 import AttachmentForm from './AttachmentForm'
 import toast from 'react-hot-toast'
 import { Box, Button } from '@mui/material'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const AttachmentList = ({ resourceId, recordId }) => {
+const AttachmentList = ({ resourceId, recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [maxSeqNo, setMaxSeqNo] = useState(0)
+
+  useSetWindow({ title: platformLabels.Attachment, window })
 
   const {
     query: { data },
@@ -39,6 +42,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
     },
     {
       width: 100,
+      field: 'preview',
       headerName: _labels.preview,
       cellRenderer: row => {
         return (
@@ -70,6 +74,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
     },
     {
       width: 100,
+      field: 'download',
       headerName: _labels.download,
       cellRenderer: row => {
         return (
@@ -109,9 +114,11 @@ const AttachmentList = ({ resourceId, recordId }) => {
   ]
 
   async function fetchGridData() {
+    if (!recordId || !resourceId) return
+
     return await getRequest({
       extension: SystemRepository.Attachment.qry,
-      parameters: `_resourceId=${ResourceIds.SystemAttachments}&_recordId=${recordId}`
+      parameters: `_resourceId=${resourceId}&_recordId=${recordId}`
     })
   }
 
@@ -129,10 +136,7 @@ const AttachmentList = ({ resourceId, recordId }) => {
         recordId,
         resourceId,
         seqNo: maxSeqNo
-      },
-      width: 800,
-      height: 500,
-      title: _labels.Attachment
+      }
     })
   }
 
@@ -168,5 +172,8 @@ const AttachmentList = ({ resourceId, recordId }) => {
     </VertLayout>
   )
 }
+
+AttachmentList.width = 1000
+AttachmentList.height = 650
 
 export default AttachmentList

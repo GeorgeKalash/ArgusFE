@@ -1,17 +1,17 @@
 import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { TrxType } from 'src/resources/AccessLevels'
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
 
 const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
-  const generalMaxAccess = maxAccess && maxAccess.record?.maxAccess
+  const generalMaxAccess = maxAccess && maxAccess.record?.accessFlags
 
-  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId === name) ?? 0
+  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId == name) ?? 0
 
   const isReadOnly =
     accessLevel === DISABLED || (readOnly && accessLevel !== MANDATORY && accessLevel !== FORCE_ENABLED)
 
   const _readOnly = maxAccess?.editMode
-    ? generalMaxAccess < TrxType.EDIT || isReadOnly
-    : generalMaxAccess < TrxType.ADD || isReadOnly
+    ? (generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]) || isReadOnly
+    : (generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]) || isReadOnly
 
   const _hidden = accessLevel ? accessLevel === HIDDEN : hidden
 

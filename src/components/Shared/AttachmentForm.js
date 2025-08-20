@@ -9,10 +9,13 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   const { platformLabels } = useContext(ControlContext)
   const fileUploadRef = useRef(null)
+
+  useSetWindow({ title: platformLabels.Attachment, window })
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.Attachment.qry
@@ -20,8 +23,8 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
 
   const { formik } = useForm({
     initialValues: {
-      resourceId: resourceId,
-      seqNo: seqNo
+      resourceId,
+      seqNo
     },
     enableReinitialize: false,
     validateOnChange: false,
@@ -45,16 +48,14 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
     >
       <VertLayout>
         <Grow>
-          <FileUpload
-            ref={fileUploadRef}
-            resourceId={ResourceIds.SystemAttachments}
-            seqNo={seqNo}
-            recordId={recordId}
-          />
+          <FileUpload ref={fileUploadRef} resourceId={resourceId} seqNo={seqNo} recordId={recordId} />
         </Grow>
       </VertLayout>
     </FormShell>
   )
 }
+
+AttachmentForm.width = 800
+AttachmentForm.height = 500
 
 export default AttachmentForm

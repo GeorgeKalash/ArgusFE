@@ -82,6 +82,12 @@ const CustomTextField = ({
     }
   }
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current && value == '' && !focus) {
+      inputRef.current.focus()
+    }
+  }, [autoFocus, inputRef.current, value])
+
   return _hidden ? (
     <></>
   ) : (
@@ -96,7 +102,9 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
+      onBlur={() => {
+        setIsFocused(false), setFocus(false)
+      }}
       inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -109,7 +117,8 @@ const CustomTextField = ({
           '-moz-appearance': 'textfield',
           textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
         },
-        tabIndex: _readOnly ? -1 : 0
+        tabIndex: _readOnly ? -1 : 0,
+        'data-search': search ? 'true' : 'false'
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
@@ -123,7 +132,15 @@ const CustomTextField = ({
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
-              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+              <IconButton
+                tabIndex={-1}
+                edge='end'
+                onClick={e => {
+                  onClear(e)
+                  setFocus(true)
+                }}
+                aria-label='clear input'
+              >
                 <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}

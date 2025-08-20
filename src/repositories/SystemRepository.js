@@ -6,10 +6,21 @@ export const SystemRepository = {
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
   ReportLayout: service + 'qryRL',
-  ReportLayoutObject: { qry: service + 'qryRLO', set2: service + 'set2RLO' },
-  ReportTemplate: { qry: service + 'qryRT', set2: service + 'set2RT' },
+  DynamicDashboard: {
+    qry: service + 'qryUDB',
+    set2: service + 'set2UDB'
+  },
+  ReportLayoutObject: {
+    qry: service + 'qryRLO',
+    set2: service + 'set2RLO'
+  },
+  ReportTemplate: {
+    qry: service + 'qryRT',
+    set2: service + 'set2RT'
+  },
   DocumentType: {
     qry: service + 'qryDT',
+    qry2: service + 'qry2DT',
     get: service + 'getDT',
     set: service + 'setDT',
     snapshot: service + 'snapshotDT',
@@ -43,6 +54,7 @@ export const SystemRepository = {
   },
   Currency: {
     qry: service + 'qryCU',
+    qry2: service + 'qryCU2',
     page: service + 'pageCU',
     get: service + 'getCU',
     set: service + 'setCU',
@@ -143,9 +155,6 @@ export const SystemRepository = {
     set: service + 'setST',
     del: service + 'delST'
   },
-  Default: {
-    get: service + 'getDE'
-  },
   Defaults: {
     qry: service + 'qryDE',
     get: service + 'getDE',
@@ -161,7 +170,8 @@ export const SystemRepository = {
   UserFunction: {
     get: service + 'getUFU',
     qry: service + 'qryUFU',
-    set: service + 'setUFU'
+    set: service + 'setUFU',
+    set2: service + 'set2UFU'
   },
   RecordRemarks: {
     qry: service + 'qryRMK',
@@ -185,7 +195,11 @@ export const SystemRepository = {
     get: service + 'getTZN'
   },
   Batch: {
-    snapshot: service + 'snapshotBAT'
+    snapshot: service + 'snapshotBAT',
+    get: service + 'getBAT',
+    set: service + 'setBAT',
+    del: service + 'delBAT',
+    page: service + 'pageBAT'
   },
   ETL: {
     get: service + 'getETL'
@@ -240,7 +254,24 @@ export const SystemRepository = {
   Attachment: {
     qry: service + 'qryAT',
     set: service + 'setAT',
+    set2: service + 'setAT2',
     get: service + 'getAT',
+    get2: service + 'getAT2',
     del: service + 'delAT'
+  },
+  Folders: {
+    page: service + 'pageFO',
+    get: service + 'getFO',
+    set: service + 'setFO',
+    del: service + 'delFO'
+  },
+  ResourcePerformance: {
+    page: service + 'pageTLP'
+  },
+  DocumentReverseReasons: {
+    page: service + 'pageRER',
+    get: service + 'getRER',
+    set: service + 'setRER',
+    del: service + 'delRER'
   }
 }

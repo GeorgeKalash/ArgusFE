@@ -88,9 +88,7 @@ const OpeningCost = () => {
       props: {
         labels: _labels,
         record,
-        recordId: record
-          ? String(record.year) + String(record.itemId)
-          : null,
+        recordId: record ? String(record.year) + String(record.itemId) : null,
         maxAccess: access
       },
       width: 550,
@@ -108,21 +106,16 @@ const OpeningCost = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar 
-          labels={_labels} 
-          maxAccess={access} 
-          onApply={onApply}
-          onAdd={add} 
+        <RPBGridToolbar
+          labels={_labels}
+          maxAccess={access}
+          filterBy={filterBy}
+          onAdd={add}
           hasSearch={false}
-          reportName={'IVOC'} 
+          reportName={'IVOC'}
         />
       </Fixed>
       <Grow>

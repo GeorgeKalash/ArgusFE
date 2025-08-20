@@ -22,7 +22,6 @@ const MfAccounts = () => {
     query: { data },
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     invalidate,
     access,
@@ -114,36 +113,10 @@ const MfAccounts = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={addAccounts}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIACC'}
-        />
+        <RPBGridToolbar onAdd={addAccounts} maxAccess={access} reportName={'FIACC'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

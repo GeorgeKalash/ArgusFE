@@ -97,7 +97,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
     const defaultParams = `_key=rt-nra-product`
     var parameters = defaultParams
     getRequest({
-      extension: SystemRepository.Default.get,
+      extension: SystemRepository.Defaults.get,
       parameters: parameters
     }).then(res => {
       res?.record?.value && changeDT({ nraId: res.record.value })

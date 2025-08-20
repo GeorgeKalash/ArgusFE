@@ -22,8 +22,6 @@ const PhysicalCountItem = () => {
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [filteredItems, setFilteredItems] = useState([])
-  const [editMode, setEditMode] = useState(false)
   const { stack } = useWindow()
 
   const {
@@ -70,11 +68,10 @@ const PhysicalCountItem = () => {
 
     formik.setFieldValue('totalCostPrice', sumCost)
     formik.setFieldValue('totalWeight', sumWeight)
-
-    setData(res ?? { list: [] })
-
-    handleClick(res.list)
+    setData(res || { list: [] })
   }
+
+  const editMode = data?.list?.length > 0
 
   const fillSiteStore = stockCountId => {
     setSiteStore([])
@@ -142,38 +139,32 @@ const PhysicalCountItem = () => {
           formik.resetForm()
           setData({ list: [] })
           setSiteStore([])
-          setFilteredItems([])
-          setEditMode(false)
         }
-      },
-      width: 570,
-      height: 170,
-      title: platformLabels.Clear
+      }
     })
   }
 
-  const handleClick = async dataList => {
-    setFilteredItems([])
-
-    const filteredItemsList = dataList
-      .filter(item => item.metalId && item.metalId.toString().trim() !== '')
+  const handleMetalClick = async () => {
+    const metalItemsList = data?.list
+      ?.filter(item => item.metalId)
       .map(item => ({
         qty: item.countedQty,
-        metalRef: null,
+        metalRef: '',
         metalId: item.metalId,
         metalPurity: item.metalPurity,
         weight: item.weight,
         priceType: item.priceType
       }))
-    setFilteredItems(filteredItemsList)
-    setEditMode(dataList.length > 0)
+
+    return metalItemsList || []
   }
 
   const actions = [
     {
       key: 'Metals',
       condition: true,
-      onClick: 'onClickMetal'
+      onClick: 'onClickMetal',
+      handleMetalClick
     }
   ]
 
@@ -187,7 +178,6 @@ const PhysicalCountItem = () => {
       actions={actions}
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItem}
-      filteredItems={filteredItems}
       previewReport={editMode}
     >
       <VertLayout>
@@ -211,7 +201,6 @@ const PhysicalCountItem = () => {
 
                   if (!newValue) {
                     setSiteStore([])
-                    setFilteredItems([])
                   } else {
                     fillSiteStore(newValue?.recordId)
                   }
@@ -263,7 +252,6 @@ const PhysicalCountItem = () => {
             columns={columns}
             gridData={data ?? { list: [] }}
             rowId={['recordId']}
-            setData={setData}
             isLoading={false}
             pageSize={50}
             refetch={refetch}

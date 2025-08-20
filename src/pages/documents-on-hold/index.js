@@ -29,6 +29,10 @@ import InwardTransferForm from '../inward-transfer/forms/InwardTransferForm'
 import InwardSettlementForm from '../inward-settlement/forms/InwardSettlementForm'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import OutwardsForm from '../outwards-order/Tabs/OutwardsForm'
+import SketchForm from '../pm-sketch/Forms/SketchForm'
+import ThreeDDesignForm from '../pm-3d-design/forms/ThreeDDesignForm'
+import SalesOrderForm from '../sales-order/Tabs/SalesOrderForm'
+import PurchaseRquisitionForm from '../purchase-requisition/form/PurchaseRquisitionForm'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -57,7 +61,6 @@ const DocumentsOnHold = () => {
     filterBy,
     clearFilter,
     refetch,
-    clear,
     paginationParameters,
     access
   } = useResourceQuery({
@@ -98,12 +101,6 @@ const DocumentsOnHold = () => {
   const popupComponent = async obj => {
     let relevantComponent
     let recordId = obj.recordId
-    let labels
-    let relevantAccess
-
-    let windowWidth
-    let windowHeight
-    let title
 
     const userData = window.sessionStorage.getItem('userData')
       ? JSON.parse(window.sessionStorage.getItem('userData'))
@@ -115,39 +112,18 @@ const DocumentsOnHold = () => {
       case SystemFunction.CurrencyCreditOrderSale:
       case SystemFunction.CurrencyCreditOrderPurchase:
         relevantComponent = CreditOrderForm
-        labels = await getLabels(ResourceIds.CreditOrder)
-        relevantAccess = await getAccess(ResourceIds.CreditOrder)
-
-        windowWidth = 950
-        title = labels[1]
         break
 
       case SystemFunction.CreditInvoiceSales:
       case SystemFunction.CreditInvoicePurchase:
         relevantComponent = CreditInvoiceForm
-        labels = await getLabels(ResourceIds.CreditInvoice)
-        relevantAccess = await getAccess(ResourceIds.CreditInvoice)
-
-        windowWidth = 950
-        title = labels[1]
         break
       case SystemFunction.CashCountTransaction:
         relevantComponent = CashCountForm
-        labels = await getLabels(ResourceIds.CashCountTransaction)
-        relevantAccess = await getAccess(ResourceIds.CashCountTransaction)
-
-        windowWidth = 1100
-        windowHeight = 700
-        title = labels.CashCount
         break
       case SystemFunction.CurrencyPurchase:
       case SystemFunction.CurrencySale:
         relevantComponent = TransactionForm
-        labels = await getLabels(ResourceIds.CashInvoice)
-        relevantAccess = await getAccess(ResourceIds.CashInvoice)
-
-        windowWidth = 1200
-        title = labels.cashInvoice
         break
 
       case SystemFunction.KYC:
@@ -159,87 +135,59 @@ const DocumentsOnHold = () => {
         })
 
         relevantComponent = ClientTemplateForm
-        labels = await getLabels(ResourceIds.ClientMaster)
-        relevantAccess = await getAccess(ResourceIds.ClientMaster)
-
-        windowWidth = 1100
-        title = labels.pageTitle
-
         break
 
       case SystemFunction.OutwardsOrder:
         relevantComponent = OutwardsForm
-        labels = await getLabels(ResourceIds.OutwardsOrder)
-        relevantAccess = await getAccess(ResourceIds.OutwardsOrder)
-
-        windowWidth = 1100
-        title = labels.OutwardsOrder
         break
 
       case SystemFunction.CashTransfer:
         relevantComponent = CashTransferTab
-        labels = await getLabels(ResourceIds.CashTransfer)
-        relevantAccess = await getAccess(ResourceIds.CashTransfer)
-
-        windowWidth = 1100
-        title = labels.CashTransfer
         break
 
       case SystemFunction.OutwardsModification:
         relevantComponent = OutwardsModificationForm
-        labels = await getLabels(ResourceIds.OutwardsModification)
-        relevantAccess = await getAccess(ResourceIds.OutwardsModification)
-
-        windowWidth = 1260
-        windowHeight = 720
-        title = labels.outwardsModification
         break
 
       case SystemFunction.OutwardsReturn:
         relevantComponent = OutwardsReturnForm
-        labels = await getLabels(ResourceIds.OutwardsReturn)
-        relevantAccess = await getAccess(ResourceIds.OutwardsReturn)
-
-        windowWidth = 800
-        windowHeight = 630
-        title = labels.outwardsReturn
         break
 
       case SystemFunction.InwardTransfer:
         relevantComponent = InwardTransferForm
-        labels = await getLabels(ResourceIds.InwardTransfer)
-        relevantAccess = await getAccess(ResourceIds.InwardTransfer)
-
-        windowWidth = 1200
-        title = labels.InwardTransfer
         break
 
       case SystemFunction.InwardSettlement:
         relevantComponent = InwardSettlementForm
-        labels = await getLabels(ResourceIds.InwardSettlement)
-        relevantAccess = await getAccess(ResourceIds.InwardSettlement)
 
-        windowWidth = 1200
-        title = labels.InwardSettlement
         break
+
+      case SystemFunction.Sketch:
+        relevantComponent = SketchForm
+        break
+
+      case SystemFunction.SalesOrder:
+        relevantComponent = SalesOrderForm
+        break
+
+      case SystemFunction.ThreeDDesign:
+        relevantComponent = ThreeDDesignForm
+
+      case SystemFunction.PurchaseRequisition:
+        relevantComponent = PurchaseRquisitionForm
       default:
         // Handle default case if needed
         break
     }
 
-    if (relevantComponent && labels && relevantAccess) {
+    if (relevantComponent) {
       stack({
         Component: relevantComponent,
         props: {
           recordId: recordId,
-          labels: labels,
-          maxAccess: relevantAccess,
           plantId: plantId,
           userData: userData
-        },
-        width: windowWidth,
-        height: windowHeight,
-        title: title
+        }
       })
     }
   }
@@ -276,7 +224,7 @@ const DocumentsOnHold = () => {
       type: 'date'
     },
     {
-      width: 100,
+      field: 'approval',
       cellRenderer: row => (
         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
           <IconButton size='small' onClick={() => edit(row.data)}>

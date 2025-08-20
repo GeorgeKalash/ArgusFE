@@ -1,36 +1,39 @@
 import React, { useEffect } from 'react'
 import { DataSets } from 'src/resources/DataSets'
 import { DataGrid } from './DataGrid'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import { useWindow } from 'src/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
-  const { labels: labels } = useResourceQuery({
-    datasetId: ResourceIds?.POSPayment
+  const editMode = !!rest.data.recordId
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds?.POSPayment,
+    editMode
   })
   const { stack } = useWindow()
 
-  useEffect(() => {
-    const initialValuePayment = [
-      {
-        id: 1,
-        seqNo: 0,
-        cashAccountId: null,
-        cashAccount: '',
-        posStatus: 1,
-        posStatusName: '',
-        type: '',
-        amount: '',
-        paidAmount: 0,
-        returnedAmount: 0,
-        bankFees: '',
-        receiptRef: ''
-      }
-    ]
+  const initialValuePayment = [
+    {
+      id: 1,
+      seqNo: 1,
+      cashAccountId: null,
+      cashAccount: '',
+      posStatus: 1,
+      posStatusName: '',
+      type: '',
+      amount: '',
+      paidAmount: '',
+      returnedAmount: 0,
+      bankFees: '',
+      receiptRef: ''
+    }
+  ]
 
+  useEffect(() => {
     const paymentValidation = yup
       .array()
       .of(
@@ -70,8 +73,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       )
       .required('Cash array is required')
 
-    rest.setFormik({ ...initialValuePayment, paymentValidation })
-  }, [rest.name])
+    !value && rest.setFormik({ ...initialValuePayment, paymentValidation })
+  }, [rest.name, value])
 
   const calculate = values => {
     const totalPaidAmount = values.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)
@@ -90,6 +93,12 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     )
 
     rest.onChange(val)
+  }
+
+  const onCondition = row => {
+    return {
+      disabled: !editMode || row.type != 3
+    }
   }
 
   const columns = [
@@ -119,14 +128,13 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
 
         const currentAmount = (parseFloat(amount) - parseFloat(sumAmount)).toFixed(2)
 
-        update({ amount: currentAmount, POS: newRow.type === '1' })
+        update({ amount: currentAmount })
       }
     },
     {
       component: 'numberfield',
       name: 'paidAmount',
       label: labels?.paidAmount,
-      defaultValue: '',
       async onChange({ row: { update, newRow, updateRow } }) {
         const totalPaidAmount =
           value
@@ -152,7 +160,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           updateRow({
             id: index,
             changes: {
-              returnedAmount: returnValue,
+              returnedAmount: returnValue || 0,
               amount:
                 amount +
                 parseFloat(cashAmount || 0) -
@@ -162,7 +170,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
           })
         } else {
           update({
-            returnedAmount: returnValue,
+            returnedAmount: returnValue || 0,
             amount: (parseFloat(amount || 0) - parseFloat(totalPaidAmount || 0)).toFixed(2)
           })
         }
@@ -172,7 +180,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'numberfield',
       name: 'returnedAmount',
       label: labels.returnedAmount,
-      defaultValue: '',
       props: {
         readOnly: true
       }
@@ -181,7 +188,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'numberfield',
       name: 'amount',
       label: labels?.Amount,
-      defaultValue: '',
       props: {
         readOnly: isPosted
       }
@@ -206,7 +212,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'resourcecombobox',
-      label: labels?.posStatusName,
+      label: labels?.posStatus,
       name: 'posStatusName',
       props: {
         readOnly: true,
@@ -221,14 +227,18 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     },
     {
       component: 'button',
-      name: 'POS',
+      name: 'pos',
+      props: {
+        imgSrc: '/images/buttonsIcons/open-external.png',
+        onCondition
+      },
       label: labels.pos,
-      onClick: (e, row, update, updateRow) => {
+      onClick: (e, row) => {
         stack({
           Component: POSForm,
-          props: {},
+          props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
           width: 700,
-          title: labels?.POS
+          title: labels?.pos
         })
       }
     }
@@ -238,6 +248,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
     <DataGrid
       {...rest}
       columns={columns}
+      maxAccess={access}
       onChange={(value, action) => {
         rest.onChange(value, action)
         if (action === 'delete' && Array.isArray(value)) {
@@ -245,6 +256,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
         }
       }}
       value={value}
+      initialValues={initialValuePayment[0]}
+      allowDelete={!rest.disabled}
     />
   )
 }

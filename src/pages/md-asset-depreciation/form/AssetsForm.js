@@ -47,13 +47,14 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
       date: new Date(),
       notes: '',
       status: 1,
-      dtId: documentType?.dtId,
+      dtId: null,
       plantId: '',
       asset: []
     },
@@ -188,6 +189,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLDepreciation,
       disabled: !editMode
     },
 
@@ -312,6 +314,7 @@ export default function AssetsForm({ recordId, maxAccess: access, labels, window
 
         <Grow>
           <Table
+            name='assets'
             columns={columns}
             gridData={formik.values.asset}
             rowId={['recordId']}

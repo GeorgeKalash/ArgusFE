@@ -60,11 +60,12 @@ const BeneficiaryCash = () => {
       props: {
         client: { clientId: obj.clientId },
         beneficiary: { beneficiaryId: obj.beneficiaryId, beneficiarySeqNo: obj.seqNo },
+        recordId:
+          obj.clientId && obj.beneficiaryId && obj?.seqNo
+            ? (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj?.seqNo
+            : null,
         dispersalType: 1
-      },
-      width: 700,
-      height: 500,
-      title: _labels.cash
+      }
     })
   }
 

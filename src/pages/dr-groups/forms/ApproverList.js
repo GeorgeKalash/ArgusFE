@@ -73,6 +73,7 @@ const ApproverList = ({ store, labels, maxAccess }) => {
       </Fixed>
       <Grow>
         <Table
+          name='approver'
           columns={columns}
           gridData={data}
           rowId={['codeId']}

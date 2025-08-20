@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
-export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
+export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
   const [debounceTimeout, setDebounceTimeout] = useState(null)
 
   function explode(str) {
@@ -55,10 +55,10 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
 
       ;(maxAccess?.record?.controls ?? []).forEach(obj => {
         const { controlId, accessLevel } = obj
-
         if (accessLevel === MANDATORY)
           if (controlId?.indexOf('.') < 0) {
-            if (!values[controlId])
+            const keys = Object.keys(formik.values)
+            if (!values[controlId] && keys?.indexOf(controlId) > -1)
               maxAccessErrors = {
                 ...maxAccessErrors,
                 [controlId]: `${controlId} is required.`
@@ -66,29 +66,50 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
           } else {
             const { gridName, fieldName } = explode(controlId)
 
-            ;(values?.[gridName] || []).forEach((row, index) => {
+            if (Array.isArray(values?.[gridName])) {
+              if (conditionSchema.indexOf(gridName) < 0) {
+                ;(values?.[gridName] || [])?.forEach((row, index) => {
+                  if (!maxAccessErrors[gridName]) {
+                    maxAccessErrors[gridName] = []
+                  }
+
+                  if (!maxAccessErrors[gridName][index]) {
+                    maxAccessErrors[gridName][index] = {}
+                  }
+
+                  if (!row[fieldName] || row[fieldName] == 0) {
+                    maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
+                  } else {
+                    if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
+
+                    if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
+                      delete maxAccessErrors[gridName][index]
+                    }
+                  }
+
+                  if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
+                    delete maxAccessErrors[gridName]
+                  }
+                })
+              }
+            } else {
               if (!maxAccessErrors[gridName]) {
-                maxAccessErrors[gridName] = []
+                maxAccessErrors[gridName] = {}
+              }
+              if (
+                !maxAccessErrors[gridName][fieldName] &&
+                formik.values[gridName] &&
+                !formik.values[gridName][fieldName] &&
+                formik.values[gridName][fieldName] !== 0 &&
+                formik.values[gridName][fieldName] !== '0'
+              ) {
+                maxAccessErrors[gridName][fieldName] = `${fieldName} is required.`
               }
 
-              if (!maxAccessErrors[gridName][index]) {
-                maxAccessErrors[gridName][index] = {}
-              }
-
-              if (!row[fieldName] || row[fieldName] == 0) {
-                maxAccessErrors[gridName][index][fieldName] = `${fieldName} is required.`
-              } else {
-                if (maxAccessErrors[gridName][index][fieldName]) delete maxAccessErrors[gridName][index][fieldName]
-
-                if (Object.keys(maxAccessErrors[gridName][index])?.length === 0) {
-                  delete maxAccessErrors[gridName][index]
-                }
-              }
-
-              if (maxAccessErrors[gridName]?.every(obj => Object.keys(obj)?.length === 0)) {
+              if (maxAccessErrors[gridName] && Object.keys(maxAccessErrors[gridName]).length === 0) {
                 delete maxAccessErrors[gridName]
               }
-            })
+            }
           }
       })
 
@@ -117,6 +138,18 @@ export function useForm({ maxAccess, validate = () => {}, ...formikProps }) {
   }, [formik.values])
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
+
+  const { key, value, reference } = documentType
+
+  useEffect(() => {
+    if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
+  }, [value])
+
+  useEffect(() => {
+    if (reference?.isEmpty) {
+      formik.setFieldValue(reference?.fieldName, '')
+    }
+  }, [reference?.isEmpty])
 
   return { formik }
 }

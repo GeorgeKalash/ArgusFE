@@ -26,12 +26,19 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-export default function OutwardReturnSettlementForm({ labels, access, recordId, cashAccountId, plantId, form, window }) {
+export default function OutwardReturnSettlementForm({
+  labels,
+  access,
+  recordId,
+  cashAccountId,
+  plantId,
+  form,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [formikSettings, setFormik] = useState({})
-  const [selectedReport, setSelectedReport] = useState(null)
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardReturnSettlement,
@@ -45,6 +52,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
 
   const { formik } = useForm({
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
@@ -53,7 +61,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       reference: '',
       accountId: null,
       date: new Date(),
-      dtId: documentType?.dtId,
+      dtId: null,
       amount: null,
       returnId: null,
       owrRef: '',
@@ -67,6 +75,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       cellPhone: null,
       cashAccountId: parseInt(cashAccountId),
       wip: 1,
+      beneficiaryName: '',
       items: formikSettings.initialValuePayment || []
     },
 
@@ -75,7 +84,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       items: formikSettings?.paymentValidation
     }),
     onSubmit: async obj => {
-      const copy = { ...formik.values, dtId: documentType?.dtId }
+      const copy = { ...formik.values }
       delete copy.items
 
       const items = formik.values.items.map((item, index) => ({
@@ -131,10 +140,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
         onSuccess: () => {
           onClose(recordId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -205,10 +211,14 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       formik.setValues({
         ...res.record.header,
         date: formatDateFromApi(res?.record?.header.date),
-        items: res.record.items.map((amount, index) => ({
-          id: index + 1,
-          ...amount
-        }))
+        items:
+          res?.record?.length != 0
+            ? res.record.items.map((item, index) => ({
+                id: index + 1,
+                pos: item?.type != 3,
+                ...item
+              }))
+            : formik.initialValues.items
       })
 
       return res.record
@@ -259,6 +269,7 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLOutwardReturnSettlement,
       disabled: !editMode
     }
   ]
@@ -330,14 +341,14 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
                       { key: 'amount', value: 'Amount' }
                     ]}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('returnId', newValue ? newValue.recordId : '')
-                      formik.setFieldValue('corId', newValue ? newValue.corId : '')
+                      formik.setFieldValue('returnId', newValue ? newValue.recordId : null)
+                      formik.setFieldValue('corId', newValue ? newValue.corId : null)
                       formik.setFieldValue('corRef', newValue ? newValue.corRef : '')
                       formik.setFieldValue('corName', newValue ? newValue.corName : '')
                       formik.setFieldValue('owrRef', newValue ? newValue.reference : '')
-
                       formik.setFieldValue('amount', newValue ? newValue.amount : '')
-                      formik.setFieldValue('clientId', newValue ? newValue.clientId : '')
+                      formik.setFieldValue('clientId', newValue ? newValue.clientId : null)
+                      formik.setFieldValue('beneficiaryName', newValue ? newValue.benName : '')
                     }}
                   />
                 </Grid>
@@ -392,6 +403,13 @@ export default function OutwardReturnSettlementForm({ labels, access, recordId, 
             allowAddNewLine={!isPosted}
             amount={formik.values.amount}
             setFormik={setFormik}
+            data={{
+              recordId: formik.values?.recordId,
+              reference: formik.values?.reference,
+              clientName: formik.values?.clientName,
+              beneficiaryName: formik.values?.beneficiaryName,
+              viewPosButtons: formik?.values?.wip === 2
+            }}
             name='items'
           />
         </Grow>

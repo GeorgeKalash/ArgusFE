@@ -26,7 +26,6 @@ const Correspondent = () => {
     paginationParameters,
     invalidate,
     filterBy,
-    clearFilter,
     refetch,
     access
   } = useResourceQuery({
@@ -136,36 +135,15 @@ const Correspondent = () => {
     openForm(obj?.recordId)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
         <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
           labels={_labels}
           onAdd={addCorrespondent}
           maxAccess={access}
-          onApply={onApply}
           reportName={'RTCOR'}
+          filterBy={filterBy}
         />
       </Fixed>
       <Grow>

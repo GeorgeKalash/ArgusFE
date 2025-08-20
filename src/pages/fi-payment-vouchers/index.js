@@ -12,20 +12,20 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FiPaymentVouchersForm from './forms/FiPaymentVouchersForm'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useError } from 'src/error'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack: stackError } = useError()
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FinancialRepository.PaymentVouchers.page,
+      extension: FinancialRepository.PaymentVouchers.page3,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&filter=`
     })
 
@@ -52,16 +52,15 @@ const FiPaymentVouchers = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.PaymentVouchers.page,
+    endpointId: FinancialRepository.PaymentVouchers.page3,
     datasetId: ResourceIds.PaymentVouchers,
     filter: {
       filterFn: fetchWithFilter
@@ -70,104 +69,95 @@ const FiPaymentVouchers = () => {
 
   const columns = [
     {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'date',
-      headerName: _labels.date,
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: _labels.reference,
-      flex: 1
-    },
-    {
-      field: 'accountTypeName',
-      headerName: _labels.accountType,
-      flex: 1
-    },
-    {
       field: 'accountRef',
-      headerName: _labels.account,
+      headerName: labels.account,
       flex: 1
     },
     {
       field: 'accountName',
-      headerName: _labels.accountName,
+      headerName: labels.accountName,
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: _labels.cashAccount,
+      field: 'currencyRef',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'paymentMethodName',
+      headerName: labels.paymentMethod,
       flex: 1
     },
     {
       field: 'amount',
-      headerName: _labels.amount,
+      headerName: labels.amount,
       flex: 1,
       type: 'number'
     },
+
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'cashAccountName',
+      headerName: labels.cashAccount,
       flex: 1
     },
     {
       field: 'notes',
-      headerName: _labels.notes,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: _labels.status,
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'isVerified',
-      headerName: _labels.isVerified,
+      headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
     openForm(obj?.recordId)
   }
 
-  const getPlantId = async () => {
-    const userData = window.sessionStorage.getItem('userData')
-      ? JSON.parse(window.sessionStorage.getItem('userData'))
-      : null
-
-    const parameters = `_userId=${userData && userData.userId}&_key=plantId`
-
-    return getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: parameters
-    }).then(res => res.record.value)
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openOutWardsWindow(recordId) {
     stack({
       Component: FiPaymentVouchersForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
-        plantId: plantId,
-        maxAccess: access
+        recordId
       },
-      width: 950,
-      height: 700,
-      title: _labels.paymentVoucher
     })
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-    openOutWardsWindow(plantId, recordId)
+    openOutWardsWindow(recordId)
   }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.PaymentVoucher,
+    action: openForm
+  })
 
   const del = async obj => {
     await postRequest({
@@ -178,37 +168,10 @@ const FiPaymentVouchers = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onSearch={onSearch}
-          onClear={onClear}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          reportName={'FIPV'}
-        />
+        <RPBGridToolbar labels={labels} onAdd={add} maxAccess={access} reportName={'FIPV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -219,13 +182,14 @@ const FiPaymentVouchers = () => {
           onEdit={edit}
           onDelete={del}
           isLoading={false}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}
         />
-      </Grow>{' '}
+      </Grow>
     </VertLayout>
   )
 }

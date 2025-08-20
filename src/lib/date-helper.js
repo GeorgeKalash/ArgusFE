@@ -69,6 +69,11 @@ function formatDateForGetApI(dateString) {
   return dayjs(dateString).format('YYYY-MM-DD')
 }
 
+function formatDateTimeForGetAPI(dateString) {
+  return dayjs(dateString).format('YYYY-MM-DD HH:mm')
+}
+
+
 function formatDateDefault(date) {
   //used for report params
   return formatDateandTime(date)
@@ -89,8 +94,8 @@ function formatDateandTime(date, recFormat) {
   return formattedDate
 }
 
-function formatDateTimeDefault(date) {
-  return formatDateandTime(date, 'hh:mm a')
+function formatDateTimeDefault(date, format = 'hh:mm a') {
+  return formatDateandTime(date, format)
 }
 
 //Omar
@@ -156,5 +161,6 @@ export {
   getTimeInTimeZone,
   formatDate,
   formatDateTimeDefault,
-  formatDateToISO
+  formatDateToISO,
+  formatDateTimeForGetAPI
 }

@@ -31,7 +31,8 @@ export const SaleRepository = {
     get: service + 'getSZ',
     set: service + 'setSZ',
     del: service + 'delSZ',
-    page: service + 'pageSZ'
+    page: service + 'pageSZ',
+    snapshot: service + 'snapshotSZ'
   },
   SalesTeam: {
     qry: service + 'qrySPT',
@@ -53,7 +54,8 @@ export const SaleRepository = {
     snapshot: service + 'snapshotCL',
     page: service + 'pageCL',
     set: service + 'setCL',
-    del: service + 'delCL'
+    del: service + 'delCL',
+    preview: service + 'getCLQV'
   },
   WorkFlow: {
     graph: service + 'graph'
@@ -155,7 +157,8 @@ export const SaleRepository = {
     reopen: service + 'reopenORD',
     cancel: service + 'terminateORD',
     postToInvoice: service + 'transfer2ORD',
-    snapshot: service + 'snapshotORD'
+    snapshot: service + 'snapshotORD',
+    summaryORD: service + 'summaryORD'
   },
   SalesOrderItem: {
     qry: service + 'qryORI'
@@ -168,6 +171,7 @@ export const SaleRepository = {
     qry: service + 'qryAD',
     set: service + 'setAD',
     del: service + 'delAD',
+    page: service + 'pageAD',
     get: service + 'getAD'
   },
   FilterAddress: {
@@ -179,7 +183,9 @@ export const SaleRepository = {
   },
   SATrx: {
     qry: service + 'qryTRX',
-    qry2: service + 'qryTRX2'
+    qry2: service + 'qryTRX2',
+    page: service + 'pageTRX',
+    sync: service + 'syncTRX'
   },
   SalesTransaction: {
     qry: service + 'qryTR',
@@ -187,7 +193,8 @@ export const SaleRepository = {
     get: service + 'getTR',
     get2: service + 'get2TR',
     set2: service + 'set2TRX',
-    del: service + 'delTR'
+    del: service + 'delTR',
+    verify: service + 'verifyTRX'
   },
   SalesTransactionItems: {
     qry: service + 'qryIT'
@@ -205,18 +212,103 @@ export const SaleRepository = {
   DraftInvoice: {
     qry: service + 'qryDFT',
     page: service + 'pageDFT',
+    page2: service + 'page2DFT',
     snapshot: service + 'snapshotDFT',
     get: service + 'getDFT',
     set2: service + 'set2DFT',
     del: service + 'delDFT',
     close: service + 'closeDFT',
+    post: service + 'postDFT',
     reopen: service + 'reopenDFT'
   },
+
   DraftInvoiceSerial: {
     qry: service + 'qryDFS',
     get: service + 'get2DFS',
     batch: service + 'batchDFS',
     append: service + 'appendDFS',
     del: service + 'delDFS'
+  },
+  SalesQuotations: {
+    page: service + 'pageQTN',
+    qry: service + 'qryQTN',
+    snapshot: service + 'snapshotQTN',
+    get: service + 'getQTN',
+    set2: service + 'set2QTN',
+    del: service + 'delQTN',
+    postQuotTrx: service + 'transfer1QTN',
+    postToInvTrx: service + 'transfer2QTN',
+    postToCons: service + 'transfer3QTN'
+  },
+  QuotationItem: {
+    qry: service + 'qryQTI'
+  },
+  DraftReturn: {
+    page: service + 'pageDRE',
+    page2: service + 'page2DRE',
+    snapshot: service + 'snapshotDRE',
+    get: service + 'getDRE',
+    set2: service + 'set2DRE',
+    del: service + 'delDRE',
+    close: service + 'closeDRE',
+    reopen: service + 'reopenDRE',
+    post: service + 'postDRE'
+  },
+  DraftReturnSerial: {
+    qry: service + 'qryDRS',
+    batch: service + 'batchDRS',
+    append: service + 'appendDRS',
+    del: service + 'delDRS'
+  },
+  LastSerialInvoice: {
+    get: service + 'lastSRL',
+    import: service + 'importSRL',
+    qry: service + 'qrySRL'
+  },
+  VerifyIntegrity: {
+    check: service + 'checkTRX'
+  },
+  ClientPriceList: {
+    page: service + 'pagePRC',
+    get: service + 'getPRC',
+    set: service + 'setPRC',
+    del: service + 'delPRC'
+  },
+  PriceListUpdate: {
+    page: service + 'pagePLU',
+    get: service + 'getPLU',
+    set: service + 'setPLU',
+    del: service + 'delPLU',
+    post: service + 'postPLU',
+    unpost: service + 'unpostPLU',
+    generate: service + 'generatePLU'
+  },
+  PriceListItem: {
+    qry: service + 'qryPLI',
+    snapshot: service + 'snapshotPLI'
+  },
+  CategoryPriceGroup: {
+    get: service + 'getPGC',
+    set: service + 'setPGC',
+    del: service + 'delPGC',
+    page: service + 'pagePGC'
+  },
+  ReturnOnInvoice: {
+    snapshot: service + 'snapshotRET',
+    page: service + 'pageRET',
+    get: service + 'getRET',
+    set2: service + 'set2RET',
+    del: service + 'delRET',
+    verify: service + 'verifyRET',
+    post: service + 'postRET',
+    unpost: service + 'unpostRET',
+    balance: service + 'balanceRET'
+  },
+  ReturnItem: {
+    qry: service + 'qryREI',
+    balance: service + 'balanceREI'
+  },
+  ReturnSerial: {
+    qry: service + 'qryRES'
   }
 }

@@ -8,13 +8,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import MemosForm from './MemosForm'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { Router } from 'src/lib/useRouter'
 
 const Financial = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,12 +22,10 @@ const Financial = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    console.log('fetching')
 
     const response = await getRequest({
       extension: FinancialRepository.FiMemo.page,
@@ -59,7 +57,6 @@ const Financial = () => {
     refetch,
     labels: _labels,
     filterBy,
-    clearFilter,
     paginationParameters,
     access,
     invalidate
@@ -67,6 +64,7 @@ const Financial = () => {
     endpointId: FinancialRepository.FiMemo.page,
     datasetId: ResourceIds.CreditNote,
     DatasetIdAccess: getResourceId(parseInt(functionId)),
+    queryFn: fetchGridData,
     filter: {
       filterFn: fetchWithSearch,
       default: { functionId }
@@ -179,6 +177,22 @@ const Financial = () => {
     }
   }
 
+  const getGLResourceId = functionId => {
+    const fn = Number(functionId)
+    switch (fn) {
+      case SystemFunction.CreditNote:
+        return ResourceIds.GLCreditNote
+      case SystemFunction.DebitNote:
+        return ResourceIds.GLDebitNote
+      case SystemFunction.ServiceBill:
+        return ResourceIds.GLServiceBillReceived
+      case SystemFunction.ServiceInvoice:
+        return ResourceIds.GLServiceInvoice
+      default:
+        return null
+    }
+  }
+
   function openForm(recordId) {
     stack({
       Component: MemosForm,
@@ -187,9 +201,10 @@ const Financial = () => {
         recordId: recordId,
         access,
         functionId: functionId,
-        getEndpoint
+        getEndpoint,
+        getGLResourceId
       },
-      width: 900,
+      width: 1200,
       height: 670,
       title: getcorrectLabel(parseInt(functionId))
     })
@@ -213,36 +228,10 @@ const Financial = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIMEM'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIMEM'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

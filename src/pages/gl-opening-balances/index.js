@@ -120,11 +120,6 @@ const OpeningBalances = () => {
     })
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   const del = async obj => {
     await postRequest({
       extension: GeneralLedgerRepository.OpeningBalances.del,
@@ -137,7 +132,7 @@ const OpeningBalances = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} onApply={onApply} reportName={'GLOBA'} hasSearch={false}/>
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'GLOBA'} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table

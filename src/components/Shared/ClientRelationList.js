@@ -11,10 +11,15 @@ import Table from './Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ClientRelationForm } from './ClientRelationForm'
 import { useWindow } from 'src/windows'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export const ClientRelationList = ({ recordId, name, reference, category }) => {
+export const ClientRelationList = ({ recordId, name, reference, category, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ClientRelation, window })
 
   async function fetchGridData() {
     const response = await getRequest({
@@ -49,23 +54,30 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
     {
       field: 'parentName',
       headerName: _labels.clientName,
-      flex: 1
+      flex: 2
     },
     {
       field: 'relationName',
-      headerName: _labels.relationName,
+      headerName: _labels.relation,
       flex: 1
     },
     {
       field: 'expiryDate',
       headerName: _labels.expiryDate,
-      type: 'date'
+      type: 'date',
+      flex: 1
     },
-
     {
       field: 'activationDate',
       headerName: _labels.activationDate,
-      type: 'date'
+      type: 'date',
+      flex: 1
+    },
+    {
+      field: 'otpVerified',
+      headerName: _labels.otp,
+      type: 'checkbox',
+      flex: 1
     }
   ]
 
@@ -73,14 +85,9 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
     stack({
       Component: ClientRelationForm,
       props: {
-        labels: _labels,
         clientId: obj?.clientId,
-        seqNo: obj?.seqNo,
-        maxAccess: access
-      },
-      width: 500,
-      height: 450,
-      title: _labels.clientRelation
+        seqNo: obj?.seqNo
+      }
     })
   }
 
@@ -113,3 +120,6 @@ export const ClientRelationList = ({ recordId, name, reference, category }) => {
     </VertLayout>
   )
 }
+
+ClientRelationList.width = 900
+ClientRelationList.height = 600

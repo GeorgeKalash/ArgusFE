@@ -14,14 +14,17 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomButton from '../Inputs/CustomButton'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) => {
+const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) => {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageInputRef = useRef(null)
   const [file, setFile] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState([])
   const { postRequest } = useContext(RequestsContext)
+
+  useSetWindow({ title: platformLabels.importSerials, window })
 
   const formik = useFormik({
     initialValues: {
@@ -31,9 +34,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
   })
 
   const handleSerialChange = inputSerials => {
-    const input = inputSerials
-
-    const lines = input.split('\n')
+    const lines = inputSerials.split('\n')
     const rowCountWithData = lines.filter(line => line.trim() !== '').length
 
     formik.setFieldValue('serialCount', rowCountWithData)
@@ -68,10 +69,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
         fullScreen: false,
         onConfirm: importSerialsData,
         dialogText: platformLabels.importConfirmation
-      },
-      width: 470,
-      height: 170,
-      title: platformLabels.import
+      }
     })
   }
 
@@ -79,7 +77,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
     const transformedSerials = formik.values.serials?.replace(/\n/g, ',\r\n')
 
     const SerialsPack = {
-      draftId: draftId,
+      ...header,
       serials: transformedSerials ? transformedSerials : parsedFileContent
     }
 
@@ -145,7 +143,10 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
                 formik.setFieldValue('serials', e.target.value)
                 handleSerialChange(e.target.value)
               }}
-              onClear={() => formik.setFieldValue('serials', '')}
+              onClear={() => {
+                formik.setFieldValue('serials', '')
+                formik.setFieldValue('serialCount', 0)
+              }}
               error={formik.touched.serials && Boolean(formik.errors.serials)}
               maxAccess={maxAccess}
             />
@@ -159,5 +160,7 @@ const ImportSerials = ({ endPoint, draftId, onCloseimport, maxAccess, window }) 
     </VertLayout>
   )
 }
+ImportSerials.width = 550
+ImportSerials.height = 270
 
 export default ImportSerials

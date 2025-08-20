@@ -27,19 +27,19 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsReturnForm({
-  labels,
-  maxAccess: access,
-  recordId,
-  plantId,
-  dtId,
-  isOpenOutwards = false,
-  refetch
-}) {
+const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsReturn
+  })
+
+  useSetWindow({ title: labels.outwardsReturn, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsReturn,
@@ -105,6 +105,7 @@ export default function OutwardsReturnForm({
       corExRate: null,
       commission: null,
       vatAmount: null,
+      reasonId: null,
       tdAmount: null,
       amount: null,
       exRate: null,
@@ -112,7 +113,7 @@ export default function OutwardsReturnForm({
       lcAmount: '',
       releaseStatus: null,
       otpVerified: false,
-      settlementStatus: 1,
+      settlementStatus: null,
       interfaceId: null,
       attemptNo: 1
     },
@@ -131,6 +132,7 @@ export default function OutwardsReturnForm({
       dispersalName: yup.string().required(),
       vatAmount: yup.string().required(),
       settlementStatus: yup.number().required(),
+      reasonId: yup.number().required(),
       lcAmount: yup
         .string()
         .required()
@@ -194,10 +196,7 @@ export default function OutwardsReturnForm({
         values: formik.values,
         recordId: recId,
         functionId: SystemFunction.OutwardsReturn
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
@@ -269,7 +268,7 @@ export default function OutwardsReturnForm({
       disabled: !isClosed || isPosted
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: isPosted || !editMode || !isClosed
@@ -661,19 +660,59 @@ export default function OutwardsReturnForm({
                       readOnly={isPosted || isClosed || isOpenOutwards}
                       maxAccess={maxAccess}
                       onChange={(event, newValue) => {
-                        const originalLcAmount = formik.values.originalLcAmount
-
                         formik.setFieldValue('requestedBy', newValue?.key)
+                      }}
+                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={RemittanceOutwardsRepository.OutwardReturnReason.qry}
+                      name='reasonId'
+                      label={labels.returnReason}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      filter={item => {
+                        const requestedByKey = formik.values.requestedBy
 
-                        if (newValue?.key === '1') {
-                          formik.setFieldValue('lcAmount', formik?.values?.amount)
+                        if (requestedByKey === '1') {
+                          return item.company
+                        } else if (requestedByKey === '2') {
+                          return item.correspondant
+                        } else if (requestedByKey === '3') {
+                          return item.client
+                        }
+
+                        return true
+                      }}
+                      values={formik.values}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue('reasonId', newValue ? newValue?.recordId : '')
+
+                        if (newValue?.rateStatus == '1') {
+                          formik.setFieldValue('lcAmount', formik.values.amount)
                           getExRateChangeStatus(formik?.values?.amount, formik?.values?.amount)
-                        } else if (newValue?.key === '3') {
-                          formik.setFieldValue('lcAmount', originalLcAmount)
+                        } else if (newValue?.rateStatus == '2') {
+                          formik.setFieldValue('lcAmount', formik.values.derivedLcAmount)
+                          getExRateChangeStatus(formik?.values?.amount, formik?.values?.derivedLcAmount)
+                        } else if (newValue?.rateStatus == '3') {
+                          const originalLcAmount = formik.values.originalLcAmount
+
+                          formik.setFieldValue(
+                            'lcAmount',
+                            Math.min(formik.values.amount, formik.values.derivedLcAmount)
+                          )
                           getExRateChangeStatus(formik?.values?.amount, originalLcAmount)
                         }
                       }}
-                      error={formik.touched.requestedBy && Boolean(formik.errors.requestedBy)}
+                      required
+                      maxAccess={maxAccess}
+                      error={formik.touched.reasonId && Boolean(formik.errors.reasonId)}
+                      readOnly={isPosted || isClosed || isOpenOutwards || !formik.values.requestedBy}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -757,3 +796,8 @@ export default function OutwardsReturnForm({
     </FormShell>
   )
 }
+
+OutwardsReturnForm.width = 1200
+OutwardsReturnForm.height = 630
+
+export default OutwardsReturnForm

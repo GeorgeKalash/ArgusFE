@@ -18,11 +18,16 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import toast from 'react-hot-toast'
 import FieldSet from './FieldSet'
 import { useError } from 'src/error'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount }) => {
+export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Shipment, window })
 
   const { formik } = useForm({
     initialValues: {
@@ -151,27 +156,27 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
       }
       formik.setFieldValue(`packages[${index}].packageReferences`, newRows)
     }
-  };
+  }
 
   const handlePackageGridChange = newRows => {
     const updatedRows = newRows?.map(row => {
-      const qty = parseInt(row?.qty, 10);
-      let packageReferences = row?.packageReferences;
-  
-      if (packageReferences?.length === 0) {
-        packageReferences = [{ seqNo: 1, id: 1, reference: '' }];
-      }
-  
-      if (qty < packageReferences?.length) {
-        packageReferences = packageReferences.slice(0, qty);
-      }
-  
-      row.packageReferences = packageReferences;
+      const qty = parseInt(row?.qty, 10)
+      let packageReferences = row?.packageReferences
 
-      return row;
-    });
-  
-    formik.setFieldValue('packages', updatedRows);
+      if (packageReferences?.length === 0) {
+        packageReferences = [{ seqNo: 1, id: 1, reference: '' }]
+      }
+
+      if (qty < packageReferences?.length) {
+        packageReferences = packageReferences.slice(0, qty)
+      }
+
+      row.packageReferences = packageReferences
+
+      return row
+    })
+
+    formik.setFieldValue('packages', updatedRows)
   }
 
   useEffect(() => {
@@ -256,6 +261,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                       maxAccess={maxAccess}
                       rowSelectionModel={selectedRowId}
                       allowAddNewLine={!editMode}
+                      initialValues={formik?.initialValues?.packages?.[0]}
                       allowDelete={!editMode}
                       onSelectionChange={row => {
                         row && loadSerialsGrid(row)
@@ -280,7 +286,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           component: 'numberfield',
                           name: 'qty',
                           label: labels.qty,
-                          defaultValue: '',
                           props: {
                             readOnly: editMode
                           }
@@ -289,7 +294,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                           component: 'numberfield',
                           label: labels.amount,
                           name: 'amount',
-                          defaultValue: '',
                           props: { readOnly: editMode }
                         }
                       ]}
@@ -365,7 +369,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                             readOnly: editMode
                           },
                           onBlur: (e, id) => handleReferenceChange(e, id),
-                          onKeyDown: (e, id) => handleReferenceChange(e, id),
+                          onKeyDown: (e, id) => handleReferenceChange(e, id)
                         }
                       ]}
                     />
@@ -379,3 +383,6 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
     </FormShell>
   )
 }
+
+LOShipmentForm.width = 1200
+LOShipmentForm.height = 670

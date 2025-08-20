@@ -24,13 +24,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
-import StrictUnpostConfirmation from 'src/components/Shared/StrictUnpostConfirmation'
-import { useWindow } from 'src/windows'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
@@ -45,7 +42,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
-      
+
       return acc
     }, {})
 
@@ -69,7 +66,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       arrivalTime: null,
       arrivalTimeField: null,
       notes: '',
-      dtId: documentType?.dtId,
+      dtId: null,
       status: 1,
       statusName: '',
       printStatusName: '',
@@ -80,24 +77,25 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       capacityVolume: null,
       wip: 1,
       wipName: '',
-      orders: [{
-        id: 1,
-        soRef: null,
-        soId: null,
-        soDate: null,
-        clientName: null,
-        soVolume: null,
-        soWipStatusName: null
-      }]
+      orders: [
+        {
+          id: 1,
+          soRef: null,
+          soId: null,
+          soDate: null,
+          clientName: null,
+          soVolume: null,
+          soWipStatusName: null
+        }
+      ]
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       departureTime: yup.string().required(),
-      plantId: yup.number().required(),
-      vehicleId: yup.string().required(),
-      driverId: yup.string().required()
+      plantId: yup.number().required()
     }),
     onSubmit: async obj => {
       const copy = { ...obj }
@@ -136,18 +134,21 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         return
       }
 
-      filteredOrders = filteredOrders.map((order, index) => ({
-        ...order,
-        tripId: headerResponse.recordId || 0,
-        id: index + 1
-      }))
+      filteredOrders =
+        filteredOrders?.some(order=> order.soId)
+          ? filteredOrders.map((order, index) => ({
+              ...order,
+              tripId: headerResponse.recordId || 0,
+              id: index + 1
+            }))
+          : []
 
       const data = {
         tripId: headerResponse.recordId || 0,
         tripOrders: filteredOrders
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: DeliveryRepository.TripOrderPack2.set2,
         record: JSON.stringify(data)
       })
@@ -319,7 +320,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     }
   ]
 
-
   const columns = [
     {
       component: 'resourcelookup',
@@ -394,10 +394,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
 
     invalidate()
   }
-
-  useEffect(() => {
-    if (documentType?.dtId) formik.setFieldValue('dtId', documentType.dtId)
-  }, [documentType?.dtId])
 
   return (
     <FormShell
@@ -510,7 +506,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('driverId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.driverId && Boolean(formik.errors.driverId)}
-                    required
                   />
                 </Grid>
               </Grid>
@@ -560,7 +555,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                       formik.setFieldValue('vehicleId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.vehicleId && Boolean(formik.errors.vehicleId)}
-                    required
                   />
                 </Grid>
               </Grid>
@@ -612,7 +606,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           />
         </Grow>
         <Fixed>
-          <Grid container rowGap={1} xs={10} spacing={2}>
+          <Grid container rowGap={1} xs={10} spacing={2} pt={2}>
             <Grid item xs={5}>
               <CustomTextField
                 name='totalVolume'

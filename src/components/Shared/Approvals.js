@@ -6,10 +6,15 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const Approvals = props => {
-  const { recordId, functionId } = props
+  const { recordId, functionId, window } = props
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Approvals, window })
 
   const {
     query: { data },
@@ -17,7 +22,7 @@ const Approvals = props => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: DocumentReleaseRepository.Approvals.qry,
+    endpointId: DocumentReleaseRepository.DocumentsOnHold.qry2,
     datasetId: ResourceIds.FRT_DR_approvals
   })
 
@@ -64,7 +69,7 @@ const Approvals = props => {
 
   async function fetchGridData() {
     return await getRequest({
-      extension: DocumentReleaseRepository.Approvals.qry,
+      extension: DocumentReleaseRepository.DocumentsOnHold.qry2,
       parameters: `_recordId=${recordId}&_functionId=${functionId}`
     })
   }
@@ -84,5 +89,7 @@ const Approvals = props => {
     </VertLayout>
   )
 }
+Approvals.width = 1000
+Approvals.height = 500
 
 export default Approvals

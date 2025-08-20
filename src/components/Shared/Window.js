@@ -1,12 +1,33 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } from 'react'
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
 import WindowToolbar from './WindowToolbar'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { TrxType } from 'src/resources/AccessLevels'
 import { CacheDataProvider } from 'src/providers/CacheDataContext.js'
+import { RequestsContext } from 'src/providers/RequestsContext'
+
+function LoadingOverlay() {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 40,
+        right: 0,
+        left: 0,
+        bottom: 50,
+        backgroundColor: 'rgba(250, 250, 250, 1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999
+      }}
+    ></Box>
+  )
+}
 
 const Window = React.memo(
   ({
@@ -20,6 +41,7 @@ const Window = React.memo(
     draggable = true,
     expandable = true,
     closable = true,
+    refresh = true,
     Title,
     nextToTitle,
     onSave,
@@ -32,6 +54,7 @@ const Window = React.memo(
     onApply,
     disabledApply,
     spacing,
+    isLoading = true,
     ...props
   }) => {
     const { settings } = useSettings()
@@ -39,6 +62,10 @@ const Window = React.memo(
     const [expanded, setExpanded] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
+    const actionRef = useRef()
+
+    const { loading } = useContext(RequestsContext)
+    const [showOverlay, setShowOverlay] = useState(false)
 
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
@@ -61,9 +88,21 @@ const Window = React.memo(
     //   }
     // }, [])
 
+    useEffect(() => {
+      if (!loading) {
+        const timer = setTimeout(() => {
+          setShowOverlay(true)
+        }, 50)
+
+        return () => clearTimeout(timer)
+      }
+    }, [loading])
+
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
     }, [expanded])
+
+    const childFormRef = useRef()
 
     return (
       <CacheDataProvider>
@@ -79,6 +118,34 @@ const Window = React.memo(
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 2
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              onClose()
+            } else {
+              const target = e.target
+              const role = target.getAttribute('role') || ''
+              const isSearchField = target.getAttribute('data-search') === 'true'
+
+              if (actionRef.current?.submit) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                  e.preventDefault()
+                  actionRef.current?.submit()
+                }
+                if (e.key === 'Enter') {
+                  if (isSearchField) {
+                    return
+                  }
+                  const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+                  const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+                  if (!isEqual) {
+                    e.preventDefault()
+                    actionRef.current?.submit()
+                  }
+                }
+              }
+            }
           }}
         >
           <Draggable
@@ -124,6 +191,17 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
+                    {refresh && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='end'
+                        onClick={props?.onRefresh}
+                        aria-label='refresh'
+                        sx={{ color: 'white !important' }}
+                      >
+                        <RefreshIcon />
+                      </IconButton>
+                    )}
                     {expandable && (
                       <IconButton
                         tabIndex={-1}
@@ -156,6 +234,8 @@ const Window = React.memo(
                     ))}
                   </Tabs>
                 )}
+                {!showOverlay && isLoading && LoadingOverlay()}
+
                 {!controlled ? (
                   <>
                     <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
@@ -175,7 +255,8 @@ const Window = React.memo(
                   React.Children.map(children, child => {
                     return React.cloneElement(child, {
                       expanded: expanded,
-                      height: expanded ? containerHeightPanel : heightPanel
+                      height: expanded ? containerHeightPanel : heightPanel,
+                      ref: actionRef
                     })
                   })
                 )}

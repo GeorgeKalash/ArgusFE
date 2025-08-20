@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useContext } from 'react'
 import TreeView from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
 import { styled } from '@mui/material/styles'
@@ -8,6 +8,8 @@ import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
 
 import { DialogActions, DialogContent } from '@mui/material'
+import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const getAllNodeIds = nodes => {
   let nodeIds = []
@@ -62,9 +64,12 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data, expanded }) {
-  const componentRef = useRef()
+function Tree({ data, window }) {
+  const { platformLabels } = useContext(ControlContext)
+
   const printComponentRef = useRef()
+
+  useSetWindow({ title: platformLabels.Tree, window })
 
   const handlePrint = useReactToPrint({
     content: () => printComponentRef.current,
@@ -136,5 +141,8 @@ function Tree({ data, expanded }) {
     </>
   )
 }
+
+Tree.width = 500
+Tree.height = 400
 
 export default Tree

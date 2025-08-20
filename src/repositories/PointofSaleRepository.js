@@ -44,6 +44,9 @@ export const PointofSaleRepository = {
   RetailPurchase: {
     set2: service + 'set2IVP'
   },
+  RetailPurchaseReturn: {
+    set2: service + 'set2IPR'
+  },
   RetailReturn: {
     set2: service + 'set2IVR'
   },

@@ -83,7 +83,13 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PuCostAllocation} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.PuCostAllocation}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isInfo={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

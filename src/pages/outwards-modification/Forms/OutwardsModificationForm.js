@@ -26,14 +26,23 @@ import { useInvalidate } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function OutwardsModificationForm({ access, labels, recordId }) {
+const OutwardsModificationForm = ({ recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const [resetForm, setResetForm] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [validSubmit, setValidSubmit] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.OutwardsModification,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.outwardsModification, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.OutwardsModification,
@@ -52,7 +61,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       reference: '',
       date: new Date(),
       outwardsDate: null,
-      outwardId: '',
+      owoId: '',
       owRef: '',
       ttNo: '',
       productName: '',
@@ -76,6 +85,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       releaseStatus: '',
       status: '',
       otpVerified: false,
+      owtId: '',
+      owtRef: '',
       plantId: '',
       seqNo: '',
       modificationType: '',
@@ -161,7 +172,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
 
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardsOrder.get2,
-      parameters: `_recordId=${data?.owoId || data?.outwardId}`
+      parameters: `_recordId=${data?.owoId}`
     })
 
     const { headerView, ttNo } = res.record
@@ -222,7 +233,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
       disabled: !isClosed
     },
     {
-      key: 'Post',
+      key: 'Locked',
       condition: true,
       onClick: onPost,
       disabled: !isPosted
@@ -239,16 +250,21 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         onSuccess: () => {
           onClose(recId)
         }
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
   async function refetchForm(recordId) {
     const res2 = await getOutwardsModification(recordId)
     res2.record.date = formatDateFromApi(res2.record.date)
     await fillOutwardData(res2.record)
+  }
+  async function getOutwardOrder(owoId) {
+    if (!owoId) return
+
+    return await getRequest({
+      extension: RemittanceOutwardsRepository.OutwardsOrder.get,
+      parameters: `_recordId=${owoId}`
+    })
   }
 
   useEffect(() => {
@@ -258,7 +274,9 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
         setValidSubmit(false)
 
         const data = {
-          outwardId: formik.values.outwardId,
+          owoId: formik.values.owoId,
+          modificationType: formik.values.modificationType,
+          owtId: formik.values.owtId,
           beneficiaryCashPack: dispersalMode === DISPERSAL_MODE_CASH ? formik.values.beneficiaryData : null,
           beneficiaryBankPack: dispersalMode === DISPERSAL_MODE_BANK ? formik.values.beneficiaryData : null
         }
@@ -324,7 +342,7 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       error={formik.touched.date && Boolean(formik.errors.date)}
                     />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item xs={2}>
                     <ResourceLookup
                       endpointId={RemittanceOutwardsRepository.OutwardsOrder.snapshot}
                       valueField='reference'
@@ -332,14 +350,14 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                       name='owRef'
                       secondDisplayField={false}
                       required
-                      readOnly={editMode}
-                      label={labels.outward}
+                      readOnly={editMode || formik.values.owtRef}
+                      label={labels.outwardOrder}
                       form={formik}
                       onChange={(event, newValue) => {
                         if (!newValue?.recordId) clearForm()
                         else
                           fillOutwardData({
-                            outwardId: newValue?.recordId,
+                            owoId: newValue?.recordId,
                             owRef: newValue?.reference,
                             oldBeneficiaryId: newValue?.beneficiaryId,
                             oldBeneficiarySeqNo: newValue?.beneficiarySeqNo,
@@ -351,6 +369,37 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
                           })
                       }}
                       error={formik.touched.owRef && Boolean(formik.errors.owRef)}
+                      maxAccess={maxAccess}
+                    />
+                  </Grid>
+                  <Grid item xs={2}>
+                    <ResourceLookup
+                      endpointId={RemittanceOutwardsRepository.OutwardsTransfer.snapshot}
+                      valueField='reference'
+                      displayField='reference'
+                      name='owtRef'
+                      secondDisplayField={false}
+                      readOnly={editMode || formik.values.owRef}
+                      label={labels.outwardTransfer}
+                      form={formik}
+                      onChange={async (event, newValue) => {
+                        if (!newValue?.recordId) clearForm()
+                        const order = await getOutwardOrder(newValue?.owoId)
+                        await fillOutwardData({
+                          owoId: newValue?.owoId,
+                          owRef: order?.record?.reference,
+                          owtId: newValue?.recordId,
+                          owtRef: newValue?.reference,
+                          oldBeneficiaryId: order?.record?.beneficiaryId,
+                          oldBeneficiarySeqNo: order?.record?.beneficiarySeqNo,
+                          oldBeneficiaryName: order?.record?.beneficiaryName,
+                          newBeneficiaryId: order?.record?.beneficiaryId,
+                          newBeneficiarySeqNo: order?.record?.beneficiarySeqNo,
+                          newBeneficiaryName: order?.record?.beneficiaryName,
+                          dispersalType: order?.record?.dispersalType
+                        })
+                      }}
+                      error={formik.touched.owtRef && Boolean(formik.errors.owtRef)}
                       maxAccess={maxAccess}
                     />
                   </Grid>
@@ -564,3 +613,8 @@ export default function OutwardsModificationForm({ access, labels, recordId }) {
     </FormShell>
   )
 }
+
+OutwardsModificationForm.width = 1200
+OutwardsModificationForm.height = 650
+
+export default OutwardsModificationForm

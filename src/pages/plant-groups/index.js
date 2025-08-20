@@ -61,22 +61,19 @@ const Plant = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: SystemRepository.PlantGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
-    try {
-      await postRequest({
-        extension: SystemRepository.PlantGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: SystemRepository.PlantGroup.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+
+    await postRequest({
+      extension: SystemRepository.PlantGroup.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
@@ -98,10 +95,7 @@ const Plant = () => {
       Component: Tree,
       props: {
         data: data
-      },
-      width: 500,
-      height: 400,
-      title: _labels.tree
+      }
     })
   }
 

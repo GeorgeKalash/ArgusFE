@@ -1,30 +1,25 @@
 import Table from 'src/components/Shared/Table'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
 
-const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
+const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) => {
   const { getRequest } = useContext(RequestsContext)
-  const [data, setData] = useState([])
 
   const formik = useFormik({
-    initialValues: { clientId: form.values.clientId },
-    enableReinitialize: true,
+    initialValues: { clientId: form.clientId, benList: [] },
     validateOnChange: true,
-    validateOnBlur: true,
-    onSubmit: () => {
-      const checkedBeneficiary = data.list.find(ben => ben.checked)
-
-      form.setValues({
-        ...form.values,
+    onSubmit: values => {
+      const checkedBeneficiary = values?.benList?.find(ben => ben?.checked)
+      onSubmit({
         beneficiaryId: checkedBeneficiary?.beneficiaryId || null,
         beneficiaryName: checkedBeneficiary?.name || null,
-        beneficiarySeqNo: checkedBeneficiary?.seqNo || null
+        beneficiarySeqNo: checkedBeneficiary?.seqNo || null,
+        branchCode: checkedBeneficiary?.branchCode
       })
-
       window.close()
     }
   })
@@ -32,16 +27,15 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   async function fetchGridData() {
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry3,
-      parameters: `_clientId=${form.values.clientId}&_dispersalId=${form.values.dispersalType}&_countryId=${form.values.countryId}`
+      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}`
     })
 
     res.list = res.list.map(item => {
-      if (item.beneficiaryId == form.values.beneficiaryId) item.checked = true
+      if (item.beneficiaryId == form.beneficiaryId) item.checked = true
 
       return item
     })
-
-    setData(res ?? { list: [] })
+    formik.setFieldValue('benList', res.list ?? { list: [] })
   }
 
   const columns = [
@@ -76,11 +70,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
   ]
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        await fetchGridData()
-      } catch (error) {}
-    })()
+    fetchGridData()
   }, [])
 
   return (
@@ -94,8 +84,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, window }) => {
     >
       <Table
         columns={columns}
-        gridData={data}
-        setData={setData}
+        gridData={{ list: formik.values.benList }}
         rowId={['beneficiaryId']}
         rowSelection='single'
         isLoading={false}

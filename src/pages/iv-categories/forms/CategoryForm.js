@@ -20,6 +20,8 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -48,6 +50,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       metalId: '',
       priceType: '',
       taxId: '',
+      returnPolicyId: null,
       applyVAT: false,
       allowNegativeQty: false,
       isInactive: false
@@ -149,8 +152,24 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.ItemCategory,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Category} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Category}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grid container gap={2}>
           <Grid item xs={7}>
@@ -315,6 +334,25 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                     maxAccess={maxAccess}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.ReturnPolicy.qry}
+                    name='returnPolicyId'
+                    label={labels.returnPolicy}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('returnPolicyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.returnPolicyId && Boolean(formik.errors.returnPolicyId)}
+                  />
+                </Grid>
               </Grid>
             </Grow>
           </Grid>
@@ -376,7 +414,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 {(formik.values.trackBy === '1' || formik.values.trackBy === 1) && (
                   <Grid item xs={12}>
                     <ResourceComboBox
-                      endpointId={InventoryRepository.SerialNumber.qry}
+                      endpointId={InventoryRepository.SerialsProfile.qry}
                       name='spfId'
                       required={formik.values.trackBy === '1' || formik.values.trackBy === 1}
                       label={labels.spf}

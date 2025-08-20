@@ -17,12 +17,12 @@ import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ItemProductionForm({ labels, editMode, maxAccess, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { recordId } = store
+  const { recordId, productionLevel } = store
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
-      itemId: store.recordId,
+      itemId: recordId,
       lineId: '',
       spfId: '',
       ltId: '',
@@ -32,17 +32,22 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
       designId: '',
       standardCost: '',
       standardId: '',
-      cgId: ''
+      cgId: '',
+      rmcId: '',
+      bomId: null,
+      wipItemId: null,
+      wipItemSku: '',
+      wipItemName: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.ItemProduction.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({
+          ...obj,
+          itemId: recordId
+        })
       })
 
       formik.setValues(obj)
@@ -75,7 +80,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
 
   return (
     <FormShell
-      resourceId={ResourceIds.IdCategories}
+      resourceId={ResourceIds.Items}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -84,7 +89,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.ProductionLine.qry}
@@ -136,7 +141,7 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.SerialProfile.qry}
+                endpointId={InventoryRepository.SerialsProfile.qry}
                 values={formik.values}
                 name='spfId'
                 label={labels.sprofile}
@@ -209,6 +214,63 @@ export default function ItemProductionForm({ labels, editMode, maxAccess, store 
                   formik.setFieldValue('ltId', newValue ? newValue.recordId : '')
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.RawMaterialCategory.qry}
+                name='rmcId'
+                label={labels.rmc}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('rmcId', newValue?.recordId)
+                }}
+                error={formik.touched.rmcId && Boolean(formik.errors.rmcId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={formik.values.itemId && ManufacturingRepository.BillOfMaterials.qry2}
+                parameters={`_itemId=${formik?.values?.itemId}`}
+                name='bomId'
+                label={labels.bom}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('bomId', newValue?.recordId || '')
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={InventoryRepository.Item.snapshot3}
+                parameters={{
+                  _productionLevel: 4
+                }}
+                name='wipItemId'
+                label={labels.wipItem}
+                valueField='sku'
+                displayField='name'
+                valueShow='wipItemSku'
+                secondValueShow='wipItemName'
+                form={formik}
+                readOnly={productionLevel == 4}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('wipItemSku', newValue?.sku || null)
+                  formik.setFieldValue('wipItemName', newValue?.name || '')
+                  formik.setFieldValue('wipItemId', newValue?.recordId || '')
+                }}
+                errorCheck={'wipItemId'}
                 maxAccess={maxAccess}
               />
             </Grid>

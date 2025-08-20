@@ -13,9 +13,11 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import toast from 'react-hot-toast'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CurrencyTrading() {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   function openForm(recordId) {
@@ -26,7 +28,7 @@ export default function CurrencyTrading() {
         maxAccess: access,
         recordId: recordId || null
       },
-      width: 1000,
+      width: 1100,
       height: 700,
       title: labels.receiptVoucher
     })
@@ -35,7 +37,6 @@ export default function CurrencyTrading() {
   const {
     query: { data },
     filterBy,
-    clearFilter,
     labels: labels,
     access,
     paginationParameters,
@@ -91,29 +92,20 @@ export default function CurrencyTrading() {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
-  }
-
-  const onApply = ({ search, rpbParams }) => {
-    if (!search && rpbParams.length === 0) {
-      clearFilter('params')
-    } else if (!search) {
-      filterBy('params', rpbParams)
-    } else {
-      filterBy('qry', search)
-    }
-    refetch()
-  }
-
-  const onSearch = value => {
-    filterBy('qry', value)
-  }
-
-  const onClear = () => {
-    clearFilter('qry')
+    toast.success(platformLabels.Deleted)
   }
 
   const columns = [
+    {
+      field: 'plantName',
+      headerName: labels.plant,
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
     {
       field: 'date',
       headerName: labels.date,
@@ -121,8 +113,8 @@ export default function CurrencyTrading() {
       type: 'date'
     },
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'accountRef',
+      headerName: labels.accountReference,
       flex: 1
     },
     {
@@ -131,43 +123,47 @@ export default function CurrencyTrading() {
       flex: 1
     },
     {
-      field: 'cashAccountName',
-      headerName: labels.CashAccount,
+      field: 'currencyName',
+      headerName: labels.currency,
+      flex: 1
+    },
+    {
+      field: 'paymentMethodName',
+      headerName: labels.receiptMethod,
       flex: 1
     },
     {
       field: 'amount',
       headerName: labels.amount,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'cashAccountName',
+      headerName: labels.CashAccount,
       flex: 1
     },
     {
-      field: 'currency',
-      headerName: labels.currency,
-      flex: 1
-    },
-    {
-      field: 'statusName',
-      headerName: labels.status,
+      field: 'notes',
+      headerName: labels.description,
       flex: 1
     },
     {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onApply={onApply}
-          onSearch={onSearch}
-          onClear={onClear}
-          reportName={'FIRV'}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIRV'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -179,6 +175,7 @@ export default function CurrencyTrading() {
           rowId={['recordId']}
           isLoading={false}
           refetch={refetch}
+          deleteConfirmationType={'strict'}
           paginationParameters={paginationParameters}
           pageSize={50}
           paginationType='api'

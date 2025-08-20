@@ -22,7 +22,6 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
@@ -40,8 +39,11 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import MoreDetails from './MoreDetails'
 import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
+import AddressForm from 'src/components/Shared/AddressForm'
 
-const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = false }) => {
+const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
   const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
   const { systemChecks, defaultsData } = useContext(ControlContext)
@@ -62,8 +64,16 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.ClientMaster,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.pageTitle, window })
 
   const initialValues = {
     //clientIDView
@@ -80,27 +90,6 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     idtId: '',
     idtName: '',
     cityName: '',
-
-    //address
-    countryId: '',
-    cityId: '',
-    city: '',
-    stateId: '',
-    cityDistrictId: '',
-    cityDistrict: '',
-    email1: '',
-    email2: '',
-    name: '',
-    phone: '',
-    phone2: '',
-    phone3: '',
-    postalCode: '',
-    street1: '',
-    street2: '',
-    subNo: '',
-    unitNo: '',
-    bldgNo: '',
-    poBox: '',
 
     //clientIndividual
     birthDate: null,
@@ -408,38 +397,17 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
-      },
-      width: 400,
-      height: 400,
-      title: labels.OTPVerification
+      }
     })
   }
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: formikSettings.maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (values.isRelativeDiplomat && !values.relativeDiplomatInfo) {
-        errors.relativeDiplomatInfo = 'Relative Diplomat Info is required'
-      }
-
-      if (values.email1 && !emailRegex.test(values.email1)) {
-        errors.email1 = 'Invalid email format'
-      }
-
-      if (values.email2 && !emailRegex.test(values.email2)) {
-        errors.email2 = 'Invalid email format'
-      }
-
-      return errors
-    },
     validationSchema: yup.object({
+      ...formikSettings.validate,
       reference: referenceRequired && yup.string().required(),
       isResident: yup.string().required(),
       birthDate: yup.date().required(),
@@ -480,8 +448,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
         }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
-      gender: yup.string().required(),
-      street1: yup.string().required()
+      gender: yup.string().required()
     }),
     onSubmit: async values => {
       shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
@@ -892,10 +859,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     !formik.values.govCellVerified &&
     !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
-  function onAddressSubmit(values) {
+  function onAddressSubmit(values, window) {
     setAddress({
       ...values
     })
+    window.close()
   }
 
   return (
@@ -1055,10 +1023,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                                 labels: labels,
                                 idTypes,
                                 refreshProf
-                              },
-                              title: labels.fetch,
-                              width: 400,
-                              height: 400
+                              }
                             })
                           }
                           disabled={
@@ -1513,7 +1478,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           type={showAsPasswordPhone && formik.values?.cellPhone ? 'password' : 'text'}
                           label={labels.cellPhone}
                           value={formik.values?.cellPhone}
-                          readOnly={editMode && !allowEdit && true}
+                          readOnly={editMode && !allowEdit}
                           required
                           phone={true}
                           onChange={(value, countryData) => {
@@ -1535,7 +1500,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           onFocus={e => {
                             setShowAsPasswordPhone(false)
                           }}
-                          onClear={() => formik.setFieldValue('cellPhone', '')}
+                          onClear={code => formik.setFieldValue('cellPhone', code)}
                           error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                           helperText={formik.touched.cellPhone && formik.errors.cellPhone}
                           maxAccess={maxAccess}
@@ -1548,11 +1513,11 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           label={labels.confirmCell}
                           value={formik.values?.cellPhoneRepeat}
                           required
-                          readOnly={editMode && !allowEdit && true}
+                          readOnly={editMode && !allowEdit}
                           maxLength='15'
                           autoComplete='off'
                           phone={true}
-                          onChange={value => {
+                          onChange={(value, countryCode) => {
                             setIsValidatePhoneClicked(false)
 
                             formik.setFieldValue('cellPhoneRepeat', value)
@@ -1567,7 +1532,7 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                           }}
                           onCopy={handleCopy}
                           onPaste={handleCopy}
-                          onClear={() => formik.setFieldValue('cellPhoneRepeat', '')}
+                          onClear={code => formik.setFieldValue('cellPhoneRepeat', code)}
                           error={formik.touched.cellPhoneRepeat && Boolean(formik.errors.cellPhoneRepeat)}
                           helperText={formik.touched.cellPhoneRepeat && formik.errors.cellPhoneRepeat}
                           maxAccess={maxAccess}
@@ -1727,8 +1692,9 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                       labels={labels}
                       defaultReadOnly={{ countryId: true }}
                       addressValidation={formik}
-                      readOnly={editMode && !allowEdit && true}
+                      readOnly={editMode && !allowEdit}
                       access={maxAccess}
+                      setFormik={setFormik}
                     />
                   </FieldSet>
                 </Grid>
@@ -1736,25 +1702,22 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
                   <Grid container spacing={2}>
                     <Grid item xs={5}>
                       <CustomButton
-                        onClick={() =>
+                        onClick={() => {
                           stack({
-                            Component: AddressFormShell,
+                            Component: AddressForm,
                             props: {
-                              readOnly: editMode && !allowEdit,
-                              allowPost: true,
-                              optional: true,
-                              labels: labels,
+                              editMode: editMode,
+                              address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
-                              address: address,
-                              maxAccess: maxAccess,
-                              isCleared: false
+                              readOnly: editMode && !allowEdit,
+                              optional: true,
+                              changeClear: true,
+                              allowPost: false
                             },
-                            width: 800,
-                            height: 350,
                             title: labels.workAddress
                           })
-                        }
+                        }}
                         label={labels.workAddress}
                         color='primary'
                       />
@@ -1834,5 +1797,8 @@ const ClientTemplateForm = ({ recordId, labels, plantId, maxAccess, allowEdit = 
     </FormShell>
   )
 }
+
+ClientTemplateForm.width = 1200
+ClientTemplateForm.height = 650
 
 export default ClientTemplateForm

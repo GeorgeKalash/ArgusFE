@@ -50,13 +50,14 @@ export default function TRXForm({ labels, access, setStore, store }) {
       baseAmount: 0.0,
       notes: '',
       wip: 1,
-      dtId: documentType?.dtId,
+      dtId: null,
       reference: '',
       status: 1,
       releaseStatus: null,
       date: new Date()
     },
     maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
@@ -76,14 +77,13 @@ export default function TRXForm({ labels, access, setStore, store }) {
         if (!recordId) {
           setStore(prevStore => ({
             ...prevStore,
-            recordId: res.recordId,
+            recordId: res?.recordId,
             isPosted: res?.status == 3
           }))
           formik.setFieldValue('recordId', res.recordId)
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
+          fetchData(res.recordId)
         }
+        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
     }
@@ -106,19 +106,19 @@ export default function TRXForm({ labels, access, setStore, store }) {
     fetchDataAndSetPlant()
   }, [])
 
-  async function fetchData() {
+  async function fetchData(recordId) {
     await getRequest({
       extension: CostAllocationRepository.PuCostAllocations.get,
       parameters: `_recordId=${recordId}`
     }).then(res => {
       setStore(prevStore => ({
         ...prevStore,
-        isPosted: res.record.status === 3,
-        isClosed: res.record.wip === 2
+        isPosted: res?.record?.status === 3,
+        isClosed: res?.record?.wip === 2
       }))
       formik.setValues({
         ...res.record,
-        date: formatDateFromApi(res.record.date)
+        date: formatDateFromApi(res?.record?.date)
       })
     })
   }
@@ -128,12 +128,11 @@ export default function TRXForm({ labels, access, setStore, store }) {
       ...formik.values,
       date: formatDateToApi(formik.values.date)
     }
-
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.post,
       record: JSON.stringify(data)
-    }).then(async res => {
-      await fetchData(res.recordId)
+    }).then(async () => {
+      await fetchData(data.recordId)
       toast.success(platformLabels.Posted)
       invalidate()
     })
@@ -192,6 +191,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      datasetId: ResourceIds.GLPuCostAllocation,
       disabled: !editMode
     },
     {
@@ -319,7 +319,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
                 onChange={formik.setFieldValue}
                 editMode={editMode}
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 readOnly={isClosed}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />

@@ -4,10 +4,12 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import { formatDateDefault } from 'src/lib/date-helper'
 
 const CustomComboBox = ({
   type = 'text',
   name,
+  fullName,
   label,
   value,
   valueField = 'key',
@@ -26,7 +28,6 @@ const CustomComboBox = ({
   readOnly = false,
   neverPopulate = false,
   displayFieldWidth = 1,
-  defaultIndex,
   sx,
   columnsInDropDown,
   editMode = false,
@@ -38,7 +39,7 @@ const CustomComboBox = ({
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
-    name,
+    fullName,
     props.maxAccess,
     required,
     readOnly,
@@ -51,16 +52,13 @@ const CustomComboBox = ({
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
 
-  useEffect(() => {
-    if (!value && store?.length > 0 && typeof defaultIndex === 'number' && defaultIndex === 0) {
-      onChange(store?.[defaultIndex])
-    }
-  }, [defaultIndex])
   const autocompleteRef = useRef(null)
 
   const valueHighlightedOption = useRef(null)
 
   const selectFirstValue = useRef(null)
+
+  const filterOptions = useRef(null)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -107,8 +105,11 @@ const CustomComboBox = ({
         }
       }}
       filterOptions={(options, { inputValue }) => {
+        var results
+        filterOptions.current = ''
+
         if (columnsInDropDown) {
-          return options.filter(option =>
+          results = options.filter(option =>
             columnsInDropDown
               .map(header => header.key)
               .some(field => option[field]?.toString()?.toLowerCase()?.toString()?.includes(inputValue?.toLowerCase()))
@@ -116,10 +117,14 @@ const CustomComboBox = ({
         } else {
           var displayFields = Array.isArray(displayField) ? displayField : [displayField]
 
-          return options.filter(option =>
+          results = options.filter(option =>
             displayFields.some(field => option[field]?.toString()?.toLowerCase()?.includes(inputValue?.toLowerCase()))
           )
         }
+
+        filterOptions.current = results
+
+        return results
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
       onChange={(event, newValue) => {
@@ -140,18 +145,26 @@ const CustomComboBox = ({
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
       renderOption={(props, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
+          const columnsWithGrid = columnsInDropDown.map(col => ({
+            ...col,
+            grid: col.width ?? 2
+          }))
+
+          const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
+
           return (
             <Box>
               {props.id.endsWith('-0') && (
                 <li className={props.className} style={{ borderBottom: '1px solid #ccc' }}>
-                  {columnsInDropDown.map((header, i) => {
+                  {columnsWithGrid.map((header, i) => {
+                    const widthPercent = `${(header.grid / totalGrid) * 100}%`
+
                     return (
                       <Box
                         key={i}
                         sx={{
-                          flex: 1,
                           fontWeight: 'bold',
-                          width: header.width || 'auto',
+                          width: widthPercent,
                           fontSize: '0.7rem',
                           height: '15px',
                           display: 'flex'
@@ -164,19 +177,24 @@ const CustomComboBox = ({
                 </li>
               )}
               <li {...props}>
-                {columnsInDropDown.map((header, i) => {
+                {columnsWithGrid.map((header, i) => {
+                  let displayValue = option[header.key]
+                  const widthPercent = `${(header.grid / totalGrid) * 100}%`
+                  if (header?.type && header?.type === 'date' && displayValue) {
+                    displayValue = formatDateDefault(displayValue)
+                  }
+
                   return (
                     <Box
                       key={i}
                       sx={{
-                        flex: 1,
-                        width: header.width || 'auto',
+                        width: widthPercent,
                         fontSize: '0.88rem',
                         height: '20px',
                         display: 'flex'
                       }}
                     >
-                      {option[header.key]}
+                      {displayValue}
                     </Box>
                   )
                 })}
@@ -208,10 +226,9 @@ const CustomComboBox = ({
           error={error}
           helperText={helperText}
           onBlur={e => {
-            const listbox = document.querySelector('[role="listbox"]')
-            if (selectFirstValue.current !== 'click' && listbox && listbox.offsetHeight > 0) {
-              onBlur(e, valueHighlightedOption?.current)
-            }
+            const allowSelect =
+              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
           }}
           InputProps={{
             ...params.InputProps,

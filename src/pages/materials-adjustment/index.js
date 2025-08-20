@@ -12,8 +12,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import SystemFunction from '../system-functions'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 const MaterialsAdjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -30,11 +30,21 @@ const MaterialsAdjustment = () => {
       }&_dgId=0&_sortBy=recordId&_trxType=1`
     })
 
+    response.list = response?.list?.map(item => ({
+      ...item,
+      isVerified: item?.isVerified === null ? false : item?.isVerified
+    }))
+
     return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    if (filters.qry)
+      return await getRequest({
+        extension: InventoryRepository.MaterialsAdjustment.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
@@ -90,11 +100,22 @@ const MaterialsAdjustment = () => {
       field: 'qty',
       headerName: labels.qty,
       flex: 1
+    },
+    {
+      field: 'pcs',
+      headerName: labels.pcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'isVerified',
+      headerName: labels.isVerified,
+      type: 'checkbox'
     }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.materialsAdjustment,
+    functionId: SystemFunction.MaterialAdjustment,
     action: openForm
   })
 
@@ -129,15 +150,10 @@ const MaterialsAdjustment = () => {
     toast.success(platformLabels.Deleted)
   }
 
-  const onApply = ({ rpbParams }) => {
-    filterBy('params', rpbParams)
-    refetch()
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} maxAccess={access} onAdd={add} onApply={onApply} reportName={'IVADJ'} />
+        <RPBGridToolbar maxAccess={access} onAdd={add} filterBy={filterBy} reportName={'IVADJ'} />
       </Fixed>
       <Grow>
         <Table

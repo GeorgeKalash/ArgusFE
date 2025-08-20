@@ -11,9 +11,10 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CAadjustmentForm from '../form/CAadjustmentForms'
-import { useRouter } from 'next/router'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
+import { Router } from 'src/lib/useRouter'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CAadjustment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,35 +22,39 @@ const CAadjustment = () => {
 
   const { stack } = useWindow()
 
-  const router = useRouter()
-  const { functionId } = router.query
+  const { functionId } = Router()
 
   async function fetchGridData(options = {}) {
-    const {
-      pagination: { _startAt = 0, _pageSize = 50 }
-    } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: CashBankRepository.CAadjustment.page,
-      parameters: `_startAt=${_startAt}&_params=&_pageSize=50&_sortBy=reference&_functionId=${functionId}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }&_sortBy=date desc&_functionId=${functionId}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
+    filterBy,
     labels: _labels,
     access,
     paginationParameters,
     invalidate,
     refetch
   } = useResourceQuery({
+    queryFn: fetchGridData,
     endpointId: CashBankRepository.CAadjustment.page,
     datasetId: ResourceIds.IncreaseDecreaseAdj,
-
     filter: {
-      filterFn: fetchGridData,
+      filterFn: fetchWithFilter,
       default: { functionId }
     }
   })
@@ -141,7 +146,7 @@ const CAadjustment = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'CAADJ'} filterBy={filterBy} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table

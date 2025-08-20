@@ -14,6 +14,9 @@ import { formatDateDefault, formatDateTimeDefault } from 'src/lib/date-helper'
 import CustomTextField from '../Inputs/CustomTextField'
 import { useError } from 'src/error'
 import CustomDateTimePicker from '../Inputs/CustomDateTimePicker'
+import CustomNumberField from '../Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const formatDateTo = value => {
   const date = new Date(value)
@@ -41,6 +44,8 @@ const formatDateFrom = value => {
 }
 
 const convertDateToCompactFormat = input => {
+  if (!input) return
+
   let date
 
   if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
@@ -59,6 +64,8 @@ const convertDateToCompactFormat = input => {
 }
 
 const convertCompactFormatToDate = compactDate => {
+  if (!compactDate) return
+
   const year = parseInt(compactDate.slice(0, 4), 10)
   const month = parseInt(compactDate.slice(4, 6), 10) - 1
   const day = parseInt(compactDate.slice(6, 8), 10)
@@ -132,12 +139,14 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     }
   }, [])
 
-  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry) {
-    newParams += `&_dgId=${field?.data}`
+  if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
+    newParams += `&_functionIds=${field?.data}`
   } else if (apiDetails?.endpoint === InventoryRepository.Dimension.qry) {
     newParams = `_dimension=${field?.data}`
   } else if (apiDetails?.endpoint === FinancialRepository.FIDimension.qry) {
     newParams = `_dimension=${field?.data}`
+  } else if (apiDetails?.endpoint === SystemRepository.Currency.qry2) {
+    newParams += `_currencyType=${field?.data}`
   }
 
   return (
@@ -247,7 +256,39 @@ const GetDate = ({ field, formik, rpbParams }) => {
 
 const GetDateTimePicker = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+    const currentValue = formik.values?.parameters?.[field.id]?.value
+
+    if (currentValue !== undefined && currentValue !== null) return
+
+    if (field.defaultValue) {
+      let defVal
+      switch (field.defaultValue) {
+        case 'today':
+          defVal = new Date()
+          break
+        case 'yesterday':
+          defVal = new Date()
+          defVal.setDate(defVal.getDate() - 1)
+          break
+        case 'boy':
+          defVal = new Date(new Date().getFullYear(), 0, 1)
+          break
+        default:
+          defVal = null
+      }
+
+      if (defVal) {
+        formik.setFieldValue(`parameters[${field.id}]`, {
+          fieldId: field.id,
+          fieldKey: field.key,
+          defaultValue: field.defaultValue,
+          value: defVal,
+          controlType: field?.controlType,
+          caption: field.caption,
+          display: formatDateTimeDefault(defVal)
+        })
+      }
+    } else if (field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -265,7 +306,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
       <CustomDateTimePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
         onChange={(name, newValue) => {
@@ -311,11 +352,41 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
+const GetNumberField = ({ field, formik }) => {
+  return (
+    <Grid item xs={12} key={field.id}>
+      <CustomNumberField
+        name={`parameters[${field.id}`}
+        label={field.caption}
+        value={formik.values?.parameters?.[field.id]?.value}
+        required={field.mandatory}
+        decimalScale={2}
+        onChange={e => {
+          e.target.value != ''
+            ? formik.setFieldValue(`parameters[${field.id}]`, {
+                fieldId: field.id,
+                fieldKey: field.key,
+                value: e.target.value,
+                caption: field.caption,
+                display: e.target.value
+              })
+            : formik.setFieldValue(`parameters[${field.id}]`, '')
+        }}
+        error={Boolean(formik.errors?.parameters?.[field.id])}
+        onClear={() => formik.setFieldValue(`parameters[${field.id}]`, null)}
+      />
+    </Grid>
+  )
+}
+
 const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const [items, setItems] = useState([])
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
+  const { platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
   const getParameterDefinition = reportName => {
     const parameters = `_reportName=${reportName}`
@@ -324,7 +395,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
       extension: SystemRepository.ParameterDefinition,
       parameters: parameters
     }).then(res => {
-      setParameters(res.list)
+      if (res?.list) setParameters(res.list)
     })
   }
 
@@ -445,6 +516,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
             return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
+          } else if (item.controlType === 2) {
+            return <GetNumberField key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 7) {
             return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           }
@@ -453,5 +526,8 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
     </FormShell>
   )
 }
+
+ReportParameterBrowser.width = 700
+ReportParameterBrowser.height = 500
 
 export default ReportParameterBrowser
