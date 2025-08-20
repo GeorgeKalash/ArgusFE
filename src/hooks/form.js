@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
@@ -45,6 +45,8 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
     return yup.object().shape(updatedSchema)
   }
+
+  const hasSubmittedOnce = useRef(false)
 
   const formik = useFormik({
     ...formikProps,
@@ -118,11 +120,24 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   })
 
+  useEffect(() => {
+    if (formik.submitCount > 0) {
+      hasSubmittedOnce.current = true
+    }
+  }, [formik.submitCount])
+
   const originalSetFieldValue = formik.setFieldValue
   formik.setFieldValue = async (field, value, shouldValidate) => {
     await originalSetFieldValue(field, value, shouldValidate)
 
-    if (value) await formik.setFieldTouched(field, false) //: await formik.setFieldTouched(field, true)
+    if (value) await formik.setFieldTouched(field, false)
+    else {
+      if (hasSubmittedOnce.current) {
+        await formik.setFieldTouched(field, true)
+      } else {
+        await formik.setFieldTouched(field, false)
+      }
+    }
   }
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
