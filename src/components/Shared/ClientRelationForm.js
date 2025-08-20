@@ -104,6 +104,8 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
         })
         toast.success('Record Successfully')
       })
+
+      window.close()
     }
   })
 
