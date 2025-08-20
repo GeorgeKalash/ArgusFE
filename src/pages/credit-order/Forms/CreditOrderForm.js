@@ -9,7 +9,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -36,55 +35,18 @@ import { LOTransportationForm } from 'src/components/Shared/LOTransportationForm
 import { LOShipmentForm } from 'src/components/Shared/LOShipmentForm'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { getStorageData } from 'src/storage/storage'
 
-const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
-  const { platformLabels } = useContext(ControlContext)
+const CreditOrderForm = ({ recordId, window }) => {
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
-
-  const initialValues = {
-    recordId: recordId,
-    date: new Date(),
-    functionId: SystemFunction.CurrencyCreditOrderPurchase,
-    deliveryDate: new Date(),
-    reference: '',
-    dtId: null,
-    plantId: parseInt(plantId),
-    corId: null,
-    corRef: '',
-    corName: '',
-    wip: 1,
-    status: 1,
-    releaseStatus: '',
-    notes: '',
-    amount: 0,
-    baseAmount: 0,
-    exRate: 1,
-    rateCalcMethod: '',
-    rateType: '',
-    isTFRClicked: false,
-    rows: [
-      {
-        id: 1,
-        orderId: recordId || null,
-        seqNo: '',
-        currencyId: null,
-        qty: 0,
-        rateCalcMethod: '',
-        exRate: 1,
-        minRate: '',
-        maxRate: '',
-        defaultRate: '',
-        amount: 0,
-        baseAmount: '',
-        notes: '',
-        goc: false
-      }
-    ]
-  }
+  const userData = getStorageData('userData').userId
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditOrder,
@@ -115,8 +77,46 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: recordId,
+      date: new Date(),
+      functionId: SystemFunction.CurrencyCreditOrderPurchase,
+      deliveryDate: new Date(),
+      reference: '',
+      dtId: null,
+      plantId: parseInt(plantId),
+      corId: null,
+      corRef: '',
+      corName: '',
+      wip: 1,
+      status: 1,
+      releaseStatus: '',
+      notes: '',
+      amount: 0,
+      baseAmount: 0,
+      exRate: 1,
+      rateCalcMethod: '',
+      rateType: '',
+      isTFRClicked: false,
+      rows: [
+        {
+          id: 1,
+          orderId: recordId || null,
+          seqNo: '',
+          currencyId: null,
+          qty: '',
+          rateCalcMethod: '',
+          exRate: '',
+          minRate: '',
+          maxRate: '',
+          defaultRate: '',
+          amount: '',
+          baseAmount: '',
+          notes: '',
+          goc: false
+        }
+      ]
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -128,7 +128,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
       const copy = {
         ...obj,
         date: formatDateToApi(obj.date),
-        deliveryDate: formatDateToApi(copy.deliveryDate),
+        deliveryDate: formatDateToApi(obj.deliveryDate),
         amount: totalCUR,
         baseAmount: totalLoc
       }
@@ -157,7 +157,6 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
       invalidate()
     }
   })
-
   const isClosed = formik.values.wip == 2
   const isTFR = formik.values.releaseStatus === 3 && formik.values.status !== 3
   const editMode = !!formik.values.recordId
@@ -197,11 +196,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
     stack({
       Component: CreditInvoiceForm,
       props: {
-        labels,
-        access,
         recordId: res?.recordId,
-        plantId,
-        userData
+        plantId
       },
       width: 900,
       height: 600,
@@ -212,30 +208,30 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const totalCUR = formik.values.rows.reduce((curSum, row) => {
     const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
-    return curSum + curValue
+    return parseFloat(curSum + curValue).toFixed(2)
   }, 0)
 
   const totalLoc = formik.values.rows.reduce((locSum, row) => {
     const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
 
-    return locSum + locValue
+    return parseFloat(locSum + locValue).toFixed(2)
   }, 0)
 
   const getCorrespondentById = async (corId, baseCurrency, plant) => {
-    if (corId) {
-      const res = await getRequest({
-        extension: RemittanceSettingsRepository.Correspondent.get,
-        parameters: `_recordId=${corId}`
-      })
-      formik.setFieldValue('currencyId', res?.record?.currencyId || null)
-      formik.setFieldValue('currencyRef', res?.record?.currencyRef || '')
+    if (!corId) return
 
-      const evalRate = await getRequest({
-        extension: CurrencyTradingSettingsRepository.Defaults.get,
-        parameters: '_key=ct_credit_eval_ratetype_id'
-      })
-      await getEXMBase(plant, res?.record?.currencyId, baseCurrency, evalRate?.record?.value)
-    }
+    const res = await getRequest({
+      extension: RemittanceSettingsRepository.Correspondent.get,
+      parameters: `_recordId=${corId}`
+    })
+    formik.setFieldValue('currencyId', res?.record?.currencyId || null)
+    formik.setFieldValue('currencyRef', res?.record?.currencyRef || '')
+
+    const evalRate = await getRequest({
+      extension: CurrencyTradingSettingsRepository.Defaults.get,
+      parameters: '_key=ct_credit_eval_ratetype_id'
+    })
+    getEXMBase(plant, res?.record?.currencyId, baseCurrency, evalRate?.record?.value)
   }
 
   const getDefaultDT = async functionId => {
@@ -254,7 +250,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
         })
       }
       if (!currencyId) {
-        formik.setFieldValue('corId', '')
+        formik.setFieldValue('corId', null)
         formik.setFieldValue('corRef', '')
         formik.setFieldValue('corName', '')
         stackError({
@@ -334,7 +330,6 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
         ],
         displayFieldWidth: 3
       },
-      updateOn: 'blur',
       async onChange({ row: { update, oldRow, newRow } }) {
         if (!newRow?.currencyId) {
           return
@@ -413,6 +408,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
       label: labels.quantity,
       name: 'qty',
       flex: 2,
+      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const rateCalcMethod = newRow.rateCalcMethod
 
@@ -498,7 +494,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
     },
     {
       component: 'numberfield',
-      label: `${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`,
+      label: `${labels.total} ${formik.values.currencyRef || ''}`,
       name: 'amount',
       props: {
         readOnly: true
@@ -508,6 +504,8 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   ]
 
   async function getCorCurrencyInfo(currencyId) {
+    if (!currencyId) return
+
     const res = await getRequest({
       extension: RemittanceSettingsRepository.CorrespondentCurrency.get,
       parameters: `_corId=${formik.values.corId}&_currencyId=${currencyId}`
@@ -516,7 +514,7 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
     return res?.record
   }
 
-  const fillItemsGrid = async orderId => {
+  const fillCurrencyGrid = async orderId => {
     const res = await getRequest({
       extension: CTTRXrepository.CreditOrderItem.qry,
       parameters: `_orderId=${orderId}`
@@ -579,13 +577,13 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
 
   async function refetchForm(recordId) {
     const res = await getOrder(recordId)
-    const res2 = await fillItemsGrid(recordId)
+    const res2 = await fillCurrencyGrid(recordId)
 
     formik.setValues(prevValues => ({
       ...prevValues,
       ...res.record,
       date: formatDateFromApi(res.record.date),
-      deliveryDate: formatDateFromApi(res.record.deliveryDate),
+      deliveryDate: res?.record?.deliveryDate ? formatDateFromApi(res.record.deliveryDate) : null,
       rows: res2
     }))
 
@@ -760,10 +758,10 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
                 form={formik}
                 required
                 firstFieldWidth={4}
-                displayFieldWidth={1.5}
+                displayFieldWidth={3}
                 valueShow='corRef'
                 secondValueShow='corName'
-                readOnly={isClosed || formik?.values?.rows[0]?.currencyId}
+                readOnly={isClosed || formik?.values?.rows?.some(row => !!row.currencyId)}
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
                   if (newValue) {
@@ -806,13 +804,13 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
                   value={SystemFunction.CurrencyCreditOrderPurchase}
                   control={<Radio />}
                   label={labels.purchase}
-                  disabled={formik?.values?.rows[0]?.currencyId}
+                  disabled={formik?.values?.rows?.some(row => !!row.currencyId)}
                 />
                 <FormControlLabel
                   value={SystemFunction.CurrencyCreditOrderSale}
                   control={<Radio />}
                   label={labels.sale}
-                  disabled={formik?.values?.rows[0]?.currencyId}
+                  disabled={formik?.values?.rows?.some(row => !!row.currencyId)}
                 />
               </RadioGroup>
             </Grid>
@@ -850,29 +848,26 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}
-                helperText={formik.touched.notes && formik.errors.notes}
               />
             </FormGrid>
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='totalCUR'
-                    label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
-                    value={parseFloat(totalCUR.toFixed(2))}
-                    numberField={true}
+                    label={`${labels.total} ${formik.values.currencyRef || ''}`}
+                    value={totalCUR}
                     readOnly
+                    align='right'
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='baseAmount'
-                    maxAccess={maxAccess}
-                    label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
-                    style={{ textAlign: 'right' }}
-                    value={parseFloat(totalLoc.toFixed(2))}
-                    numberField={true}
+                    label={`${labels.total} ${baseCurrencyRef || ''}`}
+                    value={totalLoc}
                     readOnly
+                    align='right'
                   />
                 </Grid>
               </Grid>

@@ -9,7 +9,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -33,14 +32,20 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { getStorageData } from 'src/storage/storage'
+import { createConditionalSchema } from 'src/lib/validation'
 
-const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window }) => {
+const CreditInvoiceForm = ({ recordId, window }) => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CreditInvoicePurchase)
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const userData = getStorageData('userData').userId
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const cashAccountId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'cashAccountId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditInvoice,
@@ -51,15 +56,30 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
     endpointId: CTTRXrepository.CreditInvoice.page
   })
 
+  const { maxAccess } = useDocumentType({
+    functionId: selectedFunctionId,
+    access,
+    enabled: !recordId,
+    hasDT: false
+  })
+
+  useSetWindow({ title: labels.creditInvoice, window })
+
+  // const conditions = {
+  //   currencyRef: row => row?.currencyRef,
+  //   currencyName: row => row?.currencyName,
+  //   qty: row => row?.qty,
+  //   exRate: row => row?.exRate,
+  //   amount: row => row?.amount
+  // }
+  // const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
   const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    currencyId: '',
-    currencyRef: '',
+    recordId,
     date: new Date(),
-    dtId: '',
+    dtId: null,
     functionId: SystemFunction.CreditInvoicePurchase,
     reference: '',
-    plantId: parseInt(plantId),
+    plantId,
     corId: '',
     corRef: '',
     corName: '',
@@ -67,22 +87,22 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
     status: 1,
     releaseStatus: '',
     notes: '',
-    amount: '',
-    baseAmount: '',
+    amount: 0,
+    baseAmount: 0,
     exRate: '',
     minRate: '',
     maxRate: '',
     rateCalcMethod: '',
-    cashAccountId: parseInt(cashAccountId),
+    cashAccountId,
     cashAccountName: '',
     cashAccountRef: '',
     rateType: '',
     rows: [
       {
         id: 1,
-        invoiceId: '',
+        invoiceId: recordId || null,
         seqNo: '',
-        currencyId: '',
+        currencyId: null,
         qty: '',
         rateCalcMethod: '',
         exRate: '',
@@ -97,15 +117,6 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
     ]
   })
 
-  const { maxAccess } = useDocumentType({
-    functionId: selectedFunctionId,
-    access: access,
-    enabled: !recordId,
-    hasDT: false
-  })
-
-  useSetWindow({ title: labels.creditInvoice, window })
-
   const { formik } = useForm({
     initialValues,
     maxAccess,
@@ -115,100 +126,23 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
       date: yup.string().required(),
       plantId: yup.string().required(),
       corId: yup.string().required(),
-      cashAccountId: yup.string().required(),
-      rows: yup
-        .array()
-        .of(
-          yup.object().shape({
-            currencyRef: yup.string().test({
-              name: 'currencyRef-last-row-check',
-              message: 'currencyRef is required',
-              test(value, context) {
-                const { parent } = context
-                if (parent.id == 1 && value) return true
-                if (parent.id == 1 && !value) return false
-                if (
-                  parent.id > 1 &&
-                  (!parent.amount || parent.amount == 0) &&
-                  (!parent.exRate || parent.exRate == 0) &&
-                  (!parent.qty || parent.qty == 0)
-                )
-                  return true
+      cashAccountId: yup.string().required()
 
-                return value
-              }
-            }),
-            qty: yup.string().test({
-              name: 'qty-last-row-check',
-              message: 'Quantity is required',
-              test(value, context) {
-                const { parent } = context
-                if (parent.id == 1 && value) return true
-                if (parent.id == 1 && !value) return false
-                if (
-                  parent.id > 1 &&
-                  (!parent.amount || parent.amount == 0) &&
-                  (!parent.exRate || parent.exRate == 0) &&
-                  !parent.currencyRef
-                )
-                  return true
-
-                return value
-              }
-            }),
-            exRate: yup.string().test({
-              name: 'exRate-last-row-check',
-              message: 'Exchange rate is required',
-              test(value, context) {
-                const { parent } = context
-                if (parent.id == 1 && value) return true
-                if (parent.id == 1 && !value) return false
-                if (
-                  parent.id > 1 &&
-                  (!parent.amount || parent.amount == 0) &&
-                  !parent.currencyRef &&
-                  (!parent.qty || parent.qty == 0)
-                )
-                  return true
-
-                return value
-              }
-            }),
-            amount: yup.string().test({
-              name: 'amount-last-row-check',
-              message: 'Amount is required',
-              test(value, context) {
-                const { parent } = context
-                if (parent.id == 1 && value) return true
-                if (parent.id == 1 && !value) return false
-                if (
-                  parent.id > 1 &&
-                  !parent.currencyRef &&
-                  (!parent.exRate || parent.exRate == 0) &&
-                  (!parent.qty || parent.qty == 0)
-                )
-                  return true
-
-                return value
-              }
-            })
-          })
-        )
-        .required()
+      //rows: yup.array().of(schema)
     }),
-
     onSubmit: async obj => {
-      const copy = { ...obj }
+      const copy = {
+        ...obj,
+        date: formatDateToApi(obj.date),
+        amount: totalCUR,
+        baseAmount: totalLoc
+      }
       delete copy.rows
-      copy.date = formatDateToApi(copy.date)
-      copy.amount = totalCUR
-      copy.baseAmount = totalLoc
-      const lastRow = formik.values.rows[formik.values.rows.length - 1]
-      const isLastRowMandatoryOnly = !lastRow.currencyRef && !lastRow.qty && !lastRow.exRate && !lastRow.amount
 
       const updatedRows = formik.values.rows
-        .filter((_, index) => !(index === formik.values.rows.length - 1 && isLastRowMandatoryOnly))
-        .map((orderDetail, index) => {
+
+        //   .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        ?.map((orderDetail, index) => {
           return {
             ...orderDetail,
             seqNo: index + 1,
@@ -241,13 +175,13 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
   const totalCUR = formik.values.rows.reduce((curSum, row) => {
     const curValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
 
-    return curSum + curValue
+    return parseFloat(curSum + curValue).toFixed(2)
   }, 0)
 
   const totalLoc = formik.values.rows.reduce((locSum, row) => {
     const locValue = parseFloat(row?.baseAmount?.toString().replace(/,/g, '')) || 0
 
-    return locSum + locValue
+    return parseFloat(locSum + locValue).toFixed(2)
   }, 0)
 
   async function getInvoice(recordId) {
@@ -585,7 +519,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
               : rateCalcMethod === 2
               ? parseFloat(qtyToCur) / formik.values.exRate
               : 0
-          update({ baseAmount: getFormattedNumber(curToBase.toFixed(2)) })
+          update({ baseAmount: parseFloat(curToBase.toFixed(2)) })
         }
 
         const gocPresent = await getCorCurrencyInfo(newRow?.currencyId)
@@ -625,7 +559,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
         const rate = newRow.exRate
         const rateCalcMethod = newRow.rateCalcMethod
         update({
-          qty: getFormattedNumber(parseFloat(newRow.qty.toString().replace(/,/g, '')).toFixed(2))
+          qty: parseFloat(newRow.qty.toString().replace(/,/g, '')).toFixed(2)
         })
 
         const qtyToCur =
@@ -642,8 +576,8 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
             ? parseFloat(qtyToCur) / formik.values.exRate
             : 0
         update({
-          amount: getFormattedNumber(qtyToCur.toFixed(2)),
-          baseAmount: getFormattedNumber(curToBase.toFixed(2))
+          amount: parseFloat(qtyToCur).toFixed(2),
+          baseAmount: parseFloat(curToBase).toFixed(2)
         })
       }
     },
@@ -712,20 +646,19 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
                 : 0
             update({
               exRate: parseFloat(newRow.exRate.toString().replace(/,/g, '')).toFixed(7),
-              amount: getFormattedNumber(qtyToCur.toFixed(2)),
-              baseAmount: getFormattedNumber(curToBase.toFixed(2))
+              amount: parseFloat(qtyToCur).toFixed(2),
+              baseAmount: parseFloat(curToBase).toFixed(2)
             })
           } else {
             stackError({
               message: `${labels.rateRange} ${minRate}-${maxRate} ${labels.range}`
             })
-            if (nv) {
-              update({
-                exRate: '',
-                amount: 0,
-                baseAmount: 0
-              })
-            }
+
+            update({
+              exRate: '',
+              amount: 0,
+              baseAmount: 0
+            })
           }
         }
       }
@@ -758,7 +691,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
       } else {
         await setOperationType(SystemFunction.CreditInvoicePurchase)
         await getDefaultDT(SystemFunction.CreditInvoicePurchase)
-        if (cashAccountId) await getCashAcc()
+        if (parseInt(cashAccountId)) await getCashAcc()
       }
     })()
   }, [])
@@ -942,7 +875,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
                 <CustomTextField
                   name='totalCUR'
                   label={`${labels.total} ${formik.values.currencyRef !== null ? formik.values.currencyRef : ''}`}
-                  value={getFormattedNumber(totalCUR.toFixed(2))}
+                  value={totalCUR}
                   numberField={true}
                   readOnly={true}
                 />
@@ -952,7 +885,7 @@ const CreditInvoiceForm = ({ recordId, plantId, userData, cashAccountId, window 
                   name='baseAmount'
                   label={`${labels.total} ${baseCurrencyRef !== null ? baseCurrencyRef : ''}`}
                   style={{ textAlign: 'right' }}
-                  value={getFormattedNumber(totalLoc.toFixed(2))}
+                  value={totalLoc}
                   numberField={true}
                   readOnly={true}
                 />
