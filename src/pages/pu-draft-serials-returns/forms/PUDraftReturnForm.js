@@ -738,6 +738,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
       formik.setFieldValue('header.plantId', dtd?.record?.plantId || null)
       formik.setFieldValue('header.siteId', dtd?.record?.siteId || defSiteId || null)
       formik.setFieldValue('header.dtId', recordId)
+
       //formik.setTouched({ plantId: false, siteId: false })
     } else {
       formik.setFieldValue('header.plantId', null)
