@@ -221,38 +221,36 @@ const OpenPurchaseRequisition = () => {
   ]
 
   const onGenerate = async () => {
-    setTimeout(async () => {
-      const { vendorId, currencyId, items, taxId } = formik.values
+    const { vendorId, currencyId, items, taxId } = formik.values
 
-      const itemValues = getItems(items)
+    const itemValues = getItems(items)
 
-      if (!checkItems(itemValues)) {
-        return
-      }
+    if (!checkItems(itemValues)) {
+      return
+    }
 
-      const response = await postRequest({
-        extension: PurchaseRepository.GenerateQTNPRPack.generate,
-        record: JSON.stringify({ vendorId, currencyId, taxId, items: itemValues })
+    const response = await postRequest({
+      extension: PurchaseRepository.GenerateQTNPRPack.generate,
+      record: JSON.stringify({ vendorId, currencyId, taxId, items: itemValues })
+    })
+
+    toast.success(platformLabels.Generated)
+
+    if (response.recordId)
+      stack({
+        Component: PuQtnForm,
+        props: {
+          recordId: response.recordId
+        }
       })
 
-      toast.success(platformLabels.Generated)
+    const itemsValue = items.map(({ isChecked, ...item }) => ({
+      ...item,
+      isChecked: false,
+      orderNow: 0
+    }))
 
-      if (response.recordId)
-        stack({
-          Component: PuQtnForm,
-          props: {
-            recordId: response.recordId
-          }
-        })
-
-      const itemsValue = items.map(({ isChecked, ...item }) => ({
-        ...item,
-        isChecked: false,
-        orderNow: 0
-      }))
-
-      formik.setFieldValue('items', itemsValue)
-    }, 5)
+    formik.setFieldValue('items', itemsValue)
   }
 
   const handleSubmit = e => {
@@ -271,7 +269,7 @@ const OpenPurchaseRequisition = () => {
     {
       key: 'generatePO',
       condition: true,
-      onClick: handleSubmit,
+      onClick: () => formik.handleSubmit(),
       disabled: !vendorId || !currencyId
     }
   ]
