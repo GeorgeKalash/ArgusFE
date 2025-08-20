@@ -6,12 +6,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
-import WindowToolbar from './WindowToolbar'
 import { VertLayout } from './Layouts/VertLayout'
-import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import FormShell from './FormShell'
 
 const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -144,21 +143,27 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('Integrations', value)}
-          value={formik.values.Integrations}
-          error={formik.errors.Integrations}
-          columns={column}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+    <FormShell
+      resourceId={ResourceIds.IntegrationAccount}
+      isInfo={false}
+      isCleared={false}
+      form={formik}
+      fullSize={true}
+      maxAccess={access}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('Integrations', value)}
+            value={formik.values.Integrations}
+            error={formik.errors.Integrations}
+            columns={column}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 GlobalIntegrationGrid.width = 800
