@@ -100,6 +100,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       props: {
         recordId,
         isSavedClear: false,
+        datasetId: ResourceIds.ADDClient,
         onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
@@ -171,6 +172,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       editAddress={editAddress}
       paginationParameters={paginationParameters}
       columns={columns}
+      datasetId={ResourceIds.ADDClient}
       refetch={refetch}
       {...props}
     />

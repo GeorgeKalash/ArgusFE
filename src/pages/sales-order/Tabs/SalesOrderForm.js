@@ -1103,7 +1103,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDSalesOrder
       }
     })
   }

@@ -59,6 +59,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
       props: {
         recordId,
         isCleared: false,
+        datasetId: ResourceIds.ADDPuVendors,
         onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
@@ -107,6 +108,7 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
+      datasetId={ResourceIds.ADDPuVendors}
       refetch={refetch}
       columns={columns}
       {...props}

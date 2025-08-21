@@ -13,10 +13,12 @@ const AddressGridTab = ({
   editAddress,
   columns,
   paginationParameters,
-  refetch
+  refetch,
+  datasetId
 }) => {
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
+    datasetId: ResourceIds.Address,
+    DatasetIdAccess: datasetId,
   })
 
   const tableColumns = [

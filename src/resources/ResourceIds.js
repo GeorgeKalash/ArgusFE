@@ -609,5 +609,19 @@ export const ResourceIds = {
   MCRServiceInvoice: 31620,
   MCRServiceBillReceived: 31621,
   MCRCashTransfers: 33605,
-  MCRIncreaseDecreaseAdj: 33606
+  MCRIncreaseDecreaseAdj: 33606,
+
+  // Address
+  ADDBPMasterData: 21600,
+  ADDPlants: 20601,
+  ADDPuVendors: 50613,
+  ADDRetailInvoice: 54604,
+  ADDClient: 51611,
+  ADDSalesTransaction: 51612,
+  ADDSalesOrder: 51613,
+  ADDSalesQuotations: 51614,
+  ADDCorrespondentAgentBranch: 36608,
+  ADDNationalClientMaster: 35601,
+  ADDWorkClientMaster: 35602,
+  ADDClientCorporate: 35603,
 }
