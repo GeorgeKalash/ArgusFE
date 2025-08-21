@@ -642,7 +642,7 @@ const CreditInvoiceForm = ({ recordId, window }) => {
               baseAmount: curToBase.toFixed(2)
             })
           } else {
-            stackError({ message: `${labels.rateRange} ${minRate}-${maxRate} ${labels.range}` })
+            stackError({ message: `${nv} ${labels.invalidRange} [${minRate}-${maxRate}]` })
             update({ exRate: '', amount: 0, baseAmount: 0 })
           }
         }
