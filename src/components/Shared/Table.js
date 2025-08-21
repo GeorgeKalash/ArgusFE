@@ -665,7 +665,7 @@ const Table = ({
     ({ data }) => {
       const imageUrl = data?.[column.field]
 
-      return <img src={imageUrl} alt='' width={70} />
+      return <img src={imageUrl ?? '/images/emptyPhoto.jpg'} alt='' width={70} />
     }
 
   const columnDefs = [

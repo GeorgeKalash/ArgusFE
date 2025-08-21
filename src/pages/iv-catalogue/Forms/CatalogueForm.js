@@ -13,18 +13,17 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function CatalogueForm({ labels, maxAccess, record }) {
   const { getRequest } = useContext(RequestsContext)
-  const { recordId, itemId, name, sku } = record
+  const { itemId, name, sku } = record
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId: itemId,
       itemId,
       name,
       sku,
       data: []
     },
-    maxAccess,
-    validateOnChange: true
+    maxAccess
   })
 
   useEffect(() => {
@@ -40,13 +39,13 @@ export default function CatalogueForm({ labels, maxAccess, record }) {
             ...item,
             committed: item?.committed ?? 0,
             ordered: item?.ordered ?? 0,
-            onhand: parseFloat(item?.onhand).toFixed(3) ?? 0
+            onhand: item?.onhand ?? 0
           }))
         }
 
         formik.setValues({
           data: res,
-          recordId,
+          recordId: itemId,
           itemId,
           name,
           sku
@@ -90,6 +89,7 @@ export default function CatalogueForm({ labels, maxAccess, record }) {
       field: 'onhand',
       headerName: labels.onHand,
       flex: 1,
+      decimal: 3,
       type: 'number'
     },
     {
@@ -120,7 +120,7 @@ export default function CatalogueForm({ labels, maxAccess, record }) {
       resourceId={ResourceIds.Catalogue}
       form={formik}
       maxAccess={maxAccess}
-      editMode={true}
+      editMode={!!itemId}
       infoVisible={false}
       actions={actions}
       isInfo={false}
@@ -153,7 +153,7 @@ export default function CatalogueForm({ labels, maxAccess, record }) {
         </Fixed>
         <Grow>
           <Table
-            name={'catalogueTable'}
+            name='catalogueTable'
             columns={columns}
             gridData={formik.values.data}
             rowId={['recordId']}
