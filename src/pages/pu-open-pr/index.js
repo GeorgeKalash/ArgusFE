@@ -215,7 +215,7 @@ const OpenPurchaseRequisition = () => {
         const { orderNow, balance } = newRow
         const value = orderNow <= balance ? orderNow : balance
 
-        update({ orderNow: value })
+        update({ orderNow: value || 0 })
       }
     }
   ]
@@ -251,12 +251,6 @@ const OpenPurchaseRequisition = () => {
     }))
 
     formik.setFieldValue('items', itemsValue)
-  }
-
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
   }
 
   const actions = [

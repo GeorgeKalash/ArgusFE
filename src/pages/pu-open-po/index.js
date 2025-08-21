@@ -251,17 +251,11 @@ const OpenPurchaseOrder = () => {
     }
   ]
 
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
-  }
-
   const actions = [
     {
       key: 'SHP',
       condition: true,
-      onClick: handleSubmit,
+      onClick: () => formik.handleSubmit(),
       disabled: !vendorId || !siteId
     }
   ]
