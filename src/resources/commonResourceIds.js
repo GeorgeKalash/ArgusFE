@@ -23,5 +23,9 @@ export const commonResourceIds = [
   ResourceIds.Printing,
   ResourceIds.Worksheet,
   ResourceIds.PurchaseQuotations,
-  ResourceIds.PurchaseTransactions
+  ResourceIds.PurchaseTransactions,
+  ResourceIds.PaymentOrder,
+  ResourceIds.PaymentVouchers,
+  ResourceIds.PaymentVoucherExpenses,
+  ResourceIds.PaymentOrderExpenses
 ]

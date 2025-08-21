@@ -96,7 +96,7 @@ const ComponentBOM = ({ store, labels }) => {
     openForm(obj)
   }
 
-  const maxSeqNo = data ? data?.list?.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
+  const maxSeqNo = data ? data.list?.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   function openForm(obj) {
     stack({

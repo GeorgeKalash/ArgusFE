@@ -15,7 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -149,18 +148,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     toast.success(platformLabels.Unposted)
     refetchForm(res?.recordId)
     invalidate()
-  }
-
-  async function setDefaults(dtId) {
-    if (dtId) {
-      const { record } = await getRequest({
-        extension: FinancialRepository.FIDocTypeDefaults.get,
-        parameters: `_dtId=${dtId}`
-      })
-
-      formik.setFieldValue('header.siteId', record?.siteId || null)
-      formik.setFieldValue('header.plantId', record?.plantId || null)
-    }
   }
 
   function getFilteredMetal(metalId) {
@@ -345,10 +332,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       })
     }
   }
-
-  useEffect(() => {
-    setDefaults(formik.values?.header?.dtId)
-  }, [formik.values.header.dtId])
 
   useEffect(() => {
     ;(async function () {
