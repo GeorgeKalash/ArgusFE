@@ -361,7 +361,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                         },
                         {
                           component: 'textfield',
-                          label: labels.reference,
+                          label: labels.cellNumber,
                           name: 'reference',
                           props: {
                             maxLength: 20,
