@@ -196,8 +196,7 @@ const CreditOrderForm = ({ recordId, window }) => {
     stack({
       Component: CreditInvoiceForm,
       props: {
-        recordId: res?.recordId,
-        plantId
+        recordId: res?.recordId
       },
       width: 900,
       height: 600,
@@ -205,17 +204,21 @@ const CreditOrderForm = ({ recordId, window }) => {
     })
   }
 
-  const totalCUR = formik.values.rows.reduce((curSum, row) => {
-    const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
+  const totalCUR = formik?.values?.rows?.length
+    ? formik.values.rows.reduce((curSum, row) => {
+        const curValue = parseFloat(row.amount?.toString().replace(/,/g, '')) || 0
 
-    return parseFloat(curSum + curValue).toFixed(2)
-  }, 0)
+        return curSum + curValue
+      }, 0)
+    : 0
 
-  const totalLoc = formik.values.rows.reduce((locSum, row) => {
-    const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
+  const totalLoc = formik?.values?.rows?.length
+    ? formik.values.rows.reduce((locSum, row) => {
+        const locValue = parseFloat(row.baseAmount?.toString().replace(/,/g, '')) || 0
 
-    return parseFloat(locSum + locValue).toFixed(2)
-  }, 0)
+        return locSum + locValue
+      }, 0)
+    : 0
 
   const getCorrespondentById = async (corId, baseCurrency, plant) => {
     if (!corId) return
@@ -520,15 +523,18 @@ const CreditOrderForm = ({ recordId, window }) => {
       parameters: `_orderId=${orderId}`
     })
 
-    const modifiedList = res.list.map((item, index) => ({
-      ...item,
-      id: index + 1,
-      qty: parseFloat(item?.qty).toFixed(2),
-      amount: parseFloat(item?.amount).toFixed(2),
-      baseAmount: parseFloat(item?.baseAmount).toFixed(2),
-      exRate: parseFloat(item?.exRate).toFixed(7),
-      defaultRate: parseFloat(item?.defaultRate).toFixed(7)
-    }))
+    const modifiedList =
+      res?.list?.length > 0
+        ? res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            qty: parseFloat(item?.qty).toFixed(2),
+            amount: parseFloat(item?.amount).toFixed(2),
+            baseAmount: parseFloat(item?.baseAmount).toFixed(2),
+            exRate: parseFloat(item?.exRate).toFixed(7),
+            defaultRate: parseFloat(item?.defaultRate).toFixed(7)
+          }))
+        : formik.initialValues.rows
 
     return modifiedList
   }
