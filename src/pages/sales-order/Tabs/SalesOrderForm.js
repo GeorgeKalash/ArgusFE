@@ -355,7 +355,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
           basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
           unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
+          upo: ItemConvertPrice?.upo || 0,
           priceType: ItemConvertPrice?.priceType || 1,
           mdAmount: formik.values.initialTdPct ? parseFloat(formik.values.initialTdPct).toFixed(2) : 0,
           qty: 0,
@@ -433,11 +433,14 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        decimalScale: 2
+      },
       async onChange({ row: { update, newRow } }) {
         getFilteredMU(newRow.itemId)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
-        
+
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update({ ...data, baseQty: newRow?.qty * muQty })
       }
@@ -729,7 +732,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 id: index + 1,
                 basePrice: parseFloat(item.basePrice).toFixed(5),
                 unitPrice: parseFloat(item.unitPrice).toFixed(3),
-                upo: parseFloat(item.upo).toFixed(2),
+                upo: item.upo,
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
                 msId: itemInfo?.msId || item.msId,
@@ -783,7 +786,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
-  const getClient = async (clientId) => {
+  const getClient = async clientId => {
     if (!clientId) return
 
     return await getRequest({
@@ -905,8 +908,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       volume: parseFloat(newRow?.volume) || 0,
       weight: parseFloat(newRow?.weight),
       unitPrice: parseFloat(newRow?.unitPrice || 0),
-      upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: parseFloat(newRow?.qty),
+      upo: newRow?.upo,
+      qty: newRow?.qty,
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
@@ -928,17 +931,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
-    
+
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
+      qty: itemPriceRow?.qty,
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
       basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
       unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
-      upo: parseFloat(itemPriceRow?.upo).toFixed(2),
+      upo: itemPriceRow?.upo,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),

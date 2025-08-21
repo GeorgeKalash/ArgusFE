@@ -23,30 +23,40 @@ const formatValue = val => {
     .replace(/(\.\d*?[1-9])0+$/, '$1')
 }
 
-const getFormattedNumber = (inputValue, decimal = 0, round = false, hideLeadingZeros = false) => {
-  const rawValue = hideLeadingZeros ? inputValue : formatValue(inputValue)
-  if (rawValue === undefined || rawValue === null || rawValue === '') return
-  const sanitized = rawValue.toString().replace(/[^0-9.-]/g, '')
-  let [integerPart = '0', decimalPart = ''] = sanitized.split('.')
-  const formattedInt = new Intl.NumberFormat('en-US').format(integerPart)
-  let formattedDec = ''
+const getFormattedNumber = (value, decimal, round = false, hideLeadingZeros = false) => {
+  console.log(value)
+  if (!value && value !== 0) return
 
-  if (decimalPart) {
-    if (round) {
-      const rounded = Number(`0.${decimalPart}`).toFixed(decimal).split('.')[1]
-      formattedDec = `.${hideLeadingZeros ? rounded.replace(/0+$/, '') : rounded}`
+  const sanitizedValue = String(value).replace(/[^0-9.-]/g, '')
+
+  const [integerPart, decimalPart] = sanitizedValue.split('.')
+
+  const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+
+  let formattedValue = value
+
+  if (decimalPart !== undefined) {
+    if (decimal !== undefined) {
+      !round
+        ? (formattedValue = `.${decimalPart.slice(0, decimal)}`)
+        : (formattedValue = `${parseFloat(`${integerPart}.${decimalPart}`).toFixed(decimal)}`)
     } else {
-      let sliced = decimal ? decimalPart.slice(0, decimal) : decimalPart
-      if (!hideLeadingZeros) sliced = sliced.padEnd(decimal, '0')
-      formattedDec = sliced ? `.${sliced}` : ''
-      console.log('hideLeadingZeros two', inputValue)
+      formattedValue = `${formattedIntegerPart}.${decimalPart}`
     }
   }
 
-  let result = `${formattedInt}${formattedDec}`
-  if (decimal && !result.includes('.') && !hideLeadingZeros) result += '.' + '0'.repeat(decimal)
+  const stringValue = String(formattedValue)
 
-  return result.endsWith('.') ? result.slice(0, -1) : result
+  console.log(value, decimalPart)
+  if (!decimal && stringValue?.includes('.') && hideLeadingZeros) formattedValue = formattedValue.replace(/0+$/, '')
+
+  if (decimal !== undefined && decimal >= 0 && !stringValue?.includes('.') && decimalPart) {
+    formattedValue += '.' + '0'.repeat(decimal)
+  }
+
+  formattedValue = stringValue?.endsWith('.') ? formattedValue.slice(0, -1) : formattedValue
+
+  return hideLeadingZeros ? formatValue(formattedValue) : formattedValue
 }
 
 function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
