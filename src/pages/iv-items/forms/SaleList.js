@@ -1,10 +1,7 @@
-import { useContext, useEffect, useState } from 'react'
-import { useWindow } from 'src/windows'
+import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -15,8 +12,10 @@ import { useForm } from 'src/hooks/form.js'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
-import SalesForm from './SalesForm'
 import FormShell from 'src/components/Shared/FormShell'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { DataSets } from 'src/resources/DataSets'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,21 +23,49 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
 
   const { platformLabels } = useContext(ControlContext)
 
-  const { stack } = useWindow()
-
   const { formik } = useForm({
     initialValues: {
-      currencyId: 0,
       defSaleMUId: store.measurementId || '',
       pgId: store.priceGroupId || '',
-      returnPolicyId: store.returnPolicy || ''
+      returnPolicyId: store.returnPolicy || '',
+      items: [
+        {
+          itemId: store.recordId,
+          currencyId: null,
+          plId: null,
+          priceType: '',
+          muId: 0,
+          valueType: '',
+          value: '',
+          priceWithVat: '',
+          minPrice: ''
+        }
+      ]
     },
+    validationSchema: yup.object({
+      items: yup.array().of(
+        yup.object().shape({
+          currencyId: yup.number().required(),
+          plId: yup.number().required(),
+          ptName: yup.string().required(),
+          value: yup.number().required().typeError(),
+          vtName: yup.string().required(),
+          minPrice: yup
+            .number()
+            .nullable()
+            .test(function (value) {
+              const { value: price } = this.parent
 
-    enableReinitialize: true,
+              return value == null || price == null || value <= price
+            })
+        })
+      )
+    }),
     validateOnChange: true,
     onSubmit: async obj => {
       const submissionData = {
         ...formikInitial,
+        recordId,
         defSaleMUId: formik.values.defSaleMUId,
         returnPolicyId: formik.values.returnPolicyId
       }
@@ -47,134 +74,158 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         extension: InventoryRepository.Items.set,
         record: JSON.stringify(submissionData)
       })
+
+      await postRequest({
+        extension: SaleRepository.Sales.set2,
+        record: JSON.stringify({
+          itemId: recordId,
+          items: obj.items.map(item => ({
+            ...item,
+            itemId: recordId
+          }))
+        })
+      })
+
+      toast.success(platformLabels.Updated)
     }
   })
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const response = await getRequest({
-          extension: InventoryRepository.Currency.qry,
-          parameters: `&_itemId=${recordId}`
+        const res = await getRequest({
+          extension: SaleRepository.Sales.qry,
+          parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
         })
-        if (response.list && response.list.length > 0) {
-          formik.setFieldValue('currencyId', response.list[0].currencyId)
-        }
+
+        const modifiedList = res?.list?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        }))
+
+        formik.setFieldValue('items', modifiedList)
       }
     })()
   }, [recordId])
 
-  async function fetchGridData() {
-    if (recordId) {
-      return await getRequest({
-        extension: SaleRepository.Sales.qry,
-        parameters: `&_itemId=${recordId}&_currencyId=${formik.values.currencyId || 0}`
-      })
-    }
-  }
-
-  const {
-    query: { data },
-    labels: _labels,
-    invalidate,
-    refetch
-  } = useResourceQuery({
-    enabled: !!recordId,
-    datasetId: ResourceIds.SalesList,
-    queryFn: fetchGridData,
-    endpointId: SaleRepository.Sales.qry
-  })
-
-  useEffect(() => {
-    ;(async () => {
-      await fetchGridData(formik.values.currencyId)
-
-      refetch()
-    })()
-  }, [formik.values.currencyId])
-
   const columns = [
     {
-      field: 'plName',
-      headerName: labels.priceLevel,
-      flex: 1
+      component: 'resourcecombobox',
+      label: labels.priceLevel,
+      name: 'plId',
+      props: {
+        endpointId: SaleRepository.PriceLevel.qry,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'plId' },
+          { from: 'reference', to: 'plRef' },
+          { from: 'name', to: 'plName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
     },
     {
-      field: 'muName',
-      headerName: labels.measure,
-      flex: 1
+      component: 'resourcecombobox',
+      label: labels.measure,
+      name: 'muId',
+      props: {
+        endpointId: InventoryRepository.MeasurementUnit.qry,
+        parameters: `_msId=${store._msId}`,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'muId' },
+          { from: 'reference', to: 'muRef' },
+          { from: 'name', to: 'muName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 2
+      }
     },
     {
-      field: 'ptName',
-      headerName: labels.priceType,
-      flex: 1
+      component: 'resourcecombobox',
+      label: labels.currency,
+      name: 'currencyId',
+      props: {
+        endpointId: SystemRepository.Currency.qry,
+        parameters: `_msId=${store._msId}&_filter=`,
+        valueField: 'recordId',
+        displayField: 'name',
+        mapping: [
+          { from: 'recordId', to: 'currencyId' },
+          { from: 'reference', to: 'currencyRef' },
+          { from: 'name', to: 'currencyName' }
+        ]
+      }
     },
     {
-      field: 'vtName',
-      headerName: labels.valueType,
-      flex: 1
+      component: 'resourcecombobox',
+      label: labels.priceType,
+      name: 'ptName',
+      props: {
+        endpointId: InventoryRepository.Items.pack,
+        valueField: 'recordId',
+        valueField: 'key',
+        displayField: 'value',
+        displayFieldWidth: 2,
+        mapping: [
+          { from: 'key', to: 'priceType' },
+          { from: 'value', to: 'ptName' }
+        ],
+        reducer: res => {
+          const formattedPriceTypes = res?.record?.priceTypes.map(priceTypes => ({
+            key: parseInt(priceTypes.key),
+            value: priceTypes.value
+          }))
+
+          return formattedPriceTypes
+        }
+      }
     },
     {
-      field: 'value',
-      headerName: labels.price,
-      flex: 1
+      component: 'resourcecombobox',
+      label: labels.valueType,
+      name: 'vtName',
+      props: {
+        datasetId: DataSets.VALUE_TYPE,
+        valueField: 'key',
+        displayField: 'value',
+        displayFieldWidth: 2,
+        mapping: [
+          { from: 'key', to: 'valueType' },
+          { from: 'value', to: 'vtName' }
+        ]
+      }
     },
     {
-      field: 'priceWithVat',
-      headerName: labels.pwv,
-      flex: 1
+      component: 'numberfield',
+      label: labels.price,
+      name: 'value',
+      maxLength: 17,
+      decimalScal: 3
     },
     {
-      field: 'minPrice',
-      headerName: labels.minPrice,
-      flex: 1
+      component: 'numberfield',
+      label: labels.minPrice,
+      name: 'minPrice',
+      maxLength: 17,
+      decimalScal: 3
     }
   ]
-
-  const add = () => {
-    if (formik.values.currencyId) {
-      openForm()
-    }
-  }
-
-  const edit = obj => {
-    openForm(obj)
-  }
-
-  function openForm(record) {
-    stack({
-      Component: SalesForm,
-      props: {
-        labels: labels,
-        record: record,
-        plId: record?.plId,
-        muId: record?.muId,
-
-        maxAccess,
-        cId: record?.currencyId || formik.values.currencyId,
-
-        store
-      },
-
-      title: labels.price
-    })
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: SaleRepository.Sales.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
-  }
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Fixed>
-          <GridToolbar onAdd={add} maxAccess={maxAccess} />
-          <Grid container spacing={2} sx={{ pl: 25, mt: -12 }}>
+          <Grid container spacing={2}>
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={store._msId ? InventoryRepository.MeasurementUnit.qry : ''}
@@ -209,26 +260,6 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
                 onClear={() => formik.setFieldValue('pgId', '')}
               />
             </Grid>
-            <Grid item xs={4.01}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Currency.qry}
-                parameters={recordId ? `_itemId=${recordId}` : ''}
-                name='currencyId'
-                label={labels.currency}
-                valueField='currencyId'
-                displayField={['currencyName']}
-                columnsInDropDown={[{ key: 'currencyName', value: 'Name' }]}
-                values={formik.values}
-                maxAccess={maxAccess}
-                required
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.currencyId || 0)
-                }}
-                onClear={() => formik.setFieldValue('currencyId', '')}
-                error={!formik.values.currencyId}
-              />
-            </Grid>
-
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SaleRepository.ReturnPolicy.qry}
@@ -247,16 +278,12 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <Table
-            name='sale'
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values?.items}
+            error={formik.errors?.items}
+            name='items'
             columns={columns}
-            gridData={data}
-            rowId={['plId', 'currencyId']}
-            isLoading={false}
-            pageSize={50}
-            onEdit={edit}
-            onDelete={del}
-            pagination={false}
             maxAccess={maxAccess}
           />
         </Grow>
