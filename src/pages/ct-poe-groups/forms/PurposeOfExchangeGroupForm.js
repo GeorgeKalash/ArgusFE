@@ -25,27 +25,22 @@ export default function PurposeOfExchangeGroupForm({ labels, recordId, maxAccess
     initialValues: {
       recordId: null,
       name: '',
-      flName: '',
+      flName: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
-        invalidate()
-      } catch (error) {}
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
 
@@ -53,16 +48,14 @@ export default function PurposeOfExchangeGroupForm({ labels, recordId, maxAccess
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

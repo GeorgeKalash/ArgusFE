@@ -18,7 +18,6 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     initialValues: {

@@ -172,16 +172,9 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
     return res.record
   }
 
-  const getValueFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return defaultValue ? defaultValue.value : null
-  }
-
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({

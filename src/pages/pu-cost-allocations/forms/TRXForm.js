@@ -89,7 +89,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
     }
   })
 
-  const editMode = !!recordId || formik.values.recordId
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 

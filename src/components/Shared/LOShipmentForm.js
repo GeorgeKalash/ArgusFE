@@ -50,9 +50,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
         }
       ]
     },
-    enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       carrierId: yup.string().required(),
       packages: yup

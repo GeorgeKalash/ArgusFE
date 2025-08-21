@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -7,7 +7,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
@@ -27,40 +26,32 @@ export default function DimValuesForm({ labels, maxAccess, id, dimValue }) {
   const { formik } = useForm({
     initialValues: { id: id, name: '', dimension: formatedRecordId },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      id: yup.string().required(' ')
+      name: yup.string().required(),
+      id: yup.string().required()
     }),
     onSubmit: async obj => {
-      const id = formik.values.id
-
-      const response = await postRequest({
+      await postRequest({
         extension: FinancialRepository.DimensionValue.set,
         record: JSON.stringify(obj)
       })
 
-      if (!id) {
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
-
+      toast.success(!obj.id ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (formik.values.dimension && id) {
-          const res = await getRequest({
-            extension: FinancialRepository.DimensionValue.get,
-            parameters: `_Id=${formik.values.id}&_dimension=${formik.values.dimension}`
-          })
+      if (formik.values.dimension && id) {
+        const res = await getRequest({
+          extension: FinancialRepository.DimensionValue.get,
+          parameters: `_Id=${formik.values.id}&_dimension=${formik.values.dimension}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

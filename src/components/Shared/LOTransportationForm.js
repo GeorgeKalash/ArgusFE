@@ -41,7 +41,6 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
       tripNo: '',
       arrivalCountryId: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       transporter: yup.string().required(),

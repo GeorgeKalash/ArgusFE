@@ -19,7 +19,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function CbBankAccountsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     initialValues: {
@@ -37,44 +36,41 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
       bankName: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      accountNo: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      activeStatus: yup.string().required(' '),
-      bankId: yup.string().required(' ')
+      name: yup.string().required(),
+      accountNo: yup.string().required(),
+      currencyId: yup.string().required(),
+      activeStatus: yup.string().required(),
+      bankId: yup.string().required()
     }),
     onSubmit: async obj => {
-      // const recordId = obj.recordId
-
       const response = await postRequest({
         extension: CashBankRepository.CbBankAccounts.set,
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
       invalidate()
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CbBankAccounts.get,
-            parameters: `_recordId=${recordId}&_type=1`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CbBankAccounts.get,
+          parameters: `_recordId=${recordId}&_type=1`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
-import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
@@ -36,7 +35,6 @@ const NumberRange = () => {
   }, [access])
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup
@@ -91,11 +89,9 @@ const NumberRange = () => {
     await postRequest({
       extension: RemittanceSettingsRepository.CurrencyExchangeMap.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res.statusId) toast.success(platformLabels.Updated)
     })
-      .then(res => {
-        if (res.statusId) toast.success(platformLabels.Updated)
-      })
-      .catch(error => {})
   }
 
   const getCurrenciesExchangeMaps = (currencyId, countryId) => {
@@ -107,42 +103,38 @@ const NumberRange = () => {
       getRequest({
         extension: SystemRepository.Plant.qry,
         parameters: parameters
-      })
-        .then(plants => {
-          const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
-          var parameters = defaultParams
-          getRequest({
-            extension: RemittanceSettingsRepository.CurrencyExchangeMap.qry,
-            parameters: parameters
+      }).then(plants => {
+        const defaultParams = `_currencyId=${currencyId}&_countryId=${countryId}`
+        var parameters = defaultParams
+        getRequest({
+          extension: RemittanceSettingsRepository.CurrencyExchangeMap.qry,
+          parameters: parameters
+        }).then(values => {
+          const valuesMap = values.list.reduce((acc, fee) => {
+            acc[fee.plantId] = fee
+
+            return acc
+          }, {})
+
+          const rows = plants.list.map((plant, index) => {
+            const value = valuesMap[plant.recordId] || 0
+
+            return {
+              id: index + 1,
+              currencyId: currencyId,
+              countryId: countryId,
+              plantId: plant.recordId,
+              plantName: plant.name,
+              exchangeId: value.exchangeId ? value.exchangeId : '',
+              plantRef: plant.reference,
+              exchangeRef: value.exchangeRef ? value.exchangeRef : '',
+              exchangeName: value.exchangeName ? value.exchangeName : ''
+            }
           })
-            .then(values => {
-              const valuesMap = values.list.reduce((acc, fee) => {
-                acc[fee.plantId] = fee
 
-                return acc
-              }, {})
-
-              const rows = plants.list.map((plant, index) => {
-                const value = valuesMap[plant.recordId] || 0
-
-                return {
-                  id: index + 1,
-                  currencyId: currencyId,
-                  countryId: countryId,
-                  plantId: plant.recordId,
-                  plantName: plant.name,
-                  exchangeId: value.exchangeId ? value.exchangeId : '',
-                  plantRef: plant.reference,
-                  exchangeRef: value.exchangeRef ? value.exchangeRef : '',
-                  exchangeName: value.exchangeName ? value.exchangeName : ''
-                }
-              })
-
-              formik.setFieldValue('rows', rows)
-            })
-            .catch(error => {})
+          formik.setFieldValue('rows', rows)
         })
-        .catch(error => {})
+      })
   }
 
   //columns

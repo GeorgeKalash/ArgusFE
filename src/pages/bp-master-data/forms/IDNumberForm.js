@@ -18,7 +18,6 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       rows: []

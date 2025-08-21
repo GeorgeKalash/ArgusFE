@@ -25,7 +25,6 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!recordId
 
   const { formik } = useForm({
     maxAccess,
@@ -95,6 +94,8 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   const filterIdCategory = async categId => {
     const res = await getRequest({

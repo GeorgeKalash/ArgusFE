@@ -44,49 +44,6 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
 
-  const [initialValues, setInitialData] = useState({
-    recordId: recordId || null,
-    currencyId: '',
-    currencyRef: '',
-    date: new Date(),
-    functionId: SystemFunction.CurrencyCreditOrderPurchase,
-    deliveryDate: new Date(),
-    reference: '',
-    dtId: '',
-    plantId: parseInt(plantId),
-    corId: '',
-    corRef: '',
-    corName: '',
-    wip: 1,
-    status: 1,
-    releaseStatus: '',
-    notes: '',
-    amount: '',
-    baseAmount: '',
-    exRate: '',
-    rateCalcMethod: '',
-    rateType: '',
-    isTFRClicked: false,
-    rows: [
-      {
-        id: 1,
-        orderId: '',
-        seqNo: '',
-        currencyId: '',
-        qty: '',
-        rateCalcMethod: '',
-        exRate: '',
-        minRate: '',
-        maxRate: '',
-        defaultRate: '',
-        amount: '',
-        baseAmount: '',
-        notes: '',
-        goc: false
-      }
-    ]
-  })
-
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditOrder,
     editMode: !!recordId
@@ -107,8 +64,48 @@ const CreditOrderForm = ({ recordId, plantId, userData, window }) => {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: recordId || null,
+      currencyId: '',
+      currencyRef: '',
+      date: new Date(),
+      functionId: SystemFunction.CurrencyCreditOrderPurchase,
+      deliveryDate: new Date(),
+      reference: '',
+      dtId: '',
+      plantId: parseInt(plantId),
+      corId: '',
+      corRef: '',
+      corName: '',
+      wip: 1,
+      status: 1,
+      releaseStatus: '',
+      notes: '',
+      amount: '',
+      baseAmount: '',
+      exRate: '',
+      rateCalcMethod: '',
+      rateType: '',
+      isTFRClicked: false,
+      rows: [
+        {
+          id: 1,
+          orderId: '',
+          seqNo: '',
+          currencyId: '',
+          qty: '',
+          rateCalcMethod: '',
+          exRate: '',
+          minRate: '',
+          maxRate: '',
+          defaultRate: '',
+          amount: '',
+          baseAmount: '',
+          notes: '',
+          goc: false
+        }
+      ]
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

@@ -79,7 +79,6 @@ const Postoutwards = () => {
       toDate: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
       const checkedOwoIds = dataTable.list?.filter(row => row.checked).map(row => row.recordId)

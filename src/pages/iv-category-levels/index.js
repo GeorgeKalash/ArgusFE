@@ -42,7 +42,6 @@ const CategoryLevels = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       items: yup.array().of(

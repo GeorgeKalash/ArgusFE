@@ -23,7 +23,6 @@ export default function EndSiteCountForm({ _labels, access }) {
       notes: '',
       status: ''
     },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -31,24 +30,22 @@ export default function EndSiteCountForm({ _labels, access }) {
       siteId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        if (obj.status === 3) {
-          await postRequest({
-            extension: SCRepository.Sites.reopen,
-            record: JSON.stringify(obj)
-          })
-          toast.success(platformLabels.Saved)
-        } else {
-          await postRequest({
-            extension: SCRepository.Sites.end,
-            record: JSON.stringify(obj)
-          })
-          
-          toast.success(platformLabels.Saved)
-        }
+      if (obj.status === 3) {
+        await postRequest({
+          extension: SCRepository.Sites.reopen,
+          record: JSON.stringify(obj)
+        })
+        toast.success(platformLabels.Saved)
+      } else {
+        await postRequest({
+          extension: SCRepository.Sites.end,
+          record: JSON.stringify(obj)
+        })
 
-        formik.resetForm()
-      } catch (error) {}
+        toast.success(platformLabels.Saved)
+      }
+
+      formik.resetForm()
     }
   })
 

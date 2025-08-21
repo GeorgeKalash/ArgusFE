@@ -50,7 +50,6 @@ const MCDefault = ({ _labels }) => {
   }
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues,
     onSubmit: values => {

@@ -22,7 +22,6 @@ export default function SalesForm({ labels, maxAccess, store }) {
     initialValues: {
       ...store.record
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       tdPct: yup

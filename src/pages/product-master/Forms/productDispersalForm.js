@@ -29,7 +29,6 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
       isDefault: false,
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       productId: yup.string().required(),
@@ -46,20 +45,17 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
 
   const post = async obj => {
     const recordId = obj.recordId
-    const productId = obj.productId ? obj.productId : pId
     await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
-    })
-      .then(res => {
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+    }).then(res => {
+      if (!recordId) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        getGridData(pId)
-        window.close()
-      })
-      .catch(error => {})
+      getGridData(pId)
+      window.close()
+    })
   }
 
   const getDispersalById = id => {

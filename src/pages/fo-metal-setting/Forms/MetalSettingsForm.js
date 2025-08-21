@@ -50,7 +50,6 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
         record: JSON.stringify(obj)
       })
 
-      
       if (!recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', obj.metalId)
@@ -59,7 +58,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
           extension: FoundryRepository.Scrap.qry,
           parameters: `_metalId=${formik.values?.metalId}&_metalColorId=${formik.values?.metalColorId}`
         })
-        
+
         setStore(prevStore => ({
           ...prevStore,
           recordId: formik.values?.metalId,
@@ -77,7 +76,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       window.close()
     }
   })
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

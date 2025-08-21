@@ -64,21 +64,19 @@ const CbCashGroup = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CashBankRepository.CbCashGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CashBankRepository.CbCashGroup.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
   function openForm(recordId) {
     stack({
       Component: CbCashGroupsForms,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         maxAccess: access
       },
       width: 600,
