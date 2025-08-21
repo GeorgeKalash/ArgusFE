@@ -53,7 +53,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const [idNumberOne, setIdNumber] = useState(null)
   const [search, setSearch] = useState(null)
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
   const resetAutoFilled = () => {
@@ -106,11 +106,9 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
     firstName: null,
     lastName: null,
     middleName: null,
-    familyName: null,
     fl_firstName: null,
     fl_lastName: null,
     fl_middleName: null,
-    fl_familyName: null,
     birthDate: null,
     resident: false,
     professionId: null,
@@ -152,18 +150,16 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
     formik.setFieldValue('clientId', res?.record?.clientId)
     formik.setFieldValue('middleName', res?.record?.clientIndividual.middleName)
     formik.setFieldValue('lastName', res?.record?.clientIndividual.lastName)
-    formik.setFieldValue('familyName', res?.record?.clientIndividual.familyName)
     formik.setFieldValue('fl_firstName', res?.record?.clientIndividual.fl_firstName)
     formik.setFieldValue('fl_lastName', res?.record?.clientIndividual.fl_lastName)
     formik.setFieldValue('fl_middleName', res?.record?.clientIndividual.fl_middleName)
-    formik.setFieldValue('fl_familyName', res?.record?.clientIndividual.fl_familyName)
     formik.setFieldValue('birthDate', formatDateFromApi(res?.record?.clientIndividual.birthDate))
     formik.setFieldValue('resident', res?.record?.clientIndividual.isResident)
     formik.setFieldValue('professionId', res?.record?.clientMaster.professionId)
     formik.setFieldValue('sponsorName', res?.record?.clientIndividual.sponsorName)
     formik.setFieldValue('id_type', res?.record?.clientIDView.idtId)
     formik.setFieldValue('nationalityId', res?.record?.clientMaster.nationalityId)
-    formik.setFieldValue('nationalityType', res?.record?.clientIDView.idCountryId === 195 ? 1 : 2)
+    formik.setFieldValue('nationalityType', res?.record?.clientMaster.nationalityId === 195 ? 1 : 2)
     formik.setFieldValue('cellPhone', res?.record?.clientMaster.cellPhone)
     formik.setFieldValue('expiryDate', formatDateFromApi(res?.record?.clientIDView.idExpiryDate))
 
@@ -172,29 +168,29 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
     return res.record
   }
 
-  const getValueFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return defaultValue ? defaultValue.value : null
-  }
-
   const { formik } = useForm({
     maxAccess,
     initialValues,
     enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
+    validate: values => {
+      const errors = {}
+      const total = checkAmountValidation(values.operations)
+      if (total && !values.id_type) errors['id_type'] = ' '
+      if (total && !values.idNo) errors['idNo'] = ' '
+      if (total && !values.birthDate) errors['birthDate'] = ' '
+      if (total && !values.firstName) errors['firstName'] = ' '
+      if (total && !values.lastName) errors['lastName'] = ' '
+      if (total && !values.expiryDate) errors['expiryDate'] = ' '
+      if (total && !values.nationalityId) errors['nationalityId'] = ' '
+      if (total && !values.cellPhone) errors['cellPhone'] = ' '
+      if (total && !values.professionId) errors['professionId'] = ' '
+
+      return errors
+    },
     validationSchema: yup.object({
       date: yup.string().required(),
-      id_type: yup.number().required(),
-      idNo: yup.number().required(),
-      birthDate: yup.string().required(),
-      firstName: yup.string().required(),
-      lastName: yup.string().required(),
-      expiryDate: yup.string().required(),
-      nationalityId: yup.string().required(),
-      cellPhone: yup.string().required(),
-      professionId: yup.string().required(),
       nationalityType: yup.number().required(),
       operations: yup
         .array()
@@ -285,11 +281,11 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       if (isLastRowMandatoryOnly) {
         operations = values.operations?.filter((item, index) => index !== values.operations.length - 1)
       }
-
       if (
         ((!values?.idNoConfirm && values?.clientId) ||
           (!values?.clientId && !values.cellPhoneConfirm && !values?.idNoConfirm)) &&
-        !editMode
+        !editMode &&
+        values?.idNo !== null
       ) {
         stack({
           Component: ConfirmationOnSubmit,
@@ -319,6 +315,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
           parameters: '_key=ct_minOtp_CIVAmount'
         })
         const clientId = values.clientId || 0
+        console.log(formik.values.amount)
 
         const payload = {
           header: {
@@ -331,7 +328,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
             date: formatDateToApi(values.date),
             functionId: values.functionId,
             plantId: plantId ? plantId : values.plantId,
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             cashAccountId: cashAccountRecord.value,
             poeId: values.purpose_of_exchange,
             wip: values.wip,
@@ -360,22 +357,20 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
             professionId: values.professionId
           },
           clientIndividual: {
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             firstName: values.firstName,
             lastName: values.lastName,
             middleName: values.middleName,
-            familyName: values.familyName,
             fl_firstName: values.fl_firstName,
             fl_lastName: values.fl_lastName,
             fl_middleName: values.fl_middleName,
-            fl_familyName: values.fl_familyName,
             birthDate: formatDateToApi(values.birthDate),
             isResident: values.resident,
             sponsorName: values.sponsorName
           },
           clientID: {
             idNo: values.idNo,
-            clientId,
+            clientId: total < 5000 && !clientId ? -1 : clientId,
             idtId: values.id_type,
             idExpiryDate: formatDateToApi(values.expiryDate),
             idIssueDate: null,
@@ -385,37 +380,39 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
 
           cash:
             formik.values.amount.length > 0 &&
-            formik.values.amount.map(({ id, types, cashAccountId, ...rest }) => ({
-              seqNo: id,
+            formik.values.amount.map(({ seqNo, types, cashAccountId, ...rest }) => ({
+              seqNo,
               cashAccountId: cashAccountRecord.value,
               ...rest
             }))
         }
 
-        const hasKYC = await fetchInfoByKey({ key: values.idNo })
+        if (values.idNo) {
+          const hasKYC = await fetchInfoByKey({ key: values.idNo })
 
-        let totalBaseAmount = ''
-        if (total > baseAmount.value && !recordId) {
-          if (!hasKYC?.clientRemittance) {
-            stackError({
-              message: `You need to create full KYC file for this client.`
-            })
-
-            return
-          }
-        } else {
-          if (hasKYC?.clientId) {
-            const getbase = await getRequest({
-              extension: CTTRXrepository.CurrencyTrading.get3,
-              parameters: `_clientId=${hasKYC.clientId}`
-            })
-            totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
-            if (totalBaseAmount > baseAmount.value && !hasKYC.clientRemittance && !recordId) {
+          let totalBaseAmount = ''
+          if (total > baseAmount.value && !recordId) {
+            if (!hasKYC?.clientRemittance) {
               stackError({
                 message: `You need to create full KYC file for this client.`
               })
 
               return
+            }
+          } else {
+            if (hasKYC?.clientId) {
+              const getbase = await getRequest({
+                extension: CTTRXrepository.CurrencyTrading.get3,
+                parameters: `_clientId=${hasKYC.clientId}`
+              })
+              totalBaseAmount = parseInt(getbase.record.baseAmount) + parseInt(total)
+              if (totalBaseAmount > baseAmount.value && !hasKYC.clientRemittance && !recordId) {
+                stackError({
+                  message: `You need to create full KYC file for this client.`
+                })
+
+                return
+              }
             }
           }
         }
@@ -437,6 +434,16 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       return
     }
   })
+
+  const checkAmountValidation = array => {
+    const total = array.reduce((sumLc, row) => {
+      const curValue = parseFloat(row.lcAmount?.toString()?.replace(/,/g, '')) || 0
+
+      return sumLc + curValue
+    }, 0)
+
+    return total >= 5000 ? true : false
+  }
 
   const emptyRows = formik.values.operations.filter(
     row =>
@@ -533,7 +540,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       formik.setFieldValue('recordId', record.headerView.recordId)
       formik.setFieldValue('reference', record.headerView.reference)
       formik.setFieldValue('nationalityId', record.headerView.nationalityId)
-      formik.setFieldValue('nationalityType', record.headerView.nationalityType)
+      formik.setFieldValue('nationalityType', record.headerView.nationalityId === 195 ? 1 : 2)
       formik.setFieldValue(
         'operations',
         record.items.map(({ seqNo, ...rest }) => ({
@@ -562,11 +569,9 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       formik.setFieldValue('firstName', record.clientIndividual?.firstName)
       formik.setFieldValue('lastName', record.clientIndividual?.lastName)
       formik.setFieldValue('middleName', record.clientIndividual?.middleName)
-      formik.setFieldValue('familyName', record.clientIndividual?.familyName)
       formik.setFieldValue('fl_firstName', record.clientIndividual?.fl_firstName)
       formik.setFieldValue('fl_lastName', record.clientIndividual?.fl_lastName)
       formik.setFieldValue('fl_middleName', record.clientIndividual?.fl_middleName)
-      formik.setFieldValue('fl_familyName', record.clientIndividual?.fl_familyName)
       formik.setFieldValue('birthDate', formatDateFromApi(record?.clientIndividual?.birthDate))
       formik.setFieldValue('resident', record?.clientIndividual?.isResident)
       formik.setFieldValue('professionId', record.clientMaster?.professionId)
@@ -682,18 +687,16 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       formik.setFieldValue('firstName', clientInfo.clientIndividual.firstName)
       formik.setFieldValue('middleName', clientInfo.clientIndividual.middleName)
       formik.setFieldValue('lastName', clientInfo.clientIndividual.lastName)
-      formik.setFieldValue('familyName', clientInfo.clientIndividual.familyName)
       formik.setFieldValue('fl_firstName', clientInfo.clientIndividual.fl_firstName)
       formik.setFieldValue('fl_lastName', clientInfo.clientIndividual.fl_lastName)
       formik.setFieldValue('fl_middleName', clientInfo.clientIndividual.fl_middleName)
-      formik.setFieldValue('fl_familyName', clientInfo.clientIndividual.fl_familyName)
       formik.setFieldValue('birthDate', formatDateFromApi(clientInfo.clientIndividual.birthDate))
       formik.setFieldValue('resident', clientInfo.clientIndividual.isResident)
       formik.setFieldValue('sponsorName', clientInfo.clientIndividual.sponsorName)
       formik.setFieldValue('expiryDate', formatDateFromApi(clientInfo.client.expiryDate))
       formik.setFieldValue('professionId', clientInfo.client.professionId)
       formik.setFieldValue('nationalityId', clientInfo.client.nationalityId)
-      formik.setFieldValue('nationalityType', clientInfo.client.nationalityType)
+      formik.setFieldValue('nationalityType', clientInfo.client.nationalityId === 195 ? 1 : 2)
       formik.setFieldValue('cellPhone', clientInfo.client.cellPhone)
 
       setInfoAutoFilled(true)
@@ -759,7 +762,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       key: 'Locked',
       condition: true,
       onClick: onPost,
-      disabled: isPosted
+      disabled: !editMode || isPosted
     },
     {
       key: 'Close',
@@ -777,7 +780,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
       key: 'OTP',
       condition: true,
       onClick: viewOTP,
-      disabled: isPosted && !isReleased
+      disabled: !editMode || (isPosted && !isReleased)
     },
     {
       key: 'Approval',
@@ -850,11 +853,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                       values={formik.values}
                       readOnly
                       onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('status', newValue?.key)
-                        } else {
-                          formik.setFieldValue('status', '')
-                        }
+                        formik && formik.setFieldValue('status', newValue?.key)
                       }}
                       maxAccess={maxAccess}
                       error={formik.touched.status && Boolean(formik.errors.status)}
@@ -908,16 +907,13 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                       datasetId={DataSets.NATIONALITY}
                       name='nationalityType'
                       label={labels.nationalityType}
+                      readOnly={editMode || isClosed || idInfoAutoFilled}
                       valueField='key'
                       displayField='value'
                       values={formik.values}
                       required
                       onChange={(event, newValue) => {
-                        if (newValue) {
-                          formik.setFieldValue('nationalityType', newValue?.key)
-                        } else {
-                          formik.setFieldValue('nationalityType', '')
-                        }
+                        formik && formik.setFieldValue('nationalityType', newValue?.key || null)
                       }}
                       maxAccess={maxAccess}
                       error={formik.touched.nationalityType && Boolean(formik.errors.nationalityType)}
@@ -949,7 +945,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onBlur={e => {
                             const value = e.target.value
@@ -977,7 +973,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           name='birthDate'
                           label={labels.birthDate}
                           value={formik.values?.birthDate}
-                          required={true}
+                          required={total >= 5000}
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('birthDate', '')}
                           error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
@@ -1009,7 +1005,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           }}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           values={formik.values}
-                          required
+                          required={total >= 5000}
                           maxAccess={maxAccess}
                           error={formik.touched.id_type && Boolean(formik.errors.id_type)}
                         />
@@ -1053,7 +1049,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           name='expiryDate'
                           label={labels.expiryDate}
                           value={formik.values?.expiryDate}
-                          required={true}
+                          required={total >= 5000}
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('expiryDate', '')}
                           error={formik.touched.expiryDate && Boolean(formik.errors.expiryDate)}
@@ -1065,13 +1061,13 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                   </Grid>
                   <Grid item xs={8}>
                     <Grid container spacing={2}>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='firstName'
                           label={labels.firstName}
                           value={formik.values.firstName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onChange={formik.handleChange}
                           forceUpperCase={true}
@@ -1080,7 +1076,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='middleName'
                           label={labels.middleName}
@@ -1094,28 +1090,13 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='familyName'
-                          label={labels.familyName}
-                          value={formik.values.familyName}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          maxLength='20'
-                          onChange={formik.handleChange}
-                          forceUpperCase={true}
-                          onClear={() => formik.setFieldValue('familyName', '')}
-                          error={formik.touched.familyName && Boolean(formik.errors.familyName)}
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='lastName'
                           label={labels.lastName}
                           value={formik.values.lastName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          required
+                          required={total >= 5000}
                           maxLength='20'
                           onChange={formik.handleChange}
                           forceUpperCase={true}
@@ -1126,7 +1107,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                       </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.fl_firstName}
@@ -1141,7 +1122,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.fl_middleName}
@@ -1156,22 +1137,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_familyName'
-                              label={labels.fl_familyName}
-                              value={formik.values.fl_familyName}
-                              readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                              dir='rtl'
-                              language='arabic'
-                              onChange={formik.handleChange}
-                              forceUpperCase={true}
-                              onClear={() => formik.setFieldValue('fl_familyName', '')}
-                              error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.fl_lastName}
@@ -1202,7 +1168,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                             setShowAsPasswordPhone(false)
                           }}
                           maxLength='20'
-                          required
+                          required={total >= 5000}
                           onClear={() => formik.setFieldValue('cellPhone', '')}
                           error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
                           maxAccess={maxAccess}
@@ -1216,22 +1182,18 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           label={labels.nationalityId}
                           valueField='recordId'
                           displayField={['reference', 'name', 'flName']}
+                          values={formik.values}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
+                          required={total >= 5000}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('nationalityId', newValue?.key)
-                            } else {
-                              formik.setFieldValue('nationalityId', '')
-                            }
+                            formik && formik.setFieldValue('nationalityId', newValue?.recordId)
                           }}
-                          readOnly={editMode || isClosed || idInfoAutoFilled}
-                          values={formik.values}
-                          required
                           maxAccess={maxAccess}
+                          readOnly={editMode || isClosed || idInfoAutoFilled}
                           error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
                         />
                       </Grid>
@@ -1242,20 +1204,16 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           label={labels.professionId}
                           valueField='recordId'
                           displayField={['reference', 'name']}
+                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
+                          values={formik.values}
+                          required={total >= 5000}
                           columnsInDropDown={[
                             { key: 'reference', value: 'Reference' },
                             { key: 'name', value: 'Name' }
                           ]}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('professionId', newValue?.key)
-                            } else {
-                              formik.setFieldValue('professionId', '')
-                            }
+                            formik && formik.setFieldValue('professionId', newValue?.key)
                           }}
-                          readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
-                          values={formik.values}
-                          required
                           maxAccess={maxAccess}
                           error={formik.touched.professionId && Boolean(formik.errors.professionId)}
                         />
@@ -1300,11 +1258,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                             { key: 'name', value: 'Name' }
                           ]}
                           onChange={(event, newValue) => {
-                            if (newValue) {
-                              formik.setFieldValue('purpose_of_exchange', newValue?.key)
-                            } else {
-                              formik.setFieldValue('purpose_of_exchange', '')
-                            }
+                            formik && formik.setFieldValue('purpose_of_exchange', newValue?.key)
                           }}
                           readOnly={editMode || isClosed}
                           values={formik.values}
@@ -1347,6 +1301,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                   height={175}
                   disabled={isClosed}
                   maxAccess={maxAccess}
+                  allowDelete={!editMode}
                   name='operations'
                   bg={
                     formik.values.functionId &&
@@ -1542,7 +1497,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         viewPosButtons: formik.values.wip === 2
                       }}
                       amount={total}
-                      disabled={isClosed}
+                      disabled={editMode || isClosed}
                     />
                   </Grid>
                   <Grid item xs={3}>
