@@ -345,6 +345,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         }
 
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
         getFilteredMU(newRow?.itemId)
 
         update({
@@ -358,8 +360,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           mdAmount: formik.values.initialTdPct ? parseFloat(formik.values.initialTdPct).toFixed(2) : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: filteredMeasurements?.[0]?.reference,
-          muId: filteredMeasurements?.[0]?.recordId,
+          muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
+          muId: defaultMu?.recordId || filteredMeasurements?.[0]?.recordId,
           muQty: filteredMeasurements?.[0]?.qty,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
@@ -432,14 +434,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        getFilteredMU(newRow.itemId)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
-        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         const muQty = newRow?.muQty ?? filteredItems?.qty
-
-        update({
-          ...data,
-          baseQty: newRow?.qty * muQty
-        })
+        
+        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
+        update({ ...data, baseQty: newRow?.qty * muQty })
       }
     },
     {

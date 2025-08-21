@@ -133,14 +133,9 @@ const FiPaymentVouchers = () => {
     stack({
       Component: FiPaymentVoucherExpensesForm,
       props: {
-        labels: _labels,
         recordId,
-        plantId,
-        maxAccess: access
+        plantId
       },
-      width: 1300,
-      height: 700,
-      title: _labels.paymentVoucherExpenses
     })
   }
 

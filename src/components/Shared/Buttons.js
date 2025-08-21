@@ -600,5 +600,11 @@ export const getButtons = platformLabels => [
     image: 'undo-arrow-icon.png',
     color: '#231f20',
     main: false
+  },
+  {
+    key: 'PV',
+    label: platformLabels.PV,
+    color: '#231f20',
+    main: false
   }
 ]

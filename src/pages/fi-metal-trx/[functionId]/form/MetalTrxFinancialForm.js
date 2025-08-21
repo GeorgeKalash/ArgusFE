@@ -134,7 +134,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   })
 
-  const getPayload = (obj) => {
+  const getPayload = obj => {
     const { items: originalItems, ...header } = obj
 
     const updatedHeader = {
@@ -211,7 +211,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     const { items, ...restValues } = formik.values
 
     const res = await postRequest({
-      extension: FinancialRepository.MetalTrx.unpost,
+      extension:
+        functionId === SystemFunction.MetalReceiptVoucher
+          ? FinancialRepository.MetalReceiptVoucher.unpost
+          : FinancialRepository.MetalPaymentVoucher.unpost,
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
