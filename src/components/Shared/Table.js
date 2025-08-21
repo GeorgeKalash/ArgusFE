@@ -660,6 +660,14 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
+  const imageRenderer =
+    column =>
+    ({ data }) => {
+      const imageUrl = data?.[column.field]
+
+      return <img src={imageUrl ?? '/images/emptyPhoto.jpg'} alt='' width={70} />
+    }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -690,7 +698,14 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.isTree ? IndentedCellRenderer : column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer:
+        column.type === 'image'
+          ? imageRenderer(column)
+          : column.isTree
+          ? IndentedCellRenderer
+          : column.cellRenderer
+          ? column.cellRenderer
+          : FieldWrapper
     }))
   ]
 
@@ -858,6 +873,8 @@ const Table = ({
     }
   }
 
+  const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+
   return (
     <VertLayout>
       <Grow>
@@ -910,7 +927,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            rowHeight={35}
+            rowHeight={hasImageColumn ? 70 : 35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
