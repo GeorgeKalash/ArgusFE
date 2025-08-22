@@ -77,7 +77,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
         vendorId: null,
         currencyId: defCurrencyId || null,
         siteId: defSiteId || null,
-        description: '',
+        description: null,
         status: 1,
         wip: 1,
         isVattable: false,
@@ -999,6 +999,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     name='header.plantId'
                     label={labels.plant}
                     readOnly={isPosted}
+                    form={formik}
                     required
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },

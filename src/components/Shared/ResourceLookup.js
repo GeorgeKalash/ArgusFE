@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect, useRef } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
@@ -85,6 +85,21 @@ export const ResourceLookup = ({
       : formObject != null
       ? formObject[name]
       : form.values[name])
+
+  console.log('in', form.values, formObject)
+
+  const fieldValue = formObject != null ? formObject[name] : form.values[name]
+  const lastValue = useRef(fieldValue)
+
+  useEffect(() => {
+    console.log('in', fieldValue, lastValue.current)
+    const newValue = formObject != null ? formObject[name] : form.values[name]
+    if (newValue !== lastValue.current) {
+      lastValue.current = newValue
+
+      form.setFieldTouched(name, true)
+    }
+  }, [fieldValue])
 
   const getErrorState = () => {
     if (!form || !errorCheck) return false

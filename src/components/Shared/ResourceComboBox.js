@@ -19,6 +19,7 @@ export default function ResourceComboBox({
   reducer = res => res?.list,
   refresh,
   setData,
+  form,
   ...rest
 }) {
   const { store: data } = rest
@@ -103,6 +104,12 @@ export default function ResourceComboBox({
       : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
     value ||
     ''
+
+  useEffect(() => {
+    if (_value) {
+      form?.setFieldTouched(name, true)
+    }
+  }, [_value])
 
   const onBlur = (e, HighlightedOption, options, allowSelect) => {
     if (allowSelect) {

@@ -120,7 +120,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
     }
   })
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (formik.submitCount > 0) {
       hasSubmittedOnce.current = true
     }
@@ -128,17 +128,18 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   const originalSetFieldValue = formik.setFieldValue
   formik.setFieldValue = async (field, value, shouldValidate) => {
-    await originalSetFieldValue(field, value, shouldValidate)
+    originalSetFieldValue(field, value, shouldValidate)
 
-    if (value) await formik.setFieldTouched(field, false)
+    console.log('in field', field, !!formik.touched[field])
+    if (value && !!formik.touched[field] === true) formik.setFieldTouched(field, false)
     else {
       if (hasSubmittedOnce.current) {
-        await formik.setFieldTouched(field, true)
+        formik.setFieldTouched(field, true)
       } else {
-        await formik.setFieldTouched(field, false)
+        formik.setFieldTouched(field, false)
       }
     }
-  }
+  }*/ //3 ways
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 
