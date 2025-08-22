@@ -30,7 +30,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     ptName: row => row?.ptName,
     value: row => row?.value,
     vtName: row => row?.vtName,
-    minPrice: row => row?.minPrice <= row?.value
+    minPrice: row => !row.value || row?.minPrice <= row?.value
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -41,41 +41,22 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       returnPolicyId: store.returnPolicy || '',
       items: [
         {
+          id: 1,
           itemId: store.recordId,
           currencyId: null,
           plId: null,
           priceType: '',
           muId: 0,
           valueType: '',
-          value: '',
-          priceWithVat: '',
-          minPrice: ''
+          value: null,
+          minPrice: null
         }
       ]
     },
     conditionSchema: ['items'],
     validationSchema: yup.object({
-      items: yup.array().of(schema),
-
-      // items: yup.array().of(
-      //   yup.object().shape({
-      //     currencyId: yup.number().required(),
-      //     plId: yup.number().required(),
-      //     ptName: yup.string().required(),
-      //     value: yup.number().required().typeError(),
-      //     vtName: yup.string().required(),
-      //     minPrice: yup
-      //       .number()
-      //       .nullable()
-      //       .test(function (value) {
-      //         const { value: price } = this.parent
-
-      //         return value == null || price == null || value <= price
-      //       })
-      //   })
-      // )
+      items: yup.array().of(schema)
     }),
-    validateOnChange: true,
     onSubmit: async obj => {
       const submissionData = {
         ...formikInitial,
@@ -93,10 +74,12 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         extension: SaleRepository.Sales.set2,
         record: JSON.stringify({
           itemId: recordId,
-          items: obj.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map(item => ({
-            ...item,
-            itemId: recordId
-          }))
+          items: obj.items
+            .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+            .map(item => ({
+              ...item,
+              itemId: recordId
+            }))
         })
       })
 
@@ -104,23 +87,44 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     }
   })
 
+  const getItems = async recordId => {
+    if (!recordId) return
+
+    const response = await getRequest({
+      extension: SaleRepository.Sales.qry,
+      parameters: `&_itemId=${recordId}&_currencyId=${0}`
+    })
+
+    return response?.list?.length > 0
+      ? response.list.map((item, index) => {
+          return {
+            ...item,
+            id: index + 1
+          }
+        })
+      : formik.values.items.map((row, index) => ({
+          ...row,
+          id: row.id ?? index
+        }))
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: SaleRepository.Sales.qry,
-          parameters: `&_itemId=${recordId}&_currencyId=${0}`
+        const items = await getItems(recordId)
+        formik.setValues({
+          ...formik.values,
+          items
         })
-
-        const modifiedList = res?.list?.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }))
-
-        formik.setFieldValue('items', modifiedList)
       }
     })()
   }, [recordId])
+
+  useEffect(() => {
+    formik.setFieldValue('defSaleMUId', store.measurementId || '')
+    formik.setFieldValue('pgId', store.priceGroupId || '')
+    formik.setFieldValue('returnPolicyId', store.returnPolicy || '')
+  }, [store.measurementId, store.priceGroupId, store.returnPolicy])
 
   const columns = [
     {
@@ -223,15 +227,21 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       component: 'numberfield',
       label: labels.price,
       name: 'value',
-      maxLength: 17,
-      decimalScal: 3
+      props: {
+        allowNegative: false,
+        maxLength: 17,
+        decimalScale: 3
+      }
     },
     {
       component: 'numberfield',
       label: labels.minPrice,
       name: 'minPrice',
-      maxLength: 17,
-      decimalScal: 3
+      props: {
+        allowNegative: false,
+        maxLength: 17,
+        decimalScale: 3
+      }
     }
   ]
 
@@ -297,6 +307,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             value={formik.values?.items}
             error={formik.errors?.items}
             name='items'
+            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}
           />
