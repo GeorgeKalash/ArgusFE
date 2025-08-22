@@ -182,6 +182,7 @@ export const PurchaseRepository = {
     generate: service + 'genQTN'
   },
   GeneratePOPRPack: {
-    generate: service + 'genPO'
+    gen: service + 'genPO',
+    gen2: service + 'gen2PO'
   }
 }

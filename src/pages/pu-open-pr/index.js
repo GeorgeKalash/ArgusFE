@@ -1,6 +1,5 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -56,7 +55,6 @@ const OpenPurchaseRequisition = () => {
     maxAccess: access,
     initialValues: {
       recordId: null,
-      dtId: null,
       groupId: 0,
       departmentId: 0,
       categoryId: 0,
@@ -121,7 +119,7 @@ const OpenPurchaseRequisition = () => {
       balance: item.qty - item.orderedQty
     }))
 
-    formik.setFieldValue('items', res)
+    formik.setFieldValue('items', res || [])
   }
 
   const isCheckedAll = formik.values.items?.length > 0 && formik.values.items?.every(item => item?.isChecked)
@@ -201,13 +199,16 @@ const OpenPurchaseRequisition = () => {
       component: 'numberfield',
       label: labels.balance,
       name: 'balance',
-      props: { readOnly: true, decimalScale: 2 }
+      props: { readOnly: true }
     },
     {
       component: 'numberfield',
       label: labels.genQty,
       name: 'orderNow',
       updateOn: 'blur',
+      props: {
+        allowNegative: false
+      },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.isChecked }
       },
@@ -281,8 +282,7 @@ const OpenPurchaseRequisition = () => {
                   name='categoryId'
                   label={labels.category}
                   valueField='recordId'
-                  displayField={'name'}
-                  displayFieldWidth={1}
+                  displayField='name'
                   values={formik?.values}
                   maxAccess={access}
                   onChange={(event, newValue) => {
@@ -353,7 +353,6 @@ const OpenPurchaseRequisition = () => {
                     { key: 'name', value: 'Name' }
                   ]}
                   values={formik.values}
-                  required
                   maxAccess={access}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('currencyId', newValue?.recordId || 0)
@@ -365,20 +364,14 @@ const OpenPurchaseRequisition = () => {
                 <ResourceLookup
                   endpointId={PurchaseRepository.PurchaseRequisition.snapshot}
                   valueField='reference'
-                  displayField='name'
                   name='prId'
                   label={labels.ref}
                   form={formik}
                   secondDisplayField={false}
-                  displayFieldWidth={2}
                   valueShow='poRef'
                   maxAccess={access}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
+                  columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
                   onChange={async (event, newValue) => {
-                    formik.setFieldValue('poName', newValue?.name || '')
                     formik.setFieldValue('poRef', newValue?.reference || '')
                     formik.setFieldValue('prId', newValue?.recordId || 0)
                   }}
@@ -399,7 +392,7 @@ const OpenPurchaseRequisition = () => {
                   displayField='name'
                   maxAccess={access}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('departmentId', newValue?.recordId || null)
+                    formik.setFieldValue('departmentId', newValue?.recordId || 0)
                   }}
                   error={formik.touched.departmentId && Boolean(formik.errors.departmentId)}
                 />
@@ -417,7 +410,7 @@ const OpenPurchaseRequisition = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('taxId', newValue ? newValue.recordId : '')
+                    formik.setFieldValue('taxId', newValue ? newValue.recordId : null)
                   }}
                   error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                   maxAccess={access}
@@ -430,7 +423,7 @@ const OpenPurchaseRequisition = () => {
                   label={labels.sku}
                   valueField='sku'
                   displayField='name'
-                  valueShow='itemRef'
+                  valueShow='sku'
                   secondValueShow='itemName'
                   form={formik}
                   columnsInDropDown={[
@@ -438,10 +431,9 @@ const OpenPurchaseRequisition = () => {
                     { key: 'name', value: 'Name' }
                   ]}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('itemId', newValue?.recordId || 0)
                     formik.setFieldValue('itemName', newValue?.name || '')
-                    formik.setFieldValue('itemRef', newValue?.sku || '')
                     formik.setFieldValue('sku', newValue?.sku || '')
+                    formik.setFieldValue('itemId', newValue?.recordId || 0)
                   }}
                   displayFieldWidth={2}
                   maxAccess={access}

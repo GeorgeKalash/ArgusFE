@@ -488,7 +488,7 @@ export default function PuQtnForm({ recordId, window }) {
     copy.deliveryDate = copy.deliveryDate ? formatDateToApi(copy.deliveryDate) : null
 
     await postRequest({
-      extension: PurchaseRepository.PurchaseQuotation.toOrder,
+      extension: PurchaseRepository.GeneratePOPRPack.gen2,
       record: JSON.stringify(copy)
     })
 
