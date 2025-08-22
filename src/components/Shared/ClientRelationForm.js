@@ -22,6 +22,7 @@ import { Grow } from './Layouts/Grow'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from '../Inputs/CustomTextField'
 
 export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -75,7 +76,9 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
       expiryDate: null,
       activationDate: new Date(),
       otp: 0,
-      otpVerified: false
+      otpVerified: false,
+      ldtRef: '',
+      ldtId: null
     },
     onSubmit: async values => {
       const data = {
@@ -93,6 +96,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
           props: {
             clientId: formValidation.values.recordId,
             recordId: formValidation.values.recordId,
+            deviceId: values.deviceId,
             values: formValidation.values,
             functionId: SystemFunction.ClientRelation,
             onSuccess: verified
@@ -100,6 +104,8 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
         })
         toast.success('Record Successfully')
       })
+
+      window.close()
     }
   })
 
@@ -127,9 +133,10 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
                 secondValueShow='parentName'
                 form={formik}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('parentId', newValue ? newValue.recordId : 0)
-                  formik.setFieldValue('parentRef', newValue ? newValue.reference : '')
-                  formik.setFieldValue('parentName', newValue ? newValue.name : '')
+                  formik.setFieldValue('parentId', newValue?.recordId || 0)
+                  formik.setFieldValue('parentRef', newValue?.reference || '')
+                  formik.setFieldValue('parentName', newValue?.name || '')
+                  formik.setFieldValue('deviceId', newValue?.cellPhone || '')
                 }}
                 maxAccess={access}
                 readOnly={editMode}
@@ -156,6 +163,35 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
                 }}
                 error={formik.touched.rtId && Boolean(formik.errors.rtId)}
                 readOnly={editMode}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={CurrencyTradingSettingsRepository.MasterDataDTD.qry}
+                name='ldtId'
+                label={_labels.type}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={access}
+                readOnly={editMode}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('ldtId', newValue?.recordId || null)
+                }}
+                error={formik.touched.ldtId && Boolean(formik.errors.ldtId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='ldtRef'
+                label={_labels.ldtRef}
+                value={formik.values.ldtRef}
+                readOnly={editMode}
+                maxAccess={access}
+                maxLength='50'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('ldtRef', '')}
+                error={formik.touched.ldtRef && Boolean(formik.errors.ldtRef)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -187,9 +223,9 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
             </Grid>
             <Grid item xs={12}>
               <CustomCheckBox
-                name='otp'
-                value={formik.values?.otp}
-                onChange={event => formik.setFieldValue('otp', event.target.checked)}
+                name='otpVerified'
+                value={formik.values.otpVerified}
+                onChange={event => formik.setFieldValue('otpVerified', event.target.checked)}
                 label={_labels.otp}
                 maxAccess={access}
                 disabled={true}
