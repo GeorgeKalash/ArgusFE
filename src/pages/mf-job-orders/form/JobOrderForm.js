@@ -288,7 +288,7 @@ export default function JobOrderForm({
         deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
       })
     })
-    toast.success(platformLabels.Post)
+    toast.success(platformLabels.Posted)
     lockRecord({
       recordId: res.recordId,
       reference: formik.values.reference,
@@ -296,9 +296,14 @@ export default function JobOrderForm({
       onSuccess: () => {
         addLockedScreen({
           resourceId: ResourceIds.MFJobOrders,
-          recordId,
+          recordId: res.recordId,
           reference: formik.values.reference
         })
+        refetchForm(res.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          isPosted: true
+        }))
       },
       isAlreadyLocked: name => {
         window.close()
@@ -313,12 +318,8 @@ export default function JobOrderForm({
         })
       }
     })
+
     invalidate()
-    await refetchForm(res.recordId)
-    setStore(prevStore => ({
-      ...prevStore,
-      isPosted: true
-    }))
   }
   async function onWorkFlowClick() {
     stack({
