@@ -86,19 +86,6 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
     openForm(obj.recordId)
   }
 
-  const columns = [
-    {
-      field: 'city',
-      headerName: labels.city,
-      flex: 1
-    },
-    {
-      field: 'street1',
-      headerName: labels.street1,
-      flex: 1
-    }
-  ]
-
   const addressGridData = { ...data, list: (data?.list || []).map(row => row.address) }
 
   return (
@@ -110,7 +97,6 @@ const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
       editAddress={editAddress}
       datasetId={ResourceIds.ADDPuVendors}
       refetch={refetch}
-      columns={columns}
       {...props}
     />
   )

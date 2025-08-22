@@ -11,7 +11,6 @@ const AddressGridTab = ({
   addAddress,
   delAddress,
   editAddress,
-  columns,
   paginationParameters,
   refetch,
   datasetId
@@ -67,7 +66,7 @@ const AddressGridTab = ({
       <Grow>
         <Table
           name='address'
-          columns={columns || tableColumns}
+          columns={tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
           onEdit={editAddress}
