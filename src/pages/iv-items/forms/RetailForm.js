@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, forwardRef, useImperativeHandle } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
-const RetailForm = ({ store, maxAccess }) => {
+const RetailForm = forwardRef(({ store, maxAccess }, ref) => {
   const [data, setData] = useState([])
   const [recordNum, setRecordsNum] = useState(0)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,6 +91,10 @@ const RetailForm = ({ store, maxAccess }) => {
     toast.success(platformLabels.Updated)
   }
 
+  useImperativeHandle(ref, () => ({
+    submit: handleSave
+  }))
+
   return (
     <VertLayout>
       <Grow>
@@ -112,6 +116,6 @@ const RetailForm = ({ store, maxAccess }) => {
       </Fixed>
     </VertLayout>
   )
-}
+})
 
 export default RetailForm

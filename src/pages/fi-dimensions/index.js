@@ -116,10 +116,6 @@ const FiDimensions = () => {
       .catch(error => {})
   }
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   const handleDimCountChange = event => {
     setStagingDimCount(event.target.value)
   }
@@ -144,15 +140,7 @@ const FiDimensions = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.FI_dimensions}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isSavedClear={false}
-      isParentWindow={false}
-      isCleared={false}
-    >
+    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2} xs={6}>

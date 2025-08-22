@@ -14,6 +14,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useError } from 'src/error'
+import FormShell from 'src/components/Shared/FormShell'
 
 const SalesZonesLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -120,19 +121,28 @@ const SalesZonesLevels = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <FormShell
+      resourceId={ResourceIds.SalesZoneLevels}
+      form={formik}
+      maxAccess={access}
+      infoVisible={false}
+      isSavedClear={false}
+      fullSize={true}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

@@ -400,7 +400,7 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           position: 'relative',
-
+          py: 0,
           ...(fullSize
             ? { p: '0 !important' }
             : {
@@ -476,7 +476,7 @@ export default function FormShell({
           clientRelation={clientRelation}
           addClientRelation={addClientRelation}
           resourceId={resourceId}
-          recordId={form.values?.recordId}
+          recordId={form?.values?.recordId}
           previewReport={previewReport}
           visibleClear={visibleClear}
           functionId={functionId}

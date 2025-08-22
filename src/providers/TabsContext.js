@@ -1,4 +1,14 @@
-import React, { createContext, useEffect, useState, useContext } from 'react'
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  isValidElement,
+  cloneElement,
+  Children,
+  useCallback
+} from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -30,10 +40,33 @@ function LoadingOverlay() {
     ></Box>
   )
 }
+
+function injectRefIntoInnermost(el, setRef) {
+  if (!isValidElement(el)) return el
+  const t = el.type
+  const isForwardRef = typeof t === 'object' && t?.$$typeof === Symbol.for('react.forward_ref')
+  if (isForwardRef) return cloneElement(el, { ref: setRef })
+
+  const kids = Children.toArray(el.props?.children)
+  if (kids.length === 1 && isValidElement(kids[0])) {
+    const inner = injectRefIntoInnermost(kids[0], setRef)
+
+    return cloneElement(el, { children: inner })
+  }
+
+  return el
+}
+
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
+
+  const actionRef = useRef(null)
+
+  const setAction = useCallback(api => {
+    actionRef.current = api
+  }, [])
 
   useEffect(() => {
     if (!loading) {
@@ -61,9 +94,34 @@ function CustomTabPanel(props) {
         backgroundColor: 'white'
       }}
       {...other}
+      onKeyDown={e => {
+        const target = e.target
+        const role = target.getAttribute('role') || ''
+        const isSearchField = target.getAttribute('data-search') === 'true'
+
+        if (actionRef.current?.submit) {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault()
+            actionRef.current?.submit()
+          }
+          if (e.key === 'Enter') {
+            if (isSearchField) {
+              return
+            }
+            const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+            const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+            if (!isEqual) {
+              e.preventDefault()
+              actionRef.current?.submit()
+            }
+          }
+        }
+      }}
     >
       {!showOverlay && LoadingOverlay()}
-      {children}
+
+      {injectRefIntoInnermost(children, setAction)}
     </Box>
   )
 }

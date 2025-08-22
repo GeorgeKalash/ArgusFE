@@ -132,15 +132,7 @@ const SystemFunctionIntegration = () => {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SystemFunctionIntegrations}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isSavedClear={false}
-      fullSize={true}
-      isCleared={false}
-    >
+    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
       <VertLayout>
         <Grow>
           <DataGrid

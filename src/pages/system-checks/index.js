@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
@@ -15,7 +15,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const SystemChecks = () => {
+const SystemChecks = forwardRef((_, ref) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
@@ -98,6 +98,8 @@ const SystemChecks = () => {
     postChecks()
   }
 
+  console.log(ref)
+
   const postChecks = async () => {
     const checkedObjects = data.list.filter(obj => obj.checked)
     checkedObjects.forEach(obj => {
@@ -119,6 +121,10 @@ const SystemChecks = () => {
       toast.success(platformLabels.Updated)
     })
   }
+
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit
+  }))
 
   return (
     <VertLayout>
@@ -157,6 +163,6 @@ const SystemChecks = () => {
       </Fixed>
     </VertLayout>
   )
-}
+})
 
 export default SystemChecks
