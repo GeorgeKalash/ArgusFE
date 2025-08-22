@@ -27,41 +27,34 @@ export default function ExtraIncomeForm({ labels, maxAccess, recordId }) {
       name: '',
       reference: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: RemittanceSettingsRepository.ExtraIncome.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: RemittanceSettingsRepository.ExtraIncome.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.ExtraIncome.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.ExtraIncome.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

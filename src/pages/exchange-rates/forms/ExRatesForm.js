@@ -57,75 +57,69 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
       const dayId = formik.values.dayId
       const seqNo = formik.values.seqNo
 
-      try {
-        await postRequest({
-          extension: MultiCurrencyRepository.ExchangeRates.set,
-          record: JSON.stringify({
-            ...obj,
-            dayId: formatDateToYYYYMMDD(obj.dayId)
-          })
+      await postRequest({
+        extension: MultiCurrencyRepository.ExchangeRates.set,
+        record: JSON.stringify({
+          ...obj,
+          dayId: formatDateToYYYYMMDD(obj.dayId)
         })
+      })
 
-        if (!exId && !dayId && !seqNo) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+      if (!exId && !dayId && !seqNo) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        formik.setFieldValue(
-          'recordId',
+      formik.setFieldValue(
+        'recordId',
 
-          String(obj.exId) + String(obj.dayId) + String(obj.seqNo)
-        )
-        window.close()
-        invalidate()
-      } catch (error) {}
+        String(obj.exId) + String(obj.dayId) + String(obj.seqNo)
+      )
+      window.close()
+      invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     if (editMode && record) {
       ;(async function fetchRecordDetails() {
-        try {
-          const res = await getRequest({
-            extension: MultiCurrencyRepository.ExchangeRates.get,
-            parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
+        const res = await getRequest({
+          extension: MultiCurrencyRepository.ExchangeRates.get,
+          parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
+        })
+
+        if (res && res.record) {
+          const newRecordId = `${res.record.exId}${res.record.dayId}${String(res.record.seqNo)}`
+          const formattedDate = formatDate(res.record.dayId)
+          const newDayId = new Date(formattedDate)
+
+          formik.setValues({
+            ...res.record,
+            recordId: newRecordId,
+            dayId: newDayId
           })
-
-          if (res && res.record) {
-            const newRecordId = `${res.record.exId}${res.record.dayId}${String(res.record.seqNo)}`
-            const formattedDate = formatDate(res.record.dayId)
-            const newDayId = new Date(formattedDate)
-
-            formik.setValues({
-              ...res.record,
-              recordId: newRecordId,
-              dayId: newDayId
-            })
-          }
-        } catch (error) {}
+        }
       })()
     }
   }, [])
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.exId && record.dayId && record.seqNo && recordId) {
-          const res = await getRequest({
-            extension: MultiCurrencyRepository.ExchangeRates.get,
-            parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
-          })
-          const formattedDate = formatDate(res.record.dayId)
-          const newDayId = new Date(formattedDate)
+      if (record && record.exId && record.dayId && record.seqNo && recordId) {
+        const res = await getRequest({
+          extension: MultiCurrencyRepository.ExchangeRates.get,
+          parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
+        })
+        const formattedDate = formatDate(res.record.dayId)
+        const newDayId = new Date(formattedDate)
 
-          formik.setValues({
-            ...res.record,
-            dayId: newDayId,
-            recordId: String(res.record.exId) + String(res.record.dayId) + String(res.record.seqNo)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          dayId: newDayId,
+          recordId: String(res.record.exId) + String(res.record.dayId) + String(res.record.seqNo)
+        })
+      }
     })()
   }, [])
 

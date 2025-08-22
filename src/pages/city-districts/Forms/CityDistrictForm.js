@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -39,7 +39,6 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
       isInactive: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -48,41 +47,35 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
       cityId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SystemRepository.CityDistrict.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
       setEditMode(true)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.CityDistrict.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.CityDistrict.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            isInactive: Boolean(res.record.isInactive)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          isInactive: Boolean(res.record.isInactive)
+        })
+      }
     })()
   }, [])
 

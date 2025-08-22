@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -41,7 +41,6 @@ const CashCountForm = ({ recordId, window }) => {
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
-
     const _userId = userData.userId
     const parameters = `_userId=${_userId}&_functionId=${SystemFunction.CashCountTransaction}`
 

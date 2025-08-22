@@ -19,7 +19,6 @@ export default function GlEoyClosingForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', recordId: 'N/A' },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 

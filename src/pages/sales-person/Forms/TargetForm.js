@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import toast from 'react-hot-toast'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -14,14 +14,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
-  const [isLoading, setIsLoading] = useState(false)
-
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Target.qry
   })
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       recordId: recordId,
@@ -72,38 +69,31 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const fiscalRes = await getRequest({
+          extension: SystemRepository.FiscalYears.qry,
+          parameters: '_filter='
+        })
 
-          const fiscalRes = await getRequest({
-            extension: SystemRepository.FiscalYears.qry,
-            parameters: '_filter='
+        const res = await getRequest({
+          extension: SaleRepository.Target.qry,
+          parameters: `_spId=${recordId}`
+        })
+
+        if (fiscalRes.list.length > 0) {
+          const newRows = fiscalRes.list.map(fiscalYearObj => {
+            const correspondingTarget = res.list.find(targetObj => targetObj.fiscalYear === fiscalYearObj.fiscalYear)
+
+            return {
+              spId: recordId,
+              fiscalYear: String(fiscalYearObj.fiscalYear), // Convert to string
+              targetAmount: correspondingTarget ? correspondingTarget.targetAmount : 0
+            }
           })
 
-          const res = await getRequest({
-            extension: SaleRepository.Target.qry,
-            parameters: `_spId=${recordId}`
-          })
-
-          if (fiscalRes.list.length > 0) {
-            const newRows = fiscalRes.list.map(fiscalYearObj => {
-              const correspondingTarget = res.list.find(targetObj => targetObj.fiscalYear === fiscalYearObj.fiscalYear)
-
-              return {
-                spId: recordId,
-                fiscalYear: String(fiscalYearObj.fiscalYear), // Convert to string
-                targetAmount: correspondingTarget ? correspondingTarget.targetAmount : 0
-              }
-            })
-
-            formik.setValues({ recordId: recordId, rows: newRows })
-          }
+          formik.setValues({ recordId: recordId, rows: newRows })
         }
-      } catch (error) {
-        setErrorMessage(error)
       }
-      setIsLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recordId])
@@ -111,20 +101,20 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
   return (
     <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
       <VertLayout>
-      <Grow>
-        <InlineEditGrid
-          gridValidation={formik}
-          maxAccess={maxAccess}
-          columns={columns}
-          defaultRow={{
-            spId: recordId,
-            targetAmount: '',
-            fiscalYear: ''
-          }}
-          allowAddNewLine={false}
-          allowDelete={false}
-        />
-      </Grow>
+        <Grow>
+          <InlineEditGrid
+            gridValidation={formik}
+            maxAccess={maxAccess}
+            columns={columns}
+            defaultRow={{
+              spId: recordId,
+              targetAmount: '',
+              fiscalYear: ''
+            }}
+            allowAddNewLine={false}
+            allowDelete={false}
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )

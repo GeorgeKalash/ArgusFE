@@ -27,41 +27,34 @@ export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
       name: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SaleRepository.PriceLevel.set,
         record: JSON.stringify(obj)
       })
-      if (!recordId) {
-        toast.success('Record Added Successfully')
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.PriceLevel.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.PriceLevel.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

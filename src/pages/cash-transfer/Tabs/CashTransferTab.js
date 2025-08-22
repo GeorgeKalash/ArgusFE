@@ -96,7 +96,6 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fromCashAccountId: yup.string().required(),

@@ -27,7 +27,6 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId }) {
       reference: '',
       name: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),

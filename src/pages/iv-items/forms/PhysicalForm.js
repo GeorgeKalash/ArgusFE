@@ -41,7 +41,6 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       density: 0,
       metalPurity: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup

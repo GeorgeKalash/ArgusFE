@@ -11,36 +11,32 @@ import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 
 export default function CARebuildAccountBalance({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', cashAccountId: 0, recordId: 'N/A' },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 
     validationSchema: yup.object({
-      fiscalYear: yup.string().required()    
+      fiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const { recordId, ...rest } = obj
+      const { recordId, ...rest } = obj
 
-        const response = await postRequest({
-          extension: CashBankRepository.AccountBalance.rebuild,
-          record: JSON.stringify(rest)
-        })
+      await postRequest({
+        extension: CashBankRepository.AccountBalance.rebuild,
+        record: JSON.stringify(rest)
+      })
 
-        toast.success('Record Success')
-        formik.setValues({
-          ...obj
-        })
+      toast.success('Record Success')
+      formik.setValues({
+        ...obj
+      })
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 

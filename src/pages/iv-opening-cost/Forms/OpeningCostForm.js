@@ -34,7 +34,6 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
       avgCost: 0
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       year: yup.number().required(),
@@ -79,10 +78,10 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
   }, [])
 
   return (
-    <FormShell 
-      resourceId={ResourceIds.InventoryOpeningCosts} 
-      form={formik} 
-      maxAccess={maxAccess} 
+    <FormShell
+      resourceId={ResourceIds.InventoryOpeningCosts}
+      form={formik}
+      maxAccess={maxAccess}
       editMode={editMode}
       infoVisible={false}
       isInfo={false}

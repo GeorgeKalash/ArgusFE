@@ -19,9 +19,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
-
     initialValues: {
       sites: [
         {
@@ -42,7 +40,6 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
   const postdata = obj => {
     const sites = obj?.sites?.map(({ categoryId, ...rest }) => ({
       categoryId: recordId,
-
       ...rest
     }))
 
@@ -53,12 +50,10 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
     postRequest({
       extension: InventoryRepository.CategorySites.set2,
       record: JSON.stringify(list)
+    }).then(res => {
+      toast.success(platformLabels.Edited)
+      getData()
     })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-        getData()
-      })
-      .catch(error => {})
   }
 
   const columns = [

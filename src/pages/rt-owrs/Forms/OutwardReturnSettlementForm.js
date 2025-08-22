@@ -124,7 +124,7 @@ export default function OutwardReturnSettlementForm({
     }
   })
 
-  const editMode = !!recordId || !!formik?.values?.recordId
+  const editMode = !!formik.values.recordId
   const isPosted = formik?.values?.status === 3
   const isClosed = formik?.values?.wip === 2
   const isOTPVerified = formik?.values?.otpVerified

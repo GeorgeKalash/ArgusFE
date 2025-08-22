@@ -38,7 +38,6 @@ const CTExchangeRates = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -54,7 +53,7 @@ const CTExchangeRates = () => {
       puRateTypeId: null,
       saRateTypeId: null
     },
-    onSubmit: values => {}
+    onSubmit: () => {}
   })
 
   const exchangeRatesInlineGridColumns = [
@@ -98,7 +97,6 @@ const CTExchangeRates = () => {
 
   const { formik: puFormik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup

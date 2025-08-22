@@ -69,7 +69,6 @@ const TrxDetails = () => {
       endDate: initialStartDate
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true
   })
 

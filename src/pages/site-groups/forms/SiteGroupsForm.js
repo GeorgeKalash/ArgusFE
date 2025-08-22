@@ -28,9 +28,7 @@ export default function SiteGroupsForm({ labels, recordId, maxAccess }) {
       reference: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required()

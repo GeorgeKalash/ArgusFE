@@ -30,29 +30,26 @@ export default function CcCashNotesForm({ labels, maxAccess, record, recordId, w
       note: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
       note: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const currencyId = formik.values.currencyId
-        const note = formik.values.note
-  
-        await postRequest({
-          extension: CashCountRepository.CcCashNotes.set,
-          record: JSON.stringify(obj)
-        })
-  
-        if (!currencyId && !note) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-        formik.setFieldValue('recordId',  String(obj.currencyId * 10) + obj.note)
-        window.close()
-        invalidate()
-      } catch (error) {}
+      const currencyId = formik.values.currencyId
+      const note = formik.values.note
+
+      await postRequest({
+        extension: CashCountRepository.CcCashNotes.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!currencyId && !note) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
+      formik.setFieldValue('recordId', String(obj.currencyId * 10) + obj.note)
+      window.close()
+      invalidate()
     }
   })
 
@@ -60,18 +57,16 @@ export default function CcCashNotesForm({ labels, maxAccess, record, recordId, w
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.currencyId && record.note && recordId) {
-          const res = await getRequest({
-            extension: CashCountRepository.CcCashNotes.get,
-            parameters: `_currencyId=${record.currencyId}&_note=${record.note}`
-          })
-          formik.setValues({
-            ...res.record,
-            recordId: String(res.record.currencyId * 10) + res.record.note
-          })
-        }
-      } catch (e) {}
+      if (record && record.currencyId && record.note && recordId) {
+        const res = await getRequest({
+          extension: CashCountRepository.CcCashNotes.get,
+          parameters: `_currencyId=${record.currencyId}&_note=${record.note}`
+        })
+        formik.setValues({
+          ...res.record,
+          recordId: String(res.record.currencyId * 10) + res.record.note
+        })
+      }
     })()
   }, [])
 

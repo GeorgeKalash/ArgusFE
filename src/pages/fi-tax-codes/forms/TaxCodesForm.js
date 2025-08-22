@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,7 +16,6 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -26,31 +25,27 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', nonDeductible: false },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.TaxCodes.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
+      !obj.recordId &&
         setStore(prevStore => ({
           ...prevStore,
           recordId: response.recordId
-        }))
-        toast.success('Record Added Successfully')
+        })) &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
@@ -58,16 +53,14 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.TaxCodes.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.TaxCodes.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

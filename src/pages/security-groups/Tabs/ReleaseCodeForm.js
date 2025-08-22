@@ -26,7 +26,6 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
       codeId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       codeId: yup.string().required()

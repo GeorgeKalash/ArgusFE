@@ -22,32 +22,28 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
 
   const { recordId } = store
 
-  const editMode = !!recordId
-
   const post = async obj => {
-    try {
-      const data = {
-        fiscalYear: recordId,
-        periods: obj.map(({ id, periodId, startDate, endDate, ...rest }) => ({
-          periodId: id,
-          startDate: formatDateToApi(startDate),
-          endDate: formatDateToApi(endDate),
-          ...rest
-        }))
-      }
-      await postRequest({
-        extension: SystemRepository.FiscalPeriodPack.set2,
-        record: JSON.stringify(data)
-      })
+    const data = {
+      fiscalYear: recordId,
+      periods: obj.map(({ id, periodId, startDate, endDate, ...rest }) => ({
+        periodId: id,
+        startDate: formatDateToApi(startDate),
+        endDate: formatDateToApi(endDate),
+        ...rest
+      }))
+    }
+    await postRequest({
+      extension: SystemRepository.FiscalPeriodPack.set2,
+      record: JSON.stringify(data)
+    })
 
-      toast.success(platformLabels.Edited)
-      getPeriods()
-    } catch (error) {}
+    toast.success(platformLabels.Edited)
+    getPeriods()
   }
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId,
+      recordId: recordId || null,
       periods: []
     },
     maxAccess,
@@ -69,6 +65,8 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
       await post(values.periods)
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   const columns = [
     {

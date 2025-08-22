@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik, useFormikContext } from 'formik'
+import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,7 +12,6 @@ import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTrad
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function RelationTypesForm({ labels, maxAccess, recordId, setStore }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
@@ -31,12 +30,11 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
 
   const formik = useFormik({
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      flName: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      flName: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -58,31 +56,23 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
         })
       } else toast.success(platformLabels.Edited)
       setEditMode(true)
-
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-
-          const res = await getRequest({
-            extension: CurrencyTradingSettingsRepository.RelationType.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+      if (recordId) {
+        const res = await getRequest({
+          extension: CurrencyTradingSettingsRepository.RelationType.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        setInitialData(res.record)
       }
-      setIsLoading(false)
     })()
   }, [])
 

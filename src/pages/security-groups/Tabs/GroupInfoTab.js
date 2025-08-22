@@ -20,7 +20,6 @@ const GroupInfoTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
 
   const { formik } = useForm({
     initialValues: { recordId: storeRecordId || null, name: '', description: '' },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required()

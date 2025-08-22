@@ -16,7 +16,6 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     initialValues: {

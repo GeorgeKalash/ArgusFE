@@ -16,7 +16,6 @@ const PosDefaultForm = ({ _labels, access }) => {
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       posItemPK: null

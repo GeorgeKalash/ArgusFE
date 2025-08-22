@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -27,7 +27,6 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', flName: '', countryId: '', reference: '', isInactive: false },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -58,19 +57,17 @@ export default function StatesForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.State.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.State.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            isInactive: Boolean(res.record.isInactive)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          isInactive: Boolean(res.record.isInactive)
+        })
+      }
     })()
   }, [recordId])
 

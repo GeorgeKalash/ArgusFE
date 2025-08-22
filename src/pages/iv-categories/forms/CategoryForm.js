@@ -55,7 +55,6 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       allowNegativeQty: false,
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup

@@ -36,14 +36,12 @@ const OpenMultiCurrencyCashTransfer = () => {
       return
     }
 
-    try {
-      const response = await getRequest({
-        extension: CashBankRepository.OpenMultiCurrencyCashTransfer.open,
-        parameters: `_plantId=${formik.values.plantId}`
-      })
+    const response = await getRequest({
+      extension: CashBankRepository.OpenMultiCurrencyCashTransfer.open,
+      parameters: `_plantId=${formik.values.plantId}`
+    })
 
-      setData(response || [])
-    } catch (error) {}
+    setData(response || [])
   }
 
   const {
@@ -62,7 +60,6 @@ const OpenMultiCurrencyCashTransfer = () => {
       plantId: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required()

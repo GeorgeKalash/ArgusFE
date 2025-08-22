@@ -30,7 +30,6 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
       maxPct: '',
       maxDaysBack: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -41,34 +40,30 @@ export default function ReturnPolicyForm({ labels, maxAccess, recordId }) {
         .max(100, ' must be less than or equal to 100')
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.ReturnPolicy.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.ReturnPolicy.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.ReturnPolicy.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.ReturnPolicy.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -21,9 +21,7 @@ import FormShell from 'src/components/Shared/FormShell'
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
 
   const { formik } = useForm({
@@ -34,7 +32,6 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       returnPolicyId: store.returnPolicy || ''
     },
 
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
       const submissionData = {

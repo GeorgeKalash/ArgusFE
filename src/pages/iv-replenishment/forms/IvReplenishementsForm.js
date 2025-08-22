@@ -89,7 +89,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       invalidate()
     }
   })
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   async function getDefaultSiteId() {
     if (editMode) {

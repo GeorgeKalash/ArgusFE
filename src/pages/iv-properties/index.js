@@ -56,7 +56,6 @@ const Properties = () => {
       dimValue: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dimValue: yup.string().required()

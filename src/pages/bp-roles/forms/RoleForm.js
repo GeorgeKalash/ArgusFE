@@ -33,7 +33,6 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
       description: '',
       tpType: ''
     },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -50,12 +49,11 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       formik.setFieldValue('recordId', response.recordId)
-
       invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

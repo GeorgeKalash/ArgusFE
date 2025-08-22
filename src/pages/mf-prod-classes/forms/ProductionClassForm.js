@@ -13,14 +13,7 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function ProductionClassForm({
-  labels,
-  maxAccess,
-  recordId,
-  setSelectedRecordId,
-  editMode,
-  setEditMode
-}) {
+export default function ProductionClassForm({ labels, maxAccess, recordId, setSelectedRecordId, editMode }) {
   const [initialValues, setInitialData] = useState({
     recordId: null,
     reference: '',
@@ -36,48 +29,37 @@ export default function ProductionClassForm({
 
   const formik = useFormik({
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      console.log(obj)
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: ManufacturingRepository.ProductionClass.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
+      !obj.recordId &&
         setInitialData({
           ...obj,
           recordId: response.recordId
-        })
+        }) &&
         setSelectedRecordId(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: ManufacturingRepository.ProductionClass.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.ProductionClass.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        setInitialData(res.record)
       }
     })()
   }, [])

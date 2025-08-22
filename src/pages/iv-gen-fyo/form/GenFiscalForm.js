@@ -25,7 +25,6 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
       openingStatus: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.string().required(),
@@ -40,7 +39,6 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
       toast.success(platformLabels.Generated)
     }
   })
-  console.log(formik.values, 'valuessss')
 
   return (
     <FormShell

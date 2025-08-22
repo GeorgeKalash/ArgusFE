@@ -17,7 +17,6 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({

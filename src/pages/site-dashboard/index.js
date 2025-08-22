@@ -86,7 +86,6 @@ const SiteDashboard = () => {
     initialValues: {
       siteId: null
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: () => {
       paginationActivities({ _startAt: 0, _pageSize: 50 })
