@@ -12,36 +12,51 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import MatPlaningForm from './Forms/matPlaningForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const MatPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const {
-    query: { data },
-    labels,
-    paginationParameters,
-    invalidate,
-    refetch,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: IVReplenishementRepository.MatPlanning.page,
-    datasetId: ResourceIds.MaterialReqPlannings
-  })
-
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: IVReplenishementRepository.MatPlanning.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
+  }
+
+  const {
+    query: { data },
+    labels,
+    filterBy,
+    paginationParameters,
+    invalidate,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: IVReplenishementRepository.MatPlanning.page,
+    datasetId: ResourceIds.MaterialReqPlannings,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: IVReplenishementRepository.MatPlanning.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
   }
 
   const columns = [
@@ -123,7 +138,7 @@ const MatPlaning = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={labels} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'IRMPL'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -137,7 +152,6 @@ const MatPlaning = () => {
           refetch={refetch}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />
