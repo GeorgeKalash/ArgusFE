@@ -21,6 +21,7 @@ import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function DesignsForm({ labels, access, store, setStore }) {
   const { recordId } = store
@@ -54,7 +55,11 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       lineId: null,
       classId: null,
       standardId: null,
-      stdWeight: 0
+      stdWeight: 0,
+      designerId: null,
+      designerRef: '',
+      designerName: '',
+      isInactive: false
     },
     maxAccess,
     validateOnChange: true,
@@ -128,6 +133,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       maxAccess={maxAccess}
       editMode={editMode}
       isCleared={false}
+      previewReport={editMode}
     >
       <VertLayout>
         <Grow>
@@ -369,14 +375,52 @@ export default function DesignsForm({ labels, access, store, setStore }) {
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <ImageUpload
-                ref={imageUploadRef}
-                resourceId={ResourceIds.Design}
-                seqNo={0}
-                recordId={recordId}
-                width={300}
-                height={'auto'}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ImageUpload
+                    ref={imageUploadRef}
+                    resourceId={ResourceIds.Design}
+                    seqNo={0}
+                    recordId={recordId}
+                    width={300}
+                    height={'auto'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ProductModelingRepository.Designer.snapshot}
+                    parameters={{
+                      _productionLineId: formik.values.productionLineId || 0
+                    }}
+                    valueField='name'
+                    displayField='name'
+                    secondDisplayField={false}
+                    name='designerId'
+                    label={labels.designer}
+                    form={formik}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueShow='designerRef'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('designerName', newValue?.designerName || '')
+                      formik.setFieldValue('designerId', newValue?.designerId || '')
+                    }}
+                    errorCheck={'designerId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomCheckBox
+                    name='isInactive'
+                    value={formik.values.isInactive}
+                    onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                    label={labels.isInactive}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Grow>
