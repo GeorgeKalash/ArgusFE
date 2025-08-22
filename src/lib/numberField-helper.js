@@ -16,7 +16,6 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
 
 const formatValue = val => {
   if (!val && val !== 0) return ''
-  if (isNaN(val)) return val
 
   return String(val)
     .replace(/\.0+$/, '')
@@ -24,37 +23,31 @@ const formatValue = val => {
 }
 
 const getFormattedNumber = (value, decimal, round = false, hideLeadingZeros = false) => {
-  console.log(value)
   if (!value && value !== 0) return
 
   const sanitizedValue = String(value).replace(/[^0-9.-]/g, '')
 
   const [integerPart, decimalPart] = sanitizedValue.split('.')
 
-  const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
-
-  let formattedValue = value
+  let formattedValue
 
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
-      !round
-        ? (formattedValue = `.${decimalPart.slice(0, decimal)}`)
-        : (formattedValue = `${parseFloat(`${integerPart}.${decimalPart}`).toFixed(decimal)}`)
+      if (!round) {
+        const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+        formattedValue = `${formattedIntegerPart}.${decimalPart.slice(0, decimal)}`
+      } else
+        formattedValue = new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: decimal,
+          maximumFractionDigits: decimal
+        }).format(Number(sanitizedValue))
     } else {
+      const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
       formattedValue = `${formattedIntegerPart}.${decimalPart}`
     }
+  } else {
+    formattedValue = new Intl.NumberFormat('en-US').format(integerPart)
   }
-
-  const stringValue = String(formattedValue)
-
-  console.log(value, decimalPart)
-  if (!decimal && stringValue?.includes('.') && hideLeadingZeros) formattedValue = formattedValue.replace(/0+$/, '')
-
-  if (decimal !== undefined && decimal >= 0 && !stringValue?.includes('.') && decimalPart) {
-    formattedValue += '.' + '0'.repeat(decimal)
-  }
-
-  formattedValue = stringValue?.endsWith('.') ? formattedValue.slice(0, -1) : formattedValue
 
   return hideLeadingZeros ? formatValue(formattedValue) : formattedValue
 }

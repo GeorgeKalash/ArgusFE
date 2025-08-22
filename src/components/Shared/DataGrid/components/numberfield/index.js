@@ -11,12 +11,7 @@ export function View({ value, data, ...props }) {
 
   const symbol = props?.column?.props?.iconKey && props?.column?.props?.iconKey({ data })
 
-  const formattedValue = getFormattedNumber(
-    value,
-    props.column?.props?.decimalScale,
-    !!props.column?.props?.decimalScale,
-    hideLeadingZeros
-  )
+  const formattedValue = getFormattedNumber(value, props.column?.props?.decimalScale, true, hideLeadingZeros)
 
   const icon = symbol && iconMapView[symbol]
 
