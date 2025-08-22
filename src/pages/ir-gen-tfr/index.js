@@ -22,6 +22,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
+import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
+import WCConsumpForm from '../work-center-consumption/forms/WCConsumpForm'
 
 export default function PhysicalCountItemDe() {
   const { stack } = useWindow()
@@ -87,13 +89,20 @@ export default function PhysicalCountItemDe() {
         items: updatedItems
       }
 
-      await postRequest({
+      const res = await postRequest({
         extension: IVReplenishementRepository.Transfer.generate2,
         record: JSON.stringify(payload)
       })
 
-      toast.success(platformLabels.Edited)
+      toast.success(platformLabels.Generated)
       fetchGridData()
+
+      stack({
+        Component: MaterialsTransferForm,
+        props: {
+          recordId: res?.recordId
+        }
+      })
     }
   })
 
@@ -112,8 +121,9 @@ export default function PhysicalCountItemDe() {
         id: index + 1,
         requestDate: item.requestDate ? formatDateFromApi(item.requestDate) : null,
         balance: item.qty || 0 - item.deliveredQty || 0,
-        onHandGlobal: item?.ohandGlobal || 0,
-        onHandSite: item?.onhandSite || 0,
+        onHandGlobal: parseFloat(item?.onhandGlobal).toFixed(2) || 0,
+        onHandSite: parseFloat(item?.onhandSite).toFixed(2) || 0,
+        qty: parseFloat(item?.qty).toFixed(2),
         transferNow: 0
       }
     })
@@ -252,7 +262,7 @@ export default function PhysicalCountItemDe() {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
-          transferNow: newRow?.transferNow && newRow?.transferNow > newRow?.qty ? newRow?.qty : newRow?.transferNow
+          transferNow: newRow?.transferNow > 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
         })
       }
     }
@@ -265,8 +275,36 @@ export default function PhysicalCountItemDe() {
       onClick: () => {
         formik.handleSubmit()
       }
+    },
+    {
+      key: 'GenerateCON',
+      condition: true,
+      onClick: generateConsumptions
     }
   ]
+
+  async function generateConsumptions() {
+    const payload = {
+      dtId: formik?.values?.dtId || null,
+      fromSiteId: formik?.values?.fromSiteId,
+      siteId: formik?.values?.toSiteId,
+      date: formatDateToApi(formik?.values?.date),
+      reference: formik?.values?.reference
+    }
+
+    const res = await postRequest({
+      extension: IVReplenishementRepository.ConsumptionOfTools.generate,
+      record: JSON.stringify(payload)
+    })
+    toast.success(platformLabels.Generated)
+    stack({
+      Component: WCConsumpForm,
+      props: {
+        recordId: res.recordId
+      }
+    })
+    fetchGridData()
+  }
 
   useEffect(() => {
     if (siteId) formik.setFieldValue('fromSiteId', siteId)

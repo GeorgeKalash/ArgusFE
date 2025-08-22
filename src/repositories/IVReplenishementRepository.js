@@ -43,7 +43,7 @@ export const IVReplenishementRepository = {
     reopen: service + 'reopenMPL',
     close: service + 'closeMPL',
     qry: service + 'qryMPL',
-    snapshot: service + 'snapshotMPL',
+    snapshot: service + 'snapshotMPL'
   },
   MatPlanningItem: {
     qry: service + 'qryMPI',
@@ -68,5 +68,8 @@ export const IVReplenishementRepository = {
   },
   Transfer: {
     generate2: service + 'generate2TFR'
+  },
+  ConsumptionOfTools: {
+    generate: service + 'generateMFCON'
   }
 }
