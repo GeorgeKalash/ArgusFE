@@ -328,6 +328,7 @@ const GenerateMaterialPlaning = () => {
           rightSection={
             <ResourceComboBox
               endpointId={IVReplenishementRepository.MatPlanning.qry}
+              parameters='_params='
               filter={item => item.status === 1}
               label={labels.matReqPlan}
               name='mrpId'
