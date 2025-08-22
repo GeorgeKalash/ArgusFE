@@ -179,7 +179,7 @@ export const PurchaseRepository = {
     toOrder: service + 'gen2PO'
   },
   GenerateQTNPRPack: {
-    generate: service + 'genQTN'
+    gen: service + 'genQTN'
   },
   GeneratePOPRPack: {
     gen: service + 'genPO',

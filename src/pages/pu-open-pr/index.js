@@ -76,7 +76,7 @@ const OpenPurchaseRequisition = () => {
       }
 
       const res = await postRequest({
-        extension: PurchaseRepository.GeneratePOPRPack.generate,
+        extension: PurchaseRepository.GeneratePOPRPack.gen,
         record: JSON.stringify({
           vendorId,
           currencyId,
@@ -231,7 +231,7 @@ const OpenPurchaseRequisition = () => {
     }
 
     const response = await postRequest({
-      extension: PurchaseRepository.GenerateQTNPRPack.generate,
+      extension: PurchaseRepository.GenerateQTNPRPack.gen,
       record: JSON.stringify({ vendorId, currencyId, taxId, items: itemValues })
     })
 
