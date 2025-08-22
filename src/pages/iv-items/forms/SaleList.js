@@ -16,12 +16,23 @@ import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
 
   const { platformLabels } = useContext(ControlContext)
+
+  const conditions = {
+    currencyId: row => row?.currencyId,
+    plId: row => row?.plId,
+    ptName: row => row?.ptName,
+    value: row => row?.value,
+    vtName: row => row?.vtName,
+    minPrice: row => row?.minPrice <= row?.value
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     initialValues: {
@@ -42,24 +53,27 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         }
       ]
     },
+    conditionSchema: ['items'],
     validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object().shape({
-          currencyId: yup.number().required(),
-          plId: yup.number().required(),
-          ptName: yup.string().required(),
-          value: yup.number().required().typeError(),
-          vtName: yup.string().required(),
-          minPrice: yup
-            .number()
-            .nullable()
-            .test(function (value) {
-              const { value: price } = this.parent
+      items: yup.array().of(schema),
 
-              return value == null || price == null || value <= price
-            })
-        })
-      )
+      // items: yup.array().of(
+      //   yup.object().shape({
+      //     currencyId: yup.number().required(),
+      //     plId: yup.number().required(),
+      //     ptName: yup.string().required(),
+      //     value: yup.number().required().typeError(),
+      //     vtName: yup.string().required(),
+      //     minPrice: yup
+      //       .number()
+      //       .nullable()
+      //       .test(function (value) {
+      //         const { value: price } = this.parent
+
+      //         return value == null || price == null || value <= price
+      //       })
+      //   })
+      // )
     }),
     validateOnChange: true,
     onSubmit: async obj => {
@@ -79,7 +93,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         extension: SaleRepository.Sales.set2,
         record: JSON.stringify({
           itemId: recordId,
-          items: obj.items.map(item => ({
+          items: obj.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row))).map(item => ({
             ...item,
             itemId: recordId
           }))
