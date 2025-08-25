@@ -8,8 +8,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 export default function AUDefaultsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -43,11 +43,11 @@ export default function AUDefaultsForm({ _labels, access }) {
         parameters: `_filter=`
       })
 
-      const keysToExtract = ['au_PlantSupervisorSG', 'au_GlobalSupervisorSG', 'au_PlantSupervisorSGName', 'au_GlobalSupervisorSGName']
+      const keysToExtract = ['au_PlantSupervisorSG', 'au_GlobalSupervisorSG']
 
       const myObject = res.list.reduce((acc, { key, value }) => {
         if (keysToExtract.includes(key)) {
-          acc[key] = value
+          acc[key] = value ? parseInt(value) : null
         }
 
         return acc
@@ -63,39 +63,35 @@ export default function AUDefaultsForm({ _labels, access }) {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={AccessControlRepository.SecurityGroup.snapshotGRP}
-                name='au_PlantSupervisorSGName'
+              <ResourceComboBox
+                endpointId={AccessControlRepository.SecurityGroup.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                name='au_PlantSupervisorSG'
                 label={_labels.au_PlantSupervisorSG}
-                valueField='name'
                 displayField='name'
-                secondDisplayField={false}
-                form={formik}
+                valueField='recordId'
+                values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('au_PlantSupervisorSG', newValue?.recordId || null)
-                  }
-                  formik.setFieldValue('au_PlantSupervisorSGName', newValue?.name || '')
+                  formik.setFieldValue('au_PlantSupervisorSG', newValue?.recordId || null)
                 }}
-                error={formik.touched.au_PlantSupervisorSGName && Boolean(formik.errors.au_PlantSupervisorSGName)}
+                maxAccess={access}
+                error={formik.touched.au_PlantSupervisorSG && Boolean(formik.errors.au_PlantSupervisorSG)}
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={AccessControlRepository.SecurityGroup.snapshotGRP}
-                name='au_GlobalSupervisorSGName'
+              <ResourceComboBox
+                endpointId={AccessControlRepository.SecurityGroup.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                name='au_GlobalSupervisorSG'
                 label={_labels.au_GlobalSupervisorSG}
-                valueField='name'
                 displayField='name'
-                secondDisplayField={false}
-                form={formik}
+                valueField='recordId'
+                values={formik.values}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('au_GlobalSupervisorSG', newValue?.recordId || null)
-                  }
-                  formik.setFieldValue('au_GlobalSupervisorSGName', newValue?.name || '')
+                  formik.setFieldValue('au_GlobalSupervisorSG', newValue?.recordId || null)
                 }}
-                error={formik.touched.au_GlobalSupervisorSGName && Boolean(formik.errors.au_GlobalSupervisorSGName)}
+                maxAccess={access}
+                error={formik.touched.au_GlobalSupervisorSG && Boolean(formik.errors.au_GlobalSupervisorSG)}
               />
             </Grid>
           </Grid>
