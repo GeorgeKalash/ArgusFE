@@ -245,13 +245,7 @@ const OpenPurchaseRequisition = () => {
         }
       })
 
-    const itemsValue = items.map(({ isChecked, ...item }) => ({
-      ...item,
-      isChecked: false,
-      orderNow: 0
-    }))
-
-    formik.setFieldValue('items', itemsValue)
+    getData()
   }
 
   const actions = [
@@ -388,7 +382,11 @@ const OpenPurchaseRequisition = () => {
                   name='departmentId'
                   label={labels.department}
                   values={formik.values}
-                  displayField='name'
+                  displayField={['name', 'reference']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
                   maxAccess={access}
                   onChange={(event, newValue) => {
                     formik.setFieldValue('departmentId', newValue?.recordId || 0)
