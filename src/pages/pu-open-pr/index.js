@@ -382,9 +382,9 @@ const OpenPurchaseRequisition = () => {
                   name='departmentId'
                   label={labels.department}
                   values={formik.values}
-                  displayField={['name', 'reference']}
+                  displayField={['departmentRef', 'name']}
                   columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
+                    { key: 'departmentRef', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
                   maxAccess={access}
