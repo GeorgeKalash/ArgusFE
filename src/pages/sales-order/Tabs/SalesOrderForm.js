@@ -360,6 +360,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           msId: itemInfo?.msId,
           muRef: filteredMeasurements?.[0]?.reference,
           muId: filteredMeasurements?.[0]?.recordId,
+          muQty: filteredMeasurements?.[0]?.qty,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -414,9 +415,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * muQty
         })
       },
       propsReducer({ row, props }) {
@@ -429,8 +432,14 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       name: 'qty',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
+        update({
+          ...data,
+          baseQty: newRow?.qty * muQty
+        })
       }
     },
     {
@@ -713,6 +722,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ? await Promise.all(
             soItems.list?.map(async (item, index) => {
               const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+              const itemInfo = await getItem(item?.itemId)
 
               return {
                 ...item,
@@ -722,6 +732,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
               }
             })
