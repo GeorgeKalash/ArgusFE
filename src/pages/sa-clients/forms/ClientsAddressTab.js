@@ -100,6 +100,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       props: {
         recordId,
         isSavedClear: false,
+        datasetId: ResourceIds.ADDClient,
         onSubmit: async (obj, window) => {
           if (obj) {
             const data = {
@@ -148,19 +149,6 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
     openForm(obj.recordId)
   }
 
-  const columns = [
-    {
-      field: 'city',
-      headerName: platformLabels.city,
-      flex: 1
-    },
-    {
-      field: 'street1',
-      headerName: platformLabels.street,
-      flex: 1
-    }
-  ]
-
   const addressGridData = { ...data, list: (data?.list || []).map(row => row.address) }
 
   return (
@@ -170,7 +158,7 @@ const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
       delAddress={delAddress}
       editAddress={editAddress}
       paginationParameters={paginationParameters}
-      columns={columns}
+      datasetId={ResourceIds.ADDClient}
       refetch={refetch}
       {...props}
     />

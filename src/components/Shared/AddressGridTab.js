@@ -11,12 +11,13 @@ const AddressGridTab = ({
   addAddress,
   delAddress,
   editAddress,
-  columns,
   paginationParameters,
-  refetch
+  refetch,
+  datasetId
 }) => {
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
+    datasetId: ResourceIds.Address,
+    DatasetIdAccess: datasetId,
   })
 
   const tableColumns = [
@@ -65,7 +66,7 @@ const AddressGridTab = ({
       <Grow>
         <Table
           name='address'
-          columns={columns || tableColumns}
+          columns={tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
           onEdit={editAddress}

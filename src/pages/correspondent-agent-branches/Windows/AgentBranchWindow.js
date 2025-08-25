@@ -8,6 +8,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
@@ -80,6 +81,7 @@ const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
       <CustomTabPanel height={height} index={1} value={activeTab}>
         <AddressFormShell
           editMode={editMode}
+          datasetId={ResourceIds.ADDCorrespondentAgentBranch}
           address={store.address}
           setAddress={addr =>
             setStore(prev => ({

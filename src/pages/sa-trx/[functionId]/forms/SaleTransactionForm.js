@@ -1591,7 +1591,8 @@ export default function SaleTransactionForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDSalesTransaction
       }
     })
   }

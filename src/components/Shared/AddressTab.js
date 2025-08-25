@@ -16,12 +16,14 @@ const AddressTab = ({
   defaultReadOnly = {},
   required = true,
   setFormik,
-  access
+  access,
+  ...props
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
+    datasetId: ResourceIds.Address,
+    DatasetIdAccess: props?.datasetId,
   })
 
   const lastRecordIdRef = useRef(null)

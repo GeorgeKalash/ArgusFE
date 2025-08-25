@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import SchedulesTab from '../Forms/SchedulesTab'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({
@@ -88,6 +89,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           address={store.address}
           setAddress={addr => setStore(prev => ({ ...prev, address: addr }))}
           allowPost={true}
+          datasetId={ResourceIds.ADDPlants}
           onSubmit={onAddressSubmit}
           isCleared={false}
         />
