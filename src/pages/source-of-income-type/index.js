@@ -3,11 +3,10 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useWindow } from 'src/windows'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -23,38 +22,48 @@ const SourceOfIncomeType = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    return await getRequest({
+    const response = await getRequest({
       extension: RemittanceSettingsRepository.SourceOfIncomeType.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
-    access,
-
+    filterBy,
+    clearFilter,
+    invalidate,
+    labels,
+    paginationParameters,
     refetch,
-    paginationParameters
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page,
-    datasetId: ResourceIds.SourceOfIncomeType
+    datasetId: ResourceIds.SourceOfIncomeType,
+    filter: {
+      endpointId: RemittanceSettingsRepository.SourceOfIncomeType.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SourceOfIncomeType.page
-  })
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RemittanceSettingsRepository.SourceOfIncomeType.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -80,20 +89,30 @@ const SourceOfIncomeType = () => {
     stack({
       Component: SourceOfIncomeTypeForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 500,
       height: 300,
-      title: _labels.sourceOfIncome
+      title: labels.sourceOfIncome
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} labels={_labels} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table

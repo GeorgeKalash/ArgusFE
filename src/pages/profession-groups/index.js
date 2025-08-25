@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -23,7 +23,7 @@ const ProfessionGroups = () => {
 
     const response = await getRequest({
       extension: RemittanceSettingsRepository.ProfessionGroups.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,29 +31,38 @@ const ProfessionGroups = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    filterBy,
+    clearFilter,
+    invalidate,
+    labels,
     paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.ProfessionGroups.page,
-    datasetId: ResourceIds.ProfessionGroups
+    datasetId: ResourceIds.ProfessionGroups,
+    filter: {
+      endpointId: RemittanceSettingsRepository.ProfessionGroups.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.ProfessionGroups.page
-  })
+  async function fetchWithSearch({ filters }) {
+    return await getRequest({
+      extension: RemittanceSettingsRepository.ProfessionGroups.snapshot,
+      parameters: `_filter=${filters.qry}`
+    })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -70,13 +79,13 @@ const ProfessionGroups = () => {
     stack({
       Component: ProfessionGroupsForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 330,
-      title: _labels.professionGroups
+      title: labels.professionGroups
     })
   }
 
@@ -92,7 +101,17 @@ const ProfessionGroups = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
