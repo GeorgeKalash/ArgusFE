@@ -206,7 +206,7 @@ export const ManufacturingRepository = {
     set: service + 'setJRO',
     set2: service + 'set2JRO',
     del: service + 'delJRO',
-    sync: service + 'syncJRO',
+    sync: service + 'syncJRO'
   },
   Worksheet: {
     snapshot: service + 'snapshotWST',
@@ -256,7 +256,7 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO',
+    close: service + 'closePO'
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -380,5 +380,11 @@ export const ManufacturingRepository = {
   IssueOfMaterialDimension: {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
+  },
+  JobOrder: {
+    gen: service + 'genORD'
+  },
+  RefreshPoItem: {
+    refresh: service + 'refreshPOI'
   }
 }
