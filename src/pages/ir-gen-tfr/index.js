@@ -24,6 +24,8 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
 import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
 import WCConsumpForm from '../work-center-consumption/forms/WCConsumpForm'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 export default function PhysicalCountItemDe() {
   const { stack } = useWindow()
@@ -44,6 +46,9 @@ export default function PhysicalCountItemDe() {
       toSiteId: null,
       date: new Date(),
       reference: '',
+      workCenterId: null,
+      wcRef: '',
+      wcName: '',
       items: [
         {
           id: 1,
@@ -65,11 +70,18 @@ export default function PhysicalCountItemDe() {
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      toSiteId: yup.string().required(),
       fromSiteId: yup.string().required(),
       date: yup.date().required()
     }),
     onSubmit: async obj => {
+      if (!obj.toSiteId) {
+        stackError({
+          message: labels.mandatorySite
+        })
+
+        return
+      }
+
       const updatedItems = obj.items
         .filter(row => row.isChecked)
         ?.map(itemDetails => {
@@ -106,14 +118,16 @@ export default function PhysicalCountItemDe() {
     }
   })
 
-  async function fetchGridData(toSiteId = formik.values.toSiteId, reference = formik.values.reference) {
+  async function fetchGridData(toSiteId, reference, wcId, fromSiteId) {
     if (!siteId) {
       return
     }
 
     const res = await getRequest({
       extension: IVReplenishementRepository.OrderItem.open,
-      parameters: `_reference=${reference || ''}&_siteId=${toSiteId || 0}&_fromSiteId=${formik.values.fromSiteId || 0}`
+      parameters: `_reference=${reference || ''}&_siteId=${toSiteId || 0}&_fromSiteId=${
+        fromSiteId || formik.values.fromSiteId || 0
+      }&_workCenterId=${wcId || null}`
     })
     res.list = res?.list?.map((item, index) => {
       return {
@@ -275,15 +289,27 @@ export default function PhysicalCountItemDe() {
       onClick: () => {
         formik.handleSubmit()
       }
+
+      //disabled: formik.values.rows.length > 0 && !formik.values.rows.some(item => item.isChecked)
     },
     {
       key: 'GenerateCON',
       condition: true,
       onClick: generateConsumptions
+
+      // disabled: formik.values.rows.length > 0 && !formik.values.rows.some(item => item.isChecked)
     }
   ]
 
   async function generateConsumptions() {
+    if (!formik.values.workCenterId) {
+      stackError({
+        message: labels.mandatoryWc
+      })
+
+      return
+    }
+
     const payload = {
       dtId: formik?.values?.dtId || null,
       fromSiteId: formik?.values?.fromSiteId,
@@ -311,8 +337,8 @@ export default function PhysicalCountItemDe() {
   }, [siteId])
 
   useEffect(() => {
-    fetchGridData()
-  }, [formik.values.toSiteId, formik.values.fromSiteId, formik.values.reference])
+    fetchGridData(formik.values.toSiteId, formik.values.reference, formik.values.workCenterId, formik.values.fromSiteId)
+  }, [formik.values.toSiteId, formik.values.workCenterId, formik.values.fromSiteId])
 
   return (
     <FormShell
@@ -347,7 +373,7 @@ export default function PhysicalCountItemDe() {
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={1}>
               <CustomDatePicker
                 name='date'
                 label={labels.date}
@@ -395,7 +421,6 @@ export default function PhysicalCountItemDe() {
                 displayField={['reference', 'name']}
                 maxAccess={access}
                 displayFieldWidth={2}
-                required
                 onChange={(event, newValue) => {
                   if (!siteId) {
                     stackError({
@@ -405,10 +430,29 @@ export default function PhysicalCountItemDe() {
                     return
                   }
 
-                  fetchGridData(siteId, newValue?.recordId, formik.values.reference)
                   formik.setFieldValue('toSiteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <ResourceLookup
+                endpointId={ManufacturingRepository.WorkCenter.snapshot}
+                valueField='reference'
+                displayField='name'
+                name='workCenterId'
+                label={labels.workCenter}
+                form={formik}
+                firstValue={formik.values.wcRef}
+                secondValue={formik.values.wcName}
+                errorCheck={'workCenterId'}
+                maxAccess={access}
+                displayFieldWidth={3}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('wcRef', newValue?.reference || '')
+                  formik.setFieldValue('wcName', newValue?.name || '')
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                }}
               />
             </Grid>
             <Grid item xs={2}>
@@ -417,7 +461,7 @@ export default function PhysicalCountItemDe() {
                 label={labels.reference}
                 value={formik?.values?.reference}
                 maxAccess={access}
-                onChange={e => {
+                onBlur={e => {
                   if (!siteId) {
                     stackError({
                       message: labels.selectFromSite
@@ -427,9 +471,16 @@ export default function PhysicalCountItemDe() {
                   }
 
                   const currentValue = e.target.value
+                  fetchGridData(
+                    formik.values.toSiteId,
+                    currentValue,
+                    formik.values.workCenterId,
+                    formik.values.fromSiteId
+                  )
                   formik.setFieldValue('reference', currentValue)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
+                onChange={formik.handleChange}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
