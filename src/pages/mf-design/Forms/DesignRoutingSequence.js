@@ -96,7 +96,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     })
 
     const updateItemsList =
-      res?.list?.length !== 0
+      res?.list && res?.list?.length !== 0
         ? await Promise.all(
             res.list.map(async (item, index) => {
               return {

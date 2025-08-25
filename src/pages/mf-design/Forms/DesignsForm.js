@@ -394,7 +394,9 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     }}
                     valueField='name'
                     displayField='name'
-                    secondDisplayField={false}
+                    secondDisplayField={true}
+                    firstValue={formik.values.designerRef}
+                    secondValue={formik.values.designerName}
                     name='designerId'
                     label={labels.designer}
                     form={formik}
@@ -402,11 +404,11 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    valueShow='designerRef'
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('designerName', newValue?.designerName || '')
-                      formik.setFieldValue('designerId', newValue?.designerId || '')
+                      formik.setFieldValue('designerName', newValue?.name || '')
+                      formik.setFieldValue('designerRef', newValue?.reference || '')
+                      formik.setFieldValue('designerId', newValue?.recordId || '')
                     }}
                     errorCheck={'designerId'}
                   />
