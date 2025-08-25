@@ -4,7 +4,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -16,14 +15,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
-import { getStorageData } from 'src/storage/storage'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const userData = getStorageData('userData').userId
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -59,24 +57,6 @@ const CreditInvoice = () => {
     }
   })
 
-  async function getPlantId() {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData}&_key=plantId`
-    })
-
-    return res?.record?.value
-  }
-
-  const getCashAccountId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData}&_key=cashAccountId`
-    })
-
-    return res?.record?.value
-  }
-
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.CreditInvoicePurchase,
     action: openForm,
@@ -88,28 +68,17 @@ const CreditInvoice = () => {
   }
 
   async function openForm(recordId) {
-    let plantId
-    let cashAccountId
+    if (!recordId && !plantId) {
+      stackError({
+        message: _labels.defaultPlant
+      })
 
-    if (!recordId) {
-      plantId = await getPlantId()
-      if (!plantId) {
-        stackError({
-          message: _labels.defaultPlant
-        })
-
-        return
-      }
+      return
     }
-
-    if (!recordId) cashAccountId = await getCashAccountId()
 
     stack({
       Component: CreditInvoiceForm,
       props: {
-        plantId,
-        userData,
-        cashAccountId,
         recordId
       }
     })

@@ -305,14 +305,14 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Shipment',
-    label: platformLabels.Shipment,
+    label: platformLabels.Transportation,
     color: '#843c54',
     image: 'shipment.png',
     main: false
   },
   {
     key: 'Transportation',
-    label: platformLabels.Transportation,
+    label: platformLabels.Shipment,
     color: '#064b38',
     image: 'transportation.png',
     main: false
