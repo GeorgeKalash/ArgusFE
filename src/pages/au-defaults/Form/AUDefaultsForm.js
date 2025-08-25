@@ -43,7 +43,12 @@ export default function AUDefaultsForm({ _labels, access }) {
         parameters: `_filter=`
       })
 
-      const keysToExtract = ['au_PlantSupervisorSG', 'au_GlobalSupervisorSG', 'au_PlantSupervisorSGName', 'au_GlobalSupervisorSGName']
+      const keysToExtract = [
+        'au_PlantSupervisorSG',
+        'au_GlobalSupervisorSG',
+        'au_PlantSupervisorSGName',
+        'au_GlobalSupervisorSGName'
+      ]
 
       const myObject = res.list.reduce((acc, { key, value }) => {
         if (keysToExtract.includes(key)) {
@@ -72,9 +77,7 @@ export default function AUDefaultsForm({ _labels, access }) {
                 secondDisplayField={false}
                 form={formik}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('au_PlantSupervisorSG', newValue?.recordId || null)
-                  }
+                  formik.setFieldValue('au_PlantSupervisorSG', newValue?.recordId || null)
                   formik.setFieldValue('au_PlantSupervisorSGName', newValue?.name || '')
                 }}
                 error={formik.touched.au_PlantSupervisorSGName && Boolean(formik.errors.au_PlantSupervisorSGName)}
@@ -90,9 +93,7 @@ export default function AUDefaultsForm({ _labels, access }) {
                 secondDisplayField={false}
                 form={formik}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('au_GlobalSupervisorSG', newValue?.recordId || null)
-                  }
+                  formik.setFieldValue('au_GlobalSupervisorSG', newValue?.recordId || null)
                   formik.setFieldValue('au_GlobalSupervisorSGName', newValue?.name || '')
                 }}
                 error={formik.touched.au_GlobalSupervisorSGName && Boolean(formik.errors.au_GlobalSupervisorSGName)}
