@@ -10,8 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import FormShell from 'src/components/Shared/FormShell'
 
 const SystemFunctionIntegration = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,14 +55,13 @@ const SystemFunctionIntegration = () => {
     } catch (error) {}
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SystemFunctionIntegrations
   })
 
   const { formik } = useForm({
-    maxAccess,
-    enableReinitialize: true,
+    maxAccess: access,
     validateOnChange: true,
     initialValues: {
       rows: [
@@ -134,23 +132,32 @@ const SystemFunctionIntegration = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <FormShell
+      resourceId={ResourceIds.SystemFunctionIntegrations}
+      form={formik}
+      maxAccess={access}
+      infoVisible={false}
+      isSavedClear={false}
+      fullSize={true}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+            name='rows'
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

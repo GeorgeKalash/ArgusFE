@@ -69,7 +69,8 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  isParentWindow = true
+  isParentWindow = true,
+  fullSize = false
 }) {
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
@@ -399,11 +400,16 @@ export default function FormShell({
           flexDirection: 'column',
           overflow: 'auto',
           position: 'relative',
-          '.MuiBox-root': {
-            paddingTop: isParentWindow ? '7px !important' : '2px !important',
-            px: '0px !important',
-            pb: '0px !important'
-          }
+
+          ...(fullSize
+            ? { p: '0 !important' }
+            : {
+                '& .MuiBox-root': {
+                  pt: `${isParentWindow ? 7 : 2}px !important`,
+                  px: '0 !important',
+                  pb: '0 !important'
+                }
+              })
         }}
         onKeyDown={e => {
           const target = e.target
