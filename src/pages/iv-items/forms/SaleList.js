@@ -230,7 +230,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       props: {
         allowNegative: false,
         maxLength: 17,
-        decimalScale: 3
+        decimalScale: 5
       }
     },
     {
@@ -239,7 +239,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       name: 'minPrice',
       props: {
         allowNegative: false,
-        maxLength: 17,
+        maxLength: 12,
         decimalScale: 3
       }
     }
