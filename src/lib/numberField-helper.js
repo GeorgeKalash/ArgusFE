@@ -41,6 +41,10 @@ const getFormattedNumber = (value, decimal, round = false) => {
     formattedValue += '.' + '0'.repeat(decimal)
   }
 
+  if (formattedValue.endsWith('.')) {
+    formattedValue = formattedValue.slice(0, -1)
+  }
+
   return formattedValue
 }
 
