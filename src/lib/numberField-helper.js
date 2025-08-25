@@ -46,7 +46,14 @@ const getFormattedNumber = (value, decimal, round = false, hideLeadingZeros = fa
       formattedValue = `${formattedIntegerPart}.${decimalPart}`
     }
   } else {
-    formattedValue = new Intl.NumberFormat('en-US').format(integerPart)
+    if (decimal) {
+      formattedValue = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: decimal,
+        maximumFractionDigits: decimal
+      }).format(Number(sanitizedValue))
+    } else {
+      formattedValue = new Intl.NumberFormat('en-US').format(integerPart)
+    }
   }
 
   return hideLeadingZeros ? formatValue(formattedValue) : formattedValue

@@ -925,7 +925,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
-      mdValue: parseFloat(newRow?.mdValue),
+      mdValue: newRow?.mdValue,
       tdPct: formik?.values?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -1022,7 +1022,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
-        basePrice: parseFloat(item?.basePrice),
+        basePrice: item?.basePrice,
         qty: item?.qty,
         weight: item?.weight,
         extendedPrice: item?.extendedPrice,
