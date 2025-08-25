@@ -142,7 +142,7 @@ const CashCount = () => {
           }}
           labels={_labels}
           inputSearch={true}
-        />{' '}
+        />
       </Fixed>
       <Grow>
         <Table

@@ -29,8 +29,19 @@ const MasterDataDTD = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ options = {}, filters }) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    return await getRequest({
+      extension: CurrencyTradingSettingsRepository.MasterDataDTD.snapshot,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+    })
+  }
+
   const {
     query: { data },
+    filterBy,
+    clearFilter,
     labels,
     paginationParameters,
     refetch,
@@ -39,7 +50,11 @@ const MasterDataDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.MasterDataDTD.page,
-    datasetId: ResourceIds.MasterDataDTD
+    datasetId: ResourceIds.MasterDataDTD,
+    filter: {
+      endpointId: CurrencyTradingSettingsRepository.MasterDataDTD.snapshot,
+      filterFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -84,7 +99,18 @@ const MasterDataDTD = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -94,6 +120,7 @@ const MasterDataDTD = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

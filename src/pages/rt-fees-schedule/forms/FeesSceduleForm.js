@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
 import { DataSets } from 'src/resources/DataSets'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -23,7 +21,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.page
   })
 
   const { formik } = useForm({

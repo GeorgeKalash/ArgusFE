@@ -1127,5 +1127,16 @@ export const apiMappings = {
     firstField: 'reference',
     secondDisplayField: false,
     valueOnSelection: 'recordId'
+  },
+  [ResourceIds.FeeSchedule]: {
+    type: COMBOBOX,
+    endpoint: RemittanceOutwardsRepository.FeeSchedule.qry,
+    parameters: '_startAt=0&_pageSize=50&filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }
