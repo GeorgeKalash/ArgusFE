@@ -407,7 +407,7 @@ const OpenPurchaseRequisition = () => {
                   ]}
                   values={formik.values}
                   onChange={(event, newValue) => {
-                    formik.setFieldValue('taxId', newValue ? newValue.recordId : null)
+                    formik.setFieldValue('taxId', newValue.recordId || null)
                   }}
                   error={formik.touched.taxId && Boolean(formik.errors.taxId)}
                   maxAccess={access}
