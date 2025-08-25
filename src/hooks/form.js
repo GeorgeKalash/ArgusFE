@@ -1,9 +1,11 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+  const [debounceTimeout, setDebounceTimeout] = useState(null)
+
   function explode(str) {
     const parts = str.split('.')
 
@@ -115,8 +117,25 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
         ...maxAccessErrors,
         ...validate(values)
       }
-    }
+    },
+    validateOnChange: false
   })
+
+  useEffect(() => {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout)
+    }
+
+    const timeout = setTimeout(() => {
+      formik.validateForm(formik.values)
+    }, 200)
+
+    setDebounceTimeout(timeout)
+
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [formik.values])
 
   formik.validationSchema, dynamicValidationSchema(formikProps?.validationSchema)
 

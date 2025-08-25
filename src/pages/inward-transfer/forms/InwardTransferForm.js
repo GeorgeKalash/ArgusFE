@@ -173,6 +173,7 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
       }
     }
   })
+
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
@@ -314,6 +315,7 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
                   maxLength='15'
                   readOnly={editMode}
                   onChange={e => formik.setFieldValue('reference', e.target.value)}
+                  onClear={() => formik.setFieldValue('reference', '')}
                   error={formik.touched.reference && Boolean(formik.errors.reference)}
                 />
               </Grid>
