@@ -550,6 +550,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       }
     })
   }
+  console.log(formik)
 
   const confirmation = () => {
     stack({

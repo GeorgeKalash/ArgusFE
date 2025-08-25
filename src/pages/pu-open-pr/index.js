@@ -370,7 +370,6 @@ const OpenPurchaseRequisition = () => {
                   secondDisplayField={false}
                   valueShow='poRef'
                   maxAccess={access}
-                  columnsInDropDown={[{ key: 'reference', value: 'Reference' }]}
                   onChange={async (event, newValue) => {
                     formik.setFieldValue('poRef', newValue?.reference || '')
                     formik.setFieldValue('prId', newValue?.recordId || 0)
