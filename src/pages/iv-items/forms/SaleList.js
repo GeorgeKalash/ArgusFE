@@ -30,7 +30,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     ptName: row => row?.ptName,
     value: row => row?.value,
     vtName: row => row?.vtName,
-    minPrice: row => !row.value || row?.minPrice <= row?.value
+    minPrice: row => (row.value > 0 || row?.plId  > 0 || row?.ptName  > 0 || row?.currencyId  > 0) && row?.minPrice <= row?.value
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
