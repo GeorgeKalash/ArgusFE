@@ -121,9 +121,9 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   }, [recordId])
 
   useEffect(() => {
-    formik.setFieldValue('defSaleMUId', store.measurementId || '')
-    formik.setFieldValue('pgId', store.priceGroupId || '')
-    formik.setFieldValue('returnPolicyId', store.returnPolicy || '')
+    formik.setFieldValue('defSaleMUId', store.measurementId || null)
+    formik.setFieldValue('pgId', store.priceGroupId || null)
+    formik.setFieldValue('returnPolicyId', store.returnPolicy || null)
   }, [store.measurementId, store.priceGroupId, store.returnPolicy])
 
   const columns = [
