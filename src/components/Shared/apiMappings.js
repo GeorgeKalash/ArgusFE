@@ -28,6 +28,7 @@ import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export const COMBOBOX = 1
 
@@ -1127,5 +1128,55 @@ export const apiMappings = {
     firstField: 'reference',
     secondDisplayField: false,
     valueOnSelection: 'recordId'
+  },
+  [ResourceIds.RiskLevel]: {
+    type: COMBOBOX,
+    endpoint: CurrencyTradingSettingsRepository.RiskLevel.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProfessionGroups]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.ProfessionGroups.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.SalaryRange]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.SalaryRange.qry,
+    valueField: 'recordId',
+    displayField: ['min', '->', 'max'],
+    columnsInDropDown: [
+      { key: 'min', value: 'MIN' },
+      { key: 'max', value: 'MAX' }
+    ]
+  },
+  [ResourceIds.SourceOfIncomeType]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.SourceOfIncomeType.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.PurposeExchangeGroup]: {
+    type: COMBOBOX,
+    endpoint: CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

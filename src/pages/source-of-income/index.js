@@ -1,69 +1,82 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import SourceOfIncomeWindow from './Windows/SourceOfIncomeWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SourceOfIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+
+  const {
+    query: { data },
+    labels,
+    filterBy,
+    paginationParameters,
+    invalidate,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: RemittanceSettingsRepository.SourceOfIncome.page,
+    datasetId: ResourceIds.SourceOfIncome,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: RemittanceSettingsRepository.SourceOfIncome.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    var parameters = defaultParams
 
     const response = await getRequest({
       extension: RemittanceSettingsRepository.SourceOfIncome.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: parameters
     })
 
     return { ...response, _startAt: _startAt }
   }
-  const { platformLabels } = useContext(ControlContext)
-
-  const {
-    query: { data },
-    labels: _labels,
-    paginationParameters,
-    refetch,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.SourceOfIncome.page,
-    datasetId: ResourceIds.SourceOfIncome
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: RemittanceSettingsRepository.SourceOfIncome.page
-  })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     ,
     {
       field: 'flName',
-      headerName: _labels.flName,
+      headerName: labels.flName,
       flex: 1
     },
     {
       field: 'sitName',
-      headerName: _labels.incomeType,
+      headerName: labels.incomeType,
       flex: 1
     }
   ]
@@ -71,13 +84,13 @@ const SourceOfIncome = () => {
     stack({
       Component: SourceOfIncomeWindow,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: _labels.sourceOfIncome
+      title: labels.sourceOfIncome
     })
   }
 
@@ -101,7 +114,7 @@ const SourceOfIncome = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RTSI'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
