@@ -84,6 +84,8 @@ export const RemittanceOutwardsRepository = {
   },
   FeeSchedule: {
     qry: service + 'qryFSC',
+    page: service + 'pageFSC',
+    snapshot: service + 'snapshotFSC',
     get: service + 'getFSC',
     set: service + 'setFSC',
     del: service + 'delFSC'
@@ -96,12 +98,14 @@ export const RemittanceOutwardsRepository = {
   },
   FeeScheduleOutwards: {
     qry: service + 'qryFSO',
+    page: service + 'pageFSO',
     get: service + 'getFSO',
     set: service + 'setFSO',
     del: service + 'delFSO'
   },
   FeeScheduleInwards: {
     qry: service + 'qryFSI',
+    page: service + 'pageFSI',
     get: service + 'getFSI',
     set: service + 'setFSI',
     del: service + 'delFSI'
@@ -190,6 +194,7 @@ export const RemittanceOutwardsRepository = {
   },
   OutwardReturnReason: {
     page: service + 'pageOWRR',
+    snapshot: service + 'snapshotOWRR',
     qry: service + 'qryOWRR',
     get: service + 'getOWRR',
     set: service + 'setOWRR',

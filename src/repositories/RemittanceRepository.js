@@ -161,6 +161,8 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEI',
     get: service + 'getEI',
     del: service + 'delEI',
+    page: service + 'pageEI',
+    snapshot: service + 'snapshotEI',
     set: service + 'setEI'
   },
   CountryRisk: {
@@ -181,6 +183,6 @@ export const RemittanceSettingsRepository = {
   },
   CorrespondentDispersalRate: {
     qry: service + 'qryCDR',
-    set2: service + 'set2CDR',
+    set2: service + 'set2CDR'
   }
 }
