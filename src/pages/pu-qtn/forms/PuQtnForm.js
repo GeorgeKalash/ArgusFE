@@ -45,8 +45,10 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function PuQtnForm({ labels, access, recordId, window }) {
+export default function PuQtnForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
@@ -58,6 +60,13 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
   const [reCal, setReCal] = useState(false)
   const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
   const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PurchaseQuotations,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.quotations, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseQuotation,
@@ -479,7 +488,7 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     copy.deliveryDate = copy.deliveryDate ? formatDateToApi(copy.deliveryDate) : null
 
     await postRequest({
-      extension: PurchaseRepository.PurchaseQuotation.toOrder,
+      extension: PurchaseRepository.GeneratePOPRPack.gen2,
       record: JSON.stringify(copy)
     })
 
@@ -1352,3 +1361,6 @@ export default function PuQtnForm({ labels, access, recordId, window }) {
     </FormShell>
   )
 }
+
+PuQtnForm.width = 1300
+PuQtnForm.height = 730
