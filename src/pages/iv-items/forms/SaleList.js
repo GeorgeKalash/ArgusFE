@@ -28,7 +28,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     currencyId: row => row?.currencyId,
     plId: row => row?.plId,
     ptName: row => row?.ptName,
-    value: row => row?.value,
+    value: row => row?.value || row?.value === 0,
     vtName: row => row?.vtName,
     minPrice: row => (row.value > 0 || row?.plId  > 0 || row?.ptName  > 0 || row?.currencyId  > 0) && row?.minPrice <= row?.value
   }
