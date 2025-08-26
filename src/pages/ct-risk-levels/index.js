@@ -30,30 +30,32 @@ const CtRiskLevel = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.RiskLevel.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
-    filterBy,
-    clearFilter,
-    invalidate,
+    search,
+    clear,
     labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
     datasetId: ResourceIds.RiskLevel,
-    filter: {
-      endpointId: CurrencyTradingSettingsRepository.RiskLevel.snapshot,
-      filterFn: fetchWithSearch
+    search: {
+      searchFn: fetchWithSearch
     }
   })
-  async function fetchWithSearch({ filters }) {
-    return await getRequest({
-      extension: CurrencyTradingSettingsRepository.RiskLevel.snapshot,
-      parameters: `_filter=${filters.qry}`
-    })
-  }
 
   const columns = [
     {
@@ -102,17 +104,7 @@ const CtRiskLevel = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          inputSearch={true}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
@@ -122,7 +114,6 @@ const CtRiskLevel = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

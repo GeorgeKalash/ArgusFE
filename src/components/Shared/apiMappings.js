@@ -1153,7 +1153,8 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: RemittanceSettingsRepository.SalaryRange.qry,
     valueField: 'recordId',
-    displayField: ['min', '->', 'max'],
+    displayField: ['min', 'max'],
+    separator: '->',
     columnsInDropDown: [
       { key: 'min', value: 'MIN' },
       { key: 'max', value: 'MAX' }
@@ -1173,10 +1174,6 @@ export const apiMappings = {
     type: COMBOBOX,
     endpoint: CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry,
     valueField: 'recordId',
-    displayField: ['reference', 'name'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'name', value: 'Name' }
-    ]
+    displayField: 'name'
   }
 }

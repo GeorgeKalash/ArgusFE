@@ -134,7 +134,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
               formik.setFieldValue('sitRef', newValue ? newValue.reference : '')
               formik.setFieldValue('sitName', newValue ? newValue.name : '')
             }}
-            error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
+            error={formik.touched.sitId && Boolean(formik.errors.sitId)}
           />
         </Grid>
       </Grid>
