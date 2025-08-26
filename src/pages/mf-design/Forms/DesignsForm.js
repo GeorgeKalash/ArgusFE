@@ -398,6 +398,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     firstValue={formik.values.designerRef}
                     secondValue={formik.values.designerName}
                     name='designerId'
+                    displayFieldWidth={2}
                     label={labels.designer}
                     form={formik}
                     columnsInDropDown={[
@@ -408,7 +409,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     onChange={(event, newValue) => {
                       formik.setFieldValue('designerName', newValue?.name || '')
                       formik.setFieldValue('designerRef', newValue?.reference || '')
-                      formik.setFieldValue('designerId', newValue?.recordId || '')
+                      formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
                     errorCheck={'designerId'}
                   />

@@ -147,11 +147,11 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     {
       component: 'resourcelookup',
       label: labels.sku,
-      name: 'itemId',
+      name: 'sku',
       props: {
         endpointId: InventoryRepository.RMSKU.snapshot,
         displayField: 'sku',
-        valueField: 'recordId',
+        valueField: 'sku',
         columnsInDropDown: [
           { key: 'sku', value: 'Sku' },
           { key: 'name', value: 'Name' }
