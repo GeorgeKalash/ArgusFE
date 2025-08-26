@@ -12,35 +12,66 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import SalaryForm from './forms/SalaryForm'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 export default function HrSalary() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    const response = await getRequest({
-      extension: EmployeeRepository.Employee.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
-
   const {
     query: { data },
+    filterBy,
+    refetch,
     labels,
     paginationParameters,
-    refetch,
     invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.Employee.page,
-    datasetId: ResourceIds.HrSalary
+    endpointId: EmployeeRepository.EmployeeChart.page,
+    datasetId: ResourceIds.HrSalary,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+
+  async function fetchGridData(options = {}) {
+    console.log('qry')
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: EmployeeRepository.EmployeeChart.page,
+      parameters: `_startAt=${_startAt}&_size=${_pageSize}&_params=${params}&_sortBy=recordId&_filter=`
+    })
+
+    const modifiedList = response?.list?.map(record => {
+      return {
+        recordId: record?.parent?.recordId || null,
+        reference: record?.parent?.reference || null,
+        name: record?.parent?.fullName || null,
+        departmentName: record?.department?.name || null,
+        positionName: record?.position?.name || null,
+        branchName: record?.branch?.name || null,
+        scName: record?.scName || null,
+        scTypeName: record?.scTypeName || null,
+        hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
+      }
+    })
+
+    return { list: modifiedList, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: EmployeeRepository.EmployeeChart.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
@@ -69,12 +100,12 @@ export default function HrSalary() {
       flex: 1
     },
     {
-      field: 'scheduleName',
+      field: 'scName',
       headerName: labels.schedule,
       flex: 1
     },
     {
-      field: 'scheduleType',
+      field: 'scTypeName',
       headerName: labels.scheduleType,
       flex: 1
     },
@@ -102,8 +133,8 @@ export default function HrSalary() {
         recordId,
         maxAccess: access
       },
-      width: 500,
-      height: 250,
+      width: 900,
+      height: 500,
       title: labels.folder
     })
   }
@@ -120,16 +151,16 @@ export default function HrSalary() {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RT108'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
