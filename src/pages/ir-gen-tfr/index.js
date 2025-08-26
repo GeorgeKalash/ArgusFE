@@ -81,6 +81,9 @@ export default function PhysicalCountItemDe() {
 
         return
       }
+      if (!checkItems()) {
+        return
+      }
 
       const updatedItems = obj.items
         .filter(row => row.isChecked)
@@ -96,8 +99,9 @@ export default function PhysicalCountItemDe() {
       const payload = {
         dtId: obj?.dtId || null,
         fromSiteId: obj?.fromSiteId,
-        toSiteId: obj?.toSiteId,
+        toSiteId: obj?.toSiteId || null,
         date: formatDateToApi(obj?.date),
+        workCenterId: formik?.values?.workCenterId || null,
         items: updatedItems
       }
 
@@ -118,30 +122,17 @@ export default function PhysicalCountItemDe() {
     }
   })
 
-  async function fetchGridData(toSiteId, reference, wcId, fromSiteId) {
-    if (!siteId) {
-      return
+  function checkItems() {
+    const list = formik.values.items.filter(row => row.isChecked)
+    if (list.length < 1) {
+      stackError({
+        message: labels.checkItemsBeforeAppend
+      })
+
+      return false
     }
 
-    const res = await getRequest({
-      extension: IVReplenishementRepository.OrderItem.open,
-      parameters: `_reference=${reference || ''}&_siteId=${toSiteId || 0}&_fromSiteId=${
-        fromSiteId || formik.values.fromSiteId || 0
-      }&_workCenterId=${wcId || null}`
-    })
-    res.list = res?.list?.map((item, index) => {
-      return {
-        ...item,
-        id: index + 1,
-        requestDate: item.requestDate ? formatDateFromApi(item.requestDate) : null,
-        balance: item.qty || 0 - item.deliveredQty || 0,
-        onHandGlobal: parseFloat(item?.onhandGlobal).toFixed(2) || 0,
-        onHandSite: parseFloat(item?.onhandSite).toFixed(2) || 0,
-        qty: parseFloat(item?.qty).toFixed(2),
-        transferNow: 0
-      }
-    })
-    formik.setFieldValue('items', res.list)
+    return true
   }
 
   const columns = [
@@ -289,15 +280,11 @@ export default function PhysicalCountItemDe() {
       onClick: () => {
         formik.handleSubmit()
       }
-
-      //disabled: formik.values.rows.length > 0 && !formik.values.rows.some(item => item.isChecked)
     },
     {
       key: 'GenerateCON',
       condition: true,
       onClick: generateConsumptions
-
-      // disabled: formik.values.rows.length > 0 && !formik.values.rows.some(item => item.isChecked)
     }
   ]
 
@@ -309,13 +296,28 @@ export default function PhysicalCountItemDe() {
 
       return
     }
+    if (!checkItems()) {
+      return
+    }
+
+    const updatedItems = formik.values.items
+      .filter(row => row.isChecked)
+      ?.map(itemDetails => {
+        return {
+          requestId: itemDetails.requestId,
+          requestSeqNo: itemDetails.seqNo,
+          itemId: itemDetails.itemId,
+          qty: itemDetails.transferNow
+        }
+      })
 
     const payload = {
       dtId: formik?.values?.dtId || null,
       fromSiteId: formik?.values?.fromSiteId,
-      siteId: formik?.values?.toSiteId,
+      toSiteId: formik?.values?.toSiteId || null,
       date: formatDateToApi(formik?.values?.date),
-      reference: formik?.values?.reference
+      workCenterId: formik?.values?.workCenterId || null,
+      items: updatedItems
     }
 
     const res = await postRequest({
@@ -332,12 +334,38 @@ export default function PhysicalCountItemDe() {
     fetchGridData()
   }
 
+  async function fetchGridData(reference) {
+    if (!siteId) {
+      return
+    }
+
+    const res = await getRequest({
+      extension: IVReplenishementRepository.OrderItem.open,
+      parameters: `_reference=${reference || ''}&_siteId=${formik.values.toSiteId || 0}&_fromSiteId=${
+        formik.values.fromSiteId || 0
+      }&_workCenterId=${formik.values.workCenterId || 0}`
+    })
+    res.list = res?.list?.map((item, index) => {
+      return {
+        ...item,
+        id: index + 1,
+        requestDate: item.requestDate ? formatDateFromApi(item.requestDate) : null,
+        balance: item.qty || 0 - item.deliveredQty || 0,
+        onHandGlobal: parseFloat(item?.onhandGlobal).toFixed(2) || 0,
+        onHandSite: parseFloat(item?.onhandSite).toFixed(2) || 0,
+        qty: parseFloat(item?.qty).toFixed(2),
+        transferNow: 0
+      }
+    })
+    formik.setFieldValue('items', res.list)
+  }
+
   useEffect(() => {
     if (siteId) formik.setFieldValue('fromSiteId', siteId)
   }, [siteId])
 
   useEffect(() => {
-    fetchGridData(formik.values.toSiteId, formik.values.reference, formik.values.workCenterId, formik.values.fromSiteId)
+    fetchGridData()
   }, [formik.values.toSiteId, formik.values.workCenterId, formik.values.fromSiteId])
 
   return (
@@ -471,12 +499,7 @@ export default function PhysicalCountItemDe() {
                   }
 
                   const currentValue = e.target.value
-                  fetchGridData(
-                    formik.values.toSiteId,
-                    currentValue,
-                    formik.values.workCenterId,
-                    formik.values.fromSiteId
-                  )
+                  fetchGridData(currentValue)
                   formik.setFieldValue('reference', currentValue)
                 }}
                 onClear={() => formik.setFieldValue('reference', '')}
