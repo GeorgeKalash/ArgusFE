@@ -541,7 +541,7 @@ export const ResourceIds = {
   EmployeePenalties: 71217,
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
-  RebuildAC: 41509,
+  SystemAlerts: 20129,
   Samples: 48323,
   EntitlementDeduction: 71106,
   EmployeeChart: 71201,
@@ -626,5 +626,5 @@ export const ResourceIds = {
   ADDCorrespondentAgentBranch: 36608,
   ADDNationalClientMaster: 35601,
   ADDWorkClientMaster: 35602,
-  ADDClientCorporate: 35603,
+  ADDClientCorporate: 35603
 }

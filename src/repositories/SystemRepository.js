@@ -273,5 +273,9 @@ export const SystemRepository = {
     get: service + 'getRER',
     set: service + 'setRER',
     del: service + 'delRER'
+  },
+  SystemAlerts: {
+    qry: service + 'qryAA',
+    arr: service + 'arrAA'
   }
 }
