@@ -12,9 +12,11 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function IdCategoryForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: BusinessPartnerRepository.CategoryID.page

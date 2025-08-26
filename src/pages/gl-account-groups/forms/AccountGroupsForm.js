@@ -10,9 +10,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {

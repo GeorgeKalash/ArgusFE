@@ -41,10 +41,10 @@ const NumberRange = () => {
         .array()
         .of(
           yup.object().shape({
-            exchangeId: yup.string().required(' ')
+            exchangeId: yup.string().required()
           })
         )
-        .required(' ')
+        .required()
     }),
     initialValues: {
       currencyId: '',
@@ -110,7 +110,7 @@ const NumberRange = () => {
           extension: RemittanceSettingsRepository.CurrencyExchangeMap.qry,
           parameters: parameters
         }).then(values => {
-          const valuesMap = values.list.reduce((acc, fee) => {
+          const valuesMap = values?.list?.reduce((acc, fee) => {
             acc[fee.plantId] = fee
 
             return acc

@@ -11,10 +11,11 @@ import { LogisticsRepository } from 'src/repositories/LogisticsRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
-  const editMode = !!recordId
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: LogisticsRepository.LoCollector.page
@@ -47,6 +48,7 @@ export default function LoCollectorsForms({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

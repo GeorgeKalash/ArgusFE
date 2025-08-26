@@ -74,7 +74,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
       if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
         const res = await getRequest({
           extension: SystemRepository.DocumentTypeMap.get,
-          parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
+          parameters: `_fromFunctionId=${record.fromFunctionId}&_fromDTId=${record.fromDTId}&_toFunctionId=${record.toFunctionId}`
         })
 
         formik.setValues({

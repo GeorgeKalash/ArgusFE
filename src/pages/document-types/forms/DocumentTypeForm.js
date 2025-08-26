@@ -18,7 +18,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
-  editMode = !!formik.values.recordId
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -65,6 +64,7 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

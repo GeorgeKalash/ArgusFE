@@ -7,9 +7,11 @@ import { useForm } from 'src/hooks/form'
 import { formatDateDefault, formatDateToApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.RecordRemarks.qry

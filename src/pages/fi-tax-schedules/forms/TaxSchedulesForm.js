@@ -12,10 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.TaxSchedules.qry
@@ -30,8 +32,6 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.TaxSchedules.set,
         record: JSON.stringify(obj)

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -11,12 +11,10 @@ import { useResourceQuery } from 'src/hooks/resource'
 import RecordRemarksForm from './RecordRemarksForm'
 import { useWindow } from 'src/windows'
 import DeleteDialog from '../DeleteDialog'
-import { ControlContext } from 'src/providers/ControlContext'
 
 const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels } = useContext(ControlContext)
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
 
   const fetchGridData = () => {

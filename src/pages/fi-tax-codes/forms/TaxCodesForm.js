@@ -13,10 +13,12 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.TaxCodes.qry
