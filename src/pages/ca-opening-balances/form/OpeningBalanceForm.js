@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,11 +12,12 @@ import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OpeningBalanceForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.OpeningBalance.page
