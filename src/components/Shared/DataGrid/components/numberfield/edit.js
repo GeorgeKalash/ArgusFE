@@ -14,7 +14,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
   }
 
   const formatValue = val => {
-    if (!val) return ''
+    if (!val && val !== 0) return ''
     if (typeof val === 'string') {
       val = val.replace(/,/g, '')
     }
@@ -27,7 +27,15 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
 
   return (
     <CustomNumberField
-      value={viewDecimals ? (typing.current ? value?.[field] : formatValue(value?.[field])) : value?.[field]}
+      value={
+        viewDecimals
+          ? typing.current
+            ? value?.[field]
+            : formatValue(value?.[field])
+          : props?.decimalScale != undefined && !typing.current
+          ? Number(value?.[field]).toFixed(props.decimalScale)
+          : value?.[field]
+      }
       label={''}
       readOnly={props?.readOnly}
       decimalScale={props?.decimalScale}
