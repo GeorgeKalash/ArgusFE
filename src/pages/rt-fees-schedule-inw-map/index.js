@@ -100,7 +100,7 @@ const FeeScheduleInwardsMap = () => {
     stack({
       Component: FeeScheduleInwardsMapForm,
       props: {
-        labels: labels,
+        labels,
         record,
         maxAccess: access,
         recordId: record ? String(record.corId) + String(record.dispersalMode) : null

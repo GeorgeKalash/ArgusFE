@@ -110,7 +110,6 @@ const FeeSchedule = () => {
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

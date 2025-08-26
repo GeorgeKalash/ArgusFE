@@ -28,20 +28,19 @@ const MasterDataDTD = () => {
 
     return { ...response, _startAt: _startAt }
   }
-
-  async function fetchWithSearch({ options = {}, filters }) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.MasterDataDTD.snapshot,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=${filters.qry}`
+      parameters: `_filter=${qry}`
     })
+
+    return response
   }
 
   const {
     query: { data },
-    filterBy,
-    clearFilter,
+    search,
+    clear,
     labels,
     paginationParameters,
     refetch,
@@ -51,9 +50,8 @@ const MasterDataDTD = () => {
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.MasterDataDTD.page,
     datasetId: ResourceIds.MasterDataDTD,
-    filter: {
-      endpointId: CurrencyTradingSettingsRepository.MasterDataDTD.snapshot,
-      filterFn: fetchWithSearch
+    search: {
+      searchFn: fetchWithSearch
     }
   })
 
@@ -99,18 +97,7 @@ const MasterDataDTD = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          labels={labels}
-          inputSearch={true}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

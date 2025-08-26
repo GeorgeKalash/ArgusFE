@@ -105,7 +105,7 @@ const FeeScheduleMap = () => {
     stack({
       Component: FeeScheduleMapForm,
       props: {
-        labels: labels,
+        labels,
         record,
         maxAccess: access,
         recordId: record
