@@ -11,21 +11,24 @@ import { ControlContext } from 'src/providers/ControlContext'
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = storeRecordId
 
+  const conditions = {
+    userId: row => row?.userId
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'groups')
+
   const { formik } = useForm({
     validateOnChange: true,
     validationSchema: yup.object({
-      groups: yup.array().of(
-        yup.object({
-          userId: yup.number().required()
-        })
-      )
+      groups: yup.array().of(schema)
     }),
+    conditionSchema: ['groups'],
     initialValues: {
       groups: [
         {
@@ -76,6 +79,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   const postGroups = async obj => {
     const groups = obj?.groups?.length
       ? obj.groups
+          ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
           .map(item => ({
             sgId: recordId,
             userId: item.userId

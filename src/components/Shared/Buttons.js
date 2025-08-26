@@ -380,6 +380,20 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateQTN',
+    label: platformLabels.Quotation,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'generatePO',
+    label: platformLabels.PurchaseOrder,
+    color: 'black',
+    image: 'order.png',
+    main: false
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',

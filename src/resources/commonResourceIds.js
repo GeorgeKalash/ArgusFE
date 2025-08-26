@@ -22,6 +22,8 @@ export const commonResourceIds = [
   ResourceIds.OpenOutwardsReturn,
   ResourceIds.Printing,
   ResourceIds.Worksheet,
+  ResourceIds.PurchaseQuotations,
+  ResourceIds.PurchaseTransactions,
   ResourceIds.PaymentOrder,
   ResourceIds.PaymentVouchers,
   ResourceIds.PaymentVoucherExpenses,
