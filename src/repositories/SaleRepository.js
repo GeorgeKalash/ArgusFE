@@ -64,7 +64,8 @@ export const SaleRepository = {
     qry: service + 'qryPR',
     get: service + 'getPR',
     set: service + 'setPR',
-    del: service + 'delPR'
+    del: service + 'delPR',
+    set2: service + 'set2PR',
   },
   PosUsers: {
     qry: service + 'qrySP',

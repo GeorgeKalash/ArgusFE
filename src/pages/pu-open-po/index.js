@@ -94,16 +94,11 @@ const OpenPurchaseOrder = () => {
         stack({
           Component: ShipmentsForm,
           props: {
-            labels: _labels,
             recordId: res.recordId,
-            maxAccess,
             plantId,
             siteId,
             dtId
-          },
-          width: 1300,
-          height: 700,
-          title: _labels.shipment
+          }
         })
 
         toast.success(platformLabels.Generated)
@@ -256,17 +251,11 @@ const OpenPurchaseOrder = () => {
     }
   ]
 
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
-  }
-
   const actions = [
     {
       key: 'SHP',
       condition: true,
-      onClick: handleSubmit,
+      onClick: () => formik.handleSubmit(),
       disabled: !vendorId || !siteId
     }
   ]

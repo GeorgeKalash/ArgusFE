@@ -38,6 +38,10 @@ const CustomCheckBox = ({
           inputProps={{ 'aria-label': label }}
           sx={{
             ml: 2,
+            '&.Mui-disabled': {
+              opacity: 0.7,
+              color: 'rgba(0, 0, 0, 0.44)'
+            },
             '& .MuiSvgIcon-root': { fontSize: 15 },
             ...(error && {
               color: '#fd3535ff',
@@ -54,6 +58,10 @@ const CustomCheckBox = ({
         '& .MuiFormControlLabel-label': {
           fontSize: 15,
           ...(error && { color: '#fd3535ff' })
+        },
+        '&.Mui-disabled .MuiFormControlLabel-label': {
+          opacity: 0.7,
+          color: 'rgba(0, 0, 0, 0.72)'
         }
       }}
     />

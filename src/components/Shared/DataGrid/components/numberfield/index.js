@@ -7,20 +7,12 @@ import { iconMapView } from 'src/utils/iconMap'
 
 export function View({ value, data, ...props }) {
   const { systemChecks } = useContext(ControlContext)
-  const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
+  const hideLeadingZeros = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const symbol = props?.column?.props?.iconKey && props?.column?.props?.iconKey({ data })
 
-  const formatValue = val => {
-    if (!val && val !== 0) return ''
-    if (isNaN(val)) return val
+  const formattedValue = getFormattedNumber(value, props.column?.props?.decimalScale, true, hideLeadingZeros)
 
-    return String(val)
-      .replace(/\.0+$/, '')
-      .replace(/(\.\d*?[1-9])0+$/, '$1')
-  }
-
-  const formattedValue = viewDecimals ? getFormattedNumber(formatValue(value)) : getFormattedNumber(value)
   const icon = symbol && iconMapView[symbol]
 
   return (

@@ -117,7 +117,8 @@ const CustomTextField = ({
           '-moz-appearance': 'textfield',
           textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
         },
-        tabIndex: _readOnly ? -1 : 0
+        tabIndex: _readOnly ? -1 : 0,
+        'data-search': search ? 'true' : 'false'
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
