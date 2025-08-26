@@ -11,7 +11,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import CsFoldersForm from './forms/CsFoldersForm'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 export default function HrSalary() {
@@ -97,7 +96,7 @@ export default function HrSalary() {
 
   function openForm(recordId) {
     stack({
-      Component: CsFoldersForm,
+      Component: SalaryForm,
       props: {
         labels,
         recordId,
