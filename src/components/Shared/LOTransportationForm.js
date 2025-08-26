@@ -22,7 +22,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  useSetWindow({ title: platformLabels.Transportation, window })
+  useSetWindow({ title: platformLabels.Shipment, window })
 
   const { formik } = useForm({
     initialValues: {

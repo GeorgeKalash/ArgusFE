@@ -303,10 +303,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       disabled: !editMode
     },
     {
-      key: 'Aging',
+      key: 'IV',
       condition: true,
-      onClick: 'onClickAging',
-      disabled: !editMode
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
     },
     {
       key: 'GL',

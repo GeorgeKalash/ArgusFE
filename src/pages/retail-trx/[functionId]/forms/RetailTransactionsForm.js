@@ -686,8 +686,7 @@ export default function RetailTransactionsForm({
         ...(!formik.values.disableSKULookup && {
           endpointId: PointofSaleRepository.PUItems.snapshot,
           parameters: {
-            _siteId:
-              totalQty > 0 || SystemFunction.RetailInvoice === functionId ? 0 : formik.values?.header?.siteId || 0
+            _siteId: totalQty < 0 || SystemFunction.RetailInvoice != functionId ? 0 : formik.values?.header?.siteId || 0
           },
           displayField: 'sku',
           valueField: 'sku',
@@ -1001,7 +1000,8 @@ export default function RetailTransactionsForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDRetailInvoice
       }
     })
   }

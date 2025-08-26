@@ -300,7 +300,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -310,6 +311,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow.itemId) {
+          return
+        }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+
+          stackError({
+            message: labels.inactiveItem
+          })
+
           return
         }
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
@@ -1116,7 +1129,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDSalesOrder
       }
     })
   }
