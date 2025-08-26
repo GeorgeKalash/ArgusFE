@@ -1000,7 +1000,8 @@ export default function RetailTransactionsForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDRetailInvoice
       }
     })
   }
