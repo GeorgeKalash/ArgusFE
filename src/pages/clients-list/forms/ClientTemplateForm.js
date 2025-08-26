@@ -1694,6 +1694,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       addressValidation={formik}
                       readOnly={editMode && !allowEdit}
                       access={maxAccess}
+                      datasetId={ResourceIds.ADDNationalClientMaster}
                       setFormik={setFormik}
                     />
                   </FieldSet>
@@ -1711,6 +1712,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
                               readOnly: editMode && !allowEdit,
+                              datasetId: ResourceIds.ADDWorkClientMaster,
                               optional: true,
                               changeClear: true,
                               allowPost: false

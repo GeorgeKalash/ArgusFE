@@ -4,7 +4,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -20,11 +20,18 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
-export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store, setStore }) {
+export default function BPMasterDataForm({ labels, maxAccess: access, setEditMode, store, setStore }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const { changeDT, maxAccess } = useRefBehavior({
+    access,
+    readOnlyOnEditMode: false,
+    name: 'reference'
+  })
 
   const { formik } = useForm({
     maxAccess,
@@ -209,7 +216,8 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
                     readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('groupId', newValue?.recordId)
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
+                      changeDT(newValue)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                   />
@@ -217,12 +225,11 @@ export default function BPMasterDataForm({ labels, maxAccess, setEditMode, store
                 <Grid item xs={12}>
                   <CustomTextField
                     name='reference'
+                    readOnly={editMode}
                     label={labels.reference}
                     value={formik.values.reference}
-                    required
-                    readOnly={editMode}
-                    maxLength='15'
                     maxAccess={maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}

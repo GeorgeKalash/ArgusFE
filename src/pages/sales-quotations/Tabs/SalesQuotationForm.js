@@ -1052,6 +1052,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         address: address,
         setAddress: setAddress,
+        datasetId: ResourceIds.ADDSalesQuotations,
         isCleared: false
       }
     })

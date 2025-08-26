@@ -74,11 +74,7 @@ const UndeliveredCreditOrder = () => {
     stack({
       Component: CreditOrderForm,
       props: {
-        labels: labels,
-        maxAccess: access,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        userData: userData
+        recordId
       },
       width: 950,
       title: labels.creditOrder
