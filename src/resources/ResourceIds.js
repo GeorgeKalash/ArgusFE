@@ -450,6 +450,7 @@ export const ResourceIds = {
   ItemReplacement: 41212,
   SManagement: 41213,
   OpenPOs: 50312,
+  OpenPRs: 50310,
   NotificationLabels: 23106,
   ClientPriceLists: 51208,
   Assemblies: 42301,
@@ -544,8 +545,10 @@ export const ResourceIds = {
   Samples: 48323,
   EntitlementDeduction: 71106,
   EmployeeChart: 71201,
+  Catalogue: 41218,
   MetalSmelting: 47314,
   MasterDataDTD: 35120,
+  AUDefaults: 23104,
 
   // GL
   GLSalesInvoice: 51604,
