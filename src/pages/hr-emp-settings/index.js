@@ -58,9 +58,8 @@ const EmpSettings = () => {
           }
         }
       }
-      formik.setFieldValue('firstNameFormat', myObject?.nameFormat)
 
-      formik.setValues(myObject)
+      formik.setValues({ ...myObject, firstNameFormat: myObject?.nameFormat })
     })()
   }, [])
 
@@ -188,6 +187,7 @@ const EmpSettings = () => {
               label={labels.employeeRefSize}
               value={formik.values.employeeRefSize}
               maxAccess={access}
+              required
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('employeeRefSize', '')}
               error={formik.touched.employeeRefSize && Boolean(formik.errors.employeeRefSize)}

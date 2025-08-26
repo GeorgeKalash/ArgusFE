@@ -77,7 +77,7 @@ const CustomNumberField = ({
       return null
     }
 
-    const num = val != '' ? Number(val) : null
+    const num = val != '' ? val : null
 
     return isNaN(num) ? null : num
   }
