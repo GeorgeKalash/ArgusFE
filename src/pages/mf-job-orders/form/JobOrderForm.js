@@ -25,7 +25,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
@@ -47,7 +46,6 @@ export default function JobOrderForm({
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
-  const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
@@ -508,22 +506,7 @@ export default function JobOrderForm({
 
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
-  async function getAllLines() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry,
-      parameters: `_filter=`
-    })
-    setPlStore(res?.list)
-  }
-  async function getFilteredLines(itemId) {
-    if (!itemId) return null
 
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry2,
-      parameters: `_itemId=${itemId}`
-    })
-    setPlStore(res?.list)
-  }
   async function updateWC(routingId) {
     if (!routingId) {
       formik.setFieldValue('workCenterId', null)
@@ -555,11 +538,6 @@ export default function JobOrderForm({
           : null
     })
   }
-  useEffect(() => {
-    ;(async function () {
-      !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
-    })()
-  }, [formik.values.designId])
 
   useEffect(() => {
     ;(async function () {
@@ -851,15 +829,15 @@ export default function JobOrderForm({
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <CustomComboBox
-                        store={plStore}
+                      <ResourceComboBox
+                        endpointId={ManufacturingRepository.ProductionLine.qry}
                         name='lineId'
                         label={labels.line}
+                        values={formik.values}
                         valueField='recordId'
+                        displayField='name'
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isReleased}
-                        displayField='name'
-                        value={formik.values.lineId}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                         }}
