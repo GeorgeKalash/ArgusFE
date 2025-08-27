@@ -31,6 +31,8 @@ const Operationss = () => {
   const {
     query: { data },
     labels: _labels,
+    paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -108,9 +110,10 @@ const Operationss = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
-          paginationType='client'
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
