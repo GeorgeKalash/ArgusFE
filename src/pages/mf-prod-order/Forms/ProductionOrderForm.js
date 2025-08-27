@@ -521,7 +521,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       key: 'Refresh',
       condition: true,
       onClick: sync,
-      disabled: !editMode
+      disabled: isPosted
     }
   ]
 
