@@ -55,7 +55,7 @@ export default function SyncJobOrderRoutingForm({ _labels, access }) {
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={ManufacturingRepository.MFJobOrder.snapshot3}
-                parameters={{ _status: 1 }}
+                parameters={{ _status: 4 }}
                 valueField='reference'
                 displayField='reference'
                 secondDisplayField={false}

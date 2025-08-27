@@ -1,11 +1,10 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import RelationTypesWindow from './Windows/RelationTypesWindow'
 import { useWindow } from 'src/windows'
@@ -24,42 +23,53 @@ const RelationTypes = () => {
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.RelationType.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.RelationType.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
-    labels: _labels,
+    search,
+    clear,
+    labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.RelationType.page,
-    datasetId: ResourceIds.RelationType
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.RelationType.page
+    datasetId: ResourceIds.RelationType,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'flName',
-      headerName: _labels.flName,
+      headerName: labels.flName,
       flex: 1
     }
   ]
@@ -68,13 +78,13 @@ const RelationTypes = () => {
     stack({
       Component: RelationTypesWindow,
       props: {
-        labels: _labels,
-        recordId: recordId ? recordId : null,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 600,
       height: 400,
-      title: _labels.RelationTypes
+      title: labels.RelationTypes
     })
   }
 
@@ -98,7 +108,14 @@ const RelationTypes = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
