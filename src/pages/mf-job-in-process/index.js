@@ -27,7 +27,6 @@ const JobInProcess = () => {
 
   const { stack, lockRecord } = useWindow()
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
-  console.log('workCenterId', workCenterId)
 
   const {
     query: { data },
