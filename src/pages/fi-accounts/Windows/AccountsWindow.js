@@ -46,7 +46,7 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} expanded={expanded} />
+        <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

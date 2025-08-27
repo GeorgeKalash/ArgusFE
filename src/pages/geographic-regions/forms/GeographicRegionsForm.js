@@ -36,7 +36,7 @@ export default function GeographicRegionsForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
+      if (!obj.recordId)
         formik.setValues({
           ...obj,
           recordId: response.recordId

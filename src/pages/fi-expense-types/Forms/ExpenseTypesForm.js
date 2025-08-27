@@ -35,7 +35,7 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId, invalid
         extension: FinancialRepository.ExpenseTypes.set,
         record: JSON.stringify(obj)
       })
-      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

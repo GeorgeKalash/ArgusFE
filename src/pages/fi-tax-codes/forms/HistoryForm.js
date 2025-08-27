@@ -10,10 +10,12 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -59,17 +61,15 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       taxCodeId: recordId,
       items: items
     }
-
     await postRequest({
       extension: FinancialRepository.TaxHistoryPack.set2,
       record: JSON.stringify(data)
-    }).then(res => {
-      toast.success('Record Edited Successfully')
-      setStore(prevStore => ({
-        ...prevStore,
-        TaxHistoryView: items
-      }))
     })
+    toast.success(platformLabels.Edited)
+    setStore(prevStore => ({
+      ...prevStore,
+      TaxHistoryView: items
+    }))
   }
   useEffect(() => {
     if (recordId) {

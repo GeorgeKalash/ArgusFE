@@ -89,15 +89,11 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
           parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
         })
 
-        if (res && res.record) {
-          const newRecordId = `${res.record.exId}${res.record.dayId}${String(res.record.seqNo)}`
-          const formattedDate = formatDate(res.record.dayId)
-          const newDayId = new Date(formattedDate)
-
+        if (res?.record) {
           formik.setValues({
             ...res.record,
-            recordId: newRecordId,
-            dayId: newDayId
+            recordId: `${res.record.exId}${res.record.dayId}${String(res.record.seqNo)}`,
+            dayId: new Date(formatDate(res.record.dayId))
           })
         }
       })()
@@ -111,12 +107,10 @@ export default function ExRatesForm({ labels, recordId, maxAccess, record, windo
           extension: MultiCurrencyRepository.ExchangeRates.get,
           parameters: `_exId=${record.exId}&_dayId=${record.dayId}&_seqNo=${record.seqNo}`
         })
-        const formattedDate = formatDate(res.record.dayId)
-        const newDayId = new Date(formattedDate)
 
         formik.setValues({
           ...res.record,
-          dayId: newDayId,
+          dayId: new Date(formatDate(res.record.dayId)),
           recordId: String(res.record.exId) + String(res.record.dayId) + String(res.record.seqNo)
         })
       }

@@ -85,8 +85,10 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
       record: JSON.stringify(data)
     })
 
-    !obj.recordId && formik.setFieldValue('recordId', response.recordId)
-    !obj.recordId && window.close()
+    if (!obj.recordId) {
+      formik.setFieldValue('recordId', response.recordId)
+      window.close()
+    }
     toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     invalidate()
   }
@@ -123,7 +125,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    recordId && getData()
+    if (recordId) getData()
   }, [recordId])
 
   return (

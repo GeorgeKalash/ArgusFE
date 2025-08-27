@@ -37,15 +37,16 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
+      if (!recordId) {
         setStore(prevStore => ({
           ...prevStore,
           recordId: response.recordId
-        })) &&
+        }))
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

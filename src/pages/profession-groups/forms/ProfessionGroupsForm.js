@@ -40,10 +40,7 @@ export default function ProfessionGroupsForm({ labels, maxAccess, recordId }) {
       })
 
       !obj.recordId
-      formik.setValues({
-        ...obj,
-        recordId: response.recordId
-      })
+      formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

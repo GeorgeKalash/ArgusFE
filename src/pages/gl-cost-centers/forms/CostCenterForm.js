@@ -14,7 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }) {
+export default function CostCenterForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -37,7 +37,7 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
+      if (!obj.recordId)
         formik.setValues({
           ...obj,
           recordId: response.recordId

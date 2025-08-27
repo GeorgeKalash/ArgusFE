@@ -39,11 +39,7 @@ export default function AssetClassesForm({ labels, maxAccess, recordId }) {
         extension: FixedAssetsRepository.Asset.set,
         record: JSON.stringify(obj)
       })
-      !obj.recordId &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

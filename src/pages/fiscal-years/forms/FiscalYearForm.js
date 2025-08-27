@@ -64,12 +64,13 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
         record: JSON.stringify(data)
       })
 
-      !obj.recordId && formik.setFieldValue('recordId', obj.fiscalYear)
-      !obj.recordId &&
+      if (!recordId) {
+        formik.setFieldValue('recordId', obj.fiscalYear)
         setStore(prevStore => ({
           ...prevStore,
           recordId: obj.fiscalYear
         }))
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()

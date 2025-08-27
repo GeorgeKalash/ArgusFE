@@ -38,17 +38,14 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
+      if (!recordId) {
         setStore(prevStore => ({
           ...prevStore,
           recordId: response.recordId
-        })) &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+        }))
+        formik.setFieldValue('recordId', response.recordId)
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-
       invalidate()
     }
   })
@@ -112,7 +109,6 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-
             <Grid item sx={{ pb: '10px' }} xs={12}>
               <CustomCheckBox
                 name='nonDeductible'

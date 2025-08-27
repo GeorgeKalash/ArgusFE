@@ -45,13 +45,12 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       rate: yup.number().required()
     }),
     onSubmit: async obj => {
-      const res = await postRequest({
+      await postRequest({
         extension: FoundryRepository.MetalSettings.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      if (!obj.recordId) {
         formik.setFieldValue('recordId', obj.metalId)
 
         const res2 = await getRequest({
@@ -69,8 +68,8 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
             id: index + 1
           }))
         }))
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
       window.close()
