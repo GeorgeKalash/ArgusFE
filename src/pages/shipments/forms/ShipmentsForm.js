@@ -27,8 +27,10 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
+export default function ShipmentsForm({ recordId, invalidate, plantId, dtId, siteId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -37,6 +39,12 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const { stack: stackError } = useError()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.Shipments
+  })
+
+  useSetWindow({ title: labels.shipment, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Shipment,
@@ -852,3 +860,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
     </FormShell>
   )
 }
+
+ShipmentsForm.width = 1300
+ShipmentsForm.height = 700
