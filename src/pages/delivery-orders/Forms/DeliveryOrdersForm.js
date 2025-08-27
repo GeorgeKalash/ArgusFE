@@ -1,4 +1,4 @@
-import { Grid, Checkbox, FormControlLabel } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -415,6 +415,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           }
         }
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.mu,
+      name: 'muName',
+      props: { readOnly: true }
     },
     {
       component: 'resourcecombobox',

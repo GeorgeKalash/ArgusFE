@@ -4,8 +4,9 @@ import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { forwardRef, useImperativeHandle } from 'react'
 
-const StrictDeleteConfirmation = ({ window, action }) => {
+const StrictDeleteConfirmation = forwardRef(({ window, action }, ref) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
 
@@ -24,6 +25,9 @@ const StrictDeleteConfirmation = ({ window, action }) => {
     action()
     window.close()
   }
+  useImperativeHandle(ref, () => ({
+    submit: () => handleSubmit()
+  }))
 
   const actions = [
     {
@@ -59,7 +63,7 @@ const StrictDeleteConfirmation = ({ window, action }) => {
       </Grid>
     </Grid>
   )
-}
+})
 
 StrictDeleteConfirmation.width = 500
 StrictDeleteConfirmation.height = 300
