@@ -83,7 +83,7 @@ const ExtraIncome = () => {
     stack({
       Component: ExtraIncomeForm,
       props: {
-        labels: labels,
+        labels,
         recordId,
         maxAccess: access
       },

@@ -108,7 +108,7 @@ const OutwardReturnReason = () => {
     stack({
       Component: OutwardReturnReasonForm,
       props: {
-        labels: labels,
+        labels,
         recordId,
         maxAccess: access
       },
