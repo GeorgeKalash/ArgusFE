@@ -28,6 +28,7 @@ import { useError } from 'src/error'
 import { useWindow } from 'src/windows'
 import ImportForm from 'src/components/Shared/ImportForm'
 import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function WCConsumpForm({ recordId, window }) {
   const { stack } = useWindow()

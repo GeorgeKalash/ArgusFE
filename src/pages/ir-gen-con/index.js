@@ -22,16 +22,18 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
-import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import WCConsumpForm from '../work-center-consumption/forms/WCConsumpForm'
 
-export default function IRGenerateTransfer() {
+export default function IRGenerateConsumption() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceQuery({
-    datasetId: ResourceIds.GenerateTransfers
+    datasetId: ResourceIds.GenerateConsumption
   })
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
@@ -40,9 +42,11 @@ export default function IRGenerateTransfer() {
     initialValues: {
       dtId: null,
       fromSiteId: null,
-      toSiteId: null,
+      workCenterId: null,
       date: new Date(),
       reference: '',
+      wcRef: '',
+      wcName: '',
       items: [
         {
           id: 1,
@@ -65,7 +69,7 @@ export default function IRGenerateTransfer() {
     validateOnChange: true,
     validationSchema: yup.object({
       fromSiteId: yup.string().required(),
-      toSiteId: yup.string().required(),
+      workCenterId: yup.string().required(),
       date: yup.date().required()
     }),
     onSubmit: async obj => {
@@ -87,25 +91,23 @@ export default function IRGenerateTransfer() {
       const payload = {
         dtId: obj?.dtId || null,
         fromSiteId: obj?.fromSiteId,
-        toSiteId: obj?.toSiteId || 0,
         date: formatDateToApi(obj?.date),
+        workCenterId: obj?.workCenterId || null,
         items: updatedItems
       }
 
       const res = await postRequest({
-        extension: IVReplenishementRepository.Transfer.generate2,
+        extension: IVReplenishementRepository.ConsumptionOfTools.generate,
         record: JSON.stringify(payload)
       })
-
       toast.success(platformLabels.Generated)
-      fetchGridData()
-
       stack({
-        Component: MaterialsTransferForm,
+        Component: WCConsumpForm,
         props: {
-          recordId: res?.recordId
+          recordId: res.recordId
         }
       })
+      fetchGridData()
     }
   })
 
@@ -121,6 +123,16 @@ export default function IRGenerateTransfer() {
 
     return true
   }
+
+  const actions = [
+    {
+      key: 'GenerateJob',
+      condition: true,
+      onClick: () => {
+        formik.handleSubmit()
+      }
+    }
+  ]
 
   const columns = [
     {
@@ -260,16 +272,6 @@ export default function IRGenerateTransfer() {
     }
   ]
 
-  const actions = [
-    {
-      key: 'GenerateJob',
-      condition: true,
-      onClick: () => {
-        formik.handleSubmit()
-      }
-    }
-  ]
-
   async function fetchGridData(reference) {
     if (!siteId) {
       return
@@ -277,11 +279,10 @@ export default function IRGenerateTransfer() {
 
     const res = await getRequest({
       extension: IVReplenishementRepository.OrderItem.open,
-      parameters: `_reference=${reference || ''}&_siteId=${formik.values.toSiteId || 0}&_fromSiteId=${
-        formik.values.fromSiteId || 0
-      }&_workCenterId=${0}`
+      parameters: `_reference=${reference || ''}&_siteId=0&_fromSiteId=${formik.values.fromSiteId || 0}&_workCenterId=${
+        formik.values.workCenterId || 0
+      }`
     })
-
     res.list = res?.list?.map((item, index) => {
       return {
         ...item,
@@ -303,7 +304,7 @@ export default function IRGenerateTransfer() {
 
   useEffect(() => {
     fetchGridData()
-  }, [formik.values.toSiteId, formik.values.fromSiteId])
+  }, [formik.values.fromSiteId, formik.values.workCenterId])
 
   return (
     <FormShell
@@ -313,7 +314,7 @@ export default function IRGenerateTransfer() {
       isSaved={false}
       actions={actions}
       maxAccess={access}
-      resourceId={ResourceIds.GenerateTransfers}
+      resourceId={ResourceIds.GenerateConsumption}
     >
       <VertLayout>
         <Fixed>
@@ -321,7 +322,7 @@ export default function IRGenerateTransfer() {
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.MaterialTransfer}`}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkCenterConsumption}`}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
@@ -373,21 +374,20 @@ export default function IRGenerateTransfer() {
                 error={formik.touched.fromSiteId && Boolean(formik.errors.fromSiteId)}
               />
             </Grid>
-            <Grid item xs={2}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
-                name='toSiteId'
-                label={labels.toSite}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                maxAccess={access}
-                displayFieldWidth={1.5}
+            <Grid item xs={3}>
+              <ResourceLookup
+                endpointId={ManufacturingRepository.WorkCenter.snapshot}
+                valueField='reference'
+                displayField='name'
+                name='workCenterId'
+                label={labels.workCenter}
+                form={formik}
+                firstValue={formik.values.wcRef}
+                secondValue={formik.values.wcName}
+                errorCheck={'workCenterId'}
                 required
+                maxAccess={access}
+                displayFieldWidth={3}
                 onChange={(event, newValue) => {
                   if (!siteId) {
                     stackError({
@@ -396,10 +396,10 @@ export default function IRGenerateTransfer() {
 
                     return
                   }
-
-                  formik.setFieldValue('toSiteId', newValue?.recordId || 0)
+                  formik.setFieldValue('wcRef', newValue?.reference || '')
+                  formik.setFieldValue('wcName', newValue?.name || '')
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
                 }}
-                error={formik.touched.toSiteId && Boolean(formik.errors.toSiteId)}
               />
             </Grid>
             <Grid item xs={2}>
