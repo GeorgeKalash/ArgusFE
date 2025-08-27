@@ -33,8 +33,8 @@ export default function ProfessionGroupsForm({ labels, maxAccess, recordId }) {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId

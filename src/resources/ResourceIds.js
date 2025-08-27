@@ -212,7 +212,7 @@ export const ResourceIds = {
   DimensionsValues: 31111,
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
-  SourceOfIncomeType: 36311,
+  SourceOfIncomeType: 36122,
   ProfessionGroups: 36121,
   ChangePassword: 20118,
   PaymentVouchers: 31305,
