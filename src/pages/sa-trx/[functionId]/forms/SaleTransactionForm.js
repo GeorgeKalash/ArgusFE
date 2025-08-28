@@ -922,7 +922,7 @@ export default function SaleTransactionForm({
         onSuccess: () => {
           addLockedScreen({
             resourceId: getResourceId(parseInt(functionId)),
-            recordId: res.recordId,
+            recordId,
             reference: formik.values.header.reference
           })
           refetchForm(res.recordId)
