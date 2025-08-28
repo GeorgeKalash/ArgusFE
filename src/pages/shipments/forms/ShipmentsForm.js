@@ -28,7 +28,7 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()

@@ -101,9 +101,6 @@ const OpenPurchaseOrder = () => {
             labels: _labels,
             recordId: res.recordId,
             maxAccess,
-            plantId,
-            siteId,
-            dtId,
             invalidate
           },
           width: 1300,
