@@ -106,8 +106,7 @@ const Shipments = () => {
     stack({
       Component: ShipmentsForm,
       props: {
-        recordId,
-        invalidate
+        recordId
       }
     })
   }

@@ -36,7 +36,6 @@ const SyAlerts = () => {
     queryFn: getGridData,
     datasetId: ResourceIds.SystemAlerts
   })
-  console.log(access)
 
   const { formik } = useForm({
     maxAccess: access,
