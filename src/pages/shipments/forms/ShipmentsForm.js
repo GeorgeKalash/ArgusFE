@@ -27,8 +27,9 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate, plantId, dtId, siteId }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId, plantId, dtId, siteId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -37,6 +38,10 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const { stack: stackError } = useError()
+
+  const invalidate = useInvalidate({
+    endpointId: PurchaseRepository.Shipment.page
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Shipment,
@@ -231,7 +236,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
         plantId: plantId || formik?.values?.header?.plantId,
         dtId: dtId || formik?.values?.header?.dtId,
         ...shipHeader.record,
-        siteId: siteId || formik?.values?.header?.siteId
+        siteId: shipHeader.record?.siteId || formik?.values?.header?.siteId || siteId
       },
       items: itemsList
     })
