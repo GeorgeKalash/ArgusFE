@@ -25,7 +25,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       fiscalYear: '',
       cashAccountId: '',
       currencyId: '',
@@ -73,8 +73,6 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
 
         formik.setValues({
           ...res.record,
-          cashAccountId: formik.values.cashAccountId,
-
           recordId:
             String(res.record.fiscalYear * 1000) +
             String(res.record.cashAccountId * 100) +

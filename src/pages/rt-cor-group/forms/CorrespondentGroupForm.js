@@ -23,7 +23,7 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       reference: '',
       name: '',
       flName: ''
@@ -39,7 +39,7 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId && getData(response?.recordId)
+      if (!obj.recordId) getData(response?.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -47,9 +47,7 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    ;(async function () {
-      recordId && (await getData(recordId))
-    })()
+    if (recordId) getData(recordId)
   }, [])
 
   async function getData(recordId) {

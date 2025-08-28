@@ -28,6 +28,7 @@ export default function PriceForm({ labels, maxAccess, obj, recordId, window, fe
       priceType: '',
       value: ''
     },
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       categoryId: yup.string().required(),

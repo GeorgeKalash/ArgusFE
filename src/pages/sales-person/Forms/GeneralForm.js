@@ -35,6 +35,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
   const formik = useFormik({
     initialValues,
     validateOnChange: true,
+    enableReinitialize: true,
     onSubmit: async obj => {
       const response = await postRequest({
         extension: SaleRepository.SalesPerson.set,

@@ -4,14 +4,13 @@ import CustomTextArea from '../../Inputs/CustomTextArea'
 import { Box, Button } from '@mui/material'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 import { formatDateDefault, formatDateToApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ControlContext } from 'src/providers/ControlContext'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.RecordRemarks.qry
@@ -27,6 +26,7 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
       eventDate: data?.eventDate,
       userId: data?.userId ?? userId
     },
+    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
       const date = new Date()
@@ -37,11 +37,12 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
         record: JSON.stringify(values)
       })
       if (data) {
+        toast.success('Record Edited Successfully')
         window.close()
       } else {
+        toast.success('Record Add Successfully')
         formik.setFieldValue('notes', '')
       }
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -54,7 +55,7 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
           sx={{
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'left',
+            alignItems: 'left', // Align children vertically to the start
             fontSize: 14
           }}
           fontSize={14}

@@ -112,12 +112,10 @@ export default function OutwardReturnSettlementForm({
         record: JSON.stringify(data)
       }).then(async res => {
         if (!obj.recordId) {
-          toast.success(platformLabels.Added)
           const result = await getData(res?.recordId)
           viewOTP(result)
-        } else {
-          toast.success(platformLabels.Edited)
         }
+        toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       })
 
       invalidate()

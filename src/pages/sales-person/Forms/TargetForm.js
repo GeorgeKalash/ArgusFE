@@ -20,6 +20,7 @@ export default function TargetForm({ labels, maxAccess, recordId, setErrorMessag
 
   const formik = useFormik({
     validateOnChange: true,
+    enableReinitialize: true,
     initialValues: {
       recordId: recordId,
       rows: [

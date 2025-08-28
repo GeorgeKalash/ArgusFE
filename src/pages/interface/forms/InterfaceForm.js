@@ -46,11 +46,13 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
+      if (!obj.recordId) {
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
+        setEditMode(true)
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

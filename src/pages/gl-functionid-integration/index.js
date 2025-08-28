@@ -47,11 +47,7 @@ const SystemFunctionIntegration = () => {
         ...rest
       }
     })
-
-    formik.setValues({
-      ...formik.values,
-      rows
-    })
+    formik.setFieldValue('rows', rows)
   }
 
   const { labels, maxAccess } = useResourceQuery({

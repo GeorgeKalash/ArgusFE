@@ -21,7 +21,6 @@ export default function GlEoyClosingForm({ _labels, access }) {
     initialValues: { fiscalYear: '', recordId: 'N/A' },
     maxAccess: access,
     validateOnChange: true,
-
     validationSchema: yup.object({
       fiscalYear: yup.string().required()
     }),
@@ -34,9 +33,6 @@ export default function GlEoyClosingForm({ _labels, access }) {
       })
 
       toast.success(platformLabels.Saved)
-      formik.setValues({
-        ...obj
-      })
     }
   })
 

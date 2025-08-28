@@ -20,7 +20,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { user, setUser } = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Target.qry
@@ -28,6 +28,7 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
 
   const detailsFormik = useFormik({
     validateOnChange: true,
+    enableReinitialize: true,
     initialValues: {
       rows: [
         {

@@ -198,7 +198,7 @@ const GlobalExchangeBuyMap = () => {
     <VertLayout>
       <Fixed>
         <Grid container>
-          <Grid item xs={3}>
+          <Grid item xs={3} sx={{ p: 2 }}>
             <ResourceComboBox
               endpointId={SystemRepository.Currency.qry}
               name='currencyId'

@@ -39,7 +39,7 @@ export default function ItemSizesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
