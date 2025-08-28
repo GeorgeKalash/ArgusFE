@@ -189,15 +189,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   const columns = [
     {
-      component: 'textfield',
-      label: labels.design,
-      name: 'designRef',
-      width: 200,
-      props: {
-        readOnly: true
-      }
-    },
-    {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
@@ -244,6 +235,15 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           lineRef: result?.lineRef || '',
           itemWeight: result1?.stdWeight || null
         })
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.design,
+      name: 'designRef',
+      width: 200,
+      props: {
+        readOnly: true
       }
     },
     {
