@@ -266,7 +266,7 @@ export default function IRGenerateConsumption() {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
-          transferNow: newRow?.transferNow > 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
         })
       }
     }
@@ -387,7 +387,7 @@ export default function IRGenerateConsumption() {
                 errorCheck={'workCenterId'}
                 required
                 maxAccess={access}
-                displayFieldWidth={3}
+                displayFieldWidth={2}
                 onChange={(event, newValue) => {
                   if (!siteId) {
                     stackError({
@@ -433,7 +433,6 @@ export default function IRGenerateConsumption() {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values?.items}
             error={formik.errors?.items}
-            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             disabled={false}
             allowDelete={false}

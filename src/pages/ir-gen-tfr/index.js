@@ -254,7 +254,7 @@ export default function IRGenerateTransfer() {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
-          transferNow: newRow?.transferNow > 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
         })
       }
     }
@@ -433,7 +433,6 @@ export default function IRGenerateTransfer() {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values?.items}
             error={formik.errors?.items}
-            initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             disabled={false}
             allowDelete={false}
