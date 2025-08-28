@@ -27,8 +27,9 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId, invalidate }) {
+export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -37,6 +38,11 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const { stack: stackError } = useError()
+
+  
+  const invalidate = useInvalidate({
+    endpointId: PurchaseRepository.Shipment.page
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Shipment,

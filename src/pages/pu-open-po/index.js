@@ -39,10 +39,6 @@ const OpenPurchaseOrder = () => {
     datasetId: ResourceIds.Shipments
   })
 
-  const invalidate = useInvalidate({
-    endpointId: ReportPuGeneratorRepository.OpenPurchaseOrder.open
-  })
-
   const defaultVat = defaultsData?.list?.find(({ key }) => key === 'POSHPVarPct')
 
   const { formik } = useForm({
@@ -100,8 +96,7 @@ const OpenPurchaseOrder = () => {
           props: {
             labels: _labels,
             recordId: res.recordId,
-            maxAccess,
-            invalidate
+            maxAccess
           },
           width: 1300,
           height: 700,
