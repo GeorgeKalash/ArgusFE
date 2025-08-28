@@ -177,6 +177,9 @@ const ImageUpload = forwardRef(
             border: error && '2px solid #F44336'
           }}
           onClick={handleClick}
+          onError={e => {
+            e.currentTarget.src = '/images/emptyPhoto.jpg'
+          }}
         />
         <Box>
           <input

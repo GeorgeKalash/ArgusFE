@@ -158,13 +158,24 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}
-          displayField={apiDetails.displayField}
+          displayField={
+            Array.isArray(apiDetails?.displayField)
+              ? apiDetails.displayField.flatMap((header, idx) =>
+                  idx < apiDetails.displayField.length - 1 ? [header, apiDetails?.separator ?? ' '] : [header]
+                )
+              : [apiDetails?.displayField]
+          }
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
           values={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
+            const separator = apiDetails?.separator ?? ' '
+
             const textValue = Array.isArray(apiDetails?.displayField)
-              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' ')
+              ? apiDetails.displayField
+                  .map(header => newValue?.[header]?.toString())
+                  .filter(Boolean)
+                  .join(separator)
               : newValue?.[apiDetails?.displayField]
 
             formik.setFieldValue(
