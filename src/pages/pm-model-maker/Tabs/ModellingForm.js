@@ -61,7 +61,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       productionLineId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       laborId: yup.string().required(),

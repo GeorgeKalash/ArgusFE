@@ -11,10 +11,12 @@ import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.PriceLevel.page
@@ -37,11 +39,10 @@ export default function PriceLevelsForm({ labels, maxAccess, recordId }) {
         extension: SaleRepository.PriceLevel.set,
         record: JSON.stringify(obj)
       })
-      !obj.recordId &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
+        setEditMode(true)
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

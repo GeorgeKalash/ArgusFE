@@ -42,11 +42,7 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId && toast.success(platformLabels.Added)
-      formik.setValues({
-        ...obj,
-        recordId: response.recordId
-      })
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }

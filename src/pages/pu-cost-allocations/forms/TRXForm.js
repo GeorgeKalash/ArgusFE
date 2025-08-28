@@ -58,7 +58,6 @@ export default function TRXForm({ labels, access, setStore, store }) {
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),

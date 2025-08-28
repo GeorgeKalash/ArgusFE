@@ -156,7 +156,6 @@ const CTExchangeRates = () => {
 
   const { formik: saFormik } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup

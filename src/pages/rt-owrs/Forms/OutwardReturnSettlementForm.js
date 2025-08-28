@@ -53,7 +53,6 @@ export default function OutwardReturnSettlementForm({
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: null,

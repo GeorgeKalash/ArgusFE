@@ -53,6 +53,7 @@ const IvSettings = ({ _labels }) => {
 
   const formik = useFormik({
     validateOnChange: true,
+    enableReinitialize: true,
     initialValues,
     validationSchema: yup.object({
       iv_minSerialSize: yup.number().min(1).max(20)

@@ -37,7 +37,6 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       damageItemId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup.string().required(),

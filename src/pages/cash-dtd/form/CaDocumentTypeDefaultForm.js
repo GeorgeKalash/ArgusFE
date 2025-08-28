@@ -34,7 +34,6 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
       toCashAccountId: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required(),
       fromCashAccountId: yup.string().nullable(),

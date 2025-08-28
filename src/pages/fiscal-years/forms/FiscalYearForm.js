@@ -38,7 +38,6 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       status: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup

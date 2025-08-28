@@ -40,6 +40,7 @@ const LoDefault = ({ _labels, access }) => {
   }
 
   const { formik } = useForm({
+    enableReinitialize: true,
     validateOnChange: true,
     initialValues,
     onSubmit: values => {

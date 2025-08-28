@@ -117,7 +117,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       orders: ordersInitialValues
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required(),

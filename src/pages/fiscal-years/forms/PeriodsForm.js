@@ -47,7 +47,6 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
       periods: []
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       periods: yup

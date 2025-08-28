@@ -56,7 +56,6 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       legalStatusId: null,
       isBlackListed: false
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       category: yup.string().required(),

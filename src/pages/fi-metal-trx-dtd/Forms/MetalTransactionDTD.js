@@ -31,7 +31,6 @@ export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, f
       siteId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

@@ -37,7 +37,6 @@ export default function SaleZoneForm({ labels, maxAccess, recordId }) {
       parentRef: '',
       parentName: null
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

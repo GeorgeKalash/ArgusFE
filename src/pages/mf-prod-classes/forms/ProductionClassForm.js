@@ -12,23 +12,23 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ProductionClassForm({ labels, maxAccess, recordId, setSelectedRecordId, editMode }) {
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    standardId: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionClass.page
   })
 
   const formik = useFormik({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      standardId: ''
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -40,12 +40,10 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setSe
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
-        }) &&
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
         setSelectedRecordId(response.recordId)
+      }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -59,7 +57,7 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setSe
           parameters: `_recordId=${recordId}`
         })
 
-        setInitialData(res.record)
+        formik.setValues({ ...res.record })
       }
     })()
   }, [])

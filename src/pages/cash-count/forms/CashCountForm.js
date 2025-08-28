@@ -127,7 +127,6 @@ const CashCountForm = ({ recordId, window }) => {
         }
       ]
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       cashAccountRef: yup.string().required(),

@@ -39,7 +39,6 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
       seqNo: seqNo || null,
       amount: 0.0
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       baseAmount: yup.number().required(),

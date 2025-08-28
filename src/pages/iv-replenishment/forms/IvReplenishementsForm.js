@@ -36,7 +36,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       date: new Date(),
       notes: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
