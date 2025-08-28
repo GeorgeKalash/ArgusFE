@@ -227,7 +227,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId, inv
       recordId: shipHeader.record.recordId,
       dtId: shipHeader.record.dtId,
       header: {
-        ...formik.values.header,
         ...shipHeader.record,
       },
       items: itemsList
