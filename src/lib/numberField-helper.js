@@ -14,34 +14,49 @@ export function handleChangeNumber(inputValue, digitsBeforePoint, digitsAfterPoi
   setPosition(newCursorPosition)
 }
 
-const getFormattedNumber = (value, decimal, round = false) => {
+const formatValue = val => {
+  if (!val && val !== 0) return ''
+
+  return String(val)
+    .replace(/\.0+$/, '')
+    .replace(/(\.\d*?[1-9])0+$/, '$1')
+}
+
+const getFormattedNumber = (value, decimal, round = false, hideLeadingZeros = false) => {
   if (!value && value !== 0) return
 
-  const sanitizedValue = value.toString().replace(/[^0-9.-]/g, '')
+  const sanitizedValue = String(value).replace(/[^0-9.-]/g, '')
 
   const [integerPart, decimalPart] = sanitizedValue.split('.')
 
-  const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
-
-  let formattedDecimalPart = ''
+  let formattedValue
 
   if (decimalPart !== undefined) {
     if (decimal !== undefined) {
-      !round
-        ? (formattedDecimalPart = `.${decimalPart.slice(0, decimal)}`)
-        : (formattedDecimalPart = `.${parseFloat(`0.${decimalPart}`).toFixed(decimal).split('.')[1]}`)
+      if (!round) {
+        const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+        formattedValue = `${formattedIntegerPart}.${decimalPart.slice(0, decimal)}`
+      } else
+        formattedValue = new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: decimal,
+          maximumFractionDigits: decimal
+        }).format(Number(sanitizedValue))
     } else {
-      formattedDecimalPart = `.${decimalPart}`
+      const formattedIntegerPart = new Intl.NumberFormat('en-US').format(integerPart)
+      formattedValue = `${formattedIntegerPart}.${decimalPart}`
+    }
+  } else {
+    if (decimal) {
+      formattedValue = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: decimal,
+        maximumFractionDigits: decimal
+      }).format(Number(sanitizedValue))
+    } else {
+      formattedValue = new Intl.NumberFormat('en-US').format(integerPart)
     }
   }
 
-  let formattedValue = `${formattedIntegerPart}${formattedDecimalPart}`
-
-  if (decimal !== undefined && decimal >= 0 && !formattedValue.includes('.')) {
-    formattedValue += '.' + '0'.repeat(decimal)
-  }
-
-  return formattedValue
+  return hideLeadingZeros ? formatValue(formattedValue) : formattedValue
 }
 
 function getFormattedNumberMax(number, digitsBeforePoint, digitsAfterPoint) {
