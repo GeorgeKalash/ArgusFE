@@ -22,7 +22,6 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const conditions = {
     currencyId: row => row?.currencyId,

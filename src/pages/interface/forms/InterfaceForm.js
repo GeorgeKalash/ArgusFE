@@ -33,41 +33,47 @@ export default function InterfaceForm({ labels, recordId, maxAccess }) {
       description: ''
     },
     maxAccess,
+    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      reference: yup.string().required(),
-      path: yup.string().required(),
-      description: yup.string().required()
+      name: yup.string().required(' '),
+      reference: yup.string().required(' '),
+      path: yup.string().required(' '),
+      description: yup.string().required(' ')
     }),
     onSubmit: async obj => {
+      const recordId = obj.recordId
+
       const response = await postRequest({
         extension: RemittanceSettingsRepository.Interface.set,
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
+      if (!recordId) {
+        toast.success(platformLabels.Added)
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-        setEditMode(true)
-      }
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      } else toast.success(platformLabels.Edited)
+      setEditMode(true)
+
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: RemittanceSettingsRepository.Interface.get,
-          parameters: `_recordId=${recordId}`
-        })
+      try {
+        if (recordId) {
+          const res = await getRequest({
+            extension: RemittanceSettingsRepository.Interface.get,
+            parameters: `_recordId=${recordId}`
+          })
 
-        formik.setValues(res.record)
-      }
+          formik.setValues(res.record)
+        }
+      } catch (exception) {}
     })()
   }, [])
 
