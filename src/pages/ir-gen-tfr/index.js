@@ -23,6 +23,7 @@ import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRep
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
 import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function IRGenerateTransfer() {
   const { stack } = useWindow()
@@ -34,6 +35,12 @@ export default function IRGenerateTransfer() {
     datasetId: ResourceIds.GenerateTransfers
   })
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
+  const conditions = {
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
 
   const { formik } = useForm({
     maxAccess: access,
@@ -66,7 +73,8 @@ export default function IRGenerateTransfer() {
     validationSchema: yup.object({
       fromSiteId: yup.string().required(),
       toSiteId: yup.string().required(),
-      date: yup.date().required()
+      date: yup.date().required(),
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       if (!checkItems()) {
@@ -74,7 +82,7 @@ export default function IRGenerateTransfer() {
       }
 
       const updatedItems = obj.items
-        .filter(row => row.isChecked)
+        .filter(row => row.isChecked && requiredFields.every(fn => fn(row)))
         ?.map(itemDetails => {
           return {
             requestId: itemDetails.requestId,
@@ -254,7 +262,7 @@ export default function IRGenerateTransfer() {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
-          transferNow: newRow?.transferNow > 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
         })
       }
     }

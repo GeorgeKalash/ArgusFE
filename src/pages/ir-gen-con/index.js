@@ -25,6 +25,7 @@ import { useError } from 'src/error'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import WCConsumpForm from '../work-center-consumption/forms/WCConsumpForm'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function IRGenerateConsumption() {
   const { stack } = useWindow()
@@ -36,6 +37,12 @@ export default function IRGenerateConsumption() {
     datasetId: ResourceIds.GenerateConsumption
   })
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+
+  const conditions = {
+    qty: row => row?.qty > 0
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
 
   const { formik } = useForm({
     maxAccess: access,
@@ -70,7 +77,8 @@ export default function IRGenerateConsumption() {
     validationSchema: yup.object({
       fromSiteId: yup.string().required(),
       workCenterId: yup.string().required(),
-      date: yup.date().required()
+      date: yup.date().required(),
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       if (!checkItems()) {
@@ -78,7 +86,7 @@ export default function IRGenerateConsumption() {
       }
 
       const updatedItems = obj.items
-        .filter(row => row.isChecked)
+        .filter(row => row.isChecked && requiredFields.every(fn => fn(row)))
         ?.map(itemDetails => {
           return {
             requestId: itemDetails.requestId,
@@ -266,7 +274,7 @@ export default function IRGenerateConsumption() {
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         update({
-          transferNow: newRow?.transferNow > 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
         })
       }
     }
