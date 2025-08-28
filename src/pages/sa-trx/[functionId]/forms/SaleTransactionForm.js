@@ -922,8 +922,8 @@ export default function SaleTransactionForm({
         onSuccess: () => {
           addLockedScreen({
             resourceId: getResourceId(parseInt(functionId)),
-            recordId,
-            reference
+            recordId: res.recordId,
+            reference: formik.values.header.reference
           })
           refetchForm(res.recordId)
         },
@@ -1132,7 +1132,6 @@ export default function SaleTransactionForm({
             recordId: saTrxHeader.recordId,
             reference: saTrxHeader.reference
           })
-          refetchForm(res.recordId)
         }
       })
   }
