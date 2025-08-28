@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -37,6 +37,10 @@ const OpenPurchaseOrder = () => {
 
   const { labels: _labels, access: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.Shipments
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ReportPuGeneratorRepository.OpenPurchaseOrder.open
   })
 
   const defaultVat = defaultsData?.list?.find(({ key }) => key === 'POSHPVarPct')
@@ -99,7 +103,8 @@ const OpenPurchaseOrder = () => {
             maxAccess,
             plantId,
             siteId,
-            dtId
+            dtId,
+            invalidate
           },
           width: 1300,
           height: 700,
