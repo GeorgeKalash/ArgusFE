@@ -45,6 +45,7 @@ export const SystemFunction = {
   SubsequentPurchaseDebit: Module.Purchase * 100 + 6,
   SubsequentPurchaseCredit: Module.Purchase * 100 + 7,
   ShipmentReturn: Module.Purchase * 100 + 8,
+  PUDraftSerialReturn: Module.Purchase * 100 + 9,
   SalesQuotation: Module.Sales * 100 + 0,
   SalesOrder: Module.Sales * 100 + 1,
   SalesInvoice: Module.Sales * 100 + 2,
@@ -122,7 +123,9 @@ export const SystemFunction = {
   BalanceTransferMultiAccount: Module.Financials * 100 + 13,
   BalanceTransferPurchase: Module.Financials * 100 + 10,
   BalanceTransferSales: Module.Financials * 100 + 11,
-  BalanceAdjustment: Module.LeaveReq * 100 + 4
+  BalanceAdjustment: Module.LeaveReq * 100 + 4,
+  Samples: Module.ProductModeling * 100 + 7,
+  MetalSmelting: Module.Foundry * 100 + 5
 }
 
 export const getSystemFunctionModule = functionId => {

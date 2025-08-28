@@ -4,12 +4,14 @@ export const CurrencyTradingSettingsRepository = {
   CommissionType: {
     qry: service + 'qryCOM',
     page: service + 'pageCOM',
+    snapshot: service + 'snapshotCOM',
     get: service + 'getCOM',
     set: service + 'setCOM',
     del: service + 'delCOM'
   },
   RelationType: {
     page: service + 'pageRT',
+    snapshot: service + 'snapshotRT',
     qry: service + 'qryRT',
     get: service + 'getRT',
     set: service + 'setRT',
@@ -47,14 +49,16 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getRSK',
     set: service + 'setRSK',
     del: service + 'delRSK',
-    page: service + 'pageRSK'
+    page: service + 'pageRSK',
+    snapshot: service + 'snapshotRSK'
   },
   PurposeExchange: {
     qry: service + 'qryPEX',
     get: service + 'getPEX',
     set: service + 'setPEX',
     del: service + 'delPEX',
-    page: service + 'pagePEX'
+    page: service + 'pagePEX',
+    snapshot: service + 'snapshotPEX'
   },
   ExchangeMap: {
     qry: service + 'qryEXM',
@@ -67,7 +71,8 @@ export const CurrencyTradingSettingsRepository = {
     get: service + 'getPEG',
     set: service + 'setPEG',
     del: service + 'delPEG',
-    page: service + 'pagePEG'
+    page: service + 'pagePEG',
+    snapshot: service + 'snapshotPEG'
   },
   Yakeen: {
     get: service + 'getYakeenInformations'
@@ -83,5 +88,12 @@ export const CurrencyTradingSettingsRepository = {
   },
   ScannerImage: {
     set: service + 'saveScannerImage'
+  },
+  MasterDataDTD: {
+    qry: service + 'qryLDT',
+    page: service + 'pageLDT',
+    set: service + 'setLDT',
+    get: service + 'getLDT',
+    del: service + 'delLDT'
   }
 }

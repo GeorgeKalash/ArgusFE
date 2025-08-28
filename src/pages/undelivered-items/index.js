@@ -250,17 +250,11 @@ const UndeliveredItems = () => {
     }
   ]
 
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
-  }
-
   const actions = [
     {
       key: 'ORD',
       condition: true,
-      onClick: handleSubmit
+      onClick: () => formik.handleSubmit()
     }
   ]
 

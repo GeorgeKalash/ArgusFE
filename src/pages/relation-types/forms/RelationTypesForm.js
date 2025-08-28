@@ -34,9 +34,9 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      flName: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      flName: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId

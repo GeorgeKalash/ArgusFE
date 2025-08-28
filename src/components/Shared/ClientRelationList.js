@@ -54,23 +54,30 @@ export const ClientRelationList = ({ recordId, name, reference, category, window
     {
       field: 'parentName',
       headerName: _labels.clientName,
-      flex: 1
+      flex: 2
     },
     {
       field: 'relationName',
-      headerName: _labels.relationName,
+      headerName: _labels.relation,
       flex: 1
     },
     {
       field: 'expiryDate',
       headerName: _labels.expiryDate,
-      type: 'date'
+      type: 'date',
+      flex: 1
     },
-
     {
       field: 'activationDate',
       headerName: _labels.activationDate,
-      type: 'date'
+      type: 'date',
+      flex: 1
+    },
+    {
+      field: 'otpVerified',
+      headerName: _labels.otp,
+      type: 'checkbox',
+      flex: 1
     }
   ]
 

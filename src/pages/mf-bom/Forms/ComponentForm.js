@@ -35,7 +35,7 @@ export default function ComponentForm({
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       costTypeId: null,
       bomId,
       itemId: null,
@@ -127,8 +127,9 @@ export default function ComponentForm({
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={InventoryRepository.RMSKU.snapshot}
+                endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
+                autoFocus={!editMode}
                 label={labels?.sku}
                 valueField='recordId'
                 displayField='sku'

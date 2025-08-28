@@ -10,7 +10,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
@@ -32,9 +31,9 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      type: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -59,16 +58,14 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CurrencyTradingSettingsRepository.CommissionType.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CurrencyTradingSettingsRepository.CommissionType.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

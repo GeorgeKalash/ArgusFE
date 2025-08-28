@@ -16,12 +16,14 @@ const AddressTab = ({
   defaultReadOnly = {},
   required = true,
   setFormik,
-  access
+  access,
+  ...props
 }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.Address
+    datasetId: ResourceIds.Address,
+    DatasetIdAccess: props?.datasetId,
   })
 
   const lastRecordIdRef = useRef(null)
@@ -256,7 +258,7 @@ const AddressTab = ({
           }
           valueField='name'
           displayField='name'
-          name='cityDistrict'
+          name='cityDistrictId'
           label={labels.cityDistrict}
           readOnly={readOnly || !addressValidation.values.cityId}
           form={addressValidation}
@@ -270,7 +272,7 @@ const AddressTab = ({
               addressValidation.setFieldValue('cityDistrict', '')
             }
           }}
-          errorCheck={'cityDistrict'}
+          errorCheck={'cityDistrictId'}
           maxAccess={maxAccess}
         />
       </FormGrid>

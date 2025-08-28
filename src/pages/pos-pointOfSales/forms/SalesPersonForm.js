@@ -82,7 +82,10 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
           { from: 'recordId', to: 'spId' },
           { from: 'name', to: 'spName' }
         ],
-        columnsInDropDown: [{ key: 'name', value: 'Name' }]
+        columnsInDropDown: [
+          { key: 'spRef', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ]
       }
     },
     {

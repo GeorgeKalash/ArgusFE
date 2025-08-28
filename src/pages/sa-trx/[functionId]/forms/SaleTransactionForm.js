@@ -63,6 +63,8 @@ import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import ChangeClient from 'src/components/Shared/ChangeClient'
 
 export default function SaleTransactionForm({
   labels,
@@ -1115,7 +1117,8 @@ export default function SaleTransactionForm({
         subtotal: saTrxHeader?.subtotal.toFixed(2),
         accountId: res?.record?.accountId,
         commitItems: dtInfo?.record?.commitItems,
-        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials
+        postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
+        maxDiscount: res?.record?.maxDiscount || 0
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1588,7 +1591,8 @@ export default function SaleTransactionForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDSalesTransaction
       }
     })
   }
@@ -1767,6 +1771,12 @@ export default function SaleTransactionForm({
     })
 
     invalidate()
+  }
+
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(`header.${key}`, val)
+    })
   }
 
   return (
@@ -1975,7 +1985,7 @@ export default function SaleTransactionForm({
                 error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}
               />
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
                 name='header.clientId'
@@ -2011,6 +2021,30 @@ export default function SaleTransactionForm({
                 displayFieldWidth={5}
                 editMode={editMode}
                 error={formik.touched?.header?.clientId && Boolean(formik.errors?.header?.clientId)}
+              />
+            </Grid>
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={() => {
+                  stack({
+                    Component: ChangeClient,
+                    props: {
+                      formValues: formik.values.header,
+                      onSubmit: fields => updateValues(fields)
+                    }
+                  })
+                }}
+                image='popup.png'
+                disabled={
+                  !(
+                    (editMode && !isPosted && formik.values.header.clientId) ||
+                    (!editMode &&
+                      formik.values.header.clientId &&
+                      formik.values.items?.length > 0 &&
+                      formik.values.items?.some(item => item?.itemId))
+                  )
+                }
+                tooltipText={platformLabels.editClient}
               />
             </Grid>
             <Grid item xs={1}>
