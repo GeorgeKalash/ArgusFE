@@ -22,7 +22,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       jobId: recordId,

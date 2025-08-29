@@ -32,7 +32,6 @@ export default function JoDtdForm({ labels, maxAccess, recordId, window }) {
       plantId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

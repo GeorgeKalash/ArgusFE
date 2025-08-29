@@ -21,7 +21,6 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       userId: storeRecordId || null,

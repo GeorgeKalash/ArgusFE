@@ -127,7 +127,7 @@ export default function ComponentForm({
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={InventoryRepository.RMSKU.snapshot}
+                endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
                 autoFocus={!editMode}
                 label={labels?.sku}

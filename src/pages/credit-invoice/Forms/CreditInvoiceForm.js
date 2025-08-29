@@ -157,8 +157,7 @@ const CreditInvoiceForm = ({ recordId, window }) => {
         record: JSON.stringify(resultObject)
       })
 
-      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       await refetchForm(res.recordId)
       invalidate()
     }

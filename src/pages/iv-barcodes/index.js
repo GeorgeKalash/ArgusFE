@@ -13,7 +13,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import BarcodesForm from './Forms/BarcodesForm'
-import { Box, Button, Grid } from '@mui/material'
+import { Button, Grid } from '@mui/material'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 
@@ -28,7 +28,6 @@ const IvBarcodes = () => {
     initialValues: {
       itemId: null
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.string().required()

@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
@@ -54,7 +54,6 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
       maxEndTime: '',
       status: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -73,68 +72,54 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
         })
     }),
     onSubmit: async obj => {
-      try {
-        // Format maxEndTime to hh:mm
-        const date = new Date(obj.maxEndTime)
-        const hours = date.getUTCHours().toString().padStart(2, '0')
-        const minutes = date.getUTCMinutes().toString().padStart(2, '0')
-        const formattedMaxEndTime = `${hours}:${minutes}`
+      const date = new Date(obj.maxEndTime)
+      const hours = date.getUTCHours().toString().padStart(2, '0')
+      const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+      const formattedMaxEndTime = `${hours}:${minutes}`
 
-        // Update the object with the formatted time
-        const updatedObj = {
-          ...obj,
-          maxEndTime: formattedMaxEndTime
-        }
+      const updatedObj = {
+        ...obj,
+        maxEndTime: formattedMaxEndTime
+      }
 
-        const response = await postRequest({
-          extension: PointofSaleRepository.PointOfSales.set,
-          record: JSON.stringify(updatedObj)
-        })
+      const response = await postRequest({
+        extension: PointofSaleRepository.PointOfSales.set,
+        record: JSON.stringify(updatedObj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: response.recordId
+      }))
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
-          formik.setFieldValue('recordId', response.recordId)
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId
-          }))
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: PointofSaleRepository.PointOfSales.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: PointofSaleRepository.PointOfSales.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const [hours, minutes] = res.record.maxEndTime.split(':')
+        const [hours, minutes] = res.record.maxEndTime.split(':')
 
-          const transformedMaxEndTime = dayjs()
-            .set('hour', parseInt(hours, 10))
-            .set('minute', parseInt(minutes, 10))
-            .set('second', 0)
-            .set('millisecond', 0)
+        const transformedMaxEndTime = dayjs()
+          .set('hour', parseInt(hours, 10))
+          .set('minute', parseInt(minutes, 10))
+          .set('second', 0)
+          .set('millisecond', 0)
 
-          formik.setValues({
-            ...res.record,
-            onlineStore: Boolean(res.record.onlineStore),
-            maxEndTime: transformedMaxEndTime
-          })
-        }
-      } catch (error) {
-        // Handle errors here
-        console.error('Error fetching data:', error)
+        formik.setValues({
+          ...res.record,
+          onlineStore: Boolean(res.record.onlineStore),
+          maxEndTime: transformedMaxEndTime
+        })
       }
     })()
   }, [recordId])

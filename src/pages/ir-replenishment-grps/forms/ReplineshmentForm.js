@@ -30,7 +30,6 @@ export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
       defaultMaxQty: '',
       defaultMinQty: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

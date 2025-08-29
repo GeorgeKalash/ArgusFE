@@ -164,7 +164,7 @@ const JobOrder = () => {
         invalidate
       },
       width: 1150,
-      height: 700,
+      height: 720,
       title: labels.jobOrder,
       nextToTitle: reference
     })

@@ -18,7 +18,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 export default function ActivityForm({ labels, maxAccess, recordId }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -28,12 +27,11 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', flName: '', industry: '' },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      industry: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      industry: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -58,16 +56,14 @@ export default function ActivityForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CurrencyTradingSettingsRepository.Activity.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CurrencyTradingSettingsRepository.Activity.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

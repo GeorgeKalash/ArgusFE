@@ -32,7 +32,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
   const { stack } = useWindow()
 
   const { recordId } = store
-  const editMode = !!recordId
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ModelMaker,
@@ -62,7 +61,6 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       productionLineId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       laborId: yup.string().required(),
@@ -87,6 +85,7 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
   const isPosted = formik.values.status == 3
 

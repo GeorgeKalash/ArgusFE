@@ -35,7 +35,6 @@ export default function BusinessRulesForm({ labels, obj, window, maxAccess }) {
       isActive: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

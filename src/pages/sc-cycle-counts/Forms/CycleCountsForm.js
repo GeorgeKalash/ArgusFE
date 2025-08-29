@@ -62,7 +62,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       disableItemDuplicate: false
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       genVar: yup.string().required(),

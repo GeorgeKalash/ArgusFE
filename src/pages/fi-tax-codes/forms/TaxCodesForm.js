@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,11 +13,12 @@ import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function TaxCodesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.TaxCodes.qry
@@ -26,15 +27,12 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', nonDeductible: false },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.TaxCodes.set,
         record: JSON.stringify(obj)
@@ -45,29 +43,23 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
           ...prevStore,
           recordId: response.recordId
         }))
-        toast.success('Record Added Successfully')
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success('Record Edited Successfully')
-
+        formik.setFieldValue('recordId', response.recordId)
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.TaxCodes.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.TaxCodes.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -117,7 +109,6 @@ export default function TaxCodesForm({ labels, maxAccess, setStore, store, editM
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-
             <Grid item sx={{ pb: '10px' }} xs={12}>
               <CustomCheckBox
                 name='nonDeductible'

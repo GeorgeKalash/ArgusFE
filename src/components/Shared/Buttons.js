@@ -355,7 +355,8 @@ export const getButtons = platformLabels => [
   {
     key: 'Refresh',
     label: platformLabels.Refresh,
-    color: '#231F20',
+    image: 'exchange-refresh-icon.png',
+    color: '#D3D3D3',
     main: false
   },
   {

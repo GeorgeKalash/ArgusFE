@@ -36,7 +36,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       gridRows: [],

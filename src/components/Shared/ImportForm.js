@@ -29,9 +29,9 @@ const convertValue = (value, dataType, isAPI = false) => {
   }
   switch (dataType) {
     case 2:
-      return parseInt(value, 10) || 0
+      return parseInt(value, 10)
     case 3:
-      return parseFloat(value) || 0
+      return parseFloat(value)
     case 5:
       return isAPI ? formatDateForImport(value) : formatDateDefault(formatDate(value))
     default:
@@ -204,7 +204,7 @@ const ImportForm = ({ onSuccess, resourceId, access, window }) => {
     onSuccess?.(res)
 
     toast.success(platformLabels.Imported)
-    window.close()
+    if (window) window.close()
   }
 
   const actions = [

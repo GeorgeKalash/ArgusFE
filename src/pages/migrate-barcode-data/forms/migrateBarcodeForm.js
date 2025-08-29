@@ -34,7 +34,6 @@ const MigrateBarcodeForm = () => {
       fromBarcode: null,
       toBarcode: null
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       fromBarcode: yup.string().required(),

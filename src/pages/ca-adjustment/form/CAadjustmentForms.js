@@ -66,7 +66,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       notes: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.string().required(),
@@ -434,7 +433,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={CashBankRepository.CashAccount.qry}
-                parameters={`_type=2`}
+                parameters={`_type=0`}
                 name='cashAccountId'
                 readOnly={isPosted}
                 required

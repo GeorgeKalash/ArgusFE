@@ -131,7 +131,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     initialValues,
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

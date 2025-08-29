@@ -57,7 +57,6 @@ const GenerateOutboundTransportation2 = () => {
       unallocatedOrders: { list: [] }
     },
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       departureDate: yup.date().required(),

@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import CountryRiskLevelForm from './Forms/CountryRiskLevelForm'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const CountryRiskLevel = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,43 +19,51 @@ const CountryRiskLevel = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: RemittanceSettingsRepository.CountryRisk.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
   const {
     query: { data },
-    labels: _labels,
+    labels,
     paginationParameters,
+    filterBy,
     refetch,
-    access,
-    invalidate
+    invalidate,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RemittanceSettingsRepository.CountryRisk.page,
-    datasetId: ResourceIds.CountryRiskLevel
+    datasetId: ResourceIds.CountryRiskLevel,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
 
   const columns = [
     {
       field: 'countryRef',
-      headerName: _labels.countryRef,
+      headerName: labels.countryRef,
       flex: 1
     },
     {
       field: 'countryName',
-      headerName: _labels.countryName,
+      headerName: labels.countryName,
       flex: 1
     },
     {
       field: 'riskLevelName',
-      headerName: _labels.riskLevelName,
+      headerName: labels.riskLevelName,
       flex: 1
     }
   ]
@@ -72,13 +80,13 @@ const CountryRiskLevel = () => {
     stack({
       Component: CountryRiskLevelForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 500,
       height: 300,
-      title: _labels.countryRiskLevel
+      title: labels.countryRiskLevel
     })
   }
 
@@ -94,7 +102,7 @@ const CountryRiskLevel = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar hasSearch={false} onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'RTCOU'} />
       </Fixed>
       <Grow>
         <Table

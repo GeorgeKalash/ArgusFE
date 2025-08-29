@@ -123,6 +123,7 @@ export const RemittanceSettingsRepository = {
   SourceOfIncome: {
     qry: service + 'qrySI',
     page: service + 'pageSI',
+    snapshot: service + 'snapshotSI',
     get: service + 'getSI',
     set: service + 'setSI',
     del: service + 'delSI'
@@ -138,6 +139,7 @@ export const RemittanceSettingsRepository = {
   },
   SourceOfIncomeType: {
     qry: service + 'qrySIT',
+    snapshot: service + 'snapshotSIT',
     page: service + 'pageSIT',
     get: service + 'getSIT',
     set: service + 'setSIT',
@@ -146,6 +148,7 @@ export const RemittanceSettingsRepository = {
   ProfessionGroups: {
     qry: service + 'qryPFG',
     page: service + 'pagePFG',
+    snapshot: service + 'snapshotPFG',
     get: service + 'getPFG',
     set: service + 'setPFG',
     del: service + 'delPFG'
@@ -161,6 +164,8 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEI',
     get: service + 'getEI',
     del: service + 'delEI',
+    page: service + 'pageEI',
+    snapshot: service + 'snapshotEI',
     set: service + 'setEI'
   },
   CountryRisk: {
@@ -181,6 +186,6 @@ export const RemittanceSettingsRepository = {
   },
   CorrespondentDispersalRate: {
     qry: service + 'qryCDR',
-    set2: service + 'set2CDR',
+    set2: service + 'set2CDR'
   }
 }

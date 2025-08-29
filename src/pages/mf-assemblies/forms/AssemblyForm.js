@@ -83,7 +83,6 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

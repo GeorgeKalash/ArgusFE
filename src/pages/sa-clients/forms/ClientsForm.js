@@ -62,7 +62,6 @@ const ClientsForms = ({ labels, maxAccess: access, setStore, store }) => {
       isInactive: false
     },
     maxAccess: maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

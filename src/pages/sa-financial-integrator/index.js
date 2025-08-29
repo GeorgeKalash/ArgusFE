@@ -38,7 +38,6 @@ const FinancialIntegrators = () => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       rows: []

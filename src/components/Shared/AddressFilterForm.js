@@ -34,9 +34,8 @@ export default function AddressFilterForm({
 
   const { formik } = useForm({
     initialValues: { search: '', cityId: null, countryId: null },
-    enableReinitialize: true,
     validateOnChange: true,
-    onSubmit: async obj => {
+    onSubmit: async () => {
       const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD?.addressId) {
         handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })

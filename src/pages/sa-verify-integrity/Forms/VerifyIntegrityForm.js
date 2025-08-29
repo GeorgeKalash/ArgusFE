@@ -25,7 +25,6 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
       verifyIVC: false
     },
     maxAccess,
-    enableReinitialize: false,
     onSubmit: async () => {
       const res = await getRequest({
         extension: SaleRepository.VerifyIntegrity.check,

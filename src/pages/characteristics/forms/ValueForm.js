@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
 import { formatDateFromApi } from 'src/lib/date-helper'
@@ -17,13 +17,10 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
-    value: null
-  })
-
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      value: null
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       value: yup.string().required()
@@ -41,9 +38,7 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
       record: JSON.stringify(obj)
     }).then(res => {
       getValueGridData(chId)
-      if (recordId) {
-        toast.success(platformLabels.Edited)
-      } else toast.success(platformLabels.Added)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       window.close()
     })
   }

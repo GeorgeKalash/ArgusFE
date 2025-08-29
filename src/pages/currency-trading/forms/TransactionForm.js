@@ -171,7 +171,6 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     validate: values => {

@@ -28,9 +28,19 @@ const MasterDataDTD = () => {
 
     return { ...response, _startAt: _startAt }
   }
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.MasterDataDTD.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const {
     query: { data },
+    search,
+    clear,
     labels,
     paginationParameters,
     refetch,
@@ -39,7 +49,10 @@ const MasterDataDTD = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.MasterDataDTD.page,
-    datasetId: ResourceIds.MasterDataDTD
+    datasetId: ResourceIds.MasterDataDTD,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -84,7 +97,7 @@ const MasterDataDTD = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

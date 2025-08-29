@@ -24,22 +24,18 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
       name: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       id: yup.string().required()
     }),
     onSubmit: async obj => {
-      const id = obj.id
-
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.Dimension.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(platformLabels.Updated)
-
       fetchData()
       window.close()
     }

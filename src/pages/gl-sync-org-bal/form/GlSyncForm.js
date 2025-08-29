@@ -20,7 +20,6 @@ export default function GlSyncForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', currencyId: '', recordId: 'N/A', effectiveDate: null },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
 

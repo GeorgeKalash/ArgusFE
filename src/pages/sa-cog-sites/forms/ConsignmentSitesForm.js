@@ -33,7 +33,6 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
       clientRef: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       clientRef: yup.string().required()
     }),

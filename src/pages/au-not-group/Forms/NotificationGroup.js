@@ -28,7 +28,6 @@ export default function NotificationGroupForm({ labels, maxAccess, recordId }) {
       reference: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -40,12 +39,9 @@ export default function NotificationGroupForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
-
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
       invalidate()
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
   const editMode = !!formik.values.recordId

@@ -57,9 +57,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
-
     initialValues: {
       resourceId: row.resourceId,
       resourceName: row.resourceName

@@ -4,7 +4,7 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -24,37 +24,48 @@ const CtRiskLevel = () => {
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.RiskLevel.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.RiskLevel.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
-    labels: _labels,
+    search,
+    clear,
+    labels,
     paginationParameters,
     refetch,
+    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.RiskLevel.page,
-    datasetId: ResourceIds.RiskLevel
-  })
-
-  const invalidate = useInvalidate({
-    endpointId: CurrencyTradingSettingsRepository.RiskLevel.page
+    datasetId: ResourceIds.RiskLevel,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -71,13 +82,13 @@ const CtRiskLevel = () => {
     stack({
       Component: CtRiskLevelsForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 500,
       height: 330,
-      title: _labels.riskLevel
+      title: labels.riskLevel
     })
   }
 
@@ -93,7 +104,7 @@ const CtRiskLevel = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
@@ -103,7 +114,6 @@ const CtRiskLevel = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationParameters={paginationParameters}
           paginationType='api'

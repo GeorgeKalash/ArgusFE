@@ -43,7 +43,6 @@ const ProductAgentForm = ({
   ]
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       agents: yup

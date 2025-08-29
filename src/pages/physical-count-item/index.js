@@ -42,7 +42,6 @@ const PhysicalCountItem = () => {
       totalWeight: ''
     },
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       stockCountId: yup.string().required(),

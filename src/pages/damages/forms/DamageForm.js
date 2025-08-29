@@ -54,7 +54,6 @@ export default function DamageForm({ recordId, jobId }) {
       workCenterId: null,
       maxPcs: 50
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required(),

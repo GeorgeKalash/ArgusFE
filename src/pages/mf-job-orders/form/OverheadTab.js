@@ -21,7 +21,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       items: [

@@ -16,7 +16,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 export default function OpenMultiForm({ labels, maxAccess, recordId, plId, window }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  console.log(plId, 'plantId2')
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.OpenMultiCurrencyCashTransfer.open
@@ -30,13 +29,12 @@ export default function OpenMultiForm({ labels, maxAccess, recordId, plId, windo
       cashAccountName: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       cashAccountId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: CashBankRepository.OpenMultiCurrencyCashTransfer.set,
         record: JSON.stringify(obj)
       })

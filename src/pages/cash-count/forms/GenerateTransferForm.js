@@ -26,7 +26,6 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
       toPlantId: '',
       toAccountId: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       toPlantId: yup.string().required(' '),
