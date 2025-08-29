@@ -1,4 +1,4 @@
-import React, { forwardRef, useContext, useEffect, useImperativeHandle, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -11,7 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const UserSecretOTPQrCodeForm = forwardRef((_, ref) => {
+const UserSecretOTPQrCodeForm = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const { getRequest, postRequest } = useContext(RequestsContext)
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
@@ -54,10 +54,6 @@ const UserSecretOTPQrCodeForm = forwardRef((_, ref) => {
     toast.success(platformLabels.Enabled)
   }
 
-  useImperativeHandle(ref, () => ({
-    submit: handleGenerated2FA
-  }))
-
   const actions = [
     {
       key: 'generated 2 FA',
@@ -89,6 +85,6 @@ const UserSecretOTPQrCodeForm = forwardRef((_, ref) => {
       </Fixed>
     </VertLayout>
   )
-})
+}
 
 export default UserSecretOTPQrCodeForm

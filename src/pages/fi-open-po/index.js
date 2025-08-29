@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -18,7 +18,7 @@ import { useError } from 'src/error'
 import FiPaymentVouchersForm from '../fi-payment-vouchers/forms/FiPaymentVouchersForm'
 import FiPaymentVoucherExpensesForm from '../fi-pv-expenses/forms/PaymentVoucherExpensesForm'
 
-const OpenPaymentOrder = forwardRef((_, ref) => {
+const OpenPaymentOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -179,10 +179,6 @@ const OpenPaymentOrder = forwardRef((_, ref) => {
     }
   ]
 
-  useImperativeHandle(ref, () => ({
-    submit: () => generatePV(record)
-  }))
-
   return (
     <VertLayout>
       <Fixed>
@@ -210,6 +206,6 @@ const OpenPaymentOrder = forwardRef((_, ref) => {
       </Fixed>
     </VertLayout>
   )
-})
+}
 
 export default OpenPaymentOrder
