@@ -45,6 +45,7 @@ export default function IRGenerateTransfer() {
 
   const { formik } = useForm({
     maxAccess: access,
+    conditionSchema: ['items'],
     initialValues: {
       dtId: null,
       fromSiteId: null,
