@@ -8,8 +8,8 @@ const CtIndex = () => {
       datasetId={ResourceIds.CtDefaults}
       labelKey={'rmd'}
       Component={CtDefaults}
-      height={630}
-      width={1000}
+      height={500}
+      width={850}
     />
   )
 }
