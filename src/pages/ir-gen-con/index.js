@@ -39,7 +39,8 @@ export default function IRGenerateConsumption() {
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const conditions = {
-    transferNow: row => row?.transferNow > 0
+    transferNow: row => row?.transferNow > 0,
+    isChecked: row => row?.isChecked
   }
 
   const { schema } = createConditionalSchema(conditions, true, access, 'items')
@@ -258,7 +259,7 @@ export default function IRGenerateConsumption() {
       async onChange({ row: { update, newRow } }) {
         const tfrNow = newRow?.transferNow
         update({
-          transferNow: (tfrNow >= 0 && tfrNow < newRow?.qty ? tfrNow : newRow?.qty) || '0'
+          transferNow: tfrNow >= 0 && tfrNow < newRow?.qty ? tfrNow : newRow?.qty
         })
       }
     }
