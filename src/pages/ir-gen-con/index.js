@@ -39,10 +39,10 @@ export default function IRGenerateConsumption() {
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const conditions = {
-    qty: row => row?.qty > 0
+    transferNow: row => row?.transferNow > 0
   }
 
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
+  const { schema } = createConditionalSchema(conditions, true, access, 'items')
 
   const { formik } = useForm({
     maxAccess: access,
@@ -54,24 +54,7 @@ export default function IRGenerateConsumption() {
       reference: '',
       wcRef: '',
       wcName: '',
-      items: [
-        {
-          id: 1,
-          isChecked: false,
-          sku: '',
-          itemId: null,
-          itemName: '',
-          requestRef: '',
-          requestDate: null,
-          siteRef: '',
-          siteName: '',
-          onHandSite: 0,
-          onHandGlobal: 0,
-          qty: 0,
-          deliveredQty: 0,
-          balance: 0
-        }
-      ]
+      items: []
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -86,7 +69,7 @@ export default function IRGenerateConsumption() {
       }
 
       const updatedItems = obj.items
-        .filter(row => row.isChecked && requiredFields.every(fn => fn(row)))
+        .filter(row => row.isChecked)
         ?.map(itemDetails => {
           return {
             requestId: itemDetails.requestId,
@@ -273,8 +256,9 @@ export default function IRGenerateConsumption() {
       },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        const tfrNow = parseFloat(newRow?.transferNow)
         update({
-          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: tfrNow >= 0 && tfrNow < newRow?.qty ? tfrNow : newRow?.qty
         })
       }
     }
