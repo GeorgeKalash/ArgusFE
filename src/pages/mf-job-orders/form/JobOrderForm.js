@@ -107,7 +107,6 @@ export default function JobOrderForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       date: yup.string().required(),

@@ -33,7 +33,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

@@ -14,7 +14,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }) {
+export default function CostCenterForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -26,30 +26,25 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
       ccgId: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.CostCenter.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.CostCenter.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId)
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
+        })
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+
+      invalidate()
     }
   })
 
@@ -61,15 +56,13 @@ export default function CostCenterForm({ labels, maxAccess, recordId, onSubmit }
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.CostCenter.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.CostCenter.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [recordId])
 

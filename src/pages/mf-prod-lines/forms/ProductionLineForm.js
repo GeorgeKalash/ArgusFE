@@ -32,7 +32,6 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       ccId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -45,7 +44,6 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       })
       formik.setFieldValue('recordId', res.recordId)
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-
       invalidate()
     }
   })

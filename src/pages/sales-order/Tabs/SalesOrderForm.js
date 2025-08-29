@@ -175,7 +175,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     documentType: { key: 'dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

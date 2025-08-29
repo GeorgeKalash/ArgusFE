@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,9 +16,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -27,7 +25,6 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: { recordId: null, reference: '', name: '', type: '' },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -43,18 +40,17 @@ export default function CommissionTypesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

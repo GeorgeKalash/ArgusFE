@@ -29,7 +29,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const [fullGroups, setFullGroups] = useState(initialGroups)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',

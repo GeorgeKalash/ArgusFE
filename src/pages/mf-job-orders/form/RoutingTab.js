@@ -23,7 +23,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       jobId: recordId,

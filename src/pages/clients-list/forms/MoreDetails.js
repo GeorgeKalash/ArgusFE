@@ -48,7 +48,6 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
       extraIncomeId: '',
       educationLevel: ''
     },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     onSubmit: async obj => {

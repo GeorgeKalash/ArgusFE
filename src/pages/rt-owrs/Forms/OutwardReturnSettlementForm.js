@@ -53,7 +53,6 @@ export default function OutwardReturnSettlementForm({
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: null,
@@ -112,19 +111,17 @@ export default function OutwardReturnSettlementForm({
         record: JSON.stringify(data)
       }).then(async res => {
         if (!obj.recordId) {
-          toast.success(platformLabels.Added)
           const result = await getData(res?.recordId)
           viewOTP(result)
-        } else {
-          toast.success(platformLabels.Edited)
         }
+        toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       })
 
       invalidate()
     }
   })
 
-  const editMode = !!recordId || !!formik?.values?.recordId
+  const editMode = !!formik.values.recordId
   const isPosted = formik?.values?.status === 3
   const isClosed = formik?.values?.wip === 2
   const isOTPVerified = formik?.values?.otpVerified

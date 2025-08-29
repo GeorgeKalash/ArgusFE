@@ -1,6 +1,6 @@
 import { useFormik } from 'formik'
 import * as yup from 'yup'
-import { useEffect, useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { SaleRepository } from 'src/repositories/SaleRepository'
@@ -12,7 +12,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
@@ -21,16 +20,15 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { user, setUser } = useContext(AuthContext)
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useContext(AuthContext)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.Target.qry
   })
 
   const detailsFormik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
+    enableReinitialize: true,
     initialValues: {
       rows: [
         {
@@ -45,7 +43,6 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
   })
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       recordId: recordId,
@@ -78,15 +75,12 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         items: updatedRowsWithoutMonthId
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.TargetMonth.set2,
         record: JSON.stringify(resultObject)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -170,20 +164,6 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
       width: 300
     }
   ]
-
-  useEffect(() => {
-    ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-        }
-      } catch (error) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordId])
 
   return (
     <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>

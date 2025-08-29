@@ -17,7 +17,6 @@ const SmsFunctionTemplate = () => {
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: { rows: [] },
     onSubmit: async values => {

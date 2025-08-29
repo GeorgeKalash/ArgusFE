@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
-import { Grid, Box } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -10,22 +10,15 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 import { useResourceQuery } from 'src/hooks/resource'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CurrencyRateExchangeMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  //state
   const [exchangeTableStore, setExchangeTableStore] = useState([])
-  const [errorMessage, setErrorMessage] = useState()
 
   const { labels: labels, access } = useResourceQuery({
     datasetId: ResourceIds.CurrencyRateExchangeMap
@@ -38,29 +31,22 @@ const CurrencyRateExchangeMap = () => {
     getRequest({
       extension: MultiCurrencyRepository.ExchangeTable.qry2,
       parameters: parameters
+    }).then(res => {
+      setExchangeTableStore(res)
     })
-      .then(res => {
-        setExchangeTableStore(res)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
-  const [initialValues, setInitialData] = useState({
-    currencyId: '',
-    rateTypeId: ''
-  })
-
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      currencyId: '',
+      rateTypeId: ''
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
       rateTypeId: yup.string().required()
     }),
-    onSubmit: values => {}
+    onSubmit: () => {}
   })
 
   useEffect(() => {
@@ -75,7 +61,6 @@ const CurrencyRateExchangeMap = () => {
   }, [formik.values])
 
   const exchangeMapsGridValidation = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validate: values => {
       const isValid = values.rows && values.rows.every(row => !!row.plantId)
@@ -114,13 +99,9 @@ const CurrencyRateExchangeMap = () => {
     await postRequest({
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      if (res) toast.success('Saved Successfully')
     })
-      .then(res => {
-        if (res) toast.success('Saved Successfully')
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
 
   const getCurrenciesExchangeMaps = (currencyId, rateTypeId) => {
@@ -130,43 +111,39 @@ const CurrencyRateExchangeMap = () => {
     getRequest({
       extension: SystemRepository.Plant.qry,
       parameters: parameters
-    })
-      .then(plants => {
-        const defaultParams = `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
-        var parameters = defaultParams
-        getRequest({
-          extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
-          parameters: parameters
-        }).then(values => {
-          // Create a mapping of commissionId to values entry for efficient lookup
-          const valuesMap = values.list.reduce((acc, fee) => {
-            acc[fee.plantId] = fee
+    }).then(plants => {
+      const defaultParams = `_currencyId=${currencyId}&_rateTypeId=${rateTypeId}`
+      var parameters = defaultParams
+      getRequest({
+        extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
+        parameters: parameters
+      }).then(values => {
+        // Create a mapping of commissionId to values entry for efficient lookup
+        const valuesMap = values.list.reduce((acc, fee) => {
+          acc[fee.plantId] = fee
 
-            return acc
-          }, {})
+          return acc
+        }, {})
 
-          // Combine exchangeTable and values
-          const rows = plants.list.map(plant => {
-            const value = valuesMap[plant.recordId] || 0
+        // Combine exchangeTable and values
+        const rows = plants.list.map(plant => {
+          const value = valuesMap[plant.recordId] || 0
 
-            return {
-              currencyId: currencyId,
-              rateTypeId: rateTypeId,
-              plantId: plant.recordId,
-              plantName: plant.name,
-              exchangeId: value?.exchange?.recordId ? value.exchange.recordId : '',
-              plantRef: plant.reference,
-              exchangeRef: value?.exchange?.reference ? value.exchange.reference : '',
-              exchangeName: value?.exchange?.name ? value.exchange.name : ''
-            }
-          })
-
-          exchangeMapsGridValidation.setValues({ rows })
+          return {
+            currencyId: currencyId,
+            rateTypeId: rateTypeId,
+            plantId: plant.recordId,
+            plantName: plant.name,
+            exchangeId: value?.exchange?.recordId ? value.exchange.recordId : '',
+            plantRef: plant.reference,
+            exchangeRef: value?.exchange?.reference ? value.exchange.reference : '',
+            exchangeName: value?.exchange?.name ? value.exchange.name : ''
+          }
         })
+
+        exchangeMapsGridValidation.setValues({ rows })
       })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+    })
   }
 
   //columns
@@ -303,8 +280,6 @@ const CurrencyRateExchangeMap = () => {
           <WindowToolbar onSave={handleSubmit} smallBox={true} />
         </Grid>
       </CustomTabPanel>
-
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }

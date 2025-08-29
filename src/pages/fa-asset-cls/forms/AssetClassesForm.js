@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -29,7 +29,6 @@ export default function AssetClassesForm({ labels, maxAccess, recordId }) {
       name: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -40,13 +39,8 @@ export default function AssetClassesForm({ labels, maxAccess, recordId }) {
         extension: FixedAssetsRepository.Asset.set,
         record: JSON.stringify(obj)
       })
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

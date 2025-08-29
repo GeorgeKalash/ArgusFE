@@ -79,7 +79,6 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

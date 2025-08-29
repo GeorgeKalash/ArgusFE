@@ -36,7 +36,6 @@ export default function BatchPostForm({ access }) {
       endDate: today,
       status: parseInt(status)
     },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({

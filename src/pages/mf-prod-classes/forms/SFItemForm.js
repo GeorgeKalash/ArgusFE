@@ -13,23 +13,20 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds }) => {
+const SFItemForm = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [itemStore, setItemStore] = useState([])
-
-  const [isLoading, setIsLoading] = useState(false)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionClassSemiFinished.qry
   })
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          sfItemId: yup.string().required('Semi finished item is required')
+          sfItemId: yup.string().required()
         })
       )
     }),
@@ -49,21 +46,17 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
         items: formik.values.rows
       }
 
-      console.log('rows ', resultObject)
-
       const response = await postRequest({
-        extension: ManufacturingRepository.ProductionClassSemiFinished.set2, //ProductionClassSemiFinishedPack
+        extension: ManufacturingRepository.ProductionClassSemiFinished.set2,
         record: JSON.stringify(resultObject)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
+      !recordId &&
         setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+          ...obj,
+          recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -77,13 +70,9 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
       getRequest({
         extension: InventoryRepository.Item.snapshot,
         parameters: parameters
+      }).then(res => {
+        setItemStore(res.list)
       })
-        .then(res => {
-          setItemStore(res.list)
-        })
-        .catch(error => {
-          setErrorMessage(error)
-        })
     }
   }
 
@@ -116,34 +105,27 @@ const SFItemForm = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedR
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.ProductionClassSemiFinished.qry,
+          parameters: `_classId=${recordId}`
+        })
 
-          const res = await getRequest({
-            extension: ManufacturingRepository.ProductionClassSemiFinished.qry,
-            parameters: `_classId=${recordId}`
+        if (res.list.length > 0) {
+          formik.setValues({ rows: res.list })
+        } else {
+          formik.setValues({
+            rows: [
+              {
+                classId: recordId || '',
+                sfItemId: null,
+                itemName: '',
+                sku: ''
+              }
+            ]
           })
-
-          if (res.list.length > 0) {
-            formik.setValues({ rows: res.list })
-          } else {
-            formik.setValues({
-              rows: [
-                {
-                  classId: recordId || '',
-                  sfItemId: null,
-                  itemName: '',
-                  sku: ''
-                }
-              ]
-            })
-          }
         }
-      } catch (error) {
-        setErrorMessage(error)
       }
-      setIsLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

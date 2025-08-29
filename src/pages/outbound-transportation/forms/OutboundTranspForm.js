@@ -91,7 +91,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       departureTime: yup.string().required(),
@@ -134,14 +133,13 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         return
       }
 
-      filteredOrders =
-        filteredOrders?.some(order=> order.soId)
-          ? filteredOrders.map((order, index) => ({
-              ...order,
-              tripId: headerResponse.recordId || 0,
-              id: index + 1
-            }))
-          : []
+      filteredOrders = filteredOrders?.some(order => order.soId)
+        ? filteredOrders.map((order, index) => ({
+            ...order,
+            tripId: headerResponse.recordId || 0,
+            id: index + 1
+          }))
+        : []
 
       const data = {
         tripId: headerResponse.recordId || 0,

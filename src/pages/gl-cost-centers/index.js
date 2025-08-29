@@ -98,9 +98,9 @@ const CostCenter = () => {
       Component: CostCenterForm,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         maxAccess: access,
-        invalidate: invalidate
+        invalidate
       },
       width: 600,
       height: 300,

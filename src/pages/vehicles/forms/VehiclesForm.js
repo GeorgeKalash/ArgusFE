@@ -35,7 +35,6 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
       plantId: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -44,19 +43,17 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
       capacityWeight: yup.number().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: DeliveryRepository.Vehicle.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: DeliveryRepository.Vehicle.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -64,16 +61,14 @@ export default function VehiclesForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: DeliveryRepository.Vehicle.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: DeliveryRepository.Vehicle.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

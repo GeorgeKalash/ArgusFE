@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,14 +12,12 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { DataSets } from 'src/resources/DataSets'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
-  const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -43,47 +41,41 @@ export default function DocumentTypeForm({ labels, recordId, maxAccess }) {
       nraId: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      dgName: yup.string().required(' '),
-      activeStatusName: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      dgName: yup.string().required(),
+      activeStatusName: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SystemRepository.DocumentType.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
   })
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.DocumentType.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.DocumentType.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

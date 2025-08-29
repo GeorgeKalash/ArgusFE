@@ -17,7 +17,6 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     validationSchema: yup.object({

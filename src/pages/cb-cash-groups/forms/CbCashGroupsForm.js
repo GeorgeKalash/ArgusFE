@@ -29,11 +29,10 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
       name: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' ')
+      reference: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -41,29 +40,26 @@ export default function CbCashGroupsForms({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
       invalidate()
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CbCashGroup.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CbCashGroup.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

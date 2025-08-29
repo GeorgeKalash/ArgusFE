@@ -22,7 +22,6 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       siteId: '',

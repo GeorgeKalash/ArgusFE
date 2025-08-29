@@ -36,7 +36,6 @@ export default function OutwardReturnReasonForm({ labels, maxAccess, recordId })
       rateStatus: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),

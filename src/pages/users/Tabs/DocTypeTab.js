@@ -20,7 +20,6 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: storeRecordId || null,

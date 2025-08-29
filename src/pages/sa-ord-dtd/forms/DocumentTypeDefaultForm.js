@@ -34,53 +34,43 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
       disableSKULookup: false,
       allocateBy: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),
-      allocateBy: yup
-        .string()
-        .when('commitItems', {
-          is: true,
-          then: (schema) =>
-            schema.required(),
-          otherwise: (schema) => schema.notRequired()
-        })
+      allocateBy: yup.string().when('commitItems', {
+        is: true,
+        then: schema => schema.required(),
+        otherwise: schema => schema.notRequired()
+      })
     }),
 
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.DocumentTypeDefault.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: SaleRepository.DocumentTypeDefault.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!formik.values.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', formik.values.dtId)
-        } else toast.success(platformLabels.Edited)
+      if (!formik.values.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', formik.values.dtId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
-  console.log(formik.values)
-
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
-          console.log(res.record, 'res')
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
+        console.log(res.record, 'res')
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (error) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 

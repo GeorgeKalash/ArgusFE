@@ -30,45 +30,40 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
       name: '',
       distributionLevel: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       distributionLevel: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.IntegrationLogic.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.IntegrationLogic.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId
-          }))
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId
+        }))
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: GeneralLedgerRepository.IntegrationLogic.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: GeneralLedgerRepository.IntegrationLogic.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

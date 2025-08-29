@@ -58,7 +58,6 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       parentId: yup.string().required(),

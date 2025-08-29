@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -11,10 +11,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId }) {
@@ -36,7 +34,6 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
       toCashAccountId: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required(),
       fromCashAccountId: yup.string().nullable(),
@@ -56,15 +53,12 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
         record: JSON.stringify(obj)
       })
 
-      if (!formik.values.recordId) {
-        formik.setFieldValue('recordId', formik.values.dtId)
-
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
-
+      !obj.recordId && formik.setFieldValue('recordId', formik.values.dtId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {

@@ -17,7 +17,6 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 
 export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -32,7 +31,6 @@ export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, f
       siteId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

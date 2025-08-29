@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -31,25 +31,22 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        await postRequest({
-          extension: SCRepository.DocumentTypeDefaults.set,
-          record: JSON.stringify(obj)
-        })
+      await postRequest({
+        extension: SCRepository.DocumentTypeDefaults.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', formik.values.dtId)
-        } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', formik.values.dtId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -57,16 +54,14 @@ export default function StockCountDocumentTypeDefaultForm({ labels, maxAccess, r
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SCRepository.DocumentTypeDefaults.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SCRepository.DocumentTypeDefaults.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: recordId })
-        }
-      } catch (error) {}
+        formik.setValues({ ...res.record, recordId: recordId })
+      }
     })()
   }, [])
 

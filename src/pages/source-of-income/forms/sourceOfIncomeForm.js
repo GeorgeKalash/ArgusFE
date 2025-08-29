@@ -25,7 +25,6 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', flName: '', sitId: '' },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

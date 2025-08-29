@@ -33,7 +33,6 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
       isReleased: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -42,19 +41,17 @@ export default function ReleaseIndicatorForm({ labels, maxAccess, recordId, wind
       changeability: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: DocumentReleaseRepository.ReleaseIndicator.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: DocumentReleaseRepository.ReleaseIndicator.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
-        window.close()
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId) {
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
+      window.close()
+      invalidate()
     }
   })
 

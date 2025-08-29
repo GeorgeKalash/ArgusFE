@@ -19,7 +19,6 @@ const UsersForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       pOSUser: yup
@@ -63,12 +62,10 @@ const UsersForm = ({ store, labels, maxAccess }) => {
     postRequest({
       extension: PointofSaleRepository.PosUsers.set2,
       record: JSON.stringify(data)
+    }).then(res => {
+      toast.success(platformLabels.Edited)
+      getData()
     })
-      .then(res => {
-        toast.success(platformLabels.Edited)
-        getData()
-      })
-      .catch(error => {})
   }
 
   const columns = [

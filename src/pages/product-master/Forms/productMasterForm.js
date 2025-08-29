@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -52,7 +52,6 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
       posMsgIsActive: false,
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -66,23 +65,16 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
   })
 
   const postProductMaster = async obj => {
-    const recordId = obj.recordId
     await postRequest({
       extension: RemittanceSettingsRepository.ProductMaster.set,
       record: JSON.stringify(obj)
     }).then(res => {
-      if (!recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-
-        toast.success(platformLabels.Added)
-        setEditMode(true)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+      !obj.recordId
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     })
