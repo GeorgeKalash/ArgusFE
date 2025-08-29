@@ -27,8 +27,10 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import { useWindow } from 'src/windows'
 import ImportForm from 'src/components/Shared/ImportForm'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function WCConsumpForm({ labels, access, recordId, window }) {
+export default function WCConsumpForm({ recordId, window }) {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,6 +38,12 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
   const { stack: stackError } = useError()
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.WorkCenterConsumptions,
+    editMode: !!recordId
+  })
+  useSetWindow({ title: labels.workCenterConsumption, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.WorkCenterConsumption,
@@ -706,3 +714,6 @@ export default function WCConsumpForm({ labels, access, recordId, window }) {
     </FormShell>
   )
 }
+
+WCConsumpForm.width = 1200
+WCConsumpForm.height = 700
