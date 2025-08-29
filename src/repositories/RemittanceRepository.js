@@ -164,6 +164,8 @@ export const RemittanceSettingsRepository = {
     qry: service + 'qryEI',
     get: service + 'getEI',
     del: service + 'delEI',
+    page: service + 'pageEI',
+    snapshot: service + 'snapshotEI',
     set: service + 'setEI'
   },
   CountryRisk: {

@@ -21,38 +21,47 @@ const ExtraIncome = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    try {
-      const response = await getRequest({
-        extension: RemittanceSettingsRepository.ExtraIncome.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
-      })
+    return await getRequest({
+      extension: RemittanceSettingsRepository.ExtraIncome.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
+  }
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: RemittanceSettingsRepository.ExtraIncome.snapshot,
+      parameters: `_filter=${qry}`
+    })
   }
 
   const {
     query: { data },
-    labels: _labels,
-    invalidate,
-    paginationParameters,
+    labels,
+    search,
+    clear,
+    access,
     refetch,
-    access
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceSettingsRepository.ExtraIncome.qry,
-    datasetId: ResourceIds.ExtraIncome
+    endpointId: RemittanceSettingsRepository.ExtraIncome.page,
+    datasetId: ResourceIds.ExtraIncome,
+    search: {
+      endpointId: RemittanceSettingsRepository.ExtraIncome.snapshot,
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -62,27 +71,25 @@ const ExtraIncome = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceSettingsRepository.ExtraIncome.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: RemittanceSettingsRepository.ExtraIncome.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
     stack({
       Component: ExtraIncomeForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 600,
       height: 300,
-      title: _labels.extraIncome
+      title: labels.extraIncome
     })
   }
 
@@ -93,7 +100,14 @@ const ExtraIncome = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          maxAccess={access}
+          onAdd={add}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
