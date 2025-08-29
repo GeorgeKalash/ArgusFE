@@ -246,8 +246,9 @@ export default function IRGenerateTransfer() {
       },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
+        const tfrNow = newRow?.transferNow
         update({
-          transferNow: newRow?.transferNow >= 0 && newRow?.transferNow < newRow?.qty ? newRow?.transferNow : newRow?.qty
+          transferNow: tfrNow >= 0 && tfrNow < newRow?.qty ? tfrNow : newRow?.qty
         })
       }
     }
