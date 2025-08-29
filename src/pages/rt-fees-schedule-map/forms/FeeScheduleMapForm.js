@@ -6,7 +6,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -23,14 +22,13 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeScheduleOutwards.qry
+    endpointId: RemittanceOutwardsRepository.FeeScheduleOutwards.page
   })
 
   const { formik } = useForm({
     initialValues: {
       recordId: recordId || null,
       corId: '',
-
       currencyId: '',
       countryId: '',
       dispersalMode: '',

@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -14,9 +14,11 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FiOpeningBalance.page
@@ -33,45 +35,40 @@ export default function FiOpeningBalancesForms({ labels, maxAccess, recordId }) 
       plantId: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      accountId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      amount: yup.string().required(' '),
-      baseAmount: yup.string().required(' ')
+      fiscalYear: yup.string().required(),
+      accountId: yup.string().required(),
+      currencyId: yup.string().required(),
+      amount: yup.string().required(),
+      baseAmount: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.FiOpeningBalance.set,
         record: JSON.stringify(obj)
       })
-      if (!recordId) {
-        toast.success('Record Added Successfully')
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.FiOpeningBalance.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.FiOpeningBalance.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -43,9 +43,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
-
     initialValues: {
       resourceId: row.resourceId,
       moduleId: row.moduleId,

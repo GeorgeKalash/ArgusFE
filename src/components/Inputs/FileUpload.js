@@ -14,7 +14,6 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const [initialValues, setInitialData] = useState({})
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues
   })

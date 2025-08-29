@@ -40,7 +40,6 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
       defaultLoadQty: 0,
       lineId: null
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),

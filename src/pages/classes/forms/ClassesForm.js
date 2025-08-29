@@ -29,7 +29,6 @@ const ClassesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
   })
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({

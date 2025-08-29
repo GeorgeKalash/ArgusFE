@@ -1,16 +1,11 @@
-// ** MUI Imports
 import { Grid } from '@mui/material'
 import { DataSets } from 'src/resources/DataSets'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FormShell from 'src/components/Shared/FormShell'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState, useRef } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useInvalidate } from 'src/hooks/resource'
@@ -35,12 +30,11 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
       type: '',
       groupId: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      groupId: yup.string().required(' '),
-      type: yup.string().required(' ')
+      name: yup.string().required(),
+      groupId: yup.string().required(),
+      type: yup.string().required()
     }),
     onSubmit: async values => {
       await postGroups(values)
@@ -55,25 +49,24 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
 
   const postGroups = async obj => {
     const isNewRecord = !obj?.recordId
-    try {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.Strategy.set,
-        record: JSON.stringify(obj)
-      })
 
-      const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
-      toast.success(message)
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.Strategy.set,
+      record: JSON.stringify(obj)
+    })
 
-      if (isNewRecord) {
-        formik.setFieldValue('recordId', res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-      }
+    const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
+    toast.success(message)
 
-      invalidate()
-    } catch {}
+    if (isNewRecord) {
+      formik.setFieldValue('recordId', res.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+    }
+
+    invalidate()
   }
 
   useEffect(() => {
@@ -87,11 +80,9 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
     getRequest({
       extension: DocumentReleaseRepository.Strategy.get,
       parameters: defaultParams
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        formik.setValues(res.record)
-      })
-      .catch(error => {})
   }
 
   return (

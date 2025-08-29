@@ -32,7 +32,6 @@ export default function AgentBranchForm({ _labels, maxAccess, store, setStore, e
       addressId: '',
       address: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       agentId: yup.string().required(),

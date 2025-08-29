@@ -47,7 +47,6 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
       modules: []
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
 
     onSubmit: async values => {

@@ -68,7 +68,6 @@ export default function SketchForm({ recordId, invalidate, window }) {
       wip: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

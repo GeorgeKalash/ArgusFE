@@ -44,14 +44,13 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
       endDate: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      description: yup.string().required(' '),
-      min: yup.string().required(' '),
-      max: yup.string().required(' '),
-      current: yup.string().required(' '),
+      reference: yup.string().required(),
+      description: yup.string().required(),
+      min: yup.string().required(),
+      max: yup.string().required(),
+      current: yup.string().required(),
 
       startDate: !!dateRanges ? yup.string().required() : yup.date().nullable(),
       endDate: !!dateRanges ? yup.string().required() : yup.date().nullable()
@@ -88,20 +87,18 @@ export default function NumberRangeForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.NumberRange.get,
-            parameters: `_recordId=${recordId}`
-          })
-          if (res.record) {
-            ;(res.record.startDate = formatDateFromApi(res.record.startDate)),
-              (res.record.endDate = formatDateFromApi(res.record.endDate)),
-              formik.setValues(res.record)
-            setDateRange(res.record.dateRange)
-          }
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.NumberRange.get,
+          parameters: `_recordId=${recordId}`
+        })
+        if (res.record) {
+          ;(res.record.startDate = formatDateFromApi(res.record.startDate)),
+            (res.record.endDate = formatDateFromApi(res.record.endDate)),
+            formik.setValues(res.record)
+          setDateRange(res.record.dateRange)
         }
-      } catch (exception) {}
+      }
     })()
   }, [])
 

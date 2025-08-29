@@ -92,7 +92,6 @@ const OutwardsModificationForm = ({ recordId, window }) => {
       modificationType: '',
       beneficiaryData: {}
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       owRef: yup.string().required(),

@@ -42,7 +42,6 @@ const CtDefaults = ({ _labels, access }) => {
   }, [])
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       'otp-expiry-time': yup.number().min(30).max(120).nullable(true),
