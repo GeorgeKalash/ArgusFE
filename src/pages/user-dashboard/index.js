@@ -15,6 +15,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { getStorageData } from 'src/storage/storage'
+import Form from 'src/components/Shared/Form'
 
 const UserDashboard = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -113,36 +114,38 @@ const UserDashboard = () => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container xs={12}>
-          <Grid item xs={3} sx={{ m: 2 }}>
-            <CustomTextField
-              name='search'
-              value={search}
-              label={platformLabels.Search}
-              onClear={() => setSearch('')}
-              onChange={handleSearchChange}
-              onSearch={e => setSearch(e)}
-              search={true}
-            />
+    <Form fullSize onSave={handleSubmit} isSaved>
+      <VertLayout>
+        <Fixed>
+          <Grid container xs={12}>
+            <Grid item xs={3} sx={{ m: 2 }}>
+              <CustomTextField
+                name='search'
+                value={search}
+                label={platformLabels.Search}
+                onClear={() => setSearch('')}
+                onChange={handleSearchChange}
+                onSearch={e => setSearch(e)}
+                search={true}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={{ list: filteredData }}
-          rowId={['appletId']}
-          maxAccess={access}
-          showCheckboxColumn={true}
-          pagination={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={{ list: filteredData }}
+            rowId={['appletId']}
+            maxAccess={access}
+            showCheckboxColumn={true}
+            pagination={false}
+          />
+        </Grow>
+        {/* <Fixed>
+          <WindowToolbar isSaved={true} onSave={handleSubmit} />
+        </Fixed> */}
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef, useImperativeHandle } from 'react'
 import { Grid } from '@mui/material'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,7 +16,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomButton from '../Inputs/CustomButton'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) => {
+const ImportSerials = forwardRef(({ endPoint, header, onCloseimport, maxAccess, window }, ref) => {
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageInputRef = useRef(null)
@@ -32,6 +32,10 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
       serialCount: 0
     }
   })
+
+  useImperativeHandle(ref, () => ({
+    submit: () => onImportConfirmation()
+  }))
 
   const handleSerialChange = inputSerials => {
     const lines = inputSerials.split('\n')
@@ -159,7 +163,7 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
       <input type='file' accept='.csv' ref={imageInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
     </VertLayout>
   )
-}
+})
 ImportSerials.width = 550
 ImportSerials.height = 270
 
