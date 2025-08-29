@@ -515,7 +515,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'basePrice',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 5
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)

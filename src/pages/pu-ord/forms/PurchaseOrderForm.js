@@ -397,7 +397,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       name: 'basePrice',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 5
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
