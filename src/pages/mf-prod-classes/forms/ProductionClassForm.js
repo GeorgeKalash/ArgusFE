@@ -14,7 +14,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function ProductionClassForm({ labels, maxAccess, recordId, setSelectedRecordId, editMode }) {
+export default function ProductionClassForm({
+  labels,
+  maxAccess,
+  recordId,
+  setSelectedRecordId,
+  editMode,
+  setEditMode
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -43,6 +50,7 @@ export default function ProductionClassForm({ labels, maxAccess, recordId, setSe
       if (!obj.recordId) {
         formik.setFieldValue('recordId', response.recordId)
         setSelectedRecordId(response.recordId)
+        setEditMode(true)
       }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
