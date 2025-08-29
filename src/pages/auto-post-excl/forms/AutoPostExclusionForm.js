@@ -46,7 +46,6 @@ export default function AutoPostExclusionForm({ labels, maxAccess, recordId }) {
       cgId: '',
       items: [{ checked: false, exclusionId: 0, plantRef: '', plantName: '' }]
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

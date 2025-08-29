@@ -101,7 +101,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

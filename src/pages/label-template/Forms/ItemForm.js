@@ -33,7 +33,6 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       fontSize: 0,
       font: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       seqNo: yup.string().required(),

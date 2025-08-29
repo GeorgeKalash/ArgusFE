@@ -38,7 +38,6 @@ export default function MaterialTransferDTDForm({ labels, maxAccess, recordId, w
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

@@ -93,7 +93,6 @@ const RemittanceDefaults = ({ _labels }) => {
   }
 
   const rtDefaultFormValidation = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       nraId: null,
@@ -101,18 +100,17 @@ const RemittanceDefaults = ({ _labels }) => {
       nraDescription: null
     },
 
-    onSubmit: values => {}
+    onSubmit: () => {}
   })
 
   const rtDefaultValidation = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       'rt-nra-product': null,
-      'rt_fii_accountGroupId': '',
-      'rt_max_monthly_amount': '',
-      'rt_max_yearly_ind_amount': '',
-      'rt_max_yearly_cor_amount': ''
+      rt_fii_accountGroupId: '',
+      rt_max_monthly_amount: '',
+      rt_max_yearly_ind_amount: '',
+      rt_max_yearly_cor_amount: ''
     },
 
     onSubmit: values => {

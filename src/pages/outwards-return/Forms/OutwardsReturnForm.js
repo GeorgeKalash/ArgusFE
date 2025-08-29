@@ -118,7 +118,6 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
       attemptNo: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

@@ -163,7 +163,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     documentType: { key: 'dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),

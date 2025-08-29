@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Box, Button } from '@mui/material'
-import { useFormik } from 'formik'
+import { Box } from '@mui/material'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -11,15 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 
-const IndicatorForm = ({
-  labels,
-
-  expanded,
-  editMode,
-  height,
-  maxAccess,
-  store
-}) => {
+const IndicatorForm = ({ labels, expanded, editMode, height, maxAccess, store }) => {
   const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
 
@@ -30,7 +21,6 @@ const IndicatorForm = ({
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       indicatorData: [
@@ -112,19 +102,15 @@ const IndicatorForm = ({
   }, [recordId, applyTrigger])
 
   const applyStrategy = async () => {
-    try {
-      const { groupName, ...valuesWithoutGroupName } = store
+    const { groupName, ...valuesWithoutGroupName } = store
 
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.ApplySTG.apply,
-        record: JSON.stringify(valuesWithoutGroupName)
-      })
-      toast.success('Strategy Applied Successfully')
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.ApplySTG.apply,
+      record: JSON.stringify(valuesWithoutGroupName)
+    })
+    toast.success('Strategy Applied Successfully')
 
-      setApplyTrigger(prev => prev + 1)
-    } catch (error) {
-      toast.error('An error occurred during apply')
-    }
+    setApplyTrigger(prev => prev + 1)
   }
 
   const columns = [

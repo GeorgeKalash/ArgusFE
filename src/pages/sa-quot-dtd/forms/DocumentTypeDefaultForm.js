@@ -32,7 +32,6 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
       disableSKULookup: false,
       validity: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),
@@ -41,34 +40,29 @@ export default function DocumentTypeDefaultForm({ labels, maxAccess, recordId })
     }),
 
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: SaleRepository.DocumentTypeDefault.set,
-          record: JSON.stringify(obj)
-        })
+      await postRequest({
+        extension: SaleRepository.DocumentTypeDefault.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!formik.values.recordId) {
-          formik.setFieldValue('recordId', formik.values.dtId)
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      if (!formik.values.recordId) {
+        formik.setFieldValue('recordId', formik.values.dtId)
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SaleRepository.DocumentTypeDefault.get,
-            parameters: `_dtId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.DocumentTypeDefault.get,
+          parameters: `_dtId=${recordId}`
+        })
 
-          formik.setValues({ ...res.record, recordId: res.record.dtId })
-        }
-      } catch (error) {}
+        formik.setValues({ ...res.record, recordId: res.record.dtId })
+      }
     })()
   }, [])
 

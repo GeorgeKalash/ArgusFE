@@ -18,7 +18,6 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
 
   const { formik } = useForm({
     maxAccess: maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       IdField: yup

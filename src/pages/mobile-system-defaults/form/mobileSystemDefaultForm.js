@@ -25,7 +25,6 @@ export default function MobileSystem() {
   })
 
   const { formik } = useForm({
-    enableReinitialize: false,
     initialValues: {
       rt_mob_plantId: '',
       rt_mob_whatsapp: '',

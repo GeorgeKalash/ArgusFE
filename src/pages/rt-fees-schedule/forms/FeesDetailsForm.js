@@ -91,7 +91,6 @@ const FeesDetailsForm = ({ store, labels }) => {
   ]
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       FeeScheduleDetail: yup

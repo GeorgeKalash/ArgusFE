@@ -15,7 +15,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 const CompanyInfo = () => {
   const imageUploadRef = useRef()
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access: maxAccess } = useResourceParams({
@@ -47,7 +46,6 @@ const CompanyInfo = () => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       plantId: '',

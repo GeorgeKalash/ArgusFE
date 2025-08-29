@@ -15,7 +15,6 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
   const { recordId: accountId } = store
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       currencies: [{ id: 1, accountId: accountId, currencyName: '', currencyId: '', limit: '' }]

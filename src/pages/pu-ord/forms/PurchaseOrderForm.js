@@ -203,7 +203,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues: initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({

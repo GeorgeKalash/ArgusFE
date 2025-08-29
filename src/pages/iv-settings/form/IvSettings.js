@@ -35,27 +35,25 @@ const IvSettings = ({ _labels }) => {
     getRequest({
       extension: SystemRepository.Defaults.qry,
       parameters: parameters
-    })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          const trimmedKey = obj.key.trim()
+    }).then(res => {
+      const filteredList = res.list.filter(obj => {
+        const trimmedKey = obj.key.trim()
 
-          return (
-            trimmedKey === 'itemSearchStyle' || trimmedKey === 'itemSearchFields' || trimmedKey === 'iv_minSerialSize'
-          )
-        })
-        filteredList.forEach(obj => {
-          const trimmedKey = obj.key.trim()
-          myObject[trimmedKey] = obj.value ? parseFloat(obj.value) : null
-        })
-        setInitialValues(myObject)
+        return (
+          trimmedKey === 'itemSearchStyle' || trimmedKey === 'itemSearchFields' || trimmedKey === 'iv_minSerialSize'
+        )
       })
-      .catch(error => {})
+      filteredList.forEach(obj => {
+        const trimmedKey = obj.key.trim()
+        myObject[trimmedKey] = obj.value ? parseFloat(obj.value) : null
+      })
+      setInitialValues(myObject)
+    })
   }
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
+    enableReinitialize: true,
     initialValues,
     validationSchema: yup.object({
       iv_minSerialSize: yup.number().min(1).max(20)
@@ -74,11 +72,9 @@ const IvSettings = ({ _labels }) => {
     postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: data })
+    }).then(res => {
+      if (res) toast.success(platformLabels.Edited)
     })
-      .then(res => {
-        if (res) toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
   }
 
   const handleSubmit = () => {
