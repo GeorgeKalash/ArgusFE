@@ -124,13 +124,8 @@ const WorkCenterConsump = () => {
     stack({
       Component: WCConsumpForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1200,
-      height: 700,
-      title: labels.workCenterConsumption
+      }
     })
   }
 
