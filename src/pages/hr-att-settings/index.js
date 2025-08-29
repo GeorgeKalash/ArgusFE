@@ -1,0 +1,287 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import FormShell from 'src/components/Shared/FormShell'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import toast from 'react-hot-toast'
+import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { ControlContext } from 'src/providers/ControlContext'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import * as yup from 'yup'
+import { DataSets } from 'src/resources/DataSets'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+
+const AttSettings = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.AttendanceSettings
+  })
+
+  useEffect(() => {
+    ;(async function () {
+      const res = await getRequest({
+        extension: SystemRepository.Defaults.qry,
+        parameters: `_filter=`
+      })
+
+      const keysToExtract = [
+        'caId',
+        'fdowCombo',
+        'lastGenFSDateTime',
+        'lastReceivedPunch',
+        'lastProcessedPunch',
+        'lastGenTATV',
+        'sourceTASC',
+        'sourceTACA',
+        'minPunchInterval',
+        'dailySchedule',
+        'punchSource',
+        'weeklyTAHours',
+        'prevDayTVTime',
+        'disableCrossBranchTA'
+      ]
+
+      const myObject = {}
+
+      for (const { key, value } of res.list) {
+        if (keysToExtract.includes(key)) {
+          myObject[key] = value ? parseInt(value) : null
+        }
+      }
+
+      formik.setValues(myObject)
+    })()
+  }, [])
+
+  const { formik } = useForm({
+    maxAccess: access,
+    validateOnChange: true,
+    initialValues: {
+      caId: null,
+      fdowCombo: null,
+      lastGenFSDateTime: null,
+      lastReceivedPunch: null,
+      lastProcessedPunch: null,
+      lastGenTATV: null,
+      sourceTASC: null,
+      sourceTACA: null,
+      minPunchInterval: null,
+      dailySchedule: null,
+      punchSource: null,
+      weeklyTAHours: null,
+      prevDayTVTime: null,
+      disableCrossBranchTA: null
+    },
+    validationSchema: yup.object().shape({}),
+    onSubmit: async obj => {
+      const data = Object.entries(obj).map(([key, value]) => ({
+        key,
+        value
+      }))
+
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+
+      toast.success(platformLabels.Edited)
+    }
+  })
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.AttendanceSettings}
+      form={formik}
+      infoVisible={false}
+      isCleared={false}
+      maxAccess={access}
+    >
+      <VertLayout>
+        <Grid container spacing={2} xs={5}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.SOURCE_CALENDAR}
+              name='caId'
+              label={labels.caId}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('caId', newValue?.key || null)
+              }}
+              error={formik.touched.caId && Boolean(formik.errors.caId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.WEEK_DAY}
+              name='fdowCombo'
+              label={labels.fdowCombo}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('fdowCombo', newValue?.key || null)
+              }}
+              error={formik.touched.fdowCombo && Boolean(formik.errors.fdowCombo)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDateTimePicker
+              name='lastGenFSDateTime'
+              readOnly
+              label={labels.lastGenFSDateTime}
+              value={formik.values?.lastGenFSDateTime}
+              maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDateTimePicker
+              name='lastReceivedPunch'
+              readOnly
+              label={labels.lastReceivedPunch}
+              value={formik.values?.lastReceivedPunch}
+              maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDateTimePicker
+              name='lastProcessedPunch'
+              readOnly
+              label={labels.lastProcessedPunch}
+              value={formik.values?.lastProcessedPunch}
+              maxAccess={access}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='lastGenTATV'
+              label={labels.lastGenTATV}
+              value={formik.values.lastGenTATV}
+              maxAccess={access}
+              readOnly
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('lastGenTATV', '')}
+              error={formik.touched.lastGenTATV && Boolean(formik.errors.lastGenTATV)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.SOURCE_ATTENDANCE_SCHEDULE}
+              name='sourceTASC'
+              label={labels.sourceTASC}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('sourceTASC', newValue?.key || null)
+              }}
+              error={formik.touched.sourceTASC && Boolean(formik.errors.sourceTASC)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.SOURCE_CALENDAR}
+              name='sourceTACA'
+              label={labels.sourceTACA}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('sourceTACA', newValue?.key || null)
+              }}
+              error={formik.touched.sourceTACA && Boolean(formik.errors.sourceTACA)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='minPunchInterval'
+              label={labels.minPunchInterval}
+              value={formik.values.minPunchInterval}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('minPunchInterval', '')}
+              error={formik.touched.minPunchInterval && Boolean(formik.errors.minPunchInterval)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.DAILY_SCHEDULE}
+              name='dailySchedule'
+              label={labels.dailySchedule}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('dailySchedule', newValue?.key || null)
+              }}
+              error={formik.touched.dailySchedule && Boolean(formik.errors.dailySchedule)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.PUNCH_SOURCE}
+              name='punchSource'
+              label={labels.punchSource}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={access}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('punchSource', newValue?.key || null)
+              }}
+              error={formik.touched.punchSource && Boolean(formik.errors.punchSource)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='weeklyTAHours'
+              label={labels.weeklyTAHours}
+              value={formik.values.weeklyTAHours}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('weeklyTAHours', '')}
+              error={formik.touched.weeklyTAHours && Boolean(formik.errors.weeklyTAHours)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='prevDayTVTime'
+              label={labels.prevDayTVTime}
+              value={formik.values.prevDayTVTime}
+              maxAccess={access}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('prevDayTVTime', '')}
+              error={formik.touched.prevDayTVTime && Boolean(formik.errors.prevDayTVTime)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomCheckBox
+              name='disableCrossBranchTA'
+              value={formik.values?.disableCrossBranchTA}
+              onChange={event => formik.setFieldValue('disableCrossBranchTA', event.target.checked)}
+              label={labels.disableCrossBranchTA}
+              maxAccess={access}
+            />
+          </Grid>
+        </Grid>
+      </VertLayout>
+    </FormShell>
+  )
+}
+
+export default AttSettings
