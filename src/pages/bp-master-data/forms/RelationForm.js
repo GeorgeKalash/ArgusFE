@@ -32,7 +32,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       toBPRef: null,
       fromBPId: bpId
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       toBPId: yup.string().required(),

@@ -52,7 +52,6 @@ const ChangePassword = ({
   }, [reopenLogin])
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       username: username ? username : auth?.user?.username,
@@ -72,36 +71,32 @@ const ChangePassword = ({
           newPW: encryptePWD(formik.values.newPassword)
         }
 
-        try {
-          let accessToken
+        let accessToken
 
-          if (propLoggedUser && propLoggedUser.accessToken) {
-            accessToken = propLoggedUser.accessToken
-          } else {
-            accessToken = await getAccessToken()
-          }
+        if (propLoggedUser && propLoggedUser.accessToken) {
+          accessToken = propLoggedUser.accessToken
+        } else {
+          accessToken = await getAccessToken()
+        }
 
-          if (!accessToken) {
-            throw new Error('Failed to retrieve access token')
-          }
+        if (!accessToken) {
+          throw new Error('Failed to retrieve access token')
+        }
 
-          await postIdentityRequest({
-            extension: AccountRepository.changePW,
-            accessToken: accessToken,
-            record: JSON.stringify(loginVal)
-          }).then(res => {
-            toast.success(_labels.passSuccess)
-            formik.setFieldValue('password', '')
-            formik.setFieldValue('newPassword', '')
-            formik.setFieldValue('confirmPassword', '')
-            setScore(0)
-          })
-          if (reopenLogin === true) {
-            window.close()
-            onClose()
-          }
-        } catch (error) {
-          stackError({ message: error.message })
+        await postIdentityRequest({
+          extension: AccountRepository.changePW,
+          accessToken: accessToken,
+          record: JSON.stringify(loginVal)
+        }).then(res => {
+          toast.success(_labels.passSuccess)
+          formik.setFieldValue('password', '')
+          formik.setFieldValue('newPassword', '')
+          formik.setFieldValue('confirmPassword', '')
+          setScore(0)
+        })
+        if (reopenLogin === true) {
+          window.close()
+          onClose()
         }
       } else {
         toast.error(_labels.passNotMatching)

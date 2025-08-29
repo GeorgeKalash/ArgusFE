@@ -27,7 +27,6 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       sgId: storeRecordId,

@@ -28,7 +28,6 @@ const CharacteristicsForm = ({ labels, editMode, maxAccess, setEditMode, setStor
   })
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: null,

@@ -12,7 +12,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
@@ -36,7 +35,6 @@ export default function CheckbookForm({ labels, maxAccess, recordId }) {
       issueDate: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       bankAccountId: yup.string().required(),

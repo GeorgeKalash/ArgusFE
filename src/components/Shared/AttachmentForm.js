@@ -26,7 +26,6 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
       resourceId,
       seqNo
     },
-    enableReinitialize: false,
     validateOnChange: false,
     onSubmit: async obj => {
       if (fileUploadRef.current) {

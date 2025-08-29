@@ -27,9 +27,7 @@ const UserTextForm = () => {
       ivtUDTCount: '',
       ...Object.fromEntries(Array.from({ length: counter }, (_, i) => [`ivtUDT${i + 1}`, '']))
     },
-    enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       ivtUDTCount: yup.number().nullable().required().min(1).max(20),
       ...Object.fromEntries(

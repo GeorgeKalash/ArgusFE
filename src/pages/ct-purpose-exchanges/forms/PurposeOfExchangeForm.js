@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -15,8 +15,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, setStore }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -32,7 +30,6 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
       groupId: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -49,16 +46,17 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
           recordId: response.recordId,
           name: obj.name
         })
-        toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
       } else {
         setStore(prev => ({ ...prev, name: obj.name }))
-        toast.success(platformLabels.Edited)
       }
-      setEditMode(true)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {

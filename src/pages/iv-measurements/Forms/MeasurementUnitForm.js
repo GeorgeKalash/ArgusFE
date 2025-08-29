@@ -13,7 +13,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess, getMeasurementUnitGridData, window, store }) {
+export default function MeasurementUnitForm({
+  msId,
+  recordId,
+  labels,
+  maxAccess,
+  getMeasurementUnitGridData,
+  window,
+  store
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const editMode = !!store.recordId
@@ -26,7 +34,6 @@ export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess,
       name: '',
       qty: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -34,37 +41,33 @@ export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess,
       qty: yup.number().required()
     }),
     onSubmit: async obj => {
-      try {
-        const data = {
-          msId,
-          recordId,
-          ...obj
-        }
+      const data = {
+        msId,
+        recordId,
+        ...obj
+      }
 
-        const response = await postRequest({
-          extension: InventoryRepository.MeasurementUnit.set,
-          record: JSON.stringify(data)
-        })
+      const response = await postRequest({
+        extension: InventoryRepository.MeasurementUnit.set,
+        record: JSON.stringify(data)
+      })
 
-        !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
 
-        formik.setFieldValue('recordId', response.recordId)
-  
-        await getMeasurementUnitGridData(msId)
-        window.close()
-      } catch (error) {}
+      formik.setFieldValue('recordId', response.recordId)
+
+      await getMeasurementUnitGridData(msId)
+      window.close()
     }
   })
 
   const getMeasurementUnitById = async recordId => {
-    try {
-      const res = await getRequest({
-        extension: InventoryRepository.MeasurementUnit.get,
-        parameters: `_recordId=${recordId}`
-      })
+    const res = await getRequest({
+      extension: InventoryRepository.MeasurementUnit.get,
+      parameters: `_recordId=${recordId}`
+    })
 
-      formik.setValues(res.record)
-    } catch (error) {}
+    formik.setValues(res.record)
   }
 
   useEffect(() => {
@@ -74,10 +77,10 @@ export default function MeasurementUnitForm({ msId, recordId, labels, maxAccess,
   }, [recordId])
 
   return (
-    <FormShell 
-      resourceId={ResourceIds.Measurement} 
-      form={formik} 
-      maxAccess={maxAccess} 
+    <FormShell
+      resourceId={ResourceIds.Measurement}
+      form={formik}
+      maxAccess={maxAccess}
       editMode={editMode}
       isInfo={false}
     >

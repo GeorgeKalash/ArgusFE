@@ -31,7 +31,6 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   }
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,

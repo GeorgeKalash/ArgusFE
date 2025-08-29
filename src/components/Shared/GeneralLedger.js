@@ -91,7 +91,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         }
       ]
     },
-    enableReinitialize: false,
     validationSchema: yup.object({
       glTransactions: yup
         .array()

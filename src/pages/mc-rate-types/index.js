@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -16,7 +16,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 const RateTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const [errorMessage, setErrorMessage] = useState(null)
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
@@ -45,7 +44,7 @@ const RateTypes = () => {
 
   const {
     query: { data },
-    labels: labels,
+    labels,
     filterBy,
     clearFilter,
     paginationParameters,
@@ -82,24 +81,21 @@ const RateTypes = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: MultiCurrencyRepository.RateType.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: MultiCurrencyRepository.RateType.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
     stack({
       Component: RateTypesForm,
       props: {
-        labels: labels,
-        recordId: recordId ? recordId : null,
-        maxAccess: access,
-        invalidate: invalidate
+        labels,
+        recordId,
+        maxAccess: access
       },
       width: 600,
       height: 300,

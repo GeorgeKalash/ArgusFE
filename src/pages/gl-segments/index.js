@@ -57,7 +57,6 @@ const Segments = () => {
       segmentName: null
     },
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true
   })
 

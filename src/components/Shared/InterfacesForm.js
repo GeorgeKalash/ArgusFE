@@ -36,7 +36,6 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
         }
       ]
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
       const rows = formik.values.rows.map(rest => ({

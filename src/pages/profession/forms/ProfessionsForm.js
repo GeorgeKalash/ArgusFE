@@ -41,7 +41,6 @@ export default function ProfessionsForm({ labels, maxAccess, recordId, setStore 
       isInactive: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object().shape({
       name: yup.string().required(),

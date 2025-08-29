@@ -19,7 +19,6 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   const [numRows, setNumRows] = useState(0)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       data: yup

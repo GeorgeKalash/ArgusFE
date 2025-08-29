@@ -37,7 +37,6 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       damageItemId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup.string().required(),
@@ -45,21 +44,19 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       rate: yup.number().required()
     }),
     onSubmit: async obj => {
-      const res = await postRequest({
+      await postRequest({
         extension: FoundryRepository.MetalSettings.set,
         record: JSON.stringify(obj)
       })
 
-      
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      if (!obj.recordId) {
         formik.setFieldValue('recordId', obj.metalId)
 
         const res2 = await getRequest({
           extension: FoundryRepository.Scrap.qry,
           parameters: `_metalId=${formik.values?.metalId}&_metalColorId=${formik.values?.metalColorId}`
         })
-        
+
         setStore(prevStore => ({
           ...prevStore,
           recordId: formik.values?.metalId,
@@ -70,14 +67,14 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
             id: index + 1
           }))
         }))
-        toast.success(platformLabels.Added)
-      } else toast.success(platformLabels.Edited)
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
       window.close()
     }
   })
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

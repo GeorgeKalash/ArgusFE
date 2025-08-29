@@ -1,7 +1,7 @@
 import { Grid, Box } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -14,14 +14,13 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ExchangeMapForm = ({ maxAccess, editMode, currency, store, expanded, height, labels }) => {
+const ExchangeMapForm = ({ maxAccess, editMode, currency, store, labels }) => {
   const { currencyId, currencyName } = currency
-  const { recordId, countries } = store
+  const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plants: yup

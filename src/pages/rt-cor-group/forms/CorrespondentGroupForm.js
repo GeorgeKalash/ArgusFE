@@ -23,49 +23,41 @@ export default function CorrespondentGroupForm({ labels, maxAccess, recordId }) 
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       reference: '',
       name: '',
       flName: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: RemittanceSettingsRepository.CorrespondentGroup.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: RemittanceSettingsRepository.CorrespondentGroup.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response?.recordId)
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId) getData(response?.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.CorrespondentGroup.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
-    })()
+    if (recordId) getData(recordId)
   }, [])
+
+  async function getData(recordId) {
+    const res = await getRequest({
+      extension: RemittanceSettingsRepository.CorrespondentGroup.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    formik.setValues(res.record)
+  }
 
   return (
     <FormShell resourceId={ResourceIds.CorrespondentGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>

@@ -20,7 +20,6 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
     initialValues: {
       corId: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required()

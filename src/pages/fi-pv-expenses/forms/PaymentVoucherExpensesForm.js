@@ -44,14 +44,14 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     datasetId: ResourceIds.PaymentVoucherExpenses,
     editMode: !!recordId
   })
-  
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PaymentVoucher,
     access,
     enabled: !recordId
   })
 
-   useSetWindow({ title: labels.paymentVoucherExpenses, window })
+  useSetWindow({ title: labels.paymentVoucherExpenses, window })
 
   const initialValues = {
     recordId: null,
@@ -104,7 +104,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     documentType: { key: 'dtId', value: documentType?.dtId },
     validationSchema: yup.object({

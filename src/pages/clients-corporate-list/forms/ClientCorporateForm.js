@@ -27,7 +27,6 @@ import { useForm } from 'src/hooks/form'
 const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const [referenceRequired, setReferenceRequired] = useState(true)
-  const editMode = !!recordId
   const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
@@ -165,6 +164,8 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
       })
     }
   }
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     getClient(recordId)

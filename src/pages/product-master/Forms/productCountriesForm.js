@@ -19,7 +19,6 @@ const ProductCountriesForm = ({ store, setStore, labels, editMode, height, expan
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
 
     validationSchema: yup.object({

@@ -17,11 +17,9 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     validationSchema: yup.object({

@@ -19,7 +19,6 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       rows: []
@@ -72,12 +71,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     })
 
     await Promise.all(postBody)
-
-    if (!recordId) {
-      toast.success(platformLabels.Added)
-    } else {
-      toast.success(platformLabels.Edited)
-    }
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
   }
 
   async function getIdNumber(recordId) {

@@ -84,14 +84,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
       wip: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
       setPcs: yup.number().nullable(),
-      collectionName: yup.string().required(),
+      collectionName: yup.string().required()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }

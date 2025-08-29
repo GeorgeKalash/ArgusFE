@@ -26,7 +26,6 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
 
   const { formik } = useForm({
     maxAccess: maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: null,

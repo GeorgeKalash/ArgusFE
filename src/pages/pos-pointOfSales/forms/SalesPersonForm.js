@@ -18,7 +18,6 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       pOSUser: yup

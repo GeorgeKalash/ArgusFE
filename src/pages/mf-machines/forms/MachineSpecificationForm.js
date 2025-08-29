@@ -30,7 +30,6 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
       lifeTimeHours: 0,
       productionYear: null
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       serialNo: yup.string().required(),

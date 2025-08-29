@@ -81,7 +81,6 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
         }
       ]
     },
-    enableReinitialize: false,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({

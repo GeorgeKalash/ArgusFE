@@ -37,7 +37,6 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
       nraId: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -50,11 +49,8 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
-
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

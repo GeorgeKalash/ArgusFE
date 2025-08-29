@@ -28,7 +28,6 @@ export default function CollectionsForm({ labels, maxAccess, recordId }) {
       name: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

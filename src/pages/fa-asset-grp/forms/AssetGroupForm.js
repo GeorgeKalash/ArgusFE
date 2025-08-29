@@ -40,7 +40,6 @@ export default function AssetGroupForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
     onSubmit: handleSubmit
@@ -81,7 +80,7 @@ export default function AssetGroupForm({ labels, maxAccess, recordId }) {
     fetchRecord()
   }, [recordId])
 
-  const editMode = !!recordId || !!formik.values.recordId
+  const editMode = !!formik.values.recordId
 
   const actions = [
     {

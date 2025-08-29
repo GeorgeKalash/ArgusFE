@@ -24,7 +24,6 @@ export default function RebuildForm({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: { year: '', itemId: 0, date: new Date(), recordId: 'N/A' },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({

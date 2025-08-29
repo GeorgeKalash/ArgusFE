@@ -31,7 +31,6 @@ export default function CostTypeForm({ labels, maxAccess, recordId }) {
       allocationType: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),

@@ -33,7 +33,6 @@ export default function CreditCardForm({ recordId, labels, maxAccess }) {
       creditCardFees: [{ id: 1, creditCardId: recordId, seqNo: 1, upToAmount: 0, commissionFees: 0, isPct: false }]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

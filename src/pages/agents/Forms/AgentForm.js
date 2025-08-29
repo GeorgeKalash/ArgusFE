@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import FormShell from 'src/components/Shared/FormShell'
@@ -16,8 +16,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const AgentForm = ({ labels, maxAccess, recordId }) => {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -31,11 +29,10 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
       name: '',
       countryId: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      countryId: yup.string().required(' ')
+      name: yup.string().required(),
+      countryId: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -52,24 +49,23 @@ const AgentForm = ({ labels, maxAccess, recordId }) => {
           recordId: response.recordId
         })
       } else toast.success(platformLabels.Edited)
-      setEditMode(true)
 
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.CorrespondentAgents.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.CorrespondentAgents.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

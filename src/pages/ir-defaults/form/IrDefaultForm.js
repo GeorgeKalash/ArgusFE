@@ -34,7 +34,6 @@ const IrDefaultForm = ({ _labels, access }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
     validationSchema: yup.object().shape({

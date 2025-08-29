@@ -56,7 +56,6 @@ export default function DamageReturnForm({ labels, access, recordId }) {
       type: null,
       damageId: null
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required(),

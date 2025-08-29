@@ -1,7 +1,7 @@
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
@@ -23,7 +23,6 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
   })
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -88,11 +87,9 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
 
     if (!obj.recordId) {
       formik.setFieldValue('recordId', response.recordId)
-      toast.success(platformLabels.Added)
       window.close()
-    } else {
-      toast.success(platformLabels.Edited)
     }
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     invalidate()
   }
 
@@ -128,9 +125,7 @@ const AgingForm = ({ recordId, labels, maxAccess, name, window }) => {
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
-    if (recordId) {
-      getData()
-    }
+    if (recordId) getData()
   }, [recordId])
 
   return (

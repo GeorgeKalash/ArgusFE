@@ -140,7 +140,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
     initialValues,
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

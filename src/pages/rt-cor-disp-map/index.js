@@ -32,7 +32,6 @@ const CorrespondentDispersal = () => {
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required()

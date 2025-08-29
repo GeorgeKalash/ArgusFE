@@ -28,7 +28,6 @@ const OutboundAssignDriver = () => {
     initialValues: {
       tripList: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       tripList: yup.array().of(

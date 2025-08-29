@@ -61,7 +61,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       status: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

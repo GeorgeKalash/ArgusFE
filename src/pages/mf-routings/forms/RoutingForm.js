@@ -30,7 +30,6 @@ export default function RoutingForm({ labels, maxAccess, setStore, store }) {
       name: '',
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -48,7 +47,6 @@ export default function RoutingForm({ labels, maxAccess, setStore, store }) {
         recordId: res.recordId
       }))
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-
       invalidate()
     }
   })

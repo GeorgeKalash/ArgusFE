@@ -78,7 +78,9 @@ const CreditOrderForm = ({ recordId, window }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: recordId,
+      recordId,
+      currencyId: null,
+      currencyRef: '',
       date: new Date(),
       functionId: SystemFunction.CurrencyCreditOrderPurchase,
       deliveryDate: new Date(),

@@ -32,7 +32,6 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
       reference: '',
       originCurrency: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -49,25 +48,23 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   }, [formik.values])
 
   const postGroups = async obj => {
-    try {
-      const res = await postRequest({
-        extension: RemittanceOutwardsRepository.FeeSchedule.set,
-        record: JSON.stringify(obj)
-      })
+    const res = await postRequest({
+      extension: RemittanceOutwardsRepository.FeeSchedule.set,
+      record: JSON.stringify(obj)
+    })
 
-      const message = !obj?.recordId ? platformLabels.Added : platformLabels.Edited
-      toast.success(message)
+    const message = !obj?.recordId ? platformLabels.Added : platformLabels.Edited
+    toast.success(message)
 
-      if (!obj?.recordId) {
-        formik.setFieldValue('recordId', res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-      }
+    if (!obj?.recordId) {
+      formik.setFieldValue('recordId', res.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+    }
 
-      invalidate()
-    } catch {}
+    invalidate()
   }
 
   const editMode = !!recordId
