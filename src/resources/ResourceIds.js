@@ -549,6 +549,7 @@ export const ResourceIds = {
   MetalSmelting: 47314,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
+  DayTypes: 72104,
 
   // GL
   GLSalesInvoice: 51604,
