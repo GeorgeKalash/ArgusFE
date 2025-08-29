@@ -21,7 +21,7 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeScheduleInwards.qry
+    endpointId: RemittanceOutwardsRepository.FeeScheduleInwards.page
   })
 
   const { formik } = useForm({
@@ -63,20 +63,18 @@ export default function FeeScheduleInwardsMapForm({ labels, maxAccess, recordId,
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.corId && record.scheduleId && recordId) {
-          const res = await getRequest({
-            extension: RemittanceOutwardsRepository.FeeScheduleInwards.get,
-            parameters: `_corId=${record.corId}&_dispersalMode=${record.dispersalMode}`
-          })
+      if (record && record.corId && record.scheduleId && recordId) {
+        const res = await getRequest({
+          extension: RemittanceOutwardsRepository.FeeScheduleInwards.get,
+          parameters: `_corId=${record.corId}&_dispersalMode=${record.dispersalMode}`
+        })
 
-          formik.setValues({
-            ...res.record,
+        formik.setValues({
+          ...res.record,
 
-            recordId: String(res.record.corId) + String(res.record.dispersalMode)
-          })
-        }
-      } catch (exception) {}
+          recordId: String(res.record.corId) + String(res.record.dispersalMode)
+        })
+      }
     })()
   }, [])
 

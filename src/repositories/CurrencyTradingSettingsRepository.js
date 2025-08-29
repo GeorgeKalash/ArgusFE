@@ -92,6 +92,7 @@ export const CurrencyTradingSettingsRepository = {
   MasterDataDTD: {
     qry: service + 'qryLDT',
     page: service + 'pageLDT',
+    snapshot: service + 'snapshotLDT',
     set: service + 'setLDT',
     get: service + 'getLDT',
     del: service + 'delLDT'

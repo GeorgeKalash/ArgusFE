@@ -211,17 +211,17 @@ export function DataGrid({
     })
   }
 
-  useEffect(() => {
-    const BUTTON_SELECTOR = [
-      'button:not([disabled])',
-      '[role="button"]:not(.Mui-disabled)',
-      '.MuiButtonBase-root:not(.Mui-disabled)',
-      '.MuiIconButton-root:not(.Mui-disabled)',
-      '.MuiButton-root:not(.Mui-disabled)',
-      '.MuiFab-root:not(.Mui-disabled)',
-      '.MuiListItemButton-root:not(.Mui-disabled)'
-    ].join(',')
+  const BUTTON_SELECTOR = [
+    'button:not([disabled])',
+    '[role="button"]:not(.Mui-disabled)',
+    '.MuiButtonBase-root:not(.Mui-disabled)',
+    '.MuiIconButton-root:not(.Mui-disabled)',
+    '.MuiButton-root:not(.Mui-disabled)',
+    '.MuiFab-root:not(.Mui-disabled)',
+    '.MuiListItemButton-root:not(.Mui-disabled)'
+  ].join(',')
 
+  useEffect(() => {
     const isInsideAgGridUX = (el, e) => {
       if (!el) return false
       const root = gridContainerRef.current
@@ -259,7 +259,7 @@ export function DataGrid({
       const pressedButton = target.closest(BUTTON_SELECTOR)
 
       if (gridApiRef.current?.getEditingCells()?.length == 0) return
-      if (!pressedButton) return
+      if (!pressedButton || pressedButton.closest('.MuiPaper-root')) return
       if (isInsideAgGridUX(pressedButton, e)) return
       if (gridApiRef.current?.getEditingCells()?.length > 0) {
         commitIfEditing()
@@ -739,9 +739,12 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
+      const pressedButton = event.target.closest(BUTTON_SELECTOR)
+
       if (
         (gridContainerRef.current &&
           !gridContainerRef.current.contains(event.target) &&
+          !pressedButton?.closest('.MuiPaper-root') &&
           gridApiRef.current?.getEditingCells()?.length > 0 &&
           !event.target.classList.contains('MuiAutocomplete-option')) ||
         event.target.closest('.ag-header-row')

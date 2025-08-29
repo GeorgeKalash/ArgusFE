@@ -21,7 +21,7 @@ const FeesSceduleForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.page
   })
 
   const { formik } = useForm({
