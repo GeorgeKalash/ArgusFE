@@ -47,6 +47,7 @@ export default function IRGenerateConsumption() {
 
   const { formik } = useForm({
     maxAccess: access,
+    conditionSchema: ['items'],
     initialValues: {
       dtId: null,
       fromSiteId: null,
