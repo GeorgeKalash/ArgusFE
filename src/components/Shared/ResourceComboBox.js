@@ -90,7 +90,7 @@ export default function ResourceComboBox({
   let finalItemsList = data ? data : reducer(apiResponse)?.filter?.(filter)
   finalItemsList = cacheStore?.[key] && !noCache ? cacheStore?.[key] : finalItemsList
 
-  finalItemsListRef.current = finalItemsList || []
+  finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
   const [parent, child] = fieldPath
   const name = child || rest?.name

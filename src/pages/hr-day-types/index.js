@@ -10,7 +10,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import DayTypesForm from './Forms/DayTypesForm'
 
@@ -24,7 +23,7 @@ const DayTypes = () => {
 
     const response = await getRequest({
       extension: TimeAttendanceRepository.DayTypes.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
     
 
@@ -70,7 +69,7 @@ const DayTypes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.PaymentReasons.del,
+      extension: TimeAttendanceRepository.DayTypes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
