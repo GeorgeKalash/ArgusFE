@@ -47,9 +47,7 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
       window.close()
     }
   })
-  
   const editMode = !!formik.values.recordId
-
   useEffect(() => {
     ;(async function () {
       if (recordId) {
