@@ -365,6 +365,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        decimalScale: 3
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update(data)
@@ -375,6 +378,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.volume,
       name: 'volume',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -383,6 +387,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.weight,
       name: 'weight',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -391,6 +396,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.baseprice,
       name: 'basePrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 5
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
         update(data)
@@ -410,6 +418,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.unitCost,
       name: 'unitPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 3
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
@@ -442,6 +453,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.VAT,
       name: 'vatAmount',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -481,6 +493,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       updateOn: 'blur',
       flex: 2,
       props: {
+        decimalScale: 2,
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
@@ -496,6 +509,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
       label: labels.extendedCost,
       name: 'extendedPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 2
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
@@ -734,10 +750,10 @@ export default function PurchaseOrderForm({ recordId, window }) {
         return {
           ...item,
           id: index + 1,
-          basePrice: item.basePrice ? parseFloat(item.basePrice).toFixed(5) : 0,
-          unitPrice: item.unitPrice ? parseFloat(item.unitPrice).toFixed(3) : 0,
-          vatAmount: item.vatAmount ? parseFloat(item.vatAmount).toFixed(2) : 0,
-          extendedPrice: item.extendedPrice ? parseFloat(item.extendedPrice).toFixed(2) : 0,
+          basePrice: item.basePrice ? item.basePrice : 0,
+          unitPrice: item.unitPrice ? item.unitPrice : 0,
+          vatAmount: item.vatAmount ? item.vatAmount : 0,
+          extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
           deliveryDate: formatDateFromApi(item.deliveryDate),
           puTrx: true,
           taxDetails: puTrxTaxes
@@ -836,7 +852,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
   }
 
   async function itemObject(itemPhysProp, itemInfo, vendorPrice) {
-    const weight = parseFloat(itemPhysProp?.weight || 0).toFixed(2)
+    const weight = itemPhysProp?.weight || 0
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
@@ -886,7 +902,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       isMetal: isMetal,
       metalId: metalId,
       metalPurity: metalPurity,
-      volume: parseFloat(itemPhysProp?.volume) || 0,
+      volume: itemPhysProp?.volume || 0,
       weight: weight,
       basePrice: 0,
       baseLaborPrice: baseLaborPrice,
@@ -966,16 +982,16 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: parseFloat(newRow?.basePrice || 0),
-      volume: parseFloat(newRow?.volume) || 0,
-      weight: parseFloat(newRow?.weight),
-      unitPrice: parseFloat(newRow?.unitPrice || 0),
+      basePrice: newRow?.basePrice || 0,
+      volume: newRow?.volume || 0,
+      weight: newRow?.weight,
+      unitPrice: newRow?.unitPrice || 0,
       upo: 0,
-      qty: parseFloat(newRow?.qty),
-      extendedPrice: parseFloat(newRow?.extendedPrice),
+      qty: newRow?.qty,
+      extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
-      mdValue: parseFloat(newRow?.mdValue),
+      mdValue: newRow?.mdValue,
       baseLaborPrice: 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
@@ -988,11 +1004,11 @@ export default function PurchaseOrderForm({ recordId, window }) {
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       unitPrice: itemPriceRow?.unitPrice,
-      qty: parseFloat(itemPriceRow?.qty),
-      weight: parseFloat(itemPriceRow?.weight),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+      qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
+      extendedPrice: itemPriceRow?.extendedPrice,
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.header?.tdPct,
       taxDetails: formik.values.header.isVattable === true ? newRow.taxDetails : null
     })
@@ -1002,17 +1018,17 @@ export default function PurchaseOrderForm({ recordId, window }) {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: itemPriceRow?.qty ? parseFloat(itemPriceRow?.qty).toFixed(2) : 0,
-      baseQty: qtyInBase ? parseFloat(qtyInBase).toFixed(2) : 0,
-      volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
-      weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
-      basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
-      unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
-      extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
+      qty: itemPriceRow?.qty ? itemPriceRow?.qty : 0,
+      baseQty: qtyInBase ? qtyInBase : 0,
+      volume: itemPriceRow?.volume ? itemPriceRow.volume : 0,
+      weight: itemPriceRow?.weight ? itemPriceRow.weight : 0,
+      basePrice: itemPriceRow?.basePrice ? itemPriceRow.basePrice : 0,
+      unitPrice: itemPriceRow?.unitPrice ? itemPriceRow.unitPrice : 0,
+      extendedPrice: itemPriceRow?.extendedPrice ? itemPriceRow.extendedPrice : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
-      vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0
+      mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
+      vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -1022,12 +1038,12 @@ export default function PurchaseOrderForm({ recordId, window }) {
     ?.filter(item => item.itemId !== undefined)
     .map(item => ({
       ...item,
-      basePrice: parseFloat(item.basePrice) || 0,
-      unitPrice: parseFloat(item.unitPrice) || 0,
-      vatAmount: item?.vatAmount ? parseFloat(item.vatAmount) : 0,
-      weight: parseFloat(item.weight) || 0,
-      volume: parseFloat(item.volume) || 0,
-      extendedPrice: parseFloat(item.extendedPrice) || 0
+      basePrice: item.basePrice || 0,
+      unitPrice: item.unitPrice || 0,
+      vatAmount: item?.vatAmount ? item.vatAmount : 0,
+      weight: item.weight || 0,
+      volume: item.volume || 0,
+      extendedPrice: item.extendedPrice || 0
     }))
 
   const subTotal = getSubtotal(parsedItemsArray)
@@ -1079,17 +1095,17 @@ export default function PurchaseOrderForm({ recordId, window }) {
       if (!item.requestId) {
         const vatCalcRow = getVatCalc({
           priceType: item?.priceType,
-          basePrice: parseFloat(item?.basePrice),
-          qty: parseFloat(item?.qty),
-          weight: parseFloat(item?.weight),
-          extendedPrice: parseFloat(item?.extendedPrice),
+          basePrice: item?.basePrice,
+          qty: item?.qty,
+          weight: item?.weight,
+          extendedPrice: item?.extendedPrice,
           baseLaborPrice: parseFloat(item?.baseLaborPrice),
-          vatAmount: parseFloat(item?.vatAmount),
-          tdPct: parseFloat(tdPct),
+          vatAmount: item?.vatAmount,
+          tdPct: tdPct,
           taxDetails: formik.values.header.isVattable === true ? item.taxDetails : null
         })
 
-        formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+        formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
       }
     })
   }
