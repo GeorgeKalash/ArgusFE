@@ -89,6 +89,8 @@ const UndeliveredItems = () => {
           clientId,
           siteId,
           notes,
+          plantId,
+          dtId,
           date: date ? formatDateToApi(date) : null,
           items: itemValues
         })
@@ -132,7 +134,9 @@ const UndeliveredItems = () => {
   async function getData() {
     const result = await getRequest({
       extension: RGSaleRepository.SaSaleOrder.open,
-      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${clientId || 0}&_soId=${soId}&_plantId=${plantId}`
+      parameters: `_categoryId=${categoryId}&_siteId=${siteId}&_groupId=${groupId}&_clientId=${
+        clientId || 0
+      }&_soId=${soId}&_plantId=${plantId}`
     })
 
     const res = result?.list?.map((item, index) => ({
@@ -246,17 +250,11 @@ const UndeliveredItems = () => {
     }
   ]
 
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
-  }
-
   const actions = [
     {
       key: 'ORD',
       condition: true,
-      onClick: handleSubmit
+      onClick: () => formik.handleSubmit()
     }
   ]
 
@@ -370,7 +368,7 @@ const UndeliveredItems = () => {
                     formik.setFieldValue('siteName', newValue?.name || '')
                   }}
                   required
-                  error={(formik.touched.siteId && Boolean(formik.errors.siteId))}
+                  error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                 />
               </Grid>
               <Grid item xs={12}>

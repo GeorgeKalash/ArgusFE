@@ -64,6 +64,8 @@ const CustomNumberField = ({
       val = val.slice(0, -1)
     }
 
+    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) return val.toString()
+
     if (val?.endsWith('.') && !blur) {
       return val
     }
@@ -75,7 +77,7 @@ const CustomNumberField = ({
       return null
     }
 
-    const num = val != '' ? Number(val) : null
+    const num = val != '' ? val : null
 
     return isNaN(num) ? null : num
   }

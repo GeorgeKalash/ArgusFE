@@ -4,12 +4,17 @@ import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { forwardRef, useImperativeHandle } from 'react'
 
-const StrictUnpostConfirmation = ({ window, onSuccess }) => {
+const StrictUnpostConfirmation = forwardRef(({ window, onSuccess }, ref) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
 
   useSetWindow({ title: platformLabels.UnpostConfirmation, window })
+
+  useImperativeHandle(ref, () => ({
+    submit: () => handleSubmit()
+  }))
 
   const handleChange = event => {
     const value = event.target.value
@@ -51,6 +56,7 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
           onChange={handleChange}
           onClear={handleClear}
           placeholder={platformLabels.placeHolderUnpost}
+          autoFocus={true}
         />
       </Grid>
       <Grid item xs={12}>
@@ -58,7 +64,7 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
       </Grid>
     </Grid>
   )
-}
+})
 
 StrictUnpostConfirmation.width = 500
 StrictUnpostConfirmation.height = 300

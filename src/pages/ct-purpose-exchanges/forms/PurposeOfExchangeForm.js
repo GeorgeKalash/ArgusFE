@@ -61,19 +61,17 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
   })
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: CurrencyTradingSettingsRepository.PurposeExchange.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -122,7 +120,7 @@ export default function PurposeOfExchangeForm({ labels, maxAccess, recordId, set
                 }}
                 error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
-              </Grid>
+            </Grid>
           </Grid>
         </Grow>
       </VertLayout>

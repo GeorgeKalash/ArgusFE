@@ -660,6 +660,14 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
+  const imageRenderer =
+    column =>
+    ({ data }) => {
+      const imageUrl = data?.[column.field]
+
+      return <img src={imageUrl ?? '/images/emptyPhoto.jpg'} alt='' width={70} />
+    }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -690,7 +698,14 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.isTree ? IndentedCellRenderer : column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer:
+        column.type === 'image'
+          ? imageRenderer(column)
+          : column.isTree
+          ? IndentedCellRenderer
+          : column.cellRenderer
+          ? column.cellRenderer
+          : FieldWrapper
     }))
   ]
 
@@ -714,7 +729,7 @@ const Table = ({
 
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props?.onEdit && (
+              {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
                   onClick={e => {
@@ -740,21 +755,26 @@ const Table = ({
                   <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
                 </IconButton>
               )}
-              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    if (props?.deleteConfirmationType == 'strict') {
-                      openDeleteConfirmation(data)
-                    } else {
-                      openDelete(data)
-                    }
-                  }}
-                  color='error'
-                >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-                </IconButton>
-              )}
+              {globalStatus &&
+                !isStatus3 &&
+                !isStatusCanceled &&
+                deleteBtnVisible &&
+                !isWIP &&
+                (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
+                  <IconButton
+                    size='small'
+                    onClick={e => {
+                      if (props?.deleteConfirmationType == 'strict') {
+                        openDeleteConfirmation(data)
+                      } else {
+                        openDelete(data)
+                      }
+                    }}
+                    color='error'
+                  >
+                    <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                  </IconButton>
+                )}
             </Box>
           )
         }
@@ -853,6 +873,8 @@ const Table = ({
     }
   }
 
+  const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+
   return (
     <VertLayout>
       <Grow>
@@ -905,7 +927,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            rowHeight={35}
+            rowHeight={hasImageColumn ? 70 : 35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}

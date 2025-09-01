@@ -113,20 +113,29 @@ const ImageUpload = forwardRef(
     const submit = () => {
       if (disabled) return
       if (isAbsolutePath) {
-        const obj = {
-          ...formik.values,
-          fileName: formik?.values?.file?.name || formik.values.url,
-          resourceId,
-          recordId: ref?.current?.value || recordId
-        }
+        if (formik?.values?.file?.name || formik.values.url) {
+          const obj = {
+            ...formik.values,
+            fileName: formik?.values?.file?.name || formik.values.url,
+            resourceId,
+            recordId: ref?.current?.value || recordId
+          }
 
-        return postRequest({
-          extension: SystemRepository.Attachment.set2,
-          record: JSON.stringify(obj),
-          file: formik.values?.file
-        }).then(res => {
-          return res
-        })
+          return postRequest({
+            extension: SystemRepository.Attachment.set2,
+            record: JSON.stringify(obj),
+            file: formik.values?.file
+          }).then(res => {
+            return res
+          })
+        } else if (!image && initialValues?.fileName && !formik.values?.fileName) {
+          return postRequest({
+            extension: SystemRepository.Attachment.del,
+            record: JSON.stringify(initialValues)
+          }).then(res => {
+            return res
+          })
+        }
       } else {
         if (formik.values?.file) {
           const obj = { ...formik.values, recordId: ref?.current?.value || recordId }
@@ -169,6 +178,9 @@ const ImageUpload = forwardRef(
             border: error && '2px solid #F44336'
           }}
           onClick={handleClick}
+          onError={e => {
+            e.currentTarget.src = '/images/emptyPhoto.jpg'
+          }}
         />
         <Box>
           <input

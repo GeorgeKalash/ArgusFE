@@ -25,12 +25,12 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function JobOrderForm({
   labels,
@@ -39,16 +39,17 @@ export default function JobOrderForm({
   store,
   setRefetchRouting,
   invalidate,
-  lockRecord
+  lockRecord,
+  window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
-  const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrder,
@@ -98,7 +99,8 @@ export default function JobOrderForm({
     rubberId: null,
     threeDDId: null,
     status: 1,
-    itemFromDesign: false
+    itemFromDesign: false,
+    standardCost: null
   }
 
   const { formik } = useForm({
@@ -110,7 +112,7 @@ export default function JobOrderForm({
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
-      expectedPcs: yup.number().required(),
+      expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
       itemCategoryId: yup.string().required(),
       routingId: yup.string().required()
@@ -143,7 +145,10 @@ export default function JobOrderForm({
         ...prevStore,
         recordId: res?.recordId
       }))
-      await refetchForm(res.recordId)
+      const reference = await refetchForm(res.recordId)
+      if (window.setTitle && !editMode) {
+        window.setTitle(reference ? `${labels.jobOrder} ${reference}` : labels.jobOrder)
+      }
     }
   })
   const editMode = !!formik.values.recordId
@@ -189,7 +194,9 @@ export default function JobOrderForm({
       condition: true,
       onClick: 'onClickGL',
       datasetId: ResourceIds.GLMFJobOrders,
-      disabled: !editMode
+      disabled: !editMode,
+      error: !formik?.values?.endingDT ? { message: labels.emptyEndingDate } : null,
+      values: { ...formik.values, date: formik?.values?.endingDT }
     },
     {
       key: 'IV',
@@ -200,8 +207,7 @@ export default function JobOrderForm({
     {
       key: 'SerialsLots',
       condition: true,
-      onClick: openSerials,
-      disabled: !editMode || !formik.values.itemId || (!isReleased && formik.values.trackBy == 1)
+      onClick: openSerials
     },
     {
       key: 'Start',
@@ -280,13 +286,22 @@ export default function JobOrderForm({
         deliveryDate: formik.values.deliveryDate ? formatDateToApi(formik.values.deliveryDate) : null
       })
     })
-    toast.success(platformLabels.Post)
+    toast.success(platformLabels.Posted)
     lockRecord({
       recordId: res.recordId,
       reference: formik.values.reference,
       resourceId: ResourceIds.MFJobOrders,
       onSuccess: () => {
+        addLockedScreen({
+          resourceId: ResourceIds.MFJobOrders,
+          recordId: res.recordId,
+          reference: formik.values.reference
+        })
         refetchForm(res.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          isPosted: true
+        }))
       },
       isAlreadyLocked: name => {
         window.close()
@@ -301,12 +316,8 @@ export default function JobOrderForm({
         })
       }
     })
+
     invalidate()
-    await refetchForm(res.recordId)
-    setStore(prevStore => ({
-      ...prevStore,
-      isPosted: true
-    }))
   }
   async function onWorkFlowClick() {
     stack({
@@ -388,8 +399,17 @@ export default function JobOrderForm({
       lockRecord({
         recordId: res?.record.recordId,
         reference: res?.record.reference,
-        resourceId: ResourceIds.MFJobOrders
+        resourceId: ResourceIds.MFJobOrders,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.MFJobOrders,
+            recordId: res?.record.recordId,
+            reference: res?.record.reference
+          })
+        }
       })
+
+    return res?.record.reference
   }
 
   async function getRouting(recordId) {
@@ -486,22 +506,7 @@ export default function JobOrderForm({
 
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
-  async function getAllLines() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry,
-      parameters: `_filter=`
-    })
-    setPlStore(res?.list)
-  }
-  async function getFilteredLines(itemId) {
-    if (!itemId) return null
 
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry2,
-      parameters: `_itemId=${itemId}`
-    })
-    setPlStore(res?.list)
-  }
   async function updateWC(routingId) {
     if (!routingId) {
       formik.setFieldValue('workCenterId', null)
@@ -533,11 +538,22 @@ export default function JobOrderForm({
           : null
     })
   }
+
   useEffect(() => {
     ;(async function () {
-      !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
+      if (!editMode)
+        if (formik.values.dtId) {
+          const dtd = await getRequest({
+            extension: ManufacturingRepository.DocumentTypeDefault.get,
+            parameters: `_dtId=${formik.values.dtId}`
+          })
+
+          formik.setFieldValue('plantId', dtd?.record?.plantId || null)
+        } else {
+          formik.setFieldValue('plantId', null)
+        }
     })()
-  }, [formik.values.designId])
+  }, [formik.values.dtId])
 
   useEffect(() => {
     ;(async function () {
@@ -650,6 +666,25 @@ export default function JobOrderForm({
                         error={formik.touched.deliveryDate && Boolean(formik.errors.deliveryDate)}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={SystemRepository.Plant.qry}
+                        name='plantId'
+                        label={platformLabels.plant}
+                        valueField='recordId'
+                        displayField={['reference', 'name']}
+                        columnsInDropDown={[
+                          { key: 'reference', value: 'plant Ref' },
+                          { key: 'name', value: 'Name' }
+                        ]}
+                        values={formik.values}
+                        readOnly={isCancelled || isPosted}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('plantId', newValue?.recordId || null)
+                        }}
+                        error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                      />
+                    </Grid>
                     <Grid item>
                       <ResourceLookup
                         endpointId={InventoryRepository.Item.snapshot}
@@ -754,8 +789,8 @@ export default function JobOrderForm({
                   </Grid>
                 </Grid>
                 <Grid item xs={6}>
-                  <Grid container direction='column' spacing={2}>
-                    <Grid item>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
                       <CustomTextArea
                         name='description'
                         label={labels.description}
@@ -769,7 +804,7 @@ export default function JobOrderForm({
                         error={formik.touched.description && Boolean(formik.errors.description)}
                       />
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={6}>
                       <CustomNumberField
                         name='itemWeight'
                         label={labels.itemWeight}
@@ -777,7 +812,15 @@ export default function JobOrderForm({
                         readOnly
                       />
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='standardCost'
+                        label={labels.standardCost}
+                        value={formik.values.standardCost}
+                        readOnly
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
                       <CustomNumberField
                         name='avgWeight'
                         label={labels.avgWeight}
@@ -785,22 +828,23 @@ export default function JobOrderForm({
                         readOnly
                       />
                     </Grid>
-                    <Grid item>
-                      <CustomComboBox
-                        store={plStore}
+                    <Grid item xs={12}>
+                      <ResourceComboBox
+                        endpointId={ManufacturingRepository.ProductionLine.qry}
                         name='lineId'
                         label={labels.line}
+                        values={formik.values}
                         valueField='recordId'
-                        readOnly={isCancelled || isReleased}
                         displayField='name'
-                        value={formik.values.lineId}
+                        maxAccess={maxAccess}
+                        readOnly={isCancelled || isReleased}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={12}>
                       <ResourceLookup
                         endpointId={ManufacturingRepository.Routing.snapshot2}
                         valueField='reference'
@@ -828,7 +872,7 @@ export default function JobOrderForm({
                         }}
                       />
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={12}>
                       <ResourceLookup
                         endpointId={ManufacturingRepository.WorkCenter.snapshot}
                         valueField='reference'
@@ -850,16 +894,34 @@ export default function JobOrderForm({
                         }}
                       />
                     </Grid>
-                    <Grid item>
-                      <CustomNumberField name='qty' label={labels.netProduction} value={formik.values.qty} readOnly />
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='qty'
+                        label={labels.netProduction}
+                        value={formik.values.qty}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
-                    <Grid item>
-                      <CustomNumberField name='pcs' label={labels.producedPcs} value={formik.values.pcs} readOnly />
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='pcs'
+                        label={labels.producedPcs}
+                        value={formik.values.pcs}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
-                    <Grid item>
-                      <CustomNumberField name='RMCost' label={labels.rmCost} value={formik.values.RMCost} readOnly />
+                    <Grid item xs={12}>
+                      <CustomNumberField
+                        name='RMCost'
+                        label={labels.rmCost}
+                        value={formik.values.RMCost}
+                        readOnly
+                        maxAccess={maxAccess}
+                      />
                     </Grid>
-                    <Grid item>
+                    <Grid item xs={12}>
                       <ResourceComboBox
                         endpointId={ManufacturingRepository.ProductionClass.qry}
                         values={formik.values}
@@ -920,6 +982,7 @@ export default function JobOrderForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   valueField='recordId'
+                  maxAccess={maxAccess}
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}
@@ -993,6 +1056,7 @@ export default function JobOrderForm({
                     { key: 'name', value: 'Name' }
                   ]}
                   valueField='recordId'
+                  maxAccess={maxAccess}
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}

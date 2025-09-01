@@ -20,7 +20,7 @@ import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial }) {
+export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
   const { platformLabels } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
@@ -141,6 +141,9 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       }))
 
       formik.setFieldValue('sku', res.record.sku)
+      if (window.setTitle && !editMode) {
+        window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
+      }
 
       invalidate()
     }
@@ -231,7 +234,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     label={labels.category}
                     valueField='recordId'
                     displayField={['caRef', 'name']}
-                    readOnly={editMode}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
@@ -542,7 +544,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         productionLevel: newValue?.key
                       }))
                     }}
-                    readOnly={editMode}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
                   />

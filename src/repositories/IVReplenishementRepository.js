@@ -32,7 +32,8 @@ export const IVReplenishementRepository = {
     print: service + 'printREQ'
   },
   OrderItem: {
-    qry: service + 'qryREI'
+    qry: service + 'qryREI',
+    open: service + 'openREI'
   },
   MatPlanning: {
     page: service + 'pageMPL',
@@ -41,7 +42,8 @@ export const IVReplenishementRepository = {
     set2: service + 'set2MPL',
     reopen: service + 'reopenMPL',
     close: service + 'closeMPL',
-    qry: service + 'qryMPL'
+    qry: service + 'qryMPL',
+    snapshot: service + 'snapshotMPL'
   },
   MatPlanningItem: {
     qry: service + 'qryMPI',
@@ -63,5 +65,11 @@ export const IVReplenishementRepository = {
   },
   materialPlaning: {
     preview: service + 'previewMRP'
+  },
+  Transfer: {
+    generate2: service + 'generate2TFR'
+  },
+  ConsumptionOfTools: {
+    generate: service + 'generateMFCON'
   }
 }
