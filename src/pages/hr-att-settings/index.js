@@ -9,14 +9,13 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ControlContext } from 'src/providers/ControlContext'
-import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
-import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const AttSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -81,7 +80,10 @@ const AttSettings = () => {
       prevDayTVTime: null,
       disableCrossBranchTA: null
     },
-    validationSchema: yup.object().shape({}),
+    validationSchema: yup.object().shape({
+      prevDayTVTime: yup.number().min(7).max(15),
+      minPunchInterval: yup.number().min(5).max(15),
+    }),
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
         key,
@@ -109,15 +111,15 @@ const AttSettings = () => {
         <Grid container spacing={2} xs={5}>
           <Grid item xs={12}>
             <ResourceComboBox
-              datasetId={DataSets.SOURCE_CALENDAR}
+              endpointId={TimeAttendanceRepository.Calendar.qry}
               name='caId'
               label={labels.caId}
-              valueField='key'
-              displayField='value'
               values={formik.values}
+              valueField='recordId'
+              displayField='name'
               maxAccess={access}
               onChange={(event, newValue) => {
-                formik.setFieldValue('caId', newValue?.key || null)
+                formik.setFieldValue('caId', newValue.recordId || null)
               }}
               error={formik.touched.caId && Boolean(formik.errors.caId)}
             />
@@ -138,7 +140,7 @@ const AttSettings = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomDateTimePicker
+            <CustomTextField
               name='lastGenFSDateTime'
               readOnly
               label={labels.lastGenFSDateTime}
@@ -147,7 +149,7 @@ const AttSettings = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomDateTimePicker
+            <CustomTextField
               name='lastReceivedPunch'
               readOnly
               label={labels.lastReceivedPunch}
@@ -156,7 +158,7 @@ const AttSettings = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomDateTimePicker
+            <CustomTextField
               name='lastProcessedPunch'
               readOnly
               label={labels.lastProcessedPunch}
@@ -164,8 +166,8 @@ const AttSettings = () => {
               maxAccess={access}
             />
           </Grid>
-          <Grid item xs={6}>
-            <CustomNumberField
+          <Grid item xs={12}>
+            <CustomTextField
               name='lastGenTATV'
               label={labels.lastGenTATV}
               value={formik.values.lastGenTATV}
@@ -206,12 +208,13 @@ const AttSettings = () => {
               error={formik.touched.sourceTACA && Boolean(formik.errors.sourceTACA)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='minPunchInterval'
               label={labels.minPunchInterval}
               value={formik.values.minPunchInterval}
               maxAccess={access}
+              thousandSeparator={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('minPunchInterval', '')}
               error={formik.touched.minPunchInterval && Boolean(formik.errors.minPunchInterval)}
@@ -247,18 +250,19 @@ const AttSettings = () => {
               error={formik.touched.punchSource && Boolean(formik.errors.punchSource)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='weeklyTAHours'
               label={labels.weeklyTAHours}
               value={formik.values.weeklyTAHours}
               maxAccess={access}
+              thousandSeparator={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('weeklyTAHours', '')}
               error={formik.touched.weeklyTAHours && Boolean(formik.errors.weeklyTAHours)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='prevDayTVTime'
               label={labels.prevDayTVTime}
@@ -269,7 +273,7 @@ const AttSettings = () => {
               error={formik.touched.prevDayTVTime && Boolean(formik.errors.prevDayTVTime)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <CustomCheckBox
               name='disableCrossBranchTA'
               value={formik.values?.disableCrossBranchTA}

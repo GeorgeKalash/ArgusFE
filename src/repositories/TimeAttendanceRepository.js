@@ -42,5 +42,8 @@ export const TimeAttendanceRepository = {
   },
   DSLReason: {
     qry: service + 'qryLR'
+  },
+  Calendar: {
+    qry: service + 'qryCA'
   }
 }
