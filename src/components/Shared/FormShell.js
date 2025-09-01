@@ -1,7 +1,5 @@
-import { Box } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import TransactionLog from './TransactionLog'
-import { TrxType } from 'src/resources/AccessLevels'
 import { ClientRelationList } from './ClientRelationList'
 import { useGlobalRecord, useWindow } from 'src/windows'
 import GeneralLedger from 'src/components/Shared/GeneralLedger'
@@ -21,28 +19,8 @@ import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { useError } from 'src/error'
 import Form from './Form'
-
-// function LoadingOverlay() {
-//   return (
-//     <Box
-//       style={{
-//         position: 'absolute',
-//         top: 0,
-//         right: 0,
-//         left: 0,
-//         bottom: 0,
-//         backgroundColor: 'rgba(250, 250, 250, 1)',
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//         zIndex: 9999
-//       }}
-//     ></Box>
-//   )
-// }
 
 export default function FormShell({
   form,
@@ -61,8 +39,6 @@ export default function FormShell({
   maxAccess,
   isPosted = false,
   isClosed = false,
-  clientRelation = false,
-  addClientRelation = false,
   previewReport = false,
   onClear,
   previewBtnClicked = () => {},
@@ -77,35 +53,7 @@ export default function FormShell({
   const { platformLabels } = useContext(ControlContext)
   const isSavedClearVisible = isSavedClear && isSaved && isCleared
 
-  // const { loading } = useContext(RequestsContext)
-  // const [showOverlay, setShowOverlay] = useState(false)
   const { stack: stackError } = useError()
-
-  // const windowToolbarVisible = editMode
-  //   ? maxAccess < TrxType.EDIT
-  //     ? false
-  //     : true
-  //   : maxAccess < TrxType.ADD
-  //   ? false
-  //   : true
-
-  // useEffect(() => {
-  //   if (maxAccess || maxAccess === undefined) {
-  //     if (!loading && editMode) {
-  //       const timer = setTimeout(() => {
-  //         setShowOverlay(true)
-  //       }, 150)
-
-  //       return () => clearTimeout(timer)
-  //     } else if (!editMode && !loading) {
-  //       const timer = setTimeout(() => {
-  //         setShowOverlay(true)
-  //       }, 50)
-
-  //       return () => clearTimeout(timer)
-  //     }
-  //   }
-  // }, [loading, editMode, maxAccess])
 
   useEffect(() => {
     if (!form?.values?.recordId) {
@@ -396,7 +344,6 @@ export default function FormShell({
     <Form
       form={form}
       previewBtnClicked={previewBtnClicked}
-      print={print}
       onSave={() => {
         form?.handleSubmit()
       }}
@@ -425,14 +372,14 @@ export default function FormShell({
       postVisible={postVisible}
       isPosted={isPosted}
       isClosed={isClosed}
-      clientRelation={clientRelation}
-      addClientRelation={addClientRelation}
       resourceId={resourceId}
       recordId={form?.values?.recordId}
       previewReport={previewReport}
       visibleClear={visibleClear}
       functionId={functionId}
       maxAccess={maxAccess}
+      isParentWindow={isParentWindow}
+      fullSize={fullSize}
     >
       {children}
     </Form>

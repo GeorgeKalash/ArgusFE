@@ -1,10 +1,7 @@
 import { Box, DialogContent } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
-
-// import TransactionLog from './TransactionLog'
 import { TrxType } from 'src/resources/AccessLevels'
-import { useWindow } from 'src/windows'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
 function LoadingOverlay() {
@@ -26,48 +23,14 @@ function LoadingOverlay() {
   )
 }
 
-export default function Form({
-  form,
-
-  // isSaved = true,
-
-  // isInfo = true,
-
-  // isCleared = true,
-  isSavedClear = true,
-  children,
-  editMode,
-
-  // disabledSubmit,
-  // disabledSavedClear,
-  // infoVisible = true,
-  // postVisible = false,
-  // resourceId,
-
-  // functionId,
-  maxAccess,
-
-  // isPosted = false,
-  // isClosed = false,
-  // clientRelation = false,
-  // addClientRelation = false,
-  // previewReport = false,
-  // onClear,
-  previewBtnClicked = () => {},
-
-  // visibleClear,
-  // actions,
-
-  // windowToolbarVisible,
-  isParentWindow = true,
-  fullSize = false,
-  ...props
-}) {
-  // const { stack } = useWindow()
+export default function Form({ children, isParentWindow = true, isSaved = true, fullSize = true, ...props }) {
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
+  const editMode = props.editMode
+  const maxAccess = props.maxAccess
+  const form = props?.form
 
-  const windowToolbarVisible = props.editMode
+  const windowToolbarVisible = editMode
     ? maxAccess < TrxType.EDIT
       ? false
       : true
@@ -117,12 +80,20 @@ export default function Form({
           const target = e.target
           const role = target.getAttribute('role') || ''
           const isSearchField = target.getAttribute('data-search') === 'true'
-
-          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+          console.log(props, 'test')
+          console.log(maxAccess)
+          if (
+            (e.ctrlKey || e.metaKey) &&
+            e.key.toLowerCase() === 's' &&
+            !props.isPosted &&
+            !props.isClosed &&
+            !props.disabledSubmit
+          ) {
             e.preventDefault()
-            form?.submitForm?.()
             if (props.onSave) {
               props.onSave()
+            } else {
+              form?.submitForm?.()
             }
 
             return
@@ -148,52 +119,7 @@ export default function Form({
         {!showOverlay && LoadingOverlay()}
         {children}
       </DialogContent>
-      {windowToolbarVisible && (
-        <WindowToolbar
-          // form={form}
-          // previewBtnClicked={previewBtnClicked}
-          // print={print}
-          // onSave={() => {
-          //   form?.handleSubmit()
-          // }}
-          // onSaveClear={() => {
-          //   handleSaveAndClear()
-          // }}
-          // onClear={() => handleReset()}
-          // onInfo={() =>
-          //   stack({
-          //     Component: TransactionLog,
-          //     props: {
-          //       recordId: form.values?.recordId ?? form.values.clientId,
-          //       resourceId: resourceId
-          //     }
-          //   })
-          // }
-
-          {...props}
-
-          // isSaved={isSaved}
-          // isSavedClear={isSavedClearVisible}
-
-          // isCleared={isCleared}
-          // actions={actions}
-          // editMode={editMode}
-          // disabledSubmit={disabledSubmit}
-          // disabledSavedClear={disabledSavedClear || disabledSubmit}
-          // infoVisible={infoVisible}
-          // postVisible={postVisible}
-          // isPosted={isPosted}
-          // isClosed={isClosed}
-          // clientRelation={clientRelation}
-          // addClientRelation={addClientRelation}
-          // resourceId={resourceId}
-          // recordId={form?.values?.recordId}
-          // previewReport={previewReport}
-          // visibleClear={visibleClear}
-          // functionId={functionId}
-          // maxAccess={maxAccess}
-        />
-      )}
+      {windowToolbarVisible && <WindowToolbar {...props} isSaved={isSaved} />}
     </>
   )
 }

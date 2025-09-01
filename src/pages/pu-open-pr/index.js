@@ -265,7 +265,7 @@ const OpenPurchaseRequisition = () => {
   ]
 
   return (
-    <FormShell isInfo={false} isCleared={false} form={formik} fullSize maxAccess={access}>
+    <FormShell isInfo={false} actions={actions} isCleared={false} form={formik} fullSize maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} padding={2}>
@@ -454,9 +454,6 @@ const OpenPurchaseRequisition = () => {
             maxAccess={access}
           />
         </Grow>
-        <Fixed>
-          <WindowToolbar smallBox={true} actions={actions} />
-        </Fixed>
       </VertLayout>
     </FormShell>
   )

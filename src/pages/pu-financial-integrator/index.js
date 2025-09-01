@@ -8,10 +8,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import FormShell from 'src/components/Shared/FormShell'
 
 const PUFinancialIntegrators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,24 +95,23 @@ const PUFinancialIntegrators = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('items', value)
-          }}
-          name='financialIntegrator'
-          value={formik.values?.items}
-          error={formik.errors?.items}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <FormShell form={formik} isCleared={false} isInfo={false} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('items', value)
+            }}
+            name='financialIntegrator'
+            value={formik.values?.items}
+            error={formik.errors?.items}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

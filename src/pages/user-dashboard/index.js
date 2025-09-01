@@ -2,7 +2,6 @@ import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Module } from 'src/resources/Module'
@@ -114,7 +113,7 @@ const UserDashboard = () => {
   }
 
   return (
-    <Form fullSize onSave={handleSubmit} isSaved>
+    <Form onSave={handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container xs={12}>
@@ -141,9 +140,6 @@ const UserDashboard = () => {
             pagination={false}
           />
         </Grow>
-        {/* <Fixed>
-          <WindowToolbar isSaved={true} onSave={handleSubmit} />
-        </Fixed> */}
       </VertLayout>
     </Form>
   )

@@ -11,6 +11,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,22 +102,21 @@ const ModuleDeactivation = () => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['moduleId']}
-          isLoading={false}
-          maxAccess={access}
-          showCheckboxColumn={true}
-          pagination={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={['moduleId']}
+            isLoading={false}
+            maxAccess={access}
+            showCheckboxColumn={true}
+            pagination={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -8,10 +8,9 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import toast from 'react-hot-toast'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
-const RetailForm = forwardRef(({ store, maxAccess }, ref) => {
+const RetailForm = ({ store, maxAccess }) => {
   const [data, setData] = useState([])
   const [recordNum, setRecordsNum] = useState(0)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,31 +90,26 @@ const RetailForm = forwardRef(({ store, maxAccess }, ref) => {
     toast.success(platformLabels.Updated)
   }
 
-  useImperativeHandle(ref, () => ({
-    submit: handleSave
-  }))
-
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          name='retail'
-          columns={rowColumns}
-          gridData={{ list: data }}
-          rowId={['key']}
-          pageSize={50}
-          pagination={false}
-          paginationType='client'
-          isLoading={false}
-          maxAccess={maxAccess}
-          showCheckboxColumn={true}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSave} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSave} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Table
+            name='retail'
+            columns={rowColumns}
+            gridData={{ list: data }}
+            rowId={['key']}
+            pageSize={50}
+            pagination={false}
+            paginationType='client'
+            isLoading={false}
+            maxAccess={maxAccess}
+            showCheckboxColumn={true}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
-})
+}
 
 export default RetailForm

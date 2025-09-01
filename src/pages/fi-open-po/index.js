@@ -12,11 +12,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import PaymentOrdersForm from '../fi-payment-orders/Form/PaymentOrdersForm'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import PaymentOrdersExpensesForm from '../fi-po-expenses/Form/PaymentOrdersExpensesForm'
 import { useError } from 'src/error'
 import FiPaymentVouchersForm from '../fi-payment-vouchers/forms/FiPaymentVouchersForm'
 import FiPaymentVoucherExpensesForm from '../fi-pv-expenses/forms/PaymentVoucherExpensesForm'
+import Form from 'src/components/Shared/Form'
 
 const OpenPaymentOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -180,31 +180,30 @@ const OpenPaymentOrder = () => {
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <RPBGridToolbar labels={labels} maxAccess={access} reportName={'FIPO2'} filterBy={filterBy} />
-      </Fixed>
-      <Grow>
-        <Table
-          name='table'
-          columns={columns}
-          gridData={data}
-          showCheckboxColumn={true}
-          rowId={['recordId']}
-          rowSelection='single'
-          handleCheckboxChange={(data, checked) => {
-            setRecord(checked ? data : {})
-          }}
-          onEdit={edit}
-          pagination={false}
-          refetch={refetch}
-          maxAccess={access}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar smallBox={true} actions={actions} />
-      </Fixed>
-    </VertLayout>
+    <Form actions={actions} maxAccess={access}>
+      <VertLayout>
+        <Fixed>
+          <RPBGridToolbar labels={labels} maxAccess={access} reportName={'FIPO2'} filterBy={filterBy} />
+        </Fixed>
+        <Grow>
+          <Table
+            name='table'
+            columns={columns}
+            gridData={data}
+            showCheckboxColumn={true}
+            rowId={['recordId']}
+            rowSelection='single'
+            handleCheckboxChange={(data, checked) => {
+              setRecord(checked ? data : {})
+            }}
+            onEdit={edit}
+            pagination={false}
+            refetch={refetch}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

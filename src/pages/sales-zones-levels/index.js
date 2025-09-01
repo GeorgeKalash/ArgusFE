@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import * as yup from 'yup'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'

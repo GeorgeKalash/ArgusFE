@@ -1,12 +1,11 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
-import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { forwardRef, useImperativeHandle } from 'react'
+import Form from './Form'
 
-const StrictDeleteConfirmation = forwardRef(({ window, action }, ref) => {
+const StrictDeleteConfirmation = ({ window, action }) => {
   const [confirmationText, setConfirmationText] = useState('')
   const { platformLabels } = useContext(ControlContext)
 
@@ -25,9 +24,6 @@ const StrictDeleteConfirmation = forwardRef(({ window, action }, ref) => {
     action()
     window.close()
   }
-  useImperativeHandle(ref, () => ({
-    submit: () => handleSubmit()
-  }))
 
   const actions = [
     {
@@ -39,31 +35,30 @@ const StrictDeleteConfirmation = forwardRef(({ window, action }, ref) => {
   ]
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
-          {platformLabels.areYouSure}
-          <br />
-          {platformLabels.youAreAbout}
-        </p>
-        <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeDelete}</p>
+    <Form actions={actions} isSaved={false} onSave={confirmationText.toLowerCase() === 'delete' && handleSubmit}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
+            {platformLabels.areYouSure}
+            <br />
+            {platformLabels.youAreAbout}
+          </p>
+          <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeDelete}</p>
+        </Grid>
+        <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+          <CustomTextField
+            name='deleteConfirmation'
+            value={confirmationText}
+            onChange={handleChange}
+            onClear={handleClear}
+            placeholder={platformLabels.placeHolder}
+            autoFocus={true}
+          />
+        </Grid>
       </Grid>
-      <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
-        <CustomTextField
-          name='deleteConfirmation'
-          value={confirmationText}
-          onChange={handleChange}
-          onClear={handleClear}
-          placeholder={platformLabels.placeHolder}
-          autoFocus={true}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Grid>
-    </Grid>
+    </Form>
   )
-})
+}
 
 StrictDeleteConfirmation.width = 500
 StrictDeleteConfirmation.height = 300
