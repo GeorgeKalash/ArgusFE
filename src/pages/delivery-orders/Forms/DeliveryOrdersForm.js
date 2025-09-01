@@ -361,6 +361,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },
           { from: 'qty', to: 'qty' },
+          { from: 'muName', to: 'muName' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
           { from: 'itemId', to: 'itemId' },
