@@ -1,7 +1,5 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -9,16 +7,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import SalaryForm from './forms/SalaryForm'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 export default function HrSalary() {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   const {
@@ -27,19 +22,17 @@ export default function HrSalary() {
     refetch,
     labels,
     paginationParameters,
-    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.EmployeeChart.page,
-    datasetId: ResourceIds.HrSalary,
+    datasetId: ResourceIds.Salaries,
     filter: {
       filterFn: fetchWithFilter
     }
   })
 
   async function fetchGridData(options = {}) {
-    console.log('qry')
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
@@ -61,16 +54,32 @@ export default function HrSalary() {
       }
     })
 
-    return { list: modifiedList, _startAt: _startAt }
+    return { count: response.count, list: modifiedList, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: EmployeeRepository.EmployeeChart.snapshot,
-        parameters: `_filter=${filters.qry}`
+    if (filters.qry) {
+      const res = await getRequest({
+        extension: EmployeeRepository.EmployeeChart.qry2,
+        parameters: `_branchId=0&_filter=${filters.qry}`
       })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+
+      const modifiedList = res?.list?.map(record => {
+        return {
+          recordId: record?.parent?.recordId || null,
+          reference: record?.parent?.reference || null,
+          name: record?.parent?.fullName || null,
+          departmentName: record?.department?.name || null,
+          positionName: record?.position?.name || null,
+          branchName: record?.branch?.name || null,
+          scName: record?.scName || null,
+          scTypeName: record?.scTypeName || null,
+          hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
+        }
+      })
+
+      return { count: res.count, list: modifiedList }
+    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const columns = [
@@ -117,10 +126,6 @@ export default function HrSalary() {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
   const edit = obj => {
     openForm(obj?.recordId)
   }
@@ -135,23 +140,14 @@ export default function HrSalary() {
       },
       width: 900,
       height: 500,
-      title: labels.folder
+      title: labels.salary
     })
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: SystemRepository.Folders.del,
-      record: JSON.stringify(obj)
-    })
-    toast.success(platformLabels.Deleted)
-    invalidate()
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RT108'} filterBy={filterBy} />
+        <RPBGridToolbar maxAccess={access} reportName={'RT108'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -160,7 +156,6 @@ export default function HrSalary() {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

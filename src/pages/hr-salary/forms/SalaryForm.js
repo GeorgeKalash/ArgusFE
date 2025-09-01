@@ -48,7 +48,7 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
       invalidate()
     }
   })
-  const editMode = !!formik.values.recordId
+  const editMode = !!formik?.values?.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -150,7 +150,7 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='employee'
                 label={labels.employee}
-                value={formik.values.employee}
+                value={formik?.values?.employee}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
@@ -162,7 +162,7 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='department'
                 label={labels.department}
-                value={formik.values.department}
+                value={formik?.values?.department}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
@@ -174,7 +174,7 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='position'
                 label={labels.position}
-                value={formik.values.position}
+                value={formik?.values?.position}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
@@ -186,7 +186,7 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
               <CustomTextField
                 name='branch'
                 label={labels.branch}
-                value={formik.values.branch}
+                value={formik?.values?.branch}
                 maxAccess={maxAccess}
                 readOnly
                 onChange={formik.handleChange}
