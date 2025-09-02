@@ -83,6 +83,15 @@ export default function ColorComboBox({
           />
         </li>
       )}
+      ListboxProps={{
+        sx: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          flexDirection: 'row',
+          gap: 1,
+          p: 0.5
+        }
+      }}
       startAdornment={
         value ? (
           <Box
