@@ -94,7 +94,9 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
                 name='color'
                 label={labels.color}
                 value={formik.values.color}
-                onChange={(field, hex) => formik.setFieldValue(field, hex)}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('color', newValue || null)
+                }}
                 required
                 maxAccess={maxAccess}
                 error={formik.touched.color && Boolean(formik.errors.color)}

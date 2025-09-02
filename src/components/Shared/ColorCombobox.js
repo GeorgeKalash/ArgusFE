@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import ResourceComboBox from './ResourceComboBox'
 
-export default function ColorComboBox({ value, colors, onChange, required, ...rest }) {
+export default function ColorComboBox({ colors, ...rest }) {
   const colorPalette = [
     '#000000',
     '#993300',
@@ -48,10 +48,6 @@ export default function ColorComboBox({ value, colors, onChange, required, ...re
   return (
     <ResourceComboBox
       {...rest}
-      value={value || null}
-      onChange={(_, newValue) => {
-        onChange?.(rest?.name, newValue || null)
-      }}
       filterOptions={options => options}
       isOptionEqualToValue={(option, value) => option === value}
       options={colors || colorPalette}
@@ -93,13 +89,13 @@ export default function ColorComboBox({ value, colors, onChange, required, ...re
         }
       }}
       startAdornment={
-        value ? (
+        rest?.value ? (
           <Box
             sx={{
               width: 20,
               height: 20,
               borderRadius: '4px',
-              backgroundColor: value,
+              backgroundColor: rest?.value,
               border: '1px solid #ccc',
               marginRight: 1
             }}
