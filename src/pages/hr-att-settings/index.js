@@ -78,8 +78,8 @@ const AttSettings = () => {
       disableCrossBranchTA: null
     },
     validationSchema: yup.object().shape({
-      prevDayTVTime: yup.number().min(7).max(15),
-      minPunchInterval: yup.number().min(5).max(15)
+      prevDayTVTime: yup.number().min(7).max(15).nullable(),
+      minPunchInterval: yup.number().min(5).max(15).nullable()
     }),
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
@@ -116,7 +116,7 @@ const AttSettings = () => {
               displayField='name'
               maxAccess={access}
               onChange={(event, newValue) => {
-                formik.setFieldValue('caId', newValue.recordId || null)
+                formik.setFieldValue('caId', newValue?.recordId || null)
               }}
               error={formik.touched.caId && Boolean(formik.errors.caId)}
             />
