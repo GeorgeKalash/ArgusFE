@@ -59,13 +59,13 @@ export default function ColorComboBox({ colors, ...rest }) {
               width: 29,
               height: 29,
               borderRadius: '6px',
-              border: selected ? '2px solid #000' : '0px solid #ccc',
+              border: selected ? '1px solid #000' : '0px solid #ccc',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'opacity 0.2s, border 0.2s',
-              '&:hover': { opacity: 0.7, border: '2px solid #000' }
+              transition: 'opacity 0.2s',
+              '&:hover': { border: '1px solid #000' }
             }}
           >
             <Box
