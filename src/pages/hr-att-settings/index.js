@@ -18,8 +18,8 @@ import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceReposit
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const AttSettings = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.AttendanceSettings
@@ -27,36 +27,33 @@ const AttSettings = () => {
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: SystemRepository.Defaults.qry,
-        parameters: `_filter=`
-      })
-
-      const keysToExtract = [
-        'caId',
-        'fdowCombo',
-        'lastGenFSDateTime',
-        'lastReceivedPunch',
-        'lastProcessedPunch',
-        'lastGenTATV',
-        'sourceTASC',
-        'sourceTACA',
-        'minPunchInterval',
-        'dailySchedule',
-        'punchSource',
-        'weeklyTAHours',
-        'prevDayTVTime',
-        'disableCrossBranchTA'
-      ]
-
       const myObject = {}
 
-      for (const { key, value } of res.list) {
-        if (keysToExtract.includes(key)) {
-          myObject[key] = value ? parseInt(value) : null
+      const filteredList = defaultsData?.list?.filter(obj => {
+        return (
+          obj.key === 'caId' ||
+          obj.key === 'fdowCombo' ||
+          obj.key === 'lastGenFSDateTime' ||
+          obj.key === 'lastReceivedPunch' ||
+          obj.key === 'lastProcessedPunch' ||
+          obj.key === 'lastGenTATV' ||
+          obj.key === 'sourceTASC' ||
+          obj.key === 'sourceTACA' ||
+          obj.key === 'minPunchInterval' ||
+          obj.key === 'dailySchedule' ||
+          obj.key === 'punchSource' ||
+          obj.key === 'weeklyTAHours' ||
+          obj.key === 'prevDayTVTime' ||
+          obj.key === 'disableCrossBranchTA'
+        )
+      })
+      filteredList?.forEach(obj => {
+        if (obj.key === 'disableCrossBranchTA') {
+          myObject[obj.key] = obj.value || null
+        } else {
+          myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
         }
-      }
-
+      })
       formik.setValues(myObject)
     })()
   }, [])
@@ -82,7 +79,7 @@ const AttSettings = () => {
     },
     validationSchema: yup.object().shape({
       prevDayTVTime: yup.number().min(7).max(15),
-      minPunchInterval: yup.number().min(5).max(15),
+      minPunchInterval: yup.number().min(5).max(15)
     }),
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
@@ -216,7 +213,7 @@ const AttSettings = () => {
               maxAccess={access}
               thousandSeparator={false}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('minPunchInterval', '')}
+              onClear={() => formik.setFieldValue('minPunchInterval', null)}
               error={formik.touched.minPunchInterval && Boolean(formik.errors.minPunchInterval)}
             />
           </Grid>
@@ -258,7 +255,7 @@ const AttSettings = () => {
               maxAccess={access}
               thousandSeparator={false}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('weeklyTAHours', '')}
+              onClear={() => formik.setFieldValue('weeklyTAHours', null)}
               error={formik.touched.weeklyTAHours && Boolean(formik.errors.weeklyTAHours)}
             />
           </Grid>
@@ -269,14 +266,14 @@ const AttSettings = () => {
               value={formik.values.prevDayTVTime}
               maxAccess={access}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('prevDayTVTime', '')}
+              onClear={() => formik.setFieldValue('prevDayTVTime', null)}
               error={formik.touched.prevDayTVTime && Boolean(formik.errors.prevDayTVTime)}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomCheckBox
               name='disableCrossBranchTA'
-              value={formik.values?.disableCrossBranchTA}
+              value={formik.values.disableCrossBranchTA}
               onChange={event => formik.setFieldValue('disableCrossBranchTA', event.target.checked)}
               label={labels.disableCrossBranchTA}
               maxAccess={access}
