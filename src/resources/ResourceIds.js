@@ -213,7 +213,7 @@ export const ResourceIds = {
   DimensionsValues: 31111,
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
-  SourceOfIncomeType: 36311,
+  SourceOfIncomeType: 36122,
   ProfessionGroups: 36121,
   ChangePassword: 20118,
   PaymentVouchers: 31305,
@@ -550,6 +550,8 @@ export const ResourceIds = {
   MetalSmelting: 47314,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
+  GenerateTransfers: 46600,
+  GenerateConsumption: 46601,
 
   // GL
   GLSalesInvoice: 51604,

@@ -108,8 +108,7 @@ const Shipments = () => {
       props: {
         labels,
         recordId,
-        maxAccess: access,
-        invalidate
+        maxAccess: access
       },
       width: 1300,
       height: 700,
