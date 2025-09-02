@@ -95,6 +95,7 @@ const GridToolbar = ({
                   color={'transparent'}
                   disabled={disableAdd}
                   image={'add.png'}
+                  tooltipText={platformLabels.add}
                 />
               </Grid>
             )}

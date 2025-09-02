@@ -13,7 +13,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId }) {
   })
 
   const tabs = [
-    { label: labels.Salary },
+    { label: labels.salary },
     { label: labels.Entitlements, disabled: !store.recordId },
     { label: labels.Deductions, disabled: !store.recordId }
   ]
@@ -25,10 +25,10 @@ export default function SalaryWindow({ labels, maxAccess, recordId }) {
         <SalaryTab labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore}/>
+        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore}/>
+        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
     </>
   )

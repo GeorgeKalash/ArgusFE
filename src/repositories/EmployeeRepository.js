@@ -15,7 +15,7 @@ export const EmployeeRepository = {
   HRDocTypeFilters: {
     qry: service + 'qryDT'
   },
-  SalaryChangeReasonFilters: {
+  SalaryChangeReason: {
     qry: service + 'qrySC',
     get: service + 'getSC',
     set: service + 'setSC',
@@ -116,5 +116,10 @@ export const EmployeeRepository = {
     page: service + 'pageES',
     qry: service + 'qryES',
     qry2: service + 'qryES2'
+  },
+  EmployeeSalary: {
+    qry: service + 'qrySA',
+    get: service + 'getSA',
+    set: service + 'setSA'
   }
 }

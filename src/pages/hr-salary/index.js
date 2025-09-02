@@ -32,6 +32,20 @@ export default function HrSalary() {
     }
   })
 
+  function mapEmployeeRecords(list = []) {
+    return list.map(record => ({
+      recordId: record?.parent?.recordId || null,
+      reference: record?.parent?.reference || null,
+      name: record?.parent?.fullName || null,
+      departmentName: record?.department?.name || null,
+      positionName: record?.position?.name || null,
+      branchName: record?.branch?.name || null,
+      scName: record?.scName || null,
+      scTypeName: record?.scTypeName || null,
+      hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
+    }))
+  }
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
@@ -40,21 +54,11 @@ export default function HrSalary() {
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_params=${params}&_sortBy=recordId&_filter=`
     })
 
-    const modifiedList = response?.list?.map(record => {
-      return {
-        recordId: record?.parent?.recordId || null,
-        reference: record?.parent?.reference || null,
-        name: record?.parent?.fullName || null,
-        departmentName: record?.department?.name || null,
-        positionName: record?.position?.name || null,
-        branchName: record?.branch?.name || null,
-        scName: record?.scName || null,
-        scTypeName: record?.scTypeName || null,
-        hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
-      }
-    })
-
-    return { count: response.count, list: modifiedList, _startAt: _startAt }
+    return {
+      count: response.count,
+      list: mapEmployeeRecords(response?.list),
+      _startAt
+    }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -64,22 +68,16 @@ export default function HrSalary() {
         parameters: `_branchId=0&_filter=${filters.qry}`
       })
 
-      const modifiedList = res?.list?.map(record => {
-        return {
-          recordId: record?.parent?.recordId || null,
-          reference: record?.parent?.reference || null,
-          name: record?.parent?.fullName || null,
-          departmentName: record?.department?.name || null,
-          positionName: record?.position?.name || null,
-          branchName: record?.branch?.name || null,
-          scName: record?.scName || null,
-          scTypeName: record?.scTypeName || null,
-          hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
-        }
-      })
+      return {
+        count: res.count,
+        list: mapEmployeeRecords(res?.list)
+      }
+    }
 
-      return { count: res.count, list: modifiedList }
-    } else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({
+      _startAt: pagination._startAt || 0,
+      params: filters?.params
+    })
   }
 
   const columns = [
@@ -127,19 +125,17 @@ export default function HrSalary() {
   ]
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj)
   }
 
-  function openForm(recordId) {
+  function openForm(employeeInfo) {
     stack({
       Component: SalaryForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
+        employeeInfo
       },
-      width: 900,
-      height: 500,
+      width: 1000,
+      height: 700,
       title: labels.salary
     })
   }

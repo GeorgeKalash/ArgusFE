@@ -1,10 +1,9 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect } from 'react'
-import * as yup from 'yup'
+import { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -13,94 +12,69 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+import SalaryWindow from '../Windows/SalaryWindow'
+import { useWindow } from 'src/windows'
 
-export default function SalaryForm({ labels, maxAccess, recordId }) {
+export default function SalaryForm({ employeeInfo }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
-  const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.SalaryChangeReasonFilters.page
+  const {
+    query: { data },
+    labels,
+    refetch,
+    access: maxAccess
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: EmployeeRepository.EmployeeSalary.qry,
+    datasetId: ResourceIds.Salaries
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
-      name: ''
+      employeeName: employeeInfo?.recordId || null,
+      positionName: employeeInfo?.positionName || null,
+      branchName: employeeInfo?.branchName || null,
+      departmentName: employeeInfo?.departmentName || null
     },
-    maxAccess,
-    validateOnChange: true,
-    validationSchema: yup.object({
-      name: yup.string().required()
-    }),
-    onSubmit: async obj => {
-      const response = await postRequest({
-        extension: EmployeeRepository.SalaryChangeReasonFilters.set,
-        record: JSON.stringify(obj)
-      })
-
-      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', response.recordId)
-      }
-      invalidate()
-    }
+    maxAccess
   })
-  const editMode = !!formik?.values?.recordId
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: EmployeeRepository.SalaryChangeReasonFilters.get,
-          parameters: `_recordId=${recordId}`
-        })
-        formik.setValues(res?.record)
-      }
-    })()
-  }, [])
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+    if (!employeeInfo?.recordId) return
 
     const response = await getRequest({
-      extension: EmployeeRepository.Employee.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: EmployeeRepository.EmployeeSalary.qry,
+      parameters: `_employeeId=${employeeInfo?.recordId}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return response.list.map(record => ({
+      effectiveDate: record.effectiveDate ? formatDateFromApi(record.effectiveDate) : null,
+      basicAmount: `${record.currencyRef} ${getFormattedNumber(record.basicAmount, 2)}`,
+      finalAmount: `${record.currencyRef} ${getFormattedNumber(record.finalAmount, 2)}`
+    }))
   }
-
-  const {
-    query: { data },
-    labels: _labels,
-    paginationParameters,
-    refetch,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: EmployeeRepository.Employee.page,
-    datasetId: ResourceIds.HrSalary
-  })
 
   const columns = [
     {
-      field: 'date',
-      headerName: _labels.date,
+      field: 'effectiveDate',
+      headerName: labels.date,
       flex: 1,
       type: 'date'
     },
     {
       field: 'basicAmount',
-      headerName: _labels.basicAmount,
-      flex: 1,
-      type: 'number'
+      headerName: labels.basicAmount,
+      flex: 1
     },
     {
       field: 'finalAmount',
-      headerName: _labels.finalAmount,
+      headerName: labels.finalAmount,
       flex: 1
     }
   ]
@@ -115,21 +89,21 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
 
   function openForm(recordId) {
     stack({
-      Component: SalaryForm,
+      Component: SalaryWindow,
       props: {
-        _labels,
+        labels,
         recordId,
-        maxAccess: access
+        maxAccess
       },
-      width: 500,
-      height: 250,
-      title: _labels.folder
+      width: 900,
+      height: 600,
+      title: labels.salary
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.NotificationLabel.del,
+      extension: EmployeeRepository.EmployeeSalary.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -138,79 +112,91 @@ export default function SalaryForm({ labels, maxAccess, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.SalaryChangeReasonFilter}
+      resourceId={ResourceIds.Salaries}
       form={formik}
       maxAccess={maxAccess}
-      editMode={editMode}
+      editMode={true}
+      isCleared={false}
+      isInfo={false}
+      isSaved={false}
     >
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='employee'
-                label={labels.employee}
-                value={formik?.values?.employee}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('employee', '')}
-                error={formik.touched.employee && Boolean(formik.errors.employee)}
+        <Fixed>
+          <Grid container spacing={2} alignItems='center'>
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={add}
+                style={{ border: '1px solid #4eb558' }}
+                color={'transparent'}
+                image={'add.png'}
+                tooltipText={platformLabels.add}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='department'
-                label={labels.department}
-                value={formik?.values?.department}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('department', '')}
-                error={formik.touched.department && Boolean(formik.errors.department)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='position'
-                label={labels.position}
-                value={formik?.values?.position}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('position', '')}
-                error={formik.touched.position && Boolean(formik.errors.position)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='branch'
-                label={labels.branch}
-                value={formik?.values?.branch}
-                maxAccess={maxAccess}
-                readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('branch', '')}
-                error={formik.touched.branch && Boolean(formik.errors.branch)}
-              />
+
+            <Grid item xs={11}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='employeeName'
+                    label={labels.employee}
+                    value={formik?.values?.employeeName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('employeeName', '')}
+                    error={formik.touched.employeeName && Boolean(formik.errors.employeeName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='positionName'
+                    label={labels.position}
+                    value={formik?.values?.positionName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('positionName', '')}
+                    error={formik.touched.positionName && Boolean(formik.errors.positionName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='departmentName'
+                    label={labels.department}
+                    value={formik?.values?.departmentName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('departmentName', '')}
+                    error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='branchName'
+                    label={labels.branch}
+                    value={formik?.values?.branchName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('branchName', '')}
+                    error={formik.touched.branchName && Boolean(formik.errors.branchName)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
-        </Grow>
-        <Fixed>
-          <GridToolbar onAdd={add} maxAccess={access} />
         </Fixed>
         <Grow>
           <Table
             columns={columns}
-            gridData={data}
+            gridData={{ list: data }}
             rowId={['recordId']}
             onEdit={edit}
             onDelete={del}
-            pageSize={50}
-            paginationType='api'
-            paginationParameters={paginationParameters}
+            pagination={false}
             refetch={refetch}
-            maxAccess={access}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>
