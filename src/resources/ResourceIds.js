@@ -551,6 +551,7 @@ export const ResourceIds = {
   AUDefaults: 23104,
   GenerateTransfers: 46600,
   GenerateConsumption: 46601,
+  LeaveReturn: 73203,
 
   // GL
   GLSalesInvoice: 51604,
