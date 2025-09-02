@@ -24,6 +24,7 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
       name: '',
