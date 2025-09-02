@@ -13,6 +13,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
+import { Grid } from '@mui/material'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -148,22 +150,25 @@ const SystemFunction = () => {
   }
 
   return (
-    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
+    <Form form={formik}>
       <VertLayout>
         <Fixed>
-          <CustomTextField
-            name='search'
-            value={formik.values.search}
-            label={platformLabels.Search}
-            onClear={() => {
-              formik.setFieldValue('search', '')
-            }}
-            sx={{ width: '20%' }}
-            onChange={handleSearchChange}
-            onSearch={e => formik.setFieldValue('search', e)}
-            search={true}
-            height={35}
-          />
+          <Grid container>
+            <Grid item xs={3} spacing={4} p={2}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('search', e)}
+                search={true}
+                height={35}
+              />
+            </Grid>
+          </Grid>
         </Fixed>
         <Grow>
           <DataGrid
@@ -176,7 +181,7 @@ const SystemFunction = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

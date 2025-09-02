@@ -80,8 +80,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           const target = e.target
           const role = target.getAttribute('role') || ''
           const isSearchField = target.getAttribute('data-search') === 'true'
-          console.log(props, 'test')
-          console.log(maxAccess)
+
           if (
             (e.ctrlKey || e.metaKey) &&
             e.key.toLowerCase() === 's' &&
@@ -105,12 +104,12 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
 
             const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
-            console.log('test', isEqual)
             if (!isEqual) {
               e.preventDefault()
-              form?.submitForm?.()
               if (props.onSave) {
                 props.onSave()
+              } else {
+                form?.submitForm?.()
               }
             }
           }
@@ -119,7 +118,19 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
         {!showOverlay && LoadingOverlay()}
         {children}
       </DialogContent>
-      {windowToolbarVisible && <WindowToolbar {...props} isSaved={isSaved} />}
+      {windowToolbarVisible && (
+        <WindowToolbar
+          {...props}
+          isSaved={isSaved}
+          onSave={() => {
+            if (props.onSave) {
+              props.onSave()
+            } else {
+              form?.submitForm?.()
+            }
+          }}
+        />
+      )}
     </>
   )
 }
