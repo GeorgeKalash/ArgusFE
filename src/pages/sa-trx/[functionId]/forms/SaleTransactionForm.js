@@ -1381,7 +1381,7 @@ export default function SaleTransactionForm({
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
-      upo: newRow?.upo || 0,
+      upo: parseFloat(newRow?.upo) || 0,
       qty: newRow?.qty,
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,

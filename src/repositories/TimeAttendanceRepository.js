@@ -45,5 +45,11 @@ export const TimeAttendanceRepository = {
   },
   Calendar: {
     qry: service + 'qryCA'
+  },
+  DayTypes: {
+    page: service + 'pageDT',
+    set: service + 'setDT',
+    get: service + 'getDT',
+    del: service + 'delDT'
   }
 }

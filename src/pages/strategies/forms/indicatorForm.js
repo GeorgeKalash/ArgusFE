@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Box, Button } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 const IndicatorForm = ({
   labels,
@@ -182,20 +180,20 @@ const IndicatorForm = ({
       resourceId={ResourceIds.Strategies}
       maxAccess={maxAccess}
       infoVisible={false}
+      isCleared={false}
       editMode={editMode}
       actions={actions}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow: 'hidden' }}>
+      <Grow>
         <DataGrid
           onChange={value => formik.setFieldValue('indicatorData', value)}
           value={formik.values.indicatorData}
           error={formik.errors.indicatorData}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
           allowDelete={false}
           allowAddNewLine={false}
         />
-      </Box>
+      </Grow>
     </FormShell>
   )
 }
