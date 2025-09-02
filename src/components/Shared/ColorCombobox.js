@@ -1,13 +1,7 @@
 import { Box } from '@mui/material'
 import ResourceComboBox from './ResourceComboBox'
 
-export default function ColorComboBox({
-  value,
-  colors,
-  onChange,
-  required,
-  ...rest
-}) {
+export default function ColorComboBox({ value, colors, onChange, required, ...rest }) {
   const colorPalette = [
     '#000000',
     '#993300',
@@ -66,21 +60,27 @@ export default function ColorComboBox({
         <li {...props} style={{ padding: 0, margin: 0 }}>
           <Box
             sx={{
-              width: 26,
-              height: 26,
-              borderRadius: '4px',
-              backgroundColor: option,
-              border: selected ? '2px solid #000' : '1px solid #ccc',
+              width: 29,
+              height: 29,
+              borderRadius: '6px',
+              border: selected ? '2px solid #000' : '0px solid #ccc',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
               transition: 'opacity 0.2s, border 0.2s',
-              '&:hover': {
-                opacity: 0.8
-              },
-              '&.Mui-focused': {
-                opacity: 0.9
-              }
+              '&:hover': { opacity: 0.7, border: '2px solid #000' }
             }}
-          />
+          >
+            <Box
+              sx={{
+                width: 25,
+                height: 25,
+                borderRadius: '4px',
+                backgroundColor: option
+              }}
+            />
+          </Box>
         </li>
       )}
       ListboxProps={{
