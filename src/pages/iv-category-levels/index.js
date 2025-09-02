@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import * as yup from 'yup'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -14,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import FormShell from 'src/components/Shared/FormShell'
 
 const CategoryLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -109,19 +109,18 @@ const CategoryLevels = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <FormShell form={formik} isCleared={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+          />
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

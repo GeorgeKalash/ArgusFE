@@ -160,6 +160,8 @@ const WindowToolbar = ({
             const isDisabled = eval(button.disabled)
             const handleClick = functionMapping[button.onClick]
 
+            console.log(button, handleClick, isVisible, isDisabled, form)
+
             return (
               isVisible && (
                 <CustomButton

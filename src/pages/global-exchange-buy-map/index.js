@@ -6,7 +6,6 @@ import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -16,6 +15,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import FormShell from 'src/components/Shared/FormShell'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -193,53 +193,48 @@ const GlobalExchangeBuyMap = () => {
     }
   ]
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container>
-          <Grid item xs={3}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Currency.qry}
-              name='currencyId'
-              label={_labels.currency}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Currency Ref' },
-                { key: 'name', value: 'Name' },
-                { key: 'flName', value: 'Foreign Language Name' }
-              ]}
-              values={formik.values}
-              required
-              maxAccess={access}
-              onChange={(event, newValue) => {
-                const selectedCurrencyId = newValue?.recordId || ''
-                formik.setFieldValue('currencyId', selectedCurrencyId)
-                getCurrenciesExchangeMaps(selectedCurrencyId)
-              }}
-              error={formik.errors && Boolean(formik.errors.currencyId)}
-            />
+    <FormShell form={formik} isCleared={false} isInfo={false}>
+      <VertLayout>
+        <Fixed>
+          <Grid container>
+            <Grid item xs={3}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                name='currencyId'
+                label={_labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Currency Ref' },
+                  { key: 'name', value: 'Name' },
+                  { key: 'flName', value: 'Foreign Language Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={access}
+                onChange={(event, newValue) => {
+                  const selectedCurrencyId = newValue?.recordId || ''
+                  formik.setFieldValue('currencyId', selectedCurrencyId)
+                  getCurrenciesExchangeMaps(selectedCurrencyId)
+                }}
+                error={formik.errors && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        {formik.values.currencyId && (
-          <DataGrid
-            onChange={value => formik.setFieldValue('rows', value)}
-            value={formik.values.rows}
-            error={formik.errors.rows}
-            columns={columns}
-          />
-        )}
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+        <Grow>
+          {formik.values.currencyId && (
+            <DataGrid
+              onChange={value => formik.setFieldValue('rows', value)}
+              value={formik.values.rows}
+              error={formik.errors.rows}
+              columns={columns}
+            />
+          )}
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

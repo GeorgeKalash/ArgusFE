@@ -120,7 +120,7 @@ const Window = React.memo(
             zIndex: 2
           }}
           onKeyDown={e => {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && closable) {
               onClose()
             } else {
               const target = e.target
