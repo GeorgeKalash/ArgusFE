@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } 
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import MinimizeIcon from '@mui/icons-material/Minimize'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
 import WindowToolbar from './WindowToolbar'
@@ -60,6 +61,7 @@ const Window = React.memo(
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const [expanded, setExpanded] = useState(false)
+    const [minimized, setMinimized] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
     const actionRef = useRef()
@@ -71,22 +73,18 @@ const Window = React.memo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
     )
+
     const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
     const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
     const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
     const heightPanel = height - 120
+
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
       if (transactionLogInfo) {
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
-
-    // useEffect(() => {
-    //   if (paperRef.current) {
-    //     paperRef.current.focus()
-    //   }
-    // }, [])
 
     useEffect(() => {
       if (!loading) {
@@ -102,7 +100,10 @@ const Window = React.memo(
       setExpanded(prev => !prev)
     }, [expanded])
 
-    const childFormRef = useRef()
+    const handleMinimizeToggle = useCallback(() => {
+      if (expanded) setExpanded(false)
+      setMinimized(prev => !prev)
+    }, [expanded])
 
     return (
       <CacheDataProvider>
@@ -116,7 +117,7 @@ const Window = React.memo(
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: minimized ? 'flex-end' : 'center',
             zIndex: 2
           }}
           onKeyDown={e => {
@@ -152,19 +153,37 @@ const Window = React.memo(
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded && { x: 0, y: 0 }}
+            position={expanded || minimized ? { x: 0, y: 0 } : undefined}
             onStart={() => draggable}
           >
-            <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
+            <Box
+              sx={{
+                position: 'relative',
+                pointerEvents: 'all',
+                mb: minimized ? '5px' : 0
+              }}
+            >
               <Paper
                 ref={paperRef}
                 tabIndex={-1}
                 sx={{
-                  transition: 'width 0.3s, height 0.3s',
-                  height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
+                  transition: 'width 0.3s, height 0.3s, background-color 0.3s',
+                  height: !minimized
+                    ? controlled
+                      ? expanded
+                        ? containerHeight
+                        : height
+                      : expanded
+                      ? containerHeight
+                      : height
+                    : '40px',
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset'
+                  flexDirection: controlled ? 'column' : 'unset',
+                  backgroundColor: minimized ? 'rgba(255, 255, 255, 0.4)' : 'background.paper',
+                  backdropFilter: minimized ? 'blur(4px)' : 'none',
+                  boxShadow: minimized ? 'none' : 6,
+                  overflow: 'hidden'
                 }}
               >
                 <DialogTitle
@@ -182,7 +201,8 @@ const Window = React.memo(
                     borderTopRightRadius: '5px',
                     borderBottomLeftRadius: '0px',
                     borderBottomRightRadius: '0px',
-                    height: '40px'
+                    height: '40px',
+                    zIndex: 10
                   }}
                 >
                   <Box>
@@ -191,6 +211,15 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
+                    <IconButton
+                      tabIndex={-1}
+                      edge='end'
+                      onClick={handleMinimizeToggle}
+                      aria-label='minimize'
+                      sx={{ color: 'white !important' }}
+                    >
+                      <MinimizeIcon />
+                    </IconButton>
                     {refresh && (
                       <IconButton
                         tabIndex={-1}
@@ -202,7 +231,7 @@ const Window = React.memo(
                         <RefreshIcon />
                       </IconButton>
                     )}
-                    {expandable && (
+                    {expandable && !minimized && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
@@ -227,39 +256,41 @@ const Window = React.memo(
                     )}
                   </Box>
                 </DialogTitle>
-                {tabs && (
-                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                    {tabs.map((tab, i) => (
-                      <Tab key={i} label={tab.label} disabled={tab?.disabled} />
-                    ))}
-                  </Tabs>
-                )}
-                {!showOverlay && isLoading && LoadingOverlay()}
+                <>
+                  {tabs && (
+                    <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                      {tabs.map((tab, i) => (
+                        <Tab key={i} label={tab.label} disabled={tab?.disabled} />
+                      ))}
+                    </Tabs>
+                  )}
 
-                {!controlled ? (
-                  <>
-                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
-                    {windowToolbarVisible && (
-                      <WindowToolbar
-                        onSave={onSave}
-                        onClear={onClear}
-                        onInfo={onInfo}
-                        onApply={onApply}
-                        disabledSubmit={disabledSubmit}
-                        disabledInfo={disabledInfo}
-                        disabledApply={disabledApply}
-                      />
-                    )}
-                  </>
-                ) : (
-                  React.Children.map(children, child => {
-                    return React.cloneElement(child, {
-                      expanded: expanded,
-                      height: expanded ? containerHeightPanel : heightPanel,
-                      ref: actionRef
+                  {!showOverlay && isLoading && <LoadingOverlay />}
+                  {!controlled ? (
+                    <>
+                      <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
+                      {windowToolbarVisible && (
+                        <WindowToolbar
+                          onSave={onSave}
+                          onClear={onClear}
+                          onInfo={onInfo}
+                          onApply={onApply}
+                          disabledSubmit={disabledSubmit}
+                          disabledInfo={disabledInfo}
+                          disabledApply={disabledApply}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    React.Children.map(children, child => {
+                      return React.cloneElement(child, {
+                        expanded: expanded,
+                        height: expanded ? containerHeightPanel : heightPanel,
+                        ref: actionRef
+                      })
                     })
-                  })
-                )}
+                  )}
+                </>
               </Paper>
             </Box>
           </Draggable>
