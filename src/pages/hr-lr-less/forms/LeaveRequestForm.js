@@ -98,7 +98,8 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
       formik.setValues({
         ...record,
         date: formatDateFromApi(record.date),
-        startDate: formatDateFromApi(record.startDate)
+        startDate: formatDateFromApi(record.startDate),
+        endDate: formatDateFromApi(record.endDate)
       })
     }
   }
@@ -109,7 +110,8 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
-        startDate: formatDateToApi(formik.values.startDate)
+        startDate: formatDateToApi(formik.values.startDate),
+        endDate: formatDateToApi(formik.values.endDate)
       })
     })
 
@@ -124,7 +126,8 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
-        startDate: formatDateToApi(formik.values.startDate)
+        startDate: formatDateToApi(formik.values.startDate),
+        endDate: formatDateToApi(formik.values.endDate)
       })
     })
 
@@ -245,7 +248,7 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
                 readOnly={isClosed}
                 required
                 onChange={e => formik.setFieldValue('hours', e.target.value)}
-                onClear={() => formik.setFieldValue('hours', '')}
+                onClear={() => formik.setFieldValue('hours', null)}
                 error={formik.touched.hours && Boolean(formik.errors.hours)}
                 decimalScale={2}
               />
