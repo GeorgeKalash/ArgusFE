@@ -62,7 +62,7 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.PaymentReasons} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.DayTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

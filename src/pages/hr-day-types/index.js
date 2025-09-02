@@ -53,7 +53,7 @@ const DayTypes = () => {
       field: 'color',
       headerName: labels.color,
       flex: 1,
-      type: 'color'
+      type: 'colorCombo'
     },
     {
       field: 'isWorkingDay',

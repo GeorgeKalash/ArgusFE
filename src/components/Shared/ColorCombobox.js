@@ -1,14 +1,10 @@
 import { Box } from '@mui/material'
-import PopperComponent from 'src/components/Shared/Popper/PopperComponent'
 import ResourceComboBox from './ResourceComboBox'
 
 export default function ColorComboBox({
-  name = 'color',
   value,
   colors,
   onChange,
-  label,
-  maxAccess,
   required,
   ...rest
 }) {
@@ -58,19 +54,13 @@ export default function ColorComboBox({
   return (
     <ResourceComboBox
       {...rest}
-      name={name}
-      required={required}
-      label={label}
-      maxAccess={maxAccess}
       value={value || null}
       onChange={(_, newValue) => {
-        onChange?.(name, newValue || null)
+        onChange?.(rest?.name, newValue || null)
       }}
       filterOptions={options => options}
-      size='small'
       isOptionEqualToValue={(option, value) => option === value}
       options={colors || colorPalette}
-      PopperComponent={PopperComponent}
       getOptionLabel={option => option.replace('#', '').toUpperCase()}
       renderOption={(props, option, { selected }) => (
         <li {...props} style={{ padding: 0, margin: 0 }}>
@@ -93,15 +83,6 @@ export default function ColorComboBox({
           />
         </li>
       )}
-      ListboxProps={{
-        sx: {
-          display: 'flex',
-          flexWrap: 'wrap',
-          flexDirection: 'row',
-          gap: 1,
-          p: 0.5
-        }
-      }}
       startAdornment={
         value ? (
           <Box

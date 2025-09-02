@@ -125,7 +125,7 @@ const Table = ({
           }
         }
       }
-      if (col.type === 'color') {
+      if (col.type === 'colorCombo') {
         return {
           ...col,
           cellRenderer: ({ data }) => {
