@@ -10,7 +10,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function SyncJobOrderRoutingForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
