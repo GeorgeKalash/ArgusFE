@@ -550,6 +550,8 @@ export const ResourceIds = {
   MasterDataDTD: 35120,
   AUDefaults: 23104,
   DayTypes: 72104,
+  GenerateTransfers: 46600,
+  GenerateConsumption: 46601,
 
   // GL
   GLSalesInvoice: 51604,

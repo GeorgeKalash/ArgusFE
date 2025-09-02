@@ -299,7 +299,8 @@ export const InventoryRepository = {
   },
   Management: {
     get: service + 'getMAN',
-    set2: service + 'set2MAN'
+    set2: service + 'set2MAN',
+    del: service + 'delMAN',
   },
   SManagement: {
     qry: service + 'qrySMA'

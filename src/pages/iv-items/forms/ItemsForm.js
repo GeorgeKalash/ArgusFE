@@ -234,7 +234,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     label={labels.category}
                     valueField='recordId'
                     displayField={['caRef', 'name']}
-                    readOnly={editMode}
                     displayFieldWidth={1}
                     columnsInDropDown={[
                       { key: 'caRef', value: 'Reference' },
@@ -545,7 +544,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                         productionLevel: newValue?.key
                       }))
                     }}
-                    readOnly={editMode}
                     maxAccess={maxAccess}
                     error={formik.touched.productionLevel && Boolean(formik.errors.productionLevel)}
                   />

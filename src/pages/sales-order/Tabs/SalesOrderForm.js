@@ -931,7 +931,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
-      upo: newRow?.upo,
+      upo: parseFloat(newRow?.upo) || 0,
       qty: newRow?.qty,
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
