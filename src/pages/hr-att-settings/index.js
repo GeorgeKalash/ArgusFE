@@ -56,7 +56,7 @@ const AttSettings = () => {
       })
       formik.setValues(myObject)
     })()
-  }, [])
+  }, [defaultsData])
 
   const { formik } = useForm({
     maxAccess: access,
