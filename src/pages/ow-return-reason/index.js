@@ -12,6 +12,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import OutwardReturnReasonForm from './Forms/OutwardReturnReason'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const OutwardReturnReason = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,11 +20,11 @@ const OutwardReturnReason = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: RemittanceOutwardsRepository.OutwardReturnReason.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,54 +32,66 @@ const OutwardReturnReason = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    paginationParameters,
+    filterBy,
     refetch,
+    labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.OutwardReturnReason.page,
-    datasetId: ResourceIds.OutwardReturnReason
+    endpointId: RemittanceOutwardsRepository.OutwardReturnReason.snapshot,
+    datasetId: ResourceIds.OutwardReturnReason,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.OutwardReturnReason.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'correspondant',
-      headerName: _labels.correspondant,
+      headerName: labels.correspondant,
       flex: 1,
       type: 'checkbox'
     },
     {
       field: 'client',
-      headerName: _labels.client,
+      headerName: labels.client,
       flex: 1,
       type: 'checkbox'
     },
     {
       field: 'company',
-      headerName: _labels.company,
+      headerName: labels.company,
       flex: 1,
       type: 'checkbox'
     },
     {
       field: 'feesStatusName',
-      headerName: _labels.feesStatus,
+      headerName: labels.feesStatus,
       flex: 1
     },
     {
       field: 'rateStatusName',
-      headerName: _labels.rateStatus,
+      headerName: labels.rateStatus,
       flex: 1
     }
   ]
@@ -95,13 +108,13 @@ const OutwardReturnReason = () => {
     stack({
       Component: OutwardReturnReasonForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 600,
       height: 500,
-      title: _labels.OutwardReturnReason
+      title: labels.OutwardReturnReason
     })
   }
 
@@ -117,7 +130,7 @@ const OutwardReturnReason = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RTOWRR'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
