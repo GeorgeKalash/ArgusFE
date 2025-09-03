@@ -15,9 +15,10 @@ import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useForm } from 'src/hooks/form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 const CtDefaults = ({ _labels, access }) => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const arrayAllow = [
@@ -65,6 +66,10 @@ const CtDefaults = ({ _labels, access }) => {
         .filter(([key]) => arrayAllow.includes(key))
         .map(([key, value]) => ({ key, value }))
 
+      await postRequest({
+        extension: CurrencyTradingSettingsRepository.Defaults.set2,
+        record: JSON.stringify({ sysDefaults: data })
+      })
       updateDefaults(data)
       toast.success(platformLabels.Updated)
     }
@@ -194,7 +199,7 @@ const CtDefaults = ({ _labels, access }) => {
                   decimalScale={0}
                   maxAccess={access}
                   onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
-                  onClear={() => formik.setFieldValue('otp-expiry-time', '')}
+                  onClear={() => formik.setFieldValue('otp-expiry-time', null)}
                   error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
                 />
               </Grid>
@@ -205,7 +210,7 @@ const CtDefaults = ({ _labels, access }) => {
                   value={formik.values['ct-client-trial-days']}
                   maxAccess={access}
                   onChange={e => formik.setFieldValue('ct-client-trial-days', e.target.value)}
-                  onClear={() => formik.setFieldValue('ct-client-trial-days', '')}
+                  onClear={() => formik.setFieldValue('ct-client-trial-days', null)}
                   error={formik.touched['ct-client-trial-days'] && Boolean(formik.errors['ct-client-trial-days'])}
                   allowNegative={false}
                 />

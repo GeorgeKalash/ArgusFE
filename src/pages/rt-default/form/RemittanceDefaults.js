@@ -42,16 +42,23 @@ const RemittanceDefaults = ({ _labels, access }) => {
         }),
       ir_amcLongTerm: yup.number().nullable()
     }),
-    onSubmit: values => {
-      postRtDefault(values)
+    onSubmit: async obj => {
+      const data = Object.entries(obj).map(([key, value]) => ({
+        key,
+        value
+      }))
+
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ SysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Edited)
     }
   })
 
   useEffect(() => {
-    const fetchData = async () => {
-      await loadDefaults()
-    }
-    fetchData()
+    loadDefaults()
   }, [])
 
   const loadDefaults = async () => {
@@ -84,21 +91,6 @@ const RemittanceDefaults = ({ _labels, access }) => {
     }
 
     formik.setValues(myObject)
-  }
-
-  const postRtDefault = obj => {
-    const data = Object.entries(obj).map(([key, value]) => ({
-      key,
-      value
-    }))
-
-    postRequest({
-      extension: SystemRepository.Defaults.set,
-      record: JSON.stringify({ SysDefaults: data })
-    }).then(res => {
-      if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
-    })
   }
 
   return (
@@ -137,36 +129,22 @@ const RemittanceDefaults = ({ _labels, access }) => {
               }}
             />
           </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='rt_max_monthly_amount'
-              label={_labels.maxInwardsSettlementPerMonth}
-              value={formik.values.rt_max_monthly_amount}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_max_monthly_amount', '')}
-              error={formik.touched.rt_max_monthly_amount && Boolean(formik.errors.rt_max_monthly_amount)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='rt_max_yearly_ind_amount'
-              label={_labels.maxInwardsSettlementPerYear}
-              value={formik.values.rt_max_yearly_ind_amount}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_max_yearly_ind_amount', '')}
-              error={formik.touched.rt_max_yearly_ind_amount && Boolean(formik.errors.rt_max_yearly_ind_amount)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='rt_max_yearly_cor_amount'
-              label={_labels.maxYearlyCorAmount}
-              value={formik.values.rt_max_yearly_cor_amount}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_max_yearly_cor_amount', '')}
-              error={formik.touched.rt_max_yearly_cor_amount && Boolean(formik.errors.rt_max_yearly_cor_amount)}
-            />
-          </Grid>
+          {[
+            { name: 'rt_max_monthly_amount', label: _labels.maxInwardsSettlementPerMonth },
+            { name: 'rt_max_yearly_ind_amount', label: _labels.maxInwardsSettlementPerYear },
+            { name: 'rt_max_yearly_cor_amount', label: _labels.maxYearlyCorAmount }
+          ].map(item => (
+            <Grid item xs={12} key={item.name}>
+              <CustomNumberField
+                name={item.name}
+                label={item.label}
+                value={formik.values[item.name]}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue(item.name, null)}
+                error={formik.touched[item.name] && Boolean(formik.errors[item.name])}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Grow>
       <Fixed>
