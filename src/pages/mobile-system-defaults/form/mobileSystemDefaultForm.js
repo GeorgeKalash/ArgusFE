@@ -12,8 +12,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 export default function MobileSystem() {
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const { labels, access } = useResourceQuery({
@@ -35,9 +37,12 @@ export default function MobileSystem() {
         key,
         value
       }))
-
-      await updateDefaults(data)
-      toast.success(platformLabels.Edited)
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Updated)
     }
   })
 
@@ -50,25 +55,31 @@ export default function MobileSystem() {
 
     const fetchedValues = {}
 
-    const filteredList = defaultsData.list.filter(
-      obj =>
-        obj.key === 'rt_mob_plantId' ||
-        obj.key === 'rt_mob_whatsapp' ||
-        obj.key === 'rt_mob_email1' ||
-        obj.key === 'rt_mob_call_us' ||
-        obj.key === 'rt_mob_email2' ||
-        obj.key === 'smsMobileProviderId'
-    )
+    const keysToLoad = [
+      'rt_mob_plantId',
+      'rt_mob_whatsapp',
+      'rt_mob_email1',
+      'rt_mob_call_us',
+      'rt_mob_email2',
+      'smsMobileProviderId'
+    ]
 
-    filteredList.forEach(obj => {
-      if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-        fetchedValues[obj.key] = parseInt(obj.value)
-      } else {
-        fetchedValues[obj.key] = obj.value
-      }
-    })
+    defaultsData.list
+      .filter(obj => keysToLoad.includes(obj.key))
+      .forEach(obj => {
+        const val = obj.value
 
-    formik.setValues({ ...formik.values, ...fetchedValues })
+        if (typeof val === 'string' && val.trim() !== '' && !isNaN(Number(val))) {
+          fetchedValues[obj.key] = parseInt(val, 10)
+        } else {
+          fetchedValues[obj.key] = val ?? null
+        }
+      })
+
+    formik.setValues(prev => ({
+      ...prev,
+      ...fetchedValues
+    }))
   }
 
   return (
@@ -94,7 +105,6 @@ export default function MobileSystem() {
               maxAccess={access}
             />
           </Grid>
-
           <Grid item xs={12}>
             <CustomTextField
               name='rt_mob_whatsapp'
@@ -105,7 +115,6 @@ export default function MobileSystem() {
               onClear={() => formik.setFieldValue('rt_mob_whatsapp', '')}
             />
           </Grid>
-
           <Grid item xs={12}>
             <CustomTextField
               name='rt_mob_call_us'
@@ -116,7 +125,6 @@ export default function MobileSystem() {
               onClear={() => formik.setFieldValue('rt_mob_call_us', '')}
             />
           </Grid>
-
           <Grid item xs={12}>
             <CustomTextField
               name='rt_mob_email1'
@@ -127,7 +135,6 @@ export default function MobileSystem() {
               onClear={() => formik.setFieldValue('rt_mob_email1', '')}
             />
           </Grid>
-
           <Grid item xs={12}>
             <CustomTextField
               name='rt_mob_email2'
@@ -138,7 +145,6 @@ export default function MobileSystem() {
               onClear={() => formik.setFieldValue('rt_mob_email2', '')}
             />
           </Grid>
-
           <Grid item xs={12}>
             <CustomTextField
               name='smsMobileProviderId'
@@ -151,7 +157,6 @@ export default function MobileSystem() {
           </Grid>
         </Grid>
       </Grow>
-
       <Fixed>
         <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
       </Fixed>
