@@ -30,6 +30,7 @@ export const ResourceIds = {
   Alerts: 60307,
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
+  LedgerGroup: 75114,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -600,7 +601,6 @@ export const ResourceIds = {
   IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
-  LedgerGroup: 75114,
 
   //MCR
   MCRSalesInvoice: 51607,
