@@ -51,7 +51,7 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
       reference: '',
       hours: null,
       multiDayLeave: 1,
-      wip: null
+      wip: 1
     },
     maxAccess,
     validateOnChange: true,
@@ -81,7 +81,6 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
     }
   })
 
-  console.log(formik)
   const editMode = !!formik.values.recordId
   const isClosed = formik?.values?.wip === 2
 
@@ -148,13 +147,20 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
       condition: isClosed,
       onClick: onReopen,
       disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed
     }
   ]
 
   return (
     <FormShell
       resourceId={ResourceIds.LeaveRequest}
-      previewReport
+      functionId={SystemFunction.LeaveRequest}
+      previewReport={editMode}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -297,7 +303,7 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik && formik.setFieldValue('ltId', newValue?.recordId)
+                  formik.setFieldValue('ltId', newValue?.recordId)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
