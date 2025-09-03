@@ -11,6 +11,8 @@ export const PayrollRepository = {
     qry: service + 'qryPT'
   },
   Paycode: {
-    qry: service + 'qryPC'
+    qry: service + 'qryPC',
+    set: service + 'setPC',
+    del: service + 'delPC'
   }
 }
