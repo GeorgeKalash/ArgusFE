@@ -27,9 +27,9 @@ const RemittanceDefaults = ({ _labels, access }) => {
       nraDescription: '',
       'rt-nra-product': null,
       rt_fii_accountGroupId: null,
-      rt_max_monthly_amount: '',
-      rt_max_yearly_ind_amount: '',
-      rt_max_yearly_cor_amount: ''
+      rt_max_monthly_amount: null,
+      rt_max_yearly_ind_amount: null,
+      rt_max_yearly_cor_amount: null
     },
     validationSchema: yup.object().shape({
       ir_amcShortTerm: yup
@@ -59,7 +59,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
 
   useEffect(() => {
     loadDefaults()
-  }, [])
+  }, [defaultsData])
 
   const loadDefaults = async () => {
     const myObject = {}
