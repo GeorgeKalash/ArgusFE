@@ -212,7 +212,7 @@ export const ResourceIds = {
   DimensionsValues: 31111,
   RebuildAccountBalances: 31501,
   RoleCategories: 21102,
-  SourceOfIncomeType: 36311,
+  SourceOfIncomeType: 36122,
   ProfessionGroups: 36121,
   ChangePassword: 20118,
   PaymentVouchers: 31305,
@@ -450,6 +450,7 @@ export const ResourceIds = {
   ItemReplacement: 41212,
   SManagement: 41213,
   OpenPOs: 50312,
+  OpenPRs: 50310,
   NotificationLabels: 23106,
   ClientPriceLists: 51208,
   Assemblies: 42301,
@@ -540,7 +541,7 @@ export const ResourceIds = {
   EmployeePenalties: 71217,
   DocumentReverseReasons: 20111,
   PurchaseQuotations: 50302,
-  RebuildAC: 41509,
+  SystemAlerts: 20129,
   Samples: 48323,
   EntitlementDeduction: 71106,
   EmployeeChart: 71201,
@@ -548,6 +549,10 @@ export const ResourceIds = {
   MetalSmelting: 47314,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
+  AttendanceSettings: 72108,
+  DayTypes: 72104,
+  GenerateTransfers: 46600,
+  GenerateConsumption: 46601,
 
   // GL
   GLSalesInvoice: 51604,
@@ -611,5 +616,19 @@ export const ResourceIds = {
   MCRServiceInvoice: 31620,
   MCRServiceBillReceived: 31621,
   MCRCashTransfers: 33605,
-  MCRIncreaseDecreaseAdj: 33606
+  MCRIncreaseDecreaseAdj: 33606,
+
+  // Address
+  ADDBPMasterData: 21600,
+  ADDPlants: 20601,
+  ADDPuVendors: 50613,
+  ADDRetailInvoice: 54604,
+  ADDClient: 51611,
+  ADDSalesTransaction: 51612,
+  ADDSalesOrder: 51613,
+  ADDSalesQuotations: 51614,
+  ADDCorrespondentAgentBranch: 36608,
+  ADDNationalClientMaster: 35601,
+  ADDWorkClientMaster: 35602,
+  ADDClientCorporate: 35603
 }

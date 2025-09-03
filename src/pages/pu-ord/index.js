@@ -140,13 +140,8 @@ const PuTrx = () => {
     stack({
       Component: PurchaseOrderForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 1330,
-      height: 720,
-      title: labels.purchaseOrder
+        recordId
+      }
     })
   }
 
