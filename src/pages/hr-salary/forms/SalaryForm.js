@@ -37,7 +37,7 @@ export default function SalaryForm({ employeeInfo }) {
 
   const { formik } = useForm({
     initialValues: {
-      employeeName: employeeInfo?.recordId || null,
+      employeeName: employeeInfo?.name || null,
       positionName: employeeInfo?.positionName || null,
       branchName: employeeInfo?.branchName || null,
       departmentName: employeeInfo?.departmentName || null
@@ -54,6 +54,7 @@ export default function SalaryForm({ employeeInfo }) {
     })
 
     return response.list.map(record => ({
+      ...record,
       effectiveDate: record.effectiveDate ? formatDateFromApi(record.effectiveDate) : null,
       basicAmount: `${record.currencyRef} ${getFormattedNumber(record.basicAmount, 2)}`,
       finalAmount: `${record.currencyRef} ${getFormattedNumber(record.finalAmount, 2)}`
@@ -93,7 +94,8 @@ export default function SalaryForm({ employeeInfo }) {
       props: {
         labels,
         recordId,
-        maxAccess
+        maxAccess,
+        employeeInfo
       },
       width: 900,
       height: 600,

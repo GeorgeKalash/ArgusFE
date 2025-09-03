@@ -15,39 +15,98 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function SalaryTab({ labels, maxAccess, store, setStore }) {
+export default function SalaryTab({ labels, maxAccess, store, setStore, employeeInfo }) {
   const { recordId } = store
-  const { getRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
-      currencyId: '',
-      changeReason: '',
-      date: null,
+      recordId: null,
+      currencyId: null,
+      scrId: null,
+      effectiveDate: null,
       salaryType: null,
-      paymentFrequencyId: null,
+      paymentFrequency: null,
       paymentMethod: null,
       bankId: null,
-      IBAN: null,
+      accountNumber: null,
       comments: '',
       basicAmount: '',
       finalAmount: '',
-      totalEntitlements: '',
-      totalDeductions: ''
+      eAmount: '',
+      dAmount: ''
     },
-    validateOnChange: false,
-    validationSchema: yup.object({}),
-    onSubmit: async values => {}
-  })
+    validateOnChange: true,
+    validationSchema: yup.object({
+      currencyId: yup.string().required(),
+      scrId: yup.string().required(),
+      effectiveDate: yup.date().required(),
+      salaryType: yup.string().required(),
+      paymentFrequency: yup.string().required(),
+      paymentMethod: yup.string().required(),
+      basicAmount: yup.number().required(),
+      bankId: yup.string().test('bank-required', 'Bank is required', function (value) {
+        const { paymentMethod } = this.parent
 
+        return paymentMethod == 2 ? !!value : true
+      }),
+
+      accountNumber: yup.string().test('account-required', 'Account number is required', function (value) {
+        const { paymentMethod } = this.parent
+
+        return paymentMethod == 2 ? !!value : true
+      })
+    }),
+    onSubmit: async obj => {
+      await postRequest({
+        extension: EmployeeRepository.EmployeeSalary.set,
+        record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
+      })
+      const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      invalidate()
+    }
+  })
   const editMode = !!formik?.values?.recordId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (!recordId) {
+        const res = await getRequest({
+          extension: EmployeeRepository.EmployeeSalary.qry,
+          parameters: `_employeeId=${employeeInfo?.recordId}`
+        })
+        let lastSalary = null
+
+        if (res?.list?.length > 0) {
+          lastSalary = res.list.sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate)).at(-1)
+
+          const updatedSalary = {
+            ...lastSalary,
+            eAmount: 0,
+            dAmount: 0,
+            finalAmount: lastSalary.basicAmount,
+            effectiveDate: new Date()
+          }
+
+          formik.setValues(updatedSalary)
+        } else {
+          const res = await getRequest({
+            extension: EmployeeRepository.Employee.get1,
+            parameters: `_recordId=${employeeInfo?.recordId}`
+          })
+          formik.setFieldValue('effectiveDate', res.record.hireDate ? formatDateFromApi(res.record.hireDate) : null)
+        }
+      } else {
+        const res = await getRequest({
+          extension: EmployeeRepository.EmployeeSalary.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
       }
     })()
   }, [])
@@ -74,20 +133,22 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
           />
         </Grid>
         <Grid item xs={6}>
-          <CustomNumberField
-            name='IBAN'
+          <CustomTextField
+            name='accountNumber'
             label={labels.iban}
-            value={formik?.values?.IBAN}
+            value={formik?.values?.accountNumber}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('IBAN', '')}
-            error={formik.touched.IBAN && Boolean(formik.errors.IBAN)}
+            readOnly={formik.values.paymentMethod != 2}
+            required={formik.values.paymentMethod == 2}
+            onClear={() => formik.setFieldValue('accountNumber', '')}
+            error={formik.touched.accountNumber && Boolean(formik.errors.accountNumber)}
           />
         </Grid>
         <Grid item xs={6}>
           <ResourceComboBox
             endpointId={EmployeeRepository.SalaryChangeReason.qry}
-            name='changeReasonId'
+            name='scrId'
             label={labels.changeReason}
             valueField='recordId'
             displayField='name'
@@ -95,9 +156,9 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('changeReasonId', newValue?.recordId || null)
+              formik.setFieldValue('scrId', newValue?.recordId || null)
             }}
-            error={formik.touched.changeReasonId && Boolean(formik.errors.changeReasonId)}
+            error={formik.touched.scrId && Boolean(formik.errors.scrId)}
           />
         </Grid>
         <Grid item xs={6}>
@@ -113,14 +174,14 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
         </Grid>
         <Grid item xs={6}>
           <CustomDatePicker
-            name='date'
+            name='effectiveDate'
             label={labels.date}
-            value={formik?.values?.date}
+            value={formik?.values?.effectiveDate}
             onChange={formik.setFieldValue}
             maxAccess={maxAccess}
             required
-            onClear={() => formik.setFieldValue('date', null)}
-            error={formik.touched.date && Boolean(formik.errors.date)}
+            onClear={() => formik.setFieldValue('effectiveDate', null)}
+            error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
           />
         </Grid>
         <Grid item xs={6}>
@@ -179,18 +240,18 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
         </Grid>
         <Grid item xs={6}>
           <CustomNumberField
-            name='totalEntitlements'
+            name='eAmount'
             label={labels.totalEntitlements}
-            value={formik?.values?.totalEntitlements}
+            value={formik?.values?.eAmount}
             onChange={formik.handleChange}
             readOnly
-            onClear={() => formik.setFieldValue('totalEntitlements', '')}
-            error={formik.touched.totalEntitlements && Boolean(formik.errors.totalEntitlements)}
+            onClear={() => formik.setFieldValue('eAmount', '')}
+            error={formik.touched.eAmount && Boolean(formik.errors.eAmount)}
           />
         </Grid>
         <Grid item xs={6}>
           <ResourceComboBox
-            datasetId={DataSets.PAYMENT_METHOD}
+            datasetId={DataSets.HR_PAYMENT_METHOD}
             name='paymentMethod'
             label={labels.paymentMethod}
             valueField='key'
@@ -199,6 +260,10 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
               formik.setFieldValue('paymentMethod', newValue?.key || null)
+              if (newValue?.key != 2) {
+                formik.setFieldValue('bankId', '')
+                formik.setFieldValue('accountNumber', '')
+              }
             }}
             required
             error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
@@ -206,13 +271,13 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
         </Grid>
         <Grid item xs={6}>
           <CustomNumberField
-            name='totalDeductions'
+            name='dAmount'
             label={labels.totalDeductions}
-            value={formik?.values?.totalDeductions}
+            value={formik?.values?.dAmount}
             onChange={formik.handleChange}
             readOnly
-            onClear={() => formik.setFieldValue('totalDeductions', '')}
-            error={formik.touched.totalDeductions && Boolean(formik.errors.totalDeductions)}
+            onClear={() => formik.setFieldValue('dAmount', '')}
+            error={formik.touched.dAmount && Boolean(formik.errors.dAmount)}
           />
         </Grid>
         <Grid item xs={6}>
@@ -227,7 +292,8 @@ export default function SalaryTab({ labels, maxAccess, store, setStore }) {
               { key: 'name', value: 'Name' }
             ]}
             values={formik.values}
-            readOnly
+            readOnly={formik.values.paymentMethod != 2}
+            required={formik.values.paymentMethod == 2}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
               formik.setFieldValue('bankId', newValue?.recordId || null)
