@@ -12,5 +12,11 @@ export const PayrollRepository = {
   },
   Paycode: {
     qry: service + 'qryPC'
+  },
+  SalaryBatch: {
+    page: service + 'pageBAT',
+    get: service + 'getBAT',
+    set: service + 'setBAT',
+    del: service + 'delBAT'
   }
 }
