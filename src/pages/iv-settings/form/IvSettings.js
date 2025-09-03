@@ -24,7 +24,7 @@ const IvSettings = ({ _labels, access }) => {
     maxAccess: access,
     initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
     validationSchema: yup.object({
-      iv_minSerialSize: yup.number().min(1).max(20).nullable(true)
+      iv_minSerialSize: yup.number().min(1).max(20).nullable()
     }),
     onSubmit: async obj => {
       const data = []
