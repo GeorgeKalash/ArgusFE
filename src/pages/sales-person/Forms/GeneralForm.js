@@ -193,7 +193,6 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                 endpointId={SaleRepository.CommissionSchedule.qry}
                 name='commissionScheduleId'
                 label={labels.commissionSchedule}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 values={formik.values}
                 valueField='recordId'
                 displayField='name'
