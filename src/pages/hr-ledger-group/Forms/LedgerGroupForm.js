@@ -75,7 +75,7 @@ export default function LedgerGroupForm({ labels, recordId, maxAccess, window })
 
   return (
     <FormShell
-      resourceId={ResourceIds.EntitlementDeduction}
+      resourceId={ResourceIds.LedgerGroup}
       actions={actions}
       form={formik}
       maxAccess={maxAccess}
