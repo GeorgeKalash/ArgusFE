@@ -14,8 +14,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import * as yup from 'yup'
 
-export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
+export default function GeneralForm({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -30,29 +32,32 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
       spRef: '',
       name: '',
       cellPhone: '',
-      commissionPct: '',
+      commissionPct: 0,
       plantId: null,
       sptId: null,
-      targetType: ''
+      targetType: null
     },
     maxAccess,
+    validationSchema: yup.object({
+      spRef: yup.string().required(),
+      name: yup.string().required(),
+      commissionPct: yup
+        .number()
+        .required()
+        .min(0.01, ' must be greater than 0')
+        .max(100, ' must be less than or equal to 100')
+    }),
     onSubmit: async obj => {
       const response = await postRequest({
         extension: SaleRepository.SalesPerson.set,
         record: JSON.stringify(obj)
       })
 
-      if (!!recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+      if (!obj.recordId) {
+        setStore({ recordId: response.recordId })
+        formik.setFieldValue('recordId', response.recordId)
       }
-      toast.success(!!recordId ? platformLabels.Edited : platformLabels.Added)
+      toast.success(!!obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
     }
   })
@@ -66,7 +71,7 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({ ...res.record })
+        formik.setValues(res.record)
       }
     })()
   }, [])
@@ -90,18 +95,18 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='spRef'
                 label={labels.reference}
                 value={formik.values.spRef}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('spRef', '')}
                 error={formik.touched.spRef && Boolean(formik.errors.spRef)}
-                helperText={formik.touched.spRef && formik.errors.spRef}
               />
             </Grid>
             <Grid item xs={12}>
@@ -110,11 +115,11 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -122,29 +127,27 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
                 name='cellPhone'
                 label={labels.phone}
                 value={formik.values.cellPhone}
-                maxAccess={maxAccess}
-                maxLength='15'
-                onChange={e => {
-                  const inputValue = e.target.value
-                  if (/^[0-9]*$/.test(inputValue)) {
-                    formik.setFieldValue('cellPhone', inputValue)
-                  }
-                }}
-                onClear={() => formik.setFieldValue('cellPhone', '')}
+                maxLength='8'
+                phone={true}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('cellPhone', null)}
                 error={formik.touched.cellPhone && Boolean(formik.errors.cellPhone)}
-                helperText={formik.touched.cellPhone && formik.errors.cellPhone}
+                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <CustomNumberField
                 name='commissionPct'
+                required
                 label={labels.commissionPct}
                 value={formik.values.commissionPct}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('commissionPct', '')}
+                onClear={() => formik.setFieldValue('commissionPct', null)}
                 error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
-                helperText={formik.touched.commissionPct && formik.errors.commissionPct}
+                allowNegative={false}
+                maxLength={4}
+                decimalScale={2}
               />
             </Grid>
             <Grid item xs={12}>

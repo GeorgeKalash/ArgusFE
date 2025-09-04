@@ -2,7 +2,6 @@ import { useContext } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,12 +10,12 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useForm } from 'src/hooks/form.js'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { AuthContext } from 'src/providers/AuthContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,7 +27,7 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
     maxAccess,
     initialValues: {
       recordId,
-      fiscalYear: '',
+      fiscalYear: null,
       targetAmount: 0,
       balance: '',
       rows: [
@@ -38,7 +37,7 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
           monthId: null,
           month: '',
           targetAmount: 0,
-          fiscalYear: ''
+          fiscalYear: null
         }
       ]
     },
@@ -51,7 +50,8 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
           ...monthDetail,
           id: index + 1,
           month: parseInt(monthDetail.monthId),
-          fiscalYear: formik.values.fiscalYear
+          fiscalYear: obj.fiscalYear,
+          targetAmount: monthDetail.targetAmount ? monthDetail.targetAmount : 0
         }
       })
 
@@ -87,7 +87,12 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
     {
       component: 'numberfield',
       label: labels?.targetAmount,
-      name: 'targetAmount'
+      name: 'targetAmount',
+      props: {
+        maxLength: 12,
+        decimalScale: 0,
+        allowNegative: false
+      }
     }
   ]
 
@@ -129,74 +134,78 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
             id: index + 1,
             spId: recordId,
             monthId: monthObj.key,
-            month: String(monthObj.value),
-            targetAmount: correspondingAmount ? correspondingAmount.targetAmount : 0
+            month: String(monthObj?.value),
+            targetAmount: correspondingAmount?.targetAmount || 0
           }
         })
 
         formik.setFieldValue('rows', newRows)
       }
     } else {
-      formik.setFieldValue('targetAmount', 0)
-      formik.setFieldValue('rows', [])
+      formik.setValues({
+        ...formik.values,
+        targetAmount: 0,
+        rows: []
+      })
     }
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.SalesPerson} maxAccess={maxAccess} editMode={true}>
-      <VertLayout>
-        <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalYears.qry}
-                name='fiscalYear'
-                label={labels.year}
-                valueField='fiscalYear'
-                displayField='fiscalYear'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
-                  changeFiscal(newValue?.fiscalYear)
-                }}
-                error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
-                helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='targetAmount'
-                label={labels.targetAmount}
-                value={formik.values.targetAmount}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }}>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={SystemRepository.FiscalYears.qry}
+              name='fiscalYear'
+              label={labels.year}
+              valueField='fiscalYear'
+              displayField='fiscalYear'
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
+                changeFiscal(newValue?.fiscalYear)
+              }}
+              error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('rows', value)}
-            value={formik.values?.rows}
-            error={formik.errors?.rows}
-            name='rows'
-            initialValues={formik?.initialValues?.rows}
-            columns={columns}
-            maxAccess={maxAccess}
-          />
-        </Grow>
-        <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={9}></Grid>
-            <Grid item xs={3}>
-              <CustomNumberField name='balance' label={labels.balance} value={balance} maxAccess={maxAccess} readOnly />
-            </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='targetAmount'
+              label={labels.targetAmount}
+              value={formik.values.targetAmount}
+              maxAccess={maxAccess}
+              readOnly
+            />
           </Grid>
-        </Fixed>
-      </VertLayout>
-    </FormShell>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <DataGrid
+          onChange={value => formik.setFieldValue('rows', value)}
+          value={formik.values?.rows}
+          error={formik.errors?.rows}
+          name='rows'
+          initialValues={formik?.initialValues?.rows}
+          columns={columns}
+          maxAccess={maxAccess}
+          allowDelete={false}
+          allowAddNewLine={false}
+        />
+      </Grow>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }} justifyContent='flex-end'>
+          <Grid item xs={3}>
+            <CustomNumberField name='balance' label={labels.balance} value={balance} maxAccess={maxAccess} readOnly />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Fixed>
+        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
 

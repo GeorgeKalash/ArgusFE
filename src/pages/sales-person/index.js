@@ -22,7 +22,7 @@ const SalesPerson = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SaleRepository.SalesPerson.qry,
+      extension: SaleRepository.SalesPerson.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -49,7 +49,7 @@ const SalesPerson = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.SalesPerson.snapshot,
+    endpointId: SaleRepository.SalesPerson.page,
     datasetId: ResourceIds.SalesPerson,
     search: {
       searchFn: fetchWithSearch

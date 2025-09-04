@@ -34,8 +34,8 @@ const TargetForm = ({ labels, maxAccess, store }) => {
         return {
           id: index + 1,
           spId: recordId,
-          fiscalYear: String(fiscalYearObj.fiscalYear),
-          targetAmount: correspondingTarget ? correspondingTarget.targetAmount : 0
+          fiscalYear: String(fiscalYearObj?.fiscalYear),
+          targetAmount: correspondingTarget?.targetAmount || 0
         }
       })
 
@@ -51,7 +51,10 @@ const TargetForm = ({ labels, maxAccess, store }) => {
     onSubmit: async obj => {
       const resultObject = {
         spId: recordId,
-        items: obj.rows
+        items: obj.rows.map(row => ({
+          ...row,
+          targetAmount: row.targetAmount ? row.targetAmount : 0
+        }))
       }
 
       await postRequest({
@@ -60,7 +63,6 @@ const TargetForm = ({ labels, maxAccess, store }) => {
       })
 
       toast.success(platformLabels.Updated)
-      await getGridData()
     }
   })
 
@@ -82,7 +84,12 @@ const TargetForm = ({ labels, maxAccess, store }) => {
     {
       component: 'numberfield',
       label: labels.targetAmount,
-      name: 'targetAmount'
+      name: 'targetAmount',
+      props: {
+        maxLength: 12,
+        decimalScale: 0,
+        allowNegative: false
+      }
     }
   ]
 
