@@ -4,6 +4,9 @@ export const TimeAttendanceRepository = {
   AttendanceScheduleFilters: {
     qry: service + 'qrySD'
   },
+  PSP: {
+    retry: service + 'retryPSP'
+  },
   OvertimeProfiles: {
     page: service + 'pageOTP',
     set: service + 'setOTP',
@@ -51,5 +54,8 @@ export const TimeAttendanceRepository = {
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'
+  },
+  ProcessedPunches: {
+    qry: service + 'qryPP'
   }
 }
