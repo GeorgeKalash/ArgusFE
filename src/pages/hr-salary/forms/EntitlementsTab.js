@@ -7,59 +7,59 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { Grid } from '@mui/material'
+import toast from 'react-hot-toast'
 import EntitlementForm from './EntitlementForm'
+import { useWindow } from 'src/windows'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const EntitlementsTab = ({ store, labels, maxAccess, setStore }) => {
-  const { getRequest } = useContext(RequestsContext)
-  const { recordId, items } = store
+const EntitlementsTab = ({ store, labels, maxAccess }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId } = store
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: SaleRepository.PriceListItem.qry,
-      parameters: `_pluId=${recordId}&_itemId=0`
+      extension: EmployeeRepository.SalaryDetails.qry,
+      parameters: `_salaryId=${recordId}&_type=1`
     })
 
-    setStore(prevStore => ({
-      ...prevStore,
-      items: response?.count == 0 ? items : response
+    return response.list.map(record => ({
+      ...record,
+      currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,
+      pct: record?.pct ? `${parseFloat(record.pct).toFixed(2)}%` : null
     }))
-
-    return response
   }
 
   const {
     query: { data },
-    search,
-    clear,
-    labels: _labels
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
-    datasetId: ResourceIds.PriceListUpdates,
+    datasetId: ResourceIds.Salaries,
     queryFn: fetchGridData,
-    endpointId: SaleRepository.PriceListItem.qry
+    endpointId: EmployeeRepository.SalaryDetails.qry
   })
 
   const columns = [
     {
-      field: 'entitlements',
+      field: 'edName',
       headerName: labels.entitlements,
       flex: 1
     },
     {
-      field: 'percentage',
+      field: 'pct',
       headerName: labels.percentage,
       flex: 1
     },
     {
-      field: 'amount',
+      field: 'currencyAmount',
       headerName: labels.amount,
       flex: 1
     }
   ]
-
-  const list = data || items
 
   const add = () => {
     openForm()
@@ -74,18 +74,18 @@ const EntitlementsTab = ({ store, labels, maxAccess, setStore }) => {
       Component: EntitlementForm,
       props: {
         labels,
-        maxAccess: access,
+        maxAccess,
         recordId
       },
-      width: 500,
-      height: 250,
+      width: 800,
+      height: 500,
       title: labels.entitlements
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.NotificationLabel.del,
+      extension: EmployeeRepository.SalaryDetails.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -95,17 +95,13 @@ const EntitlementsTab = ({ store, labels, maxAccess, setStore }) => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={6}>
-            <GridToolbar onAdd={add} maxAccess={maxAccess} labels={_labels} />
-          </Grid>
-        </Grid>
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
         <Table
           name='entitlementsTable'
           columns={columns}
-          gridData={list}
+          gridData={{ list: data }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}

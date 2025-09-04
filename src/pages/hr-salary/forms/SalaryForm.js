@@ -28,6 +28,7 @@ export default function SalaryForm({ employeeInfo }) {
     query: { data },
     labels,
     refetch,
+    invalidate,
     access: maxAccess
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -106,7 +107,19 @@ export default function SalaryForm({ employeeInfo }) {
   const del = async obj => {
     await postRequest({
       extension: EmployeeRepository.EmployeeSalary.del,
-      record: JSON.stringify(obj)
+      record: JSON.stringify({
+        ...obj,
+        finalAmount: 0,
+        comments: '',
+        accountNumber: '',
+        basicAmount: 0,
+        currencyId: 0,
+        effectiveDate: new Date(),
+        paymentFrequency: 0,
+        paymentMethod: 0,
+        salaryType: 0,
+        scrId: 0
+      })
     })
     invalidate()
     toast.success(platformLabels.Deleted)

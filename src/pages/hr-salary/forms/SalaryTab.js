@@ -16,11 +16,17 @@ import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { useInvalidate } from 'src/hooks/resource'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function SalaryTab({ labels, maxAccess, store, setStore, employeeInfo }) {
   const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: EmployeeRepository.EmployeeSalary.qry
+  })
 
   const { formik } = useForm({
     maxAccess,
@@ -73,6 +79,36 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
   })
   const editMode = !!formik?.values?.recordId
 
+  async function ChangeDeductionsAmount(offset) {}
+
+  async function ReCalculateFinal() {}
+
+  async function ChangeEntitlementsAmount(amountOffset) {
+    let sum = 0
+
+    const updatedEntitlements = entitlements.map(record => {
+      if (record.includeInTotal) {
+        if (record.pct === '0') {
+          sum += parseFloat(record.fixedAmount)
+
+          return record
+        } else {
+          const x = (parseFloat(record.pct) / 100) * parseFloat(String(basicSalary).replace(/,/g, ''))
+          sum += x
+
+          return { ...record, fixedAmount: x }
+        }
+      }
+
+      return record
+    })
+
+    // setEntitlements(updatedEntitlements)
+    // setEAmount(sum)
+    // ChangeDeductionsAmount(0)
+    // ReCalculateFinal()
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -90,10 +126,15 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
             eAmount: 0,
             dAmount: 0,
             finalAmount: lastSalary.basicAmount,
-            effectiveDate: new Date()
+            effectiveDate: new Date(),
+            recordId: null
           }
 
           formik.setValues(updatedSalary)
+          setStore(prevStore => ({
+            ...prevStore,
+            currency: lastSalary.currencyRef
+          }))
         } else {
           const res = await getRequest({
             extension: EmployeeRepository.Employee.get1,
@@ -107,201 +148,207 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
           parameters: `_recordId=${recordId}`
         })
         formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
+        setStore(prevStore => ({
+          ...prevStore,
+          currency: res?.record?.currencyRef
+        }))
       }
     })()
   }, [])
 
   return (
     <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={SystemRepository.Currency.qry}
-            name='currencyId'
-            label={labels.currency}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || '')}
-            error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-          />
+      <VertLayout>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={SystemRepository.Currency.qry}
+              name='currencyId'
+              label={labels.currency}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || '')}
+              error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomTextField
+              name='accountNumber'
+              label={labels.iban}
+              value={formik?.values?.accountNumber}
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              readOnly={formik.values.paymentMethod != 2}
+              required={formik.values.paymentMethod == 2}
+              onClear={() => formik.setFieldValue('accountNumber', '')}
+              error={formik.touched.accountNumber && Boolean(formik.errors.accountNumber)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.SalaryChangeReason.qry}
+              name='scrId'
+              label={labels.changeReason}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('scrId', newValue?.recordId || null)
+              }}
+              error={formik.touched.scrId && Boolean(formik.errors.scrId)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomTextField
+              name='comments'
+              label={labels.comments}
+              value={formik.values?.comments}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('comments', '')}
+              error={formik.touched.comments && Boolean(formik.errors.comments)}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomDatePicker
+              name='effectiveDate'
+              label={labels.date}
+              value={formik?.values?.effectiveDate}
+              onChange={formik.setFieldValue}
+              maxAccess={maxAccess}
+              required
+              onClear={() => formik.setFieldValue('effectiveDate', null)}
+              error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='basicAmount'
+              label={labels.basicAmount}
+              value={formik?.values?.basicAmount}
+              onChange={formik.handleChange}
+              required
+              onClear={() => formik.setFieldValue('basicAmount', '')}
+              error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              datasetId={DataSets.SALARY_TYPE}
+              name='salaryType'
+              label={labels.salaryType}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={maxAccess}
+              required
+              onChange={(event, newValue) => {
+                formik.setFieldValue('salaryType', newValue?.key || null)
+              }}
+              error={formik.touched.salaryType && Boolean(formik.errors.salaryType)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='finalAmount'
+              label={labels.finalAmount}
+              value={formik?.values?.finalAmount}
+              readOnly
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('finalAmount', '')}
+              error={formik.touched.finalAmount && Boolean(formik.errors.finalAmount)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              datasetId={DataSets.PY_PAY_PERIOD}
+              name='paymentFrequency'
+              label={labels.paymentFrequency}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={maxAccess}
+              required
+              onChange={(event, newValue) => {
+                formik.setFieldValue('paymentFrequency', newValue?.key || null)
+              }}
+              error={formik.touched.paymentFrequency && Boolean(formik.errors.paymentFrequency)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='eAmount'
+              label={labels.totalEntitlements}
+              value={formik?.values?.eAmount}
+              onChange={formik.handleChange}
+              readOnly
+              onClear={() => formik.setFieldValue('eAmount', '')}
+              error={formik.touched.eAmount && Boolean(formik.errors.eAmount)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              datasetId={DataSets.HR_PAYMENT_METHOD}
+              name='paymentMethod'
+              label={labels.paymentMethod}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('paymentMethod', newValue?.key || null)
+                if (newValue?.key != 2) {
+                  formik.setFieldValue('bankId', '')
+                  formik.setFieldValue('accountNumber', '')
+                }
+              }}
+              required
+              error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='dAmount'
+              label={labels.totalDeductions}
+              value={formik?.values?.dAmount}
+              onChange={formik.handleChange}
+              readOnly
+              onClear={() => formik.setFieldValue('dAmount', '')}
+              error={formik.touched.dAmount && Boolean(formik.errors.dAmount)}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={CashBankRepository.CbBank.qry}
+              name='bankId'
+              label={labels.bank}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              readOnly={formik.values.paymentMethod != 2}
+              required={formik.values.paymentMethod == 2}
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('bankId', newValue?.recordId || null)
+              }}
+              error={formik.touched.bankId && Boolean(formik.errors.bankId)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={6}>
-          <CustomTextField
-            name='accountNumber'
-            label={labels.iban}
-            value={formik?.values?.accountNumber}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            readOnly={formik.values.paymentMethod != 2}
-            required={formik.values.paymentMethod == 2}
-            onClear={() => formik.setFieldValue('accountNumber', '')}
-            error={formik.touched.accountNumber && Boolean(formik.errors.accountNumber)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={EmployeeRepository.SalaryChangeReason.qry}
-            name='scrId'
-            label={labels.changeReason}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('scrId', newValue?.recordId || null)
-            }}
-            error={formik.touched.scrId && Boolean(formik.errors.scrId)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomTextField
-            name='comments'
-            label={labels.comments}
-            value={formik.values?.comments}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('comments', '')}
-            error={formik.touched.comments && Boolean(formik.errors.comments)}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomDatePicker
-            name='effectiveDate'
-            label={labels.date}
-            value={formik?.values?.effectiveDate}
-            onChange={formik.setFieldValue}
-            maxAccess={maxAccess}
-            required
-            onClear={() => formik.setFieldValue('effectiveDate', null)}
-            error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='basicAmount'
-            label={labels.basicAmount}
-            value={formik?.values?.basicAmount}
-            onChange={formik.handleChange}
-            required
-            onClear={() => formik.setFieldValue('basicAmount', '')}
-            error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            datasetId={DataSets.SALARY_TYPE}
-            name='salaryType'
-            label={labels.salaryType}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            maxAccess={maxAccess}
-            required
-            onChange={(event, newValue) => {
-              formik.setFieldValue('salaryType', newValue?.key || null)
-            }}
-            error={formik.touched.salaryType && Boolean(formik.errors.salaryType)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='finalAmount'
-            label={labels.finalAmount}
-            value={formik?.values?.finalAmount}
-            readOnly
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('finalAmount', '')}
-            error={formik.touched.finalAmount && Boolean(formik.errors.finalAmount)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            datasetId={DataSets.PY_PAY_PERIOD}
-            name='paymentFrequency'
-            label={labels.paymentFrequency}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            maxAccess={maxAccess}
-            required
-            onChange={(event, newValue) => {
-              formik.setFieldValue('paymentFrequency', newValue?.key || null)
-            }}
-            error={formik.touched.paymentFrequency && Boolean(formik.errors.paymentFrequency)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='eAmount'
-            label={labels.totalEntitlements}
-            value={formik?.values?.eAmount}
-            onChange={formik.handleChange}
-            readOnly
-            onClear={() => formik.setFieldValue('eAmount', '')}
-            error={formik.touched.eAmount && Boolean(formik.errors.eAmount)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            datasetId={DataSets.HR_PAYMENT_METHOD}
-            name='paymentMethod'
-            label={labels.paymentMethod}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('paymentMethod', newValue?.key || null)
-              if (newValue?.key != 2) {
-                formik.setFieldValue('bankId', '')
-                formik.setFieldValue('accountNumber', '')
-              }
-            }}
-            required
-            error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='dAmount'
-            label={labels.totalDeductions}
-            value={formik?.values?.dAmount}
-            onChange={formik.handleChange}
-            readOnly
-            onClear={() => formik.setFieldValue('dAmount', '')}
-            error={formik.touched.dAmount && Boolean(formik.errors.dAmount)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={CashBankRepository.CbBank.qry}
-            name='bankId'
-            label={labels.bank}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            values={formik.values}
-            readOnly={formik.values.paymentMethod != 2}
-            required={formik.values.paymentMethod == 2}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('bankId', newValue?.recordId || null)
-            }}
-            error={formik.touched.bankId && Boolean(formik.errors.bankId)}
-          />
-        </Grid>
-      </Grid>
+      </VertLayout>
     </FormShell>
   )
 }

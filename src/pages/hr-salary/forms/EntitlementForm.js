@@ -13,14 +13,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
 export default function EntitlementForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Machine.page
+    endpointId: EmployeeRepository.SalaryDetails.qry
   })
 
   const { formik } = useForm({
@@ -28,20 +29,21 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
     initialValues: {
       recordId,
       includeInTotal: false,
-      entitlementId: null,
-      isPercentage: false,
-      amount: 0,
-      percentage: 0,
+      edId: null,
+      isPct: false,
+      fixedAmount: 0,
+      pct: 0,
       comments: '',
       isTaxable: false,
-      calculationType: null
+      edCalcType: null
     },
-    validateOnChange: false,
+    validateOnChange: true,
     validationSchema: yup.object({
+      edId: yup.string().required(),
+      fixedAmount: yup.string().required(),
+      edCalcType: yup.string().required()
     }),
-    onSubmit: async values => {
-      
-    }
+    onSubmit: async values => {}
   })
 
   const editMode = !!formik.values.recordId
@@ -49,103 +51,108 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        
       }
     })()
   }, [])
 
   return (
     <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.WorkCenter.qry}
-            name='entitlementId'
-            label={labels.entitlementId}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('entitlementId', newValue?.recordId || null)
-            }}
-            error={formik.touched.entitlementId && Boolean(formik.errors.entitlementId)}
-          />
+      <VertLayout>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.EmployeeDeduction.qry}
+              name='edId'
+              label={labels.entitlements}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              filter={item => item.type == 1}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('edId', newValue?.recordId || null)
+              }}
+              required
+              error={formik.touched.edId && Boolean(formik.errors.edId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='includeInTotal'
+              value={formik.values?.includeInTotal}
+              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
+              label={labels.includeInTotal}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isPct'
+              value={formik.values?.isPct}
+              onChange={event => formik.setFieldValue('isPct', event.target.checked)}
+              label={labels.isPct}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='pct'
+              label={labels.pct}
+              value={formik.values.pct}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('pct', 0)}
+              error={formik.touched.pct && Boolean(formik.errors.pct)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='fixedAmount'
+              label={labels.amount}
+              value={formik.values.fixedAmount}
+              onChange={formik.handleChange}
+              required
+              onClear={() => formik.setFieldValue('fixedAmount', 0)}
+              error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='comments'
+              label={labels.comments}
+              value={formik.values.comments}
+              maxLength='100'
+              rows={2}
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('comments', '')}
+              error={formik.touched.comments && Boolean(formik.errors.comments)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isTaxable'
+              value={formik.values?.isTaxable}
+              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+              label={labels.isTaxable}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={ManufacturingRepository.Operation.qry}
+              name='edCalcType'
+              label={labels.edCalcType}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              required
+              onChange={(event, newValue) => {
+                formik.setFieldValue('edCalcType', newValue?.recordId || null)
+              }}
+              error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='includeInTotal'
-            value={formik.values?.includeInTotal}
-            onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
-            label={labels.includeInTotal}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='isPercentage'
-            value={formik.values?.isPercentage}
-            onChange={event => formik.setFieldValue('isPercentage', event.target.checked)}
-            label={labels.isPercentage}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='percentage'
-            label={labels.percentage}
-            value={formik.values.percentage}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('percentage', 0)}
-            error={formik.touched.percentage && Boolean(formik.errors.percentage)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='amount'
-            label={labels.amount}
-            value={formik.values.amount}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('amount', 0)}
-            error={formik.touched.amount && Boolean(formik.errors.amount)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextArea
-            name='comments'
-            label={labels.comments}
-            value={formik.values.comments}
-            maxLength='100'
-            rows={2}
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('comments', '')}
-            error={formik.touched.comments && Boolean(formik.errors.comments)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='isTaxable'
-            value={formik.values?.isTaxable}
-            onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
-            label={labels.isTaxable}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.Operation.qry}
-            name='calculationType'
-            label={labels.calculationType}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('calculationType', newValue?.recordId || null)
-            }}
-            error={formik.touched.calculationType && Boolean(formik.errors.calculationType)}
-          />
-        </Grid>
-      </Grid>
+      </VertLayout>
     </FormShell>
   )
 }

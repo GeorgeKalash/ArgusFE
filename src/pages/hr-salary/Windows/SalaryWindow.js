@@ -9,7 +9,8 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId
+    recordId,
+    currency: ''
   })
 
   const tabs = [
@@ -31,10 +32,10 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
+        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
+        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

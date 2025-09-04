@@ -120,6 +120,11 @@ export const EmployeeRepository = {
   EmployeeSalary: {
     qry: service + 'qrySA',
     get: service + 'getSA',
-    set: service + 'setSA'
+    set: service + 'setSA',
+    del: service + 'delSA'
+  },
+  SalaryDetails: {
+    qry: service + 'qrySD',
+    del: service + 'delSD'
   }
 }
