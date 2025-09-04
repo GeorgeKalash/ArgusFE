@@ -39,13 +39,8 @@ export default function SalaryBatchForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -75,7 +70,7 @@ export default function SalaryBatchForm({ labels, maxAccess, recordId }) {
                 value={formik.values.reference}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='10'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -87,7 +82,7 @@ export default function SalaryBatchForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                rows={2}
+                maxLength='50'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
