@@ -245,6 +245,7 @@ const CustomComboBox = ({
           }}
           InputProps={{
             ...params.InputProps,
+            startAdornment: props?.startAdornment || params.InputProps.startAdornment,
             endAdornment: !_readOnly && (
               <React.Fragment>
                 {hover &&
@@ -295,6 +296,7 @@ const CustomComboBox = ({
           }}
         />
       )}
+      {...props}
     />
   )
 }
