@@ -54,7 +54,7 @@ const AuthProvider = ({ children }) => {
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-    const accountName = matchHostname ? matchHostname[1] : 'neg-deploy'
+    const accountName = matchHostname ? matchHostname[1] : 'anthonys'
 
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
@@ -122,11 +122,19 @@ const AuthProvider = ({ children }) => {
         dashboardId: getUS2.data.record.dashboardId,
         role: 'admin',
         expiresAt: jwt(signIn3.data.record.accessToken).exp,
+        forcePasswordReset: signIn3.data.record.forcePasswordReset,
         ...signIn3.data.record
       }
       setLanguageId(loggedUser.languageId)
       window.localStorage.setItem('languageId', loggedUser.languageId)
-      if (getUS2.data.record.umcpnl === true || getUS2.data.record.is2FAEnabled === true) {
+      if (signIn3.data.record.forcePasswordReset == true) {
+        errorCallback({
+          username: params.username,
+          loggedUser,
+          signIn3: signIn3.data.record,
+          getUS2: getUS2.data.record
+        })
+      } else if (getUS2.data.record.umcpnl === true || getUS2.data.record.is2FAEnabled === true) {
         errorCallback({
           username: params.username,
           loggedUser,

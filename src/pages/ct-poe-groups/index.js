@@ -23,34 +23,48 @@ const PurposeOfExchangeGroup = () => {
 
     const response = await getRequest({
       extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
+
   const {
     query: { data },
-    labels: _labels,
+    search,
+    clear,
+    labels,
     paginationParameters,
     refetch,
-    access,
-    invalidate
+    invalidate,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: CurrencyTradingSettingsRepository.PurposeExchangeGroup.page,
-    datasetId: ResourceIds.PurposeExchangeGroup
+    datasetId: ResourceIds.PurposeExchangeGroup,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'flName',
-      headerName: _labels.flName,
+      headerName: labels.flName,
       flex: 1
     }
   ]
@@ -67,31 +81,29 @@ const PurposeOfExchangeGroup = () => {
     stack({
       Component: PurposeOfExchangeGroupForm,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 600,
       height: 300,
-      title: _labels.purposeOfExchangeGroup
+      title: labels.purposeOfExchangeGroup
     })
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CurrencyTradingSettingsRepository.PurposeExchangeGroup.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

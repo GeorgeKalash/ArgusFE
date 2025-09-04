@@ -48,6 +48,8 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import AddressForm from 'src/components/Shared/AddressForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import ChangeClient from 'src/components/Shared/ChangeClient'
 
 export default function SalesQuotationForm({ labels, access, recordId, currency, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -69,7 +71,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   })
 
   const initialValues = {
-    recordId: recordId,
+    recordId,
     dtId: null,
     reference: null,
     date: new Date(),
@@ -355,9 +357,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
         update({
-          baseQty: newRow?.qty * filteredItems?.qty
+          baseQty: newRow?.qty * muQty
         })
       },
       propsReducer({ row, props }) {
@@ -371,11 +375,12 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+
+        const muQty = newRow?.muQty ?? filteredItems?.qty
         update({
-          baseQty: Number(filteredItems?.[0]?.qty) * Number(newRow?.qty)
+          ...data,
+          baseQty: newRow?.qty * muQty
         })
       }
     },
@@ -637,7 +642,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     }
   ]
 
-  async function fillForm(sqHeader, sqItems) {
+  async function fillForm(sqHeader, sqItems, clientDiscount) {
     const shipAdd = await getAddress(sqHeader?.record?.shipToAddressId)
 
     sqHeader?.record?.tdType == 1 || sqHeader?.record?.tdType == null
@@ -649,6 +654,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         ? await Promise.all(
             sqItems.list?.map(async (item, index) => {
               const taxDetailsResponse = sqHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+              const itemInfo = await getItem(item?.itemId)
 
               return {
                 ...item,
@@ -658,6 +664,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -671,6 +678,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           ? sqHeader?.record?.tdAmount
           : sqHeader?.record?.tdPct,
       amount: parseFloat(sqHeader?.record?.amount).toFixed(2),
+      maxDiscount: clientDiscount?.record?.tdPct || 0,
       shipAddress: shipAdd,
       items: modifiedList
     })
@@ -706,14 +714,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
-
-  async function fillClientData(clientId) {
-    if (!clientId) return
-
+  async function getClientInfo(clientId) {
     const res = await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
     })
+
+    return res
+  }
+
+  async function fillClientData(clientId) {
+    if (!clientId) return
+
+    const res = await getClientInfo(clientId)
 
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || formik.values?.plId || 0)
@@ -848,7 +861,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
       qty: parseFloat(newRow?.qty),
       extendedPrice: parseFloat(newRow?.extendedPrice),
-      mdAmount: mdAmount,
+      mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
@@ -858,8 +871,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
@@ -944,8 +959,10 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
+        weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
@@ -1008,7 +1025,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
   async function refetchForm(recordId) {
     const sqHeader = await getSalesQuotation(recordId)
     const sqItems = await getSalesQuotationItems(recordId)
-    await fillForm(sqHeader, sqItems)
+    const clientDiscount = await getClientInfo(sqHeader.record.clientId)
+    await fillForm(sqHeader, sqItems, clientDiscount)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1034,6 +1052,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         address: address,
         setAddress: setAddress,
+        datasetId: ResourceIds.ADDSalesQuotations,
         isCleared: false
       }
     })
@@ -1086,6 +1105,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       systemDefaultsList: systemObject
     }
   }
+
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(key, val)
+    })
+  }
+
   async function onChangeDtId(dtId) {
     if (!dtId) return
 
@@ -1218,7 +1244,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                   <ResourceLookup
                     endpointId={SaleRepository.Client.snapshot}
                     valueField='reference'
@@ -1244,9 +1270,26 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       formik.setFieldValue('clientRef', newValue?.reference)
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                       formik.setFieldValue('taxId', newValue?.taxId)
+                      formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                       fillClientData(newValue?.recordId)
                     }}
                     errorCheck={'clientId'}
+                  />
+                </Grid>
+                <Grid item xs={1}>
+                  <CustomButton
+                    onClick={() => {
+                      stack({
+                        Component: ChangeClient,
+                        props: {
+                          formValues: formik.values,
+                          onSubmit: fields => updateValues(fields)
+                        }
+                      })
+                    }}
+                    image='popup.png'
+                    disabled={!(editMode && isRaw && formik.values.clientId)}
+                    tooltipText={platformLabels.editClient}
                   />
                 </Grid>
                 <Grid item xs={12}>

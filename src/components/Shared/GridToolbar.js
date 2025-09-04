@@ -87,7 +87,6 @@ const GridToolbar = ({
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
         <Grid item xs={previewReport ? 6 : 9}>
           <Grid container spacing={zoomSpacing}>
-            {leftSection}
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                 <CustomButton
@@ -99,6 +98,7 @@ const GridToolbar = ({
                 />
               </Grid>
             )}
+            {leftSection}
             {inputSearch && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', mt: '1px !important' }}>
                 <CustomTextField

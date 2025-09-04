@@ -38,6 +38,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
       moduleId: null,
       resourceId: null,
       sgId: null,
+      isInactive: false,
       flags: []
     },
     maxAccess,
@@ -223,6 +224,15 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 valueField='recordId'
                 displayField='name'
                 onChange={(event, newValue) => formik.setFieldValue('sgId', newValue?.recordId || null)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                label={labels.isInactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

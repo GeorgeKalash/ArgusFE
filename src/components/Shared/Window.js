@@ -62,6 +62,7 @@ const Window = React.memo(
     const [expanded, setExpanded] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
+    const actionRef = useRef()
 
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
@@ -101,6 +102,8 @@ const Window = React.memo(
       setExpanded(prev => !prev)
     }, [expanded])
 
+    const childFormRef = useRef()
+
     return (
       <CacheDataProvider>
         <Box
@@ -115,6 +118,37 @@ const Window = React.memo(
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 2
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              onClose()
+            } else {
+              const target = e.target
+              const role = target.getAttribute('role') || ''
+              const isSearchField = target.getAttribute('data-search') === 'true'
+
+              if (actionRef.current?.submit) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                  e.preventDefault()
+                  actionRef.current?.submit()
+                }
+                if (e.key === 'Enter') {
+                  if (target.tagName === 'TEXTAREA') {
+                    return
+                  }
+                  if (isSearchField) {
+                    return
+                  }
+                  const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+                  const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+                  if (!isEqual) {
+                    e.preventDefault()
+                    actionRef.current?.submit()
+                  }
+                }
+              }
+            }
           }}
         >
           <Draggable
@@ -224,7 +258,8 @@ const Window = React.memo(
                   React.Children.map(children, child => {
                     return React.cloneElement(child, {
                       expanded: expanded,
-                      height: expanded ? containerHeightPanel : heightPanel
+                      height: expanded ? containerHeightPanel : heightPanel,
+                      ref: actionRef
                     })
                   })
                 )}

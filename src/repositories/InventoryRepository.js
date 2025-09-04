@@ -74,6 +74,7 @@ export const InventoryRepository = {
     del: service + 'delADJ',
     page: service + 'pageADJ',
     verify: service + 'verifyADJ',
+    snapshot: service + 'snapshotADJ'
   },
   MaterialsAdjustmentDetail: {
     qry: service + 'qryADI'
@@ -298,7 +299,8 @@ export const InventoryRepository = {
   },
   Management: {
     get: service + 'getMAN',
-    set2: service + 'set2MAN'
+    set2: service + 'set2MAN',
+    del: service + 'delMAN',
   },
   SManagement: {
     qry: service + 'qrySMA'
@@ -340,5 +342,12 @@ export const InventoryRepository = {
   },
   Materials: {
     snapshot: service + 'snapshotUF'
+  },
+  RebuildAC: {
+    rebuild: service + 'rebuildAC'
+  },
+  Catalogue: {
+    page: service + 'pageCTG',
+    snapshot: service + 'snapshotCTG'
   }
 }
