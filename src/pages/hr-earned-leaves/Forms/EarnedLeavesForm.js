@@ -80,7 +80,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       formik.setFieldValue('recordId', response.recordId)
-
+      getData(response.recordId)
       invalidate()
     }
   })
@@ -89,25 +89,28 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   const isPosted = formik.values.status === 3
   const preview = formik.values.items.length > 0
 
+  const getData = async recordId => {
+    const res = await getRequest({
+      extension: LoanManagementRepository.EarnedLeave.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    formik.setValues({
+      recordId: res?.record?.header?.recordId,
+      ...res?.record?.header,
+      date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
+      items:
+        res?.record?.items?.map((item, index) => ({
+          id: index + 1,
+          ...item
+        })) || []
+    })
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: LoanManagementRepository.EarnedLeave.get2,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          recordId: res?.record?.header?.recordId,
-          ...res?.record?.header,
-          date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
-
-          items:
-            res?.record?.items?.map((item, index) => ({
-              id: index + 1,
-              ...item
-            })) || []
-        })
+        getData(recordId)
       }
     })()
   }, [])
@@ -125,14 +128,14 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const columns = [
     {
-      field: 'employee',
+      field: 'employeeName',
       headerName: labels.employee,
       flex: 1
     },
     {
-      field: 'days',
+      field: 'effectiveDate',
       headerName: labels.days,
-      type: 'number',
+      type: 'date',
       flex: 1
     }
   ]
@@ -146,8 +149,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       extension: LoanManagementRepository.EarnedLeave.preview,
       parameters: `_lsId=${formik.values.lsId || 0}&_asOfDate=${formatDateForGetApI(formik.values.date)}`
     })
-
-    // formik.setFieldValue('items', { list: items?.record })
+    formik.setFieldValue('items', items?.list)
   }
 
   async function refetchForm(recordId) {
@@ -156,6 +158,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       parameters: `_recordId=${recordId}`
     })
 
+    formik.setFieldValue('items', [])
     formik.setValues({
       recordId: res?.record?.header?.recordId,
       ...res?.record?.header,
