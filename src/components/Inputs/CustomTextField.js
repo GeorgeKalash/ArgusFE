@@ -16,7 +16,7 @@ const CustomTextField = ({
   autoFocus = false,
   readOnly = false,
   clearable = false,
-  autoComplete = 'off',
+  autoComplete = 'new-password',
   numberField = false,
   editMode = false,
   maxLength = '1000',
@@ -106,7 +106,7 @@ const CustomTextField = ({
         setIsFocused(false), setFocus(false)
       }}
       inputProps={{
-        autoComplete: 'off',
+        autoComplete,
         readOnly: _readOnly,
         maxLength: maxLength,
         dir: dir,

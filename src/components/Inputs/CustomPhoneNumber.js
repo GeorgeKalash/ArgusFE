@@ -5,7 +5,6 @@ import 'react-phone-input-2/lib/material.css'
 import { ControlContext } from 'src/providers/ControlContext'
 import ClearIcon from '@mui/icons-material/Clear'
 import { checkAccess } from 'src/lib/maxAccess'
-import { auto } from '@popperjs/core'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {
   const prefix = '+'
