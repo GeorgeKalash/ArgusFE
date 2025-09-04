@@ -96,11 +96,11 @@ const PYSettings = () => {
         value
       }))
 
-      const res = await postRequest({
+      await postRequest({
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      if (res) updateDefaults(data)
+      updateDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
@@ -184,6 +184,7 @@ const PYSettings = () => {
                   label={labels.ldValue}
                   value={formik.values.ldValue}
                   maxAccess={access}
+                  allowNegative={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('ldValue', null)}
                   error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
@@ -261,6 +262,7 @@ const PYSettings = () => {
                   label={labels.yearDays}
                   value={formik.values.yearDays}
                   maxAccess={access}
+                  allowNegative={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('yearDays', null)}
                   error={formik.touched.yearDays && Boolean(formik.errors.yearDays)}
@@ -274,6 +276,7 @@ const PYSettings = () => {
               label={labels.monthWorkDays}
               value={formik.values.monthWorkDays}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('monthWorkDays', null)}
               error={formik.touched.monthWorkDays && Boolean(formik.errors.monthWorkDays)}
@@ -285,6 +288,7 @@ const PYSettings = () => {
               label={labels.monthWorkHrs}
               value={formik.values.monthWorkHrs}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('monthWorkHrs', null)}
               error={formik.touched.monthWorkHrs && Boolean(formik.errors.monthWorkHrs)}
@@ -296,6 +300,7 @@ const PYSettings = () => {
               label={labels.dayWorkHrs}
               value={formik.values.dayWorkHrs}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('dayWorkHrs', null)}
               error={formik.touched.dayWorkHrs && Boolean(formik.errors.dayWorkHrs)}
@@ -337,6 +342,7 @@ const PYSettings = () => {
               label={labels.MaxLoanDeduction}
               value={formik.values.MaxLoanDeduction}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('MaxLoanDeduction', null)}
               error={formik.touched.MaxLoanDeduction && Boolean(formik.errors.MaxLoanDeduction)}
@@ -348,6 +354,7 @@ const PYSettings = () => {
               label={labels.pytvStartDate}
               value={formik.values.pytvStartDate}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('pytvStartDate', null)}
               error={formik.touched.pytvStartDate && Boolean(formik.errors.pytvStartDate)}
@@ -359,6 +366,7 @@ const PYSettings = () => {
               label={labels.pytvEndDate}
               value={formik.values.pytvEndDate}
               maxAccess={access}
+              allowNegative={false}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('pytvEndDate', null)}
               error={formik.touched.pytvEndDate && Boolean(formik.errors.pytvEndDate)}
