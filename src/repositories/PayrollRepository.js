@@ -18,5 +18,11 @@ export const PayrollRepository = {
   },
   IndemnitySchedule: {
     qry: service + 'qryIS'
+  },
+  LedgerGroup: {
+    qry: service + 'qryGLG',
+    get: service + 'getGLG',
+    set: service + 'setGLG',
+    del: service + 'delGLG'
   }
 }
