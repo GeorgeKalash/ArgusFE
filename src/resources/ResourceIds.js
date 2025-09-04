@@ -556,6 +556,7 @@ export const ResourceIds = {
   GenerateConsumption: 46601,
   LeaveRequest: 73209,
   PayrollArguments: 75100,
+  CnssBranches: 75111,
 
   // GL
   GLSalesInvoice: 51604,

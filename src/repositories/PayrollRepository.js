@@ -21,5 +21,11 @@ export const PayrollRepository = {
   },
   Arguments: {
     page: service + 'pageAR',
+  },
+  CnssBranches: {
+    page: service + 'pageSB',
+    get: service + 'getSB',
+    set: service + 'setSB',
+    del: service + 'delSB'
   }
 }
