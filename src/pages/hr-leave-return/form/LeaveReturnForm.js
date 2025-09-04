@@ -154,7 +154,7 @@ export default function LeaveReturnForm({ labels, access, recordId }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.releaseStatus === 3
+      disabled: !isClosed
     },
     {
       key: 'Approval',
@@ -266,7 +266,7 @@ export default function LeaveReturnForm({ labels, access, recordId }) {
                 endpointId={formik.values.employeeId && LoanManagementRepository.LeaveRequest.qry}
                 parameters={`_filter=&_multiDayLeave=2&_params=1|${formik.values.employeeId}&_sortBy=recordId&_startAt=0&_size=100`}
                 filter={item => item.status == 4}
-                displayField={['reference', { name: 'startDate', type: 'date' }, { name: 'startDate', type: 'date' }]}
+                displayField={['reference', { name: 'startDate', type: 'date' }, { name: 'endDate', type: 'date' }]}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'startDate', value: 'Start Date', type: 'date' },
@@ -298,10 +298,14 @@ export default function LeaveReturnForm({ labels, access, recordId }) {
                 maxAccess={maxAccess}
                 onChange={async (event, newValue) => {
                   const obj = await fillDate(newValue?.key, formik.values.leaveId)
-                  formik.setFieldValue('maxDate', obj.maxDate)
-                  formik.setFieldValue('minDate', obj.minDate)
-                  formik.setFieldValue('date', obj.date)
-                  formik.setFieldValue('returnType', newValue?.key || null)
+
+                  formik.setValues({
+                    ...formik.values,
+                    maxDate: obj?.maxDate || null,
+                    minDate: obj?.minDate || null,
+                    date: obj?.date || null,
+                    returnType: newValue?.key || null
+                  })
                 }}
                 error={formik.touched.returnType && Boolean(formik.errors.returnType)}
               />

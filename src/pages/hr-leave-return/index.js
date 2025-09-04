@@ -25,7 +25,7 @@ const LeaveReturn = () => {
 
     const response = await getRequest({
       extension: LoanManagementRepository.LeaveReturn.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=5&_multiDayLeave=1&_params=${params || ''}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=50&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -42,15 +42,8 @@ const LeaveReturn = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LoanManagementRepository.LeaveReturn.page,
-    datasetId: ResourceIds.LeaveReturn,
-    filter: {
-      filterFn: fetchWithFilter
-    }
+    datasetId: ResourceIds.LeaveReturn
   })
-
-  async function fetchWithFilter({ filters, pagination }) {
-    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.ReturnFromLeave,
