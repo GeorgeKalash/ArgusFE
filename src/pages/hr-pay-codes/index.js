@@ -57,12 +57,12 @@ const PayCodes = () => {
     openForm()
   }
 
-  function openForm(data) {
+  function openForm(payCode) {
     stack({
       Component: PayCodesForm,
       props: {
         labels,
-        data,
+        payCode,
         maxAccess: access
       },
       width: 500,
@@ -72,7 +72,7 @@ const PayCodes = () => {
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj.payCode)
   }
 
   const del = async obj => {

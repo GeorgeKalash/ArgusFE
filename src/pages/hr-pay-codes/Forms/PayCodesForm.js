@@ -13,11 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 
-export default function PayCodesForm({ labels, data, maxAccess, window }) {
+export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
   const { platformLabels } = useContext(ControlContext)
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const editMode = !!data
+  const editMode = !!payCode
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Paycode.qry
@@ -25,57 +25,61 @@ export default function PayCodesForm({ labels, data, maxAccess, window }) {
 
   const { formik } = useForm({
     initialValues: {
-      name: '',
-      payCode: ''
+      recordId: payCode,
+      name: ''
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(),
-      payCode: yup.string().required()
+      recordId: yup.string().required(),
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
+      const data = { ...obj, payCode: obj.recordId }
       await postRequest({
         extension: PayrollRepository.Paycode.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify(data)
       })
 
-      toast.success(!data ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }
   })
 
   useEffect(() => {
-    if (data) {
-      console.log(data)
-      formik.setValues({ ...data })
-    }
+    ;(async function () {
+      if (payCode) {
+        const res = await getRequest({
+          extension: PayrollRepository.Paycode.get,
+          parameters: `_payCode=${payCode}`
+        })
+
+        formik.setValues({
+          ...res.record,
+          recordId: res.record.payCode
+        })
+      }
+    })()
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PayCode}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <FormShell resourceId={ResourceIds.PayCode} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
-                name='payCode'
+                name='recordId'
                 label={labels.PayCode}
-                value={formik.values.payCode}
+                value={formik.values.recordId}
                 readOnly={editMode}
                 maxLength='10'
                 required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('payCode', '')}
-                error={formik.touched.payCode && formik.errors.payCode}
+                onClear={() => formik.setFieldValue('recordId', '')}
+                error={formik.touched.recordId && formik.errors.recordId}
               />
             </Grid>
             <Grid item xs={12}>
