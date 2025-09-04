@@ -37,13 +37,8 @@ export default function CnssBranchesForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      } else toast.success(platformLabels.Edited)
+      if (obj.recordId) formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -72,7 +67,6 @@ export default function CnssBranchesForm({ labels, maxAccess, recordId }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                rows={2}
                 maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
