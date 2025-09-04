@@ -553,6 +553,7 @@ export const ResourceIds = {
   DayTypes: 72104,
   GenerateTransfers: 46600,
   GenerateConsumption: 46601,
+  LeaveRequest: 73209,
 
   // GL
   GLSalesInvoice: 51604,
