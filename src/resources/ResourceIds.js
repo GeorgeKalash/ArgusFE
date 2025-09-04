@@ -31,6 +31,7 @@ export const ResourceIds = {
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
   PayCode: 75104,
+  LedgerGroup: 75114,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -554,6 +555,8 @@ export const ResourceIds = {
   DayTypes: 72104,
   GenerateTransfers: 46600,
   GenerateConsumption: 46601,
+  LeaveRequest: 73209,
+  CnssBranches: 75111,
 
   // GL
   GLSalesInvoice: 51604,
