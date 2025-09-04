@@ -4,7 +4,7 @@ export const TimeAttendanceRepository = {
   AttendanceScheduleFilters: {
     qry: service + 'qrySD'
   },
-  PSP: {
+  ProcessedShiftPunches: {
     retry: service + 'retryPSP'
   },
   OvertimeProfiles: {

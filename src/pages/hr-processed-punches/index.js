@@ -70,7 +70,7 @@ const ProcessedPunches = () => {
       disabled: false,
       onClick: async () => {
         await getRequest({
-          extension: TimeAttendanceRepository.PSP.retry
+          extension: TimeAttendanceRepository.ProcessedShiftPunches.retry
         })
       }
     }
