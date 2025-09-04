@@ -18,5 +18,8 @@ export const PayrollRepository = {
     get: service + 'getGLG',
     set: service + 'setGLG',
     del: service + 'delGLG'
+  },
+  Arguments: {
+    page: service + 'pageAR',
   }
 }
