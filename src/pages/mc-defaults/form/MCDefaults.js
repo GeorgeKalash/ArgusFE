@@ -1,183 +1,92 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useForm } from 'src/hooks/form'
 
-const MCDefault = ({ _labels }) => {
+const MCDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [initialValues, setInitialValues] = useState({
-    mc_defaultRTSA: null,
-    mc_defaultRTPU: null,
-    mc_defaultRTMF: null,
-    mc_defaultRTFI: null,
-    mc_defaultRTTAX: null,
-    baseMetalCuId: null,
-    baseSalesMetalId: null
-  })
+  const arrayAllow = [
+    'mc_defaultRTSA',
+    'mc_defaultRTPU',
+    'mc_defaultRTMF',
+    'mc_defaultRTFI',
+    'mc_defaultRTTAX',
+    'baseMetalCuId',
+    'baseSalesMetalId'
+  ]
 
-  useEffect(() => {
-    getDataResult()
-  }, [])
-
-  const getDataResult = () => {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'mc_defaultRTSA' ||
-        obj.key === 'mc_defaultRTPU' ||
-        obj.key === 'mc_defaultRTMF' ||
-        obj.key === 'mc_defaultRTFI' ||
-        obj.key === 'mc_defaultRTTAX' ||
-        obj.key === 'baseMetalCuId' ||
-        obj.key === 'baseSalesMetalId'
-      )
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setInitialValues(myObject)
-  }
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
-    onSubmit: values => {
-      postMcDefault(values)
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    onSubmit: async obj => {
+      const data = Object.entries(obj).map(([key, value]) => ({ key, value }))
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Edited)
     }
   })
 
-  const postMcDefault = obj => {
-    var data = []
-
-    Object.entries(obj).forEach(([key, value]) => {
-      const newObj = { key: key, value: value }
-      data.push(newObj)
+  useEffect(() => {
+    const updated = {}
+    defaultsData.list.forEach(obj => {
+      if (arrayAllow.includes(obj.key)) {
+        updated[obj.key] = obj.value ? parseFloat(obj.value) : null
+        formik.setFieldValue(obj.key, updated[obj.key])
+      }
     })
-    postRequest({
-      extension: SystemRepository.Defaults.set,
-      record: JSON.stringify({ sysDefaults: data })
-    }).then(res => {
-      if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
-    })
-  }
-
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
+  }, [defaultsData])
 
   const isReadOnly = key => {
     const item = defaultsData?.list?.find(obj => obj.key === key)
 
-    return item && item?.value != null && item?.value !== ''
+    return item && item.value != null && item.value !== ''
   }
+
+  const rateTypeFields = [
+    { name: 'mc_defaultRTSA', label: _labels.mc_defaultRTSA },
+    { name: 'mc_defaultRTPU', label: _labels.mc_defaultRTPU },
+    { name: 'mc_defaultRTMF', label: _labels.mc_defaultRTMF },
+    { name: 'mc_defaultRTFI', label: _labels.mc_defaultRTFI },
+    { name: 'mc_defaultRTTAX', label: _labels.mc_defaultRTTAX }
+  ]
 
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={4} sx={{ pl: '10px', pt: '10px' }} xs={12}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTSA'
-              label={_labels.mc_defaultRTSA}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTSA', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTSA && Boolean(formik.errors.mc_defaultRTSA)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTPU'
-              label={_labels.mc_defaultRTPU}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTPU', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTPU && Boolean(formik.errors.mc_defaultRTPU)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTMF'
-              label={_labels.mc_defaultRTMF}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTMF', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTMF && Boolean(formik.errors.mc_defaultRTMF)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTFI'
-              label={_labels.mc_defaultRTFI}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTFI', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTFI && Boolean(formik.errors.mc_defaultRTFI)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={MultiCurrencyRepository.RateType.qry}
-              name='mc_defaultRTTAX'
-              label={_labels.mc_defaultRTTAX}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mc_defaultRTTAX', newValue?.recordId || '')
-              }}
-              error={formik.touched.mc_defaultRTTAX && Boolean(formik.errors.mc_defaultRTTAX)}
-            />
-          </Grid>
+        <Grid container spacing={4} sx={{ p: 2 }}>
+          {rateTypeFields.map(({ name, label }) => (
+            <Grid item xs={12} key={name}>
+              <ResourceComboBox
+                endpointId={MultiCurrencyRepository.RateType.qry}
+                name={name}
+                label={label}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue(name, newValue?.recordId || null)}
+                error={formik.touched[name] && Boolean(formik.errors[name])}
+              />
+            </Grid>
+          ))}
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={SystemRepository.Currency.qry}
@@ -190,9 +99,7 @@ const MCDefault = ({ _labels }) => {
                 { key: 'name', value: 'Name' }
               ]}
               values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('baseMetalCuId', newValue?.recordId || '')
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('baseMetalCuId', newValue?.recordId || null)}
               error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
               readOnly={isReadOnly('baseMetalCuId')}
             />
@@ -205,9 +112,7 @@ const MCDefault = ({ _labels }) => {
               valueField='recordId'
               displayField='reference'
               values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('baseSalesMetalId', newValue?.recordId || '')
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('baseSalesMetalId', newValue?.recordId || null)}
               error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
               readOnly={isReadOnly('baseSalesMetalId')}
             />
@@ -215,7 +120,7 @@ const MCDefault = ({ _labels }) => {
         </Grid>
       </Grow>
       <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
+        <WindowToolbar onSave={formik.handleSubmit} isSaved />
       </Fixed>
     </VertLayout>
   )
