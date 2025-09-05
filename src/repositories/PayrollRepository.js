@@ -24,5 +24,11 @@ export const PayrollRepository = {
     get: service + 'getSB',
     set: service + 'setSB',
     del: service + 'delSB'
+  },
+  TimeCodes: {
+    page: service + 'pageTC',
+    get: service + 'getTC',
+    set: service + 'setTC',
+    del: service + 'delTC'
   }
 }
