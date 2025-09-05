@@ -123,7 +123,7 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 valueField='recordId'
-                displayField={'name'}
+                displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
