@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -14,17 +14,21 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const EntitlementsTab = ({ store, labels, maxAccess }) => {
+const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const [maxSeqNo, setMaxSeqNo] = useState(0)
 
   async function fetchGridData() {
     const response = await getRequest({
       extension: EmployeeRepository.SalaryDetails.qry,
       parameters: `_salaryId=${recordId}&_type=1`
     })
+
+    const maxSeq = response.list.length > 0 ? Math.max(...response.list.map(r => r.seqNo ?? 0)) : 0
+    setMaxSeqNo(maxSeq)
 
     return response.list.map(record => ({
       ...record,
@@ -66,16 +70,18 @@ const EntitlementsTab = ({ store, labels, maxAccess }) => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj.seqNo)
   }
 
-  function openForm(recordId) {
+  function openForm(seqNo) {
     stack({
       Component: EntitlementForm,
       props: {
         labels,
         maxAccess,
-        recordId
+        salaryId: recordId,
+        seqNumbers: { current: seqNo, maxSeqNo },
+        salaryInfo: { header: salaryInfo, details: data }
       },
       width: 800,
       height: 500,
@@ -102,7 +108,7 @@ const EntitlementsTab = ({ store, labels, maxAccess }) => {
           name='entitlementsTable'
           columns={columns}
           gridData={{ list: data }}
-          rowId={['recordId']}
+          rowId='salaryId'
           onEdit={edit}
           onDelete={del}
           maxAccess={maxAccess}

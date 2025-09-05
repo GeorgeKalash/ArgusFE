@@ -7,6 +7,7 @@ import DeductionsTab from '../forms/DeductionsTab'
 
 export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo }) {
   const [activeTab, setActiveTab] = useState(0)
+  const [salaryInfo, setSalaryInfo] = useState({})
 
   const [store, setStore] = useState({
     recordId,
@@ -15,7 +16,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
 
   const tabs = [
     { label: labels.salary },
-    { label: labels.entitlements, disabled: !store.recordId },
+    { label: labels.entitlement, disabled: !store.recordId },
     { label: labels.deductions, disabled: !store.recordId }
   ]
 
@@ -29,10 +30,11 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           setStore={setStore}
           store={store}
           employeeInfo={employeeInfo}
+          setSalaryInfo={setSalaryInfo}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} />
+        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
         <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} />

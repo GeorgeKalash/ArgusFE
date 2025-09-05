@@ -19,7 +19,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 
-export default function SalaryTab({ labels, maxAccess, store, setStore, employeeInfo }) {
+export default function SalaryTab({ labels, maxAccess, store, setStore, employeeInfo, setSalaryInfo }) {
   const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -46,7 +46,6 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
       eAmount: '',
       dAmount: ''
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
       scrId: yup.string().required(),
@@ -148,6 +147,7 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
           parameters: `_recordId=${recordId}`
         })
         formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
+        setSalaryInfo({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
         setStore(prevStore => ({
           ...prevStore,
           currency: res?.record?.currencyRef

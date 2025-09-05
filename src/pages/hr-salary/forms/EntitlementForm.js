@@ -15,8 +15,10 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { DataSets } from 'src/resources/DataSets'
+import { calculateFixed } from 'src/utils/payroll'
 
-export default function EntitlementForm({ labels, maxAccess, recordId }) {
+export default function EntitlementForm({ labels, maxAccess, salaryId, seqNumbers, salaryInfo, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -27,43 +29,73 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
+      salaryId,
+      seqNo: seqNumbers?.current,
       includeInTotal: false,
       edId: null,
       isPct: false,
-      fixedAmount: 0,
+      fixedAmount: null,
       pct: 0,
       comments: '',
       isTaxable: false,
       edCalcType: null
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       edId: yup.string().required(),
       fixedAmount: yup.string().required(),
       edCalcType: yup.string().required()
     }),
-    onSubmit: async values => {}
+    onSubmit: async obj => {
+      const newObj = {
+        ...obj,
+        seqNo: seqNumbers?.current || (seqNumbers?.maxSeqNo || 0) + 1
+      }
+      const updatedDetails = [...(salaryInfo?.details || []).filter(d => d.seqNo !== newObj.seqNo), newObj]
+
+      await postRequest({
+        extension: EmployeeRepository.SalaryDetails.set2,
+        record: JSON.stringify({
+          salary: salaryInfo?.header,
+          salaryDetails: updatedDetails
+        })
+      })
+      const actionMessage = obj.salaryId ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      window.close()
+      invalidate()
+    }
   })
 
-  const editMode = !!formik.values.recordId
+  const editMode = !!formik.values.salaryId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (salaryId && seqNumbers?.current) {
+        const res = await getRequest({
+          extension: EmployeeRepository.SalaryDetails.get,
+          parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
+        })
+        formik.setValues(res?.record)
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Machines}
+      form={formik}
+      maxAccess={maxAccess}
+      isCleared={false}
+      isInfo={false}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={EmployeeRepository.EmployeeDeduction.qry}
               name='edId'
-              label={labels.entitlements}
+              label={labels.entitlement}
               valueField='recordId'
               displayField='name'
               values={formik.values}
@@ -88,7 +120,11 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
             <CustomCheckBox
               name='isPct'
               value={formik.values?.isPct}
-              onChange={event => formik.setFieldValue('isPct', event.target.checked)}
+              onChange={event => {
+                formik.setFieldValue('isPct', event.target.checked)
+                if (event.target.checked) formik.setFieldValue('fixedAmount', 0)
+                else formik.setFieldValue('pct', 0)
+              }}
               label={labels.isPct}
               maxAccess={maxAccess}
             />
@@ -98,7 +134,13 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
               name='pct'
               label={labels.pct}
               value={formik.values.pct}
-              onChange={formik.handleChange}
+              readOnly={!formik.values.isPct}
+              onBlur={e => {
+                let pctValue = Number(e.target.value)
+                formik.setFieldValue('pct', pctValue)
+                const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
+                formik.setFieldValue('fixedAmount', amount)
+              }}
               onClear={() => formik.setFieldValue('pct', 0)}
               error={formik.touched.pct && Boolean(formik.errors.pct)}
             />
@@ -110,7 +152,8 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
               value={formik.values.fixedAmount}
               onChange={formik.handleChange}
               required
-              onClear={() => formik.setFieldValue('fixedAmount', 0)}
+              readOnly={formik.values.isPct}
+              onClear={() => formik.setFieldValue('fixedAmount', null)}
               error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
             />
           </Grid>
@@ -138,15 +181,16 @@ export default function EntitlementForm({ labels, maxAccess, recordId }) {
           </Grid>
           <Grid item xs={12}>
             <ResourceComboBox
-              endpointId={ManufacturingRepository.Operation.qry}
+              datasetId={DataSets.ED_CALC_TYPE}
               name='edCalcType'
-              label={labels.edCalcType}
-              valueField='recordId'
-              displayField='name'
+              label={labels.calculationType}
+              valueField='key'
+              displayField='value'
               values={formik.values}
+              maxAccess={maxAccess}
               required
               onChange={(event, newValue) => {
-                formik.setFieldValue('edCalcType', newValue?.recordId || null)
+                formik.setFieldValue('edCalcType', newValue?.key || null)
               }}
               error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
             />
