@@ -24,6 +24,7 @@ import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useError } from 'src/error'
+import Installments from './Installments'
 
 function LoadingOverlay() {
   return (
@@ -341,6 +342,25 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 resourceId,
                 functionId
+              }
+            })
+          }
+          break
+        case 'onClickInstallments':
+          action.onClick = () => {
+            stack({
+              Component: Installments,
+              props: {
+                recordId: form.values?.recordId,
+                data: form.values,
+                onOk: ({ installments }) => {
+                  form.setValues(prevValues => ({
+                    ...prevValues,
+                    installments
+                  }))
+
+                  console.log(form)
+                }
               }
             })
           }

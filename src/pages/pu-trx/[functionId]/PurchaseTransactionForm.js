@@ -274,12 +274,25 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           }
         })
 
+      const installments = obj.installments.map((installment, index) => {
+        return {
+          ...installment,
+          id: index + 1,
+          seqNo: index + 1,
+          reference: obj?.header?.reference,
+          vendorId: obj?.header?.vendorId,
+          invoiceId: formik?.values?.recordId || 0,
+          currencyId: obj?.header?.currencyId
+        }
+      })
+
       const payload = {
         header: {
           ...obj.header,
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
+        installments,
         items: updatedRows,
         serials: serialsValues,
         taxCodes: [
@@ -730,6 +743,42 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     return metalItemsList || []
   }
 
+  async function verifyRecord() {
+    const copy = { ...formik.values.header, isVerified: !formik.values.header.isVerified }
+    delete copy.items
+    await postRequest({
+      extension: PurchaseRepository.PurchaseInvoiceHeader.verify,
+      record: JSON.stringify(copy)
+    })
+
+    toast.success(!formik.values.header.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    refetchForm(formik.values.header.recordId)
+    invalidate()
+  }
+
+  async function syncRecord() {
+    const { header, items, installments, ...rest } = formik.values
+
+    const serials = items.flatMap(item => item.serials || [])
+
+    const record = {
+      ...rest,
+      header,
+      items,
+      installments,
+      serials
+    }
+
+    await postRequest({
+      extension: PurchaseRepository.Serials.sync,
+      record: JSON.stringify(record)
+    })
+
+    toast.success(platformLabels.syncedSuccessfully)
+    refetchForm(formik.values.header.recordId)
+    invalidate()
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -787,6 +836,36 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       condition: true,
       onClick: onClick,
       disabled: !editMode
+    },
+    {
+      key: 'Installments',
+      condition: true,
+      onClick: 'onClickInstallments',
+      disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: formik.values.header.isVerified || !editMode || !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.header.isVerified,
+      onClick: verifyRecord,
+      disabled: !formik.values.header.isVerified
+    },
+    {
+      key: 'Sync',
+      condition: true,
+      onClick: syncRecord,
+      disabled: !editMode || isPosted
+    },
+    {
+      key: 'Attachment',
+      condition: true,
+      onClick: 'onClickAttachment',
+      disabled: !editMode
     }
   ]
 
@@ -795,6 +874,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxItems = puTrxPack?.items
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
+    const puTrxInstallments = puTrxPack?.installments
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -839,6 +919,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
+      installments: puTrxInstallments?.map((installment, index) => {
+        return {
+          ...installment,
+          id: index,
+          dueDate: formatDateFromApi(installment.dueDate)
+        }
+      }),
       header: {
         ...formik.values.header,
         ...puTrxHeader,
@@ -882,7 +969,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         )}&_rateDivision=${RateDivision.PURCHASE}`
       })
 
-      return res.record.exRate * 1000
+      return res?.record?.exRate * 1000
     }
   }
 
