@@ -358,8 +358,6 @@ export default function FormShell({
                     ...prevValues,
                     installments
                   }))
-
-                  console.log(form)
                 }
               }
             })
