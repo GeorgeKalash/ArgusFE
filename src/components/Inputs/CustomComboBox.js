@@ -89,7 +89,20 @@ const CustomComboBox = ({
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
-            .map(header => (option[header] ? option[header]?.toString() : header === '->' && header))
+            .map(header => {
+              if (typeof header === 'string') {
+                return option[header] ? option[header].toString() : header === '->' ? header : ''
+              }
+
+              if (typeof header === 'object' && header?.name) {
+                let value = option[header.name]
+                if (!value) return ''
+
+                return header.type === 'date' ? formatDateDefault(value) : value.toString()
+              }
+
+              return ''
+            })
             ?.filter(item => item)
             ?.join(' ')
           if (text !== undefined) return text
