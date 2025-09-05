@@ -181,6 +181,7 @@ const LoginPage = () => {
                     onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
                     helperText={validation.touched.username && validation.errors.username}
+                    autoComplete='on'
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -194,6 +195,7 @@ const LoginPage = () => {
                     onChange={validation.handleChange}
                     error={validation.touched.password && validation.errors.password}
                     helperText={validation.touched.password && validation.errors.password}
+                    autoComplete='on'
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position='end'>
