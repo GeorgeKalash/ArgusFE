@@ -136,7 +136,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           <Grid item xs={3}>
             <CustomNumberField
               name='startAt'
-              label={''}
               value={formik.values.startAt}
               required
               maxLength={4}
@@ -152,7 +151,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
             <ResourceComboBox
               datasetId={DataSets.ACCRUAL_PERIOD}
               name='period'
-              label={''}
               values={formik.values}
               valueField='key'
               displayField='value'
@@ -173,7 +171,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           <Grid item xs={3}>
             <CustomNumberField
               name='amount'
-              label={''}
               value={formik.values.amount}
               required
               maxLength={10}
@@ -189,7 +186,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
             <ResourceComboBox
               datasetId={DataSets.ACCRUAL_ACCUMULATION}
               name='accumulation'
-              label={''}
               values={formik.values}
               valueField='key'
               displayField='value'
@@ -209,7 +205,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           <Grid item xs={3}>
             <CustomNumberField
               name='maxAmount'
-              label={''}
               value={formik.values.maxAmount}
               required
               maxLength={4}
@@ -230,7 +225,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
             <ResourceComboBox
               datasetId={DataSets.ACCRUAL_CARRY_OVER}
               name='carryOver'
-              label={''}
               values={formik.values}
               valueField='key'
               displayField='value'
@@ -247,7 +241,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           <Grid item xs={3}>
             <CustomNumberField
               name='carryOverMax'
-              label={''}
               value={formik.values.carryOverMax}
               maxAccess={maxAccess}
               maxLength={4}
@@ -271,7 +264,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
             <ResourceComboBox
               datasetId={DataSets.ACCRUAL_ACTIVATION}
               name='accrualActivation'
-              label={''}
               values={formik.values}
               valueField='key'
               displayField='value'

@@ -22,7 +22,7 @@ const HRLeaveSchedule = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: LoanManagementRepository.LeaveSchedule.page,
+      extension: LoanManagementRepository.LeaveScheduleFilters.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const HRLeaveSchedule = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanManagementRepository.LeaveSchedule.page,
+    endpointId: LoanManagementRepository.LeaveScheduleFilters.page,
     datasetId: ResourceIds.LeaveSchedule
   })
 
@@ -79,7 +79,7 @@ const HRLeaveSchedule = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: LoanManagementRepository.LeaveSchedule.del,
+      extension: LoanManagementRepository.LeaveScheduleFilters.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

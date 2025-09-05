@@ -34,7 +34,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: LoanManagementRepository.LeaveSchedule.page
+    endpointId: LoanManagementRepository.LeaveScheduleFilters.page
   })
 
   const { formik } = useForm({
@@ -62,7 +62,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     }),
     onSubmit: values => {
       postRequest({
-        extension: LoanManagementRepository.LeaveSchedule.set,
+        extension: LoanManagementRepository.LeaveScheduleFilters.set,
         record: JSON.stringify(values)
       }).then(res => {
         formik.setFieldValue('recordId', res.recordId)
@@ -85,7 +85,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: LoanManagementRepository.LeaveSchedule.get,
+          extension: LoanManagementRepository.LeaveScheduleFilters.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -134,7 +134,7 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
 
         <Grid item xs={12}>
           <ResourceComboBox
-            endpointId={LoanManagementRepository.LeaveType.qry}
+            endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
             filter={item => item.isPaid}
             name='ltId'
             label={labels.ltId}
