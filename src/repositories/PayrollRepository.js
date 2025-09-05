@@ -24,5 +24,11 @@ export const PayrollRepository = {
     get: service + 'getSB',
     set: service + 'setSB',
     del: service + 'delSB'
+  },
+  SalaryBatch: {
+    page: service + 'pageBAT',
+    get: service + 'getBAT',
+    set: service + 'setBAT',
+    del: service + 'delBAT'
   }
 }
