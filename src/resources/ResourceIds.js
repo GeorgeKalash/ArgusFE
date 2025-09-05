@@ -559,6 +559,7 @@ export const ResourceIds = {
   LeaveRequest: 73209,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
+  RepairName: 45108,
 
   // GL
   GLSalesInvoice: 51604,
