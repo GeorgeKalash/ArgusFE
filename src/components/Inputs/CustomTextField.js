@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { checkAccess } from 'src/lib/maxAccess'
 
@@ -53,6 +53,8 @@ const CustomTextField = ({
 
   const handleInput = e => {
     const inputValue = e.target.value
+    e.target.name = name
+
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
@@ -88,6 +90,8 @@ const CustomTextField = ({
     }
   }, [autoFocus, inputRef.current, value])
 
+  const section = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [])
+
   return _hidden ? (
     <></>
   ) : (
@@ -105,13 +109,18 @@ const CustomTextField = ({
       onBlur={() => {
         setIsFocused(false), setFocus(false)
       }}
+      autoComplete
       inputProps={{
+        name: autoComplete === 'new-password' ? section : name,
         autoComplete,
         readOnly: _readOnly,
         maxLength: maxLength,
         dir: dir,
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
+        autoCorrect: 'off',
+        autoCapitalize: 'none',
+        spellCheck: 'false',
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
@@ -120,7 +129,6 @@ const CustomTextField = ({
         tabIndex: _readOnly ? -1 : 0,
         'data-search': search ? 'true' : 'false'
       }}
-      autoComplete={autoComplete}
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
