@@ -19,6 +19,9 @@ export const PayrollRepository = {
     set: service + 'setGLG',
     del: service + 'delGLG'
   },
+  Arguments: {
+    page: service + 'pageAR',
+  },
   CnssBranches: {
     page: service + 'pageSB',
     get: service + 'getSB',
