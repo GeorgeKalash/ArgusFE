@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -10,10 +11,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import WarehouseForm from './form/WarehouseForm'
+import SalaryBatchForm from './forms/SalaryBatchForm'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
 
-const Warehouse = () => {
+const SalaryBatch = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +23,7 @@ const Warehouse = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.Warehouse.page,
+      extension: PayrollRepository.SalaryBatch.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,24 +39,19 @@ const Warehouse = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.Warehouse.page,
-    datasetId: ResourceIds.Warehouse
+    endpointId: PayrollRepository.SalaryBatch.page,
+    datasetId: ResourceIds.SalaryBatch
   })
 
   const columns = [
     {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
       field: 'name',
       headerName: labels.name,
-      flex: 1
-    },
-    {
-      field: 'siteRef',
-      headerName: labels.siteRef,
-      flex: 1
-    },
-    {
-      field: 'siteName',
-      headerName: labels.siteName,
       flex: 1
     }
   ]
@@ -70,7 +66,7 @@ const Warehouse = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.Warehouse.del,
+      extension: PayrollRepository.SalaryBatch.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -79,7 +75,7 @@ const Warehouse = () => {
 
   function openForm(recordId) {
     stack({
-      Component: WarehouseForm,
+      Component: SalaryBatchForm,
       props: {
         labels,
         recordId,
@@ -87,7 +83,7 @@ const Warehouse = () => {
       },
       width: 600,
       height: 250,
-      title: labels.warehouse
+      title: labels.salaryBatch
     })
   }
 
@@ -115,4 +111,4 @@ const Warehouse = () => {
   )
 }
 
-export default Warehouse
+export default SalaryBatch
