@@ -1,3 +1,5 @@
+import SalaryBatch from 'src/pages/hr-salary-batch'
+
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -555,9 +557,12 @@ export const ResourceIds = {
   DayTypes: 72104,
   GenerateTransfers: 46600,
   GenerateConsumption: 46601,
+  PayrollSettings: 75113,
+  LeaveReturn: 73203,
   LeaveRequest: 73209,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
+  RepairType: 45109,
 
   // GL
   GLSalesInvoice: 51604,
@@ -622,6 +627,7 @@ export const ResourceIds = {
   MCRServiceBillReceived: 31621,
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
+  SalaryBatch: 75115,
 
   // Address
   ADDBPMasterData: 21600,
