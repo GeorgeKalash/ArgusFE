@@ -23,11 +23,21 @@ export const LoanManagementRepository = {
   },
   LeaveRequest: {
     page: service + 'pageLR',
+    qry: service + 'qryLR',
     set: service + 'setLR',
     get: service + 'getLR',
     del: service + 'delLR',
     snapshot: service + 'snapshotLR',
     close: service + 'closeLR',
     reopen: service + 'reopenLR'
+  },
+  LeaveReturn: {
+    page: service + 'pageRE',
+    set: service + 'setRE',
+    get: service + 'getRE',
+    del: service + 'delRE',
+    snapshot: service + 'snapshotRE',
+    close: service + 'closeRE',
+    reopen: service + 'reopenRE'
   }
 }
