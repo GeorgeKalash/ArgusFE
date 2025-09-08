@@ -18,14 +18,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getRT',
     set: service + 'setRT',
     del: service + 'delRT'
-<<<<<<< HEAD:src/repositories/RepairRepository.js
   },
   PreventiveMaintenanceTasks: {
     page: service + 'pagePMT',
     get: service + 'getPMT',
     set: service + 'setPMT',
     del: service + 'delPMT'
-=======
->>>>>>> master:src/repositories/RepairAndServiceRepository.js
   }
 }

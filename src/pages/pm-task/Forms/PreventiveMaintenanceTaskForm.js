@@ -11,14 +11,14 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
-export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recordId }) {
+export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.PreventiveMaintenanceTasks.page
+    endpointId: RepairAndServiceRepository.PreventiveMaintenanceTasks.page
   })
 
   const { formik } = useForm({
@@ -32,13 +32,14 @@ export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recor
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairRepository.PreventiveMaintenanceTasks.set,
+        extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       invalidate()
+      window.close()
     }
   })
   const editMode = !!formik.values.recordId
@@ -47,7 +48,7 @@ export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recor
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.PreventiveMaintenanceTasks.get,
+          extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)

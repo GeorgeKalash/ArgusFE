@@ -10,8 +10,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
 import PreventiveMaintenanceTaskForm from './Forms/PreventiveMaintenanceTaskForm'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 export default function PreventiveMaintenanceTask() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,7 +22,7 @@ export default function PreventiveMaintenanceTask() {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.PreventiveMaintenanceTasks.page,
+      extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ export default function PreventiveMaintenanceTask() {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.PreventiveMaintenanceTasks.page,
+    endpointId: RepairAndServiceRepository.PreventiveMaintenanceTasks.page,
     datasetId: ResourceIds.PreventiveMaintenanceTasks
   })
 
@@ -74,7 +74,7 @@ export default function PreventiveMaintenanceTask() {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.PreventiveMaintenanceTasks.del,
+      extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)
