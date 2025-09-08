@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -7,85 +7,89 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { Grid } from '@mui/material'
 import DeductionsForm from './DeductionsForm'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
-const DeductionsTab = ({ store, labels, maxAccess, setStore }) => {
-  const { getRequest } = useContext(RequestsContext)
-  const { recordId, items } = store
+const DeductionsTab = ({ store, labels, maxAccess, salaryInfo }) => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId } = store
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+  const [maxSeqNo, setMaxSeqNo] = useState(0)
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: SaleRepository.PriceListItem.qry,
-      parameters: `_pluId=${recordId}&_itemId=0`
+      extension: EmployeeRepository.SalaryDetails.qry,
+      parameters: `_salaryId=${recordId}&_type=2`
     })
 
-    setStore(prevStore => ({
-      ...prevStore,
-      items: response?.count == 0 ? items : response
-    }))
+    const maxSeq = response.list.length > 0 ? Math.max(...response.list.map(r => r.seqNo ?? 0)) : 0
+    setMaxSeqNo(maxSeq)
 
-    return response
+    return response.list.map(record => ({
+      ...record,
+      currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,
+      pct: record?.pct ? `${parseFloat(record.pct).toFixed(2)}%` : null
+    }))
   }
 
   const {
     query: { data },
-    search,
-    clear,
-    labels: _labels
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
-    datasetId: ResourceIds.PriceListUpdates,
+    datasetId: ResourceIds.Salaries,
     queryFn: fetchGridData,
-    endpointId: SaleRepository.PriceListItem.qry
+    endpointId: EmployeeRepository.SalaryDetails.qry
   })
 
   const columns = [
     {
-      field: 'deductions',
+      field: 'edName',
       headerName: labels.deductions,
       flex: 1
     },
     {
-      field: 'percentage',
+      field: 'pct',
       headerName: labels.percentage,
       flex: 1
     },
     {
-      field: 'amount',
+      field: 'currencyAmount',
       headerName: labels.amount,
       flex: 1
     }
   ]
-
-  const list = data || items
 
   const add = () => {
     openForm()
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj.seqNo)
   }
 
-  function openForm(recordId) {
+  function openForm(seqNo) {
     stack({
       Component: DeductionsForm,
       props: {
         labels,
-        maxAccess: access,
-        recordId
+        maxAccess,
+        salaryId: recordId,
+        seqNumbers: { current: seqNo, maxSeqNo },
+        salaryInfo: { header: salaryInfo, details: data }
       },
-      width: 500,
-      height: 250,
-      title: labels.deductions
+      width: 800,
+      height: 500,
+      title: labels.entitlements
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: AccessControlRepository.NotificationLabel.del,
+      extension: EmployeeRepository.SalaryDetails.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -95,18 +99,14 @@ const DeductionsTab = ({ store, labels, maxAccess, setStore }) => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={6}>
-            <GridToolbar onAdd={add} maxAccess={maxAccess} labels={_labels} />
-          </Grid>
-        </Grid>
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
         <Table
-          name='deductionsTable'
+          name='deductionTable'
           columns={columns}
-          gridData={list}
-          rowId={['recordId']}
+          gridData={{ list: data }}
+          rowId='salaryId'
           onEdit={edit}
           onDelete={del}
           maxAccess={maxAccess}

@@ -37,7 +37,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
         <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} />
+        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} />
       </CustomTabPanel>
     </>
   )

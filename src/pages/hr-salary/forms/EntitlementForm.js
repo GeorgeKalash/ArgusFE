@@ -16,7 +16,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { DataSets } from 'src/resources/DataSets'
-import { calculateFixed } from 'src/utils/payroll'
+import { calculateFixed } from 'src/utils/Payroll'
 
 export default function EntitlementForm({ labels, maxAccess, salaryId, seqNumbers, salaryInfo, window }) {
   const { platformLabels } = useContext(ControlContext)
