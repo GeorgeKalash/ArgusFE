@@ -18,5 +18,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getRT',
     set: service + 'setRT',
     del: service + 'delRT'
+  },
+  Department: {
+    page: service + 'pageDEP',
+    get: service + 'getDEP',
+    set: service + 'setDEP',
+    del: service + 'delDEP'
   }
 }
