@@ -566,6 +566,7 @@ export const ResourceIds = {
   WorkOrderTypes: 75101,
   RepairType: 45109,
   TimeCodes: 75102,
+  SpManufacturer: 45110,
 
   // GL
   GLSalesInvoice: 51604,
