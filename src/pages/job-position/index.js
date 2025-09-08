@@ -10,7 +10,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import JobPositionForm from './form/JobPositionForm'
 
 const JobPosition = () => {
@@ -22,7 +22,7 @@ const JobPosition = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.JobPosition.page,
+      extension: RepairAndServiceRepository.JobPosition.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,7 +38,7 @@ const JobPosition = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.JobPosition.page,
+    endpointId: RepairAndServiceRepository.JobPosition.page,
     datasetId: ResourceIds.JobPosition
   })
 
@@ -70,7 +70,7 @@ const JobPosition = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.JobPosition.del,
+      extension: RepairAndServiceRepository.JobPosition.del,
       record: JSON.stringify(obj)
     })
     invalidate()

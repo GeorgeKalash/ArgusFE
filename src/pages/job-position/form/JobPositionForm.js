@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function JobPositionForm({ labels, maxAccess, recordId }) {
@@ -19,7 +19,7 @@ export default function JobPositionForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.JobPosition.page
+    endpointId: RepairAndServiceRepository.JobPosition.page
   })
 
   const { formik } = useForm({
@@ -37,7 +37,7 @@ export default function JobPositionForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairRepository.JobPosition.set,
+        extension: RepairAndServiceRepository.JobPosition.set,
         record: JSON.stringify(obj)
       })
 
@@ -52,7 +52,7 @@ export default function JobPositionForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.JobPosition.get,
+          extension: RepairAndServiceRepository.JobPosition.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
