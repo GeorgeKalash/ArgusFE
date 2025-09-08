@@ -1,4 +1,5 @@
 import SalaryBatch from 'src/pages/hr-salary-batch'
+import JobPosition from 'src/pages/job-position'
 
 export const ResourceIds = {
   //Dashboard
@@ -564,7 +565,8 @@ export const ResourceIds = {
   CnssBranches: 75111,
   WorkOrderTypes: 75101,
   RepairType: 45109,
-  
+  JobPosition: 45103,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
