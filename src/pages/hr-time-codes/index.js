@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -9,13 +8,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import TimeCodesForm from './forms/TimeCodesForm'
 
 const TimeCodes = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -34,7 +31,6 @@ const TimeCodes = () => {
     labels,
     paginationParameters,
     refetch,
-    invalidate,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,

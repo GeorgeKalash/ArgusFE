@@ -16,7 +16,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function TimeCodesForm({ labels, maxAccess, recordId }) {
+export default function TimeCodesForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -45,6 +45,7 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
       })
 
       toast.success(platformLabels.Edited)
+      window.close()
       invalidate()
     }
   })
@@ -68,8 +69,6 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
-  console.log(formik)
-
   return (
     <FormShell
       resourceId={ResourceIds.TimeCodes}
@@ -91,7 +90,8 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('industry', newValue?.key || '')
+                  formik.setFieldValue('edType', newValue?.key || null)
+                  formik.setFieldValue('edId', null)
                 }}
                 error={formik.touched.edType && Boolean(formik.errors.edType)}
               />
@@ -107,7 +107,7 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('recordId', newValue?.key || '')
+                  formik.setFieldValue('recordId', newValue?.key || null)
                 }}
                 error={formik.touched.recordId && Boolean(formik.errors.recordId)}
               />
@@ -116,6 +116,7 @@ export default function TimeCodesForm({ labels, maxAccess, recordId }) {
               <ResourceComboBox
                 endpointId={EmployeeRepository.EmployeeDeduction.qry}
                 parameters={`_filter=&_size=30&_startAt=0`}
+                filter={item => item.type == formik.values.edType}
                 name='edId'
                 label={labels.entDed}
                 columnsInDropDown={[
