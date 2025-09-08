@@ -1,28 +1,25 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
-import WorkOrderTypesForm from './Forms/WorkOrderTypesForm'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+import { useWindow } from 'src/windows'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import TimeCodesForm from './forms/TimeCodesForm'
 
-const WorkOrderTypes = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+const TimeCodes = () => {
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.WorkOrderTypes.page,
+      extension: PayrollRepository.TimeCodes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -32,59 +29,56 @@ const WorkOrderTypes = () => {
   const {
     query: { data },
     labels,
-    invalidate,
     paginationParameters,
     refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.WorkOrderTypes.page,
-    datasetId: ResourceIds.WorkOrderTypes
+    endpointId: PayrollRepository.TimeCodes.page,
+    datasetId: ResourceIds.TimeCodes
   })
 
   const columns = [
     {
       field: 'name',
-      headerName: labels.name,
+      headerName: labels.TimeCode,
+      flex: 1
+    },
+    {
+      field: 'edName',
+      headerName: labels.entDed,
+      flex: 1
+    },
+    {
+      field: 'edTypeName',
+      headerName: labels.type,
+      flex: 1
+    },
+    {
+      field: 'gracePeriod',
+      headerName: labels.gracePeriod,
       flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
-  const del = async obj => {
-    await postRequest({
-      extension: RepairAndServiceRepository.WorkOrderTypes.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(recordId) {
+  const edit = obj => {
     stack({
-      Component: WorkOrderTypesForm,
+      Component: TimeCodesForm,
       props: {
         labels,
-        recordId,
+        recordId: obj?.timeCode,
         maxAccess: access
       },
       width: 500,
-      height: 250,
-      title: labels.WorkOrderTypes
+      height: 320,
+      title: labels.timeCode
     })
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -93,11 +87,10 @@ const WorkOrderTypes = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -105,4 +98,4 @@ const WorkOrderTypes = () => {
   )
 }
 
-export default WorkOrderTypes
+export default TimeCodes

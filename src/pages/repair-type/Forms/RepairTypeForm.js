@@ -11,14 +11,14 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 export default function RepairTypeForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.RepairType.page
+    endpointId: RepairAndServiceRepository.RepairType.page
   })
 
   const { formik } = useForm({
@@ -32,7 +32,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairRepository.RepairType.set,
+        extension: RepairAndServiceRepository.RepairType.set,
         record: JSON.stringify(obj)
       })
 
@@ -48,7 +48,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.RepairType.get,
+          extension: RepairAndServiceRepository.RepairType.get,
           parameters: `_recordId=${recordId}`
         })
 
