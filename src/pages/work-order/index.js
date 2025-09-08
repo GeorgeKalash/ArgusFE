@@ -9,9 +9,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import MetalsWindows from './Window/WorkOrderWindow'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import WorkOrderWindow from './Window/WorkOrderWindow'
 
 const WorkOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +25,7 @@ const WorkOrder = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.WorkOrder.page,
+      extension: RepairAndServiceRepository.WorkOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -32,37 +34,58 @@ const WorkOrder = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels: labels,
     invalidate,
     refetch,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.WorkOrder.page,
-    datasetId: ResourceIds.Metals
+    endpointId: RepairAndServiceRepository.WorkOrder.page,
+    datasetId: ResourceIds.WorkOrder
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'purity',
-      headerName: _labels.purity,
+      field: 'equipmentName',
+      headerName: labels.equipment,
       flex: 1
     },
     {
-      field: 'currencyRef',
-      headerName: _labels.currency,
+      field: 'wotName',
+      headerName: labels.type,
+      flex: 1
+    },
+    {
+      field: 'priorityName',
+      headerName: labels.priority,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'progressName',
+      headerName: labels.progress,
       flex: 1
     }
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.JobOrder,
+    functionId: SystemFunction.WorkOrder,
     action: openForm
   })
 
@@ -76,7 +99,7 @@ const WorkOrder = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.WorkOrder.del,
+      extension: RepairAndServiceRepository.WorkOrder.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -86,15 +109,15 @@ const WorkOrder = () => {
 
   function openForm(recordId) {
     stack({
-      Component: MetalsWindows,
+      Component: WorkOrderWindow,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 1000,
-      height: 600,
-      title: _labels.metals
+      height: 750,
+      title: labels.metals
     })
   }
 

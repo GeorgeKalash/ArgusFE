@@ -2,6 +2,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import WorkOrderForm from '../forms/WorkOrderForm'
+import TaskList from '../forms/TaskList'
 
 const WorkOrderWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -19,7 +20,7 @@ const WorkOrderWindow = ({ recordId, labels, maxAccess }) => {
         <WorkOrderForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        {/* <ScrapForm labels={labels} maxAccess={maxAccess} store={store} /> */}
+        <TaskList labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

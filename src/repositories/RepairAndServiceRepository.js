@@ -9,6 +9,7 @@ export const RepairAndServiceRepository = {
   },
   WorkOrderTypes: {
     page: service + 'pageWOT',
+    qry: service + 'qryWOT',
     get: service + 'getWOT',
     set: service + 'setWOT',
     del: service + 'delWOT'
@@ -20,9 +21,15 @@ export const RepairAndServiceRepository = {
     del: service + 'delRT'
   },
   WorkOrder: {
-    page: service + 'pageWO',
+    page: service + 'qryWO',
     get: service + 'getWO',
     set: service + 'setWO',
     del: service + 'delWO'
+  },
+  Equipment: {
+    snapshot: service + 'snapshotEQP'
+  },
+  WorkTask: {
+    qry: service + 'qryWTK'
   }
 }
