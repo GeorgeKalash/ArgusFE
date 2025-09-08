@@ -536,6 +536,7 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
   ResetTimeVariation: 72203,
   RebuildAC: 41509,
@@ -564,6 +565,7 @@ export const ResourceIds = {
   CnssBranches: 75111,
   WorkOrderTypes: 75101,
   RepairType: 45109,
+  TimeCodes: 75102,
   SpCategory: 45111,
 
   // GL
