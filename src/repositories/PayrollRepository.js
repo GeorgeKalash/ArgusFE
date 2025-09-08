@@ -13,6 +13,12 @@ export const PayrollRepository = {
   Paycode: {
     qry: service + 'qryPC'
   },
+  SecuritySchedule: {
+    qry: service + 'qrySS'
+  },
+  IndemnitySchedule: {
+    qry: service + 'qryIS'
+  },
   LedgerGroup: {
     qry: service + 'qryGLG',
     get: service + 'getGLG',

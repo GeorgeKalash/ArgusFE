@@ -6,5 +6,11 @@ export const RepairRepository = {
     get: service + 'getWOT',
     set: service + 'setWOT',
     del: service + 'delWOT',
+  },
+  RepairType: {
+    page: service + 'pageRT',
+    get: service + 'getRT',
+    set: service + 'setRT',
+    del: service + 'delRT',
   }
 }

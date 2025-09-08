@@ -556,10 +556,13 @@ export const ResourceIds = {
   DayTypes: 72104,
   GenerateTransfers: 46600,
   GenerateConsumption: 46601,
+  PayrollSettings: 75113,
+  LeaveReturn: 73203,
   LeaveRequest: 73209,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
   WorkOrderTypes: 75101,
+  RepairType: 45109,
   
   // GL
   GLSalesInvoice: 51604,
