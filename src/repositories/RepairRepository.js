@@ -5,12 +5,18 @@ export const RepairRepository = {
     page: service + 'pageWOT',
     get: service + 'getWOT',
     set: service + 'setWOT',
-    del: service + 'delWOT',
+    del: service + 'delWOT'
   },
   RepairType: {
     page: service + 'pageRT',
     get: service + 'getRT',
     set: service + 'setRT',
-    del: service + 'delRT',
+    del: service + 'delRT'
+  },
+  WorkOrder: {
+    page: service + 'pageWO',
+    get: service + 'getWO',
+    set: service + 'setWO',
+    del: service + 'delWO'
   }
 }
