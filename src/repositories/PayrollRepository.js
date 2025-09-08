@@ -13,6 +13,12 @@ export const PayrollRepository = {
   Paycode: {
     qry: service + 'qryPC'
   },
+  SecuritySchedule: {
+    qry: service + 'qrySS'
+  },
+  IndemnitySchedule: {
+    qry: service + 'qryIS'
+  },
   LedgerGroup: {
     qry: service + 'qryGLG',
     get: service + 'getGLG',
@@ -24,6 +30,12 @@ export const PayrollRepository = {
     get: service + 'getSB',
     set: service + 'setSB',
     del: service + 'delSB'
+  },
+  SalaryBatch: {
+    page: service + 'pageBAT',
+    get: service + 'getBAT',
+    set: service + 'setBAT',
+    del: service + 'delBAT'
   },
   TimeCodes: {
     page: service + 'pageTC',
