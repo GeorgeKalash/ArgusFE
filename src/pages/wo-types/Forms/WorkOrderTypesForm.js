@@ -23,6 +23,7 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
       name: '',
@@ -77,7 +78,7 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <CustomCheckBox
                 name='isPM'
                 value={formik.values?.isPM}
