@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -21,7 +21,7 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.InspectionTemplate.page
+    endpointId: RepairAndServiceRepository.InspectionTemplate.page
   })
 
   const { formik } = useForm({
@@ -58,7 +58,7 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
       }))
 
       const response = await postRequest({
-        extension: RepairRepository.InspectionTemplate.set2,
+        extension: RepairAndServiceRepository.InspectionTemplate.set2,
         record: JSON.stringify({
           header: {
             ...values
@@ -79,7 +79,7 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.InspectionTemplate.get2,
+          extension: RepairAndServiceRepository.InspectionTemplate.get2,
           parameters: `_recordId=${recordId}`
         })
 

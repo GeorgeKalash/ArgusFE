@@ -10,7 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import InspectionTemplateForm from './Form/InspectionTemplateForm'
 
 const InspectionTemplate = () => {
@@ -22,7 +22,7 @@ const InspectionTemplate = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.InspectionTemplate.page,
+      extension: RepairAndServiceRepository.InspectionTemplate.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const InspectionTemplate = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.InspectionTemplate.page,
+    endpointId: RepairAndServiceRepository.InspectionTemplate.page,
     datasetId: ResourceIds.InspectionTemplate
   })
 
@@ -56,7 +56,7 @@ const InspectionTemplate = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.InspectionTemplate.del,
+      extension: RepairAndServiceRepository.InspectionTemplate.del,
       record: JSON.stringify(obj)
     })
     invalidate()
