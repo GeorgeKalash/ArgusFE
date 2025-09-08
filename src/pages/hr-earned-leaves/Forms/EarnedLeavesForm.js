@@ -20,7 +20,6 @@ import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomButton from 'src/components/Inputs/CustomButton'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import Table from 'src/components/Shared/Table'
 
 export default function EarnedLeavesForm({ labels, access, recordId }) {
@@ -33,8 +32,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.EarnedLeaves,
-    access,
-    enabled: !recordId
+    access
   })
 
   const { formik } = useForm({
@@ -42,14 +40,13 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
     initialValues: {
       recordId,
       dtId: null,
-      reference: null,
+      reference: '',
       date: new Date(),
       lsId: null,
       status: 1,
       items: []
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
       lsId: yup.number().required()
@@ -79,7 +76,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      formik.setFieldValue('recordId', response.recordId)
+
       getData(response.recordId)
       invalidate()
     }
@@ -109,11 +106,9 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   }
 
   useEffect(() => {
-    ;(async function () {
       if (recordId) {
         getData(recordId)
       }
-    })()
   }, [])
 
   const onPost = async () => {
@@ -124,7 +119,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
 
     toast.success(platformLabels.Posted)
     invalidate()
-    refetchForm(res?.recordId)
+    getData(res?.recordId)
   }
 
   const columns = [
@@ -158,28 +153,6 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
         ...item
       })) || []
     )
-  }
-
-  async function refetchForm(recordId) {
-    const res = await getRequest({
-      extension: LoanManagementRepository.EarnedLeave.get2,
-      parameters: `_recordId=${recordId}`
-    })
-
-    formik.setFieldValue('items', [])
-    formik.setValues({
-      recordId: res?.record?.header?.recordId,
-      ...res?.record?.header,
-      date: res?.record?.header?.date ? formatDateFromApi(res?.record?.header.date) : null,
-
-      items:
-        res?.record?.items?.map((item, index) => ({
-          id: index + 1,
-          ...item
-        })) || []
-    })
-
-    return res?.record
   }
 
   const actions = [
@@ -255,7 +228,7 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
                 maxAccess={!editMode && maxAccess}
                 readOnly={editMode}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', null)}
+                onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
             </Grid>
