@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
@@ -19,7 +19,7 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.WorkOrderTypes.page
+    endpointId: RepairAndServiceRepository.WorkOrderTypes.page
   })
 
   const { formik } = useForm({
@@ -35,7 +35,7 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairRepository.WorkOrderTypes.set,
+        extension: RepairAndServiceRepository.WorkOrderTypes.set,
         record: JSON.stringify(obj)
       })
 
@@ -51,7 +51,7 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.WorkOrderTypes.get,
+          extension: RepairAndServiceRepository.WorkOrderTypes.get,
           parameters: `_recordId=${recordId}`
         })
 

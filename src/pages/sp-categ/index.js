@@ -10,7 +10,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import SpCategoryForm from './form/SpCategoryForm'
 
 const SpCategory = () => {
@@ -22,7 +22,7 @@ const SpCategory = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.SpCategory.page,
+      extension: RepairAndServiceRepository.SpCategory.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,7 +38,7 @@ const SpCategory = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.SpCategory.page,
+    endpointId: RepairAndServiceRepository.SpCategory.page,
     datasetId: ResourceIds.SpCategory
   })
 
@@ -60,7 +60,7 @@ const SpCategory = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.SpCategory.del,
+      extension: RepairAndServiceRepository.SpCategory.del,
       record: JSON.stringify(obj)
     })
     invalidate()

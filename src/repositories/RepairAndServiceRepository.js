@@ -1,8 +1,12 @@
-import SpCategory from 'src/pages/sp-categ'
-
 const service = 'RS.asmx/'
 
-export const RepairRepository = {
+export const RepairAndServiceRepository = {
+  RepairName: {
+    page: service + 'pageRNA',
+    get: service + 'getRNA',
+    set: service + 'setRNA',
+    del: service + 'delRNA'
+  },
   WorkOrderTypes: {
     page: service + 'pageWOT',
     get: service + 'getWOT',

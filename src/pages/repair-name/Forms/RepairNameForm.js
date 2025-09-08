@@ -3,42 +3,42 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
-import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
-export default function SpCategoryForm({ labels, maxAccess, recordId, window }) {
+export default function RepairNameForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairAndServiceRepository.SpCategory.page
+    endpointId: RepairAndServiceRepository.RepairName.page
   })
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: null,
       name: ''
     },
-    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      await postRequest({
-        extension: RepairAndServiceRepository.SpCategory.set,
+      const response = await postRequest({
+        extension: RepairAndServiceRepository.RepairName.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      window.close()
+      formik.setFieldValue('recordId', response.recordId)
+
       invalidate()
     }
   })
@@ -48,27 +48,28 @@ export default function SpCategoryForm({ labels, maxAccess, recordId, window }) 
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairAndServiceRepository.SpCategory.get,
+          extension: RepairAndServiceRepository.RepairName.get,
           parameters: `_recordId=${recordId}`
         })
+
         formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.SpCategory} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.RepairName} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='30'
                 maxAccess={maxAccess}
+                maxLength='30'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
