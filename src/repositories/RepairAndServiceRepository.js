@@ -1,22 +1,22 @@
 const service = 'RS.asmx/'
 
-export const RepairRepository = {
+export const RepairAndServiceRepository = {
   RepairName: {
     page: service + 'pageRNA',
     get: service + 'getRNA',
     set: service + 'setRNA',
-    del: service + 'delRNA',
+    del: service + 'delRNA'
   },
   WorkOrderTypes: {
     page: service + 'pageWOT',
     get: service + 'getWOT',
     set: service + 'setWOT',
-    del: service + 'delWOT',
+    del: service + 'delWOT'
   },
   RepairType: {
     page: service + 'pageRT',
     get: service + 'getRT',
     set: service + 'setRT',
-    del: service + 'delRT',
+    del: service + 'delRT'
   }
 }

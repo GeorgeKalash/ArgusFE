@@ -11,7 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import WorkOrderTypesForm from './Forms/WorkOrderTypesForm'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 const WorkOrderTypes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,7 +22,7 @@ const WorkOrderTypes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.WorkOrderTypes.page,
+      extension: RepairAndServiceRepository.WorkOrderTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const WorkOrderTypes = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.WorkOrderTypes.page,
+    endpointId: RepairAndServiceRepository.WorkOrderTypes.page,
     datasetId: ResourceIds.WorkOrderTypes
   })
 
@@ -56,7 +56,7 @@ const WorkOrderTypes = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.WorkOrderTypes.del,
+      extension: RepairAndServiceRepository.WorkOrderTypes.del,
       record: JSON.stringify(obj)
     })
     invalidate()
