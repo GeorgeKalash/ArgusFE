@@ -251,13 +251,13 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
   const editMode = !!formik?.values?.header?.recordId
 
   const totalQty = formik.values?.items?.reduce((qty, row) => {
-    const qtyValue = parseFloat(row.qty?.toString().replace(/,/g, '')) || 0
+    const qtyValue = parseFloat(row.qty) || 0
 
     return qty + qtyValue
   }, 0)
 
   const totalPcs = formik.values?.items?.reduce((pcs, row) => {
-    const pcsValue = parseFloat(row.pcs?.toString().replace(/,/g, '')) || 0
+    const pcsValue = parseFloat(row.pcs) || 0
 
     return pcs + pcsValue
   }, 0)
