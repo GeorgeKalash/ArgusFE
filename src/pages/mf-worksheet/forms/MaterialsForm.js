@@ -563,7 +563,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 label: labels.pieces,
                 name: 'pcs',
                 props: {
-                  maxLength: 6
+                  maxLength: 6,
+                  decimalScale: 0
                 }
               }
             ]}
