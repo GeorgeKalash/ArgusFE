@@ -564,7 +564,8 @@ export const ResourceIds = {
   CnssBranches: 75111,
   WorkOrderTypes: 75101,
   RepairType: 45109,
-  
+  SpCategory: 45111,
+
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
