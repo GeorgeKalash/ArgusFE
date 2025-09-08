@@ -11,14 +11,14 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 export default function SpManufacturerForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairRepository.SpManufacturer.page
+    endpointId: RepairAndServiceRepository.SpManufacturer.page
   })
 
   const { formik } = useForm({
@@ -33,7 +33,7 @@ export default function SpManufacturerForm({ labels, maxAccess, recordId, window
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: RepairRepository.SpManufacturer.set,
+        extension: RepairAndServiceRepository.SpManufacturer.set,
         record: JSON.stringify(obj)
       })
 
@@ -48,7 +48,7 @@ export default function SpManufacturerForm({ labels, maxAccess, recordId, window
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairRepository.SpManufacturer.get,
+          extension: RepairAndServiceRepository.SpManufacturer.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)

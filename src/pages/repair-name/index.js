@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import RepairNameForm from './Forms/RepairNameForm'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import SpManufacturerForm from './form/SpManufacturerForm'
 
-const SpManufacturer = () => {
+const RepairName = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +22,8 @@ const SpManufacturer = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.SpManufacturer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: RepairAndServiceRepository.RepairName.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,14 +32,14 @@ const SpManufacturer = () => {
   const {
     query: { data },
     labels,
-    refetch,
     invalidate,
     paginationParameters,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.SpManufacturer.page,
-    datasetId: ResourceIds.SpManufacturer
+    endpointId: RepairAndServiceRepository.RepairName.page,
+    datasetId: ResourceIds.RepairName
   })
 
   const columns = [
@@ -54,13 +54,9 @@ const SpManufacturer = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.SpManufacturer.del,
+      extension: RepairAndServiceRepository.RepairName.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -69,16 +65,20 @@ const SpManufacturer = () => {
 
   function openForm(recordId) {
     stack({
-      Component: SpManufacturerForm,
+      Component: RepairNameForm,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 200,
-      title: labels.manufacturer
+      width: 500,
+      height: 250,
+      title: labels.RepairName
     })
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -95,14 +95,14 @@ const SpManufacturer = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          paginationType='api'
-          maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default SpManufacturer
+export default RepairName

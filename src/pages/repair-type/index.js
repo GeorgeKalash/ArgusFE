@@ -11,7 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import RepairTypeForm from './Forms/RepairTypeForm'
-import { RepairRepository } from 'src/repositories/RepairRepository'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 const RepairType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,7 +22,7 @@ const RepairType = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairRepository.RepairType.page,
+      extension: RepairAndServiceRepository.RepairType.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const RepairType = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairRepository.RepairType.page,
+    endpointId: RepairAndServiceRepository.RepairType.page,
     datasetId: ResourceIds.RepairType
   })
 
@@ -56,7 +56,7 @@ const RepairType = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairRepository.RepairType.del,
+      extension: RepairAndServiceRepository.RepairType.del,
       record: JSON.stringify(obj)
     })
     invalidate()
