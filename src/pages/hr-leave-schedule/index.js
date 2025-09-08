@@ -1,19 +1,19 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import RepairTypeForm from './Forms/RepairTypeForm'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+import GridToolbar from 'src/components/Shared/GridToolbar'
+import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
+import LeaveScheduleWindow from './Windows/LeaveScheduleWindow'
 
-const RepairType = () => {
+const HRLeaveSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const RepairType = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.RepairType.page,
+      extension: LoanManagementRepository.LeaveScheduleFilters.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -31,18 +31,23 @@ const RepairType = () => {
 
   const {
     query: { data },
-    labels,
-    invalidate,
-    paginationParameters,
     refetch,
-    access
+    labels,
+    access,
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.RepairType.page,
-    datasetId: ResourceIds.RepairType
+    endpointId: LoanManagementRepository.LeaveScheduleFilters.page,
+    datasetId: ResourceIds.LeaveSchedule
   })
 
   const columns = [
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
     {
       field: 'name',
       headerName: labels.name,
@@ -50,35 +55,35 @@ const RepairType = () => {
     }
   ]
 
+  function openForm(obj) {
+    stack({
+      Component: LeaveScheduleWindow,
+      props: {
+        labels,
+        recordId: obj?.recordId,
+        maxAccess: access
+      },
+      width: 800,
+      height: 500,
+      title: labels.LeaveSchedule
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
+
   const add = () => {
     openForm()
   }
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.RepairType.del,
+      extension: LoanManagementRepository.LeaveScheduleFilters.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: RepairTypeForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 500,
-      height: 250,
-      title: labels.RepairType
-    })
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
+    invalidate()
   }
 
   return (
@@ -95,9 +100,9 @@ const RepairType = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -105,4 +110,4 @@ const RepairType = () => {
   )
 }
 
-export default RepairType
+export default HRLeaveSchedule

@@ -12,19 +12,22 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
-export default function RepairTypeForm({ labels, maxAccess, recordId }) {
+export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairAndServiceRepository.RepairType.page
+    endpointId: RepairAndServiceRepository.WorkOrderTypes.page
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
-      name: ''
+      name: '',
+      isPM: false
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -32,7 +35,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairAndServiceRepository.RepairType.set,
+        extension: RepairAndServiceRepository.WorkOrderTypes.set,
         record: JSON.stringify(obj)
       })
 
@@ -48,7 +51,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairAndServiceRepository.RepairType.get,
+          extension: RepairAndServiceRepository.WorkOrderTypes.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -58,7 +61,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.RepairType} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.WorkOrderTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -73,6 +76,15 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isPM'
+                value={formik.values?.isPM}
+                onChange={event => formik.setFieldValue('isPM', event.target.checked)}
+                label={labels.isPreventiveMaintenance}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>

@@ -10,10 +10,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import RepairTypeForm from './Forms/RepairTypeForm'
+import RepairNameForm from './Forms/RepairNameForm'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
-const RepairType = () => {
+const RepairName = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,7 +22,7 @@ const RepairType = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.RepairType.page,
+      extension: RepairAndServiceRepository.RepairName.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,8 +38,8 @@ const RepairType = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.RepairType.page,
-    datasetId: ResourceIds.RepairType
+    endpointId: RepairAndServiceRepository.RepairName.page,
+    datasetId: ResourceIds.RepairName
   })
 
   const columns = [
@@ -56,7 +56,7 @@ const RepairType = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.RepairType.del,
+      extension: RepairAndServiceRepository.RepairName.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -65,7 +65,7 @@ const RepairType = () => {
 
   function openForm(recordId) {
     stack({
-      Component: RepairTypeForm,
+      Component: RepairNameForm,
       props: {
         labels,
         recordId,
@@ -73,7 +73,7 @@ const RepairType = () => {
       },
       width: 500,
       height: 250,
-      title: labels.RepairType
+      title: labels.RepairName
     })
   }
 
@@ -105,4 +105,4 @@ const RepairType = () => {
   )
 }
 
-export default RepairType
+export default RepairName

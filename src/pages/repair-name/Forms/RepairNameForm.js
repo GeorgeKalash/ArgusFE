@@ -13,12 +13,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
-export default function RepairTypeForm({ labels, maxAccess, recordId }) {
+export default function RepairNameForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairAndServiceRepository.RepairType.page
+    endpointId: RepairAndServiceRepository.RepairName.page
   })
 
   const { formik } = useForm({
@@ -32,7 +32,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairAndServiceRepository.RepairType.set,
+        extension: RepairAndServiceRepository.RepairName.set,
         record: JSON.stringify(obj)
       })
 
@@ -48,7 +48,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairAndServiceRepository.RepairType.get,
+          extension: RepairAndServiceRepository.RepairName.get,
           parameters: `_recordId=${recordId}`
         })
 
@@ -58,7 +58,7 @@ export default function RepairTypeForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.RepairType} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.RepairName} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
