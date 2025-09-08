@@ -5,7 +5,11 @@ export const LoanManagementRepository = {
     qry: service + 'qryLT'
   },
   LeaveScheduleFilters: {
-    qry: service + 'qryLS'
+    qry: service + 'qryLS',
+    page: service + 'pageLS',
+    set: service + 'setLS',
+    get: service + 'getLS',
+    del: service + 'delLS'
   },
   OpeningBalances: {
     page: service + 'pageOBA',
@@ -20,6 +24,12 @@ export const LoanManagementRepository = {
     get: service + 'getBA',
     del: service + 'delBA',
     snapshot: service + 'snapshotBA'
+  },
+  LeavePeriod: {
+    qry: service + 'qryLP',
+    del: service + 'delLP',
+    get: service + 'getLP',
+    set: service + 'setLP'
   },
   LeaveRequest: {
     page: service + 'pageLR',
