@@ -42,5 +42,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getPMT',
     set: service + 'setPMT',
     del: service + 'delPMT'
+  },
+  SpManufacturer: {
+    page: service + 'pageSPM',
+    get: service + 'getSPM',
+    set: service + 'setSPM',
+    del: service + 'delSPM'
   }
 }
