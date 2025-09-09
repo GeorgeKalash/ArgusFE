@@ -13,7 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
-export default function DepartmentForm({ labels, maxAccess, recordId }) {
+export default function DepartmentForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -39,9 +39,9 @@ export default function DepartmentForm({ labels, maxAccess, recordId }) {
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
+      window.close()
     }
   })
   const editMode = !!formik.values.recordId
@@ -84,7 +84,7 @@ export default function DepartmentForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                maxLength='30'
+                maxLength='50'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
