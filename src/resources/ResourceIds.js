@@ -571,6 +571,7 @@ export const ResourceIds = {
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
   SpManufacturer: 45110,
+  JobPosition: 45103,
 
   // GL
   GLSalesInvoice: 51604,
