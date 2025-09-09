@@ -5,7 +5,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -18,10 +17,10 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-export default function TasksForm({ taskInfo, maxAccess, labels }) {
+export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { templateId: recordId, taskId } = taskInfo || {}
+  const { templateId, taskId } = taskInfo || {}
 
   const invalidate = useInvalidate({
     endpointId: RepairAndServiceRepository.MaintenanceTemplateTask.qry
@@ -30,8 +29,8 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: null,
-      namePMT: null,
+      templateId,
+      taskId,
       tbd: false,
       tbdEvery: null,
       tbdFrequency: null,
@@ -43,37 +42,74 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
       notes: ''
     },
     validationSchema: yup.object({
-      namePMT: yup.string().required(),
-      tbdEvery: yup.number().min(1).required(),
-      tbdReminder: yup.number().min(1).required(),
-      tbhEvery: yup.number().min(1).required(),
-      tbhReminder: yup.number().min(1).required(),
-      expectedLaborHrs: yup.number().min(1).required()
+      taskId: yup.string().required(),
+      tbdEvery: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(32767)
+        .test('required-when-tbd', 'tbdEvery is required', function (value) {
+          const { tbd } = this.parent
+
+          return !tbd || value
+        }),
+      tbdReminder: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(32767)
+        .test('required-when-tbd', 'tbdReminder is required', function (value) {
+          const { tbd } = this.parent
+
+          return !tbd || value
+        }),
+      tbdFrequency: yup
+        .number()
+        .nullable()
+        .test('required-when-tbd', 'tbdFrequency is required', function (value) {
+          const { tbd } = this.parent
+
+          return !tbd || value !== null
+        }),
+      tbhEvery: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(32767)
+        .test('required-when-tbh', 'tbhEvery is required', function (value) {
+          const { tbh } = this.parent
+
+          return !tbh || value
+        }),
+      tbhReminder: yup
+        .number()
+        .nullable()
+        .min(1)
+        .max(32767)
+        .test('required-when-tbh', 'tbhReminder is required', function (value) {
+          const { tbh } = this.parent
+
+          return !tbh || value
+        }),
+      expectedLaborHrs: yup.number().min(1).max(32767).nullable()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: RepairAndServiceRepository.MaintenanceTemplateTask.set,
         record: JSON.stringify(obj)
       })
-
-      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: response.recordId
-      }))
+      toast.success(platformLabels.Saved)
       invalidate()
       window.close()
     }
   })
-  const editMode = !!formik?.values?.recordId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (templateId && taskId) {
         const res = await getRequest({
           extension: RepairAndServiceRepository.MaintenanceTemplateTask.get,
-          parameters: `_templateId=${recordId}&_taskId=${taskId}`
+          parameters: `_templateId=${templateId}&_taskId=${taskId}`
         })
         formik.setValues(res?.record)
       }
@@ -81,14 +117,21 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.MaintenanceTemplates} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.MaintenanceTemplates}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={true}
+      isInfo={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              {/* <ResourceComboBox
-                endpointId={LogisticsRepository.LoCarrier.qry}
-                name='namePMT'
+              <ResourceComboBox
+                endpointId={RepairAndServiceRepository.PreventiveMaintenanceTasks.qry}
+                name='taskId'
                 label={labels.name}
                 values={formik.values}
                 valueField='recordId'
@@ -96,16 +139,21 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('namePMT', newValue?.recordId || null)
+                  formik.setFieldValue('taskId', newValue?.recordId || null)
                 }}
-                error={formik.touched.namePMT && Boolean(formik.errors.namePMT)}
-              /> */}
+                error={formik.touched.taskId && Boolean(formik.errors.taskId)}
+              />
             </Grid>
             <Grid item xs={12}>
               <CustomCheckBox
                 name='tbd'
                 value={formik.values?.tbd}
-                onChange={event => formik.setFieldValue('tbd', event.target.checked)}
+                onChange={event => {
+                  formik.setFieldValue('tbdEvery', null)
+                  formik.setFieldValue('tbdReminder', null)
+                  formik.setFieldValue('tbdFrequency', null)
+                  formik.setFieldValue('tbd', event.target.checked)
+                }}
                 label={labels.trackByDate}
                 maxAccess={maxAccess}
               />
@@ -116,9 +164,10 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 label={labels.due}
                 value={formik?.values?.tbdEvery}
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbd}
-                required={formik.values.tbd}
+                readOnly={!formik?.values?.tbd}
+                required={formik?.values?.tbd}
                 onChange={formik.handleChange}
+                allowNegative={false}
                 onClear={() => formik.setFieldValue('tbdEvery', null)}
                 error={formik.touched.tbdEvery && Boolean(formik.errors.tbdEvery)}
               />
@@ -126,14 +175,14 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 datasetId={DataSets.RS_FREQUENCY}
-                label={''}
+                label={labels.frequency}
                 name='tbdFrequency'
                 values={formik.values}
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbd}
-                required={formik.values.tbd}
+                readOnly={!formik?.values?.tbd}
+                required={formik?.values?.tbd}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('tbdFrequency', newValue?.key || null)
                 }}
@@ -146,8 +195,9 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 label={labels.reminder}
                 value={formik?.values?.tbdReminder}
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbd}
-                required={formik.values.tbd}
+                readOnly={!formik?.values?.tbd}
+                required={formik?.values?.tbd}
+                allowNegative={false}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tbdReminder', null)}
                 error={formik.touched.tbdReminder && Boolean(formik.errors.tbdReminder)}
@@ -157,8 +207,12 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
               <CustomCheckBox
                 name='tbh'
                 value={formik.values?.tbh}
-                onChange={event => formik.setFieldValue('tbh', event.target.checked)}
-                label={labels.trackByHour}
+                onChange={event => {
+                  formik.setFieldValue('tbhEvery', null)
+                  formik.setFieldValue('tbhReminder', null)
+                  formik.setFieldValue('tbh', event.target.checked)
+                }}
+                label={labels.trackByHours}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -168,8 +222,8 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 label={labels.due}
                 value={formik?.values?.tbhEvery}
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbh}
-                required={formik.values.tbh}
+                readOnly={!formik?.values?.tbh}
+                required={formik?.values?.tbh}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tbhEvery', null)}
                 error={formik.touched.tbhEvery && Boolean(formik.errors.tbhEvery)}
@@ -181,8 +235,8 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 label={labels.reminder}
                 value={formik?.values?.tbhReminder}
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbh}
-                required={formik.values.tbh}
+                readOnly={!formik?.values?.tbh}
+                required={formik?.values?.tbh}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('tbhReminder', null)}
                 error={formik.touched.tbhReminder && Boolean(formik.errors.tbhReminder)}
@@ -194,8 +248,8 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 label={labels.labor}
                 value={formik?.values?.expectedLaborHrs}
                 maxAccess={maxAccess}
-                readOnly={!formik.values.tbh}
-                required={formik.values.tbh}
+                readOnly={!formik?.values?.tbh}
+                allowNegative={false}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('expectedLaborHrs', null)}
                 error={formik.touched.expectedLaborHrs && Boolean(formik.errors.expectedLaborHrs)}
@@ -208,6 +262,7 @@ export default function TasksForm({ taskInfo, maxAccess, labels }) {
                 value={formik?.values?.notes}
                 maxAccess={maxAccess}
                 rows={3}
+                maxLength='300'
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}

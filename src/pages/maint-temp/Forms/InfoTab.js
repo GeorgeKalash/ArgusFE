@@ -15,7 +15,7 @@ import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function InfoTab({ labels, maxAccess, store, setStore, window }) {
+export default function InfoTab({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
@@ -41,15 +41,15 @@ export default function InfoTab({ labels, maxAccess, store, setStore, window }) 
         extension: RepairAndServiceRepository.MaintenanceTemplates.set,
         record: JSON.stringify(obj)
       })
-
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: response.recordId
-      }))
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId
+        }))
+      }
       invalidate()
-      window.close()
     }
   })
   const editMode = !!formik.values.recordId
@@ -70,7 +70,7 @@ export default function InfoTab({ labels, maxAccess, store, setStore, window }) 
     <FormShell resourceId={ResourceIds.MaintenanceTemplates} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

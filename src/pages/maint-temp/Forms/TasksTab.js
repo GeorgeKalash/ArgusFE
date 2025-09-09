@@ -67,7 +67,7 @@ export default function TasksTab({ store, labels, maxAccess }) {
   function openForm(taskInfo) {
     stack({
       Component: TasksForm,
-      props: { taskInfo, maxAccess, labels },
+      props: { taskInfo: { taskId: taskInfo?.taskId, templateId: recordId }, maxAccess, labels },
       width: 600,
       height: 550,
       title: labels.maintenanceTemplateTask
@@ -90,7 +90,7 @@ export default function TasksTab({ store, labels, maxAccess }) {
       </Fixed>
       <Grow>
         <Table
-          name='table'
+          name='MMTTable'
           columns={columns}
           gridData={data}
           rowId={['templateId']}
