@@ -25,17 +25,10 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
     endpointId: RepairAndServiceRepository.InspectionTemplate.page
   })
 
-  const conditions = {
-    taskName: row => row?.taskName
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
-
   const { formik } = useForm({
-    conditionSchema: ['items'],
     maxAccess,
     initialValues: {
-      recordId: null,
+      recordId,
       name: '',
       allowSkipTask: false,
       items: [
@@ -48,14 +41,12 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
       ]
     },
     validationSchema: yup.object({
-      name: yup.string().required(),
-      items: yup.array().of(schema)
+      name: yup.string().required()
     }),
     onSubmit: async obj => {
       const { items, ...values } = obj
 
       const modifiedList = items
-        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         ?.map((item, index) => ({
           ...item,
           id: index + 1,
@@ -80,7 +71,6 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
     }
   })
 
-  console.log(formik)
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -111,7 +101,6 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      isCleared={false}
     >
       <VertLayout>
         <Fixed>
