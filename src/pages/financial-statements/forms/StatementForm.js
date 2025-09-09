@@ -9,6 +9,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
+import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 
 export default function StatementForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

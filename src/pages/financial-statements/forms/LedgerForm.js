@@ -3,7 +3,7 @@ import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
+import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -20,52 +20,51 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
 
   const formik = useFormik({
     validationSchema: yup.object({
-      /* currencies: yup
+      ledgers: yup
         .array()
         .of(
           yup.object().shape({
-            countryId: yup.string().required(),
-            countryId: yup.string().required(),
-            dispersalType: yup.string().required()
+            signName: yup.string().required()
           })
         )
-        .required() */
+        .required()
     }),
     initialValues: {
       ledgers: [
         {
           id: 1,
-          fsId: fsId,
+          seqNo: 1,
+          fsNodeId: fsId,
           seg0: '',
           seg1: '',
           seg2: '',
           seg3: '',
           seg4: '',
-          signName: ''
+          signName: null
         }
       ]
     },
     enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async values => {
-      await post(values.currencies)
+      await post(values.ledgers)
     }
   })
 
   const post = async obj => {
     const data = {
-      productId: pId,
-      productMonetaries: obj.map(({ id, productId, ...rest }) => ({
-        productId: pId,
+      fsNodeId: fsId,
+      ledgers: obj.map(({ id, seqNo, ...rest }) => ({
+        seqNo: id,
         ...rest
       }))
     }
     await postRequest({
-      extension: RemittanceSettingsRepository.ProductMonetaries.set2,
+      extension: FinancialStatementRepository.Ledger.set2,
       record: JSON.stringify(data)
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-      getMonetaries(pId)
+      //getMonetaries(pId)
     })
   }
 
@@ -129,7 +128,7 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
   ]
 
   useEffect(() => {
-    fsId && getMonetaries(fsId)
+    fsId && getLedgers(fsId)
   }, [fsId])
 
   const getLedgers = fsNodeId => {

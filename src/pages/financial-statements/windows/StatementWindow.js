@@ -1,5 +1,7 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import StatementForm from '../forms/StatementForm'
+import NodeList from '../forms/NodeList'
+import LedgerForm from '../forms/LedgerForm'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
@@ -24,14 +26,14 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
         <StatementForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <RoutingSeqForm maxAccess={maxAccess} labels={labels} store={store} />
+        <NodeList maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <RoutingSeqForm maxAccess={maxAccess} labels={labels} store={store} />
+      <CustomTabPanel index={2} value={activeTab}>
+        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      {/* <CustomTabPanel index={1} value={activeTab}>
         <RoutingSeqForm maxAccess={maxAccess} labels={labels} store={store} />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
     </>
   )
 }

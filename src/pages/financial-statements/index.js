@@ -11,7 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 const FinancialStatements = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -73,7 +73,7 @@ const FinancialStatements = () => {
       Component: StatementWindow,
       props: {
         labels,
-        access,
+        maxAccess: access,
         recordId
       },
       width: 800,
@@ -85,7 +85,7 @@ const FinancialStatements = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={labels} />
       </Fixed>
       <Grow>
         <Table

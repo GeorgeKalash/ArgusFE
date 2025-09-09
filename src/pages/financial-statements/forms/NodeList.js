@@ -4,12 +4,14 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import { useWindow } from 'src/windows'
-import ProductDispersalForm from './productDispersalForm'
+import NodeWindow from '../windows/NodeWindow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import FormShell from 'src/components/Shared/FormShell'
 
 const NodeList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: fsId } = store
@@ -25,18 +27,15 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     getRequest({
       extension: FinancialStatementRepository.Node.qry,
       parameters: parameters
-    })
-      .then(res => {
-        setGridData(res)
+    }).then(res => {
+      setGridData(res)
 
-        setStore(prevStore => ({
-          ...prevStore,
-          nodes: res.list
-        }))
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
+      setStore(prevStore => ({
+        ...prevStore,
+        nodes: res.list,
+        rowSelectionSaved: true
+      }))
+    })
   }
 
   const columns = [
@@ -118,7 +117,7 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
         <Table //name
