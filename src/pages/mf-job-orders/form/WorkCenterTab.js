@@ -51,6 +51,11 @@ const WorkCenterTab = ({ labels, maxAccess, store }) => {
       field: 'pcs',
       headerName: labels.pcs,
       flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
     }
   ]
 
