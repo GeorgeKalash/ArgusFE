@@ -48,5 +48,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getSPM',
     set: service + 'setSPM',
     del: service + 'delSPM'
+  },
+  JobPosition: {
+    page: service + 'pagePOS',
+    get: service + 'getPOS',
+    set: service + 'setPOS',
+    del: service + 'delPOS'
   }
 }
