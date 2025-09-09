@@ -30,5 +30,11 @@ export const RepairAndServiceRepository = {
   },
   Manufacturer: {
     qry: service + 'qrySPM'
+  },
+  Warehouse: {
+    page: service + 'pageWH',
+    set: service + 'setWH',
+    get: service + 'getWH',
+    del: service + 'delWH'
   }
 }
