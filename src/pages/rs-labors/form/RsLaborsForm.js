@@ -38,7 +38,6 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
       activeStatus: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       firstName: yup.string().required(),
