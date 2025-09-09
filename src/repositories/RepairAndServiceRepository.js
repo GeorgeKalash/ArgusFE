@@ -54,5 +54,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getPOS',
     set: service + 'setPOS',
     del: service + 'delPOS'
+  },
+  SpCategory: {
+    page: service + 'pageSPC',
+    get: service + 'getSPC',
+    set: service + 'setSPC',
+    del: service + 'delSPC'
   }
 }
