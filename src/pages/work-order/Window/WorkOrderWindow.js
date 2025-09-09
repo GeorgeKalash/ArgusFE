@@ -4,7 +4,7 @@ import { useState } from 'react'
 import WorkOrderForm from '../forms/WorkOrderForm'
 import TaskList from '../forms/TaskList'
 
-const WorkOrderWindow = ({ recordId, labels, maxAccess }) => {
+const WorkOrderWindow = ({ recordId, labels, access }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -17,10 +17,10 @@ const WorkOrderWindow = ({ recordId, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <WorkOrderForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
+        <WorkOrderForm labels={labels} setStore={setStore} store={store} access={access} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <TaskList labels={labels} maxAccess={maxAccess} store={store} />
+        <TaskList labels={labels} access={access} store={store} />
       </CustomTabPanel>
     </>
   )

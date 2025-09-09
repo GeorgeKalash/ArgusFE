@@ -49,12 +49,23 @@ export const RepairAndServiceRepository = {
     snapshot: service + 'snapshotEQP'
   },
   WorkTask: {
-    qry: service + 'qryWTK'
+    qry: service + 'qryWTK',
+    get: service + 'getWTK',
+    set: service + 'setWTK',
+    del: service + 'delWTK'
   },
   MaintenanceTemplateTask: {
     qry: service + 'qryMTT',
     get: service + 'getMTT',
     set: service + 'setMTT',
     del: service + 'delMTT'
+  },
+  EquipmentType: {
+    qry: service + 'qryEQT'
+  },
+  WorkOrderParts: {
+    qry: service + 'qryWOP',
+    set: service + 'setWO',
+    del: service + 'delWO'
   }
 }

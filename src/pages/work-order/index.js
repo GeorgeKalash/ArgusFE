@@ -113,7 +113,7 @@ const WorkOrder = () => {
       props: {
         labels,
         recordId,
-        maxAccess: access
+        access
       },
       width: 1000,
       height: 750,

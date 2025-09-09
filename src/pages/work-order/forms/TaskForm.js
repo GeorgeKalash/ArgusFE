@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Grid, FormControlLabel, Checkbox } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,93 +12,110 @@ import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
-
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import { formatDateToApi } from 'src/lib/date-helper'
 
-const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
+const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [options, setOptions] = useState([])
 
   const invalidate = useInvalidate({
     endpointId: RepairAndServiceRepository.WorkTask.qry
   })
 
-  const { recordId: itemId } = store
-
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: access,
     initialValues: {
-      itemId,
-      vendorId: record?.vendorId || '',
-      currencyId: record?.currencyId || '',
-      baseLaborPrice: '',
-      priceList: '',
-      markdown: '',
-      sku: '',
-      isPreferred: false,
-      deliveryLeadDays: ''
+      workOrderId: store.recordId,
+      seqNo: null,
+      dueDate: null,
+      taskType: null,
+      priority: null,
+      status: 1,
+      pmtId: null,
+      notes: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      type: yup.number().required(),
-      priority: yup.string().required()
+      taskType: yup.number().required(),
+      priority: yup.number().required()
     }),
     onSubmit: async obj => {
-      const vendorId = formik.values.vendorId
-      const currencyId = formik.values.currencyId
-
-      const submitData = {
-        ...obj,
-        markdown: obj.markdown || 0
-      }
-
-      const response = await postRequest({
+      await postRequest({
         extension: RepairAndServiceRepository.WorkTask.set,
-        record: JSON.stringify(submitData)
+        record: JSON.stringify({
+          ...obj,
+          dueDate: obj.dueDate ? formatDateToApi(obj.dueDate) : null
+        })
       })
 
-      if (!vendorId && !currencyId) {
-        toast.success(platformLabels.Added)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
-
-      formik.setValues(submitData)
+      toast.success(!obj.seqNo ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
   })
 
   useEffect(() => {
+    const equipmentId = 10
+
     const fetchData = async () => {
-      if (record && record.currencyId && record.vendorId) {
+      const [rnRes, pmtRes] = await Promise.all([
+        getRequest({
+          extension: RepairAndServiceRepository.EquipmentType.qry,
+          parameters: `_equipmentId=${store?.equipmentId}`
+        }),
+        getRequest({
+          extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.qry,
+          parameters: ``
+        })
+      ])
+
+      const taskMap = {}
+      pmtRes?.list.forEach(t => {
+        taskMap[t.recordId] = t.name
+      })
+
+      const merged = rnRes?.list.map(item => ({
+        ...item,
+        taskName: taskMap[item.pmtId] || null
+      }))
+
+      console.log(merged)
+      setOptions(merged)
+    }
+
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (store?.workOrderId && record.seqNo) {
         const res = await getRequest({
           extension: RepairAndServiceRepository.WorkTask.get,
-          parameters: `_itemId=${itemId}&_vendorId=${formik.values.vendorId}&_currencyId=${formik.values.currencyId}`
+          parameters: `_workOrderId=${store.workOrderId}&_seqNo=${eqNo}`
         })
 
         if (res.record) {
           formik.setValues(res.record)
         }
+      } else {
+        formik.setFieldValue('seqNo', seqNo)
       }
     }
 
     fetchData()
-  }, [record])
+  }, [])
 
   return (
     <FormShell
       form={formik}
       infoVisible={false}
-      resourceId={ResourceIds.PriceList}
-      maxAccess={maxAccess}
+      resourceId={ResourceIds.WorkOrder}
+      maxAccess={access}
       editMode={editMode}
       isCleared={false}
     >
@@ -110,33 +127,33 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     datasetId={DataSets.RS_WO_TASK_TYPE}
-                    name='priority'
+                    name='taskType'
                     label={labels.priority}
                     valueField='key'
                     displayField='value'
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('priority', newValue?.key || null)
+                      formik.setFieldValue('taskType', newValue?.key || null)
                     }}
-                    error={formik.touched.priority && Boolean(formik.errors.priority)}
-                    maxAccess={maxAccess}
+                    error={formik.touched.taskType && Boolean(formik.errors.taskType)}
+                    maxAccess={access}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={RepairAndServiceRepository.PreventiveMaintenanceTasks.qry}
-                    parameters='_filter=&_size=30&_startAt=0'
-                    name='currencyId'
-                    label={labels.currency}
-                    valueField='recordId'
-                    displayField={'name'}
+                    store={options}
+                    name='pmtId'
+                    label={labels.taskRepair}
+                    valueField='pmtId'
+                    displayField='taskName'
                     values={formik.values}
                     required
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                      formik.setFieldValue('pmtId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    error={formik.touched.pmtId && Boolean(formik.errors.pmtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -146,8 +163,8 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                     value={formik.values?.dueDate}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('dueDate', '')}
-                    error={formik.touched.date && Boolean(formik.errors.dueDate)}
-                    maxAccess={maxAccess}
+                    error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
+                    maxAccess={access}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -162,7 +179,8 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                       formik.setFieldValue('priority', newValue?.key || null)
                     }}
                     error={formik.touched.priority && Boolean(formik.errors.priority)}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
+                    required
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -172,7 +190,7 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                     value={formik.values.notes}
                     rows={4}
                     editMode={editMode}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     onChange={e => formik.setFieldValue('notes', e.target.value)}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}
@@ -194,7 +212,7 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                     value={formik.values.notes}
                     rows={3}
                     editMode={editMode}
-                    maxAccess={maxAccess}
+                    maxAccess={access}
                     onChange={e => formik.setFieldValue('notes', e.target.value)}
                     onClear={() => formik.setFieldValue('notes', '')}
                     error={formik.touched.notes && Boolean(formik.errors.notes)}

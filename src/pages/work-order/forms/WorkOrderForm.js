@@ -51,31 +51,18 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       dueDate: null,
       schedule: null,
       priority: null,
-      type: null,
+      wotId: null,
       progress: null,
-      notes: ''
-    },
-    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
-    initialValues: {
-      recordId: store.recordId,
-      dtId: null,
-      reference: '',
-      equipmentId: null,
-      equipmentRef: '',
-      equipmentName: '',
-      date: new Date(),
-      dueDate: null,
-      schedule: null,
-      priority: null,
-      type: null,
-      progress: null,
-      notes: ''
+      notes: '',
+      status: 1
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       equipmentId: yup.number().required(),
-      type: yup.number().required()
+      wotId: yup.number().required(),
+      progress: yup.number().required(),
+      priority: yup.number().required()
     }),
 
     onSubmit: async obj => {
@@ -84,15 +71,9 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
         extension: RepairAndServiceRepository.WorkOrder.set,
         record: JSON.stringify(obj)
       })
-      if (!obj.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: response.recordId
-        }))
-        toast.success(platformLabels.Added)
-        formik.setFieldValue('recordId', response.recordId)
-      } else toast.success(platformLabels.Edited)
 
+      refetchForm(response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -101,28 +82,29 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
   const isRaw = formik.values.status === 1
   const isPosted = formik.values.status === 2
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: RepairAndServiceRepository.WorkOrder.get,
-          parameters: `_recordId=${recordId}`
-        })
+  const refetchForm = async recordId => {
+    if (recordId) {
+      const res = await getRequest({
+        extension: RepairAndServiceRepository.WorkOrder.get,
+        parameters: `_recordId=${recordId}`
+      })
 
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record?.date),
-          schedule: res.record?.schedule ? formatDateFromApi(res.record?.schedule) : null,
-          dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
-        })
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record?.date),
-          schedule: res.record?.schedule ? formatDateFromApi(res.record?.schedule) : null,
-          dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
-        })
-      }
-    })()
+      formik.setValues({
+        ...res.record,
+        date: formatDateFromApi(res.record?.date),
+        scheduled: res.record?.scheduled ? formatDateFromApi(res.record?.scheduled) : null,
+        dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
+      })
+
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.record.recordId,
+        equipmentId: res.record.equipmentId
+      }))
+    }
+  }
+  useEffect(() => {
+    refetchForm(recordId)
   }, [])
 
   const onPost = async () => {
@@ -131,12 +113,13 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       record: JSON.stringify({
         ...formik?.values,
         date: formatDateToApi(formik?.values?.date),
-        schedule: formik?.values?.schedule ? formatDateToApi(formik?.values?.schedule) : null,
+        scheduled: formik?.values?.scheduled ? formatDateToApi(formik?.values?.scheduled) : null,
         dueDate: formik?.values?.dueDate ? formatDateToApi(formik?.values?.dueDate) : null
       })
     })
 
     toast.success(platformLabels.Posted)
+    refetchForm(formik.values.recordId)
     invalidate()
     window.close()
   }
@@ -251,7 +234,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 label={labels.scheduled}
                 value={formik.values?.scheduled}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('scheduled', '')}
+                onClear={() => formik.setFieldValue('scheduled', null)}
                 error={formik.touched.scheduled && Boolean(formik.errors.scheduled)}
                 maxAccess={maxAccess}
               />
@@ -263,8 +246,8 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 label={labels.dueDate}
                 value={formik.values?.dueDate}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('dueDate', '')}
-                error={formik.touched.date && Boolean(formik.errors.dueDate)}
+                onClear={() => formik.setFieldValue('dueDate', null)}
+                error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -286,34 +269,34 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={RepairAndServiceRepository.WorkOrderTypes.qry}
-                name='type'
-                label={labels.type}
+                name='wotId'
+                label={labels.wot}
                 values={formik.values}
                 valueField='recordId'
                 displayField='name'
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue.recordId)
+                  formik.setFieldValue('wotId', newValue?.recordId || null)
                 }}
-                error={formik.touched.type && Boolean(formik.errors.type)}
+                error={formik.touched.wotId && Boolean(formik.errors.wotId)}
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextArea
-                name='notes'
-                label={labels.remarks}
-                value={formik.values.notes}
+                name='description'
+                label={labels.description}
+                value={formik.values.description}
                 rows={4}
                 editMode={editMode}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                onChange={e => formik.setFieldValue('description', e.target.value)}
+                onClear={() => formik.setFieldValue('description', '')}
+                error={formik.touched.description && Boolean(formik.errors.description)}
               />
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.RS_PRIORITY}
+                datasetId={DataSets.RS_WO_PROGRESS}
                 name='progress'
                 label={labels.progress}
                 valueField='key'
@@ -332,7 +315,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 name='currentPM'
                 label={labels.currentPM}
                 value={formik.values?.currentPM}
-                readOnly={!formik.values?.currentPM}
+                readOnly={!formik.values?.equipmentId}
                 maxLength={6}
                 decimalScale={3}
                 required
@@ -348,7 +331,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 name='currentSM'
                 label={labels.currentSM}
                 value={formik.values?.currentSM}
-                readOnly={!formik.values?.currentSM}
+                readOnly={!formik.values?.equipmentId}
                 maxLength={6}
                 decimalScale={3}
                 required

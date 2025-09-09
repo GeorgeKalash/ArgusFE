@@ -14,8 +14,9 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import PartsForm from './PartsForm'
 
-const TaskList = ({ store, labels, maxAccess }) => {
+const TaskList = ({ store, labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
@@ -30,15 +31,14 @@ const TaskList = ({ store, labels, maxAccess }) => {
 
     return response
   }
-  console.log(maxAccess)
+  console.log(access)
 
   const {
     query: { data },
-    labels: _labels,
     refetch
   } = useResourceQuery({
     enabled: !!recordId,
-    datasetId: ResourceIds.PriceList,
+    datasetId: ResourceIds.WorkOrder,
     queryFn: fetchGridData,
     endpointId: RepairAndServiceRepository.WorkTask.qry
   })
@@ -64,10 +64,28 @@ const TaskList = ({ store, labels, maxAccess }) => {
       headerName: labels.parts,
       flex: 1,
       cellRenderer: row => {
+        console.log(row)
+
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
-            <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/buttonIcons/partGrid.png`} width={18} height={18} alt='post.png' />
+            <IconButton
+              size='small'
+              onClick={() =>
+                stack({
+                  Component: PartsForm,
+                  props: {
+                    labels,
+                    recordId,
+                    access,
+                    store,
+                    seqNo: row?.data?.seqNo
+                  },
+
+                  title: labels.vendor
+                })
+              }
+            >
+              <Image src={`/images/buttonsicons/partGrid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
@@ -81,7 +99,7 @@ const TaskList = ({ store, labels, maxAccess }) => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
             <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/buttonIcons/labor2Grid.png`} width={18} height={18} alt='post.png' />
+              <Image src={`/images/buttonsicons/labor2Grid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
@@ -113,9 +131,10 @@ const TaskList = ({ store, labels, maxAccess }) => {
       Component: TaskForm,
       props: {
         labels,
-        recordId,
+        recordId: record?.recordId,
+        seqNo: data.list.length + 1,
         record,
-        maxAccess,
+        access,
         store
       },
 
@@ -130,7 +149,7 @@ const TaskList = ({ store, labels, maxAccess }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -142,7 +161,7 @@ const TaskList = ({ store, labels, maxAccess }) => {
           onEdit={edit}
           pagination={false}
           onDelete={del}
-          maxAccess={maxAccess}
+          maxAccess={access}
           height={200}
         />
       </Grow>
