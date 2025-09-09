@@ -19,7 +19,10 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+<<<<<<< .merge_file_vcZfWj
 import { DataSets } from 'src/resources/DataSets'
+=======
+>>>>>>> .merge_file_bbP8m4
 
 const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -108,6 +111,7 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
+<<<<<<< .merge_file_vcZfWj
               <ResourceComboBox
                 datasetId={DataSets.RS_PRIORITY}
                 name='priority'
@@ -119,13 +123,39 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
                   formik.setFieldValue('priority', newValue?.key || null)
                 }}
                 error={formik.touched.priority && Boolean(formik.errors.priority)}
+=======
+              <ResourceLookup
+                endpointId={PurchaseRepository.Vendor.snapshot}
+                name='vendorId'
+                label={labels.vendor}
+                form={formik}
+                displayFieldWidth={2}
+                valueField='vendorRef'
+                displayField='name'
+                required
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueShow='vendorRef'
+                secondValueShow='vendorName'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('vendorId', newValue.recordId || '')
+                  formik.setFieldValue('vendorName', newValue.name || '')
+                  formik.setFieldValue('vendorRef', newValue.reference || '')
+                }}
+>>>>>>> .merge_file_bbP8m4
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+<<<<<<< .merge_file_vcZfWj
                 endpointId={RepairAndServiceRepository.EquipmentType.qry}
                 parameters='_filter=&_size=30&_startAt=0&_equipmentId=11'
+=======
+                endpointId={SystemRepository.Currency.qry}
+>>>>>>> .merge_file_bbP8m4
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'

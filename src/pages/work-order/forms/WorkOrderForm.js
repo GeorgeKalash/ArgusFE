@@ -21,7 +21,6 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import { SystemChecks } from 'src/resources/SystemChecks'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 export default function WorkOrderForm({ labels, access, setStore, store }) {
@@ -56,6 +55,22 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       progress: null,
       notes: ''
     },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
+    initialValues: {
+      recordId: store.recordId,
+      dtId: null,
+      reference: '',
+      equipmentId: null,
+      equipmentRef: '',
+      equipmentName: '',
+      date: new Date(),
+      dueDate: null,
+      schedule: null,
+      priority: null,
+      type: null,
+      progress: null,
+      notes: ''
+    },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -65,6 +80,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
 
     onSubmit: async obj => {
       const response = await postRequest({
+        extension: RepairAndServiceRepository.WorkOrder.set,
         extension: RepairAndServiceRepository.WorkOrder.set,
         record: JSON.stringify(obj)
       })
@@ -93,6 +109,12 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
           parameters: `_recordId=${recordId}`
         })
 
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record?.date),
+          schedule: res.record?.schedule ? formatDateFromApi(res.record?.schedule) : null,
+          dueDate: res.record?.dueDate ? formatDateFromApi(res.record.dueDate) : null
+        })
         formik.setValues({
           ...res.record,
           date: formatDateFromApi(res.record?.date),
