@@ -274,25 +274,23 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           }
         })
 
-      const installments = obj.installments.map((installment, index) => {
-        return {
-          ...installment,
-          id: index + 1,
-          seqNo: index + 1,
-          reference: obj?.header?.reference,
-          vendorId: obj?.header?.vendorId,
-          invoiceId: formik?.values?.recordId || 0,
-          currencyId: obj?.header?.currencyId
-        }
-      })
-
       const payload = {
         header: {
           ...obj.header,
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        installments,
+        installments: obj.installments.map((installment, index) => {
+          return {
+            ...installment,
+            id: index + 1,
+            seqNo: index + 1,
+            reference: obj?.header?.reference,
+            vendorId: obj?.header?.vendorId,
+            invoiceId: formik?.values?.recordId || 0,
+            currencyId: obj?.header?.currencyId
+          }
+        }),
         items: updatedRows,
         serials: serialsValues,
         taxCodes: [
@@ -744,11 +742,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function verifyRecord() {
-    const copy = { ...formik.values.header, isVerified: !formik.values.header.isVerified }
-    delete copy.items
     await postRequest({
       extension: PurchaseRepository.PurchaseInvoiceHeader.verify,
-      record: JSON.stringify(copy)
+      record: JSON.stringify({ ...formik.values.header, isVerified: !formik.values.header.isVerified })
     })
 
     toast.success(!formik.values.header.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
@@ -757,17 +753,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function syncRecord() {
-    const { header, items, installments, ...rest } = formik.values
+    const { items } = formik.values
 
-    const serials = items.flatMap(item => item.serials || [])
-
-    const record = {
-      ...rest,
-      header,
-      items,
-      installments,
-      serials
-    }
+    const record = { ...formik.values, serials: items.flatMap(item => item.serials || []) }
 
     await postRequest({
       extension: PurchaseRepository.Serials.sync,

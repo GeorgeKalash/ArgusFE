@@ -88,6 +88,7 @@ export default function Installments({ data, onOk, window }) {
           columns={columns}
           allowDelete={!isPosted}
           allowAddNewLine={!isPosted}
+          maxAccess={maxAccess}
         />
       </Grow>
       <Fixed>
