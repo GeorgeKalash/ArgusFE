@@ -561,6 +561,7 @@ export const ResourceIds = {
   PayrollSettings: 75113,
   LeaveReturn: 73203,
   LeaveRequest: 73209,
+  PayrollArguments: 75100,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
   RepairName: 45108,
