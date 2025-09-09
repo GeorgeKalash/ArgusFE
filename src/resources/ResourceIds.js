@@ -565,8 +565,12 @@ export const ResourceIds = {
   RepairName: 45108,
   WorkOrderTypes: 75101,
   RepairType: 45109,
+  InspectionTemplate: 45105,
   TimeCodes: 75102,
+  Department: 45112,
   Warehouse: 45102,
+  PreventiveMaintenanceTasks: 45107,
+  SpManufacturer: 45110,
   JobPosition: 45103,
 
   // GL
