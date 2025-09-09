@@ -350,8 +350,8 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    close: service + 'closeJWC',
-    reopen: service + 'reopenJWC'
+    close: service + 'closeJRO',
+    reopen: service + 'reopenJRO'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
