@@ -206,7 +206,9 @@ export const ManufacturingRepository = {
     set: service + 'setJRO',
     set2: service + 'set2JRO',
     del: service + 'delJRO',
-    sync: service + 'syncJRO'
+    sync: service + 'syncJRO',
+    close: service + 'closeJRO',
+    reopen: service + 'reopenJRO'
   },
   Worksheet: {
     snapshot: service + 'snapshotWST',
@@ -350,8 +352,7 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    close: service + 'closeJRO',
-    reopen: service + 'reopenJRO'
+    qry: service + 'qryJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
