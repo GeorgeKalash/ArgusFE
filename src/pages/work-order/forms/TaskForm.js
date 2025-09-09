@@ -11,18 +11,15 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
-import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-<<<<<<< .merge_file_vcZfWj
 import { DataSets } from 'src/resources/DataSets'
-=======
->>>>>>> .merge_file_bbP8m4
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 
 const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -50,10 +47,8 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
     enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      vendorId: yup.string().required(),
-      currencyId: yup.string().required(),
-      baseLaborPrice: yup.string().required(),
-      priceList: yup.string().required()
+      type: yup.number().required(),
+      priority: yup.string().required()
     }),
     onSubmit: async obj => {
       const vendorId = formik.values.vendorId
@@ -109,128 +104,103 @@ const TaskForm = ({ labels, editMode, maxAccess, store, record }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-<<<<<<< .merge_file_vcZfWj
-              <ResourceComboBox
-                datasetId={DataSets.RS_PRIORITY}
-                name='priority'
-                label={labels.priority}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('priority', newValue?.key || null)
-                }}
-                error={formik.touched.priority && Boolean(formik.errors.priority)}
-=======
-              <ResourceLookup
-                endpointId={PurchaseRepository.Vendor.snapshot}
-                name='vendorId'
-                label={labels.vendor}
-                form={formik}
-                displayFieldWidth={2}
-                valueField='vendorRef'
-                displayField='name'
-                required
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                valueShow='vendorRef'
-                secondValueShow='vendorName'
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('vendorId', newValue.recordId || '')
-                  formik.setFieldValue('vendorName', newValue.name || '')
-                  formik.setFieldValue('vendorRef', newValue.reference || '')
-                }}
->>>>>>> .merge_file_bbP8m4
-                maxAccess={maxAccess}
-              />
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.RS_WO_TASK_TYPE}
+                    name='priority'
+                    label={labels.priority}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('priority', newValue?.key || null)
+                    }}
+                    error={formik.touched.priority && Boolean(formik.errors.priority)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={RepairAndServiceRepository.PreventiveMaintenanceTasks.qry}
+                    parameters='_filter=&_size=30&_startAt=0'
+                    name='currencyId'
+                    label={labels.currency}
+                    valueField='recordId'
+                    displayField={'name'}
+                    values={formik.values}
+                    required
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='dueDate'
+                    label={labels.dueDate}
+                    value={formik.values?.dueDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('dueDate', '')}
+                    error={formik.touched.date && Boolean(formik.errors.dueDate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.RS_PRIORITY}
+                    name='priority'
+                    label={labels.priority}
+                    valueField='key'
+                    displayField='value'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('priority', newValue?.key || null)
+                    }}
+                    error={formik.touched.priority && Boolean(formik.errors.priority)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.remarks}
+                    value={formik.values.notes}
+                    rows={4}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-<<<<<<< .merge_file_vcZfWj
-                endpointId={RepairAndServiceRepository.EquipmentType.qry}
-                parameters='_filter=&_size=30&_startAt=0&_equipmentId=11'
-=======
-                endpointId={SystemRepository.Currency.qry}
->>>>>>> .merge_file_bbP8m4
-                name='currencyId'
-                label={labels.currency}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
-                }}
-                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='baseLaborPrice'
-                label={labels.baseLabor}
-                value={formik.values.baseLaborPrice}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('baseLaborPrice', '')}
-                required
-                error={formik.touched.baseLaborPrice && Boolean(formik.errors.baseLaborPrice)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='priceList'
-                label={labels.priceList}
-                value={formik.values.priceList}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('priceList', '')}
-                required
-                error={formik.touched.priceList && Boolean(formik.errors.priceList)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='markdown'
-                label={labels.markdown}
-                value={formik.values.markdown}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('markdown', '')}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='sku'
-                label={labels.sku}
-                value={formik.values.sku}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('sku', '')}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomCheckBox
-                name='isPreferred'
-                value={formik.values?.isPreferred}
-                onChange={event => formik.setFieldValue('isPreferred', event.target.checked)}
-                label={labels.isPreffered}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='deliveryLeadDays'
-                label={labels.dld}
-                value={formik.values.deliveryLeadDays}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('deliveryLeadDays', '')}
-              />
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.remarks}
+                    value={formik.values.notes}
+                    rows={3}
+                    editMode={editMode}
+                    maxAccess={maxAccess}
+                    onChange={e => formik.setFieldValue('notes', e.target.value)}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Grow>

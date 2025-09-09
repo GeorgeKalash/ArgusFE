@@ -34,6 +34,7 @@ export const RepairAndServiceRepository = {
   },
   PreventiveMaintenanceTasks: {
     page: service + 'pagePMT',
+    qry: service + 'qryPMT',
     get: service + 'getPMT',
     set: service + 'setPMT',
     del: service + 'delPMT'
@@ -49,5 +50,11 @@ export const RepairAndServiceRepository = {
   },
   WorkTask: {
     qry: service + 'qryWTK'
+  },
+  MaintenanceTemplateTask: {
+    qry: service + 'qryMTT',
+    get: service + 'getMTT',
+    set: service + 'setMTT',
+    del: service + 'delMTT'
   }
 }

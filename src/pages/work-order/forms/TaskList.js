@@ -67,7 +67,7 @@ const TaskList = ({ store, labels, maxAccess }) => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
             <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/folderIcons/CogGo.png`} width={18} height={18} alt='post.png' />
+              <Image src={`/images/buttonIcons/partGrid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
@@ -81,7 +81,7 @@ const TaskList = ({ store, labels, maxAccess }) => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
             <IconButton size='small' onClick={() => confirmationPost(row.data)}>
-              <Image src={`/images/folderIcons/user.png`} width={18} height={18} alt='post.png' />
+              <Image src={`/images/buttonIcons/labor2Grid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
