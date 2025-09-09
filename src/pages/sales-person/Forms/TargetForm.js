@@ -51,10 +51,7 @@ const TargetForm = ({ labels, maxAccess, store }) => {
     onSubmit: async obj => {
       const resultObject = {
         spId: recordId,
-        items: obj.rows.map(row => ({
-          ...row,
-          targetAmount: row.targetAmount ? row.targetAmount : 0
-        }))
+        items: obj.rows
       }
 
       await postRequest({
@@ -89,6 +86,10 @@ const TargetForm = ({ labels, maxAccess, store }) => {
         maxLength: 12,
         decimalScale: 0,
         allowNegative: false
+      },
+      updateOn: 'blur',
+      onChange: ({ row: { update, newRow } }) => {
+        update(targetAmount, newRow.targetAmount || 0)
       }
     }
   ]

@@ -131,6 +131,7 @@ const SalesPerson = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
+          deleteConfirmationType={'strict'}
           paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}

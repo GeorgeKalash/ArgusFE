@@ -51,7 +51,7 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
           id: index + 1,
           month: parseInt(monthDetail.monthId),
           fiscalYear: obj.fiscalYear,
-          targetAmount: monthDetail.targetAmount ? monthDetail.targetAmount : 0
+          targetAmount: monthDetail?.targetAmount || 0
         }
       })
 

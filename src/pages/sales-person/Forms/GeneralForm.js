@@ -32,7 +32,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
       spRef: '',
       name: '',
       cellPhone: '',
-      commissionPct: 0,
+      commissionPct: null,
       plantId: null,
       sptId: null,
       targetType: null
@@ -43,7 +43,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
       name: yup.string().required(),
       commissionPct: yup
         .number()
-        .required()
+        .nullable()
         .min(0.01, ' must be greater than 0')
         .max(100, ' must be less than or equal to 100')
     }),
@@ -115,7 +115,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='10'
+                maxLength='15'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -127,7 +127,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                 name='cellPhone'
                 label={labels.phone}
                 value={formik.values.cellPhone}
-                maxLength='8'
+                maxLength='15'
                 phone={true}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('cellPhone', null)}
@@ -138,7 +138,6 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
             <Grid item xs={12}>
               <CustomNumberField
                 name='commissionPct'
-                required
                 label={labels.commissionPct}
                 value={formik.values.commissionPct}
                 maxAccess={maxAccess}
@@ -146,7 +145,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                 onClear={() => formik.setFieldValue('commissionPct', null)}
                 error={formik.touched.commissionPct && Boolean(formik.errors.commissionPct)}
                 allowNegative={false}
-                maxLength={4}
+                maxLength={5}
                 decimalScale={2}
               />
             </Grid>
