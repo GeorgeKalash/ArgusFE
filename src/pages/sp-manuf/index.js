@@ -96,6 +96,7 @@ const SpManufacturer = () => {
           onDelete={del}
           pageSize={50}
           paginationType='api'
+          deleteConfirmationType='strict'
           maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
