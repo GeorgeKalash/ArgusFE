@@ -28,7 +28,7 @@ export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recor
       name: ''
     },
     validationSchema: yup.object({
-      name: yup.string().min(3, 'Name must be at least 3 characters').required('Name is required')
+      name: yup.string().min(3, 'Name must be at least 3 characters').required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
