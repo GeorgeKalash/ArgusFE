@@ -1,5 +1,3 @@
-import SalaryBatch from 'src/pages/hr-salary-batch'
-
 export const ResourceIds = {
   //Dashboard
   WeeklySalesYTD: 60100,
@@ -561,6 +559,7 @@ export const ResourceIds = {
   PayrollSettings: 75113,
   LeaveReturn: 73203,
   LeaveRequest: 73209,
+  PayrollArguments: 75100,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
   RepairName: 45108,
@@ -568,6 +567,9 @@ export const ResourceIds = {
   RepairType: 45109,
   InspectionTemplate: 45105,
   TimeCodes: 75102,
+  Department: 45112,
+  Warehouse: 45102,
+  PreventiveMaintenanceTasks: 45107,
 
   // GL
   GLSalesInvoice: 51604,

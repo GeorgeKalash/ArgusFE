@@ -24,5 +24,23 @@ export const RepairAndServiceRepository = {
     page: service + 'pageITE',
     set2: service + 'set2ITE',
     del: service + 'delITE'
+  },
+  Department: {
+    page: service + 'pageDEP',
+    get: service + 'getDEP',
+    set: service + 'setDEP',
+    del: service + 'delDEP'
+  },
+  Warehouse: {
+    page: service + 'pageWH',
+    set: service + 'setWH',
+    get: service + 'getWH',
+    del: service + 'delWH'
+  },
+  PreventiveMaintenanceTasks: {
+    page: service + 'pagePMT',
+    get: service + 'getPMT',
+    set: service + 'setPMT',
+    del: service + 'delPMT'
   }
 }
