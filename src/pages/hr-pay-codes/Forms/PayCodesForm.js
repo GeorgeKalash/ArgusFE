@@ -13,11 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 
-export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
+export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const editMode = !!payCode
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Paycode.qry
@@ -25,7 +25,7 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: payCode,
+      recordId,
       name: ''
     },
     maxAccess,
@@ -49,10 +49,10 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (payCode) {
+      if (recordId) {
         const res = await getRequest({
           extension: PayrollRepository.Paycode.get,
-          parameters: `_payCode=${payCode}`
+          parameters: `_payCode=${recordId}`
         })
 
         formik.setValues({
