@@ -351,7 +351,8 @@ export const ManufacturingRepository = {
   },
   JobWorkCenter: {
     close: service + 'closeJWC',
-    reopen: service + 'reopenJWC'
+    reopen: service + 'reopenJWC',
+    qry: service + 'qryJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
