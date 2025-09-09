@@ -3,45 +3,45 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
+export default function WarehouseForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairAndServiceRepository.WorkOrderTypes.page
+    endpointId: RepairAndServiceRepository.Warehouse.page
   })
 
   const { formik } = useForm({
-    maxAccess,
     initialValues: {
-      recordId: null,
+      recordId,
       name: '',
-      isPM: false
+      siteId: null
     },
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairAndServiceRepository.WorkOrderTypes.set,
+        extension: RepairAndServiceRepository.Warehouse.set,
         record: JSON.stringify(obj)
       })
 
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      formik.setFieldValue('recordId', response.recordId)
-
       invalidate()
     }
   })
@@ -51,40 +51,49 @@ export default function WorkOrderTypesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: RepairAndServiceRepository.WorkOrderTypes.get,
+          extension: RepairAndServiceRepository.Warehouse.get,
           parameters: `_recordId=${recordId}`
         })
-
         formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.WorkOrderTypes} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Warehouse} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxAccess={maxAccess}
                 maxLength='30'
+                maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomCheckBox
-                name='isPM'
-                value={formik.values?.isPM}
-                onChange={event => formik.setFieldValue('isPM', event.target.checked)}
-                label={labels.isPreventiveMaintenance}
+              <ResourceComboBox
+                endpointId={InventoryRepository.Site.qry}
+                name='siteId'
+                label={labels.site}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
                 maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('siteId', newValue?.recordId)
+                }}
+                error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
           </Grid>

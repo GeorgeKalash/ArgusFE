@@ -3,17 +3,17 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import WorkOrderTypesForm from './Forms/WorkOrderTypesForm'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+import WarehouseForm from './form/WarehouseForm'
 
-const WorkOrderTypes = () => {
+const Warehouse = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +22,8 @@ const WorkOrderTypes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.WorkOrderTypes.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: RepairAndServiceRepository.Warehouse.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,20 +32,30 @@ const WorkOrderTypes = () => {
   const {
     query: { data },
     labels,
+    refetch,
     invalidate,
     paginationParameters,
-    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.WorkOrderTypes.page,
-    datasetId: ResourceIds.WorkOrderTypes
+    endpointId: RepairAndServiceRepository.Warehouse.page,
+    datasetId: ResourceIds.Warehouse
   })
 
   const columns = [
     {
       field: 'name',
       headerName: labels.name,
+      flex: 1
+    },
+    {
+      field: 'siteRef',
+      headerName: labels.siteRef,
+      flex: 1
+    },
+    {
+      field: 'siteName',
+      headerName: labels.siteName,
       flex: 1
     }
   ]
@@ -54,9 +64,13 @@ const WorkOrderTypes = () => {
     openForm()
   }
 
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.WorkOrderTypes.del,
+      extension: RepairAndServiceRepository.Warehouse.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -65,20 +79,16 @@ const WorkOrderTypes = () => {
 
   function openForm(recordId) {
     stack({
-      Component: WorkOrderTypesForm,
+      Component: WarehouseForm,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
-      width: 500,
+      width: 600,
       height: 250,
-      title: labels.WorkOrderTypes
+      title: labels.warehouse
     })
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
   }
 
   return (
@@ -95,14 +105,14 @@ const WorkOrderTypes = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
           maxAccess={access}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default WorkOrderTypes
+export default Warehouse

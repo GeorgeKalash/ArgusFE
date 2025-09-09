@@ -563,9 +563,11 @@ export const ResourceIds = {
   LeaveRequest: 73209,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
+  RepairName: 45108,
   WorkOrderTypes: 75101,
   RepairType: 45109,
   TimeCodes: 75102,
+  Warehouse: 45102,
 
   // GL
   GLSalesInvoice: 51604,
