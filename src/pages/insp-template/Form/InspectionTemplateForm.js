@@ -15,6 +15,7 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function InspectionTemplateForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,7 +25,14 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
     endpointId: RepairAndServiceRepository.InspectionTemplate.page
   })
 
+  const conditions = {
+    taskName: row => row?.taskName
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
+    conditionSchema: ['items'],
     maxAccess,
     initialValues: {
       recordId: null,
@@ -41,21 +49,19 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
     },
     validationSchema: yup.object({
       name: yup.string().required(),
-      items: yup.array().of(
-        yup.object({
-          taskName: yup.string().required()
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { items, ...values } = obj
 
-      const modifiedList = items?.map((item, index) => ({
-        ...item,
-        id: index + 1,
-        seqNo: index + 1,
-        itId: recordId
-      }))
+      const modifiedList = items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        ?.map((item, index) => ({
+          ...item,
+          id: index + 1,
+          seqNo: index + 1,
+          itId: recordId
+        }))
 
       const response = await postRequest({
         extension: RepairAndServiceRepository.InspectionTemplate.set2,
@@ -73,6 +79,8 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
       invalidate()
     }
   })
+
+  console.log(formik)
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -98,7 +106,13 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.InspectionTemplate} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.InspectionTemplate}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isCleared={false}
+    >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
