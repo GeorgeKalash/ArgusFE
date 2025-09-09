@@ -25,6 +25,12 @@ export const RepairAndServiceRepository = {
     get: service + 'getWH',
     del: service + 'delWH'
   },
+  PreventiveMaintenanceTasks: {
+    page: service + 'pagePMT',
+    get: service + 'getPMT',
+    set: service + 'setPMT',
+    del: service + 'delPMT'
+  },
   MaintenanceTemplates: {
     page: service + 'pageMTE',
     get: service + 'getMTE',
