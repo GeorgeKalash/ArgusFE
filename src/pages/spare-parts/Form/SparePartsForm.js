@@ -12,14 +12,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
-export default function SparePartsForm({ labels, maxAccess, recordId }) {
+export default function SparePartsForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -31,22 +30,23 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
     maxAccess,
     initialValues: {
       recordId: null,
-      partNo: null,
+      partNo: '',
       name: '',
       categoryId: null,
       vendorId: null,
       manufacturerId: null,
-      vendorPartNo: null,
-      barcode: null,
+      vendorPartNo: '',
+      barcode: '',
       trackInventory: false,
-      itemId: null
+      itemId: null,
+      sku: '',
+      itemName: ''
     },
     validationSchema: yup.object({
       name: yup.string().required(),
-      partNo: yup.number().required(),
-      vendorPartNo: yup.number().nullable(),
+      partNo: yup.string().required(),
       itemId: yup
-        .number()
+        .string()
         .nullable()
         .when('trackInventory', {
           is: true,
@@ -64,6 +64,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
       formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
+      window.close()
     }
   })
   const editMode = !!formik.values.recordId
@@ -87,7 +88,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='partNo'
                 label={labels.partNo}
                 value={formik?.values?.partNo}
@@ -95,7 +96,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
                 maxLength={24}
                 required
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('partNo', null)}
+                onClear={() => formik.setFieldValue('partNo', '')}
                 error={formik.touched.partNo && Boolean(formik.errors.partNo)}
               />
             </Grid>
@@ -163,7 +164,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='vendorPartNo'
                 label={labels.vendorPartNo}
                 value={formik?.values?.vendorPartNo}
@@ -175,7 +176,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomNumberField
+              <CustomTextField
                 name='barcode'
                 label={labels.barcode}
                 value={formik?.values?.barcode}
@@ -211,9 +212,9 @@ export default function SparePartsForm({ labels, maxAccess, recordId }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId || null)
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
+                  formik.setFieldValue('itemId', newValue?.recordId || null)
                 }}
                 errorCheck={'itemId'}
                 maxAccess={maxAccess}

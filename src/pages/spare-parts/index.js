@@ -104,6 +104,7 @@ const SpareParts = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}
