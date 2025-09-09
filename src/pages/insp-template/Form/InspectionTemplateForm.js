@@ -47,6 +47,7 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
       const { items, ...values } = obj
 
       const modifiedList = items
+        ?.filter(item => item.taskName)
         ?.map((item, index) => ({
           ...item,
           id: index + 1,
@@ -96,12 +97,7 @@ export default function InspectionTemplateForm({ labels, maxAccess, recordId }) 
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.InspectionTemplate}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell resourceId={ResourceIds.InspectionTemplate} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
