@@ -463,12 +463,13 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                           ]}
                           displayField={['workCenterRef', 'workCenterName']}
                           onChange={async (event, newValue) => {
-                            formik.setFieldValue('transfer.qty', newValue?.qty || null)
-                            formik.setFieldValue('transfer.pcs', newValue?.pcs || null)
+                            formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                            formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
 
-                            formik.setFieldValue('transfer.maxQty', newValue?.qty || null)
-                            formik.setFieldValue('transfer.maxPcs', newValue?.pcs || null)
-                            formik.setFieldValue('transfer.fromSeqNo', newValue?.recordId || null)
+                            formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
+                            formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
+                            formik.setFieldValue('transfer.fromSeqNo', newValue?.seqNo || null)
+                            formik.setFieldValue('transfer.workCenterId', newValue?.workCenterId || null)
                           }}
                           required
                           maxAccess
@@ -524,7 +525,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         ]}
                         displayField={['workCenterRef', 'workCenterName']}
                         onChange={async (event, newValue) => {
-                          formik.setFieldValue('transfer.workCenterId', newValue?.recordId || null)
+                          formik.setFieldValue('transfer.toWCId', newValue?.workCenterId || null)
                         }}
                         values={formik.values.transfer}
                         required
