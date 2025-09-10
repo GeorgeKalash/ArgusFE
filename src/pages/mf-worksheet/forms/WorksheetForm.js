@@ -313,7 +313,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                   <ResourceLookup
                     endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
                     parameters={{ _workCenterId: formik.values.workCenterId }}
-                    filter={{ status: 4 }}
                     name='jobRef'
                     label={labels.jobRef}
                     valueField='reference'
