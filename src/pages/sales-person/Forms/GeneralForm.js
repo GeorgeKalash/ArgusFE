@@ -28,7 +28,7 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      recordId: null,
       spRef: '',
       name: '',
       cellPhone: '',
