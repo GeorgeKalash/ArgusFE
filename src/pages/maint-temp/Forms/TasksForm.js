@@ -98,7 +98,7 @@ export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
         extension: RepairAndServiceRepository.MaintenanceTemplateTask.set,
         record: JSON.stringify(obj)
       })
-      toast.success(platformLabels.Saved)
+      toast.success(templateId && taskId ? platformLabels.Edited : platformLabels.Saved)
       invalidate()
       window.close()
     }
