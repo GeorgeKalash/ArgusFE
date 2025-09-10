@@ -926,11 +926,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
-      basePrice: newRow?.basePrice || 0,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
-      upo: newRow?.upo,
+      upo: parseFloat(newRow?.upo) || 0,
       qty: newRow?.qty,
       extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,

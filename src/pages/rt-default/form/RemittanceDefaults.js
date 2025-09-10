@@ -1,13 +1,10 @@
-import { useContext, useEffect, useState } from 'react'
-import { Box, Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { useContext, useEffect } from 'react'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -15,217 +12,143 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import * as yup from 'yup'
+import { useForm } from 'src/hooks/form'
 
-const RemittanceDefaults = ({ _labels }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getLabels, getAccess } = useContext(ControlContext)
-  const [labels, setLabels] = useState(null)
-  const [access, setAccess] = useState(null)
-  const { platformLabels } = useContext(ControlContext)
+const RemittanceDefaults = ({ _labels, access }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [errorMessage, setErrorMessage] = useState(null)
-
-  useEffect(() => {
-    if (!access) getAccess(ResourceIds.SystemDefault, setAccess)
-    else {
-      if (access.record.maxAccess > 0) {
-        getLabels(ResourceIds.SystemDefault, setLabels)
-
-        getDataResult()
-      } else {
-        setErrorMessage({ message: "YOU DON'T HAVE ACCESS TO THIS SCREEN" })
-      }
-    }
-  }, [access])
-
-  const getDataResult = () => {
-    const myObject = {}
-
-    var parameters = `_filter=`
-    getRequest({
-      extension: RemittanceSettingsRepository.RtDefault.qry,
-      parameters: parameters
-    })
-      .then(res => {
-        res.list.map(obj => (myObject[obj.key] = obj.value))
-        myObject['nraRef'] = null
-
-        if (myObject['rt_fii_accountGroupId']) {
-          rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', parseInt(myObject['rt_fii_accountGroupId']))
-        }
-
-        if (myObject['rt-nra-product']) {
-          rtDefaultFormValidation.setFieldValue('rt-nra-product', myObject['rt-nra-product'])
-          getNumberRange(myObject['rt-nra-product'])
-        }
-
-        if (myObject['rt_max_monthly_amount']) {
-          rtDefaultValidation.setFieldValue('rt_max_monthly_amount', myObject['rt_max_monthly_amount'])
-        }
-
-        if (myObject['rt_max_yearly_ind_amount']) {
-          rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', myObject['rt_max_yearly_ind_amount'])
-        }
-
-        if (myObject['rt_max_yearly_cor_amount']) {
-          rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', myObject['rt_max_yearly_cor_amount'])
-        }
-
-        rtDefaultFormValidation.setValues(myObject)
-      })
-      .catch(error => {})
-  }
-
-  const getNumberRange = nraId => {
-    var parameters = `_filter=` + '&_recordId=' + nraId
-    getRequest({
-      extension: SystemRepository.NumberRange.get,
-      parameters: parameters
-    })
-      .then(res => {
-        rtDefaultValidation.setFieldValue('rt-nra-product', res.record.recordId)
-
-        rtDefaultFormValidation.setFieldValue('nraId', res.record.recordId)
-        rtDefaultFormValidation.setFieldValue('nraRef', res.record.reference)
-        rtDefaultFormValidation.setFieldValue('nraDescription', res.record.description)
-      })
-      .catch(error => {})
-  }
-
-  const rtDefaultFormValidation = useFormik({
+  const { formik } = useForm({
     validateOnChange: true,
     initialValues: {
       nraId: null,
-      nraRef: null,
-      nraDescription: null
-    },
-
-    onSubmit: () => {}
-  })
-
-  const rtDefaultValidation = useFormik({
-    validateOnChange: true,
-    initialValues: {
+      nraRef: '',
+      nraDescription: '',
       'rt-nra-product': null,
-      rt_fii_accountGroupId: '',
-      rt_max_monthly_amount: '',
-      rt_max_yearly_ind_amount: '',
-      rt_max_yearly_cor_amount: ''
+      rt_fii_accountGroupId: null,
+      rt_max_monthly_amount: null,
+      rt_max_yearly_ind_amount: null,
+      rt_max_yearly_cor_amount: null
     },
+    validationSchema: yup.object().shape({
+      ir_amcShortTerm: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { ir_amcLongTerm } = this.parent
 
-    onSubmit: values => {
-      postRtDefault(values)
+          return value == null || ir_amcLongTerm == null || value <= ir_amcLongTerm
+        }),
+      ir_amcLongTerm: yup.number().nullable()
+    }),
+    onSubmit: async obj => {
+      const data = Object.entries(obj).map(([key, value]) => ({
+        key,
+        value
+      }))
+
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ SysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Edited)
     }
   })
 
-  const postRtDefault = obj => {
-    var data = []
-    Object.entries(obj).forEach(([key, value], i) => {
-      const newObj = { key: key, value: value }
+  useEffect(() => {
+    loadDefaults()
+  }, [defaultsData])
 
-      data.push(newObj)
+  const loadDefaults = async () => {
+    const myObject = {}
+
+    const filteredList = defaultsData?.list?.filter(
+      obj =>
+        obj.key === 'rt-nra-product' ||
+        obj.key === 'rt_fii_accountGroupId' ||
+        obj.key === 'rt_max_monthly_amount' ||
+        obj.key === 'rt_max_yearly_ind_amount' ||
+        obj.key === 'rt_max_yearly_cor_amount'
+    )
+
+    filteredList?.forEach(obj => {
+      myObject[obj.key] = obj.value ? parseInt(obj.value) : ''
     })
 
-    postRequest({
-      extension: RemittanceSettingsRepository.RtDefault.set2,
-      record: JSON.stringify({ sysDefaults: data })
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Updated)
+    if (myObject['rt-nra-product']) {
+      const res = await getRequest({
+        extension: SystemRepository.NumberRange.get,
+        parameters: `_filter=&_recordId=${myObject['rt-nra-product']}`
       })
-      .catch(error => {})
-  }
 
-  const handleSubmit = () => {
-    rtDefaultValidation.handleSubmit()
+      if (res?.record) {
+        myObject['nraId'] = res.record.recordId
+        myObject['nraRef'] = res.record.reference
+        myObject['nraDescription'] = res.record.description
+      }
+    }
+
+    formik.setValues(myObject)
   }
 
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={4} sx={{ pt: '0.5rem' }}>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+        <Grid container spacing={4} sx={{ p: 2 }}>
+          <Grid item xs={12}>
             <ResourceLookup
               endpointId={SystemRepository.NumberRange.snapshot}
-              form={rtDefaultFormValidation}
+              form={formik}
               name='nraId'
               label={_labels.nuRange}
               valueField='reference'
               displayField='description'
-              firstValue={rtDefaultFormValidation.values.nraRef}
-              secondValue={rtDefaultFormValidation.values.nraDescription}
+              firstValue={formik.values.nraRef}
+              secondValue={formik.values.nraDescription}
               onChange={(event, newValue) => {
-                if (newValue) {
-                  rtDefaultValidation.setFieldValue('rt-nra-product', newValue?.recordId || '')
-                  rtDefaultFormValidation.setFieldValue('nraId', newValue?.recordId)
-                  rtDefaultFormValidation.setFieldValue('nraRef', newValue?.reference)
-                  rtDefaultFormValidation.setFieldValue('nraDescription', newValue?.description || '')
-                } else {
-                  rtDefaultValidation.setFieldValue('rt-nra-product', '')
-                  rtDefaultFormValidation.setFieldValue('nraId', '')
-                  rtDefaultFormValidation.setFieldValue('nraRef', '')
-                  rtDefaultFormValidation.setFieldValue('nraDescription', '')
-                }
+                formik.setFieldValue('rt-nra-product', newValue?.recordId || null)
+                formik.setFieldValue('nraId', newValue?.recordId || null)
+                formik.setFieldValue('nraRef', newValue?.reference || '')
+                formik.setFieldValue('nraDescription', newValue?.description || '')
               }}
               maxAccess={access}
             />
           </Grid>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+          <Grid item xs={12}>
             <ResourceComboBox
               endpointId={FinancialRepository.Group.qry}
               name='rt_fii_accountGroupId'
               label={_labels.dag}
               valueField='recordId'
               displayField='name'
-              values={rtDefaultValidation.values}
+              values={formik.values}
               onChange={(event, newValue) => {
-                rtDefaultValidation.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || '')
+                formik.setFieldValue('rt_fii_accountGroupId', newValue?.recordId || null)
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <CustomNumberField
-              name='rt_max_monthly_amount'
-              label={_labels.maxInwardsSettlementPerMonth}
-              value={rtDefaultValidation.values.rt_max_monthly_amount}
-              onChange={rtDefaultValidation.handleChange}
-              onClear={() => rtDefaultValidation.setFieldValue('rt_max_monthly_amount', '')}
-              error={
-                rtDefaultValidation.touched.rt_max_monthly_amount &&
-                Boolean(rtDefaultValidation.errors.rt_max_monthly_amount)
-              }
-            />
-          </Grid>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <CustomNumberField
-              name='rt_max_yearly_ind_amount'
-              label={_labels.maxInwardsSettlementPerYear}
-              value={rtDefaultValidation.values.rt_max_yearly_ind_amount}
-              onChange={rtDefaultValidation.handleChange}
-              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_ind_amount', '')}
-              error={
-                rtDefaultValidation.touched.rt_max_yearly_ind_amount &&
-                Boolean(rtDefaultValidation.errors.rt_max_yearly_ind_amount)
-              }
-            />
-          </Grid>
-          <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
-            <CustomNumberField
-              name='rt_max_yearly_cor_amount'
-              label={_labels.maxYearlyCorAmount}
-              value={rtDefaultValidation.values.rt_max_yearly_cor_amount}
-              onChange={rtDefaultValidation.handleChange}
-              onClear={() => rtDefaultValidation.setFieldValue('rt_max_yearly_cor_amount', '')}
-              error={
-                rtDefaultValidation.touched.rt_max_yearly_cor_amount &&
-                Boolean(rtDefaultValidation.errors.rt_max_yearly_cor_amount)
-              }
-            />
-          </Grid>
+          {[
+            { name: 'rt_max_monthly_amount', label: _labels.maxInwardsSettlementPerMonth },
+            { name: 'rt_max_yearly_ind_amount', label: _labels.maxInwardsSettlementPerYear },
+            { name: 'rt_max_yearly_cor_amount', label: _labels.maxYearlyCorAmount }
+          ].map(item => (
+            <Grid item xs={12} key={item.name}>
+              <CustomNumberField
+                name={item.name}
+                label={item.label}
+                value={formik.values[item.name]}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue(item.name, null)}
+                error={formik.touched[item.name] && Boolean(formik.errors[item.name])}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Grow>
       <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
+        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
       </Fixed>
     </VertLayout>
   )

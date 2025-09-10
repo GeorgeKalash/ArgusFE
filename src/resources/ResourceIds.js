@@ -30,6 +30,7 @@ export const ResourceIds = {
   Alerts: 60307,
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
+  LedgerGroup: 75114,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
@@ -533,6 +534,7 @@ export const ResourceIds = {
   TerminationReasons: 71110,
   GeneralSettings: 20600,
   JobInfos: 71207,
+  EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
   ResetTimeVariation: 72203,
   RebuildAC: 41509,
@@ -549,6 +551,29 @@ export const ResourceIds = {
   MetalSmelting: 47314,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
+  AttendanceSettings: 72108,
+  DayTypes: 72104,
+  GenerateTransfers: 46600,
+  GenerateConsumption: 46601,
+  LeaveSchedule: 73103,
+  PayrollSettings: 75113,
+  LeaveReturn: 73203,
+  LeaveRequest: 73209,
+  PayrollArguments: 75100,
+  BenefitSchedule: 78102,
+  CnssBranches: 75111,
+  RepairName: 45108,
+  WorkOrderTypes: 75101,
+  RepairType: 45109,
+  InspectionTemplate: 45105,
+  TimeCodes: 75102,
+  Department: 45112,
+  Warehouse: 45102,
+  PreventiveMaintenanceTasks: 45107,
+  SpManufacturer: 45110,
+  JobPosition: 45103,
+  SpCategory: 45111,
+  MaintenanceTemplates: 45106,
 
   // GL
   GLSalesInvoice: 51604,
@@ -613,6 +638,7 @@ export const ResourceIds = {
   MCRServiceBillReceived: 31621,
   MCRCashTransfers: 33605,
   MCRIncreaseDecreaseAdj: 33606,
+  SalaryBatch: 75115,
 
   // Address
   ADDBPMasterData: 21600,
