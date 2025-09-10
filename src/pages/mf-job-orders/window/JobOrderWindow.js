@@ -7,6 +7,7 @@ import WorksheetTab from '../form/WorksheetTab'
 import OverheadTab from '../form/OverheadTab'
 import MaterialsTab from '../form/MaterialsTab'
 import SizesTab from '../form/SizesTab'
+import WorkCenterTab from '../form/WorkCenterTab'
 
 const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lockRecord, window }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -19,7 +20,8 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
     { label: labels.worksheet, disabled: !store.recordId },
     { label: labels.overhead, disabled: !store.recordId },
     { label: labels.materials, disabled: !store.recordId },
-    { label: labels.size, disabled: !store.recordId }
+    { label: labels.size, disabled: !store.recordId },
+    { label: labels.workCenter, disabled: !store.recordId }
   ]
 
   return (
@@ -57,6 +59,9 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
       </CustomTabPanel>
       <CustomTabPanel index={5} value={activeTab}>
         <SizesTab store={store} labels={labels} maxAccess={access} />
+      </CustomTabPanel>
+      <CustomTabPanel index={6} value={activeTab}>
+        <WorkCenterTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>
   )

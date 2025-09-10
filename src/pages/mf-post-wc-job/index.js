@@ -72,7 +72,7 @@ const PostWorkCenterJob = () => {
 
   async function onPost() {
     await postRequest({
-      extension: ManufacturingRepository.JobWorkCenter.close,
+      extension: ManufacturingRepository.JobRouting.close,
       record: JSON.stringify({
         jobId: formik.values.jobId,
         seqNo: formik.values.seqNo,
@@ -85,7 +85,7 @@ const PostWorkCenterJob = () => {
 
   async function onUnlock() {
     await postRequest({
-      extension: ManufacturingRepository.JobWorkCenter.reopen,
+      extension: ManufacturingRepository.JobRouting.reopen,
       record: JSON.stringify({
         jobId: formik.values.jobId,
         seqNo: formik.values.seqNo,
