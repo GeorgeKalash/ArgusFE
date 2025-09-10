@@ -13,7 +13,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
@@ -115,15 +114,15 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={companyStructureRepository.CompanyPositions.qry}
-                parameters='_filter=&_size=1000&_startAt=0&_sortBy=recordId'
+                endpointId={RepairAndServiceRepository.JobPosition.qry}
+                parameters='_size=30&_startAt=0'
                 name='positionId'
                 label={labels.positionId}
                 required
                 valueField='recordId'
-                displayField={['positionRef', 'name']}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
-                  { key: 'positionRef', value: 'Reference' },
+                  { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
                 maxAccess={maxAccess}
@@ -170,7 +169,7 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
                 readOnly={!formik.values.allowLogIn}
                 label={labels.userId}
                 valueField='recordId'
-                displayField='fullName'
+                displayField='email'
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
