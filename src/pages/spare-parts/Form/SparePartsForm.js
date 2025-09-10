@@ -216,6 +216,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
                   formik.setFieldValue('sku', newValue?.sku || '')
                   formik.setFieldValue('itemId', newValue?.recordId || null)
                 }}
+                displayFieldWidth={2}
                 errorCheck={'itemId'}
                 maxAccess={maxAccess}
               />
