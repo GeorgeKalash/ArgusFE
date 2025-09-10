@@ -50,10 +50,10 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       date: new Date(),
       dueDate: null,
       schedule: null,
-      priority: null,
+      priority: 2,
       wotId: null,
-      progress: null,
-      notes: '',
+      progress: 1,
+      description: '',
       status: 1
     },
     maxAccess,
@@ -80,7 +80,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
 
   const editMode = !!formik.values.recordId
   const isRaw = formik.values.status === 1
-  const isPosted = formik.values.status === 2
+  const isPosted = store.isPosted
 
   const refetchForm = async recordId => {
     if (recordId) {
@@ -99,7 +99,9 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       setStore(prevStore => ({
         ...prevStore,
         recordId: res.record.recordId,
-        equipmentId: res.record.equipmentId
+        equipmentId: res.record.equipmentId,
+        reference: res.record.reference,
+        isPosted: res.record.status === 3
       }))
     }
   }
@@ -169,7 +171,6 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                required
                 onChange={(_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   changeDT(newValue)
@@ -195,7 +196,8 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
               <ResourceLookup
                 endpointId={RepairAndServiceRepository.Equipment.snapshot}
                 name='equipmentId'
-                label={labels?.sku}
+                label={labels?.equipment}
+                secondFieldLabel={labels?.equipmentName}
                 valueField='recordId'
                 displayField='reference'
                 valueShow='equipmentRef'
@@ -206,9 +208,9 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                   { key: 'description', value: 'Description' }
                 ]}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('equipmentId', newValue?.recordId || null)
                   formik.setFieldValue('equipmentName', newValue?.description || '')
                   formik.setFieldValue('equipmentRef', newValue?.reference || '')
+                  formik.setFieldValue('equipmentId', newValue?.recordId || null)
                 }}
                 maxAccess={maxAccess}
                 errorCheck={'equipmentId'}
@@ -231,7 +233,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
             <Grid item xs={6}>
               <CustomDatePicker
                 name='scheduled'
-                label={labels.scheduled}
+                label={labels.Scheduled}
                 value={formik.values?.scheduled}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('scheduled', null)}
@@ -243,7 +245,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
             <Grid item xs={6}>
               <CustomDatePicker
                 name='dueDate'
-                label={labels.dueDate}
+                label={labels.dueBy}
                 value={formik.values?.dueDate}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('dueDate', null)}
@@ -258,6 +260,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 label={labels.priority}
                 valueField='key'
                 displayField='value'
+                required
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('priority', newValue?.key || null)
@@ -270,7 +273,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
               <ResourceComboBox
                 endpointId={RepairAndServiceRepository.WorkOrderTypes.qry}
                 name='wotId'
-                label={labels.wot}
+                label={labels.type}
                 values={formik.values}
                 valueField='recordId'
                 displayField='name'
@@ -279,15 +282,15 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                   formik.setFieldValue('wotId', newValue?.recordId || null)
                 }}
                 error={formik.touched.wotId && Boolean(formik.errors.wotId)}
+                required
               />
             </Grid>
             <Grid item xs={12}>
               <CustomTextArea
                 name='description'
-                label={labels.description}
+                label={labels.notes}
                 value={formik.values.description}
                 rows={4}
-                editMode={editMode}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('description', e.target.value)}
                 onClear={() => formik.setFieldValue('description', '')}
@@ -301,6 +304,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 label={labels.progress}
                 valueField='key'
                 displayField='value'
+                required
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('progress', newValue?.key || null)
@@ -313,7 +317,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
             <Grid item xs={6}>
               <CustomNumberField
                 name='currentPM'
-                label={labels.currentPM}
+                label={labels.cpm}
                 value={formik.values?.currentPM}
                 readOnly={!formik.values?.equipmentId}
                 maxLength={6}
@@ -329,7 +333,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
             <Grid item xs={6}>
               <CustomNumberField
                 name='currentSM'
-                label={labels.currentSM}
+                label={labels.csm}
                 value={formik.values?.currentSM}
                 readOnly={!formik.values?.equipmentId}
                 maxLength={6}

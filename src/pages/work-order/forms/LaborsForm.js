@@ -14,41 +14,46 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import { createConditionalSchema } from 'src/lib/validation'
 import { Grid } from '@mui/material'
 
-const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, data: { seqNo, taskName, status } }) => {
+const LaborsForm = ({
+  data: { seqNo, taskName, status },
+  access,
+  labels,
+  recordId,
+  store: { reference, isPosted }
+}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const isCompleted = status === 2
 
   const conditions = {
-    sparePartId: row => row?.sparePartId,
-    whId: row => row?.whId,
-    qty: row => row?.qty > 0,
-    unitPrice: row => row?.unitPrice > 0
+    laborId: row => row?.laborId,
+    hours: row => row?.hours > 0
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'parts')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'labors')
 
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      parts: [{ id: 1, workOrderId: recordId, seqNo, unitPrice: 0, qty: 0, extendedPrice: 0 }]
+      labors: [{ id: 1, workOrderId: recordId, seqNo, hours: 0, qty: 0, rate: 0 }]
     },
     validationSchema: yup.object({
-      parts: yup.array().of(schema)
+      labors: yup.array().of(schema)
     }),
     onSubmit: async values => {
       const data = {
         workOrderId: recordId,
         seqNo,
-        parts: values.parts
+        labors: values.labors
           ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-          .map(({ id, partNo, partName, whName, itemId, ...item }, index) => ({
-            wopSeqNo: index + 1,
+          .map(({ id, laborRef, firstName, lastName, rate, ...item }, index) => ({
+            laborSeqNo: index + 1,
+            rate: rate || 0,
             ...item
           }))
       }
 
       await postRequest({
-        extension: RepairAndServiceRepository.WorkOrderParts.set2,
+        extension: RepairAndServiceRepository.WorkOrderLabors.set2,
         record: JSON.stringify(data)
       })
 
@@ -59,78 +64,67 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
   const columns = [
     {
       component: 'resourcelookup',
-      label: labels.partNo,
-      name: 'sparePartId',
+      label: labels.labor,
+      name: 'laborId',
       props: {
-        endpointId: RepairAndServiceRepository.Part.snapshot,
-        displayField: 'partNo',
-        valueField: 'partNo',
+        endpointId: RepairAndServiceRepository.Labor.snapshot,
+        displayField: 'reference',
+        valueField: 'reference',
         columnsInDropDown: [
-          { key: 'partNo', value: 'Part No' },
-          { key: 'name', value: 'Name' }
+          { key: 'reference', value: 'Reference' },
+          { key: 'firstName', value: 'First Name' },
+          { key: 'lastName', value: 'Last Name' }
         ],
         mapping: [
-          { from: 'partNo', to: 'partNo' },
-          { from: 'name', to: 'partName' },
-          { from: 'recordId', to: 'sparePartId' }
+          { from: 'firstName', to: 'firstName' },
+          { from: 'reference', to: 'laborRef' },
+          { from: 'lastName', to: 'lastName' },
+          { from: 'rate', to: 'rate' },
+          { from: 'recordId', to: 'laborId' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 5
       }
     },
     {
       component: 'textfield',
-      name: 'partName',
-      label: labels.name,
+      name: 'firstName',
+      label: labels.lastName,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      name: 'lastName',
+      label: labels.lastName,
       props: {
         readOnly: true
       }
     },
     {
       component: 'numberfield',
-      name: 'qty',
-      label: labels.qty,
+      name: 'hours',
+      label: labels.hours,
       updateOn: 'blur',
       props: {
         decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
-        update({ extendedPrice: newRow.qty * newRow.unitPrice })
-      }
-    },
-
-    {
-      component: 'resourcecombobox',
-      label: labels.warehouse,
-      name: 'whId',
-      props: {
-        endpointId: RepairAndServiceRepository.Warehouse.qry,
-        parameters: `_startAt=0&_pageSize=50`,
-        valueField: 'recordId',
-        displayField: 'name',
-        mapping: [
-          { from: 'name', to: 'whName' },
-          { from: 'recordId', to: 'whId' }
-        ],
-
-        displayFieldWidth: 2
+        update({ total: newRow.hours * newRow.rate || 0 })
       }
     },
     {
       component: 'numberfield',
-      name: 'unitPrice',
-      label: labels.unitCost,
-      updateOn: 'blur',
+      name: 'rate',
+      label: labels.rate,
       props: {
-        decimalScale: 2
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({ extendedPrice: newRow.qty * newRow.unitPrice })
+        readOnly: true
       }
     },
     {
       component: 'numberfield',
-      name: 'extendedPrice',
-      label: labels.extendedCost,
+      name: 'total',
+      label: labels.total,
       props: {
         readOnly: true
       }
@@ -141,7 +135,7 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
     ;(async function () {
       if (recordId) {
         const response = await getRequest({
-          extension: RepairAndServiceRepository.WorkOrderParts.qry,
+          extension: RepairAndServiceRepository.WorkOrderLabors.qry,
           parameters: `_workOrderId=${recordId}&_seqNo=${seqNo}`
         })
         if (response?.list?.length) {
@@ -150,7 +144,7 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
             id: index + 1
           }))
 
-          formik.setValues({ parts: data })
+          formik.setValues({ labors: data })
         }
       }
     })()
@@ -178,11 +172,11 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
           </Fixed>
           <Grow>
             <DataGrid
-              onChange={value => formik.setFieldValue('parts', value)}
-              initialValues={formik.initialValues.parts?.[0]}
-              value={formik.values.parts}
-              error={formik.errors.parts}
-              name='parts'
+              onChange={value => formik.setFieldValue('labors', value)}
+              initialValues={formik.initialValues.labors?.[0]}
+              value={formik.values.labors}
+              error={formik.errors.labors}
+              name='labors'
               columns={columns}
               maxAccess={access}
               disabled={isPosted || isCompleted}
@@ -195,4 +189,4 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
   )
 }
 
-export default PartsForm
+export default LaborsForm

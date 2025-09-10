@@ -8,10 +8,13 @@ const WorkOrderWindow = ({ recordId, labels, access }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId: recordId || null,
+    equipmentId: null,
+    reference: null,
+    isPosted: false
   })
 
-  const tabs = [{ label: labels.metals }, { label: labels.scrap, disabled: !store.recordId }]
+  const tabs = [{ label: labels.workOrder }, { label: labels.task, disabled: !store.recordId }]
 
   return (
     <>

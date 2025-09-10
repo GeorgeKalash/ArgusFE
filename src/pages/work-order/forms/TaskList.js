@@ -15,6 +15,8 @@ import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import PartsForm from './PartsForm'
+import LaborsForm from './LaborsForm'
+import Link from '@mui/material/Link'
 
 const TaskList = ({ store, labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,7 +33,6 @@ const TaskList = ({ store, labels, access }) => {
 
     return response
   }
-  console.log(access)
 
   const {
     query: { data },
@@ -51,7 +52,7 @@ const TaskList = ({ store, labels, access }) => {
     },
     {
       field: 'taskName',
-      headerName: labels.taskName,
+      headerName: labels.task,
       flex: 1
     },
     {
@@ -64,8 +65,6 @@ const TaskList = ({ store, labels, access }) => {
       headerName: labels.parts,
       flex: 1,
       cellRenderer: row => {
-        console.log(row)
-
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
             <IconButton
@@ -78,10 +77,10 @@ const TaskList = ({ store, labels, access }) => {
                     recordId,
                     access,
                     store,
-                    seqNo: row?.data?.seqNo
+                    data: row?.data
                   },
-
-                  title: labels.vendor
+                  width: 900,
+                  title: labels.parts
                 })
               }
             >
@@ -98,7 +97,23 @@ const TaskList = ({ store, labels, access }) => {
       cellRenderer: row => {
         return (
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
-            <IconButton size='small' onClick={() => confirmationPost(row.data)}>
+            <IconButton
+              size='small'
+              onClick={() =>
+                stack({
+                  Component: LaborsForm,
+                  props: {
+                    labels,
+                    recordId,
+                    access,
+                    store,
+                    data: row?.data
+                  },
+                  width: 900,
+                  title: labels.labors
+                })
+              }
+            >
               <Image src={`/images/buttonsicons/labor2Grid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
@@ -108,7 +123,37 @@ const TaskList = ({ store, labels, access }) => {
     {
       field: 'mark',
       headerName: labels.markAsComplete,
-      flex: 1
+      flex: 1,
+      cellRenderer: row => {
+        return (
+          <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
+            <Link
+              component='button'
+              sx={{
+                fontSize: 14,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                textDecorationColor: 'blue',
+                color: 'blue'
+              }}
+              onClick={async () => {
+                await postRequest({
+                  extension: RepairAndServiceRepository.WorkTask.set,
+                  record: JSON.stringify({
+                    ...row.data,
+                    status: row.data.status === 1 ? 2 : 1
+                  })
+                })
+                toast.success(platformLabels.Updated)
+
+                refetch()
+              }}
+            >
+              {row.data.status == 2 ? labels.incompleted : labels.completed}
+            </Link>
+          </Box>
+        )
+      }
     }
   ]
 
@@ -137,8 +182,7 @@ const TaskList = ({ store, labels, access }) => {
         access,
         store
       },
-
-      title: labels.vendor
+      title: labels.task
     })
   }
 
@@ -149,7 +193,7 @@ const TaskList = ({ store, labels, access }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} disableAdd={store.isPosted} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
@@ -160,9 +204,8 @@ const TaskList = ({ store, labels, access }) => {
           pageSize={50}
           onEdit={edit}
           pagination={false}
-          onDelete={del}
+          onDelete={!store.isPosted && del}
           maxAccess={access}
-          height={200}
         />
       </Grow>
     </VertLayout>

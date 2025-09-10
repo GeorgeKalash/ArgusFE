@@ -3,6 +3,7 @@ const service = 'RS.asmx/'
 export const RepairAndServiceRepository = {
   RepairName: {
     page: service + 'pageRNA',
+    qry: service + 'qryRNA',
     get: service + 'getRNA',
     set: service + 'setRNA',
     del: service + 'delRNA'
@@ -20,6 +21,12 @@ export const RepairAndServiceRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
+  InspectionTemplate: {
+    get2: service + 'get2ITE',
+    page: service + 'pageITE',
+    set2: service + 'set2ITE',
+    del: service + 'delITE'
+  },
   Department: {
     page: service + 'pageDEP',
     get: service + 'getDEP',
@@ -28,6 +35,7 @@ export const RepairAndServiceRepository = {
   },
   Warehouse: {
     page: service + 'pageWH',
+    qry: service + 'qryWH',
     set: service + 'setWH',
     get: service + 'getWH',
     del: service + 'delWH'
@@ -38,6 +46,24 @@ export const RepairAndServiceRepository = {
     get: service + 'getPMT',
     set: service + 'setPMT',
     del: service + 'delPMT'
+  },
+  SpManufacturer: {
+    page: service + 'pageSPM',
+    get: service + 'getSPM',
+    set: service + 'setSPM',
+    del: service + 'delSPM'
+  },
+  JobPosition: {
+    page: service + 'pagePOS',
+    get: service + 'getPOS',
+    set: service + 'setPOS',
+    del: service + 'delPOS'
+  },
+  SpCategory: {
+    page: service + 'pageSPC',
+    get: service + 'getSPC',
+    set: service + 'setSPC',
+    del: service + 'delSPC'
   },
   WorkOrder: {
     page: service + 'qryWO',
@@ -65,7 +91,16 @@ export const RepairAndServiceRepository = {
   },
   WorkOrderParts: {
     qry: service + 'qryWOP',
-    set: service + 'setWO',
-    del: service + 'delWO'
+    set2: service + 'set2WOP'
+  },
+  Part: {
+    snapshot: service + 'snapshotSP'
+  },
+  Labor: {
+    snapshot: service + 'snapshotLBR'
+  },
+  WorkOrderLabors: {
+    qry: service + 'qryWOL',
+    set2: service + 'set2WOL'
   }
 }

@@ -16,16 +16,20 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
+const TaskForm = ({ labels, access, store, seqNo, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [options, setOptions] = useState([])
+  const isPosted = store.isPosted
+  const isCompleted = record.status == 2
 
   const invalidate = useInvalidate({
     endpointId: RepairAndServiceRepository.WorkTask.qry
   })
+  const editMode = !!record?.seqNo
 
   const { formik } = useForm({
     maxAccess: access,
@@ -36,8 +40,11 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
       taskType: null,
       priority: null,
       status: 1,
+      rnId: null,
       pmtId: null,
-      notes: ''
+      notes: '',
+      eqNotes: '',
+      otherName: ''
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -45,11 +52,13 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
       priority: yup.number().required()
     }),
     onSubmit: async obj => {
+      const { eqNotes, dueDate, ...data } = obj
       await postRequest({
         extension: RepairAndServiceRepository.WorkTask.set,
+
         record: JSON.stringify({
-          ...obj,
-          dueDate: obj.dueDate ? formatDateToApi(obj.dueDate) : null
+          ...data,
+          dueDate: dueDate ? formatDateToApi(dueDate) : null
         })
       })
 
@@ -60,8 +69,6 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
   })
 
   useEffect(() => {
-    const equipmentId = 10
-
     const fetchData = async () => {
       const [rnRes, pmtRes] = await Promise.all([
         getRequest({
@@ -84,7 +91,6 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
         taskName: taskMap[item.pmtId] || null
       }))
 
-      console.log(merged)
       setOptions(merged)
     }
 
@@ -93,14 +99,14 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (store?.workOrderId && record.seqNo) {
+      if (record?.seqNo) {
         const res = await getRequest({
           extension: RepairAndServiceRepository.WorkTask.get,
-          parameters: `_workOrderId=${store.workOrderId}&_seqNo=${eqNo}`
+          parameters: `_workOrderId=${store.recordId}&_seqNo=${record.seqNo}`
         })
 
         if (res.record) {
-          formik.setValues(res.record)
+          formik.setValues({ ...res.record, dueDate: formatDateFromApi(res.record.dueDate) })
         }
       } else {
         formik.setFieldValue('seqNo', seqNo)
@@ -110,6 +116,8 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
     fetchData()
   }, [])
 
+  const taskNotes = options?.find(item => item.pmtId === formik?.values.pmtId)?.notes || ''
+
   return (
     <FormShell
       form={formik}
@@ -118,6 +126,7 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
       maxAccess={access}
       editMode={editMode}
       isCleared={false}
+      disabledSubmit={store.isPosted || isCompleted}
     >
       <VertLayout>
         <Grow>
@@ -128,12 +137,15 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
                   <ResourceComboBox
                     datasetId={DataSets.RS_WO_TASK_TYPE}
                     name='taskType'
-                    label={labels.priority}
+                    label={labels.type}
                     valueField='key'
                     displayField='value'
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    readOnly={isPosted || isCompleted}
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('taskType', newValue?.key || null)
+                      formik.setFieldValue('pmtId', null)
+                      formik.setFieldValue('rnId', null)
                     }}
                     error={formik.touched.taskType && Boolean(formik.errors.taskType)}
                     maxAccess={access}
@@ -144,23 +156,53 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
                   <ResourceComboBox
                     store={options}
                     name='pmtId'
-                    label={labels.taskRepair}
+                    label={`${labels.task} / ${labels.repair}`}
+                    hidden={formik.values.taskType == 2 || formik.values.taskType == 3}
                     valueField='pmtId'
                     displayField='taskName'
                     values={formik.values}
-                    required
+                    readOnly={!formik.values.taskType || isPosted || isCompleted}
                     maxAccess={access}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('pmtId', newValue?.recordId || null)
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('pmtId', newValue?.pmtId || null)
                     }}
                     error={formik.touched.pmtId && Boolean(formik.errors.pmtId)}
                   />
+                  <ResourceComboBox
+                    endpointId={RepairAndServiceRepository.RepairName.qry}
+                    name='rnId'
+                    label={`${labels.task} / ${labels.repair}`}
+                    hidden={formik.values.taskType == 1 || formik.values.taskType == 3 || !formik.values.taskType}
+                    valueField='recordId'
+                    displayField='name'
+                    readOnly={isPosted || isCompleted}
+                    values={formik.values}
+                    maxAccess={access}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('rnId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.rnId && Boolean(formik.errors.rnId)}
+                  />
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='otherName'
+                      label={`${labels.task} / ${labels.repair}`}
+                      value={formik.values.otherName}
+                      maxAccess={access}
+                      readOnly={isPosted || isCompleted}
+                      hidden={formik.values.taskType == 2 || formik.values.taskType == 1 || !formik.values.taskType}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('otherName', '')}
+                      error={formik.touched.otherName && Boolean(formik.errors.otherName)}
+                    />
+                  </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='dueDate'
-                    label={labels.dueDate}
+                    label={labels.dueBy}
                     value={formik.values?.dueDate}
+                    readOnly={isPosted || isCompleted}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('dueDate', '')}
                     error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
@@ -172,6 +214,7 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
                     datasetId={DataSets.RS_PRIORITY}
                     name='priority'
                     label={labels.priority}
+                    readOnly={isPosted || isCompleted}
                     valueField='key'
                     displayField='value'
                     values={formik.values}
@@ -186,8 +229,9 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
-                    label={labels.remarks}
+                    label={labels.notes}
                     value={formik.values.notes}
+                    readOnly={isPosted || isCompleted}
                     rows={4}
                     editMode={editMode}
                     maxAccess={access}
@@ -207,15 +251,13 @@ const TaskForm = ({ labels, editMode, access, store, seqNo }) => {
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='notes'
-                    label={labels.remarks}
-                    value={formik.values.notes}
+                    name='eqNotes'
+                    label={labels.taskNotes}
+                    value={taskNotes}
                     rows={3}
-                    editMode={editMode}
+                    hidden={formik.values.taskType != 1}
+                    readOnly
                     maxAccess={access}
-                    onChange={e => formik.setFieldValue('notes', e.target.value)}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
                 </Grid>
               </Grid>
