@@ -319,7 +319,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     displayField='name'
                     valueShow='jobRef'
                     columnsInDropDown={[
-                      { key: 'reference', value: 'Job Order' },
+                      { key: 'jobRef', value: 'Job Order' },
                       { key: 'designRef', value: 'Design Ref' }
                     ]}
                     readOnly={!formik?.values?.workCenterId || isPosted || editMode}
@@ -329,9 +329,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     onChange={async (event, newValue) => {
                       formik.setValues({
                         ...formik.values,
-                        jobId: newValue?.recordId || null,
-                        jobRef: newValue?.reference || '',
-                        jobName: newValue?.name || '',
+                        jobId: newValue?.jobId || null,
+                        jobRef: newValue?.jobRef || '',
                         routingId: newValue?.routingId || null,
                         designRef: newValue?.designRef || '',
                         pgItemName: newValue?.itemName || '',
@@ -347,12 +346,12 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                         laborName: ''
                       })
 
-                      if (newValue) {
+                      if (newValue?.itemId) {
                         const res = await getRequest({
                           extension: InventoryRepository.Item.get,
                           parameters: `_recordId=${newValue?.itemId}`
                         })
-                        formik.setFieldValue('itemCategoryName', res.record.categoryName || null)
+                        formik.setFieldValue('itemCategoryName', res?.record?.categoryName || null)
                       }
                     }}
                     errorCheck={'jobId'}
