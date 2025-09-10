@@ -137,6 +137,7 @@ export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
                 valueField='recordId'
                 displayField='name'
                 required
+                readOnly={taskId}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('taskId', newValue?.recordId || null)
