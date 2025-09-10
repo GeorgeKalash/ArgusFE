@@ -1,100 +1,156 @@
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 
-const MatrixGrid = () => {
+const MatrixGrid = ({ intersectionValue = 'X', length = 5 }) => {
   const gridRef = useRef(null)
-
-  const [selectedRow, setSelectedRow] = useState(null)
+  const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
 
-  const [rowData, setRowData] = useState(
-    Array.from({ length: 5 }, (_, rIndex) => {
-      const row = { rowLabel: `Row ${rIndex + 1}` }
-      for (let c = 1; c <= 5; c++) {
-        row[`col${c}`] = `R${rIndex + 1}C${c}`
-      }
-
-      return row
-    })
+  // rowData must stay as state to allow updates
+  const [rowData, setRowData] = useState(() =>
+    length === 0
+      ? []
+      : Array.from({ length }, (_, rIndex) => ({
+          recordId: rIndex,
+          rowLabel: `Work center ${rIndex + 1}`,
+          ...Object.fromEntries(Array.from({ length }, (_, cIndex) => [`col${cIndex + 1}`, '']))
+        }))
   )
 
   const columnDefs = useMemo(() => {
-    const cols = [{ headerName: 'Row', field: 'rowLabel', pinned: 'left', sortable: false }]
-    for (let i = 1; i <= 5; i++) {
-      cols.push({ headerName: `Col ${i}`, field: `col${i}`, sortable: false })
+    const cols = [
+      {
+        field: 'rowLabel',
+        headerName: '',
+        pinned: 'left',
+        sortable: false,
+        headerStyle: { fontWeight: 'bold' }
+      }
+    ]
+
+    for (let i = 0; i < length; i++) {
+      cols.push({
+        field: `col${i + 1}`,
+        headerName: `Work center ${i + 1}`,
+        sortable: false,
+        headerStyle: { fontWeight: 'bold' },
+        valueGetter: params => params.data?.[`col${i + 1}`] || '',
+        cellStyle: params => {
+          const rowId = params.data?.recordId ?? -1
+
+          if (rowId === i) {
+            return {
+              backgroundColor: '#d3d3d3',
+              color: '#000',
+              pointerEvents: 'none',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }
+          }
+
+          if (params.value === intersectionValue) {
+            return {
+              backgroundColor: '#ffff99',
+              fontWeight: 'bold',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }
+          }
+
+          if (selectedRowId === rowId || selectedCol === params.colDef.field) {
+            return { backgroundColor: '#e0f7fa', display: 'flex', justifyContent: 'center', alignItems: 'center' }
+          }
+
+          return {
+            backgroundColor: '#fff',
+            color: '#000',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }
+        }
+      })
     }
 
     return cols
-  }, [])
+  }, [length, selectedRowId, selectedCol, intersectionValue])
 
-  // Row label click
+  useEffect(() => {
+    const api = gridRef.current?.api
+    if (!api) return
+    api.refreshCells({ force: true, suppressFlash: true })
+    api.refreshHeader()
+  }, [selectedRowId, selectedCol])
+
   const onCellClicked = params => {
-    if (params.colDef.field === 'rowLabel') setSelectedRow(params.rowIndex)
-  }
+    const { colDef, data } = params
+    const colId = colDef.field
 
-  // Column header click
-  const onColumnHeaderClicked = params => {
-    const colId = params.column.getColId()
-    if (colId === 'rowLabel') return
-    if (selectedRow === null) return // no row selected
+    if (!data) return
 
-    const rowIndex = selectedRow
-    const colIndex = parseInt(colId.replace('col', ''), 10) - 1
-
-    // Skip diagonal cells silently
-    if (rowIndex === colIndex) {
-      setSelectedRow(null)
-      setSelectedCol(null)
+    if (colId === 'rowLabel') {
+      if (selectedCol) {
+        const colIndex = parseInt(selectedCol.replace('col', ''), 10) - 1
+        if (data.recordId !== colIndex) {
+          setRowData(prev =>
+            prev.map(row => (row.recordId === data.recordId ? { ...row, [selectedCol]: intersectionValue } : row))
+          )
+        }
+        setSelectedRowId(null)
+        setSelectedCol(null)
+      } else {
+        setSelectedRowId(data.recordId)
+      }
 
       return
     }
 
-    // Modify intersection
-    setRowData(prev => {
-      const updated = [...prev]
-      updated[rowIndex] = {
-        ...updated[rowIndex],
-        [colId]: '✅ Modified'
-      }
-
-      return updated
-    })
-
-    // Reset selection
-    setSelectedRow(null)
-    setSelectedCol(null)
+    const colIndex = parseInt(colId.replace('col', ''), 10) - 1
+    if (data.recordId === colIndex) return
+    setRowData(prev => prev.map(row => (row.recordId === data.recordId ? { ...row, [colId]: intersectionValue } : row)))
   }
 
-  const getRowClass = params => (params.node.rowIndex === selectedRow ? 'highlight-row' : '')
+  const onColumnHeaderClicked = params => {
+    const colId = params.column.getColId()
+    if (colId === 'rowLabel') return
+
+    if (selectedRowId !== null) {
+      const rowId = selectedRowId
+      const colIndex = parseInt(colId.replace('col', ''), 10) - 1
+      if (rowId !== colIndex) {
+        setRowData(prev => prev.map(row => (row.recordId === rowId ? { ...row, [colId]: intersectionValue } : row)))
+      }
+      setSelectedRowId(null)
+      setSelectedCol(null)
+    } else {
+      setSelectedCol(colId)
+    }
+  }
 
   const cellClassRules = {
-    'highlight-intersection': params =>
-      params.node.rowIndex === selectedRow && params.colDef.field === selectedCol && selectedCol !== 'rowLabel',
-    'disabled-cell': params => {
-      const colIndex = parseInt(params.colDef.field.replace('col', ''), 10) - 1
-
-      return params.node.rowIndex === colIndex
-    }
+    'highlight-col': params => selectedCol && params.colDef.field === selectedCol,
+    'modified-cell': params => params.value === intersectionValue
   }
 
   return (
     <div style={{ height: 400, width: '100%' }} className='ag-theme-alpine'>
       <style>{`
+        .bold-header {
+          font-weight: bold !important;
+        }
         .highlight-row {
           background-color: #e0f7fa !important;
         }
-
-        .highlight-intersection {
-          background-color: #ffcc80 !important;
-          font-weight: bold;
+        .highlight-col {
+          background-color: #e0f7fa !important;
         }
-
-        .disabled-cell {
-          background-color: #f5f5f5 !important;
-          color: #aaa;
-          pointer-events: none;
+        .modified-cell {
+          background-color: #ffff99 !important;
+          font-weight: bold !important;
         }
       `}</style>
 
@@ -102,14 +158,14 @@ const MatrixGrid = () => {
         ref={gridRef}
         rowData={rowData}
         columnDefs={columnDefs}
-        onCellClicked={onCellClicked}
-        onColumnHeaderClicked={col => {
-          setSelectedCol(col.column.getColId())
-          onColumnHeaderClicked(col)
+        defaultColDef={{
+          sortable: false,
+          headerClass: params => (selectedCol === params.column.getColId() ? 'highlight-col-header' : 'bold-header')
         }}
+        onCellClicked={onCellClicked}
+        onColumnHeaderClicked={onColumnHeaderClicked}
         suppressRowClickSelection={true}
-        suppressSorting={true}
-        getRowClass={getRowClass}
+        getRowClass={params => (params.data?.recordId === selectedRowId ? 'highlight-row' : '')}
         cellClassRules={cellClassRules}
       />
     </div>
