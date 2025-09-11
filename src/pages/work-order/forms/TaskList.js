@@ -74,7 +74,6 @@ const TaskList = ({ store, labels, access }) => {
                   Component: PartsForm,
                   props: {
                     labels,
-                    recordId,
                     access,
                     store,
                     data: row?.data
@@ -84,7 +83,7 @@ const TaskList = ({ store, labels, access }) => {
                 })
               }
             >
-              <Image src={`/images/buttonsicons/partGrid.png`} width={18} height={18} alt='post.png' />
+              <Image src={`/images/buttonsIcons/partGrid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
@@ -104,7 +103,6 @@ const TaskList = ({ store, labels, access }) => {
                   Component: LaborsForm,
                   props: {
                     labels,
-                    recordId,
                     access,
                     store,
                     data: row?.data
@@ -114,7 +112,7 @@ const TaskList = ({ store, labels, access }) => {
                 })
               }
             >
-              <Image src={`/images/buttonsicons/labor2Grid.png`} width={18} height={18} alt='post.png' />
+              <Image src={`/images/buttonsIcons/labor2Grid.png`} width={18} height={18} alt='post.png' />
             </IconButton>
           </Box>
         )
@@ -171,17 +169,19 @@ const TaskList = ({ store, labels, access }) => {
     openForm(obj)
   }
 
+  const maxSeqNo = (data?.list?.length ? Math.max(...data.list.map(item => item.seqNo)) : 0) + 1
+
   function openForm(record) {
     stack({
       Component: TaskForm,
       props: {
         labels,
-        recordId: record?.recordId,
-        seqNo: data.list.length + 1,
+        seqNo: maxSeqNo,
         record,
         access,
         store
       },
+      height: 400,
       title: labels.task
     })
   }
@@ -201,7 +201,6 @@ const TaskList = ({ store, labels, access }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          pageSize={50}
           onEdit={edit}
           pagination={false}
           onDelete={!store.isPosted && del}

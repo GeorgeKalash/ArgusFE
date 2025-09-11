@@ -104,7 +104,6 @@ const WorkOrder = () => {
     })
     invalidate()
     toast.success(platformLabels.Deleted)
-    x
   }
 
   function openForm(recordId) {
@@ -116,7 +115,7 @@ const WorkOrder = () => {
         access
       },
       width: 1000,
-      height: 750,
+      height: 710,
       title: labels.workOrder
     })
   }

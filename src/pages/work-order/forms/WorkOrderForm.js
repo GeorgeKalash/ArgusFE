@@ -23,7 +23,7 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function WorkOrderForm({ labels, access, setStore, store }) {
+export default function WorkOrderForm({ labels, access, setStore, store, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -49,7 +49,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       equipmentName: '',
       date: new Date(),
       dueDate: null,
-      schedule: null,
+      scheduled: new Date(),
       priority: 2,
       wotId: null,
       progress: 1,
@@ -57,7 +57,6 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       status: 1
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       equipmentId: yup.number().required(),
       wotId: yup.number().required(),
@@ -67,7 +66,6 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
 
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: RepairAndServiceRepository.WorkOrder.set,
         extension: RepairAndServiceRepository.WorkOrder.set,
         record: JSON.stringify(obj)
       })
@@ -111,7 +109,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
 
   const onPost = async () => {
     await postRequest({
-      extension: RepairAndServiceRepository.WorkTask.post,
+      extension: RepairAndServiceRepository.WorkOrder.post,
       record: JSON.stringify({
         ...formik?.values,
         date: formatDateToApi(formik?.values?.date),
@@ -121,9 +119,8 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
     })
 
     toast.success(platformLabels.Posted)
-    refetchForm(formik.values.recordId)
-    invalidate()
     window.close()
+    invalidate()
   }
 
   const actions = [
@@ -132,7 +129,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode,
-      datasetId: ResourceIds.GLBalanceTransferBetweenAccounts
+      datasetId: ResourceIds.GLWorkOrder
     },
     {
       key: 'Unlocked',
@@ -147,6 +144,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       disabled: !editMode || isRaw
     }
   ]
+  console.log(7 - formik.values?.currentPM?.length)
 
   return (
     <FormShell
@@ -156,41 +154,45 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkOrder}`}
-                filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                name='dtId'
-                label={labels.docType}
-                readOnly={editMode}
-                valueField='recordId'
-                displayField='name'
-                values={formik.values}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId || null)
-                  changeDT(newValue)
-                }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                maxAccess={!editMode && maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik.values.reference}
-                readOnly={editMode || !formik.values.dtId}
-                maxAccess={!editMode && maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.WorkOrder}`}
+                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
+                    name='dtId'
+                    label={labels.docType}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      changeDT(newValue)
+                    }}
+                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    maxAccess={!editMode && maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='reference'
+                    label={labels.reference}
+                    value={formik.values.reference}
+                    readOnly={editMode}
+                    maxAccess={!editMode && maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('reference', '')}
+                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceLookup
@@ -202,6 +204,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 displayField='reference'
                 valueShow='equipmentRef'
                 secondValueShow='equipmentName'
+                readOnly={isPosted}
                 form={formik}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -218,40 +221,46 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <CustomDatePicker
-                name='date'
-                label={labels.date}
-                value={formik.values?.date}
-                required
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('date', '')}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='scheduled'
-                label={labels.Scheduled}
-                value={formik.values?.scheduled}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('scheduled', null)}
-                error={formik.touched.scheduled && Boolean(formik.errors.scheduled)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='dueDate'
-                label={labels.dueBy}
-                value={formik.values?.dueDate}
-                onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('dueDate', null)}
-                error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
-                maxAccess={maxAccess}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='date'
+                    label={labels.date}
+                    value={formik.values?.date}
+                    required
+                    readOnly={isPosted}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('date', null)}
+                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='scheduled'
+                    label={labels.Scheduled}
+                    value={formik.values?.scheduled}
+                    readOnly={isPosted}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('scheduled', null)}
+                    error={formik.touched.scheduled && Boolean(formik.errors.scheduled)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='dueDate'
+                    label={labels.dueBy}
+                    value={formik.values?.dueDate}
+                    readOnly={isPosted}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('dueDate', null)}
+                    error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
@@ -260,6 +269,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 label={labels.priority}
                 valueField='key'
                 displayField='value'
+                readOnly={isPosted}
                 required
                 values={formik.values}
                 onChange={(event, newValue) => {
@@ -277,6 +287,7 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 values={formik.values}
                 valueField='recordId'
                 displayField='name'
+                readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('wotId', newValue?.recordId || null)
@@ -290,7 +301,8 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
                 name='description'
                 label={labels.notes}
                 value={formik.values.description}
-                rows={4}
+                readOnly={isPosted}
+                rows={2}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('description', e.target.value)}
                 onClear={() => formik.setFieldValue('description', '')}
@@ -298,52 +310,53 @@ export default function WorkOrderForm({ labels, access, setStore, store }) {
               />
             </Grid>
             <Grid item xs={6}>
-              <ResourceComboBox
-                datasetId={DataSets.RS_WO_PROGRESS}
-                name='progress'
-                label={labels.progress}
-                valueField='key'
-                displayField='value'
-                required
-                values={formik.values}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('progress', newValue?.key || null)
-                }}
-                error={formik.touched.progress && Boolean(formik.errors.progress)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='currentPM'
-                label={labels.cpm}
-                value={formik.values?.currentPM}
-                readOnly={!formik.values?.equipmentId}
-                maxLength={6}
-                decimalScale={3}
-                required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('currentPM', '')}
-                maxAccess={maxAccess}
-                error={formik.touched.currentPM && Boolean(formik.errors.currentPM)}
-              />
-            </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <CustomNumberField
-                name='currentSM'
-                label={labels.csm}
-                value={formik.values?.currentSM}
-                readOnly={!formik.values?.equipmentId}
-                maxLength={6}
-                decimalScale={3}
-                required
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('currentSM', '')}
-                maxAccess={maxAccess}
-                error={formik.touched.currentSM && Boolean(formik.errors.currentSM)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    datasetId={DataSets.RS_WO_PROGRESS}
+                    name='progress'
+                    readOnly={isPosted}
+                    label={labels.progress}
+                    valueField='key'
+                    displayField='value'
+                    required
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('progress', newValue?.key || null)
+                    }}
+                    error={formik.touched.progress && Boolean(formik.errors.progress)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='currentPM'
+                    label={labels.cpm}
+                    value={formik.values?.currentPM}
+                    readOnly={!formik.values?.equipmentId || isPosted}
+                    maxLength={9}
+                    decimalScale={2}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('currentPM', '')}
+                    maxAccess={maxAccess}
+                    error={formik.touched.currentPM && Boolean(formik.errors.currentPM)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='currentSM'
+                    label={labels.csm}
+                    value={formik.values?.currentSM}
+                    readOnly={!formik.values?.equipmentId || isPosted}
+                    maxLength={9}
+                    decimalScale={2}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('currentSM', '')}
+                    maxAccess={maxAccess}
+                    error={formik.touched.currentSM && Boolean(formik.errors.currentSM)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Grow>

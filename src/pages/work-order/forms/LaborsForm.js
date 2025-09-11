@@ -18,8 +18,7 @@ const LaborsForm = ({
   data: { seqNo, taskName, status },
   access,
   labels,
-  recordId,
-  store: { reference, isPosted }
+  store: { reference, isPosted, recordId }
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -47,7 +46,7 @@ const LaborsForm = ({
           ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
           .map(({ id, laborRef, firstName, lastName, rate, ...item }, index) => ({
             laborSeqNo: index + 1,
-            rate: rate || 0,
+            rate: rate,
             ...item
           }))
       }
@@ -83,6 +82,9 @@ const LaborsForm = ({
           { from: 'recordId', to: 'laborId' }
         ],
         displayFieldWidth: 5
+      },
+      async onChange({ row: { update, newRow } }) {
+        update({ rate: newRow.rate || 0 })
       }
     },
     {
@@ -107,7 +109,8 @@ const LaborsForm = ({
       label: labels.hours,
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        decimalScale: 2,
+        allowNegative: false
       },
       async onChange({ row: { update, newRow } }) {
         update({ total: newRow.hours * newRow.rate || 0 })
@@ -133,7 +136,7 @@ const LaborsForm = ({
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (recordId && seqNo) {
         const response = await getRequest({
           extension: RepairAndServiceRepository.WorkOrderLabors.qry,
           parameters: `_workOrderId=${recordId}&_seqNo=${seqNo}`
@@ -180,7 +183,7 @@ const LaborsForm = ({
               columns={columns}
               maxAccess={access}
               disabled={isPosted || isCompleted}
-              allowDelete={isPosted || isCompleted ? false : true}
+              allowDelete={!isPosted && !isCompleted}
             />
           </Grow>
         </Grow>

@@ -14,7 +14,7 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import { createConditionalSchema } from 'src/lib/validation'
 import { Grid } from '@mui/material'
 
-const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, data: { seqNo, taskName, status } }) => {
+const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, data: { seqNo, taskName, status } }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const isCompleted = status === 2
@@ -74,7 +74,7 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
           { from: 'name', to: 'partName' },
           { from: 'recordId', to: 'sparePartId' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 3
       }
     },
     {
@@ -91,7 +91,8 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
       label: labels.qty,
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        decimalScale: 2,
+        allowNegative: false
       },
       async onChange({ row: { update, newRow } }) {
         update({ extendedPrice: newRow.qty * newRow.unitPrice })
@@ -186,7 +187,7 @@ const PartsForm = ({ access, labels, recordId, store: { reference, isPosted }, d
               columns={columns}
               maxAccess={access}
               disabled={isPosted || isCompleted}
-              allowDelete={isPosted || isCompleted ? false : true}
+              allowDelete={!isPosted && !isCompleted}
             />
           </Grow>
         </Grow>

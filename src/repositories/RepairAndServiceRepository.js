@@ -69,7 +69,8 @@ export const RepairAndServiceRepository = {
     page: service + 'qryWO',
     get: service + 'getWO',
     set: service + 'setWO',
-    del: service + 'delWO'
+    del: service + 'delWO',
+    post: service + 'postWO'
   },
   Equipment: {
     snapshot: service + 'snapshotEQP'

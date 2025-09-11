@@ -621,6 +621,7 @@ export const ResourceIds = {
   IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
+  GLWorkOrder: 45600,
 
   //MCR
   MCRSalesInvoice: 51607,

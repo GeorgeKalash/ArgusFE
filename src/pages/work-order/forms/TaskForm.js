@@ -24,7 +24,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
   const { platformLabels } = useContext(ControlContext)
   const [options, setOptions] = useState([])
   const isPosted = store.isPosted
-  const isCompleted = record.status == 2
+  const isCompleted = record?.status == 2
 
   const invalidate = useInvalidate({
     endpointId: RepairAndServiceRepository.WorkTask.qry
@@ -35,7 +35,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
     maxAccess: access,
     initialValues: {
       workOrderId: store.recordId,
-      seqNo: null,
+      seqNo: seqNo,
       dueDate: null,
       taskType: null,
       priority: null,
@@ -46,7 +46,6 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
       eqNotes: '',
       otherName: ''
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       taskType: yup.number().required(),
       priority: yup.number().required()
@@ -70,28 +69,12 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [rnRes, pmtRes] = await Promise.all([
-        getRequest({
-          extension: RepairAndServiceRepository.EquipmentType.qry,
-          parameters: `_equipmentId=${store?.equipmentId}`
-        }),
-        getRequest({
-          extension: RepairAndServiceRepository.PreventiveMaintenanceTasks.qry,
-          parameters: ``
-        })
-      ])
-
-      const taskMap = {}
-      pmtRes?.list.forEach(t => {
-        taskMap[t.recordId] = t.name
+      const result = await getRequest({
+        extension: RepairAndServiceRepository.EquipmentType.qry,
+        parameters: `_equipmentId=${store?.equipmentId}`
       })
 
-      const merged = rnRes?.list.map(item => ({
-        ...item,
-        taskName: taskMap[item.pmtId] || null
-      }))
-
-      setOptions(merged)
+      setOptions(result?.list)
     }
 
     fetchData()
@@ -105,11 +88,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
           parameters: `_workOrderId=${store.recordId}&_seqNo=${record.seqNo}`
         })
 
-        if (res.record) {
-          formik.setValues({ ...res.record, dueDate: formatDateFromApi(res.record.dueDate) })
-        }
-      } else {
-        formik.setFieldValue('seqNo', seqNo)
+        formik.setValues({ ...res.record, dueDate: formatDateFromApi(res.record.dueDate) })
       }
     }
 
@@ -117,6 +96,8 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
   }, [])
 
   const taskNotes = options?.find(item => item.pmtId === formik?.values.pmtId)?.notes || ''
+
+  console.log(formik)
 
   return (
     <FormShell
@@ -159,11 +140,12 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
                     label={`${labels.task} / ${labels.repair}`}
                     hidden={formik.values.taskType == 2 || formik.values.taskType == 3}
                     valueField='pmtId'
-                    displayField='taskName'
+                    displayField='pmtName'
                     values={formik.values}
                     readOnly={!formik.values.taskType || isPosted || isCompleted}
                     maxAccess={access}
                     onChange={(_, newValue) => {
+                      console.log(newValue)
                       formik.setFieldValue('pmtId', newValue?.pmtId || null)
                     }}
                     error={formik.touched.pmtId && Boolean(formik.errors.pmtId)}
@@ -183,19 +165,17 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
                     }}
                     error={formik.touched.rnId && Boolean(formik.errors.rnId)}
                   />
-                  <Grid item xs={12}>
-                    <CustomTextField
-                      name='otherName'
-                      label={`${labels.task} / ${labels.repair}`}
-                      value={formik.values.otherName}
-                      maxAccess={access}
-                      readOnly={isPosted || isCompleted}
-                      hidden={formik.values.taskType == 2 || formik.values.taskType == 1 || !formik.values.taskType}
-                      onChange={formik.handleChange}
-                      onClear={() => formik.setFieldValue('otherName', '')}
-                      error={formik.touched.otherName && Boolean(formik.errors.otherName)}
-                    />
-                  </Grid>
+                  <CustomTextField
+                    name='otherName'
+                    label={`${labels.task} / ${labels.repair}`}
+                    value={formik.values.otherName}
+                    maxAccess={access}
+                    readOnly={isPosted || isCompleted}
+                    hidden={formik.values.taskType == 2 || formik.values.taskType == 1 || !formik.values.taskType}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('otherName', '')}
+                    error={formik.touched.otherName && Boolean(formik.errors.otherName)}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
@@ -204,7 +184,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
                     value={formik.values?.dueDate}
                     readOnly={isPosted || isCompleted}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('dueDate', '')}
+                    onClear={() => formik.setFieldValue('dueDate', null)}
                     error={formik.touched.dueDate && Boolean(formik.errors.dueDate)}
                     maxAccess={access}
                   />
@@ -232,7 +212,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
                     label={labels.notes}
                     value={formik.values.notes}
                     readOnly={isPosted || isCompleted}
-                    rows={4}
+                    rows={3}
                     editMode={editMode}
                     maxAccess={access}
                     onChange={e => formik.setFieldValue('notes', e.target.value)}
