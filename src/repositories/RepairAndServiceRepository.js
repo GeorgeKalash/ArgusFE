@@ -52,6 +52,7 @@ export const RepairAndServiceRepository = {
   },
   JobPosition: {
     page: service + 'pagePOS',
+    qry: service + 'qryPOS',
     get: service + 'getPOS',
     set: service + 'setPOS',
     del: service + 'delPOS'
@@ -73,5 +74,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getMTT',
     set: service + 'setMTT',
     del: service + 'delMTT'
+  },
+  RsLabors: {
+    page: service + 'pageLBR',
+    set: service + 'setLBR',
+    get: service + 'getLBR',
+    del: service + 'delLBR'
   }
 }

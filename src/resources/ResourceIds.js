@@ -574,6 +574,7 @@ export const ResourceIds = {
   JobPosition: 45103,
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
+  RsLabors: 45104,
 
   // GL
   GLSalesInvoice: 51604,
