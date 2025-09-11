@@ -89,7 +89,10 @@ const TargetForm = ({ labels, maxAccess, store }) => {
       },
       updateOn: 'blur',
       onChange: ({ row: { update, newRow } }) => {
-        update('targetAmount', newRow.targetAmount || 0)
+        update('targetAmount', newRow?.targetAmount || 0)
+      },
+      onClear: ({ row: { update } }) => {
+        update('targetAmount', 0)
       }
     }
   ]
