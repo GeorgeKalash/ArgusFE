@@ -63,16 +63,12 @@ const DimensionsValues = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: FinancialRepository.DimensionValue.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {
-      toast.error(platformLabels.Error)
-    }
+    await postRequest({
+      extension: FinancialRepository.DimensionValue.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const add = () => {
@@ -90,7 +86,7 @@ const DimensionsValues = () => {
       Component: DimValuesForm,
       props: {
         labels: _labels,
-        id,
+        recordId: id,
         maxAccess: access,
         invalidate,
         dimValue: filters?.qry

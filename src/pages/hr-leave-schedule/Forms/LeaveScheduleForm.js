@@ -14,7 +14,7 @@ import { LoanManagementRepository } from 'src/repositories/LoanManagementReposit
 import { DataSets } from 'src/resources/DataSets'
 
 const iconOptions = [
-  { key: 'Aid-kit', value: 'Aid-kit', icon: '/images/icons/project-icons/Aid-kit.png' },
+  { key: 'Aid-kit', value: 'Aid-kit', icon: '/images/icons/project-icons/Aid-Kit.png' },
   { key: 'Birthday', value: 'Birthday', icon: '/images/icons/project-icons/Birthday.png' },
   { key: 'Calendar', value: 'Calendar', icon: '/images/icons/project-icons/Calendar.png' },
   { key: 'Graduation', value: 'Graduation', icon: '/images/icons/project-icons/Graduation.png' },

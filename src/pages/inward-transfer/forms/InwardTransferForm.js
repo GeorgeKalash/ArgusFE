@@ -122,7 +122,6 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validate: values => {
       const errors = {}

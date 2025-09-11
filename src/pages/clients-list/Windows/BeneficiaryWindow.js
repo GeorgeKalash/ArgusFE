@@ -1,5 +1,5 @@
 import Table from 'src/components/Shared/Table'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -17,13 +17,10 @@ import historyIcon from '/public/images/TableIcons/history.png'
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
 
-  const [initialValues, setInitialData] = useState({
-    recordId: clientId
-  })
-
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: clientId
+    },
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: () => {}

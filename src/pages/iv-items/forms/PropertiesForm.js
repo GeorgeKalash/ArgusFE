@@ -1,7 +1,5 @@
 import { useState, useContext, useEffect } from 'react'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -100,7 +98,6 @@ const PropertiesForm = ({ store, maxAccess }) => {
   const { formik } = useForm({
     initialValues: {},
 
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async () => {
       const submissionData = dimensions.map(dimension => {

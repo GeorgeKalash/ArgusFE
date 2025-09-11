@@ -23,7 +23,6 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     initialValues: { recordId: null, min: '', max: '' },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -36,39 +35,35 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
       max: yup.string().required(' ')
     }),
     onSubmit: async obj => {
-      try {
-        const recordId = obj.recordId
+      const recordId = obj.recordId
 
-        const response = await postRequest({
-          extension: RemittanceSettingsRepository.SalaryRange.set,
-          record: JSON.stringify(obj)
+      const response = await postRequest({
+        extension: RemittanceSettingsRepository.SalaryRange.set,
+        record: JSON.stringify(obj)
+      })
+
+      if (!recordId) {
+        toast.success('Record Added Successfully')
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!recordId) {
-          toast.success('Record Added Successfully')
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else toast.success('Record Edited Successfully')
-        setEditMode(true)
-        invalidate()
-      } catch (exception) {}
+      } else toast.success('Record Edited Successfully')
+      setEditMode(true)
+      invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.SalaryRange.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.SalaryRange.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

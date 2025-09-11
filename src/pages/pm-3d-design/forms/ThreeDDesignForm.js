@@ -81,7 +81,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       collectionId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       source: yup.number().required(),
