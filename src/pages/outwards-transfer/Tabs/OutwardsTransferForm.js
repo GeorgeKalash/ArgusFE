@@ -192,7 +192,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     name='reference'
                     label={labels.Reference}
                     value={formik?.values?.reference}
-                    maxAccess={false && maxAccess}
+                    maxAccess={maxAccess}
                     maxLength='30'
                     readOnly
                   />
