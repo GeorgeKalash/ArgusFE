@@ -31,36 +31,33 @@ const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resour
         unpost: false
       }
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
-      try {
-        const updatedData = data.list.map(item => ({
-          moduleId: moduleId,
-          resourceId: item.resourceId || item.key,
-          accessFlags: obj.accessFlags,
-          sgId: item.sgId
-        }))
-        if (resourceId == ResourceIds.SecurityGroup) {
-          updatedData.forEach(async item => {
-            await postRequest({
-              extension: AccessControlRepository.ModuleClass.set,
-              record: JSON.stringify(item)
-            })
+      const updatedData = data.list.map(item => ({
+        moduleId: moduleId,
+        resourceId: item.resourceId || item.key,
+        accessFlags: obj.accessFlags,
+        sgId: item.sgId
+      }))
+      if (resourceId == ResourceIds.SecurityGroup) {
+        updatedData.forEach(async item => {
+          await postRequest({
+            extension: AccessControlRepository.ModuleClass.set,
+            record: JSON.stringify(item)
           })
-        }
-        if (resourceId == ResourceIds.GlobalAuthorization) {
-          updatedData.forEach(async item => {
-            await postRequest({
-              extension: AccessControlRepository.AuthorizationResourceGlobal.set,
-              record: JSON.stringify(item)
-            })
+        })
+      }
+      if (resourceId == ResourceIds.GlobalAuthorization) {
+        updatedData.forEach(async item => {
+          await postRequest({
+            extension: AccessControlRepository.AuthorizationResourceGlobal.set,
+            record: JSON.stringify(item)
           })
-        }
-        toast.success(platformLabels.Edited)
-        invalidate()
-        window.close()
-      } catch (error) {}
+        })
+      }
+      toast.success(platformLabels.Edited)
+      invalidate()
+      window.close()
     }
   })
 

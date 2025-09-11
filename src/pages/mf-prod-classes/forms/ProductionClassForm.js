@@ -12,6 +12,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ProductionClassForm({
   labels,
@@ -21,63 +22,50 @@ export default function ProductionClassForm({
   editMode,
   setEditMode
 }) {
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    name: '',
-    standardId: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionClass.page
   })
 
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      name: '',
+      standardId: ''
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      console.log(obj)
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: ManufacturingRepository.ProductionClass.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj,
-          recordId: response.recordId
-        })
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
         setSelectedRecordId(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
+        setEditMode(true)
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: ManufacturingRepository.ProductionClass.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: ManufacturingRepository.ProductionClass.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        formik.setValues({ ...res.record })
       }
     })()
   }, [])

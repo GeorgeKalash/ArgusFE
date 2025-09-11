@@ -35,7 +35,6 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
       countryId: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -44,28 +43,24 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: CashBankRepository.CbBank.set,
-          record: JSON.stringify(obj)
+      const response = await postRequest({
+        extension: CashBankRepository.CbBank.set,
+        record: JSON.stringify(obj)
+      })
+
+      !obj.recordId &&
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
+      !obj.recordId &&
+        setStore({
+          recordId: response.recordId,
+          name: obj.name
+        })
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-          setStore({
-            recordId: response.recordId,
-            name: obj.name
-          })
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -73,19 +68,17 @@ export default function CbBanksForms({ labels, maxAccess, store, setStore }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.CbBank.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.CbBank.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+      }
     })()
   }, [recordId])
 

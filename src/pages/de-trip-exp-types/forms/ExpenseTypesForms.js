@@ -29,7 +29,6 @@ export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
       reference: '',
       description: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

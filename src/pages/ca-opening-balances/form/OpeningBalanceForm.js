@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,11 +12,12 @@ import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function OpeningBalanceForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.OpeningBalance.page
@@ -24,7 +25,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
 
   const { formik } = useForm({
     initialValues: {
-      recordId: recordId || null,
+      recordId,
       fiscalYear: '',
       cashAccountId: '',
       currencyId: '',
@@ -33,14 +34,13 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
       baseAmount: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      cashAccountId: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      amount: yup.number().required(' '),
-      baseAmount: yup.number().required(' ')
+      fiscalYear: yup.string().required(),
+      cashAccountId: yup.string().required(),
+      currencyId: yup.string().required(),
+      amount: yup.number().required(),
+      baseAmount: yup.number().required()
     }),
     onSubmit: async obj => {
       const currencyId = formik.values.currencyId
@@ -51,13 +51,9 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
         extension: CashBankRepository.OpeningBalance.set,
         record: JSON.stringify(obj)
       })
-
-      if (!currencyId && !fiscalYear && !cashAccountId) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
+      toast.success(!currencyId && !fiscalYear && !cashAccountId ? platformLabels.Added : platformLabels.Edited)
       formik.setValues({
         ...obj,
-
         recordId: String(obj.fiscalYear * 1000) + String(obj.cashAccountId * 100) + String(obj.currencyId * 10)
       })
 
@@ -65,28 +61,24 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.OpeningBalance.get,
-            parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
-          })
+      if (record && record.currencyId && record.fiscalYear && record.cashAccountId && recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.OpeningBalance.get,
+          parameters: `_fiscalYear=${record.fiscalYear}&_cashAccountId=${record.cashAccountId}&_currencyId=${record.currencyId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            cashAccountId: formik.values.cashAccountId,
-
-            recordId:
-              String(res.record.fiscalYear * 1000) +
-              String(res.record.cashAccountId * 100) +
-              String(res.record.currencyId * 10)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId:
+            String(res.record.fiscalYear * 1000) +
+            String(res.record.cashAccountId * 100) +
+            String(res.record.currencyId * 10)
+        })
+      }
     })()
   }, [])
 

@@ -9,15 +9,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const IndicatorForm = ({
-  labels,
-
-  expanded,
-  editMode,
-  height,
-  maxAccess,
-  store
-}) => {
+const IndicatorForm = ({ labels, expanded, editMode, height, maxAccess, store }) => {
   const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
 
@@ -28,7 +20,6 @@ const IndicatorForm = ({
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       indicatorData: [
@@ -110,19 +101,15 @@ const IndicatorForm = ({
   }, [recordId, applyTrigger])
 
   const applyStrategy = async () => {
-    try {
-      const { groupName, ...valuesWithoutGroupName } = store
+    const { groupName, ...valuesWithoutGroupName } = store
 
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.ApplySTG.apply,
-        record: JSON.stringify(valuesWithoutGroupName)
-      })
-      toast.success('Strategy Applied Successfully')
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.ApplySTG.apply,
+      record: JSON.stringify(valuesWithoutGroupName)
+    })
+    toast.success('Strategy Applied Successfully')
 
-      setApplyTrigger(prev => prev + 1)
-    } catch (error) {
-      toast.error('An error occurred during apply')
-    }
+    setApplyTrigger(prev => prev + 1)
   }
 
   const columns = [

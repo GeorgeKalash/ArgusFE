@@ -20,7 +20,6 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
   const recordId = store?.recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       items: [

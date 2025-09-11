@@ -18,14 +18,13 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencies: yup
         .array()
         .of(
           yup.object().shape({
-            currencyId: yup.string().required('currency  is required')
+            currencyId: yup.string().required()
           })
         )
         .required('currencies array is required')

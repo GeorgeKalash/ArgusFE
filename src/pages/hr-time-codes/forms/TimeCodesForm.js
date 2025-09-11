@@ -60,9 +60,9 @@ export default function TimeCodesForm({ labels, maxAccess, recordId, window }) {
         })
         formik.setValues({
           edId: record?.edId,
-          gracePeriod: record?.gracePeriod,
+          gracePeriod: record?.gracePeriod || null,
           edType: record?.edType,
-          timeCode: record?.timeCode,
+          timeCode: recordId,
           recordId
         })
       }

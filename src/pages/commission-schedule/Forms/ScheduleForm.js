@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -7,56 +7,46 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    type: ''
-  })
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SaleRepository.CommissionSchedule.qry
   })
 
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: null,
+      name: '',
+      type: ''
+    },
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       type: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SaleRepository.CommissionSchedule.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
+      !obj.recordId &&
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-        setSelectedRecordId(response.recordId)
-      } else toast.success('Record Edited Successfully')
+      !obj.recordId && setSelectedRecordId(response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       setEditMode(true)
 
       invalidate()
@@ -65,23 +55,15 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.CommissionSchedule.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const res = await getRequest({
-            extension: SaleRepository.CommissionSchedule.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        formik.setValues(res.record)
       }
-      setIsLoading(false)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
@@ -67,23 +67,19 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
   })
 
   const postAccount = async obj => {
-    const recordId = obj.recordId
-    await postRequest({
+    const res = await postRequest({
       extension: FinancialRepository.Account.set,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        if (!recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res.recordId
-          }))
-          formik.setFieldValue('recordId', res.recordId)
-          toast.success(platformLabels.Added)
-          invalidate()
-        } else toast.success(platformLabels.Edited)
-      })
-      .catch(error => {})
+    if (!obj.recordId) {
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+      formik.setFieldValue('recordId', res.recordId)
+    }
+    invalidate()
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
   }
 
   useEffect(() => {

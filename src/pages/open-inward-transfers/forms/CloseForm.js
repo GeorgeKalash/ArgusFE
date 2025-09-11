@@ -46,7 +46,6 @@ export default function CloseForm({ form, labels, access, window }) {
       receiver_accountNo: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required(),

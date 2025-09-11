@@ -1,16 +1,11 @@
-// ** MUI Imports
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-
-// ** Custom Imports
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-
 import FormShell from 'src/components/Shared/FormShell'
 import { useFormik } from 'formik'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { useInvalidate } from 'src/hooks/resource'
@@ -18,7 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store }) => {
+const DRGroupForm = ({ labels, editMode, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
@@ -27,16 +22,13 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     endpointId: DocumentReleaseRepository.DRGroup.qry
   })
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: null,
-    reference: null
-  })
-
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
-    initialValues,
+    initialValues: {
+      recordId: null,
+      name: null,
+      reference: null
+    },
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
@@ -48,25 +40,24 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
 
   const postGroups = async obj => {
     const isNewRecord = !obj?.recordId
-    try {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.DRGroup.set,
-        record: JSON.stringify(obj)
-      })
 
-      const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
-      toast.success(message)
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.DRGroup.set,
+      record: JSON.stringify(obj)
+    })
 
-      if (isNewRecord) {
-        formik.setFieldValue('recordId', res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-      }
+    const message = isNewRecord ? platformLabels.Added : platformLabels.Edited
+    toast.success(message)
 
-      invalidate()
-    } catch {}
+    if (isNewRecord) {
+      formik.setFieldValue('recordId', res.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
+    }
+
+    invalidate()
   }
   useEffect(() => {
     recordId && getGroupId(recordId)
@@ -78,14 +69,9 @@ const DRGroupForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
     getRequest({
       extension: DocumentReleaseRepository.DRGroup.get,
       parameters: parameters
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        setInitialData(res.record) // This is where you expect setInitialData to be called.
-        setEditMode(true)
-      })
-      .catch(error => {
-        // Handle your error here
-      })
   }
 
   return (
