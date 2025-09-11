@@ -10,7 +10,6 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
 
-  // Separate state for rows and columns
   const [rowsList, setRowsList] = useState([])
   const [columnsList, setColumnsList] = useState([])
 
@@ -161,10 +160,10 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
         {
           rowId: rowRecord.recordId,
           colId: colRecord.recordId,
+          rowRef: rowRecord.rowRef,
           rowName: rowRecord.rowLabel,
-          rowRef: rowRecord.rowRef || rowRecord.reference,
-          colName: colRecord.name,
-          colRef: colRecord.reference
+          colRef: colRecord.reference,
+          colName: colRecord.name
         }
       ]
     })
