@@ -168,6 +168,10 @@ const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
                 formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 changeFiscal(newValue?.fiscalYear)
               }}
+              onClear={() => {
+                formik.setFieldValue('fiscalYear', null)
+                changeFiscal(null)
+              }}
               error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
             />
           </Grid>
