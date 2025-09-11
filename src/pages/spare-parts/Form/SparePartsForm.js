@@ -190,7 +190,14 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
               <CustomCheckBox
                 name='trackInventory'
                 value={formik.values?.trackInventory}
-                onChange={event => formik.setFieldValue('trackInventory', event.target.checked)}
+                onChange={event => {
+                  if (!event.target.checked) {
+                    formik.setFieldValue('itemId', null)
+                    formik.setFieldValue('sku', '')
+                    formik.setFieldValue('itemName', '')
+                  }
+                  formik.setFieldValue('trackInventory', event.target.checked)
+                }}
                 label={labels.trackInventory}
                 maxAccess={maxAccess}
               />
