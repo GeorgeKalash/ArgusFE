@@ -1,12 +1,10 @@
 const path = require('path')
 
 /** @type {import('next').NextConfig} */
-
-// Remove this if you're not using Fullcalendar features
-
 module.exports = {
   trailingSlash: true,
-  reactStrictMode: false,
+  reactStrictMode: true, // ✅ Enable strict mode to catch warnings
+  productionBrowserSourceMaps: true, // ✅ Enable source maps for readable errors
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,
