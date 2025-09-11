@@ -352,7 +352,9 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    qry: service + 'qryJWC'
+    qry: service + 'qryJWC',
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',

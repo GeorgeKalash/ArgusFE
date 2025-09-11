@@ -31,6 +31,7 @@ const PostWorkCenterJob = () => {
       jobId: null,
       toWorkCenterId: null,
       workCenterId: null,
+      seqNo: 0,
       data: { list: [] }
     },
     maxAccess,
@@ -42,7 +43,7 @@ const PostWorkCenterJob = () => {
     onSubmit: async values => {
       if (!isLocked) {
         await postRequest({
-          extension: ManufacturingRepository.JobRouting.close,
+          extension: ManufacturingRepository.JobWorkCenter.close,
           record: JSON.stringify({
             jobId: formik.values.jobId,
             seqNo: formik.values.seqNo,
@@ -53,7 +54,7 @@ const PostWorkCenterJob = () => {
         formik.resetForm()
       } else {
         await postRequest({
-          extension: ManufacturingRepository.JobRouting.reopen,
+          extension: ManufacturingRepository.JobWorkCenter.reopen,
           record: JSON.stringify({
             jobId: formik.values.jobId,
             seqNo: formik.values.seqNo,
@@ -188,7 +189,9 @@ const PostWorkCenterJob = () => {
             qtyIn: jobRes?.record?.expectedQty || 0,
             jobId: jobRes?.record?.recordId || null,
             jobRef: jobRes?.record?.reference || '',
-            documentTypeID: jobRes?.record?.dtName || null
+            documentTypeID: jobRes?.record?.dtName || null,
+            seqNo: 0,
+            status: jobRes?.record?.status,
           })
         }
       })
