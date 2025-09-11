@@ -567,6 +567,7 @@ export const ResourceIds = {
   RepairType: 45109,
   InspectionTemplate: 45105,
   TimeCodes: 75102,
+  SpareParts: 45201,
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,

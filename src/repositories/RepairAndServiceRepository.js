@@ -19,6 +19,18 @@ export const RepairAndServiceRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
+  SpareParts: {
+    page: service + 'pageSP',
+    get: service + 'getSP',
+    set: service + 'setSP',
+    del: service + 'delSP'
+  },
+  SparePartsCategory: {
+    qry: service + 'qrySPC'
+  },
+  Manufacturer: {
+    qry: service + 'qrySPM'
+  },
   InspectionTemplate: {
     get2: service + 'get2ITE',
     page: service + 'pageITE',
