@@ -39,7 +39,6 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
       isSerialCreator: false,
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -55,7 +54,6 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       formik.setFieldValue('recordId', response?.recordId)
-
       invalidate()
     }
   })

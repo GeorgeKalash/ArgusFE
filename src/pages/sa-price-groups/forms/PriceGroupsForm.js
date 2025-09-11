@@ -30,7 +30,6 @@ export default function PriceGroupsForm({ labels, maxAccess, recordId }) {
       minUnitPrice: '',
       maxUnitPrice: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),

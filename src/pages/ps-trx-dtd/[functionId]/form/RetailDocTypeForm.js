@@ -29,7 +29,6 @@ export default function RetailDocTypeForm({ labels, maxAccess, recordId, functio
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required()

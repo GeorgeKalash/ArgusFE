@@ -34,7 +34,6 @@ const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
       labelHomeY: '',
       format: ''
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       name: yup.string().required(),

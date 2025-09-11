@@ -10,14 +10,11 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-
   const [initialValues, setInitialData] = useState({
     recordId: null,
     spRef: '',
@@ -37,8 +34,8 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
 
   const formik = useFormik({
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
+    enableReinitialize: true,
     onSubmit: async obj => {
       const response = await postRequest({
         extension: SaleRepository.SalesPerson.set,
@@ -54,28 +51,20 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
         })
       } else toast.success('Record Edited Successfully')
       setEditMode(true)
-
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.SalesPerson.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          const res = await getRequest({
-            extension: SaleRepository.SalesPerson.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+        setInitialData(res.record)
       }
-      setIsLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
