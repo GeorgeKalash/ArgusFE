@@ -38,9 +38,16 @@ const PostWorkCenterJob = () => {
     validateOnChange: true,
     validationSchema: yup.object({
       workCenterId: yup.number().required(),
-      toWorkCenterId: yup.number().required()
+      toWorkCenterId: yup
+        .number()
+        .nullable()
+        .when('routingId', {
+          is: val => !!val, 
+          then: () => yup.number().required(),
+          otherwise: () => yup.number().nullable()
+        })
     }),
-    onSubmit: async values => {
+    onSubmit: async () => {
       if (!isLocked) {
         await postRequest({
           extension: ManufacturingRepository.JobWorkCenter.close,
@@ -191,7 +198,7 @@ const PostWorkCenterJob = () => {
             jobRef: jobRes?.record?.reference || '',
             documentTypeID: jobRes?.record?.dtName || null,
             seqNo: 0,
-            status: jobRes?.record?.status,
+            status: jobRes?.record?.status
           })
         }
       })
@@ -333,7 +340,7 @@ const PostWorkCenterJob = () => {
                 }
                 name='toWorkCenterId'
                 label={labels.toWorkCenter}
-                readOnly={!!formik?.values?.routingId || !formik.values.jobId}
+                readOnly
                 valueField={
                   formik?.values?.jobId ? (formik?.values?.routingId ? 'recordId' : 'workCenterId') : 'recordId'
                 }
@@ -364,7 +371,7 @@ const PostWorkCenterJob = () => {
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('toWorkCenterId', newValue?.workCenterId || null)
                 }}
-                required
+                required={formik.values.routingId}
                 maxAccess={maxAccess}
                 error={formik.touched.toWorkCenterId && formik.errors.toWorkCenterId}
               />
