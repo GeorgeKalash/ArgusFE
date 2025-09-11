@@ -431,51 +431,46 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <Grid item xs={12}>
-                        <ResourceComboBox
-                          endpointId={
-                            formik?.values?.transfer.jobId
-                              ? formik?.values?.transfer?.routingId
-                                ? ManufacturingRepository.JobRouting.qry
-                                : ManufacturingRepository.JobWorkCenter.qry
-                              : null
-                          }
-                          parameters={
-                            formik.values.transfer.jobId
-                              ? formik.values.transfer?.routingId
-                                ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
-                                : `_jobId=${formik.values.transfer.jobId}`
-                              : ''
-                          }
-                          name='transfer.fromSeqNo'
-                          label={labels.workCenter}
-                          readOnly={
-                            !!formik?.values?.transfer?.routingId ||
-                            !formik.values.transfer.jobId ||
-                            isClosed ||
-                            isPosted
-                          }
-                          valueField='seqNo'
-                          values={formik.values.transfer}
-                          columnsInDropDown={[
-                            { key: 'workCenterRef', value: 'Reference' },
-                            { key: 'workCenterName', value: 'Name' }
-                          ]}
-                          displayField={['workCenterRef', 'workCenterName']}
-                          onChange={async (event, newValue) => {
-                            formik.setFieldValue('transfer.qty', newValue?.qty || 0)
-                            formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
+                      <ResourceComboBox
+                        endpointId={
+                          formik?.values?.transfer.jobId
+                            ? formik?.values?.transfer?.routingId
+                              ? ManufacturingRepository.JobRouting.qry
+                              : ManufacturingRepository.JobWorkCenter.qry
+                            : null
+                        }
+                        parameters={
+                          formik.values.transfer.jobId
+                            ? formik.values.transfer?.routingId
+                              ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
+                              : `_jobId=${formik.values.transfer.jobId}`
+                            : ''
+                        }
+                        name='transfer.fromSeqNo'
+                        label={labels.workCenter}
+                        readOnly={
+                          !!formik?.values?.transfer?.routingId || !formik.values.transfer.jobId || isClosed || isPosted
+                        }
+                        valueField='seqNo'
+                        values={formik.values.transfer}
+                        columnsInDropDown={[
+                          { key: 'workCenterRef', value: 'Reference' },
+                          { key: 'workCenterName', value: 'Name' }
+                        ]}
+                        displayField={['workCenterRef', 'workCenterName']}
+                        onChange={async (event, newValue) => {
+                          formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
 
-                            formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
-                            formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
-                            formik.setFieldValue('transfer.fromSeqNo', newValue?.seqNo || null)
-                            formik.setFieldValue('transfer.workCenterId', newValue?.workCenterId || null)
-                          }}
-                          required
-                          maxAccess
-                          error={formik.touched.transfer?.fromSeqNo && formik.errors.transfer?.fromSeqNo}
-                        />
-                      </Grid>
+                          formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
+                          formik.setFieldValue('transfer.fromSeqNo', newValue?.seqNo || null)
+                          formik.setFieldValue('transfer.workCenterId', newValue?.workCenterId || null)
+                        }}
+                        required
+                        maxAccess
+                        error={formik.touched.transfer?.fromSeqNo && formik.errors.transfer?.fromSeqNo}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <CustomNumberField

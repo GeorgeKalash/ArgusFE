@@ -60,6 +60,8 @@ const CustomComboBox = ({
 
   const filterOptions = useRef(null)
 
+  console.log(displayField)
+
   useEffect(() => {
     function handleBlur(event) {
       if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
