@@ -107,7 +107,6 @@ export default function JobOrderForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -564,7 +563,6 @@ export default function JobOrderForm({
       setImageSource(res?.record?.value || 3)
 
       if (recordId) await refetchForm(recordId, res?.record?.value || 3)
-      else await getAllLines()
     })()
   }, [])
 

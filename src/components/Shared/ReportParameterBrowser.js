@@ -439,7 +439,6 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
       return errors.parameters.length > 0 ? errors : {}
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])

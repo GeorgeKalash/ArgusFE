@@ -35,7 +35,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',

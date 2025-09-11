@@ -133,6 +133,9 @@ const Window = React.memo(
                   actionRef.current?.submit()
                 }
                 if (e.key === 'Enter') {
+                  if (target.tagName === 'TEXTAREA') {
+                    return
+                  }
                   if (isSearchField) {
                     return
                   }

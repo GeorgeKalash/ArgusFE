@@ -18,7 +18,6 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     initialValues: {
@@ -106,6 +105,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
                 component: 'resourcelookup',
                 label: labels.reference,
                 name: 'invoiceId',
+                flex: 1,
                 props: {
                   valueField: 'reference',
                   displayField: 'reference',
@@ -131,6 +131,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
               {
                 component: 'date',
                 name: 'date',
+                flex: 1,
                 props: { readOnly: true },
                 width: 200
               }

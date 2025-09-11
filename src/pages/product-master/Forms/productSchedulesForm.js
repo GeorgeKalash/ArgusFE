@@ -21,7 +21,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   const ref = useRef()
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       schedules: yup

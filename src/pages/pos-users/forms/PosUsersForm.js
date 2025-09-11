@@ -31,7 +31,6 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
       spId: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       userId: yup.string().required(),

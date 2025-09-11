@@ -125,6 +125,29 @@ const Table = ({
           }
         }
       }
+      if (col.type === 'colorCombo') {
+        return {
+          ...col,
+          cellRenderer: ({ data }) => {
+            const color = data?.[col.field]
+
+            return color ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: '4px',
+                    backgroundColor: color,
+                    border: '1px solid #ccc'
+                  }}
+                />
+                <span>{color}</span>
+              </div>
+            ) : null
+          }
+        }
+      }
 
       return {
         ...col,

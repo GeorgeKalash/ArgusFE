@@ -23,7 +23,6 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

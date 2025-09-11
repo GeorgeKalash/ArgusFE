@@ -36,7 +36,6 @@ export default function BatchPostForm({ access }) {
       endDate: today,
       status: parseInt(status)
     },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -44,25 +43,26 @@ export default function BatchPostForm({ access }) {
       endDate: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const res = await postRequest({
-          extension: api,
-          record: JSON.stringify(obj)
-        })
+      if (!obj.batchId) {
+        delete obj.batchId
+        delete obj.batchRef
+        delete obj.batchName
+      }
 
-        stack({
-          Component: ThreadProgress,
-          props: {
-            recordId: res.recordId
-          },
-          closable: false
-        })
+      const res = await postRequest({
+        extension: api,
+        record: JSON.stringify(obj)
+      })
 
-        toast.success(platformLabels.Added)
-        formik.setValues(obj)
+      stack({
+        Component: ThreadProgress,
+        props: {
+          recordId: res.recordId
+        },
+        closable: false
+      })
 
-        invalidate()
-      } catch (error) {}
+      toast.success(platformLabels.Added)
     }
   })
 
@@ -137,11 +137,10 @@ export default function BatchPostForm({ access }) {
                 displayField='name'
                 valueShow='batchRef'
                 secondValueShow='batchName'
+                displayFieldWidth={2}
                 form={formik}
                 onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('batchId', newValue?.recordId)
-                  }
+                  formik.setFieldValue('batchId', newValue?.recordId || '')
                   formik.setFieldValue('batchRef', newValue?.reference || '')
                   formik.setFieldValue('batchName', newValue?.name || '')
                 }}

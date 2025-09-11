@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -42,7 +42,6 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
       isPreferred: false,
       deliveryLeadDays: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       vendorId: yup.string().required(),

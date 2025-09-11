@@ -417,6 +417,10 @@ export default function FormShell({
             return
           }
           if (e.key === 'Enter') {
+            if (target.tagName === 'TEXTAREA') {
+              return
+            }
+
             if (isSearchField) {
               return
             }

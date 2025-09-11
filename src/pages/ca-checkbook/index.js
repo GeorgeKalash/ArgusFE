@@ -12,7 +12,6 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CheckbookForm from './forms/CheckbookForm'
-import { formatDateDefault } from 'src/lib/date-helper'
 
 const Checkbook = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

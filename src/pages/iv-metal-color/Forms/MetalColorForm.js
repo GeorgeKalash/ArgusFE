@@ -27,7 +27,6 @@ export default function MetalColorForm({ labels, maxAccess, recordId }) {
       reference: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required()
