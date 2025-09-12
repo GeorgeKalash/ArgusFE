@@ -10,18 +10,20 @@ import WindowToolbar from './WindowToolbar'
 import { formatDateToApi } from 'src/lib/date-helper'
 
 export default function Installments({ data, onOk, window }) {
-  const isPosted = data.header.status === 3
+  const isPosted = data.status === 3
 
   const { labels, access: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.Installments
   })
 
-  
   useSetWindow({ title: labels.Installments, window })
 
   const { formik } = useForm({
     initialValues: {
-      installments: data.installments || [
+      installments: data?.installments?.map((item, index) => ({
+        ...item,
+        id: index + 1
+      })) || [
         {
           id: 1,
           dueDate: null,
@@ -38,10 +40,10 @@ export default function Installments({ data, onOk, window }) {
             ...item,
             id: index + 1,
             seqNo: index + 1,
-            reference: data?.header?.reference,
-            vendorId: data?.header?.vendorId,
+            reference: data?.reference,
+            vendorId: data?.vendorId,
             invoiceId: formik?.values?.recordId || 0,
-            currencyId: data?.header?.currencyId,
+            currencyId: data?.currencyId,
             dueDate: formatDateToApi(item.dueDate)
           }
         })

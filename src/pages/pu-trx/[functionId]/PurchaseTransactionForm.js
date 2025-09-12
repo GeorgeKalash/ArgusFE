@@ -61,6 +61,7 @@ import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import Installments from 'src/components/Shared/Installments'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -765,6 +766,25 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     invalidate()
   }
 
+  const onClickInstallments = () => {
+    stack({
+      Component: Installments,
+      props: {
+        recordId: formik.values?.recordId,
+        data: {
+          installments: formik.values.installments,
+          reference: formik.values.header.reference,
+          status: formik.values.header.status,
+          vendorId: formik.values.header.vendorId,
+          currencyId: formik.values.header.currencyId
+        },
+        onOk: ({ installments }) => {
+          formik.setFieldValue('installments', installments)
+        }
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -826,8 +846,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     {
       key: 'Installments',
       condition: true,
-      onClick: 'onClickInstallments',
-      disabled: !editMode
+      onClick: onClickInstallments,
+      disabled: !editMode,
     },
     {
       key: 'Verify',
