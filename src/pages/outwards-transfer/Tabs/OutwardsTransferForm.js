@@ -314,7 +314,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                         readOnly
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                       <CustomSwitch
                         readOnly={true}
                         label={labels.includeTransferFees}
@@ -322,7 +322,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                         checked={formik.values.includingFees}
                         onChange={formik.handleChange}
                       />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                       <CustomNumberField
                         name='fcAmount'
