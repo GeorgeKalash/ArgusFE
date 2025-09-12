@@ -18,7 +18,6 @@ const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window 
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       userId: storeRecordId,

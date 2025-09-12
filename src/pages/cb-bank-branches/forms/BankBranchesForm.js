@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -48,7 +48,6 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
       remarks: '',
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -56,26 +55,18 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
       countryId: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const recordId = obj.recordId
+      const response = await postRequest({
+        extension: CashBankRepository.BankBranches.set,
+        record: JSON.stringify(obj)
+      })
 
-        const response = await postRequest({
-          extension: CashBankRepository.BankBranches.set,
-          record: JSON.stringify(obj)
+      !obj.recordId &&
+        formik.setValues({
+          ...obj,
+          recordId: response.recordId
         })
-
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-
-        invalidate()
-      } catch (error) {}
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
 
@@ -83,16 +74,14 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: CashBankRepository.BankBranches.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: CashBankRepository.BankBranches.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -119,7 +119,6 @@ export default function ShipmentsForm({ recordId, window }) {
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({

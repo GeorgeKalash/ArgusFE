@@ -44,7 +44,6 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
         )
         .required()
     }),
-    enableReinitialize: false,
     validateOnChange: true,
     maxAccess,
     onSubmit: async values => {
@@ -62,7 +61,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
           extension: SystemRepository.PlantsSchedule.set2,
           record: JSON.stringify(data)
         })
-    
+
         if (res) toast.success(platformLabels.Edited)
         setStore(prevStore => ({
           ...prevStore,

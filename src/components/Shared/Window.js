@@ -102,8 +102,6 @@ const Window = React.memo(
       setExpanded(prev => !prev)
     }, [expanded])
 
-    const childFormRef = useRef()
-
     return (
       <CacheDataProvider>
         <Box
@@ -133,6 +131,9 @@ const Window = React.memo(
                   actionRef.current?.submit()
                 }
                 if (e.key === 'Enter') {
+                  if (target.tagName === 'TEXTAREA') {
+                    return
+                  }
                   if (isSearchField) {
                     return
                   }

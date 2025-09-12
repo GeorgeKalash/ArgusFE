@@ -58,7 +58,6 @@ export default function TRXForm({ labels, access, setStore, store }) {
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -89,7 +88,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
     }
   })
 
-  const editMode = !!recordId || formik.values.recordId
+  const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
   const isPosted = formik.values.status === 3
 

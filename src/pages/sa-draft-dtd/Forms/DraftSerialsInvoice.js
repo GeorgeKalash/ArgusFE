@@ -35,7 +35,6 @@ export default function DraftSerialsInvoiceForm({ labels, maxAccess, recordId, f
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

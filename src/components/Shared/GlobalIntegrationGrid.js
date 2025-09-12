@@ -25,7 +25,6 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       Integrations: [

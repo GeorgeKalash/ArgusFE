@@ -1,7 +1,6 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { useState, useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import axios from 'axios'
-
 import { Card, CardContent, Button, Grid, Box, IconButton, InputAdornment } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import * as yup from 'yup'
@@ -23,7 +22,6 @@ const Reset = () => {
   const { stack: stackError } = useError()
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       username: ''

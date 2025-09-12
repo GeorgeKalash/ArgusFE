@@ -17,7 +17,7 @@ import { useForm } from 'src/hooks/form'
 
 const RemittanceDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const getNumberRange = async nraId => {
     const { record } = await getRequest({
@@ -41,21 +41,29 @@ const RemittanceDefaults = ({ _labels, access }) => {
       rt_max_yearly_cor_amount: ''
     },
     onSubmit: values => {
-      postRtDefault(values)
+      var data = []
+      Object.entries(values).forEach(([key, value], i) => {
+        const newObj = { key: key, value: value }
+
+        data.push(newObj)
+      })
+
+      postRequest({
+        extension: RemittanceSettingsRepository.RtDefault.set2,
+        record: JSON.stringify({ sysDefaults: data })
+      }).then(res => {
+        if (res) toast.success(platformLabels.Updated)
+        updateDefaults(data)
+      })
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      const res = await getRequest({
-        extension: RemittanceSettingsRepository.RtDefault.qry,
-        parameters: `_filter=`
-      })
-
-      if (res?.list) {
+      if (defaultsData) {
         const myObject = { nraRef: null, nraDescription: null }
 
-        for (const { key, value } of res?.list ?? []) {
+        for (const { key, value } of defaultsData?.list ?? []) {
           if (
             [
               'rt_max_monthly_amount',
@@ -78,25 +86,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
         formik.setValues(myObject)
       }
     })()
-  }, [])
-
-  const postRtDefault = obj => {
-    var data = []
-    Object.entries(obj).forEach(([key, value], i) => {
-      const newObj = { key: key, value: value }
-
-      data.push(newObj)
-    })
-
-    postRequest({
-      extension: RemittanceSettingsRepository.RtDefault.set2,
-      record: JSON.stringify({ sysDefaults: data })
-    })
-      .then(res => {
-        if (res) toast.success(platformLabels.Updated)
-      })
-      .catch(error => {})
-  }
+  }, [defaultsData])
 
   return (
     <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
@@ -136,36 +126,22 @@ const RemittanceDefaults = ({ _labels, access }) => {
                 error={formik.touched.rt_fii_accountGroupId && Boolean(formik.errors.rt_fii_accountGroupId)}
               />
             </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='rt_max_monthly_amount'
-                label={_labels.maxInwardsSettlementPerMonth}
-                value={formik.values.rt_max_monthly_amount}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rt_max_monthly_amount', '')}
-                error={formik.touched.rt_max_monthly_amount && Boolean(formik.errors.rt_max_monthly_amount)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='rt_max_yearly_ind_amount'
-                label={_labels.maxInwardsSettlementPerYear}
-                value={formik.values.rt_max_yearly_ind_amount}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rt_max_yearly_ind_amount', '')}
-                error={formik.touched.rt_max_yearly_ind_amount && Boolean(formik.errors.rt_max_yearly_ind_amount)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='rt_max_yearly_cor_amount'
-                label={_labels.maxYearlyCorAmount}
-                value={formik.values.rt_max_yearly_cor_amount}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('rt_max_yearly_cor_amount', '')}
-                error={formik.touched.rt_max_yearly_cor_amount && Boolean(formik.errors.rt_max_yearly_cor_amount)}
-              />
-            </Grid>
+            {[
+              { name: 'rt_max_monthly_amount', label: _labels.maxInwardsSettlementPerMonth },
+              { name: 'rt_max_yearly_ind_amount', label: _labels.maxInwardsSettlementPerYear },
+              { name: 'rt_max_yearly_cor_amount', label: _labels.maxYearlyCorAmount }
+            ].map(item => (
+              <Grid item xs={12} key={item.name}>
+                <CustomNumberField
+                  name={item.name}
+                  label={item.label}
+                  value={formik.values[item.name]}
+                  onChange={formik.handleChange}
+                  onClear={() => formik.setFieldValue(item.name, null)}
+                  error={formik.touched[item.name] && Boolean(formik.errors[item.name])}
+                />
+              </Grid>
+            ))}
           </Grid>
         </Grow>
       </VertLayout>

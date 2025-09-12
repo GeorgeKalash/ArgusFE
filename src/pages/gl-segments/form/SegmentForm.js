@@ -29,7 +29,6 @@ export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, f
       segmentId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

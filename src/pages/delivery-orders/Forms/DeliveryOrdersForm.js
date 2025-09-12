@@ -74,6 +74,9 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       deliveredNowQty: null,
       deliveredQty: null,
       mwFunctionId: null,
+      muId: null,
+      muRef: '',
+      muName: '',
       mwId: null,
       mwRef: '',
       mwSeqNo: null
@@ -117,7 +120,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       orders: ordersInitialValues
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required(),
@@ -361,6 +363,9 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },
           { from: 'qty', to: 'qty' },
+          { from: 'muName', to: 'muName' },
+          { from: 'muRef', to: 'muRef' },
+          { from: 'muId', to: 'muId' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
           { from: 'itemId', to: 'itemId' },

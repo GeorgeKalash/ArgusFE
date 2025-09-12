@@ -20,22 +20,19 @@ const PersonalSettings = ({ _labels, access }) => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        const userData = getStorageData('userData')
-        const _userId = userData.userId
+      const userData = getStorageData('userData')
+      const _userId = userData.userId
 
-        const res = await getRequest({
-          extension: SelfServiceRepository.SSUserInfo.get,
-          parameters: `_recordId=${_userId}`
-        })
+      const res = await getRequest({
+        extension: SelfServiceRepository.SSUserInfo.get,
+        parameters: `_recordId=${_userId}`
+      })
 
-        formik.setValues(res.record)
-      } catch (exception) {}
+      formik.setValues(res.record)
     })()
   }, [])
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       recordId: null,
@@ -50,8 +47,8 @@ const PersonalSettings = ({ _labels, access }) => {
       languageName: ''
     },
     validationSchema: yup.object({
-      fullName: yup.string().required(' '),
-      languageId: yup.string().required(' ')
+      fullName: yup.string().required(),
+      languageId: yup.string().required()
     }),
     onSubmit: async values => {
       await postPersonalSettings(values)
@@ -59,25 +56,23 @@ const PersonalSettings = ({ _labels, access }) => {
   })
 
   const postPersonalSettings = async obj => {
-    try {
-      await postRequest({
-        extension: SelfServiceRepository.SSUserInfo.set,
-        record: JSON.stringify(obj)
-      })
-      toast.success('Record Success')
+    await postRequest({
+      extension: SelfServiceRepository.SSUserInfo.set,
+      record: JSON.stringify(obj)
+    })
+    toast.success('Record Success')
 
-      window.localStorage.setItem('languageId', obj.languageId)
+    window.localStorage.setItem('languageId', obj.languageId)
 
-      const currentSettings = JSON.parse(window.localStorage.getItem('settings')) || {}
-      changeLang(obj.languageId)
+    const currentSettings = JSON.parse(window.localStorage.getItem('settings')) || {}
+    changeLang(obj.languageId)
 
-      const newSettings = {
-        ...currentSettings,
-        direction: obj.languageId == 2 ? 'rtl' : 'ltr'
-      }
+    const newSettings = {
+      ...currentSettings,
+      direction: obj.languageId == 2 ? 'rtl' : 'ltr'
+    }
 
-      window.localStorage.setItem('settings', JSON.stringify(newSettings))
-    } catch (error) {}
+    window.localStorage.setItem('settings', JSON.stringify(newSettings))
   }
 
   const changeLang = id => {

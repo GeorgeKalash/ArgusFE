@@ -31,47 +31,34 @@ export default function PlantGroupsForm({ labels, maxAccess, recordId }) {
       parentId: '',
       parentName: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const recordId = obj.recordId
+      const response = await postRequest({
+        extension: SystemRepository.PlantGroup.set,
+        record: JSON.stringify(obj)
+      })
 
-        const response = await postRequest({
-          extension: SystemRepository.PlantGroup.set,
-          record: JSON.stringify(obj)
-        })
-
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-          formik.setValues({
-            ...obj,
-            recordId: response.recordId
-          })
-        } else toast.success(platformLabels.Edited)
-
-        invalidate()
-      } catch (error) {}
+      if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.PlantGroup.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.PlantGroup.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

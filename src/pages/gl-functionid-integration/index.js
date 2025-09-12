@@ -17,42 +17,36 @@ const SystemFunctionIntegration = () => {
   const { platformLabels } = useContext(ControlContext)
 
   const getGridData = async () => {
-    try {
-      const [resSystemFunction, resIntegrationLogic] = await Promise.all([
-        getRequest({
-          extension: SystemRepository.SystemFunction.qry,
-          parameters: `_filter=`
-        }),
-        getRequest({
-          extension: GeneralLedgerRepository.IntegrationSystemFunction.qry,
-          parameters: `_filter=`
-        })
-      ])
-
-      const integrationLogicMap =
-        resIntegrationLogic?.list?.reduce((acc, { functionId, ilId, ilName }) => {
-          acc[functionId] = { ilId, ilName }
-
-          return acc
-        }, {}) || {}
-
-      const rows = resSystemFunction?.list?.map(({ functionId, ...rest }, index) => {
-        const integrationLogic = integrationLogicMap[functionId] || {}
-
-        return {
-          id: index + 1,
-          functionId,
-          ilId: integrationLogic.ilId || null,
-          name: integrationLogic.ilName || null,
-          ...rest
-        }
+    const [resSystemFunction, resIntegrationLogic] = await Promise.all([
+      getRequest({
+        extension: SystemRepository.SystemFunction.qry,
+        parameters: `_filter=`
+      }),
+      getRequest({
+        extension: GeneralLedgerRepository.IntegrationSystemFunction.qry,
+        parameters: `_filter=`
       })
+    ])
 
-      formik.setValues({
-        ...formik.values,
-        rows
-      })
-    } catch (error) {}
+    const integrationLogicMap =
+      resIntegrationLogic?.list?.reduce((acc, { functionId, ilId, ilName }) => {
+        acc[functionId] = { ilId, ilName }
+
+        return acc
+      }, {}) || {}
+
+    const rows = resSystemFunction?.list?.map(({ functionId, ...rest }, index) => {
+      const integrationLogic = integrationLogicMap[functionId] || {}
+
+      return {
+        id: index + 1,
+        functionId,
+        ilId: integrationLogic.ilId || null,
+        name: integrationLogic.ilName || null,
+        ...rest
+      }
+    })
+    formik.setFieldValue('rows', rows)
   }
 
   const { labels, access } = useResourceQuery({
@@ -75,26 +69,24 @@ const SystemFunctionIntegration = () => {
       ]
     },
     onSubmit: async values => {
-      try {
-        const filteredRows = values.rows
-          .filter(row => row.ilId && row.ilId !== '')
-          .map(({ functionId, ilId, name }) => ({
-            functionId,
-            ilId,
-            name
-          }))
+      const filteredRows = values.rows
+        .filter(row => row.ilId && row.ilId !== '')
+        .map(({ functionId, ilId, name }) => ({
+          functionId,
+          ilId,
+          name
+        }))
 
-        const resultObject = {
-          items: filteredRows
-        }
+      const resultObject = {
+        items: filteredRows
+      }
 
-        await postRequest({
-          extension: GeneralLedgerRepository.IntegrationSystemFunction.set2,
-          record: JSON.stringify(resultObject)
-        })
-        toast.success(platformLabels.Updated)
-        await getGridData()
-      } catch (error) {}
+      await postRequest({
+        extension: GeneralLedgerRepository.IntegrationSystemFunction.set2,
+        record: JSON.stringify(resultObject)
+      })
+      toast.success(platformLabels.Updated)
+      await getGridData()
     }
   })
 

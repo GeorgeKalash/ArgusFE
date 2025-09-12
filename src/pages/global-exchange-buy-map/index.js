@@ -9,7 +9,6 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -20,7 +19,6 @@ import FormShell from 'src/components/Shared/FormShell'
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getLabels, getAccess } = useContext(ControlContext)
-  const { height } = useWindowDimensions()
   const { platformLabels } = useContext(ControlContext)
 
   const [errorMessage, setErrorMessage] = useState()
@@ -39,7 +37,6 @@ const GlobalExchangeBuyMap = () => {
   }, [access])
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

@@ -36,7 +36,6 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       date: new Date(),
       notes: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       siteId: yup.string().required(),
@@ -89,7 +88,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       invalidate()
     }
   })
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   async function getDefaultSiteId() {
     if (editMode) {

@@ -41,7 +41,6 @@ const FiDimensions = () => {
       tpaDimension19: '',
       tpaDimension20: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
@@ -76,22 +75,20 @@ const FiDimensions = () => {
     getRequest({
       extension: SystemRepository.Defaults.qry,
       parameters: parameters
-    })
-      .then(res => {
-        const filteredList = res.list.filter(obj => {
-          return Object.keys(formik.values).includes(obj.key)
-        })
-
-        filteredList.forEach(obj => {
-          if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
-            fetchedValues[obj.key] = parseInt(obj.value)
-          } else {
-            fetchedValues[obj.key] = obj.value
-          }
-        })
-        formik.setValues(fetchedValues)
+    }).then(res => {
+      const filteredList = res.list.filter(obj => {
+        return Object.keys(formik.values).includes(obj.key)
       })
-      .catch(error => {})
+
+      filteredList.forEach(obj => {
+        if (obj.value && !isNaN(obj.value) && obj.value.trim() !== '') {
+          fetchedValues[obj.key] = parseInt(obj.value)
+        } else {
+          fetchedValues[obj.key] = obj.value
+        }
+      })
+      formik.setValues(fetchedValues)
+    })
   }
 
   const { labels, access } = useResourceQuery({
@@ -109,11 +106,9 @@ const FiDimensions = () => {
     await postRequest({
       extension: SystemRepository.Defaults.set,
       record: JSON.stringify({ sysDefaults: dataToPost })
+    }).then(() => {
+      toast.success('Record Successfully Updated')
     })
-      .then(res => {
-        toast.success('Record Successfully Updated')
-      })
-      .catch(error => {})
   }
 
   const handleDimCountChange = event => {

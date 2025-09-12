@@ -1,9 +1,7 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,70 +9,46 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
+import { useForm } from 'src/hooks/form'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 const IvSettings = ({ _labels, access }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { postRequest } = useContext(RequestsContext)
 
-  const [initialValues, setInitialValues] = useState({
-    itemSearchStyle: null,
-    itemSearchFields: null,
-    iv_minSerialSize: null
-  })
+  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize']
 
-  useEffect(() => {
-    getDataResult()
-  }, [])
-
-  const getDataResult = () => {
-    const myObject = {}
-    const parameters = `_filter=`
-
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: parameters
-    }).then(res => {
-      const filteredList = res.list.filter(obj => {
-        const trimmedKey = obj.key.trim()
-
-        return (
-          trimmedKey === 'itemSearchStyle' || trimmedKey === 'itemSearchFields' || trimmedKey === 'iv_minSerialSize'
-        )
-      })
-      filteredList.forEach(obj => {
-        const trimmedKey = obj.key.trim()
-        myObject[trimmedKey] = obj.value ? parseFloat(obj.value) : null
-      })
-      setInitialValues(myObject)
-    })
-  }
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
     validationSchema: yup.object({
-      iv_minSerialSize: yup.number().min(1).max(20)
+      iv_minSerialSize: yup.number().min(1).max(20).nullable()
     }),
-    onSubmit: values => {
-      postIvSettings(values)
+    onSubmit: async obj => {
+      const data = []
+      Object.entries(obj).forEach(([key, value]) => {
+        const newObj = { key: key, value: value }
+        data.push(newObj)
+      })
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Edited)
     }
   })
 
-  const postIvSettings = obj => {
-    var data = []
-    Object.entries(obj).forEach(([key, value]) => {
-      const newObj = { key: key, value: value }
-      data.push(newObj)
+  useEffect(() => {
+    const myObject = {}
+    defaultsData?.list?.forEach(obj => {
+      if (arrayAllow.includes(obj.key)) {
+        myObject[obj.key] = obj.value ? parseFloat(obj.value) : null
+        formik.setFieldValue(obj.key, myObject[obj.key])
+      }
     })
-    postRequest({
-      extension: SystemRepository.Defaults.set,
-      record: JSON.stringify({ sysDefaults: data })
-    }).then(res => {
-      if (res) toast.success(platformLabels.Edited)
-    })
-  }
+  }, [defaultsData])
 
   return (
     <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>

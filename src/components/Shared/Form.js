@@ -81,6 +81,10 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           const role = target.getAttribute('role') || ''
           const isSearchField = target.getAttribute('data-search') === 'true'
 
+          if (target.tagName === 'TEXTAREA') {
+            return
+          }
+
           if (
             (e.ctrlKey || e.metaKey) &&
             e.key.toLowerCase() === 's' &&

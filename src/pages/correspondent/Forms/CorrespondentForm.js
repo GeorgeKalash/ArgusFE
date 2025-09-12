@@ -31,7 +31,6 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
   })
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: null,

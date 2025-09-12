@@ -24,12 +24,7 @@ const PUSettingsForm = () => {
     datasetId: ResourceIds.PUSettings
   })
 
-  const arrayAllow = [
-    'PUCurrencyId',
-    'PUSiteId',
-    'PUFIIntegration',
-    'POSHPVarPct'
-  ]
+  const arrayAllow = ['PUCurrencyId', 'PUSiteId', 'PUFIIntegration', 'POSHPVarPct']
 
   const { formik } = useForm({
     initialValues: {
@@ -40,7 +35,6 @@ const PUSettingsForm = () => {
       POSHPVarPct: ''
     },
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       POSHPVarPct: yup.number().min(0).max(100)
@@ -67,7 +61,7 @@ const PUSettingsForm = () => {
       } catch (error) {}
     }
   })
-  
+
   useEffect(() => {
     ;(async function () {
       try {

@@ -75,7 +75,6 @@ export default function JobInfoForm({ labels, access, recordId, window }) {
   })
 
   const editMode = !!formik.values.recordId
-
   const isClosed = formik.values.wip == 2
 
   async function refetchForm(recordId) {

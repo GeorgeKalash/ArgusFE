@@ -27,7 +27,6 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
       ivtDimCount: '',
       ...Object.fromEntries(Array.from({ length: counter }, (_, i) => [`ivtDimension${i + 1}`, '']))
     },
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({

@@ -123,7 +123,6 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
       itemGridData: [],
       taxDetailsStore: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

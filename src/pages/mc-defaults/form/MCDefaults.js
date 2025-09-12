@@ -1,85 +1,68 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useForm } from 'src/hooks/form'
 import FormShell from 'src/components/Shared/FormShell'
 
 const MCDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
-  const [initialValues, setInitialValues] = useState({
-    mc_defaultRTSA: null,
-    mc_defaultRTPU: null,
-    mc_defaultRTMF: null,
-    mc_defaultRTFI: null,
-    mc_defaultRTTAX: null,
-    baseMetalCuId: null,
-    baseSalesMetalId: null
-  })
+  const arrayAllow = [
+    'mc_defaultRTSA',
+    'mc_defaultRTPU',
+    'mc_defaultRTMF',
+    'mc_defaultRTFI',
+    'mc_defaultRTTAX',
+    'baseMetalCuId',
+    'baseSalesMetalId'
+  ]
 
-  useEffect(() => {
-    getDataResult()
-  }, [])
-
-  const getDataResult = () => {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return (
-        obj.key === 'mc_defaultRTSA' ||
-        obj.key === 'mc_defaultRTPU' ||
-        obj.key === 'mc_defaultRTMF' ||
-        obj.key === 'mc_defaultRTFI' ||
-        obj.key === 'mc_defaultRTTAX' ||
-        obj.key === 'baseMetalCuId' ||
-        obj.key === 'baseSalesMetalId'
-      )
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setInitialValues(myObject)
-  }
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
-    initialValues,
-    onSubmit: values => {
-      postMcDefault(values)
+  const { formik } = useForm({
+    maxAccess: access,
+    initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
+    onSubmit: async obj => {
+      const data = Object.entries(obj).map(([key, value]) => ({ key, value }))
+      await postRequest({
+        extension: SystemRepository.Defaults.set,
+        record: JSON.stringify({ sysDefaults: data })
+      })
+      updateDefaults(data)
+      toast.success(platformLabels.Edited)
     }
   })
 
-  const postMcDefault = obj => {
-    var data = []
-
-    Object.entries(obj).forEach(([key, value]) => {
-      const newObj = { key: key, value: value }
-      data.push(newObj)
+  useEffect(() => {
+    const updated = {}
+    defaultsData.list.forEach(obj => {
+      if (arrayAllow.includes(obj.key)) {
+        updated[obj.key] = obj.value ? parseFloat(obj.value) : null
+        formik.setFieldValue(obj.key, updated[obj.key])
+      }
     })
-    postRequest({
-      extension: SystemRepository.Defaults.set,
-      record: JSON.stringify({ sysDefaults: data })
-    }).then(res => {
-      if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
-    })
-  }
+  }, [defaultsData])
 
   const isReadOnly = key => {
     const item = defaultsData?.list?.find(obj => obj.key === key)
 
-    return item && item?.value != null && item?.value !== ''
+    return item && item.value != null && item.value !== ''
   }
+
+  const rateTypeFields = [
+    { name: 'mc_defaultRTSA', label: _labels.mc_defaultRTSA },
+    { name: 'mc_defaultRTPU', label: _labels.mc_defaultRTPU },
+    { name: 'mc_defaultRTMF', label: _labels.mc_defaultRTMF },
+    { name: 'mc_defaultRTFI', label: _labels.mc_defaultRTFI },
+    { name: 'mc_defaultRTTAX', label: _labels.mc_defaultRTTAX }
+  ]
 
   return (
     <FormShell form={formik} maxAccess={access} infoVisible={false} isSavedClear={false} isCleared={false}>

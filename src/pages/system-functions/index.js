@@ -43,7 +43,6 @@ const SystemFunction = () => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',
