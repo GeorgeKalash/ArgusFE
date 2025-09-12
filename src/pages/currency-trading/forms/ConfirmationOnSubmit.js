@@ -51,7 +51,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
                   name='idNoRepeat'
                   label={labels.confirmIdNumber}
                   value={fetchFormik.values?.idNoRepeat}
-                  onChange={fetchFormik.handleChange}
+                  onChange={fetchFormik.setFieldValue}
                   maxLength='15'
                   onClear={() => {
                     fetchFormik.setFieldValue('idNoRepeat', '')
@@ -67,7 +67,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
                     name='cellPhoneRepeat'
                     label={labels.cellPhoneConfirm}
                     value={fetchFormik.values?.cellPhoneRepeat}
-                    onChange={fetchFormik.handleChange}
+                    onChange={fetchFormik.setFieldValue}
                     maxLength='15'
                     onClear={() => {
                       fetchFormik.setFieldValue('cellPhoneRepeat', '')

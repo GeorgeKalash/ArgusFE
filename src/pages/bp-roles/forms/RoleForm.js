@@ -81,7 +81,7 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
                 required
                 maxAccess={maxAccess}
                 maxLength='30'
-                onChange={formik.handleChange}
+                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('reference', '')}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
               />
@@ -93,7 +93,7 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
                 value={formik.values.name}
                 required
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
+                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
               />
@@ -105,7 +105,7 @@ export default function RoleForm({ labels, maxAccess, recordId }) {
                 value={formik.values.description}
                 maxLength='100'
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
+                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('description', '')}
                 error={formik.touched.description && Boolean(formik.errors.description)}
               />

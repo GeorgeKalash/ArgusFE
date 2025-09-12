@@ -250,7 +250,8 @@ const CustomComboBox = ({
             ...params.inputProps,
             tabIndex: _readOnly ? -1 : 0,
             ...(neverPopulate && { value: '' }),
-            name: section
+            name: section,
+            autoComplete: 'new-password'
           }}
           type={type}
           variant={variant}

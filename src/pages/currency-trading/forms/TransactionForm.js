@@ -866,8 +866,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                       readOnly={editMode || isClosed}
                       maxLength='20'
                       required
-                      onChange={e => {
-                        const value = e.target.value
+                      onChange={(_, value) => {
                         setSearch(value)
                         value && search != value && fetchInfoByKey({ key: value })
                       }}
@@ -941,7 +940,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
+                          displayValue={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required={total >= 5000}
@@ -962,7 +961,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                             formik.setFieldValue('idNo', '')
                             setIdNumber('')
                           }}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
                         />
@@ -1068,7 +1067,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           required={total >= 5000}
                           maxLength='20'
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('firstName', '')}
                           error={formik.touched.firstName && Boolean(formik.errors.firstName)}
@@ -1082,7 +1081,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           value={formik.values.middleName}
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           maxLength='20'
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('middleName', '')}
                           error={formik.touched.middleName && Boolean(formik.errors.middleName)}
@@ -1097,7 +1096,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                           required={total >= 5000}
                           maxLength='20'
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('lastName', '')}
                           error={formik.touched.lastName && Boolean(formik.errors.lastName)}
@@ -1114,7 +1113,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                               dir='rtl'
                               language='arabic'
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               forceUpperCase={true}
                               onClear={() => formik.setFieldValue('fl_firstName', '')}
                               error={formik.touched.fl_firstName && Boolean(formik.errors.fl_firstName)}
@@ -1129,7 +1128,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                               dir='rtl'
                               language='arabic'
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               forceUpperCase={true}
                               onClear={() => formik.setFieldValue('fl_middleName', '')}
                               error={formik.touched.fl_middleName && Boolean(formik.errors.fl_middleName)}
@@ -1144,7 +1143,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               readOnly={editMode || isClosed || idInfoAutoFilled || infoAutoFilled}
                               dir='rtl'
                               language='arabic'
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               forceUpperCase={true}
                               onClear={() => formik.setFieldValue('fl_lastName', '')}
                               error={formik.touched.fl_lastName && Boolean(formik.errors.fl_lastName)}
@@ -1159,7 +1158,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           phone={true}
                           label={labels.cellPhone}
                           value={formik.values?.cellPhone}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           onBlur={e => {
                             setShowAsPasswordPhone(true)
                           }}
@@ -1224,7 +1223,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           value={formik.values.sponsorName}
                           readOnly={editMode || isClosed}
                           maxLength='20'
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('sponsorName', '')}
                           error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
@@ -1238,7 +1237,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                           value={formik.values.remarks}
                           readOnly={editMode || isClosed}
                           maxLength='20'
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           forceUpperCase={true}
                           onClear={() => formik.setFieldValue('remarks', '')}
                           error={formik.touched.remarks && Boolean(formik.errors.remarks)}
