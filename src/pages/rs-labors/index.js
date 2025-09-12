@@ -86,7 +86,7 @@ const RsLabors = () => {
         maxAccess: access
       },
       width: 600,
-      height: 450,
+      height: 500,
       title: labels.labor
     })
   }
