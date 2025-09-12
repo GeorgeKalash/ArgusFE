@@ -39,14 +39,6 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     if (onBlur) onBlur(event)
   }
 
-  useEffect(() => {
-    const inputElement = document.querySelector(`[name="${name}"]`)
-
-    if (inputElement) {
-      inputElement.type = type
-    }
-  }, [type])
-
   return _hidden ? (
     <></>
   ) : (
@@ -83,7 +75,8 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
           name: name,
           onPaste: props.onPaste,
           onCopy: props.onCopy,
-          readOnly: _readOnly
+          readOnly: _readOnly,
+          autoComplete: 'off'
         }}
         containerStyle={{
           border: `1px solid ${error ? 'red' : '#ccc'}`,
@@ -93,7 +86,8 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
         }}
         inputStyle={{
           width: '100%',
-          border: 'none'
+          border: 'none',
+          WebkitTextSecurity: type === 'password' ? 'disc' : 'none'
         }}
         specialLabel={''}
         {...props}
