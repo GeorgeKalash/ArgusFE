@@ -81,7 +81,7 @@ export default function Installments({ data, onOk, window }) {
       name: 'amount',
       props: {
         maxLength: 12,
-        decimalScale: 3,
+        decimalScale: 2,
         readOnly: isPosted
       },
       propsReducer({ row, props }) {
