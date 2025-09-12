@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -20,7 +20,6 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
   const [editMode, setEditMode] = useState(!!recordId)
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -46,7 +45,6 @@ export default function CountryForm({ labels, maxAccess, recordId, setStore }) {
       isoCode2: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       ibanLength: yup

@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -33,45 +33,40 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
       serialItems: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.Measurement.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: InventoryRepository.Measurement.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: response.recordId
-          }))
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else toast.success(platformLabels.Edited)
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId
+        }))
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else toast.success(platformLabels.Edited)
 
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.Measurement.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.Measurement.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (error) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

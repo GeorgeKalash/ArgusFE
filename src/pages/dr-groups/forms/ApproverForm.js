@@ -1,5 +1,4 @@
 import React, { useContext, useEffect } from 'react'
-import { useFormik } from 'formik'
 import { Grid } from '@mui/material'
 import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -13,7 +12,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, store }) => {
+const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { recordId: grId } = store
 
@@ -33,7 +32,6 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
       await postGroups(values)
     },
     validateOnChange: true,
-    enableReinitialize: true,
     maxAccess
   })
 
@@ -43,31 +41,25 @@ const ApproverForm = ({ labels, editMode, maxAccess, setEditMode, recordId, stor
     }
   }, [recordId])
 
-  const getGroupId = async codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${grId}`
-    try {
-      const res = await getRequest({
-        extension: DocumentReleaseRepository.GroupCode.get,
-        parameters: `_groupId=${recordId}`
-      })
-      formik.setValues({
-        ...formik.values,
-        codeId: res.record.codeId,
-        groupId: res.record.groupId
-      })
-      setEditMode(true)
-    } catch {}
+  const getGroupId = async () => {
+    const res = await getRequest({
+      extension: DocumentReleaseRepository.GroupCode.get,
+      parameters: `_groupId=${recordId}`
+    })
+    formik.setValues({
+      ...formik.values,
+      codeId: res.record.codeId,
+      groupId: res.record.groupId
+    })
   }
 
   const postGroups = async obj => {
-    try {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.GroupCode.set,
-        record: JSON.stringify(obj)
-      })
-      toast.success('Record Successfully Updated')
-      invalidate()
-    } catch {}
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.GroupCode.set,
+      record: JSON.stringify(obj)
+    })
+    toast.success('Record Successfully Updated')
+    invalidate()
   }
 
   return (

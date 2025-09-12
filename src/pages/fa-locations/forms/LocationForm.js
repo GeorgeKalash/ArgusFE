@@ -33,7 +33,6 @@ export default function LocationForm({ labels, maxAccess, recordId }) {
       plantId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -43,18 +42,14 @@ export default function LocationForm({ labels, maxAccess, recordId }) {
     onSubmit: handleSubmit
   })
 
-  async function handleSubmit(values) {
+  async function handleSubmit(obj) {
     const response = await postRequest({
       extension: FixedAssetsRepository.Location.set,
-      record: JSON.stringify(values)
+      record: JSON.stringify(obj)
     })
 
-    if (!values.recordId) {
-      toast.success(platformLabels.Added)
-      formik.setFieldValue('recordId', response.recordId)
-    } else {
-      toast.success(platformLabels.Edited)
-    }
+    if (!obj.recordId) formik.setFieldValue('recordId', response.recordId)
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
     invalidate()
   }
 

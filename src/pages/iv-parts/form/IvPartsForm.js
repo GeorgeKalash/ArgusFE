@@ -28,7 +28,6 @@ export default function IvPartsForm({ labels, maxAccess, recordId }) {
       reference: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -40,14 +39,12 @@ export default function IvPartsForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

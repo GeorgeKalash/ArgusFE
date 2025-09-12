@@ -28,7 +28,6 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   const { formik } = useForm({
     initialValues: { recordId: store.recordId, reference: '', purity: '', reportingPurity: '', currencyId: '' },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validateOnBlur: true,
     validationSchema: yup.object({

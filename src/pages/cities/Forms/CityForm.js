@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -38,7 +38,6 @@ export default function CityForm({ labels, recordId, maxAccess }) {
       isInactive: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
@@ -62,26 +61,23 @@ export default function CityForm({ labels, recordId, maxAccess }) {
         })
       } else toast.success(platformLabels.Edited)
       setEditMode(true)
-
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: SystemRepository.City.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: SystemRepository.City.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues({
-            ...res.record,
-            isInactive: Boolean(res.record.isInactive)
-          })
-        }
-      } catch {}
+        formik.setValues({
+          ...res.record,
+          isInactive: Boolean(res.record.isInactive)
+        })
+      }
     })()
   }, [])
 
