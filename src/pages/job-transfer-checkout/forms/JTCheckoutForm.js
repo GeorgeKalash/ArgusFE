@@ -75,17 +75,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         date: yup.string().required(),
         jobId: yup.number().required(),
         fromWCId: yup.string().required(),
-        toWCId: yup.number().required(),
-        qty: yup.number().test('max-qty', 'Quantity exceeds maximum allowed', function (value) {
-          const { maxQty } = this.parent
-
-          return maxQty === undefined || parseFloat(value) <= maxQty
-        }),
-        pcs: yup.number().test('max-pcs', 'Pieces exceed maximum allowed', function (value) {
-          const { maxPcs } = this.parent
-
-          return maxPcs === undefined || parseFloat(value) <= maxPcs
-        })
+        toWCId: yup.number().required()
       })
     }),
     onSubmit: async obj => {
@@ -121,8 +111,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         transfer: {
           ...res?.record?.transfer,
           date: formatDateFromApi(res?.record?.transfer?.date),
-          maxQty: res?.record?.transfer.qty,
-          maxPcs: res?.record?.transfer.pcs,
           workCenterId: res?.record?.transfer?.fromWCId
         },
         categorySummary: res?.record?.categorySummary || []
@@ -467,9 +455,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('transfer.qty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
-
-                          formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
-                          formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
                           formik.setFieldValue('transfer.fromSeqNo', newValue?.seqNo || null)
                           formik.setFieldValue('transfer.workCenterId', newValue?.workCenterId || null)
                           formik.setFieldValue('transfer.fromWCId', newValue?.workCenterId || null)
