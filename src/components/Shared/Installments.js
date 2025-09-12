@@ -7,7 +7,7 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import { DataGrid } from './DataGrid'
 import { Fixed } from './Layouts/Fixed'
 import WindowToolbar from './WindowToolbar'
-import { formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 export default function Installments({ data, onOk, window }) {
   const isPosted = data.status === 3
@@ -22,7 +22,11 @@ export default function Installments({ data, onOk, window }) {
     initialValues: {
       installments: data?.installments?.map((item, index) => ({
         ...item,
-        id: index + 1
+        id: index + 1,
+        dueDate:
+          item.dueDate && /^\/Date\(-?\d+\)\/$/.test(item.dueDate)
+            ? formatDateFromApi(item.dueDate)
+            : item.dueDate || null 
       })) || [
         {
           id: 1,
@@ -38,11 +42,10 @@ export default function Installments({ data, onOk, window }) {
         const installments = values.installments.map((item, index) => {
           return {
             ...item,
-            id: index + 1,
             seqNo: index + 1,
             reference: data?.reference,
             vendorId: data?.vendorId,
-            invoiceId: formik?.values?.recordId || 0,
+            invoiceId: data?.recordId || 0,
             currencyId: data?.currencyId,
             dueDate: formatDateToApi(item.dueDate)
           }

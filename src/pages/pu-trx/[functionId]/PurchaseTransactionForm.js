@@ -770,10 +770,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     stack({
       Component: Installments,
       props: {
-        recordId: formik.values?.recordId,
         data: {
           installments: formik.values.installments,
           reference: formik.values.header.reference,
+          recordId: formik.values?.recordId,
           status: formik.values.header.status,
           vendorId: formik.values.header.vendorId,
           currencyId: formik.values.header.currencyId
