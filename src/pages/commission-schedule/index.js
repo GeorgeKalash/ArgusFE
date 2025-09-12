@@ -1,28 +1,29 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CommissionScheduleWindow from './Windows/CommissionScheduleWindow'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
 
 const CommissionSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [activeTab, setActiveTab] = useState(0)
-  const [windowOpen, setWindowOpen] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-  const [selectedRecordId, setSelectedRecordId] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
+    paginationParameters,
+    invalidate,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -30,54 +31,58 @@ const CommissionSchedule = () => {
     datasetId: ResourceIds.CommissionSchedule
   })
 
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: SaleRepository.CommissionSchedule.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
   const columns = [
     {
       field: 'name',
-      headerName: _labels[2],
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'typeName',
-      headerName: _labels[3],
+      headerName: labels.type,
       flex: 1
     }
   ]
-
-  const tabs = [{ label: _labels[7] }, { label: _labels[8], disabled: !editMode }]
-
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
-
-    return await getRequest({
-      extension: SaleRepository.CommissionSchedule.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-    })
-  }
-
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionSchedule.qry
-  })
-
-  const add = () => {
-    setWindowOpen(true)
-    setActiveTab(0)
-    setEditMode(false)
-  }
-
-  const edit = obj => {
-    setSelectedRecordId(obj.recordId)
-    setWindowOpen(true)
-    setActiveTab(0)
-    setEditMode(true)
-  }
 
   const del = async obj => {
     await postRequest({
       extension: SaleRepository.CommissionSchedule.del,
       record: JSON.stringify(obj)
     })
+    toast.success(platformLabels.Deleted)
     invalidate()
-    toast.success('Record Deleted Successfully')
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CommissionScheduleWindow,
+      props: {
+        labels,
+        recordId,
+        access
+      },
+      width: 600,
+      title: labels.CommissionSchedule
+    })
+  }
+
+  const onEdit = obj => {
+    openForm(obj?.recordId)
   }
 
   return (
@@ -90,33 +95,15 @@ const CommissionSchedule = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
+          onEdit={onEdit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
-          paginationType='client'
           maxAccess={access}
         />
       </Grow>
-      {windowOpen && (
-        <CommissionScheduleWindow
-          onClose={() => {
-            setWindowOpen(false)
-            setSelectedRecordId(null)
-          }}
-          labels={_labels}
-          maxAccess={access}
-          activeTab={activeTab}
-          tabs={tabs}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          setErrorMessage={setErrorMessage}
-          setActiveTab={setActiveTab}
-          recordId={selectedRecordId}
-          setSelectedRecordId={setSelectedRecordId}
-        />
-      )}
-      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
     </VertLayout>
   )
 }
