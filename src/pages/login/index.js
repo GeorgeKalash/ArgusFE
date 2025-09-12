@@ -176,7 +176,7 @@ const LoginPage = () => {
                     label={platformLabels.Username}
                     value={validation.values.username}
                     type='text'
-                    onChange={validation.handleChange}
+                    onChange={validation.setFieldValue}
                     onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
                     helperText={validation.touched.username && validation.errors.username}
@@ -191,7 +191,7 @@ const LoginPage = () => {
                     label={platformLabels.password}
                     type={showPassword ? 'text' : 'password'}
                     value={validation.values.password}
-                    onChange={validation.handleChange}
+                    onChange={validation.setFieldValue}
                     error={validation.touched.password && validation.errors.password}
                     helperText={validation.touched.password && validation.errors.password}
                     autoComplete='on'

@@ -11,6 +11,7 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  onChange,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -28,6 +29,7 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
+  displayValue,
   ...props
 }) => {
   const name = props.name
@@ -53,34 +55,22 @@ const CustomTextField = ({
 
   const handleInput = e => {
     const inputValue = e.target.value
-    e.target.name = name
-
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
-
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
-      props?.onChange(e)
     }
   }
 
@@ -109,6 +99,7 @@ const CustomTextField = ({
       onBlur={() => {
         setIsFocused(false), setFocus(false)
       }}
+      onChange={e => onChange(name, e.target.value)}
       autoComplete
       inputProps={{
         name: autoComplete === 'new-password' ? section : name,
@@ -124,7 +115,8 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
+          textTransform: forceUpperCase ? 'uppercase' : 'none', // Apply text transform if forceUpperCase is true,
+          WebkitTextSecurity: displayValue == 'password' ? 'disc' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
         'data-search': search ? 'true' : 'false'
@@ -154,6 +146,9 @@ const CustomTextField = ({
             )}
           </InputAdornment>
         )
+      }}
+      inputStyle={{
+        WebkitTextSecurity: type === 'password' ? 'disc' : 'none'
       }}
       sx={{
         '& .MuiOutlinedInput-root': {
