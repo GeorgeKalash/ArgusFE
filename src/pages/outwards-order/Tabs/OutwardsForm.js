@@ -1117,7 +1117,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                       error={formik.touched.header?.currencyId && Boolean(formik.errors.header?.currencyId)}
                     />
                   </Grid>
-                  {/* <Grid item xs={12}>
+                  <Grid item xs={12}>
                     <CustomSwitch
                       readOnly={header.lcAmount || header.fcAmount || editMode}
                       label={labels.includeTransferFees}
@@ -1129,7 +1129,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                         formik.setFieldValue('header.fcAmount', '')
                       }}
                     />
-                  </Grid> */}
+                  </Grid>
                   <Grid item xs={12}>
                     <CustomNumberField
                       name='header.fcAmount'
