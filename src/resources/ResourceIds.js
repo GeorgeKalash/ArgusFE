@@ -568,6 +568,7 @@ export const ResourceIds = {
   TimeCodes: 75102,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
+  Equipment: 45200,
 
   // GL
   GLSalesInvoice: 51604,
