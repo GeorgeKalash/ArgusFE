@@ -354,10 +354,7 @@ export default function FormShell({
                 recordId: form.values?.recordId,
                 data: form.values,
                 onOk: ({ installments }) => {
-                  form.setValues(prevValues => ({
-                    ...prevValues,
-                    installments
-                  }))
+                  form.setFieldValue('installments',installments)
                 }
               }
             })
