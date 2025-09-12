@@ -42,6 +42,7 @@ const ConfirmationDialog = ({
         }}
       >
         <Button
+          autoFocus
           onClick={() => {
             okButtonAction(window)
             if (props?.close) window.close()

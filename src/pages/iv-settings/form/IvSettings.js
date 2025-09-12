@@ -1,10 +1,9 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
@@ -52,53 +51,52 @@ const IvSettings = ({ _labels, access }) => {
   }, [defaultsData])
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={4} sx={{ p: 2 }}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.ITEM_SEARCH_STYLE}
-              name='itemSearchStyle'
-              label={_labels.itemSearchStyle}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('itemSearchStyle', newValue?.key || null)
-              }}
-              error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
-            />
+    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ITEM_SEARCH_STYLE}
+                name='itemSearchStyle'
+                label={_labels.itemSearchStyle}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('itemSearchStyle', newValue?.key || '')
+                }}
+                error={formik.touched.itemSearchStyle && Boolean(formik.errors.itemSearchStyle)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ITEM_SEARCH_FIELDS}
+                name='itemSearchFields'
+                label={_labels.itemSearchFields}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('itemSearchFields', newValue?.key || '')
+                }}
+                error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='iv_minSerialSize'
+                label={_labels.serial}
+                value={formik.values.iv_minSerialSize}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('iv_minSerialSize', '')}
+                error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.ITEM_SEARCH_FIELDS}
-              name='itemSearchFields'
-              label={_labels.itemSearchFields}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('itemSearchFields', newValue?.key || null)
-              }}
-              error={formik.touched.itemSearchFields && Boolean(formik.errors.itemSearchFields)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='iv_minSerialSize'
-              label={_labels.serial}
-              value={formik.values.iv_minSerialSize}
-              onChange={e => formik.setFieldValue('iv_minSerialSize', e?.target?.value)}
-              onClear={() => formik.setFieldValue('iv_minSerialSize', null)}
-              error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </FormShell>
   )
 }
 

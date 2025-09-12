@@ -10,20 +10,20 @@ import UserDefinedForm from './forms/UserDefinedForm'
 const PropertiesWindow = () => {
   const [activeTab, setActiveTab] = useState(0)
 
-  const { labels: _labels, access } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.UserDefined
   })
 
-  const tabs = [{ label: _labels.userProperties }, { label: _labels.userText }]
-  if (_labels && Object.keys(_labels).length > 0) {
+  const tabs = [{ label: labels.userProperties }, { label: labels.userText }]
+  if (labels && Object.keys(labels).length > 0) {
     return (
       <VertLayout>
         <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
         <CustomTabPanel index={0} value={activeTab}>
-          <UserDefinedForm maxAccess={access} labels={_labels} />
+          <UserDefinedForm maxAccess={access} labels={labels} />
         </CustomTabPanel>
-        <CustomTabPanel index={1} value={activeTab} labels={_labels}>
-          <UserTextForm maxAccess={access} />
+        <CustomTabPanel index={1} value={activeTab}>
+          <UserTextForm maxAccess={access} labels={labels} />
         </CustomTabPanel>
       </VertLayout>
     )

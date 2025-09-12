@@ -195,9 +195,6 @@ const ComponentBOM = ({ store, labels }) => {
           </Grid>
         </Grid>
       </Fixed>
-      <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-      </Fixed>
     </VertLayout>
   )
 }
