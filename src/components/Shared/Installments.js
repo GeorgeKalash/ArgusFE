@@ -71,15 +71,22 @@ export default function Installments({ data, onOk, window }) {
       component: 'date',
       label: labels.date,
       name: 'dueDate',
-      readOnly: isPosted
+      props: {
+        readOnly: isPosted
+      }
     },
     {
       component: 'numberfield',
       label: labels.amount,
       name: 'amount',
-      maxLength: 12,
-      decimalScale: 3,
-      readOnly: isPosted
+      props: {
+        maxLength: 12,
+        decimalScale: 3,
+        readOnly: isPosted
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.dueDate }
+      }
     }
   ]
 
