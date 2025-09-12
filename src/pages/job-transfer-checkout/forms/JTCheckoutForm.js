@@ -74,8 +74,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       transfer: yup.object({
         date: yup.string().required(),
         jobId: yup.number().required(),
-        fromSeqNo: yup.string().required(),
-        toWCId: yup.string().required()
+        fromWCId: yup.string().required(),
+        toWCId: yup.number().required()
       })
     }),
     onSubmit: async obj => {
@@ -100,6 +100,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
 
   const getData = async recordId => {
     if (!recordId) return
+
     await getRequest({
       extension: ManufacturingRepository.JobTransfer.get2,
       parameters: `_recordId=${recordId}`
@@ -109,7 +110,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         recordId: res?.record?.transfer?.recordId || null,
         transfer: {
           ...res?.record?.transfer,
-          date: formatDateFromApi(res?.record?.transfer?.date)
+          date: formatDateFromApi(res?.record?.transfer?.date),
+          workCenterId: res?.record?.transfer?.fromWCId
         },
         categorySummary: res?.record?.categorySummary || []
       })
@@ -122,7 +124,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   console.log('check formik', formik.values.transfer)
 
   const totalQty =
-    formik?.values?.categorySummary != [] ? formik?.values?.categorySummary.reduce((op, item) => op + item?.qty, 0) : 0
+    formik?.values?.categorySummary != [] ? formik?.values?.categorySummary?.reduce((op, item) => op + item?.qty, 0) : 0
 
   const editMode = !!formik?.values?.transfer?.recordId
   const isPosted = formik.values.transfer.status === 3
@@ -172,14 +174,13 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     })
   }
 
-  async function onJobSelection(jobId, routingSeq, transferUpdate) {
+  async function onJobSelection(jobId, routingSeq, routingId, transferUpdate) {
     if (jobId) {
-      const routingRes = await getRequest({
-        extension: ManufacturingRepository.JobRouting.qry,
-        parameters: `_jobId=${jobId}&_workCenterId=0&_status=0`
-      })
-
-      if (routingSeq) {
+      if (routingSeq && routingId) {
+        const routingRes = await getRequest({
+          extension: ManufacturingRepository.JobRouting.qry,
+          parameters: `_jobId=${jobId}&_workCenterId=0&_status=0`
+        })
         const record = routingRes?.list?.find(x => x.seqNo === routingSeq)
         if (record) {
           const toWCRecord = routingRes?.list?.find(x => x.seqNo === Number(routingSeq) + 1)
@@ -188,6 +189,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
             ...transferUpdate,
             fromSeqNo: record.seqNo,
             fromWCId: record.workCenterId,
+            workCenterId: record.workCenterId,
             fromSVName: record.supervisorName,
             qty: record.qty,
             pcs: record.pcs,
@@ -308,42 +310,52 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                       <ResourceLookup
                         endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
                         parameters={{ _workCenterId: '0' }}
-                        filter={{ status: 4 }}
-                        name='transfer.jobId'
+                        name='transfer.jobRef'
                         label={labels.jobRef}
-                        valueField='reference'
-                        displayField='reference'
+                        valueField='jobRef'
+                        displayField='jobRef'
                         valueShow='jobRef'
                         columnsInDropDown={[
-                          { key: 'reference', value: 'Job Order' },
-                          { key: 'description', value: 'Description' },
-                          { key: 'itemName', value: 'Item Name' }
+                          { key: 'jobRef', value: 'Job Order' },
+                          { key: 'designRef', value: 'Design Ref' }
                         ]}
                         readOnly={editMode}
                         required
                         secondDisplayField={false}
-                        formObject={formik.values.transfer}
                         form={formik}
-                        onChange={(event, newValue) => {
+                        onChange={async (event, newValue) => {
+                          if (!newValue?.jobId) return
+
+                          const res = await getRequest({
+                            extension: ManufacturingRepository.MFJobOrder.get,
+                            parameters: `_recordId=${newValue?.jobId}`
+                          })
+
                           let transferUpdate = {
-                            ...formik?.values?.transfer,
-                            jobRef: newValue?.reference || '',
-                            jobName: newValue?.name || '',
-                            itemId: newValue?.itemId || '',
-                            sku: newValue?.sku || '',
-                            itemName: newValue?.itemName || '',
-                            designRef: newValue?.designRef || '',
-                            designId: newValue?.designId || '',
-                            designName: newValue?.designName || '',
-                            jobDescription: newValue?.description || '',
-                            routingSeq: newValue?.routingSeqNo || null,
-                            jobId: newValue?.recordId || null
+                            ...formik.values.transfer,
+                            jobId: newValue?.jobId || null,
+                            jobRef: newValue?.jobRef || '',
+                            itemId: res?.record?.itemId || '',
+                            sku: res?.record?.sku || '',
+                            itemName: res?.record?.itemName || '',
+                            designRef: res?.record?.designRef || '',
+                            designId: res?.record?.designId || '',
+                            designName: res?.record?.designName || '',
+                            jobDescription: res?.record?.description || '',
+                            routingSeq: res?.record?.routingSeqNo || null,
+                            routingId: res?.record?.routingId || null,
+                            workCenterId: res?.record?.workCenterId
                           }
 
-                          onJobSelection(newValue?.recordId, newValue?.routingSeqNo, transferUpdate)
+                          onJobSelection(
+                            newValue?.jobId,
+                            res?.record?.routingSeqNo,
+                            res?.record?.routingId,
+                            transferUpdate
+                          )
                         }}
-                        maxAccess
                         errorCheck={'transfer.jobId'}
+                        maxAccess={access}
                       />
                     </Grid>
                   </Grid>
@@ -414,33 +426,79 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={formik?.values?.transfer.jobId && ManufacturingRepository.JobRouting.qry}
-                        parameters={`_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`}
-                        name='transfer.fromSeqNo'
+                        endpointId={
+                          formik?.values?.transfer.jobId
+                            ? formik?.values?.transfer?.routingId
+                              ? ManufacturingRepository.JobRouting.qry
+                              : ManufacturingRepository.JobWorkCenter.qry
+                            : null
+                        }
+                        parameters={
+                          formik.values.transfer.jobId
+                            ? formik.values.transfer?.routingId
+                              ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
+                              : `_jobId=${formik.values.transfer.jobId}`
+                            : ''
+                        }
+                        name='transfer.fromWCId'
                         label={labels.workCenter}
-                        readOnly
-                        valueField='seqNo'
+                        readOnly={
+                          !!formik?.values?.transfer?.routingId || !formik.values.transfer.jobId || isClosed || isPosted
+                        }
+                        valueField={'workCenterId'}
                         displayField={['workCenterRef', 'workCenterName']}
                         values={formik.values.transfer}
+                        columnsInDropDown={[
+                          { key: 'workCenterRef', value: 'Reference' },
+                          { key: 'workCenterName', value: 'Name' }
+                        ]}
+                        onChange={async (event, newValue) => {
+                          formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
+                          formik.setFieldValue('transfer.fromSeqNo', newValue?.seqNo || null)
+                          formik.setFieldValue('transfer.workCenterId', newValue?.workCenterId || null)
+                          formik.setFieldValue('transfer.fromWCId', newValue?.workCenterId || null)
+                        }}
                         required
                         maxAccess
-                        error={formik.touched.transfer?.fromSeqNo && formik.errors.transfer?.fromSeqNo}
+                        error={formik.touched.transfer?.fromWCId && formik.errors.transfer?.fromWCId}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <CustomNumberField
                         name='transfer.qty'
-                        readOnly
+                        readOnly={
+                          isClosed || isPosted || !!formik?.values?.transfer?.routingId || !formik.values.transfer.jobId
+                        }
                         label={labels.qty}
                         value={formik?.values?.transfer.qty}
                         maxAccess
                         decimalScale={2}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('transfer.qty', null)}
+                        error={formik.touched.transfer?.qty && Boolean(formik.errors.transfer?.qty)}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={formik?.values?.transfer?.jobId && ManufacturingRepository.JobRouting.qry}
-                        parameters={`_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`}
+                        endpointId={
+                          formik?.values?.transfer.jobId
+                            ? formik?.values?.transfer?.routingId
+                              ? ManufacturingRepository.JobRouting.qry
+                              : formik.values.transfer?.workCenterId
+                              ? ManufacturingRepository.WorkCenter.qry3
+                              : null
+                            : null
+                        }
+                        parameters={
+                          formik.values.transfer.jobId
+                            ? formik.values.transfer?.routingId
+                              ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
+                              : formik.values.transfer?.workCenterId
+                              ? `_fromWorkCenterId=${formik.values.transfer.workCenterId}`
+                              : null
+                            : ''
+                        }
                         name='transfer.toWCId'
                         filter={
                           formik?.values?.transfer?.routingSeq
@@ -448,9 +506,33 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                             : undefined
                         }
                         label={labels.toWorkCenter}
-                        readOnly
-                        valueField='workCenterId'
-                        displayField={['workCenterRef', 'workCenterName']}
+                        readOnly={
+                          !!formik?.values?.transfer?.routingId || !formik.values.transfer.jobId || isClosed || isPosted
+                        }
+                        valueField={
+                          formik.values.transfer.jobId && formik.values.transfer?.routingId
+                            ? 'workCenterId'
+                            : 'recordId'
+                        }
+                        columnsInDropDown={
+                          formik.values.transfer.jobId && formik.values.transfer?.routingId
+                            ? [
+                                { key: 'workCenterRef', value: 'Reference' },
+                                { key: 'workCenterName', value: 'Name' }
+                              ]
+                            : [
+                                { key: 'reference', value: 'Reference' },
+                                { key: 'name', value: 'Name' }
+                              ]
+                        }
+                        displayField={
+                          formik.values.transfer.jobId && formik.values.transfer?.routingId
+                            ? ['workCenterRef', 'workCenterName']
+                            : ['reference', 'name']
+                        }
+                        onChange={async (event, newValue) => {
+                          formik.setFieldValue('transfer.toWCId', newValue?.recordId || null)
+                        }}
                         values={formik.values.transfer}
                         required
                         maxAccess
@@ -493,10 +575,15 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     <Grid item xs={12}>
                       <CustomNumberField
                         name='transfer.pcs'
-                        readOnly
+                        readOnly={
+                          !!formik?.values?.transfer?.routingId || !formik.values.transfer.jobId || isClosed || isPosted
+                        }
                         label={labels.pieces}
                         value={formik?.values?.transfer?.pcs}
                         maxAccess
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('transfer.pcs', null)}
+                        error={formik.touched.transfer?.pcs && Boolean(formik.errors.transfer?.pcs)}
                       />
                     </Grid>
 

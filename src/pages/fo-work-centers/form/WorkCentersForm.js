@@ -64,7 +64,7 @@ export default function WorkCentersForm({ labels, recordId, maxAccess }) {
             parameters: `_workCenterId=${recordId}`
           })
 
-          formik.setValues({ ...res.record, recordId: recordId })
+          formik.setValues({ ...res.record })
         }
       } catch (exception) {}
     })()

@@ -313,14 +313,13 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                   <ResourceLookup
                     endpointId={ManufacturingRepository.MFJobOrder.snapshot2}
                     parameters={{ _workCenterId: formik.values.workCenterId }}
-                    filter={{ status: 4 }}
                     name='jobRef'
                     label={labels.jobRef}
-                    valueField='reference'
-                    displayField='name'
+                    valueField='jobRef'
+                    displayField='jobRef'
                     valueShow='jobRef'
                     columnsInDropDown={[
-                      { key: 'reference', value: 'Job Order' },
+                      { key: 'jobRef', value: 'Job Order' },
                       { key: 'designRef', value: 'Design Ref' }
                     ]}
                     readOnly={!formik?.values?.workCenterId || isPosted || editMode}
@@ -328,32 +327,37 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     secondDisplayField={false}
                     form={formik}
                     onChange={async (event, newValue) => {
+                      if (!newValue?.jobId) return
+
+                      const res = await getRequest({
+                        extension: ManufacturingRepository.MFJobOrder.get,
+                        parameters: `_recordId=${newValue?.jobId}`
+                      })
                       formik.setValues({
                         ...formik.values,
-                        jobId: newValue?.recordId || null,
-                        jobRef: newValue?.reference || '',
-                        jobName: newValue?.name || '',
-                        routingId: newValue?.routingId || null,
-                        designRef: newValue?.designRef || '',
-                        pgItemName: newValue?.itemName || '',
-                        pgItemId: newValue?.itemId || null,
-                        category: newValue?.categoryName || '',
+                        jobId: newValue?.jobId || null,
+                        jobRef: newValue?.jobRef || '',
+                        routingId: res?.record?.routingId || null,
+                        designRef: res?.record?.designRef || '',
+                        pgItemName: res?.record?.itemName || '',
+                        pgItemId: res?.record?.itemId || null,
+                        category: res?.record?.categoryName || '',
                         jobQty: newValue?.qty || 0,
                         jobPcs: newValue?.pcs || 0,
                         wipQty: newValue?.qty || 0,
                         wipPcs: newValue?.pcs || 0,
-                        seqNo: newValue?.routingSeqNo || 1,
+                        seqNo: res?.record?.routingSeqNo || 1,
                         laborId: null,
                         laborRef: '',
                         laborName: ''
                       })
 
-                      if (newValue) {
-                        const res = await getRequest({
+                      if (res?.record?.itemId) {
+                        const res2 = await getRequest({
                           extension: InventoryRepository.Item.get,
-                          parameters: `_recordId=${newValue?.itemId}`
+                          parameters: `_recordId=${res?.record?.itemId}`
                         })
-                        formik.setFieldValue('itemCategoryName', res.record.categoryName || null)
+                        formik.setFieldValue('itemCategoryName', res2?.record?.categoryName || null)
                       }
                     }}
                     errorCheck={'jobId'}

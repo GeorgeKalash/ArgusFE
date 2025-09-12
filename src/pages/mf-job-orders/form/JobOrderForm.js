@@ -113,8 +113,7 @@ export default function JobOrderForm({
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
-      itemCategoryId: yup.string().required(),
-      routingId: yup.string().required()
+      itemCategoryId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -850,7 +849,6 @@ export default function JobOrderForm({
                         name='routingId'
                         label={labels.routing}
                         form={formik}
-                        required
                         minChars={2}
                         firstValue={formik.values.routingRef}
                         secondValue={formik.values.routingName}
