@@ -26,7 +26,7 @@ export default function Installments({ data, onOk, window }) {
         dueDate:
           item.dueDate && /^\/Date\(-?\d+\)\/$/.test(item.dueDate)
             ? formatDateFromApi(item.dueDate)
-            : item.dueDate || null 
+            : item.dueDate || null
       })) || [
         {
           id: 1,
@@ -39,8 +39,9 @@ export default function Installments({ data, onOk, window }) {
     validateOnChange: true,
     onSubmit: async values => {
       if (onOk) {
-        const installments = values.installments.map((item, index) => {
-          return {
+        let installments = values.installments
+          .filter(item => item.dueDate)
+          .map((item, index) => ({
             ...item,
             seqNo: index + 1,
             reference: data?.reference,
@@ -48,8 +49,7 @@ export default function Installments({ data, onOk, window }) {
             invoiceId: data?.recordId || 0,
             currencyId: data?.currencyId,
             dueDate: formatDateToApi(item.dueDate)
-          }
-        })
+          }))
 
         onOk({ installments })
         window.close()
