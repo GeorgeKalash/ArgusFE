@@ -1,122 +1,121 @@
-import { useFormik } from 'formik'
-import { useEffect, useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { ControlContext } from 'src/providers/ControlContext'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
 
-export default function TargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
+const TargetForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
 
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.Target.qry
-  })
+  const getGridData = async () => {
+    const fiscalRes = await getRequest({
+      extension: SystemRepository.FiscalYears.qry,
+      parameters: '_filter='
+    })
 
-  const formik = useFormik({
-    validateOnChange: true,
-    enableReinitialize: true,
-    initialValues: {
-      recordId: recordId,
-      rows: [
-        {
+    const res = await getRequest({
+      extension: SaleRepository.Target.qry,
+      parameters: `_spId=${recordId}`
+    })
+
+    if (fiscalRes.list.length > 0) {
+      const newRows = fiscalRes.list.map((fiscalYearObj, index) => {
+        const correspondingTarget = res.list.find(targetObj => targetObj.fiscalYear === fiscalYearObj.fiscalYear)
+
+        return {
+          id: index + 1,
           spId: recordId,
-          fiscalYear: '',
-          targetAmount: ''
+          fiscalYear: String(fiscalYearObj?.fiscalYear),
+          targetAmount: correspondingTarget?.targetAmount || 0
         }
-      ]
+      })
+
+      formik.setValues({ rows: newRows })
+    }
+  }
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: {
+      rows: []
     },
     onSubmit: async obj => {
-      // Create the resultObject
       const resultObject = {
         spId: recordId,
         items: obj.rows
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.Target.set2,
         record: JSON.stringify(resultObject)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-      } else toast.success('Record Edited Successfully')
-
-      invalidate()
+      toast.success(platformLabels.Updated)
     }
   })
 
+  useEffect(() => {
+    if (recordId) {
+      getGridData()
+    }
+  }, [recordId])
+
   const columns = [
     {
-      field: 'textfield',
-      header: labels[10],
+      component: 'textfield',
+      label: labels.year,
       name: 'fiscalYear',
-      mandatory: true,
-      readOnly: true,
-      width: 300
+      props: {
+        readOnly: true
+      }
     },
     {
-      field: 'numberfield',
-      header: labels[9],
+      component: 'numberfield',
+      label: labels.targetAmount,
       name: 'targetAmount',
-      width: 300
+      props: {
+        maxLength: 12,
+        decimalScale: 0,
+        allowNegative: false
+      },
+      updateOn: 'blur',
+      onChange: ({ row: { update, newRow } }) => {
+        update('targetAmount', newRow?.targetAmount || 0)
+      },
+      onClear: ({ row: { update } }) => {
+        update('targetAmount', 0)
+      }
     }
   ]
 
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const fiscalRes = await getRequest({
-          extension: SystemRepository.FiscalYears.qry,
-          parameters: '_filter='
-        })
-
-        const res = await getRequest({
-          extension: SaleRepository.Target.qry,
-          parameters: `_spId=${recordId}`
-        })
-
-        if (fiscalRes.list.length > 0) {
-          const newRows = fiscalRes.list.map(fiscalYearObj => {
-            const correspondingTarget = res.list.find(targetObj => targetObj.fiscalYear === fiscalYearObj.fiscalYear)
-
-            return {
-              spId: recordId,
-              fiscalYear: String(fiscalYearObj.fiscalYear), // Convert to string
-              targetAmount: correspondingTarget ? correspondingTarget.targetAmount : 0
-            }
-          })
-
-          formik.setValues({ recordId: recordId, rows: newRows })
-        }
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordId])
-
   return (
-    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
-      <VertLayout>
-        <Grow>
-          <InlineEditGrid
-            gridValidation={formik}
-            maxAccess={maxAccess}
-            columns={columns}
-            defaultRow={{
-              spId: recordId,
-              targetAmount: '',
-              fiscalYear: ''
-            }}
-            allowAddNewLine={false}
-            allowDelete={false}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+    <VertLayout>
+      <Grow>
+        <DataGrid
+          onChange={value => {
+            formik.setFieldValue('rows', value)
+          }}
+          value={formik.values?.rows}
+          error={formik.errors?.rows}
+          columns={columns}
+          allowDelete={false}
+          allowAddNewLine={false}
+        />
+      </Grow>
+      <Fixed>
+        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
+
+export default TargetForm
