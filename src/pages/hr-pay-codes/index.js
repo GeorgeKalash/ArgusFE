@@ -62,7 +62,7 @@ const PayCodes = () => {
       Component: PayCodesForm,
       props: {
         labels,
-        recordId: payCode,
+        payCode,
         maxAccess: access
       },
       width: 500,

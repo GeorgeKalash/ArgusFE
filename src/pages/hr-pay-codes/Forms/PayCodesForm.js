@@ -13,11 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 
-export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
+export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const editMode = !!recordId
+  const editMode = !!payCode
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Paycode.qry
@@ -25,23 +25,22 @@ export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId,
+      payCode: null,
       name: ''
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
-      recordId: yup.string().required(),
+      payCode: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const data = { ...obj, payCode: obj.recordId }
       await postRequest({
         extension: PayrollRepository.Paycode.set,
-        record: JSON.stringify(data)
+        record: JSON.stringify(obj)
       })
 
-      toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!obj?.payCode ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }
@@ -49,15 +48,14 @@ export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (payCode) {
         const res = await getRequest({
           extension: PayrollRepository.Paycode.get,
-          parameters: `_payCode=${recordId}`
+          parameters: `_payCode=${payCode}`
         })
 
         formik.setValues({
-          ...res.record,
-          recordId: res.record.payCode
+          ...res.record
         })
       }
     })()
@@ -70,16 +68,16 @@ export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
-                name='recordId'
+                name='payCode'
                 label={labels.PayCode}
-                value={formik.values.recordId}
+                value={formik.values.payCode}
                 readOnly={editMode}
                 maxLength='10'
                 required
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('recordId', '')}
-                error={formik.touched.recordId && formik.errors.recordId}
+                onChange={e => formik.setFieldValue('payCode', e.target.value)}
+                onClear={() => formik.setFieldValue('payCode', '')}
+                error={formik.touched.payCode && formik.errors.payCode}
               />
             </Grid>
             <Grid item xs={12}>
