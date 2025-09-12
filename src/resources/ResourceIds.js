@@ -567,6 +567,7 @@ export const ResourceIds = {
   RepairType: 45109,
   InspectionTemplate: 45105,
   TimeCodes: 75102,
+  SpareParts: 45201,
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
@@ -574,6 +575,7 @@ export const ResourceIds = {
   JobPosition: 45103,
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
+  RsLabors: 45104,
 
   // GL
   GLSalesInvoice: 51604,

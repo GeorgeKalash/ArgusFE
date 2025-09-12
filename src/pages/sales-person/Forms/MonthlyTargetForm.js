@@ -1,64 +1,57 @@
-import { useFormik } from 'formik'
-import * as yup from 'yup'
 import { useContext } from 'react'
+import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { Box, Grid } from '@mui/material'
-import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { AuthContext } from 'src/providers/AuthContext'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { useForm } from 'src/hooks/form.js'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { Grid } from '@mui/material'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { DataSets } from 'src/resources/DataSets'
+import { AuthContext } from 'src/providers/AuthContext'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
-export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErrorMessage }) {
+const MonthlyTargetForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
 
-  const invalidate = useInvalidate({
-    endpointId: SaleRepository.Target.qry
-  })
-
-  const detailsFormik = useFormik({
-    validateOnChange: true,
-    enableReinitialize: true,
+  const { formik } = useForm({
+    maxAccess,
     initialValues: {
+      recordId,
+      fiscalYear: null,
+      targetAmount: 0,
+      balance: '',
       rows: [
         {
+          id: 1,
           spId: recordId,
-          monthId: '',
+          monthId: null,
           month: '',
-          targetAmount: '',
-          fiscalYear: ''
+          targetAmount: 0,
+          fiscalYear: null
         }
       ]
-    }
-  })
-
-  const formik = useFormik({
-    validateOnChange: true,
-    initialValues: {
-      recordId: recordId,
-      fiscalYear: '',
-      targetAmount: '',
-      balance: ''
     },
     validationSchema: yup.object({
       fiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
-      const updatedRows = detailsFormik.values.rows.map(monthDetail => {
+      const updatedRows = obj.rows.map((monthDetail, index) => {
         return {
           ...monthDetail,
+          id: index + 1,
           month: parseInt(monthDetail.monthId),
-          fiscalYear: formik.values.fiscalYear
+          fiscalYear: obj.fiscalYear,
+          targetAmount: monthDetail?.targetAmount || 0
         }
       })
 
@@ -68,7 +61,6 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         return rest
       })
 
-      // Create the resultObject
       const resultObject = {
         spId: recordId,
         fiscalYear: obj.fiscalYear,
@@ -79,167 +71,146 @@ export default function MonthlyTargetForm({ labels, maxAccess, recordId, setErro
         extension: SaleRepository.TargetMonth.set2,
         record: JSON.stringify(resultObject)
       })
-
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      invalidate()
+      toast.success(platformLabels.Updated)
     }
   })
 
-  const changeFiscal = async selectedFiscal => {
-    if (selectedFiscal) {
-      var fiscalYear = selectedFiscal
-      var spId = recordId
-      var parameters = `_fiscalYear=${fiscalYear}&_spId=${spId}`
-
-      const res = await getRequest({
-        extension: SaleRepository.Target.get,
-        parameters: parameters
-      })
-      if (res.record?.targetAmount) {
-        formik.setFieldValue('targetAmount', res.record.targetAmount)
-      } else {
-        formik.setFieldValue('targetAmount', '')
+  const columns = [
+    {
+      component: 'textfield',
+      label: labels.month,
+      name: 'month',
+      props: {
+        readOnly: true
       }
-      var _language = user.languageId
-      var _dataset = DataSets.MONTHS
-      var parameters = `_dataset=${_dataset}&_language=${_language}`
-
-      const monthRes = await getRequest({
-        extension: SystemRepository.KeyValueStore,
-        parameters: parameters
-      })
-
-      // Assuming sortedList is an array of objects
-      const sortedList = monthRes.list.sort((a, b) => {
-        const keyA = parseInt(a.key, 10)
-        const keyB = parseInt(b.key, 10)
-
-        return keyA - keyB
-      })
-      if (sortedList.length > 0) {
-        const amountRes = await getRequest({
-          extension: SaleRepository.TargetMonth.qry,
-          parameters: `_spId=${recordId}&_fiscalYear=${fiscalYear}`
-        })
-
-        const newRows = sortedList.map(monthObj => {
-          const correspondingAmount = amountRes.list.find(amountObj => amountObj.month === parseInt(monthObj.key))
-
-          return {
-            spId: recordId,
-            monthId: monthObj.key,
-            month: String(monthObj.value), // Convert to string
-            targetAmount: correspondingAmount ? correspondingAmount.targetAmount : 0
-          }
-        })
-
-        detailsFormik.setValues({ rows: newRows })
+    },
+    {
+      component: 'numberfield',
+      label: labels?.targetAmount,
+      name: 'targetAmount',
+      props: {
+        maxLength: 12,
+        decimalScale: 0,
+        allowNegative: false
       }
-    } else {
-      formik.setFieldValue('targetAmount', '')
-      detailsFormik.resetForm()
     }
-  }
+  ]
 
-  const totalAmount = detailsFormik.values.rows.reduce((sumAmount, row) => {
-    // Parse amount as a number
-    const amountValue = parseFloat(row.targetAmount.toString().replace(/,/g, '')) || 0
+  const totalAmount = formik.values.rows.reduce((sumAmount, row) => {
+    const amountValue = parseFloat(row.targetAmount?.toString().replace(/,/g, '')) || 0
 
     return sumAmount + amountValue
   }, 0)
 
-  const columns = [
-    {
-      field: 'textfield',
-      header: labels[12],
-      name: 'month',
-      mandatory: true,
-      readOnly: true,
-      width: 300
-    },
-    {
-      field: 'numberfield',
-      header: labels[13],
-      name: 'targetAmount',
-      width: 300
+  const targetAmountValue = parseFloat(formik.values.targetAmount?.toString().replace(/,/g, '')) || 0
+  const balance = totalAmount - targetAmountValue || 0
+
+  const changeFiscal = async selectedFiscal => {
+    if (selectedFiscal) {
+      const res = await getRequest({
+        extension: SaleRepository.Target.get,
+        parameters: `_fiscalYear=${selectedFiscal}&_spId=${recordId}`
+      })
+
+      formik.setFieldValue('targetAmount', res.record?.targetAmount || 0)
+
+      const monthRes = await getRequest({
+        extension: SystemRepository.KeyValueStore,
+        parameters: `_dataset=${DataSets.MONTHS}&_language=${user?.languageId}`
+      })
+
+      const sortedList = monthRes.list.sort((a, b) => parseInt(a.key, 10) - parseInt(b.key, 10))
+
+      if (sortedList.length > 0) {
+        const amountRes = await getRequest({
+          extension: SaleRepository.TargetMonth.qry,
+          parameters: `_spId=${recordId}&_fiscalYear=${selectedFiscal}`
+        })
+
+        const newRows = sortedList.map((monthObj, index) => {
+          const correspondingAmount = amountRes.list.find(amountObj => amountObj.month === parseInt(monthObj.key))
+
+          return {
+            id: index + 1,
+            spId: recordId,
+            monthId: monthObj.key,
+            month: String(monthObj?.value),
+            targetAmount: correspondingAmount?.targetAmount || 0
+          }
+        })
+
+        formik.setFieldValue('rows', newRows)
+      }
+    } else {
+      formik.setValues({
+        ...formik.values,
+        targetAmount: 0,
+        rows: []
+      })
     }
-  ]
+  }
 
   return (
-    <FormShell resourceId={ResourceIds.SalesPerson} form={formik} editMode={true} maxAccess={maxAccess}>
-      <VertLayout>
-        <Grow>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Grid container spacing={2}>
-                <Grid item xs={9}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.FiscalYears.qry}
-                    name='fiscalYear'
-                    label={labels[10]}
-                    valueField='fiscalYear'
-                    displayField='fiscalYear'
-                    values={formik.values}
-                    required
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('fiscalYear', newValue?.fiscalYear)
-                      changeFiscal(newValue?.fiscalYear)
-                    }}
-                    error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
-                    helperText={formik.touched.fiscalYear && formik.errors.fiscalYear}
-                  />
-                </Grid>
-                <Grid item xs={3}>
-                  <CustomTextField
-                    name='targetAmount'
-                    label={labels[9]}
-                    value={getFormattedNumber(formik.values.targetAmount)}
-                    maxAccess={maxAccess}
-                    readOnly={true}
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('targetAmount', '')}
-                    error={formik.touched.targetAmount && Boolean(formik.errors.targetAmount)}
-                    helperText={formik.touched.targetAmount && formik.errors.targetAmount}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Box>
-                <InlineEditGrid
-                  gridValidation={detailsFormik}
-                  maxAccess={maxAccess}
-                  columns={columns}
-                  defaultRow={{
-                    spId: recordId,
-                    month: '',
-                    targetAmount: ''
-                  }}
-                  allowAddNewLine={false}
-                  allowDelete={false}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={9}></Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='balance'
-                label={labels[14]}
-                value={getFormattedNumber(totalAmount - formik.values.targetAmount)}
-                maxAccess={maxAccess}
-                readOnly={true}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('balance', '')}
-                error={formik.touched.balance && Boolean(formik.errors.balance)}
-                helperText={formik.touched.balance && formik.errors.balance}
-                numberField={true}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }}>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={SystemRepository.FiscalYears.qry}
+              name='fiscalYear'
+              label={labels.year}
+              valueField='fiscalYear'
+              displayField='fiscalYear'
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
+                changeFiscal(newValue?.fiscalYear)
+              }}
+              onClear={() => {
+                formik.setFieldValue('fiscalYear', null)
+                changeFiscal(null)
+              }}
+              error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
+            />
           </Grid>
-        </Grow>
-      </VertLayout>
-    </FormShell>
+          <Grid item xs={6}>
+            <CustomNumberField
+              name='targetAmount'
+              label={labels.targetAmount}
+              value={formik.values.targetAmount}
+              maxAccess={maxAccess}
+              readOnly
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <DataGrid
+          onChange={value => formik.setFieldValue('rows', value)}
+          value={formik.values?.rows}
+          error={formik.errors?.rows}
+          name='rows'
+          initialValues={formik?.initialValues?.rows}
+          columns={columns}
+          maxAccess={maxAccess}
+          allowDelete={false}
+          allowAddNewLine={false}
+        />
+      </Grow>
+      <Fixed>
+        <Grid container spacing={2} sx={{ p: 2 }} justifyContent='flex-end'>
+          <Grid item xs={3}>
+            <CustomNumberField name='balance' label={labels.balance} value={balance} maxAccess={maxAccess} readOnly />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Fixed>
+        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
+      </Fixed>
+    </VertLayout>
   )
 }
+
+export default MonthlyTargetForm
