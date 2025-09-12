@@ -19,7 +19,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-const TaskForm = ({ labels, access, store, seqNo, record }) => {
+const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [options, setOptions] = useState([])
@@ -35,7 +35,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
     maxAccess: access,
     initialValues: {
       workOrderId: store.recordId,
-      seqNo: seqNo,
+      seqNo,
       dueDate: null,
       taskType: null,
       priority: null,
@@ -61,24 +61,11 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
         })
       })
 
-      toast.success(!obj.seqNo ? platformLabels.Added : platformLabels.Edited)
-
+      toast.success(!record?.seqNo ? platformLabels.Added : platformLabels.Edited)
+      window.close()
       invalidate()
     }
   })
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await getRequest({
-        extension: RepairAndServiceRepository.EquipmentType.qry,
-        parameters: `_equipmentId=${store?.equipmentId}`
-      })
-
-      setOptions(result?.list)
-    }
-
-    fetchData()
-  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,9 +82,7 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
     fetchData()
   }, [])
 
-  const taskNotes = options?.find(item => item.pmtId === formik?.values.pmtId)?.notes || ''
-
-  console.log(formik)
+  const taskNotes = options?.list?.find(item => item.pmtId === formik?.values.pmtId)?.notes || ''
 
   return (
     <FormShell
@@ -135,7 +120,9 @@ const TaskForm = ({ labels, access, store, seqNo, record }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    store={options}
+                    endpointId={RepairAndServiceRepository.EquipmentType.qry}
+                    parameters={`_equipmentId=${store?.equipmentId}`}
+                    setData={setOptions}
                     name='pmtId'
                     label={`${labels.task} / ${labels.repair}`}
                     hidden={formik.values.taskType == 2 || formik.values.taskType == 3}

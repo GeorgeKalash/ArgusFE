@@ -127,6 +127,7 @@ const TaskList = ({ store, labels, access }) => {
           <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
             <Link
               component='button'
+              disabled={store.isPosted}
               sx={{
                 fontSize: 14,
                 cursor: 'pointer',

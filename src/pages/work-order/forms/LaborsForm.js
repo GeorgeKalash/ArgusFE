@@ -26,7 +26,7 @@ const LaborsForm = ({
 
   const conditions = {
     laborId: row => row?.laborId,
-    hours: row => row?.hours > 0
+    hours: row => row?.hours != 0
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'labors')
 
@@ -46,7 +46,7 @@ const LaborsForm = ({
           ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
           .map(({ id, laborRef, firstName, lastName, rate, ...item }, index) => ({
             laborSeqNo: index + 1,
-            rate: rate,
+            rate,
             ...item
           }))
       }
@@ -109,8 +109,7 @@ const LaborsForm = ({
       label: labels.hours,
       updateOn: 'blur',
       props: {
-        decimalScale: 2,
-        allowNegative: false
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         update({ total: newRow.hours * newRow.rate || 0 })

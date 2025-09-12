@@ -133,9 +133,14 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
     },
     {
       key: 'Unlocked',
-      condition: true,
+      condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      disabled: true
     },
     {
       key: 'IV',
@@ -144,7 +149,6 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
       disabled: !editMode || isRaw
     }
   ]
-  console.log(7 - formik.values?.currentPM?.length)
 
   return (
     <FormShell
@@ -177,7 +181,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
                       changeDT(newValue)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>

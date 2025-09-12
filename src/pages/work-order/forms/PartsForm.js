@@ -22,7 +22,7 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
   const conditions = {
     sparePartId: row => row?.sparePartId,
     whId: row => row?.whId,
-    qty: row => row?.qty > 0,
+    qty: row => row?.qty != 0,
     unitPrice: row => row?.unitPrice > 0
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'parts')
@@ -91,8 +91,7 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
       label: labels.qty,
       updateOn: 'blur',
       props: {
-        decimalScale: 2,
-        allowNegative: false
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         update({ extendedPrice: newRow.qty * newRow.unitPrice })
