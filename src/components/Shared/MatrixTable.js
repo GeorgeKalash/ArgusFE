@@ -3,7 +3,14 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 
-const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], intersections, setIntersections }) => {
+const MatrixGrid = ({
+  intersectionValue = 'X',
+  rowsList = [],
+  columnsList = [],
+  intersections,
+  setIntersections,
+  maxAccess
+}) => {
   const gridRef = useRef(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
@@ -208,7 +215,6 @@ const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], 
         getRowClass={params => (params.data?.recordId === selectedRowId ? 'highlight-row' : '')}
         cellClassRules={cellClassRules}
       />
-      <pre>{JSON.stringify(intersections, null, 2)}</pre>
     </div>
   )
 }
