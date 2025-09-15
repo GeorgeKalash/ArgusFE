@@ -70,7 +70,8 @@ export const PurchaseRepository = {
     unpost: service + 'unpostIVC',
     generate: service + 'generateIVC',
     preview: service + 'previewIVC',
-    sync: service + 'syncIVC'
+    sync: service + 'syncIVC',
+    verify: service + 'verifyIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -91,7 +92,8 @@ export const PurchaseRepository = {
   Serials: {
     qry: service + 'qrySRL',
     import: service + 'importSRL',
-    last: service + 'lastSRL'
+    last: service + 'lastSRL',
+    sync: service + 'syncSRL'
   },
   Shipment: {
     get: service + 'getSHP',
