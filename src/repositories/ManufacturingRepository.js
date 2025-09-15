@@ -195,7 +195,9 @@ export const ManufacturingRepository = {
     del: service + 'delDMG',
     page: service + 'pageDMG',
     snapshot: service + 'snapshotDMG',
-    post: service + 'postDMG'
+    post: service + 'postDMG',
+    get2: service + 'get2DMG',
+    set2: service + 'set2DMG'
   },
   JobCategory: {
     qry: service + 'qryJCA'
@@ -387,5 +389,8 @@ export const ManufacturingRepository = {
   },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
+  },
+  DamageReturnRawMaterial: {
+    preview: service + 'previewDMRM'
   }
 }
