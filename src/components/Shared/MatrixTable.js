@@ -3,12 +3,11 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 
-const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], savedIntersections = [] }) => {
+const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], intersections, setIntersections }) => {
   const gridRef = useRef(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
   const [newIntersection, setNewIntersection] = useState([])
-  const [intersections, setIntersections] = useState(savedIntersections)
 
   // Map column keys to actual record
   const colKeyToRecord = useMemo(() => {
@@ -197,7 +196,7 @@ const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], 
     <div style={{ height: 450, width: '100%' }} className='ag-theme-alpine'>
       <AgGridReact
         ref={gridRef}
-        newIntersection={newIntersection}
+        rowData={newIntersection}
         columnDefs={columnDefs}
         defaultColDef={{
           sortable: false,
