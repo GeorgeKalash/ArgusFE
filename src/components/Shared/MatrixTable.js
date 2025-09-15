@@ -1,39 +1,14 @@
-import React, { useState, useMemo, useRef, useEffect, useContext } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
 
-const MatrixGrid = ({ intersectionValue = 'X' }) => {
+const MatrixGrid = ({ intersectionValue = 'X', rowsList = [], columnsList = [], savedIntersections = [] }) => {
   const gridRef = useRef(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
-
-  const [rowsList, setRowsList] = useState([])
-  const [columnsList, setColumnsList] = useState([])
-
-  const [rowData, setRowData] = useState([])
-  const [intersections, setIntersections] = useState([])
-  const { getRequest } = useContext(RequestsContext)
-
-  // Fetch rows and columns
-  async function getAllWorkCenter() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.WorkCenter.qry,
-      parameters: `_filter=`
-    })
-
-    // For example, treat the first half as rows, second half as columns
-    // or apply your logic for separation
-    const list = res.list || []
-    setRowsList(list) // Rows
-    setColumnsList(list) // Columns (can be filtered if needed)
-  }
-
-  useEffect(() => {
-    getAllWorkCenter()
-  }, [])
+  const [newIntersection, setNewIntersection] = useState([])
+  const [intersections, setIntersections] = useState(savedIntersections)
 
   // Map column keys to actual record
   const colKeyToRecord = useMemo(() => {
@@ -46,7 +21,7 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     }, {})
   }, [columnsList])
 
-  // Build rowData and pre-fill intersections
+  // Build newIntersection and pre-fill intersections
   useEffect(() => {
     if (!rowsList || rowsList.length === 0 || !columnsList || columnsList.length === 0) return
 
@@ -70,10 +45,9 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
       return row
     })
 
-    setRowData(rows)
+    setNewIntersection(rows)
   }, [rowsList, columnsList, intersections, colKeyToRecord, intersectionValue])
 
-  // Build columnDefs
   const columnDefs = useMemo(() => {
     if (!columnsList || columnsList.length === 0) return []
 
@@ -149,7 +123,6 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     api.refreshHeader()
   }, [selectedRowId, selectedCol])
 
-  // Store intersection with extra info
   const recordIntersection = (rowRecord, colRecord) => {
     setIntersections(prev => {
       const alreadyExists = prev.some(item => item.rowId === rowRecord.recordId && item.colId === colRecord.recordId)
@@ -169,7 +142,6 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     })
   }
 
-  // Cell click handler
   const onCellClicked = params => {
     const { colDef, data } = params
     const colId = colDef.field
@@ -178,7 +150,7 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     if (colId === 'rowLabel') {
       if (selectedCol) {
         const colRecord = colKeyToRecord[selectedCol]
-        setRowData(prev =>
+        setNewIntersection(prev =>
           prev.map(row => (row.recordId === data.recordId ? { ...row, [selectedCol]: intersectionValue } : row))
         )
         recordIntersection(data, colRecord)
@@ -192,19 +164,20 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     }
 
     const colRecord = colKeyToRecord[colId]
-    setRowData(prev => prev.map(row => (row.recordId === data.recordId ? { ...row, [colId]: intersectionValue } : row)))
+    setNewIntersection(prev =>
+      prev.map(row => (row.recordId === data.recordId ? { ...row, [colId]: intersectionValue } : row))
+    )
     recordIntersection(data, colRecord)
   }
 
-  // Column header click handler
   const onColumnHeaderClicked = params => {
     const colId = params.column.getColId()
     if (colId === 'rowLabel') return
     const colRecord = colKeyToRecord[colId]
 
     if (selectedRowId !== null) {
-      const rowRecord = rowData.find(r => r.recordId === selectedRowId)
-      setRowData(prev =>
+      const rowRecord = newIntersection.find(r => r.recordId === selectedRowId)
+      setNewIntersection(prev =>
         prev.map(row => (row.recordId === rowRecord.recordId ? { ...row, [colId]: intersectionValue } : row))
       )
       recordIntersection(rowRecord, colRecord)
@@ -224,7 +197,7 @@ const MatrixGrid = ({ intersectionValue = 'X' }) => {
     <div style={{ height: 450, width: '100%' }} className='ag-theme-alpine'>
       <AgGridReact
         ref={gridRef}
-        rowData={rowData}
+        newIntersection={newIntersection}
         columnDefs={columnDefs}
         defaultColDef={{
           sortable: false,

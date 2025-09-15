@@ -577,6 +577,10 @@ export const ResourceIds = {
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
+  SyncPurchaseTrx: 50602,
+  IRPlantSettings: 46100,
+  IssueOfMaterials: 42304,
+  WorkCenterTransferMap: 42128,
 
   // GL
   GLSalesInvoice: 51604,
@@ -618,10 +622,6 @@ export const ResourceIds = {
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
   GLReturnOnInvoice: 51606,
-  IomProperties: 42606,
-  SyncPurchaseTrx: 50602,
-  IRPlantSettings: 46100,
-  IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
 
