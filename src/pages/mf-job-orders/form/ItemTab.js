@@ -11,21 +11,28 @@ import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
 
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty > 0
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
-    validateOnChange: true,
     initialValues: {
       items: [
         {
           id: 1,
           jobId: recordId,
           itemId: null,
-          seqNo: 0,
+          seqNo: 1,
           qty: 0,
           pcs: 0,
           sku: '',
@@ -33,56 +40,20 @@ export default function ItemTab({ labels, maxAccess, store }) {
         }
       ]
     },
+    conditionSchema: ['items'],
     validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object({
-          sku: yup.string().test(function (value) {
-            const { itemName, qty, pcs } = this.parent
-            const isAnyFilled = !!value || !!itemName || qty > 0 || pcs > 0
-
-            if (!isAnyFilled) return true
-
-            return !!value
-          }),
-          itemName: yup.string().test(function (value) {
-            const { sku, qty, pcs } = this.parent
-            const isAnyFilled = !!sku || !!value || qty > 0 || pcs > 0
-
-            if (!isAnyFilled) return true
-
-            return !!value
-          }),
-          qty: yup.number().test(function (value) {
-            const { sku, itemName, pcs } = this.parent
-            const isAnyFilled = !!sku || !!itemName || pcs > 0 || value > 0
-
-            if (!isAnyFilled) return true
-
-            return value != null && value >= 1
-          }),
-          pcs: yup.number().test(function (value) {
-            const { sku, itemName, qty } = this.parent
-            const isAnyFilled = !!sku || !!itemName || qty > 0 || (value ?? 0) > 0
-
-            if (!isAnyFilled) return true
-
-            return (value ?? 0) >= 0
-          })
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      const filteredItems = obj?.items.filter(row => row.sku || row.itemName || row.qty > 0 || row.pcs > 0)
-
-      const modifiedItems = filteredItems.map((details, index) => {
-        return {
+      const filteredItems = obj?.items
+        .filter(row => Object.values(requiredFields).some(fn => fn(row)))
+        .map((details, index) => ({
           ...details,
           seqNo: index + 1,
           jobId: recordId
-        }
-      })
+        }))
 
-      const payload = { jobId: recordId, items: modifiedItems }
+      const payload = { jobId: recordId, items: filteredItems }
       await postRequest({
         extension: ManufacturingRepository.JobOrdersItem.set2,
         record: JSON.stringify(payload)
@@ -125,7 +96,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       label: labels.qty,
       name: 'qty',
       props: {
-        allowNegative: false
+        allowNegative: false,
+        maxLength: 9
       }
     },
     {
@@ -133,8 +105,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       label: labels.pcs,
       name: 'pcs',
       props: {
-        allowNegative: false,
-        decimalScale: 0
+        decimalScale: 0,
+        maxLength: 9
       }
     }
   ]
@@ -144,26 +116,22 @@ export default function ItemTab({ labels, maxAccess, store }) {
       extension: ManufacturingRepository.JobOrdersItem.qry,
       parameters: `_jobId=${recordId}`
     })
+    if (res?.list?.length > 0) {
+      const updateItemsList = await Promise.all(
+        res?.list?.map(async (item, index) => {
+          return {
+            ...item,
+            id: index + 1
+          }
+        })
+      )
 
-    const updateItemsList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res?.list?.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : formik.initialValues.items
-
-    formik.setFieldValue('items', updateItemsList)
+      formik.setFieldValue('items', updateItemsList)
+    }
   }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) await fetchGridData()
-    })()
+    if (recordId) fetchGridData()
   }, [recordId])
 
   return (
