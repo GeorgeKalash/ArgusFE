@@ -19,6 +19,18 @@ export const RepairAndServiceRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
+  SpareParts: {
+    page: service + 'pageSP',
+    get: service + 'getSP',
+    set: service + 'setSP',
+    del: service + 'delSP'
+  },
+  SparePartsCategory: {
+    qry: service + 'qrySPC'
+  },
+  Manufacturer: {
+    qry: service + 'qrySPM'
+  },
   InspectionTemplate: {
     get2: service + 'get2ITE',
     page: service + 'pageITE',
@@ -52,6 +64,7 @@ export const RepairAndServiceRepository = {
   },
   JobPosition: {
     page: service + 'pagePOS',
+    qry: service + 'qryPOS',
     get: service + 'getPOS',
     set: service + 'setPOS',
     del: service + 'delPOS'
@@ -73,5 +86,11 @@ export const RepairAndServiceRepository = {
     get: service + 'getMTT',
     set: service + 'setMTT',
     del: service + 'delMTT'
+  },
+  RsLabors: {
+    page: service + 'pageLBR',
+    set: service + 'setLBR',
+    get: service + 'getLBR',
+    del: service + 'delLBR'
   }
 }

@@ -562,11 +562,13 @@ export const ResourceIds = {
   PayrollArguments: 75100,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
+  Installments: 50614,
   RepairName: 45108,
-  WorkOrderTypes: 75101,
+  WorkOrderTypes: 45101,
   RepairType: 45109,
   InspectionTemplate: 45105,
   TimeCodes: 75102,
+  SpareParts: 45201,
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
@@ -574,6 +576,7 @@ export const ResourceIds = {
   JobPosition: 45103,
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
+  RsLabors: 45104,
 
   // GL
   GLSalesInvoice: 51604,
