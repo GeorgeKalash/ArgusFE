@@ -1121,7 +1121,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                     <CustomSwitch
                       readOnly={header.lcAmount || header.fcAmount || editMode}
                       label={labels.includeTransferFees}
-                      name='header,includingFees'
+                      name='header.includingFees'
                       checked={header.includingFees}
                       onChange={e => {
                         formik.setFieldValue('header.includingFees', e.target.checked)
