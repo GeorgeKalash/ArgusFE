@@ -621,5 +621,19 @@ export const getButtons = platformLabels => [
     label: platformLabels.PV,
     color: '#231f20',
     main: false
+  },
+  {
+    key: 'Installments',
+    label: platformLabels.Installments,
+    color: '#49732F',
+    image: 'invoice-installements.png',
+    main: false
+  },
+  {
+    key: 'Sync',
+    label: platformLabels.Sync,
+    color: '#231F20',
+    image: 'sync.png',
+    main: false
   }
 ]

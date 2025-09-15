@@ -107,7 +107,7 @@ export const EmployeeRepository = {
     del: service + 'delED',
     get: service + 'getED',
     set: service + 'setED',
-    snapshot: service + 'snapshotED',
+    snapshot: service + 'snapshotED'
   },
   FullName: {
     sync: service + 'syncFullName'

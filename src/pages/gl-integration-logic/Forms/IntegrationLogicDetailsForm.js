@@ -32,7 +32,6 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
       description: '',
       costCenterSource: null
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       sign: yup.string().required(),

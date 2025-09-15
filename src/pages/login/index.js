@@ -33,7 +33,6 @@ const LoginPage = () => {
   const { stack } = useWindow()
 
   const validation = useFormik({
-    enableReinitialize: true,
     initialValues: {
       username: '',
       password: '',

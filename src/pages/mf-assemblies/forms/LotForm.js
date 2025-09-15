@@ -39,7 +39,6 @@ export default function LotForm({ labels, maxAccess, form }) {
       udn2: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
     onSubmit: async obj => {

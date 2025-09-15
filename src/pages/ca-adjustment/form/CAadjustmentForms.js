@@ -66,7 +66,6 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
       notes: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.string().required(),

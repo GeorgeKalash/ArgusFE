@@ -38,7 +38,6 @@ export default function DraftSerialsTransferDTDForm({ labels, maxAccess, recordI
       disableSKULookup: false
     },
     maxAccess,
-    enableReinitialize: false,
     validationSchema: yup.object({
       dtId: yup.string().required()
     }),

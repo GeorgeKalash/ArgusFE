@@ -87,7 +87,6 @@ const OutwardsCorrespondent = () => {
   const { formik } = useForm({
     initialValues,
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required()

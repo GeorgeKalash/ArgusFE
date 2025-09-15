@@ -34,7 +34,6 @@ export default function GroupsForm({ labels, maxAccess, recordId }) {
       nraId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),

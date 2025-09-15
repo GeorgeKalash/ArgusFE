@@ -3,7 +3,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import ProductionClassForm from '../forms/ProductionClassForm'
 import SFItemForm from '../forms/SFItemForm'
 
-const ProductionClassWindow = ({ 
+const ProductionClassWindow = ({
   onClose,
   labels,
   maxAccess,
@@ -14,7 +14,8 @@ const ProductionClassWindow = ({
   setActiveTab,
   editMode,
   setEditMode,
-  setSelectedRecordId }) => {
+  setSelectedRecordId
+}) => {
   return (
     <Window
       id='productionClass'
@@ -28,19 +29,25 @@ const ProductionClassWindow = ({
       setActiveTab={setActiveTab}
     >
       <CustomTabPanel index={0} value={activeTab}>
-        <ProductionClassForm labels={labels} maxAccess={maxAccess} recordId={recordId} setErrorMessage={setErrorMessage} editMode={editMode}
-           setEditMode={setEditMode}
-           setSelectedRecordId={setSelectedRecordId} />
+        <ProductionClassForm
+          labels={labels}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setErrorMessage={setErrorMessage}
+          editMode={editMode}
+          setEditMode={setEditMode}
+          setSelectedRecordId={setSelectedRecordId}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-          <SFItemForm
-             labels={labels}
-             setErrorMessage={setErrorMessage}
-             maxAccess={maxAccess}
-             recordId={recordId}
-             setSelectedRecordId={setSelectedRecordId}
-          />
-        </CustomTabPanel>
+        <SFItemForm
+          labels={labels}
+          setErrorMessage={setErrorMessage}
+          maxAccess={maxAccess}
+          recordId={recordId}
+          setSelectedRecordId={setSelectedRecordId}
+        />
+      </CustomTabPanel>
     </Window>
   )
 }
