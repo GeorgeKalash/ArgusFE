@@ -129,7 +129,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const editMode = !!formik?.values?.transfer?.recordId
   const isPosted = formik.values.transfer.status === 3
   const isClosed = formik.values.transfer.wip === 2
-  const isMismatch = Math.abs(totalQty - formik?.values?.transfer?.qty) > 0.05
 
   const onPost = async () => {
     await postRequest({
@@ -274,7 +273,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       editMode={editMode}
       actions={actions}
       previewReport={editMode}
-      disabledSubmit={isClosed || isMismatch}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Fixed>
