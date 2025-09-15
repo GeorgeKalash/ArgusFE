@@ -181,7 +181,12 @@ export default function ItemTab({ labels, maxAccess, store }) {
         />
       </Grow>
       <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved smallBox />
+        <WindowToolbar
+          disabledSubmit={store?.isCancelled || store?.isPosted}
+          onSave={formik.submitForm}
+          isSaved
+          smallBox
+        />
       </Fixed>
     </VertLayout>
   )
