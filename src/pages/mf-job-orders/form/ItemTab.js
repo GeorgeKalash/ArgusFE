@@ -106,7 +106,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
       name: 'pcs',
       props: {
         decimalScale: 0,
-        maxLength: 9
+        maxLength: 5
       }
     }
   ]
@@ -116,15 +116,12 @@ export default function ItemTab({ labels, maxAccess, store }) {
       extension: ManufacturingRepository.JobOrdersItem.qry,
       parameters: `_jobId=${recordId}`
     })
+
     if (res?.list?.length > 0) {
-      const updateItemsList = await Promise.all(
-        res?.list?.map(async (item, index) => {
-          return {
-            ...item,
-            id: index + 1
-          }
-        })
-      )
+      const updateItemsList = res.list.map((item, index) => ({
+        ...item,
+        id: index + 1
+      }))
 
       formik.setFieldValue('items', updateItemsList)
     }
