@@ -6,6 +6,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryDRM',
     set2: service + 'set2DRM'
   },
+  JobOrdersItem: { qry: service + 'qryJIT', set2: service + 'set2JIT' },
   IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
