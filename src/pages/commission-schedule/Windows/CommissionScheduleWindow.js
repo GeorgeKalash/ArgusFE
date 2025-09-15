@@ -8,8 +8,7 @@ const CommissionScheduleWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
-    countries: []
+    recordId: recordId || null
   })
 
   const tabs = [{ label: labels.schedule }, { label: labels.brackets, disabled: !store.recordId }]

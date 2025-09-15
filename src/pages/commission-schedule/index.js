@@ -27,7 +27,7 @@ const CommissionSchedule = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SaleRepository.CommissionSchedule.qry,
+    endpointId: SaleRepository.CommissionSchedule.page,
     datasetId: ResourceIds.CommissionSchedule
   })
 
@@ -35,7 +35,7 @@ const CommissionSchedule = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: SaleRepository.CommissionSchedule.qry,
+      extension: SaleRepository.CommissionSchedule.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 

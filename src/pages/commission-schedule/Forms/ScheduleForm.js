@@ -21,7 +21,7 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionSchedule.qry
+    endpointId: SaleRepository.CommissionSchedule.page
   })
 
   const formik = useFormik({
@@ -32,7 +32,7 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
     },
     validationSchema: yup.object({
       name: yup.string().required(),
-      type: yup.string().required()
+      type: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -58,8 +58,6 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
           extension: SaleRepository.CommissionSchedule.get,
           parameters: `_recordId=${recordId}`
         })
-        console.log(res, 'res')
-
         formik.setValues({ ...res.record })
       }
     })()
@@ -76,7 +74,7 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='15'
+                maxLength='30'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
@@ -89,6 +87,8 @@ export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
                 name='type'
                 label={labels.type}
                 required
+                readOnly={editMode}
+                maxAccess={maxAccess}
                 valueField='key'
                 displayField='value'
                 values={formik.values}

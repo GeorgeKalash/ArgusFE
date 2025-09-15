@@ -176,7 +176,6 @@ export const ResourceIds = {
   FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
-  CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
   CashCountTransaction: 37301,
   ExchangeRates: 32103,

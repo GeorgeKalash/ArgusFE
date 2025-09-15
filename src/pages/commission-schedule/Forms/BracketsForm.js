@@ -18,7 +18,7 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionScheduleBracket.qry
+    endpointId: SaleRepository.CommissionScheduleBracket.page
   })
 
   const { formik } = useForm({
@@ -27,27 +27,39 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
     validationSchema: yup.object({
       rows: yup.array().of(
         yup.object({
-          minAmount: yup.number().typeError('Must be a number').required('Required'),
-          maxAmount: yup
-            .number()
-            .typeError('Must be a number')
-            .required('Required')
-            .test('max-greater-than-min', 'Max must be greater than Min', function (value) {
-              const { minAmount } = this.parent
-              if (minAmount == null || value == null) return true
+          minAmount: yup.number().test(function (value) {
+            const { maxAmount, pct } = this.parent
+            const isAnyFilled = value != null || maxAmount != null || pct != null
 
-              return Number(value) >= Number(minAmount)
-            }),
-          pct: yup
-            .number()
-            .nullable()
-            .min(0.01, ' must be greater than 0')
-            .max(100, ' must be less than or equal to 100')
+            if (!isAnyFilled) return true
+
+            return value != null
+          }),
+          maxAmount: yup.number().test('max-greater-than-min', 'Max must be greater than Min', function (value) {
+            const { minAmount, pct } = this.parent
+            const isAnyFilled = minAmount != null || value != null || pct != null
+
+            if (!isAnyFilled) return true
+            if (value == null) return false
+
+            return Number(value) >= Number(minAmount)
+          }),
+          pct: yup.number().test(function (value) {
+            const { minAmount, maxAmount } = this.parent
+            const isAnyFilled = minAmount != null || maxAmount != null || value != null
+
+            if (!isAnyFilled) return true
+            if (value == null) return false
+
+            return value >= 0.01 && value <= 100
+          })
         })
       )
     }),
     onSubmit: async values => {
-      const updatedRows = values.rows.map((row, index) => ({
+      const filteredRows = values.rows.filter(row => row.minAmount != null || row.maxAmount != null || row.pct != null)
+
+      const updatedRows = filteredRows.map((row, index) => ({
         ...row,
         commissionScheduleId: recordId,
         seqNo: index + 1
@@ -86,28 +98,31 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
   }
 
   useEffect(() => {
-    getGridData()
-  }, [])
+    if (recordId) getGridData()
+  }, [recordId])
 
   const columns = [
     {
       component: 'numberfield',
       label: labels.min,
       name: 'minAmount',
-      props: { required: true }
+      props: {
+        allowNegative: false
+      }
     },
     {
       component: 'numberfield',
       label: labels.max,
       name: 'maxAmount',
-      props: { required: true }
+      props: {
+        allowNegative: false
+      }
     },
     {
       component: 'numberfield',
       label: labels.pct,
       name: 'pct',
       props: {
-        required: true,
         allowNegative: false,
         maxLength: 5,
         decimalScale: 2
@@ -119,6 +134,8 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
     <VertLayout>
       <Grow>
         <DataGrid
+          name='rows'
+          maxAccess={maxAccess}
           value={formik.values.rows}
           error={formik.errors?.rows}
           columns={columns}
