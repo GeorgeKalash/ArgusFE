@@ -562,6 +562,7 @@ export const ResourceIds = {
   PayrollArguments: 75100,
   BenefitSchedule: 78102,
   CnssBranches: 75111,
+  Installments: 50614,
   RepairName: 45108,
   WorkOrderTypes: 45101,
   RepairType: 45109,
