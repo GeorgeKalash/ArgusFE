@@ -62,7 +62,7 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
       label: labels.partNo,
       name: 'sparePartId',
       props: {
-        endpointId: RepairAndServiceRepository.Part.snapshot,
+        endpointId: RepairAndServiceRepository.SpareParts.snapshot,
         displayField: 'partNo',
         valueField: 'partNo',
         columnsInDropDown: [

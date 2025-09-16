@@ -66,7 +66,7 @@ const LaborsForm = ({
       label: labels.labor,
       name: 'laborId',
       props: {
-        endpointId: RepairAndServiceRepository.Labor.snapshot,
+        endpointId: RepairAndServiceRepository.RsLabors.snapshot,
         displayField: 'reference',
         valueField: 'reference',
         columnsInDropDown: [
