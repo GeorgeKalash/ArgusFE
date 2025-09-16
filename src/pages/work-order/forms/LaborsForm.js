@@ -26,7 +26,7 @@ const LaborsForm = ({
 
   const conditions = {
     laborId: row => row?.laborId,
-    hours: row => row?.hours != 0
+    hours: row => row?.hours
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'labors')
 

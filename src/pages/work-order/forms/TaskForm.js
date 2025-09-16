@@ -132,7 +132,6 @@ const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
                     readOnly={!formik.values.taskType || isPosted || isCompleted}
                     maxAccess={access}
                     onChange={(_, newValue) => {
-                      console.log(newValue)
                       formik.setFieldValue('pmtId', newValue?.pmtId || null)
                     }}
                     error={formik.touched.pmtId && Boolean(formik.errors.pmtId)}
@@ -209,13 +208,8 @@ const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={6} sx={{ mt: 10 }}>
               <Grid container spacing={2}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='eqNotes'

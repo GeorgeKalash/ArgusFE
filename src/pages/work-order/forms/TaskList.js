@@ -28,7 +28,7 @@ const TaskList = ({ store, labels, access }) => {
   async function fetchGridData() {
     const response = await getRequest({
       extension: RepairAndServiceRepository.WorkTask.qry,
-      parameters: `&_workOrderId=${recordId}`
+      parameters: `_workOrderId=${recordId}`
     })
 
     return response
