@@ -16,6 +16,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function RsLaborsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,14 +35,16 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
       userId: null,
       positionId: null,
       allowLogIn: false,
-      activeStatus: null
+      activeStatus: null,
+      rate: null
     },
     maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
-      positionId: yup.number().required()
+      positionId: yup.number().required(),
+      activeStatus: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -176,6 +179,17 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
                   formik.setFieldValue('userId', newValue?.recordId || null)
                 }}
                 error={formik.touched.userId && Boolean(formik.errors.userId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='rate'
+                label={labels.rate}
+                value={formik.values.rate}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rate', null)}
+                decimalScale={2}
+                maxLength={10}
               />
             </Grid>
           </Grid>
