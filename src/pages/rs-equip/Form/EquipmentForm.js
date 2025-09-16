@@ -58,7 +58,23 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
-      description: yup.string().required()
+      description: yup.string().required(),
+      purc_primMeter: yup
+        .number()
+        .nullable()
+        .test('purc_primMeter-check', 'Purchase value must be less than or equal to current value', function (value) {
+          const { currentPM } = this.parent
+          if (value == null || currentPM == null) return true
+          return value <= currentPM
+        }),
+      purc_secMeter: yup
+        .number()
+        .nullable()
+        .test('purc_secMeter-check', 'Purchase value must be less than or equal to current value', function (value) {
+          const { currentSM } = this.parent
+          if (value == null || currentSM == null) return true
+          return value <= currentSM
+        })
     }),
     onSubmit: async values => {
       await postRequest({
@@ -192,7 +208,11 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             name='maintTplId'
             label={labels.maintTplId}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('maintTplId', newValue?.recordId || null)
@@ -342,7 +362,11 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             name='purc_vendorId'
             label={labels.vendor}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'name']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('purc_vendorId', newValue?.recordId || null)
@@ -356,7 +380,11 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             name='operatorId'
             label={labels.operatorId}
             valueField='recordId'
-            displayField='name'
+            displayField={['reference', 'firstName']}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'firstName', value: 'Name' }
+            ]}
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('operatorId', newValue?.recordId || null)

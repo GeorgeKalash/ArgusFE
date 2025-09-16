@@ -28,7 +28,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
     maxAccess,
     initialValues: {
       recordId,
-      pmtId: pmtId,
+      pmtId,
       activeStatus: null,
       tbd: false,
       tbdFrequency: null,
@@ -146,7 +146,14 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
             <CustomCheckBox
               name='tbd'
               value={formik.values.tbd}
-              onChange={event => formik.setFieldValue('tbd', event.target.checked)}
+              onChange={event => {
+                formik.setFieldValue('tbd', event.target.checked)
+                if (!event.target.checked) {
+                  formik.setFieldValue('tbdEvery', null)
+                  formik.setFieldValue('tbdReminder', null)
+                  formik.setFieldValue('tbdFrequency', null)
+                }
+              }}
               label={labels.tbd}
               maxAccess={maxAccess}
             />
@@ -204,7 +211,13 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
             <CustomCheckBox
               name='tbh'
               value={formik.values.tbh}
-              onChange={event => formik.setFieldValue('tbh', event.target.checked)}
+              onChange={event => {
+                formik.setFieldValue('tbh', event.target.checked)
+                if (!event.target.checked) {
+                  formik.setFieldValue('tbhEvery', null)
+                  formik.setFieldValue('tbhReminder', null)
+                }
+              }}
               label={labels.tbh}
               maxAccess={maxAccess}
             />
