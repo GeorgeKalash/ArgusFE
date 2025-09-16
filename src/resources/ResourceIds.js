@@ -30,6 +30,7 @@ export const ResourceIds = {
   Alerts: 60307,
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
+  PayCode: 75104,
   LedgerGroup: 75114,
 
   // Authorization Dashboard
