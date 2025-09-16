@@ -57,7 +57,6 @@ const GenerateOutboundTransportation = () => {
       vehicleId: yup.number().required()
     }),
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
       const data = {

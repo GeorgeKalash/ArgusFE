@@ -24,7 +24,6 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
       defaultSalePrice: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true
   })
 
@@ -38,7 +37,7 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
 
         formik.setValues({
           ...res.record,
-          currentCost: res?.record?.hideCost ? '**' : res?.record?.currentCost,
+          currentCost: res?.record?.hideCost ? '**' : res?.record?.currentCost
         })
       }
     })()

@@ -21,7 +21,6 @@ import { Module } from 'src/resources/Module'
 import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
-  const [isLoading, setIsLoading] = useState(false)
   const [responseValue, setResponseValue] = useState(null)
   const { platformLabels } = useContext(ControlContext)
 
@@ -46,7 +45,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
 
   const formik = useFormik({
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async obj => {
       const data = {
@@ -57,46 +55,37 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         recordId: initialValues.recordId,
         response: responseValue
       }
-      try {
-        const checkModule = getSystemFunctionModule(functionId)
-        if (checkModule === Module.CurrencyTrading || checkModule === Module.Remittance) {
-          await postRequest({
-            extension: CTDRRepository.DocumentsOnHold.set,
-            record: JSON.stringify(data)
-          })
-        } else {
-          await postRequest({
-            extension: DocumentReleaseRepository.DocumentsOnHold.set,
-            record: JSON.stringify(data)
-          })
-        }
+      const checkModule = getSystemFunctionModule(functionId)
+      if (checkModule === Module.CurrencyTrading || checkModule === Module.Remittance) {
+        await postRequest({
+          extension: CTDRRepository.DocumentsOnHold.set,
+          record: JSON.stringify(data)
+        })
+      } else {
+        await postRequest({
+          extension: DocumentReleaseRepository.DocumentsOnHold.set,
+          record: JSON.stringify(data)
+        })
+      }
+      toast.success(
+        !functionId && !seqNo && !obj.recordId && responseValue !== null ? platformLabels.Added : platformLabels.Edited
+      )
 
-        if (!functionId && !seqNo && !recordId && responseValue !== null) {
-          toast.success(platformLabels.Added)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        setWindowOpen(false)
-        invalidate()
-      } catch (error) {}
+      setWindowOpen(false)
+      invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        setIsLoading(true)
-
-        const res = await getRequest({
-          extension: DocumentReleaseRepository.DocumentsOnHold.get,
-          parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
-        })
-        setInitialData({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-      } catch (exception) {}
-      setIsLoading(false)
+      const res = await getRequest({
+        extension: DocumentReleaseRepository.DocumentsOnHold.get,
+        parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
+      })
+      setInitialData({
+        ...res.record,
+        date: formatDateFromApi(res.record.date)
+      })
     })()
   }, [])
 

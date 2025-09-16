@@ -38,7 +38,6 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       status: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup
@@ -65,21 +64,19 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       })
 
       if (!recordId) {
-        toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', obj.fiscalYear)
         setStore(prevStore => ({
           ...prevStore,
           recordId: obj.fiscalYear
         }))
-      } else toast.success(platformLabels.Edited)
-
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
-
       window.close()
     }
   })
 
-  const editMode = !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -91,7 +88,6 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
 
         formik.setValues({
           ...res.record,
-
           startDate: formatDateFromApi(res.record.startDate),
           endDate: formatDateFromApi(res.record.endDate),
           recordId: res.record.fiscalYear

@@ -44,7 +44,6 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       maxRateVarPct: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -54,23 +53,18 @@ export default function CurrencyForm({ labels, maxAccess, recordId }) {
       profileId: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SystemRepository.Currency.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !obj?.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-        setEditMode(true)
-      } else {
-        toast.success(platformLabels.Edited)
-      }
+      setEditMode(true)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

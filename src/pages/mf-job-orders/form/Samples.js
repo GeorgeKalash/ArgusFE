@@ -19,7 +19,6 @@ export default function Samples({ labels, maxAccess, recordId }) {
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       jobId: recordId,

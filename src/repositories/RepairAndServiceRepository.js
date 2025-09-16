@@ -21,6 +21,19 @@ export const RepairAndServiceRepository = {
     set: service + 'setRT',
     del: service + 'delRT'
   },
+  SpareParts: {
+    snapshot: service + 'snapshotSP',
+    page: service + 'pageSP',
+    get: service + 'getSP',
+    set: service + 'setSP',
+    del: service + 'delSP'
+  },
+  SparePartsCategory: {
+    qry: service + 'qrySPC'
+  },
+  Manufacturer: {
+    qry: service + 'qrySPM'
+  },
   InspectionTemplate: {
     get2: service + 'get2ITE',
     page: service + 'pageITE',
@@ -55,6 +68,7 @@ export const RepairAndServiceRepository = {
   },
   JobPosition: {
     page: service + 'pagePOS',
+    qry: service + 'qryPOS',
     get: service + 'getPOS',
     set: service + 'setPOS',
     del: service + 'delPOS'
@@ -64,6 +78,25 @@ export const RepairAndServiceRepository = {
     get: service + 'getSPC',
     set: service + 'setSPC',
     del: service + 'delSPC'
+  },
+  MaintenanceTemplates: {
+    page: service + 'pageMTE',
+    get: service + 'getMTE',
+    set: service + 'setMTE',
+    del: service + 'delMTE'
+  },
+  MaintenanceTemplateTask: {
+    qry: service + 'qryMTT',
+    get: service + 'getMTT',
+    set: service + 'setMTT',
+    del: service + 'delMTT'
+  },
+  RsLabors: {
+    snapshot: service + 'snapshotLBR',
+    page: service + 'pageLBR',
+    set: service + 'setLBR',
+    get: service + 'getLBR',
+    del: service + 'delLBR'
   },
   WorkOrder: {
     page: service + 'qryWO',
@@ -81,24 +114,12 @@ export const RepairAndServiceRepository = {
     set: service + 'setWTK',
     del: service + 'delWTK'
   },
-  MaintenanceTemplateTask: {
-    qry: service + 'qryMTT',
-    get: service + 'getMTT',
-    set: service + 'setMTT',
-    del: service + 'delMTT'
-  },
   EquipmentType: {
     qry: service + 'qryEQT'
   },
   WorkOrderParts: {
     qry: service + 'qryWOP',
     set2: service + 'set2WOP'
-  },
-  Part: {
-    snapshot: service + 'snapshotSP'
-  },
-  Labor: {
-    snapshot: service + 'snapshotLBR'
   },
   WorkOrderLabors: {
     qry: service + 'qryWOL',
