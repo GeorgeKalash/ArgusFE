@@ -43,7 +43,8 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
       reference: yup.string().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
-      positionId: yup.number().required()
+      positionId: yup.number().required(),
+      activeStatus: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -185,7 +186,7 @@ export default function RsLaborsForm({ labels, maxAccess, recordId }) {
                 name='rate'
                 label={labels.rate}
                 value={formik.values.rate}
-                onBlur={formik.handleChange}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('rate', null)}
                 decimalScale={2}
                 maxLength={10}
