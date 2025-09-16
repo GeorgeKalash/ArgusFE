@@ -21,7 +21,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: RepairAndServiceRepository.EquipmentTask.qry
+    endpointId: RepairAndServiceRepository.EquipmentType.qry
   })
 
   const { formik } = useForm({
@@ -71,7 +71,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
     }),
     onSubmit: async values => {
       await postRequest({
-        extension: RepairAndServiceRepository.EquipmentTask.set,
+        extension: RepairAndServiceRepository.EquipmentType.set,
         record: JSON.stringify({
           ...values,
           equipmentId: recordId
@@ -92,7 +92,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
     ;(async function () {
       if (recordId && pmtId) {
         const res = await getRequest({
-          extension: RepairAndServiceRepository.EquipmentTask.get,
+          extension: RepairAndServiceRepository.EquipmentType.get,
           parameters: `_equipmentId=${recordId}&_pmtId=${pmtId}`
         })
         formik.setValues(res.record)

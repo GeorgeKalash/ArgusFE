@@ -21,7 +21,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: RepairAndServiceRepository.EquipmentTask.qry,
+      extension: RepairAndServiceRepository.EquipmentType.qry,
       parameters: `_filter=&_size=30_startAt=0&_equipmentId=${recordId}`
     })
 
@@ -35,7 +35,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.EquipmentTask.qry,
+    endpointId: RepairAndServiceRepository.EquipmentType.qry,
     datasetId: ResourceIds.Equipment
   })
 
@@ -74,7 +74,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.EquipmentTask.del,
+      extension: RepairAndServiceRepository.EquipmentType.del,
       record: JSON.stringify(obj)
     })
 

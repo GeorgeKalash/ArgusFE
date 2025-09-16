@@ -74,7 +74,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
         .test('purc_secMeter-check', 'Purchase value must be less than or equal to current value', function (value) {
           const { currentSM } = this.parent
           if (value == null || currentSM == null) return true
-          
+
           return value <= currentSM
         })
     }),
@@ -206,7 +206,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
         </Grid>
         <Grid item xs={6}>
           <ResourceComboBox
-            endpointId={RepairAndServiceRepository.Maintenance.qry}
+            endpointId={RepairAndServiceRepository.MaintenanceTemplates.qry}
             name='maintTplId'
             label={labels.maintTplId}
             valueField='recordId'
@@ -374,7 +374,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
         </Grid>
         <Grid item xs={6}>
           <ResourceComboBox
-            endpointId={RepairAndServiceRepository.Labor.qry}
+            endpointId={RepairAndServiceRepository.RsLabors.qry}
             name='operatorId'
             label={labels.operatorId}
             valueField='recordId'
