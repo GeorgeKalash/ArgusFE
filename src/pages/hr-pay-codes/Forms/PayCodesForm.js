@@ -13,11 +13,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 
-export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
+export default function PayCodesForm({ labels, recordId, maxAccess, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest, getRequest } = useContext(RequestsContext)
 
-  const editMode = !!payCode
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Paycode.qry
@@ -25,6 +25,7 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
 
   const { formik } = useForm({
     initialValues: {
+      recordId: null,
       payCode: null,
       name: ''
     },
@@ -40,7 +41,7 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
         record: JSON.stringify(obj)
       })
 
-      toast.success(!obj?.payCode ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }
@@ -48,14 +49,15 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (payCode) {
+      if (recordId) {
         const res = await getRequest({
           extension: PayrollRepository.Paycode.get,
-          parameters: `_payCode=${payCode}`
+          parameters: `_payCode=${recordId}`
         })
 
         formik.setValues({
-          ...res.record
+          ...res.record,
+          recordId: res.record.payCode
         })
       }
     })()
@@ -75,7 +77,7 @@ export default function PayCodesForm({ labels, payCode, maxAccess, window }) {
                 maxLength='10'
                 required
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('payCode', e.target.value)}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('payCode', '')}
                 error={formik.touched.payCode && formik.errors.payCode}
               />
