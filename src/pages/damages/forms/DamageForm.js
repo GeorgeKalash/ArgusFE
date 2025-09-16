@@ -24,6 +24,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import Table from 'src/components/Shared/Table'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -71,6 +72,8 @@ export default function DamageForm({ recordId, jobId }) {
         plantId: yup.string().required(),
         jobId: yup.string().required(),
         date: yup.string().required(),
+        laborId: yup.number().required(),
+        damageRate: yup.number().required(),
         pcs: yup.lazy((_, { parent }) =>
           yup
             .number()
@@ -365,12 +368,15 @@ export default function DamageForm({ recordId, jobId }) {
                 label={labels.qty}
                 value={formik.values?.header?.qty}
                 onChange={e => {
-                  formik.setFieldValue('header.damageRate', (e.target.value / formik?.values?.header?.jobQty) * 100)
+                  formik.setFieldValue('header.damageRate', (e.target.value / formik?.values?.header?.jobQty) * 100 || 0)
                   formik.setFieldValue('header.qty', e.target.value)
                 }}
                 maxLength={11}
                 decimalScale={2}
-                onClear={() => formik.setFieldValue('header.qty', null)}
+                onClear={() => {
+                  formik.setFieldValue('header.damageRate', 0)
+                  formik.setFieldValue('header.qty', 0)
+                }}
                 maxAccess={maxAccess}
                 readOnly={isPosted}
                 error={formik?.touched?.header?.qty && Boolean(formik?.errors?.header?.qty)}
@@ -458,13 +464,32 @@ export default function DamageForm({ recordId, jobId }) {
                 label={labels.damageRate}
                 value={formik.values?.header?.damageRate}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('header.damageRate', null)}
+                onClear={() => formik.setFieldValue('header.damageRate', 0)}
                 maxAccess={maxAccess}
                 readOnly
+                required
                 error={formik?.touched?.header?.damageRate && Boolean(formik?.errors?.header?.damageRate)}
               />
             </Grid>
-
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={RepairAndServiceRepository.RsLabors.qry}
+                name='header.laborId'
+                label={labels.labor}
+                valueField='recordId'
+                displayField={['reference', 'firstName']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'firstName', value: 'Name' }
+                ]}
+                required
+                values={formik.values.header}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.laborId', newValue?.recordId || null)
+                }}
+                error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}
+              />
+            </Grid>
             <Grid item xs={4}>
               <CustomButton
                 onClick={onPreview}
