@@ -25,7 +25,7 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
   const conditions = {
     minAmount: row => row?.minAmount != null && row.minAmount <= row.maxAmount,
     maxAmount: row => row?.maxAmount != null && row.minAmount <= row.maxAmount,
-    pct: row => row?.pct != null
+    pct: row => row?.pct != null && row.pct >= 0 && row.pct <= 100
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
