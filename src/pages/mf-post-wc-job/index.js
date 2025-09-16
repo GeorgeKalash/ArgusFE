@@ -31,18 +31,17 @@ const PostWorkCenterJob = () => {
       jobId: null,
       toWorkCenterId: null,
       workCenterId: null,
-      seqNo: 0,
+      seqNo: 1,
       data: { list: [] }
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       workCenterId: yup.number().required(),
       toWorkCenterId: yup
         .number()
         .nullable()
         .when('routingId', {
-          is: val => !!val, 
+          is: val => !!val,
           then: () => yup.number().required(),
           otherwise: () => yup.number().nullable()
         })
@@ -197,8 +196,7 @@ const PostWorkCenterJob = () => {
             jobId: jobRes?.record?.recordId || null,
             jobRef: jobRes?.record?.reference || '',
             documentTypeID: jobRes?.record?.dtName || null,
-            seqNo: 0,
-            status: jobRes?.record?.status
+            seqNo: 1
           })
         }
       })
@@ -278,9 +276,9 @@ const PostWorkCenterJob = () => {
                 }
                 parameters={
                   formik.values.jobId
-                    ? formik.values?.routingId
-                      ? `_jobId=${formik.values.jobId}&_workCenterId=0&_status=0&_params=`
-                      : `_jobId=${formik.values.jobId}`
+                    ? `_jobId=${formik.values.jobId}${
+                        formik.values.routingId ? '&_workCenterId=0&_status=0&_params=' : ''
+                      }`
                     : ''
                 }
                 name='workCenterId'
@@ -290,24 +288,17 @@ const PostWorkCenterJob = () => {
                   formik?.values?.jobId ? (formik?.values?.routingId ? 'recordId' : 'workCenterId') : 'recordId'
                 }
                 displayField={
-                  formik?.values?.jobId
-                    ? formik?.values?.routingId
-                      ? ['reference', 'name']
-                      : ['workCenterRef', 'workCenterName']
+                  formik?.values?.jobId && !formik?.values?.routingId
+                    ? ['workCenterRef', 'workCenterName']
                     : ['reference', 'name']
                 }
                 values={formik.values}
                 columnsInDropDown={
-                  formik?.values?.jobId
-                    ? formik?.values?.routingId
-                      ? [
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ]
-                      : [
-                          { key: 'workCenterRef', value: 'Reference' },
-                          { key: 'workCenterName', value: 'Name' }
-                        ]
+                  formik?.values?.jobId && !formik?.values?.routingId
+                    ? [
+                        { key: 'workCenterRef', value: 'Reference' },
+                        { key: 'workCenterName', value: 'Name' }
+                      ]
                     : [
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }
@@ -333,9 +324,9 @@ const PostWorkCenterJob = () => {
                 }
                 parameters={
                   formik.values.jobId
-                    ? formik.values?.routingId
-                      ? `_jobId=${formik.values.jobId}&_workCenterId=0&_status=0&_params=`
-                      : `_jobId=${formik.values.jobId}`
+                    ? `_jobId=${formik.values.jobId}${
+                        formik.values.routingId ? '&_workCenterId=0&_status=0&_params=' : ''
+                      }`
                     : ''
                 }
                 name='toWorkCenterId'
@@ -345,24 +336,17 @@ const PostWorkCenterJob = () => {
                   formik?.values?.jobId ? (formik?.values?.routingId ? 'recordId' : 'workCenterId') : 'recordId'
                 }
                 displayField={
-                  formik?.values?.jobId
-                    ? formik?.values?.routingId
-                      ? ['reference', 'name']
-                      : ['workCenterRef', 'workCenterName']
+                  formik?.values?.jobId && !formik?.values?.routingId
+                    ? ['workCenterRef', 'workCenterName']
                     : ['reference', 'name']
                 }
                 values={formik.values}
                 columnsInDropDown={
-                  formik?.values?.jobId
-                    ? formik?.values?.routingId
-                      ? [
-                          { key: 'reference', value: 'Reference' },
-                          { key: 'name', value: 'Name' }
-                        ]
-                      : [
-                          { key: 'workCenterRef', value: 'Reference' },
-                          { key: 'workCenterName', value: 'Name' }
-                        ]
+                  formik?.values?.jobId && !formik?.values?.routingId
+                    ? [
+                        { key: 'workCenterRef', value: 'Reference' },
+                        { key: 'workCenterName', value: 'Name' }
+                      ]
                     : [
                         { key: 'reference', value: 'Reference' },
                         { key: 'name', value: 'Name' }

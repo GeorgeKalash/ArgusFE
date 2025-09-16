@@ -862,7 +862,6 @@ export default function JobOrderForm({
                           { key: 'name', value: 'Name' }
                         ]}
                         onChange={async (event, newValue) => {
-                          await updateWC(newValue?.recordId)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
                           formik.setFieldValue('routingId', newValue?.recordId || null)
