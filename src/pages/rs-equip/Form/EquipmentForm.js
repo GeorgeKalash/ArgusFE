@@ -65,6 +65,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
         .test('purc_primMeter-check', 'Purchase value must be less than or equal to current value', function (value) {
           const { currentPM } = this.parent
           if (value == null || currentPM == null) return true
+
           return value <= currentPM
         }),
       purc_secMeter: yup
@@ -73,6 +74,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
         .test('purc_secMeter-check', 'Purchase value must be less than or equal to current value', function (value) {
           const { currentSM } = this.parent
           if (value == null || currentSM == null) return true
+          
           return value <= currentSM
         })
     }),
