@@ -1,10 +1,9 @@
-import { Box, Grid } from '@mui/material'
-import { useContext, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useFormik } from 'formik'
@@ -43,7 +42,6 @@ const BeneficiaryFields = () => {
 
   const formik = useFormik({
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       countryId: yup.string().required(),

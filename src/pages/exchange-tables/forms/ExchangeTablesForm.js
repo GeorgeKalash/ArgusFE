@@ -30,14 +30,13 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       rateAgainstCurrencyId: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      reference: yup.string().required(' '),
-      name: yup.string().required(' '),
-      currencyId: yup.string().required(' '),
-      rateCalcMethod: yup.string().required(' '),
-      rateAgainst: yup.string().required(' '),
+      reference: yup.string().required(),
+      name: yup.string().required(),
+      currencyId: yup.string().required(),
+      rateCalcMethod: yup.string().required(),
+      rateAgainst: yup.string().required(),
       rateAgainstCurrencyId: yup
         .string()
         .nullable()
@@ -64,23 +63,19 @@ export default function ExchangeTablesForm({ labels, maxAccess, recordId, invali
       invalidate()
     }
   })
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: MultiCurrencyRepository.ExchangeTable.get,
-            parameters: `_recordId=${recordId}`
-          })
-          formik.setValues(res.record)
-        }
-      } catch (e) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: MultiCurrencyRepository.ExchangeTable.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [recordId])
-
-  // if rate againt = base currency, foreign currency is optional and readonly.
 
   return (
     <FormShell resourceId={ResourceIds.ExchangeTables} form={formik} maxAccess={maxAccess} editMode={editMode}>

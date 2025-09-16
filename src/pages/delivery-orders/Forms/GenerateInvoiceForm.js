@@ -73,7 +73,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       deliveryOrderId: form?.values?.recordId
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required()

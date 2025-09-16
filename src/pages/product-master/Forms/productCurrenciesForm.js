@@ -48,7 +48,6 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         }
       ]
     },
-    enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async values => {
       await post(values.currencies)

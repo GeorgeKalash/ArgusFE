@@ -85,7 +85,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     initialValues,
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

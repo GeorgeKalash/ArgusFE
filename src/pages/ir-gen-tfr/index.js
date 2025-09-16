@@ -73,7 +73,8 @@ export default function IRGenerateTransfer() {
             requestId: itemDetails.requestId,
             requestSeqNo: itemDetails.seqNo,
             itemId: itemDetails.itemId,
-            qty: itemDetails.transferNow
+            qty: itemDetails.transferNow,
+            muId: itemDetails?.muId || null
           }
         })
 
