@@ -12,11 +12,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import OutboundTranspForm from './forms/OutboundTranspForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
@@ -123,10 +126,10 @@ const OutboundTransp = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openForm(recordId) {
+  async function openStack(recordId) {
     stack({
       Component: OutboundTranspForm,
       props: {
@@ -138,6 +141,35 @@ const OutboundTransp = () => {
       height: 700,
       title: _labels.outboundTransp
     })
+  }
+
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.Trip,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.Trip,
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
   }
 
   const del = async obj => {
