@@ -133,7 +133,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
   useEffect(() => {
     getData(recordId)
   }, [])
-  console.log('check formik', formik.values.transfer)
 
   const totalQty =
     formik?.values?.categorySummary != [] ? formik?.values?.categorySummary?.reduce((op, item) => op + item?.qty, 0) : 0
@@ -185,7 +184,9 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     })
   }
 
-  async function onJobSelection(jobId, routingSeq, routingId, transferUpdate) {
+  async function onJobSelection(transferUpdate) {
+    const { jobId, routingSeq, routingId } = transferUpdate
+
     if (jobId) {
       if (routingSeq && routingId) {
         const routingRes = await getRequest({
@@ -357,7 +358,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                             workCenterId: newValue?.workCenterId
                           }
 
-                          onJobSelection(newValue?.recordId, newValue?.routingSeqNo, newValue?.routingId, transferUpdate)
+                          onJobSelection(transferUpdate)
                         }}
                         errorCheck={'transfer.jobId'}
                       />
