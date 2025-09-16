@@ -211,8 +211,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
           }
 
           formik.setValues({
+
             ...formik.values,
-            transfer: transferUpdate
           })
         } else clearSelection(transferUpdate)
       } else clearSelection(transferUpdate)
