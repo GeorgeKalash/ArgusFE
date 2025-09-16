@@ -16,7 +16,6 @@ const MatrixGrid = ({
   const [selectedCol, setSelectedCol] = useState(null)
   const [newIntersection, setNewIntersection] = useState([])
 
-  // Map column keys to actual record
   const colKeyToRecord = useMemo(() => {
     if (!columnsList) return {}
 
@@ -27,7 +26,6 @@ const MatrixGrid = ({
     }, {})
   }, [columnsList])
 
-  // Build newIntersection and pre-fill intersections
   useEffect(() => {
     if (!rowsList || rowsList.length === 0 || !columnsList || columnsList.length === 0) return
 
@@ -40,7 +38,6 @@ const MatrixGrid = ({
         ...Object.fromEntries(columnsList.map((_, cIndex) => [`col${cIndex + 1}`, '']))
       }
 
-      // Pre-fill intersections if any
       intersections.forEach(inter => {
         const colKey = Object.keys(colKeyToRecord).find(key => colKeyToRecord[key].recordId === inter.colId)
         if (row.recordId === inter.rowId && colKey) {
@@ -77,7 +74,6 @@ const MatrixGrid = ({
         cellStyle: params => {
           const rowIndex = params.data?.rowIndex ?? -1
 
-          // Disable diagonal cells if rowIndex matches column index
           if (rowIndex === cIndex) {
             return {
               backgroundColor: '#d3d3d3',
@@ -130,9 +126,17 @@ const MatrixGrid = ({
   }, [selectedRowId, selectedCol])
 
   const recordIntersection = (rowRecord, colRecord) => {
+    // Toggle intersection in intersections array
     setIntersections(prev => {
-      const alreadyExists = prev.some(item => item.rowId === rowRecord.recordId && item.colId === colRecord.recordId)
-      if (alreadyExists) return prev
+      const existsIndex = prev.findIndex(item => item.rowId === rowRecord.recordId && item.colId === colRecord.recordId)
+
+      if (existsIndex !== -1) {
+        // Remove intersection
+        const newArr = [...prev]
+        newArr.splice(existsIndex, 1)
+
+        return newArr
+      }
 
       return [
         ...prev,
@@ -146,6 +150,22 @@ const MatrixGrid = ({
         }
       ]
     })
+
+    setNewIntersection(prev =>
+      prev.map(row => {
+        if (row.recordId === rowRecord.recordId) {
+          const colKey = Object.keys(row).find(key => colKeyToRecord[key]?.recordId === colRecord.recordId)
+          if (!colKey) return row
+
+          return {
+            ...row,
+            [colKey]: row[colKey] === intersectionValue ? '' : intersectionValue
+          }
+        }
+
+        return row
+      })
+    )
   }
 
   const onCellClicked = params => {
@@ -156,9 +176,6 @@ const MatrixGrid = ({
     if (colId === 'rowLabel') {
       if (selectedCol) {
         const colRecord = colKeyToRecord[selectedCol]
-        setNewIntersection(prev =>
-          prev.map(row => (row.recordId === data.recordId ? { ...row, [selectedCol]: intersectionValue } : row))
-        )
         recordIntersection(data, colRecord)
         setSelectedRowId(null)
         setSelectedCol(null)
@@ -170,9 +187,6 @@ const MatrixGrid = ({
     }
 
     const colRecord = colKeyToRecord[colId]
-    setNewIntersection(prev =>
-      prev.map(row => (row.recordId === data.recordId ? { ...row, [colId]: intersectionValue } : row))
-    )
     recordIntersection(data, colRecord)
   }
 
@@ -183,9 +197,6 @@ const MatrixGrid = ({
 
     if (selectedRowId !== null) {
       const rowRecord = newIntersection.find(r => r.recordId === selectedRowId)
-      setNewIntersection(prev =>
-        prev.map(row => (row.recordId === rowRecord.recordId ? { ...row, [colId]: intersectionValue } : row))
-      )
       recordIntersection(rowRecord, colRecord)
       setSelectedRowId(null)
       setSelectedCol(null)

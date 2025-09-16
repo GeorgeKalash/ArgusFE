@@ -17,7 +17,7 @@ export default function WorkCenterTransferMap() {
   const [intersections, setIntersections] = useState([])
   const [data, setData] = useState([])
 
-  const { labels, access } = useResourceQuery({
+  const { access } = useResourceQuery({
     datasetId: ResourceIds.WorkCenterTransferMap
   })
 
