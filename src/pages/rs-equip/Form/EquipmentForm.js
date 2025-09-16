@@ -208,11 +208,7 @@ export default function EquipmentForm({ labels, maxAccess, store, setStore }) {
             name='maintTplId'
             label={labels.maintTplId}
             valueField='recordId'
-            displayField={['reference', 'name']}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
+            displayField='name'
             values={formik.values}
             onChange={(event, newValue) => {
               formik.setFieldValue('maintTplId', newValue?.recordId || null)
