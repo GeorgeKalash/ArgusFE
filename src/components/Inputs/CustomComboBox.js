@@ -12,6 +12,7 @@ const CustomComboBox = ({
   fullName,
   label,
   value,
+  hidden = false,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -43,7 +44,7 @@ const CustomComboBox = ({
     props.maxAccess,
     required,
     readOnly,
-    false,
+    hidden,
     disabled
   )
 

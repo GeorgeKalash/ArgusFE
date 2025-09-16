@@ -3,12 +3,14 @@ const service = 'RS.asmx/'
 export const RepairAndServiceRepository = {
   RepairName: {
     page: service + 'pageRNA',
+    qry: service + 'qryRNA',
     get: service + 'getRNA',
     set: service + 'setRNA',
     del: service + 'delRNA'
   },
   WorkOrderTypes: {
     page: service + 'pageWOT',
+    qry: service + 'qryWOT',
     get: service + 'getWOT',
     set: service + 'setWOT',
     del: service + 'delWOT'
@@ -20,6 +22,7 @@ export const RepairAndServiceRepository = {
     del: service + 'delRT'
   },
   SpareParts: {
+    snapshot: service + 'snapshotSP',
     page: service + 'pageSP',
     get: service + 'getSP',
     set: service + 'setSP',
@@ -45,6 +48,7 @@ export const RepairAndServiceRepository = {
   },
   Warehouse: {
     page: service + 'pageWH',
+    qry: service + 'qryWH',
     set: service + 'setWH',
     get: service + 'getWH',
     del: service + 'delWH'
@@ -88,9 +92,37 @@ export const RepairAndServiceRepository = {
     del: service + 'delMTT'
   },
   RsLabors: {
+    snapshot: service + 'snapshotLBR',
     page: service + 'pageLBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
     del: service + 'delLBR'
+  },
+  WorkOrder: {
+    page: service + 'qryWO',
+    get: service + 'getWO',
+    set: service + 'setWO',
+    del: service + 'delWO',
+    post: service + 'postWO'
+  },
+  Equipment: {
+    snapshot: service + 'snapshotEQP'
+  },
+  WorkTask: {
+    qry: service + 'qryWTK',
+    get: service + 'getWTK',
+    set: service + 'setWTK',
+    del: service + 'delWTK'
+  },
+  EquipmentType: {
+    qry: service + 'qryEQT'
+  },
+  WorkOrderParts: {
+    qry: service + 'qryWOP',
+    set2: service + 'set2WOP'
+  },
+  WorkOrderLabors: {
+    qry: service + 'qryWOL',
+    set2: service + 'set2WOL'
   }
 }
