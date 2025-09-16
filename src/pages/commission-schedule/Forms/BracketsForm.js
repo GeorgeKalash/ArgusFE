@@ -11,6 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const BracketsForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,43 +22,23 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
     endpointId: SaleRepository.CommissionScheduleBracket.page
   })
 
+  const conditions = {
+    minAmount: row => row?.minAmount != null && row.minAmount <= row.maxAmount,
+    maxAmount: row => row?.maxAmount != null && row.minAmount <= row.maxAmount,
+    pct: row => row?.pct != null
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
+
   const { formik } = useForm({
     maxAccess,
     initialValues: { rows: [] },
+    conditionSchema: ['rows'],
     validationSchema: yup.object({
-      rows: yup.array().of(
-        yup.object({
-          minAmount: yup.number().test(function (value) {
-            const { maxAmount, pct } = this.parent
-            const isAnyFilled = value != null || maxAmount != null || pct != null
-
-            if (!isAnyFilled) return true
-
-            return value != null
-          }),
-          maxAmount: yup.number().test('max-greater-than-min', 'Max must be greater than Min', function (value) {
-            const { minAmount, pct } = this.parent
-            const isAnyFilled = minAmount != null || value != null || pct != null
-
-            if (!isAnyFilled) return true
-            if (value == null) return false
-
-            return Number(value) >= Number(minAmount)
-          }),
-          pct: yup.number().test(function (value) {
-            const { minAmount, maxAmount } = this.parent
-            const isAnyFilled = minAmount != null || maxAmount != null || value != null
-
-            if (!isAnyFilled) return true
-            if (value == null) return false
-
-            return value >= 0.01 && value <= 100
-          })
-        })
-      )
+      rows: yup.array().of(schema)
     }),
     onSubmit: async values => {
-      const filteredRows = values.rows.filter(row => row.minAmount != null || row.maxAmount != null || row.pct != null)
+      const filteredRows = values.rows.filter(row => Object.values(requiredFields)?.some(fn => fn(row)))
 
       const updatedRows = filteredRows.map((row, index) => ({
         ...row,
@@ -86,13 +67,10 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
       parameters: `_commissionScheduleId=${recordId}`
     })
     if (res.list.length > 0) {
-      const newRows = res.list.map((obj, index) => {
-        return {
-          id: index + 1,
-          ...obj
-        }
-      })
-
+      const newRows = res.list.map((obj, index) => ({
+        id: index + 1,
+        ...obj
+      }))
       formik.setValues({ rows: newRows })
     }
   }
@@ -106,17 +84,13 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
       component: 'numberfield',
       label: labels.min,
       name: 'minAmount',
-      props: {
-        allowNegative: false
-      }
+      props: { allowNegative: false }
     },
     {
       component: 'numberfield',
       label: labels.max,
       name: 'maxAmount',
-      props: {
-        allowNegative: false
-      }
+      props: { allowNegative: false }
     },
     {
       component: 'numberfield',
