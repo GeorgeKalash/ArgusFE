@@ -21,6 +21,9 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import Table from 'src/components/Shared/Table'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,43 +37,72 @@ export default function DamageForm({ recordId, jobId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Damage,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    objectName: 'header'
   })
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId: recordId || '',
-      dtId: null,
-      reference: '',
-      date: new Date(),
-      plantId: null,
-      notes: '',
-      status: 1,
-      jobId: null,
-      seqNo: 0,
-      pcs: 0,
-      workCenterId: null,
-      maxPcs: 50
+      header: {
+        recordId: recordId || '',
+        dtId: null,
+        reference: '',
+        date: new Date(),
+        plantId: null,
+        notes: '',
+        status: 1,
+        jobId: null,
+        seqNo: 0,
+        pcs: 0,
+        workCenterId: null,
+        maxPcs: 50,
+        qty: 0,
+        jobQty: 0,
+        damageRate: 0
+      },
+      items: []
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      plantId: yup.string().required(),
-      jobId: yup.string().required(),
-      date: yup.string().required(),
-      pcs: yup.lazy((_, { parent }) =>
-        yup
+      header: yup.object({
+        plantId: yup.string().required(),
+        jobId: yup.string().required(),
+        date: yup.string().required(),
+        pcs: yup.lazy((_, { parent }) =>
+          yup
+            .number()
+            .min(1)
+            .max(parent.maxPcs, ({ max }) => `Must be less than or equal to ${max}`)
+            .nullable(true)
+        ),
+        qty: yup
           .number()
-          .min(0)
-          .max(parent.maxPcs, ({ max }) => `Must be less than or equal to ${max}`)
           .nullable(true)
-      )
+          .test('max-jobQty', 'Qty cannot be greater than Job Qty', function (value) {
+            if (value == null) return true
+
+            return value <= this.parent.jobQty
+          })
+      })
     }),
     onSubmit: async obj => {
+      const payload = {
+        header: {
+          ...formik.values.header,
+          date: formatDateToApi(obj.header.date),
+          damageRate: obj.header.damageRate
+        },
+        items: formik.values.items.map(({ id, ...rest }) => ({
+          seqNo: id,
+          ...rest
+        }))
+      }
       postRequest({
-        extension: ManufacturingRepository.Damage.set,
-        record: JSON.stringify({ ...obj, date: formatDateToApi(obj.date) })
+        extension: ManufacturingRepository.Damage.set2,
+        record: JSON.stringify(payload)
       }).then(async res => {
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         await refetchForm(res.recordId)
@@ -81,10 +113,10 @@ export default function DamageForm({ recordId, jobId }) {
 
   async function refetchForm(damageId) {
     await getRequest({
-      extension: ManufacturingRepository.Damage.get,
+      extension: ManufacturingRepository.Damage.get2,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
-      await refetchFormJob(res?.record?.jobId, res.record)
+      await refetchFormJob(res?.record?.header?.jobId, res.record)
     })
   }
 
@@ -94,30 +126,39 @@ export default function DamageForm({ recordId, jobId }) {
       parameters: `_recordId=${jobId}`
     }).then(jobRes => {
       formik.setValues({
-        ...formik.values,
-        ...res,
-        date: formatDateFromApi(jobRes?.record?.date),
-        sku: jobRes?.record?.sku,
-        itemName: jobRes?.record?.itemName,
-        designName: jobRes?.record?.designName,
-        designRef: jobRes?.record?.designRef,
-        jobRef: jobRes?.record?.reference,
-        jobId: jobRes?.record?.recordId,
-        workCenterName: jobRes?.record?.wcName,
-        workCenterRef: jobRes?.record?.wcRef,
-        workCenterId: jobRes?.record?.workCenterId,
-        maxPcs: jobRes.record.pcs
+        ...formik.values.header,
+        header: {
+          ...res.header,
+          date: formatDateFromApi(jobRes?.record?.date),
+          sku: jobRes?.record?.sku,
+          itemName: jobRes?.record?.itemName,
+          designName: jobRes?.record?.designName,
+          designRef: jobRes?.record?.designRef,
+          jobRef: jobRes?.record?.reference,
+          jobId: jobRes?.record?.recordId,
+          workCenterName: jobRes?.record?.wcName,
+          workCenterRef: jobRes?.record?.wcRef,
+          workCenterId: jobRes?.record?.workCenterId,
+          maxPcs: jobRes?.record?.pcs
+        },
+        items:
+          res?.items.map((item, index) => {
+            return {
+              id: index + 1,
+              ...item
+            }
+          }) || []
       })
     })
   }
 
   const editMode = !!formik.values.recordId
-  const isPosted = formik.values.status === 3
+  const isPosted = formik.values.header.status === 3
 
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.Damage.post,
-      record: JSON.stringify(formik.values)
+      record: JSON.stringify(formik.values.header)
     })
 
     toast.success(platformLabels.Posted)
@@ -148,6 +189,48 @@ export default function DamageForm({ recordId, jobId }) {
     }
   }, [])
 
+  const columns = [
+    {
+      field: 'sku',
+      headerName: labels.sku,
+      flex: 1
+    },
+    {
+      field: 'itemName',
+      headerName: labels.itemName,
+      flex: 1
+    },
+    {
+      field: 'qty',
+      headerName: labels.qty,
+      flex: 1
+    },
+    {
+      field: 'damageQty',
+      headerName: labels.damageQty,
+      flex: 1
+    }
+  ]
+
+  const onPreview = async () => {
+    if (!formik.values.header.jobId && !formik.values.header.damageRate) {
+      return
+    }
+
+    const items = await getRequest({
+      extension: ManufacturingRepository.DamageReturnRawMaterial.preview,
+      parameters: `_jobId=${formik.values.header.jobId || 0}&_rate=${formik.values.header.damageRate || 0}`
+    })
+
+    formik.setFieldValue(
+      'items',
+      items?.list.map((item, index) => ({
+        id: index + 1,
+        ...item
+      })) || []
+    )
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -162,13 +245,13 @@ export default function DamageForm({ recordId, jobId }) {
       disabledSavedClear={isPosted}
     >
       <VertLayout>
-        <Grow>
+        <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.Damage}`}
-                name='dtId'
+                name='header.dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -177,39 +260,27 @@ export default function DamageForm({ recordId, jobId }) {
                 readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
-                values={formik.values}
+                values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
+
+                  formik.setFieldValue('header.dtId', newValue?.recordId || null)
                 }}
-                error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                error={formik?.touched?.header?.dtId && Boolean(formik?.errors?.header?.dtId)}
               />
             </Grid>
-            <Grid item xs={7}></Grid>
-            <Grid item xs={5}>
-              <CustomTextField
-                name='reference'
-                label={labels.reference}
-                value={formik?.values?.reference}
-                maxAccess={!editMode && maxAccess}
-                readOnly={editMode}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
-            <Grid item xs={7}></Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceLookup
                 endpointId={ManufacturingRepository.MFJobOrder.snapshot}
                 filter={{ status: 4 }}
                 valueField='reference'
                 displayField='reference'
                 secondDisplayField={false}
-                name='jobId'
+                name='header.jobId'
                 label={labels.jobOrder}
                 form={formik}
+                formObject={formik.values.header}
                 required
                 readOnly={editMode}
                 displayFieldWidth={2}
@@ -223,51 +294,138 @@ export default function DamageForm({ recordId, jobId }) {
                 ]}
                 onChange={(event, newValue) => {
                   formik.setValues({
-                    ...formik.values,
-                    jobId: newValue?.recordId || null,
-                    jobRef: newValue?.reference || '',
-                    sku: newValue?.sku || '',
-                    designRef: newValue?.designRef || '',
-                    designName: newValue?.designName || '',
-                    itemName: newValue?.itemName || '',
-                    workCenterName: newValue?.wcName || '',
-                    workCenterId: newValue?.workCenterId || null,
-                    plantId: newValue?.plantId || null,
-                    maxPcs: newValue?.pcs || 0
+                    header: {
+                      ...formik.values.header,
+                      jobId: newValue?.recordId || null,
+                      jobRef: newValue?.reference || '',
+                      jobQty: newValue?.qty || 0,
+                      sku: newValue?.sku || '',
+                      designRef: newValue?.designRef || '',
+                      designName: newValue?.designName || '',
+                      itemName: newValue?.itemName || '',
+                      workCenterName: newValue?.wcName || '',
+                      workCenterId: newValue?.workCenterId || null,
+                      plantId: newValue?.plantId || null,
+                      maxPcs: newValue?.pcs || 0,
+                      damageRate: (formik.values.qty / newValue?.qty) * 100
+                    }
                   })
                 }}
-                errorCheck={'jobId'}
+                errorCheck={'header.jobId'}
               />
             </Grid>
-            <Grid item xs={7}></Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.pcs'
+                readOnly={editMode}
+                label={labels.damagedPcs}
+                value={formik.values?.header?.pcs}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.pcs', 0)}
+                maxAccess={maxAccess}
+                error={formik?.touched?.header?.pcs && Boolean(formik?.errors?.header?.pcs)}
+              />
+            </Grid>
+            <Grid item xs={4}>
               <CustomTextField
-                name='sku'
-                label={labels.item}
-                value={formik?.values?.sku}
+                name='header.reference'
+                label={labels.reference}
+                value={formik?.values?.header?.reference}
+                maxAccess={!editMode && maxAccess}
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik?.touched?.header?.reference && Boolean(formik?.errors?.header?.reference)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container xs={12} spacing={2}>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.sku'
+                    label={labels.item}
+                    value={formik?.values?.header?.sku}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.itemName'
+                    value={formik?.values?.header?.itemName}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.qty'
+                label={labels.qty}
+                value={formik.values?.header?.qty}
+                onChange={e => {
+                  formik.setFieldValue('header.damageRate', (e.target.value / formik?.values?.header?.jobQty) * 100)
+                  formik.setFieldValue('header.qty', e.target.value)
+                }}
+                maxLength={11}
+                decimalScale={2}
+                onClear={() => formik.setFieldValue('header.qty', null)}
+                maxAccess={maxAccess}
+                readOnly={isPosted}
+                error={formik?.touched?.header?.qty && Boolean(formik?.errors?.header?.qty)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomDatePicker
+                name='header.date'
+                required
+                label={labels.date}
+                value={formik?.values?.header?.date}
+                onChange={formik.setFieldValue}
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('header.date', null)}
+                error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container xs={12} spacing={2}>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.designRef'
+                    label={labels.designRef}
+                    value={formik?.values?.header?.designRef}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='header.designName'
+                    value={formik?.values?.header?.designName}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.jobQty'
+                label={labels.jobQty}
+                value={formik.values?.header?.jobQty}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.jobQty', null)}
                 maxAccess={maxAccess}
                 readOnly
+                error={formik?.touched?.header?.jobQty && Boolean(formik?.errors?.header?.jobQty)}
               />
             </Grid>
-            <Grid item xs={5}>
-              <CustomTextField name='itemName' value={formik?.values?.itemName} maxAccess={maxAccess} readOnly />
-            </Grid>
-            <Grid item xs={5}>
-              <CustomTextField
-                name='designRef'
-                label={labels.designRef}
-                value={formik?.values?.designRef}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <CustomTextField name='designName' value={formik?.values?.designName} maxAccess={maxAccess} readOnly />
-            </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}
-                name='plantId'
+                name='header.plantId'
                 required
                 readOnly={isPosted}
                 label={labels.plant}
@@ -275,74 +433,77 @@ export default function DamageForm({ recordId, jobId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                values={formik.values}
+                values={formik.values.header}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId)
+                  formik.setFieldValue('header.plantId', newValue?.recordId)
                 }}
-                error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
               />
             </Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={12}></Grid>
-            <Grid item xs={5}>
-              <CustomDatePicker
-                name='date'
-                required
-                label={labels.date}
-                value={formik?.values?.date}
-                onChange={formik.setFieldValue}
-                editMode={editMode}
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('date', null)}
-                error={formik.touched.date && Boolean(formik.errors.date)}
-              />
-            </Grid>
-            <Grid item xs={7}></Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <CustomTextField
-                name='workCenterName'
+                name='header.workCenterName'
                 label={labels.workCenter}
-                value={formik?.values?.workCenterName}
+                value={formik?.values?.header?.workCenterName}
                 maxAccess={maxAccess}
                 readOnly
               />
             </Grid>
-            <Grid item xs={7}></Grid>
-            <Grid item xs={5}>
+            <Grid item xs={4}>
               <CustomNumberField
-                name='pcs'
-                readOnly={editMode}
-                label={labels.damagedPcs}
-                value={formik.values?.pcs}
+                name='header.damageRate'
+                label={labels.damageRate}
+                value={formik.values?.header?.damageRate}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('pcs', 0)}
+                onClear={() => formik.setFieldValue('header.damageRate', null)}
                 maxAccess={maxAccess}
-                error={formik.touched.pcs && Boolean(formik.errors.pcs)}
-                helperText={formik.touched.pcs && formik.errors.pcs}
+                readOnly
+                error={formik?.touched?.header?.damageRate && Boolean(formik?.errors?.header?.damageRate)}
               />
             </Grid>
-            <Grid item xs={7}></Grid>
+
+            <Grid item xs={4}>
+              <CustomButton
+                onClick={onPreview}
+                image={'preview.png'}
+                tooltipText={platformLabels.Preview}
+                disabled={isPosted}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+
+        <Grow>
+          <Table
+            name={'damageTable'}
+            columns={columns}
+            gridData={{ list: formik.values.items }}
+            rowId={['recordId']}
+            pagination={false}
+            maxAccess={access}
+          />
+        </Grow>
+        <Fixed>
+          <Grid container spacing={2}>
             <Grid item xs={7}>
               <CustomTextArea
-                name='notes'
+                name='header.notes'
                 label={labels.remarks}
-                value={formik.values.notes}
+                value={formik.values.header.notes}
                 rows={4}
                 editMode={editMode}
                 readOnly={isPosted}
                 maxAccess={maxAccess}
-                onChange={e => formik.setFieldValue('notes', e.target.value)}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+                error={formik?.touched?.header?.notes && Boolean(formik.errors?.header?.notes)}
               />
             </Grid>
           </Grid>
-        </Grow>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )
