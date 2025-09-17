@@ -634,8 +634,12 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                           : 0
                       formik.setFieldValue('vatPct', parseFloat(vatPct).toFixed(2) || 0)
                       formik.setFieldValue('vatAmount', e.target.value)
+                      formik.setFieldValue('amount', Number(e.target.value || 0) + Number(formik.values.subtotal))
                     }}
-                    onClear={() => formik.setFieldValue('vatAmount', '')}
+                    onClear={() => {
+                      formik.setFieldValue('vatAmount', 0)
+                      formik.setFieldValue('amount', Number(formik.values.subtotal || 0))
+                    }}
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
