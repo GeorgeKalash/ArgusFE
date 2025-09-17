@@ -310,7 +310,7 @@ export default function DamageForm({ recordId, jobId }) {
                       workCenterId: newValue?.workCenterId || null,
                       plantId: newValue?.plantId || null,
                       maxPcs: newValue?.pcs || 0,
-                      damageRate: (formik.values.qty / newValue?.qty) * 100
+                      damageRate: (formik.values.qty / newValue?.qty) * 100 || 0,
                     }
                   })
                 }}
