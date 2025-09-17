@@ -27,7 +27,14 @@ export default function WorkCenterTransferMap() {
       parameters: `_filter=`
     })
 
-    setData(res?.list || [])
+    const mapping = res?.list?.map(item => {
+      return {
+        id: item.recordId,
+        rowLabels: item.name,
+        colLabels: item.name
+      }
+    })
+    setData(mapping || [])
   }
 
   async function getIntersections() {
@@ -39,11 +46,7 @@ export default function WorkCenterTransferMap() {
     const mapping = res?.list?.map(item => {
       return {
         rowId: item.fromWorkCenterId,
-        colId: item.toWorkCenterId,
-        rowRef: item.fromWorkCenterRef,
-        rowName: item.fromWorkCenterName,
-        colRef: item.toWorkCenterRef,
-        colName: item.toWorkCenterName
+        colId: item.toWorkCenterId
       }
     })
     setIntersections(mapping || [])
@@ -55,11 +58,7 @@ export default function WorkCenterTransferMap() {
       record: JSON.stringify({
         items: intersections?.map(item => ({
           fromWorkCenterId: item.rowId,
-          toWorkCenterId: item.colId,
-          fromWorkCenterRef: item.rowRef,
-          fromWorkCenterName: item.rowName,
-          toWorkCenterRef: item.colRef,
-          toWorkCenterName: item.colName
+          toWorkCenterId: item.colId
         }))
       })
     })

@@ -30,16 +30,15 @@ const MatrixGrid = ({
 
     return rowsList.map((rowItem, rIndex) => {
       const row = {
-        recordId: rowItem.recordId,
-        rowLabel: rowItem.name,
-        rowRef: rowItem.reference,
+        id: rowItem.id,
+        rowLabel: rowItem.rowLabels,
         rowIndex: rIndex,
         ...Object.fromEntries(columnsList.map((_, cIndex) => [`col${cIndex + 1}`, '']))
       }
 
       intersections.forEach(inter => {
-        const colKey = Object.keys(colKeyToRecord).find(key => colKeyToRecord[key].recordId === inter.colId)
-        if (row.recordId === inter.rowId && colKey) {
+        const colKey = Object.keys(colKeyToRecord).find(key => colKeyToRecord[key].id === inter.colId)
+        if (row.id === inter.rowId && colKey) {
           row[colKey] = intersectionValue
         }
       })
@@ -70,7 +69,7 @@ const MatrixGrid = ({
     columnsList.forEach((colItem, cIndex) => {
       cols.push({
         field: `col${cIndex + 1}`,
-        headerName: colItem.name,
+        headerName: colItem.colLabels,
         sortable: false,
         headerStyle: { fontWeight: 'bold' },
         cellStyle: params => {
@@ -98,7 +97,7 @@ const MatrixGrid = ({
             }
           }
 
-          if (selectedRowId === params.data?.recordId || selectedCol === params.colDef.field) {
+          if (selectedRowId === params.data?.id || selectedCol === params.colDef.field) {
             return {
               backgroundColor: '#e0f7fa',
               display: 'flex',
@@ -127,15 +126,15 @@ const MatrixGrid = ({
     const api = gridRef.current?.api
     if (!api) return
 
-    const rowNode = api.getRowNode(rowRecord.recordId)
-    const colKey = Object.keys(colKeyToRecord).find(key => colKeyToRecord[key].recordId === colRecord.recordId)
+    const rowNode = api.getRowNode(rowRecord.id)
+    const colKey = Object.keys(colKeyToRecord).find(key => colKeyToRecord[key].id === colRecord.id)
     if (!rowNode || !colKey) return
 
     const newValue = rowNode.data[colKey] === intersectionValue ? '' : intersectionValue
     rowNode.setDataValue(colKey, newValue)
 
     setIntersections(prev => {
-      const existsIndex = prev.findIndex(item => item.rowId === rowRecord.recordId && item.colId === colRecord.recordId)
+      const existsIndex = prev.findIndex(item => item.rowId === rowRecord.id && item.colId === colRecord.id)
       if (existsIndex !== -1) {
         const newArr = [...prev]
         newArr.splice(existsIndex, 1)
@@ -146,12 +145,8 @@ const MatrixGrid = ({
       return [
         ...prev,
         {
-          rowId: rowRecord.recordId,
-          colId: colRecord.recordId,
-          rowRef: rowRecord.rowRef,
-          rowName: rowRecord.rowLabel,
-          colRef: colRecord.reference,
-          colName: colRecord.name
+          rowId: rowRecord.id,
+          colId: colRecord.id
         }
       ]
     })
@@ -169,7 +164,7 @@ const MatrixGrid = ({
         setSelectedRowId(null)
         setSelectedCol(null)
       } else {
-        setSelectedRowId(data.recordId)
+        setSelectedRowId(data.id)
       }
 
       return
@@ -186,7 +181,7 @@ const MatrixGrid = ({
     const colRecord = colKeyToRecord[colId]
 
     if (selectedRowId !== null) {
-      const rowRecord = initialRowData.find(r => r.recordId === selectedRowId)
+      const rowRecord = initialRowData.find(r => r.id === selectedRowId)
       recordIntersection(rowRecord, colRecord)
       setSelectedRowId(null)
       setSelectedCol(null)
@@ -205,7 +200,7 @@ const MatrixGrid = ({
       <AgGridReact
         ref={gridRef}
         rowData={initialRowData}
-        getRowId={params => params.data.recordId}
+        getRowId={params => params.data.id}
         columnDefs={columnDefs}
         defaultColDef={{
           sortable: false,
@@ -214,7 +209,7 @@ const MatrixGrid = ({
         onCellClicked={onCellClicked}
         onColumnHeaderClicked={onColumnHeaderClicked}
         suppressRowClickSelection={true}
-        getRowClass={params => (params.data?.recordId === selectedRowId ? 'highlight-row' : '')}
+        getRowClass={params => (params.data?.id === selectedRowId ? 'highlight-row' : '')}
         cellClassRules={cellClassRules}
       />
     </div>
