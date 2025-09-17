@@ -122,7 +122,9 @@ const MatrixGrid = ({
 
   const recordIntersection = (rowRecord, colRecord) => {
     if (!rowRecord || !colRecord) return
-
+    const rowIndex = rowRecord.rowIndex
+    const colIndex = columnsList.findIndex(c => c.id === colRecord.id)
+    if (rowIndex === colIndex) return
     const api = gridRef.current?.api
     if (!api) return
 
@@ -142,13 +144,7 @@ const MatrixGrid = ({
         return newArr
       }
 
-      return [
-        ...prev,
-        {
-          rowId: rowRecord.id,
-          colId: colRecord.id
-        }
-      ]
+      return [...prev, { rowId: rowRecord.id, colId: colRecord.id }]
     })
   }
 
