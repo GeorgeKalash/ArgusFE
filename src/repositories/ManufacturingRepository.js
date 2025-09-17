@@ -34,6 +34,7 @@ export const ManufacturingRepository = {
   WorkCenter: {
     page: service + 'pageWCT',
     qry: service + 'qryWCT',
+    qry3: service + 'qryWCT3',
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT',
@@ -353,7 +354,9 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    qry: service + 'qryJWC'
+    qry: service + 'qryJWC',
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',

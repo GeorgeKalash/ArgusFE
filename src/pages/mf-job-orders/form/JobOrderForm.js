@@ -113,8 +113,7 @@ export default function JobOrderForm({
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
       workCenterId: yup.string().required(),
-      itemCategoryId: yup.string().required(),
-      routingId: yup.string().required()
+      itemCategoryId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -850,7 +849,6 @@ export default function JobOrderForm({
                         name='routingId'
                         label={labels.routing}
                         form={formik}
-                        required
                         minChars={2}
                         firstValue={formik.values.routingRef}
                         secondValue={formik.values.routingName}
@@ -863,7 +861,6 @@ export default function JobOrderForm({
                           { key: 'name', value: 'Name' }
                         ]}
                         onChange={async (event, newValue) => {
-                          await updateWC(newValue?.recordId)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
                           formik.setFieldValue('routingId', newValue?.recordId || null)
@@ -883,7 +880,7 @@ export default function JobOrderForm({
                         secondValue={formik.values.wcName}
                         errorCheck={'workCenterId'}
                         maxAccess={maxAccess}
-                        readOnly={editMode ? true : formik?.values?.designId || formik?.values?.routingId}
+                        readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('workCenterId', newValue?.recordId)
