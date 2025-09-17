@@ -572,6 +572,7 @@ export const ResourceIds = {
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
+  Equipment: 45200,
   SpManufacturer: 45110,
   JobPosition: 45103,
   SpCategory: 45111,
