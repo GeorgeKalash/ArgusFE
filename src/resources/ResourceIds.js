@@ -577,6 +577,7 @@ export const ResourceIds = {
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
+  AttendanceDay: 72202,
 
   // GL
   GLSalesInvoice: 51604,
