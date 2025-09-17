@@ -440,9 +440,9 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         }
                         parameters={
                           formik.values.transfer.jobId
-                            ? formik.values.transfer?.routingId
-                              ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
-                              : `_jobId=${formik.values.transfer.jobId}`
+                            ? `_jobId=${formik.values.transfer.jobId}${
+                                formik.values.transfer.routingId ? '&_workCenterId=0&_status=0' : ''
+                              }`
                             : ''
                         }
                         name='transfer.fromWCId'
@@ -499,11 +499,13 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         }
                         parameters={
                           formik.values.transfer.jobId
-                            ? formik.values.transfer?.routingId
-                              ? `_jobId=${formik.values.transfer.jobId}&_workCenterId=0&_status=0`
-                              : formik.values.transfer?.workCenterId
-                              ? `_fromWorkCenterId=${formik.values.transfer.workCenterId}`
-                              : null
+                            ? `_jobId=${formik.values.transfer.jobId}${
+                                formik.values.transfer.routingId
+                                  ? '&_workCenterId=0&_status=0'
+                                  : formik.values.transfer.workCenterId
+                                  ? `&_fromWorkCenterId=${formik.values.transfer.workCenterId}`
+                                  : ''
+                              }`
                             : ''
                         }
                         name='transfer.toWCId'

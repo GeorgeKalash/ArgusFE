@@ -881,7 +881,7 @@ export default function JobOrderForm({
                         secondValue={formik.values.wcName}
                         errorCheck={'workCenterId'}
                         maxAccess={maxAccess}
-                        readOnly={editMode ? true : formik?.values?.designId || formik?.values?.routingId}
+                        readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('workCenterId', newValue?.recordId)
