@@ -68,10 +68,8 @@ export default function WorkCenterTransferMap() {
   }
 
   useEffect(() => {
-    ;(async function () {
-      await getAllWorkCenters()
-      await getIntersections()
-    })()
+    getAllWorkCenters()
+    getIntersections()
   }, [])
 
   return (
