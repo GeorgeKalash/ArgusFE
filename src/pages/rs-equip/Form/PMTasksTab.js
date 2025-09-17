@@ -101,7 +101,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
       },
       width: 650,
       height: 600,
-      title: labels.PMTasks
+      title: labels.EquipmentTask
     })
   }
 

@@ -170,7 +170,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               required={formik.values.tbd}
               readOnly={!formik.values.tbd}
               onClear={() => formik.setFieldValue('tbdEvery', null)}
-              error={formik.touched.tbdEvery && Boolean(formik.errors.tbdEvery)}
+              error={formik.values.tbd && formik.touched.tbdEvery && Boolean(formik.errors.tbdEvery)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -186,7 +186,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               onChange={(event, newValue) => {
                 formik.setFieldValue('tbdFrequency', newValue?.key || 1)
               }}
-              error={formik.touched.tbdFrequency && Boolean(formik.errors.tbdFrequency)}
+              error={formik.values.tbd && formik.touched.tbdFrequency && Boolean(formik.errors.tbdFrequency)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -201,7 +201,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               maxLength={4}
               allowNegative={false}
               onClear={() => formik.setFieldValue('tbdReminder', null)}
-              error={formik.touched.tbdReminder && Boolean(formik.errors.tbdReminder)}
+              error={formik.values.tbd && formik.touched.tbdReminder && Boolean(formik.errors.tbdReminder)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -234,7 +234,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               allowNegative={false}
               readOnly={!formik.values.tbh}
               onClear={() => formik.setFieldValue('tbhEvery', null)}
-              error={formik.touched.tbhEvery && Boolean(formik.errors.tbhEvery)}
+              error={formik.values.tbh && formik.touched.tbhEvery && Boolean(formik.errors.tbhEvery)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -252,7 +252,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
               required={formik.values.tbh}
               readOnly={!formik.values.tbh}
               onClear={() => formik.setFieldValue('tbhReminder', null)}
-              error={formik.touched.tbhReminder && Boolean(formik.errors.tbhReminder)}
+              error={formik.values.tbh && formik.touched.tbhReminder && Boolean(formik.errors.tbhReminder)}
             />
           </Grid>
           <Grid item xs={6}>
