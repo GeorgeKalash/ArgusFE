@@ -85,7 +85,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       accountId: yup.string().required(),
       subtotal: yup.number().required(),
       date: yup.string().required(),
-      dueDate: yup.string().required()
+      dueDate: yup.string().required(),
+      vatAmount: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { subtotal, isSubjectToVAT } = this.parent
+
+          return isSubjectToVAT == true ? value != null && value <= subtotal : true
+        })
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {
@@ -614,12 +622,24 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='vatAmount'
-                    readOnly
+                    readOnly={!formik.values.isSubjectToVAT || isPosted || isCancelled}
+                    required={formik.values.isSubjectToVAT}
                     label={labels.vatAmount}
                     value={formik.values.vatAmount}
                     maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('vatAmount', '')}
+                    onChange={async e => {
+                      const vatPct =
+                        formik.values.subtotal != 0
+                          ? (parseFloat(e.target.value) * 100) / parseFloat(formik.values.subtotal)
+                          : 0
+                      formik.setFieldValue('vatPct', parseFloat(vatPct).toFixed(2) || 0)
+                      formik.setFieldValue('vatAmount', e.target.value)
+                      formik.setFieldValue('amount', Number(e.target.value || 0) + Number(formik.values.subtotal))
+                    }}
+                    onClear={() => {
+                      formik.setFieldValue('vatAmount', 0)
+                      formik.setFieldValue('amount', Number(formik.values.subtotal || 0))
+                    }}
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>
