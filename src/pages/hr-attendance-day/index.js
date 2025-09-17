@@ -62,17 +62,20 @@ const AttendanceDay = () => {
         timeVariations: `<div style="text-align:center;">
                    ${item?.variationsList
                      ?.map(tv => {
+                      
                        if (tv.timeName) {
                          let text =
                            tv.timeCode === 20 || tv.timeCode === 41
                              ? tv.timeName
                              : `${tv.timeName}: ${tv.duration} minutes`
+
                          return `<a href="#" data-id="${tv.variationId}" 
                                    class="approval-link" 
                                    style="color: black; text-decoration: underline;">
                                    ${text}
                                  </a>`
                        }
+
                        return ''
                      })
                      .join('<br>')}
