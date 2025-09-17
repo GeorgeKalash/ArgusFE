@@ -29,7 +29,7 @@ export const PayrollRepository = {
     del: service + 'delGLG'
   },
   Arguments: {
-    page: service + 'pageAR',
+    page: service + 'pageAR'
   },
   CnssBranches: {
     page: service + 'pageSB',
@@ -48,5 +48,19 @@ export const PayrollRepository = {
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
+  },
+  Indemnity: {
+    page: service + 'pageIS',
+    get: service + 'getIS',
+    set: service + 'setIS',
+    del: service + 'delIS'
+  },
+  IndemnityCompany: {
+    qry: service + 'qryID',
+    set2: service + 'set2ID'
+  },
+  IndemnityResignation: {
+    qry: service + 'qryIR',
+    set2: service + 'set2IR'
   }
 }
