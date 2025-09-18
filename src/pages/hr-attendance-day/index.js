@@ -67,7 +67,7 @@ const AttendanceDay = () => {
                          let text =
                            tv.timeCode === 20 || tv.timeCode === 41
                              ? tv.timeName
-                             : `${tv.timeName}: ${tv.duration} minutes`
+                             : `${tv.timeName}: ${tv.duration} ${labels.minutes}`
 
                          return `<a href="#" data-id="${tv.variationId}" 
                                    class="approval-link" 
