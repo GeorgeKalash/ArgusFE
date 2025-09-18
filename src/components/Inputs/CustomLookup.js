@@ -1,7 +1,7 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
@@ -78,6 +78,8 @@ const CustomLookup = ({
       setInputValue('')
     }
   }, [firstValue])
+
+  const textName = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [firstValue])
 
   return _hidden ? (
     <></>
@@ -253,6 +255,8 @@ const CustomLookup = ({
               }}
               inputProps={{
                 ...params.inputProps,
+                autoComplete: 'new-password',
+                name: textName,
                 tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
               }}
               autoFocus={focus}
