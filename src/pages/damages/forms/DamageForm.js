@@ -83,7 +83,7 @@ export default function DamageForm({ recordId, jobId }) {
         ),
         qty: yup
           .number()
-          .nullable(true)
+          .required()
           .test('max-jobQty', 'Qty cannot be greater than Job Qty', function (value) {
             if (value == null) return true
 
@@ -379,6 +379,7 @@ export default function DamageForm({ recordId, jobId }) {
                 }}
                 maxAccess={maxAccess}
                 readOnly={isPosted}
+                required
                 error={formik?.touched?.header?.qty && Boolean(formik?.errors?.header?.qty)}
               />
             </Grid>
