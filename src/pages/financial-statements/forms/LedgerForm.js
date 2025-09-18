@@ -12,11 +12,14 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { AuthContext } from 'src/providers/AuthContext'
 
-const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
-  const { recordId: fsId, nodes } = store
+const LedgerForm = ({ store, labels, editMode, maxAccess, active }) => {
+  const { nodeId, nodeRef } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { user } = useContext(AuthContext)
 
   const formik = useFormik({
     validationSchema: yup.object({
@@ -24,7 +27,7 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
         .array()
         .of(
           yup.object().shape({
-            signName: yup.string().required()
+            sign: yup.string().required()
           })
         )
         .required()
@@ -34,12 +37,13 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
         {
           id: 1,
           seqNo: 1,
-          fsNodeId: fsId,
+          fsNodeId: nodeId,
           seg0: '',
           seg1: '',
           seg2: '',
           seg3: '',
           seg4: '',
+          sign: null,
           signName: null
         }
       ]
@@ -53,12 +57,13 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
 
   const post = async obj => {
     const data = {
-      fsNodeId: fsId,
+      fsNodeId: nodeId,
       ledgers: obj.map(({ id, seqNo, ...rest }) => ({
         seqNo: id,
         ...rest
       }))
     }
+    console.log('data', data)
     await postRequest({
       extension: FinancialStatementRepository.Ledger.set2,
       record: JSON.stringify(data)
@@ -97,39 +102,25 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
     {
       component: 'resourcecombobox',
       label: labels.sign,
-      name: 'signName'
-
-      /* props: {
-      datasetId: DataSets.RT_Dispersal_Type,
+      name: 'signName',
+      props: {
+        datasetId: DataSets.GLFS_SIGN,
         valueField: 'key',
         displayField: 'value',
-        displayFieldWidth: 1,
-        refresh: false,
-        mapping: [
-          { from: 'key', to: 'dispersalType' },
-          { from: 'value', to: 'dispersalTypeName' }
-        ]
+        displayFieldWidth: 1.25,
 
-        store: countries,
-        valueField: 'countryId',
-        displayField: 'countryRef',
-        displayFieldWidth: 2,
+        //refresh: false,
         mapping: [
-          { from: 'countryId', to: 'countryId' },
-          { from: 'countryName', to: 'countryName' },
-          { from: 'countryRef', to: 'countryRef' }
-        ],
-        columnsInDropDown: [
-          { key: 'countryRef', value: 'Reference' },
-          { key: 'countryName', value: 'Name' }
+          { from: 'key', to: 'sign' },
+          { from: 'value', to: 'signName' }
         ]
-      } */
+      }
     }
   ]
 
   useEffect(() => {
-    fsId && getLedgers(fsId)
-  }, [fsId])
+    if (active && nodeId) getLedgers(nodeId)
+  }, [nodeId, active])
 
   const getLedgers = fsNodeId => {
     const defaultParams = `_fsNodeId=${fsNodeId}`
@@ -137,23 +128,48 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
     getRequest({
       extension: FinancialStatementRepository.Ledger.qry,
       parameters: parameters
-    }).then(res => {
-      if (res?.list.length > 0)
+    }).then(async res => {
+      if (res?.list.length > 0) {
+        var _dataset = DataSets.GLFS_SIGN
+        var _language = user.languageId
+        var parameters = `_dataset=${_dataset}&_language=${_language}`
+
+        const titlesXMLList = await getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: parameters
+        })
+
+        console.log('titlesXMLList', titlesXMLList)
+
+        const updatedLedger = res?.list?.map(x => {
+          const match = titlesXMLList?.list?.find(item => item.key === x.sign.toString())
+
+          console.log('match', match)
+
+          return {
+            ...x,
+            signName: match ? match.value : ''
+          }
+        })
+
+        console.log('updatedLedger', updatedLedger)
+
         formik.setValues({
-          ledgers: res.list.map(({ ...rest }, index) => ({
+          ledgers: updatedLedger.map(({ ...rest }, index) => ({
             id: index,
             ...rest
           }))
         })
 
-      /*  const uniqueCurrencies = res.list.filter(
-        (item, index, self) =>
-          index === self.findIndex(t => t.currencyId === item.currencyId && t.countryId === item.countryId)
-      ) */
-      setStore(prevStore => ({
-        ...prevStore,
-        ledgers: res.list
-      }))
+        /*  setStore(prevStore => ({
+          ...prevStore,
+          ledgers: updatedLedger
+        })) */
+      } else {
+        formik.setValues({
+          ledgers: []
+        })
+      }
     })
   }
 
@@ -166,17 +182,27 @@ const LedgerForm = ({ store, setStore, labels, editMode, maxAccess }) => {
       editMode={editMode}
       isCleared={false}
     >
-      <VertLayout>
-        <Grow>
-          <DataGrid
-            name='rows'
-            onChange={value => formik.setFieldValue('ledgers', value)}
-            value={formik.values.ledgers}
-            error={formik.errors.ledgers}
-            columns={columns}
-          />
-        </Grow>
-      </VertLayout>
+      {active && nodeId && (
+        <VertLayout>
+          <Grow>
+            <CustomTextField
+              name='nodeRef'
+              label={labels.selectedNode}
+              value={nodeRef}
+              required
+              readOnly
+              maxAccess={maxAccess}
+            />
+            <DataGrid
+              name='rows'
+              onChange={value => formik.setFieldValue('ledgers', value)}
+              value={formik.values.ledgers}
+              error={formik.errors.ledgers}
+              columns={columns}
+            />
+          </Grow>
+        </VertLayout>
+      )}
     </FormShell>
   )
 }

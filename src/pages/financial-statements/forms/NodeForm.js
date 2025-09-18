@@ -14,19 +14,16 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function NodeForm({ labels, maxAccess, setStore, store }) {
+export default function NodeForm({ labels, maxAccess, setStore, store, getGridData, toggleUpdateTree }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, fsId } = store
   const editMode = !!recordId
 
-  const invalidate = useInvalidate({
-    endpointId: FinancialStatementRepository.Node.qry
-  })
-
   const formik = useFormik({
     initialValues: {
       recordId: null,
+      fsId: fsId,
       reference: '',
       parentId: null,
       TBAmount: null,
@@ -49,10 +46,15 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
       })
 
       formik.setFieldValue('recordId', res.recordId)
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId
+      }))
 
+      toggleUpdateTree()
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
 
-      invalidate()
+      getGridData(fsId)
     }
   })
 

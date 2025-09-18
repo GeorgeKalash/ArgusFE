@@ -30,11 +30,13 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     }).then(res => {
       setGridData(res)
 
-      setStore(prevStore => ({
-        ...prevStore,
-        nodes: res.list,
-        rowSelectionSaved: true
-      }))
+      /* const item = res.list.find(item => item?.recordId === rowSelectionModel)
+      item &&
+        setStore(prevStore => ({
+          ...prevStore,
+          nodeId: item.recordId,
+          nodeRef: item.reference
+        })) */
     })
   }
 
@@ -95,6 +97,11 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
       extension: FinancialStatementRepository.Node.del,
       record: JSON.stringify(obj)
     })
+    setStore(prevStore => ({
+      ...prevStore,
+      nodeId: null,
+      nodeRef: ''
+    }))
     await getGridData(fsId)
     toast.success(platformLabels.Deleted)
   }
@@ -114,10 +121,32 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     })
   }
 
+  const actions = [
+    {
+      key: 'Flag',
+      condition: true,
+      onClick: () => openFlags()
+    }
+  ]
+
+  async function openFlags() {
+    stack({
+      Component: FlagsForm,
+      props: {
+        endPoint: SaleRepository.DraftInvoiceSerial.batch,
+        header: {
+          draftId: formik?.values?.recordId
+        },
+        onCloseimport: fillGrids,
+        maxAccess: maxAccess
+      }
+    })
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} actions={actions} />
       </Fixed>
       <Grow>
         <Table //name
@@ -130,6 +159,20 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
           isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
+          onSelectionChange={row => {
+            console.log('row', row)
+            if (row) {
+              setStore(prevStore => ({
+                ...prevStore,
+                nodeId: row.recordId,
+                nodeRef: row.reference
+              }))
+
+              //setRowSelectionModel(row.seqNo)
+
+              //ref.current = currencies.filter(item => item.countryId === row.countryId)
+            }
+          }}
         />
       </Grow>
     </VertLayout>

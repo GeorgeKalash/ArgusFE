@@ -2,6 +2,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import StatementForm from '../forms/StatementForm'
 import NodeList from '../forms/NodeList'
 import LedgerForm from '../forms/LedgerForm'
+import TreeForm from '../forms/TreeForm'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
@@ -9,7 +10,10 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId
+    recordId,
+    nodeRef: null,
+    nodeId: null,
+    seqNo: null
   })
 
   const tabs = [
@@ -29,11 +33,11 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
         <NodeList maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
+        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} active={activeTab === 2} />
       </CustomTabPanel>
-      {/* <CustomTabPanel index={1} value={activeTab}>
-        <RoutingSeqForm maxAccess={maxAccess} labels={labels} store={store} />
-      </CustomTabPanel> */}
+      <CustomTabPanel index={3} value={activeTab}>
+        <TreeForm maxAccess={maxAccess} store={store} active={activeTab === 3} />
+      </CustomTabPanel>
     </>
   )
 }

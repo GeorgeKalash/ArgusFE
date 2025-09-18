@@ -64,7 +64,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data, window }) {
+function Tree({ data, window, labels, printable = true }) {
   const { platformLabels } = useContext(ControlContext)
 
   const printComponentRef = useRef()
@@ -79,8 +79,9 @@ function Tree({ data, window }) {
 
   const treeData = useMemo(() => {
     if (data) {
-      const map = new Map(data.list.map(item => [item.recordId, { ...item, children: [] }]))
-      data.list.forEach(item => {
+      console.log('data', data)
+      const map = new Map(data?.list?.map(item => [item.recordId, { ...item, children: [] }]))
+      data?.list?.forEach(item => {
         if (item.parentId) {
           const parent = map.get(item.parentId)
           if (parent) {
@@ -89,6 +90,11 @@ function Tree({ data, window }) {
         }
       })
 
+      console.log(
+        'test',
+        [...map.values()].filter(item => !item.parentId)
+      )
+
       return [...map.values()].filter(item => !item.parentId)
     }
 
@@ -96,19 +102,25 @@ function Tree({ data, window }) {
   }, [data])
 
   const renderTree = nodes => (
-    <StyledTreeItem key={nodes.recordId} nodeId={nodes.recordId.toString()} label={nodes.name}>
+    <StyledTreeItem
+      key={nodes.recordId}
+      nodeId={nodes.recordId.toString()}
+      label={labels?.find(item => item.fsNodeId === nodes.recordId)?.title || nodes.name || 'undefined'}
+    >
       {Array.isArray(nodes.children) ? nodes.children.map(node => renderTree(node)) : null}
     </StyledTreeItem>
   )
 
-  const actions = [
-    {
-      key: 'Print',
-      condition: true,
-      onClick: handlePrint,
-      disabled: false
-    }
-  ]
+  const actions = printable
+    ? [
+        {
+          key: 'Print',
+          condition: true,
+          onClick: handlePrint,
+          disabled: false
+        }
+      ]
+    : []
 
   return (
     <>

@@ -14,24 +14,17 @@ import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 
-const NodesTitleForm = ({ labels, maxAccess, store }) => {
-  const { recordId: nodeId, fsId } = store
+const NodesTitleForm = ({ labels, maxAccess, store, toggleUpdateTree }) => {
+  const { recordId: nodeId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
 
   const formik = useFormik({
-    /*  validationSchema: yup.object({
-      titles: yup.array().of(
-        yup.object().shape({
-          title: yup.string().required()
-        })
-      )
-    }), */
     initialValues: {
       titles: [
         {
-          fsNodeId: fsId,
+          fsNodeId: nodeId,
           languageId: null,
           languageName: '',
           title: ''
@@ -41,19 +34,17 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
     enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async values => {
-      await post(values.titles.filter(line => !line.title))
+      await post(values.titles.filter(line => line.title))
     }
   })
 
   const post = async obj => {
     const data = {
-      fsNodeId: fsId,
-      titles: obj
-
-      /* .map(({ id, seqNo, ...rest }) => ({
+      fsNodeId: nodeId,
+      titles: obj.map(({ id, seqNo, ...rest }) => ({
         seqNo: id,
         ...rest
-      })) */
+      }))
     }
 
     await postRequest({
@@ -61,9 +52,9 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
       record: JSON.stringify(data)
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-
-      //fill tree
     })
+
+    toggleUpdateTree()
   }
 
   const columns = [
@@ -80,8 +71,8 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
   ]
 
   useEffect(() => {
-    fsId && getTitles(fsId)
-  }, [fsId])
+    nodeId && getTitles(nodeId)
+  }, [nodeId])
 
   const getTitles = nodeId => {
     const defaultParams = `_fsNodeId=${nodeId}`
@@ -101,20 +92,29 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
       })
 
       titlesXMLList?.list?.forEach(x => {
-        const lang = res?.list?.find(item => item.languageId === x.key)
+        const lang = res?.list?.find(item => item.languageId.toString() === x.key)
+
+        console.log('lang', lang)
 
         const titleView = {
           languageId: parseInt(x.key, 10),
-          title: lang?.titleString,
+          title: lang?.title,
           fsNodeId: parseInt(nodeId, 10),
           languageName: x.value
         }
 
+        console.log('title', titleView)
+
         listView.push(titleView)
       })
 
+      console.log('test', listView)
+
       formik.setValues({
-        titles: listView
+        titles: listView.map(({ ...rest }, index) => ({
+          id: index,
+          ...rest
+        }))
       })
     })
   }
@@ -125,7 +125,6 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
       resourceId={ResourceIds.FinancialStatements}
       maxAccess={maxAccess}
       infoVisible={false}
-      //editMode={editMode}
       isCleared={false}
     >
       <VertLayout>
