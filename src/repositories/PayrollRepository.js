@@ -48,5 +48,12 @@ export const PayrollRepository = {
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
+  },
+  FinalSettlement: {
+    page: service + 'pageFS',
+    get: service + 'getFS',
+    set: service + 'setFS',
+    del: service + 'delFS',
+    snapshot: service + 'snapshotFS'
   }
 }
