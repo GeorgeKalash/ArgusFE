@@ -71,7 +71,22 @@ const MatrixGrid = ({
         field: `col${cIndex + 1}`,
         headerName: colItem.colLabels,
         sortable: false,
-        headerStyle: { fontWeight: 'bold' },
+        flex: 1,
+        headerComponent: props => (
+          <div
+            style={{
+              transform: 'rotate(-90deg)',
+              transformOrigin: 'center center',
+              whiteSpace: 'normal',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold'
+            }}
+          >
+            {props.displayName}
+          </div>
+        ),
         cellStyle: params => {
           const rowIndex = params.data?.rowIndex ?? -1
           const colIndex = cIndex
@@ -198,6 +213,8 @@ const MatrixGrid = ({
         rowData={initialRowData}
         getRowId={params => params.data.id}
         columnDefs={columnDefs}
+        headerHeight={100}
+        domLayout='autoHeight'
         defaultColDef={{
           sortable: false,
           headerClass: params => (selectedCol === params.column.getColId() ? 'highlight-col-header' : 'bold-header')
