@@ -225,13 +225,7 @@ export default function DamageForm({ recordId, jobId }) {
       parameters: `_jobId=${formik.values.header.jobId || 0}&_rate=${formik.values.header.damageRate || 0}`
     })
 
-    formik.setFieldValue(
-      'items',
-      items?.list.map((item, index) => ({
-        id: index + 1,
-        ...item
-      })) || []
-    )
+    formik.setFieldValue('items', items?.list || [])
   }
 
   return (
@@ -311,7 +305,7 @@ export default function DamageForm({ recordId, jobId }) {
                       workCenterId: newValue?.workCenterId || null,
                       plantId: newValue?.plantId || null,
                       maxPcs: newValue?.pcs || 0,
-                      damageRate: (formik.values.qty / newValue?.qty) * 100 || 0,
+                      damageRate: (formik.values.qty / newValue?.qty) * 100 || 0
                     }
                   })
                 }}
@@ -369,7 +363,10 @@ export default function DamageForm({ recordId, jobId }) {
                 label={labels.qty}
                 value={formik.values?.header?.qty}
                 onChange={e => {
-                  formik.setFieldValue('header.damageRate', (e.target.value / formik?.values?.header?.jobQty) * 100 || 0)
+                  formik.setFieldValue(
+                    'header.damageRate',
+                    (e.target.value / formik?.values?.header?.jobQty) * 100 || 0
+                  )
                   formik.setFieldValue('header.qty', e.target.value)
                 }}
                 maxLength={11}
