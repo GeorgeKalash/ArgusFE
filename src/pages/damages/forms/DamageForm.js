@@ -53,6 +53,7 @@ export default function DamageForm({ recordId, jobId }) {
         reference: '',
         date: new Date(),
         plantId: null,
+        laborId: null,
         notes: '',
         status: 1,
         jobId: null,
@@ -96,12 +97,14 @@ export default function DamageForm({ recordId, jobId }) {
         header: {
           ...formik.values.header,
           date: formatDateToApi(obj.header.date),
-          damageRate: obj.header.damageRate
+          damageRate: obj.header.damageRate || 0,
+          qty: obj.header.qty || 0
         },
-        items: formik.values.items.map(({ id, ...rest }) => ({
-          seqNo: id,
-          ...rest
-        }))
+        items:
+          formik?.values?.items?.map(({ id, ...rest }) => ({
+            seqNo: id,
+            ...rest
+          })) || []
       }
       postRequest({
         extension: ManufacturingRepository.Damage.set2,
@@ -129,9 +132,10 @@ export default function DamageForm({ recordId, jobId }) {
       parameters: `_recordId=${jobId}`
     }).then(jobRes => {
       formik.setValues({
+        recordId: res?.header.recordId || null,
         ...formik.values.header,
         header: {
-          ...res.header,
+          ...res?.header,
           date: formatDateFromApi(jobRes?.record?.date),
           sku: jobRes?.record?.sku,
           itemName: jobRes?.record?.itemName,
@@ -145,17 +149,12 @@ export default function DamageForm({ recordId, jobId }) {
           maxPcs: jobRes?.record?.pcs
         },
         items:
-          res?.items.map((item, index) => {
-            return {
-              id: index + 1,
-              ...item
-            }
-          }) || []
+          res?.items || []
       })
     })
   }
 
-  const editMode = !!formik.values.recordId
+  const editMode = !!formik.values.header.recordId
   const isPosted = formik.values.header.status === 3
 
   const onPost = async () => {
@@ -372,8 +371,8 @@ export default function DamageForm({ recordId, jobId }) {
                 maxLength={11}
                 decimalScale={2}
                 onClear={() => {
-                  formik.setFieldValue('header.damageRate', 0)
-                  formik.setFieldValue('header.qty', 0)
+                  formik.setFieldValue('header.damageRate', null)
+                  formik.setFieldValue('header.qty', null)
                 }}
                 maxAccess={maxAccess}
                 readOnly={isPosted}
