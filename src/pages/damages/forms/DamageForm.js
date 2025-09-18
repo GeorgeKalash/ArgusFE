@@ -46,9 +46,9 @@ export default function DamageForm({ recordId, jobId }) {
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
-      recordId: recordId || '',
+      recordId: recordId || null,
       header: {
-        recordId: recordId || '',
+        recordId: recordId || null,
         dtId: null,
         reference: '',
         date: new Date(),
@@ -263,6 +263,7 @@ export default function DamageForm({ recordId, jobId }) {
                 readOnly={editMode}
                 valueField='recordId'
                 displayField={['reference', 'name']}
+                displayFieldWidth={2}
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -474,14 +475,15 @@ export default function DamageForm({ recordId, jobId }) {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={RepairAndServiceRepository.RsLabors.qry}
+                endpointId={ManufacturingRepository.Labor.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
                 name='header.laborId'
                 label={labels.labor}
                 valueField='recordId'
-                displayField={['reference', 'firstName']}
+                displayField={['reference', 'name']}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
-                  { key: 'firstName', value: 'Name' }
+                  { key: 'name', value: 'Name' }
                 ]}
                 required
                 values={formik.values.header}
@@ -504,7 +506,7 @@ export default function DamageForm({ recordId, jobId }) {
 
         <Grow>
           <Table
-            name={'damageTable'}
+            name='damageTable'
             columns={columns}
             gridData={{ list: formik.values.items }}
             rowId={['recordId']}
