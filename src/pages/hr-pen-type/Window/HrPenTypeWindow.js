@@ -1,4 +1,3 @@
-// ** Custom Imports
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
@@ -12,8 +11,6 @@ const HrPenTypeWindow = ({ recordId, labels, access, window }) => {
     recordId
   })
 
-  const editMode = !!store.recordId
-
   const tabs = [{ label: labels.penaltyType }, { label: labels.penaltyDetail, disabled: !store.recordId }]
 
   return (
@@ -21,17 +18,10 @@ const HrPenTypeWindow = ({ recordId, labels, access, window }) => {
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <CustomTabPanel index={0} value={activeTab}>
-        <HrPenTypeForm
-          labels={labels}
-          setStore={setStore}
-          store={store}
-          editMode={editMode}
-          maxAccess={access}
-          window={window}
-        />
+        <HrPenTypeForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <HrPenDetailForm labels={labels} maxAccess={access} store={store} editMode={editMode} />
+        <HrPenDetailForm labels={labels} maxAccess={access} store={store} />
       </CustomTabPanel>
     </>
   )

@@ -15,7 +15,7 @@ import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
-const HrPenDetailForm = ({ store, maxAccess, labels, editMode }) => {
+const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -27,7 +27,9 @@ const HrPenDetailForm = ({ store, maxAccess, labels, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            amount: yup.string().required()
+            amount: yup.number().required(),
+            actionName: yup.string().required(),
+            deductionType: yup.number().required()
           })
         )
         .required()
@@ -38,9 +40,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels, editMode }) => {
     },
     onSubmit: async values => {
       const items = values?.items.map(
-        ({ id, expressionName, deductionTypeName, actionName, recordId, ...item }, index) => ({
-          ...item
-        })
+        ({ id, expressionName, deductionTypeName, actionName, recordId, ...rest }) => rest
       )
 
       const data = {
@@ -66,8 +66,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels, editMode }) => {
           'items',
           res?.list?.map((item, index) => ({
             ...item,
-            id: index + 1,
-            sequence: index + 1
+            id: index + 1
           })) || []
         )
       })()
@@ -77,12 +76,13 @@ const HrPenDetailForm = ({ store, maxAccess, labels, editMode }) => {
   const columns = [
     {
       component: 'numberfield',
-      label: labels.seqNo,
-      name: 'sequence'
+      label: labels.seq,
+      name: 'sequence',
+      props: { readOnly: true }
     },
     {
       component: 'resourcecombobox',
-      name: 'actionId',
+      name: 'actionName',
       label: labels.action,
       props: {
         datasetId: DataSets.PENALTY_DETAIL_ACTION,

@@ -16,10 +16,12 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function HrPenTypeForm({ labels, maxAccess, setStore, store, editMode, window }) {
+export default function HrPenTypeForm({ labels, maxAccess, setStore, store, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.PenaltyType.page
@@ -52,7 +54,6 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, edit
         .max(32767)
         .test(function (value) {
           const { reason, from } = this.parent
-          console.log(reason, from, value)
 
           return (reason === 1 && (value != null || from != null) && value >= from) || (value == null && from == null)
         })
@@ -89,11 +90,17 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, edit
     })()
   }, [])
 
+  const disabled =
+    formik.values.reason != 1 ||
+    formik.values.timeCode == 41 ||
+    formik.values.timeCode == 20 ||
+    formik.values.timeCode == 21
+
   return (
     <FormShell resourceId={ResourceIds.PenaltyType} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -170,7 +177,7 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, edit
                 value={formik.values.from}
                 maxAccess={maxAccess}
                 maxLength={7}
-                readOnly={formik.values.reason != 1}
+                readOnly={disabled}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('from', null)}
                 error={formik.touched.from && Boolean(formik.errors.from)}
@@ -183,7 +190,7 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, edit
                 value={formik.values.to}
                 maxAccess={maxAccess}
                 maxLength={7}
-                readOnly={formik.values.reason != 1}
+                readOnly={disabled}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('to', null)}
                 error={formik.touched.to && Boolean(formik.errors.to)}

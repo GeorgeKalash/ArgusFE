@@ -27,25 +27,12 @@ const HrPenType = () => {
 
     const response = await getRequest({
       extension: PayrollRepository.PenaltyType.page,
-
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    const timeCodes = await new Promise(resolve => {
-      getAllKvsByDataset({
-        _dataset: DataSets.TIME_CODE,
-        callback: resolve
-      })
-    })
-
-    const timeCodeMap = Object.fromEntries(timeCodes.map(tc => [tc.key, tc.value]))
-
     return {
       ...response,
-      list: response.list.map(row => ({
-        ...row,
-        timeCodeName: timeCodeMap[row.timeCode]
-      })),
+
       _startAt: _startAt
     }
   }
@@ -82,12 +69,14 @@ const HrPenType = () => {
     {
       field: 'from',
       headerName: labels.from,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'to',
       headerName: labels.to,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'timeCodeName',
@@ -123,7 +112,7 @@ const HrPenType = () => {
         access
       },
       width: 800,
-      height: 460,
+      height: 420,
       title: labels.penaltyType
     })
   }
@@ -135,12 +124,12 @@ const HrPenType = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}
