@@ -245,7 +245,12 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
+          inputProps={{
+            ...params.inputProps,
+            tabIndex: _readOnly ? -1 : 0,
+            ...(neverPopulate && { value: '' }),
+            autoComplete: 'new-password'
+          }}
           type={type}
           variant={variant}
           label={label}

@@ -253,6 +253,7 @@ const CustomLookup = ({
               }}
               inputProps={{
                 ...params.inputProps,
+                autoComplete: 'new-password',
                 tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
               }}
               autoFocus={focus}
