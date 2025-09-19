@@ -5,8 +5,8 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 const MatrixGrid = ({
   intersectionValue = 'X',
-  rowsList = [],
-  columnsList = [],
+  rows = [],
+  columns = [],
   intersections,
   setIntersections,
   maxAccess
@@ -16,24 +16,24 @@ const MatrixGrid = ({
   const [selectedCol, setSelectedCol] = useState(null)
 
   const colKeyToRecord = useMemo(() => {
-    if (!columnsList) return {}
+    if (!columns) return {}
 
-    return columnsList.reduce((acc, col, index) => {
+    return columns.reduce((acc, col, index) => {
       acc[`col${index + 1}`] = col
 
       return acc
     }, {})
-  }, [columnsList])
+  }, [columns])
 
   const initialRowData = useMemo(() => {
-    if (!rowsList || !columnsList) return []
+    if (!rows || !columns) return []
 
-    return rowsList.map((rowItem, rIndex) => {
+    return rows.map((rowItem, rIndex) => {
       const row = {
         id: rowItem.id,
         rowLabel: rowItem.rowLabels,
         rowIndex: rIndex,
-        ...Object.fromEntries(columnsList.map((_, cIndex) => [`col${cIndex + 1}`, '']))
+        ...Object.fromEntries(columns.map((_, cIndex) => [`col${cIndex + 1}`, '']))
       }
 
       intersections.forEach(inter => {
@@ -45,10 +45,10 @@ const MatrixGrid = ({
 
       return row
     })
-  }, [rowsList, columnsList, intersections, colKeyToRecord, intersectionValue])
+  }, [rows, columns, intersections, colKeyToRecord, intersectionValue])
 
   const columnDefs = useMemo(() => {
-    if (!columnsList) return []
+    if (!columns) return []
 
     const cols = [
       {
@@ -66,7 +66,7 @@ const MatrixGrid = ({
       }
     ]
 
-    columnsList.forEach((colItem, cIndex) => {
+    columns.forEach((colItem, cIndex) => {
       cols.push({
         field: `col${cIndex + 1}`,
         headerName: colItem.colLabels,
@@ -133,12 +133,12 @@ const MatrixGrid = ({
     })
 
     return cols
-  }, [columnsList, selectedRowId, selectedCol, intersectionValue])
+  }, [columns, selectedRowId, selectedCol, intersectionValue])
 
   const recordIntersection = (rowRecord, colRecord) => {
     if (!rowRecord || !colRecord) return
     const rowIndex = rowRecord.rowIndex
-    const colIndex = columnsList.findIndex(c => c.id === colRecord.id)
+    const colIndex = columns.findIndex(c => c.id === colRecord.id)
     if (rowIndex === colIndex) return
     const api = gridRef.current?.api
     if (!api) return
@@ -181,19 +181,16 @@ const MatrixGrid = ({
       return
     }
 
-    const colRecord = colKeyToRecord[colId]
-    recordIntersection(data, colRecord)
+    recordIntersection(data, colKeyToRecord[colId])
   }
 
   const onColumnHeaderClicked = params => {
     const colId = params.column.getColId()
     if (colId === 'rowLabel') return
 
-    const colRecord = colKeyToRecord[colId]
-
     if (selectedRowId !== null) {
       const rowRecord = initialRowData.find(r => r.id === selectedRowId)
-      recordIntersection(rowRecord, colRecord)
+      recordIntersection(rowRecord, colKeyToRecord[colId])
       setSelectedRowId(null)
       setSelectedCol(null)
     } else {

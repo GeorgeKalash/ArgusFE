@@ -75,8 +75,8 @@ export default function WorkCenterTransferMap() {
     <VertLayout>
       <Grow>
         <MatrixGrid
-          rowsList={data}
-          columnsList={data}
+          rows={data}
+          columns={data}
           intersections={intersections}
           setIntersections={setIntersections}
           maxAccess={access}
