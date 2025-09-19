@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { checkAccess } from 'src/lib/maxAccess'
 
@@ -11,12 +11,13 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  onChange,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
   clearable = false,
-  autoComplete = 'off',
+  autoComplete = 'new-password',
   numberField = false,
   editMode = false,
   maxLength = '1000',
@@ -28,6 +29,7 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
+  displayValue,
   ...props
 }) => {
   const name = props.name
@@ -54,31 +56,21 @@ const CustomTextField = ({
   const handleInput = e => {
     const inputValue = e.target.value
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
-
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
-      props?.onChange(e)
     }
   }
 
@@ -87,6 +79,8 @@ const CustomTextField = ({
       inputRef.current.focus()
     }
   }, [autoFocus, inputRef.current, value])
+
+  const section = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [])
 
   return _hidden ? (
     <></>
@@ -105,22 +99,28 @@ const CustomTextField = ({
       onBlur={() => {
         setIsFocused(false), setFocus(false)
       }}
+      onChange={e => onChange(name, e.target.value)}
+      autoComplete
       inputProps={{
-        autoComplete: 'off',
+        name: autoComplete === 'new-password' ? section : name,
+        autoComplete,
         readOnly: _readOnly,
         maxLength: maxLength,
         dir: dir,
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
+        autoCorrect: 'off',
+        autoCapitalize: 'none',
+        spellCheck: 'false',
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
+          textTransform: forceUpperCase ? 'uppercase' : 'none', // Apply text transform if forceUpperCase is true,
+          WebkitTextSecurity: displayValue == 'password' ? 'disc' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
         'data-search': search ? 'true' : 'false'
       }}
-      autoComplete={autoComplete}
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
@@ -146,6 +146,9 @@ const CustomTextField = ({
             )}
           </InputAdornment>
         )
+      }}
+      inputStyle={{
+        WebkitTextSecurity: type === 'password' ? 'disc' : 'none'
       }}
       sx={{
         '& .MuiOutlinedInput-root': {

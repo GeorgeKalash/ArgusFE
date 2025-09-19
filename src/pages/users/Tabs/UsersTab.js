@@ -483,7 +483,6 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
                       readOnly={passwordState}
                       maxAccess={maxAccess}
                       onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
                       onClear={() => formik.setFieldValue('confirmPassword', '')}
                       error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
                     />

@@ -106,9 +106,9 @@ const GridToolbar = ({
                   value={searchValue}
                   label={platformLabels.Search}
                   onClear={clear}
-                  onChange={e => {
-                    setSearchValue(e.target.value)
-                    if (onSearchChange) onSearchChange(e.target.value)
+                  onChange={(_, newValue) => {
+                    setSearchValue(newValue)
+                    if (onSearchChange) onSearchChange(newValue)
                   }}
                   onSearch={onSearch}
                   search={true}
