@@ -66,8 +66,8 @@ export default function RepairRequestForm({ labels, access, recordId, window }) 
         extension: RepairAndServiceRepository.RepairRequest.set,
         record: JSON.stringify({
           ...obj,
-          date: formatDateToApi(res.record.date),
-          dueDate: formatDateToApi(res.record.dueDate)
+          date: formatDateToApi(obj.date),
+          dueDate: formatDateToApi(obj.dueDate)
         })
       })
 
@@ -78,6 +78,7 @@ export default function RepairRequestForm({ labels, access, recordId, window }) 
       window.close()
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
