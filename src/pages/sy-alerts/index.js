@@ -10,7 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const SyAlerts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,7 +100,7 @@ const SyAlerts = () => {
   ]
 
   return (
-    <FormShell isInfo={false} isCleared={false} form={formik} fullSize maxAccess={access}>
+    <Form onSave={formik.handleSubmit} fullSize maxAccess={access}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -117,7 +117,7 @@ const SyAlerts = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -10,7 +10,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
-import FormShell from './FormShell'
+import Form from './Form'
 
 const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -142,14 +142,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.IntegrationAccount}
-      isInfo={false}
-      isCleared={false}
-      form={formik}
-      fullSize={true}
-      maxAccess={access}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -162,7 +155,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 GlobalIntegrationGrid.width = 800

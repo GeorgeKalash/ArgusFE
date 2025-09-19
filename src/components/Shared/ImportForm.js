@@ -7,7 +7,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -222,7 +221,7 @@ const ImportForm = forwardRef(({ onSuccess, resourceId, access, window }, ref) =
   ]
 
   return (
-    <Form actions={actions} maxAccess={access}>
+    <Form actions={actions} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <GridToolbar

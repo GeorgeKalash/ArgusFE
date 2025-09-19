@@ -8,12 +8,11 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { useError } from 'src/error'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const CategoryLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -108,18 +107,20 @@ const CategoryLevels = () => {
   ]
 
   return (
-    <FormShell form={formik} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
+            name='items'
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
+            maxAccess={access}
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

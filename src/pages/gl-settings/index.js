@@ -1,7 +1,6 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -9,12 +8,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const GLSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -189,10 +187,10 @@ const GLSettings = () => {
   const rows = [0, 1, 2, 3, 4]
 
   return (
-    <FormShell form={form} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
-          <Grid container sx={{ p: 3 }} spacing={2}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomNumberField
                 name='GLACSegments'
@@ -251,7 +249,7 @@ const GLSettings = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

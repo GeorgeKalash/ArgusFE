@@ -13,6 +13,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 export default function MobileSystem() {
   const { postRequest } = useContext(RequestsContext)
@@ -83,7 +84,7 @@ export default function MobileSystem() {
   }
 
   return (
-    <FormShell form={formik} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -146,7 +147,7 @@ export default function MobileSystem() {
                 onClear={() => formik.setFieldValue('rt_mob_email2', '')}
               />
             </Grid>
-            <Grid item xs={12} sx={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}>
+            <Grid item xs={12}>
               <CustomTextField
                 name='smsMobileProviderId'
                 label={labels.smsMobileProviderId}
@@ -159,6 +160,6 @@ export default function MobileSystem() {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -14,7 +14,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const CorrespondentDispersal = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -25,14 +25,13 @@ const CorrespondentDispersal = () => {
     items: []
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.CorrespondentDispersal
   })
 
   const { formik } = useForm({
     initialValues,
-    maxAccess,
-    validateOnChange: true,
+    maxAccess: access,
     validationSchema: yup.object({
       corId: yup.string().required()
     }),
@@ -92,7 +91,7 @@ const CorrespondentDispersal = () => {
   ]
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -125,13 +124,13 @@ const CorrespondentDispersal = () => {
             error={formik.errors.items}
             name='items'
             allowAddNewLine={false}
-            maxAccess={maxAccess}
+            maxAccess={access}
             allowDelete={false}
             columns={columns}
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

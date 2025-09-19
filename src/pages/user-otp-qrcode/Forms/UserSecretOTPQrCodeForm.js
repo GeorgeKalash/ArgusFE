@@ -7,8 +7,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Form from 'src/components/Shared/Form'
 
@@ -65,7 +63,7 @@ const UserSecretOTPQrCodeForm = () => {
   ]
 
   return (
-    <Form actions={actions} fullSize>
+    <Form actions={actions} onSave={handleGenerated2FA} isSaved={false} fullSize>
       <VertLayout>
         <Grow>
           {qrCodeUrl ? (

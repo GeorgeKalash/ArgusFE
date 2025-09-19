@@ -10,7 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const SystemFunctionIntegration = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -124,7 +124,7 @@ const SystemFunctionIntegration = () => {
   ]
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -141,7 +141,7 @@ const SystemFunctionIntegration = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

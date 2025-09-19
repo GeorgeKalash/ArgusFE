@@ -14,6 +14,7 @@ import i18n from 'src/configs/i18n'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const PersonalSettings = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -93,7 +94,7 @@ const PersonalSettings = ({ _labels, access }) => {
   }
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={3}>
@@ -143,7 +144,7 @@ const PersonalSettings = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

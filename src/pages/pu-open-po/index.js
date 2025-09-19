@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -17,7 +17,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
@@ -25,6 +24,7 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ReportPuGeneratorRepository } from 'src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
 import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const OpenPurchaseOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -260,15 +260,7 @@ const OpenPurchaseOrder = () => {
   ]
 
   return (
-    <FormShell
-      actions={actions}
-      isInfo={false}
-      isCleared={false}
-      isSaved={false}
-      form={formik}
-      fullSize
-      maxAccess={access}
-    >
+    <Form actions={actions} onSave={formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} padding={2}>
@@ -474,7 +466,7 @@ const OpenPurchaseOrder = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

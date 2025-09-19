@@ -15,7 +15,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
@@ -24,7 +23,7 @@ import { companyStructureRepository } from 'src/repositories/companyStructureRep
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import PuQtnForm from '../pu-qtn/forms/PuQtnForm'
 import PurchaseOrderForm from '../pu-ord/forms/PurchaseOrderForm'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const OpenPurchaseRequisition = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -265,7 +264,7 @@ const OpenPurchaseRequisition = () => {
   ]
 
   return (
-    <FormShell isInfo={false} actions={actions} isCleared={false} form={formik} fullSize maxAccess={access}>
+    <Form actions={actions} onSave={formik.handleSubmit} fullSize maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} padding={2}>
@@ -455,7 +454,7 @@ const OpenPurchaseRequisition = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

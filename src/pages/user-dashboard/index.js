@@ -113,7 +113,7 @@ const UserDashboard = () => {
   }
 
   return (
-    <Form onSave={handleSubmit} maxAccess={access}>
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container xs={12}>

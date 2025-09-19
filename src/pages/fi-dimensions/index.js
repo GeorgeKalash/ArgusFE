@@ -11,6 +11,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const FiDimensions = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -135,7 +136,7 @@ const FiDimensions = () => {
   }
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2} xs={6}>
@@ -205,7 +206,7 @@ const FiDimensions = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

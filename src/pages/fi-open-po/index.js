@@ -180,7 +180,7 @@ const OpenPaymentOrder = () => {
   ]
 
   return (
-    <Form actions={actions} maxAccess={access}>
+    <Form actions={actions} onSave={() => generatePV(record)} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <RPBGridToolbar labels={labels} maxAccess={access} reportName={'FIPO2'} filterBy={filterBy} />

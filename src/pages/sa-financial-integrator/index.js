@@ -10,7 +10,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const FinancialIntegrators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -99,7 +99,7 @@ const FinancialIntegrators = () => {
   ]
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false} fullSize>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -116,7 +116,7 @@ const FinancialIntegrators = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

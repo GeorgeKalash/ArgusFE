@@ -102,7 +102,7 @@ const ModuleDeactivation = () => {
   }
 
   return (
-    <Form onSave={handleSubmit} maxAccess={access}>
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <Table

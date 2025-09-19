@@ -14,7 +14,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const GlobalExchangeBuyMap = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -191,10 +191,10 @@ const GlobalExchangeBuyMap = () => {
   ]
 
   return (
-    <FormShell form={formik} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} fullSize maxAccess={access}>
       <VertLayout>
         <Fixed>
-          <Grid container>
+          <Grid container p={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
@@ -231,7 +231,7 @@ const GlobalExchangeBuyMap = () => {
           )}
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -18,6 +18,7 @@ import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterfac
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const CorrespondentDispersalRate = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -261,7 +262,7 @@ const CorrespondentDispersalRate = () => {
   ])
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} fullSize isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} padding={2}>
@@ -408,7 +409,7 @@ const CorrespondentDispersalRate = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

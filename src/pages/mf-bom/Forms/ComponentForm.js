@@ -15,6 +15,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import Form from 'src/components/Shared/Form'
 
 export default function ComponentForm({
   labels,
@@ -114,14 +115,7 @@ export default function ComponentForm({
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.BillOfMaterials}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -233,6 +227,6 @@ export default function ComponentForm({
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

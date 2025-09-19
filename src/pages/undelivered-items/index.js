@@ -26,7 +26,7 @@ import { useWindow } from 'src/windows'
 import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 import { useError } from 'src/error'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -259,7 +259,7 @@ const UndeliveredItems = () => {
   ]
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isParentWindow={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} padding={2}>
@@ -479,7 +479,7 @@ const UndeliveredItems = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

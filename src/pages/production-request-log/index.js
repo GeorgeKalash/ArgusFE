@@ -118,7 +118,7 @@ const ProductionRequestLog = () => {
   }
 
   return (
-    <Form onSave={handleSubmit} maxAccess={access}>
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />

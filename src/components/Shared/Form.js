@@ -23,7 +23,7 @@ function LoadingOverlay() {
   )
 }
 
-export default function Form({ children, isParentWindow = true, isSaved = true, fullSize = true, ...props }) {
+export default function Form({ children, isParentWindow = true, isSaved = true, fullSize = false, ...props }) {
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
   const editMode = props.editMode
@@ -77,13 +77,11 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
               })
         }}
         onKeyDown={e => {
+          console.log('text', e.target)
           const target = e.target
+
           const role = target.getAttribute('role') || ''
           const isSearchField = target.getAttribute('data-search') === 'true'
-
-          if (target.tagName === 'TEXTAREA') {
-            return
-          }
 
           if (
             (e.ctrlKey || e.metaKey) &&
@@ -93,7 +91,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             !props.disabledSubmit
           ) {
             e.preventDefault()
-            if (props.onSave) {
+            if (props?.onSave) {
               props.onSave()
             } else {
               form?.submitForm?.()
@@ -101,6 +99,11 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
 
             return
           }
+
+          if (target.tagName === 'TEXTAREA' && !target?.closest(':read-only, [aria-readonly="true"]')?.readOnly) {
+            return
+          }
+
           if (e.key === 'Enter') {
             if (isSearchField) {
               return
@@ -111,7 +114,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             if (!isEqual) {
               e.preventDefault()
               if (props.onSave) {
-                props.onSave()
+                props?.onSave()
               } else {
                 form?.submitForm?.()
               }

@@ -8,12 +8,11 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useError } from 'src/error'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const SalesZonesLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -115,15 +114,7 @@ const SalesZonesLevels = () => {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SalesZoneLevels}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isSavedClear={false}
-      fullSize={true}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -136,7 +127,7 @@ const SalesZonesLevels = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

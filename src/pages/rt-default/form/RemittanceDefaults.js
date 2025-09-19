@@ -14,6 +14,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 const RemittanceDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -89,7 +90,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
   }, [defaultsData])
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -145,7 +146,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -5,7 +5,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -36,14 +35,13 @@ const SystemFunction = () => {
     })
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels: labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SystemFunction
   })
 
   const { formik } = useForm({
-    maxAccess,
-    validateOnChange: true,
+    maxAccess: access,
     initialValues: {
       search: '',
       rows: [
@@ -149,7 +147,7 @@ const SystemFunction = () => {
   }
 
   return (
-    <Form form={formik}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <Grid container>

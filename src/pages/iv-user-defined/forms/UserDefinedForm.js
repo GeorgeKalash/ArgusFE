@@ -1,18 +1,16 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const UserDefinedForm = ({ labels, maxAccess }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -113,7 +111,7 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
   }
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isSavedClear={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={3} xs={6}>
@@ -180,7 +178,7 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

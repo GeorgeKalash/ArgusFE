@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useError } from 'src/error'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -298,15 +298,7 @@ const GenerateMaterialPlaning = () => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      actions={actions}
-      maxAccess={access}
-      infoVisible={false}
-      isSaved={false}
-      fullSize
-      isCleared={false}
-    >
+    <Form actions={actions} onSave={() => formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
           <RPBGridToolbar
@@ -369,7 +361,7 @@ const GenerateMaterialPlaning = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

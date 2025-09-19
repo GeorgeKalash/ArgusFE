@@ -24,6 +24,7 @@ import { useWindow } from 'src/windows'
 import ClearDialog from 'src/components/Shared/ClearDialog'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import Form from 'src/components/Shared/Form'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -301,14 +302,7 @@ const CTExchangeRates = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CtExchangeRates}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isCleared={false}
-      fullSize
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <Grid container xs={12} sx={{ flexDirection: 'column', padding: '5px' }}>
@@ -533,7 +527,7 @@ const CTExchangeRates = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

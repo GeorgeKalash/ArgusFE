@@ -12,6 +12,7 @@ import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import Form from 'src/components/Shared/Form'
 
 const IvSettings = ({ _labels, access }) => {
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
@@ -51,7 +52,7 @@ const IvSettings = ({ _labels, access }) => {
   }, [defaultsData])
 
   return (
-    <FormShell form={formik} maxAccess={access} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -96,7 +97,7 @@ const IvSettings = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

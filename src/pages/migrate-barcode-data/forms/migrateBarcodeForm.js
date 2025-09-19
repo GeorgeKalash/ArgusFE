@@ -14,7 +14,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const MigrateBarcodeForm = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -71,7 +71,7 @@ const MigrateBarcodeForm = () => {
   ]
 
   return (
-    <FormShell form={formik} maxAccess={access} actions={actions} infoVisible={false} isCleared={false} isSaved={false}>
+    <Form maxAccess={access} actions={actions} onSave={() => formik.handleSubmit()} isSaved={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -238,7 +238,7 @@ const MigrateBarcodeForm = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

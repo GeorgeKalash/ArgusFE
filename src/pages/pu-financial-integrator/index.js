@@ -10,7 +10,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const PUFinancialIntegrators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -95,7 +95,7 @@ const PUFinancialIntegrators = () => {
   ]
 
   return (
-    <FormShell form={formik} isCleared={false} isInfo={false} fullSize>
+    <Form onSave={formik.handleSubmit} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -111,7 +111,7 @@ const PUFinancialIntegrators = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

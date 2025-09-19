@@ -172,6 +172,7 @@ const ProductsWindow = ({
       }}
       disabledSubmit={editMode}
       maxAccess={access}
+      fullSize
     >
       <VertLayout>
         <Grow>

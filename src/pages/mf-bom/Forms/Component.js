@@ -14,7 +14,6 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import ComponentForm from './ComponentForm'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 
 const ComponentBOM = ({ store, labels }) => {
   const { recordId } = store

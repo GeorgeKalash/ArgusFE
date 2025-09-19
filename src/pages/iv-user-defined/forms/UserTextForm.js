@@ -10,7 +10,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const UserTextForm = ({ labels, maxAccess }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -109,7 +109,7 @@ const UserTextForm = ({ labels, maxAccess }) => {
   }
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={3} xs={6}>
@@ -174,7 +174,7 @@ const UserTextForm = ({ labels, maxAccess }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
