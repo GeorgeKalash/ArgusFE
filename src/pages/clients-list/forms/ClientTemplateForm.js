@@ -831,7 +831,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }, [formik?.values?.nationalityId])
 
   const handleFetchMobileOwner = async window => {
-    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${formik.values.cellPhone}`
+    const cleanMobile = formik.values.cellPhone.replace(/^\+/, '')
+    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${cleanMobile}`
 
     getRequest({
       extension: CurrencyTradingSettingsRepository.Mobile.get,
