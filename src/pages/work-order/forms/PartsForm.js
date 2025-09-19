@@ -8,11 +8,11 @@ import * as yup from 'yup'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import { createConditionalSchema } from 'src/lib/validation'
 import { Grid } from '@mui/material'
+import Form from 'src/components/Shared/Form'
 
 const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, data: { seqNo, taskName, status } }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -157,13 +157,7 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
-      disabledSubmit={isPosted || isCompleted}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} disabledSubmit={isPosted || isCompleted}>
       <VertLayout>
         <Grow>
           <Fixed>
@@ -191,7 +185,7 @@ const PartsForm = ({ access, labels, store: { reference, isPosted, recordId }, d
           </Grow>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

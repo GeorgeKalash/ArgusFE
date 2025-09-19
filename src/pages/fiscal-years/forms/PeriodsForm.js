@@ -14,6 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const PeriodsForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -154,13 +155,7 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.FiscalYears}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -173,7 +168,7 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

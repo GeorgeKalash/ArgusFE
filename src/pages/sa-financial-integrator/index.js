@@ -8,10 +8,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import Form from 'src/components/Shared/Form'
 
 const FinancialIntegrators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -31,13 +30,14 @@ const FinancialIntegrators = () => {
     })
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.FinancialIntegrators
   })
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: access,
+    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       rows: []
@@ -99,23 +99,24 @@ const FinancialIntegrators = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='rows'
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
@@ -20,6 +19,7 @@ import { useWindow } from 'src/windows'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import Form from 'src/components/Shared/Form'
 
 const GenerateOutboundTransportation = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
@@ -400,14 +400,7 @@ const GenerateOutboundTransportation = () => {
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GenerateTrip}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSaved={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -610,7 +603,7 @@ const GenerateOutboundTransportation = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -1,8 +1,6 @@
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
@@ -10,6 +8,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
 const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -106,14 +105,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   }, [store.category, recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.BPMasterData}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -127,7 +119,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

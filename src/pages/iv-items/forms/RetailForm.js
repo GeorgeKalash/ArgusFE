@@ -8,8 +8,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import toast from 'react-hot-toast'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 const RetailForm = ({ store, maxAccess }) => {
   const [data, setData] = useState([])
@@ -92,25 +91,24 @@ const RetailForm = ({ store, maxAccess }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          name='retail'
-          columns={rowColumns}
-          gridData={{ list: data }}
-          rowId={['key']}
-          pageSize={50}
-          pagination={false}
-          paginationType='client'
-          isLoading={false}
-          maxAccess={maxAccess}
-          showCheckboxColumn={true}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSave} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSave} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Table
+            name='retail'
+            columns={rowColumns}
+            gridData={{ list: data }}
+            rowId={['key']}
+            pageSize={50}
+            pagination={false}
+            paginationType='client'
+            isLoading={false}
+            maxAccess={maxAccess}
+            showCheckboxColumn={true}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -7,9 +7,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
 const UserSecretOTPQrCodeForm = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState('')
@@ -64,26 +63,25 @@ const UserSecretOTPQrCodeForm = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        {qrCodeUrl ? (
-          <img
-            src={qrCodeUrl}
-            alt={_labels.QRCode}
-            style={{
-              width: 200,
-              height: 200,
-              margin: 'auto'
-            }}
-          />
-        ) : (
-          <div></div>
-        )}
-      </Grow>
-      <Fixed>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form actions={actions} onSave={handleGenerated2FA} isSaved={false} fullSize>
+      <VertLayout>
+        <Grow>
+          {qrCodeUrl ? (
+            <img
+              src={qrCodeUrl}
+              alt={_labels.QRCode}
+              style={{
+                width: 200,
+                height: 200,
+                margin: 'auto'
+              }}
+            />
+          ) : (
+            <div></div>
+          )}
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -11,7 +11,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
@@ -22,6 +21,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
 import { formatDateToApi } from 'src/lib/date-helper'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import Form from 'src/components/Shared/Form'
 
 const GenerateOutboundTransportation2 = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState([])
@@ -491,14 +491,7 @@ const GenerateOutboundTransportation2 = () => {
   const balance = totalTrucksVolume - ordersVolume
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GenerateTrip}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSaved={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -760,7 +753,7 @@ const GenerateOutboundTransportation2 = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

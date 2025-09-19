@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -10,6 +9,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
+import Form from './Form'
 
 const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resourceId, window }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -62,14 +62,7 @@ const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resour
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SecurityGroup}
-      form={formik}
-      height={400}
-      maxAccess={maxAccess}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={6}>
@@ -146,7 +139,7 @@ const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resour
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

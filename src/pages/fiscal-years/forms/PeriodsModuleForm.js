@@ -1,16 +1,15 @@
 import { useForm } from 'src/hooks/form'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -141,14 +140,7 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.FiscalYears}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -161,7 +153,7 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

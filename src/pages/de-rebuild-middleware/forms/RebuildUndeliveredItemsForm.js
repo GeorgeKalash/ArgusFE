@@ -13,6 +13,7 @@ import { useWindow } from 'src/windows'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { formatDateToISO } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
 export default function RebuildUndeliveredItemsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -81,7 +82,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
   ]
 
   return (
-    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} actions={actions} isSaved={false} editMode={true} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -95,6 +96,7 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('startDate', '')}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -107,11 +109,12 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', '')}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -10,6 +10,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function DisassemblyForm({ labels, maxAccess, store, setStore }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -152,13 +153,10 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
   }, [recordId, metalInfo])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.FoCastings}
-      form={formik}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={true}
-      isInfo={false}
-      isCleared={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -177,6 +175,6 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

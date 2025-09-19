@@ -10,6 +10,7 @@ import { RemittanceSettingsRepository } from 'src/repositories/RemittanceReposit
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 export default function AssignCorrespondentForm({ maxAccess, labels, outwardsList, refetch, window }) {
   const { postRequest } = useContext(RequestsContext)
@@ -41,14 +42,7 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
   })
 
   return (
-    <FormShell
-      form={formik}
-      isInfo={false}
-      isCleared={false}
-      isSavedClear={false}
-      maxAccess={maxAccess}
-      resourceId={ResourceIds.CorrespondentOutwards}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <ResourceLookup
           endpointId={RemittanceSettingsRepository.Correspondent.snapshot}
@@ -70,6 +64,6 @@ export default function AssignCorrespondentForm({ maxAccess, labels, outwardsLis
           error={formik.touched.corId && Boolean(formik.errors.corId)}
         />
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
