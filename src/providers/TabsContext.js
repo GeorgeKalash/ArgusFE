@@ -420,6 +420,8 @@ const TabsProvider = ({ children }) => {
         {openTabs.length > 0 &&
           openTabs.map((activeTab, i) => (
             <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+              <input type='text' style={{ display: 'none' }} autoComplete='username' />
+              <input type='password' style={{ display: 'none' }} autoComplete='new-password' />
               {activeTab.page}
             </CustomTabPanel>
           ))}

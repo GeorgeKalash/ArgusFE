@@ -941,7 +941,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          displayValue={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : ''}
+                          displayType={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : ''}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required={total >= 5000}
