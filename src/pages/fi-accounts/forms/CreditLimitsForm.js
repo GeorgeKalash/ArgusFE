@@ -9,8 +9,9 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
-const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded, maxAccess }) => {
+const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: accountId } = store
 
@@ -91,15 +92,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Accounts}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -112,7 +105,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

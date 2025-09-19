@@ -19,6 +19,7 @@ import { useWindow } from 'src/windows'
 import { getSystemFunctionModule } from 'src/resources/SystemFunction'
 import { Module } from 'src/resources/Module'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [responseValue, setResponseValue] = useState(null)
@@ -123,15 +124,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   ]
 
   return (
-    <FormShell
-      actions={actions}
-      resourceId={ResourceIds.DocumentsOnHold}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-      isSaved={false}
-    >
+    <Form actions={actions} onSave={() => openConfirmation(2)} isSaved={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -189,6 +182,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
