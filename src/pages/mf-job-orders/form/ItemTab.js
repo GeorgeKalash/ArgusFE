@@ -12,6 +12,8 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { createConditionalSchema } from 'src/lib/validation'
+import { Grid } from '@mui/material'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -108,8 +110,35 @@ export default function ItemTab({ labels, maxAccess, store }) {
         decimalScale: 0,
         maxLength: 5
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.extendedCost,
+      name: 'extendedCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
     }
   ]
+
+  const totalCost =
+    formik?.values?.items?.length > 0
+      ? formik.values.items.reduce((extendedSum, row) => {
+          const extendedValue = parseFloat(row.extendedCost?.toString().replace(/,/g, '')) || 0
+
+          return extendedSum + extendedValue
+        }, 0)
+      : 0
 
   async function fetchGridData() {
     const res = await getRequest({
@@ -120,7 +149,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
     if (res?.list?.length > 0) {
       const updateItemsList = res.list.map((item, index) => ({
         ...item,
-        id: index + 1
+        id: index + 1,
+        extendedCost: item?.unitCost || 0 * item?.qty || 0
       }))
 
       formik.setFieldValue('items', updateItemsList)
@@ -146,6 +176,12 @@ export default function ItemTab({ labels, maxAccess, store }) {
         />
       </Grow>
       <Fixed>
+        <Grid container p={4} justifyContent='flex-end'>
+          <Grid item xs={2}>
+            <CustomNumberField name='totalCost' label={labels.totalCost} value={totalCost} readOnly />
+          </Grid>
+        </Grid>
+
         <WindowToolbar
           disabledSubmit={store?.isCancelled || store?.isPosted}
           onSave={formik.submitForm}
