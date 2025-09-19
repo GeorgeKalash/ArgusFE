@@ -80,7 +80,12 @@ const WindowToolbar = ({
 
     const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
 
-    setReportStore(combinedStore)
+    setReportStore(
+      (combinedStore || []).map((item, index) => ({
+        ...item,
+        uniqueId: index + 1
+      }))
+    )
   }
 
   const functionMapping = {
