@@ -7,9 +7,6 @@ export const PayrollRepository = {
   BankTransferFilters: {
     qry: service + 'qrySB'
   },
-  Penalty: {
-    qry: service + 'qryPT'
-  },
   Paycode: {
     qry: service + 'qryPC',
     set: service + 'setPC',
@@ -29,7 +26,7 @@ export const PayrollRepository = {
     del: service + 'delGLG'
   },
   Arguments: {
-    page: service + 'pageAR',
+    page: service + 'pageAR'
   },
   CnssBranches: {
     page: service + 'pageSB',
@@ -45,8 +42,20 @@ export const PayrollRepository = {
   },
   TimeCodes: {
     page: service + 'pageTC',
+    qry: service + 'qryTC',
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
+  },
+  PenaltyType: {
+    page: service + 'pagePT',
+    qry: service + 'qryPT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT'
+  },
+  PenaltyDetail: {
+    qry: service + 'qryPD',
+    set2: service + 'set2PD'
   }
 }
