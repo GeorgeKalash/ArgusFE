@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -10,10 +9,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import RsLaborsForm from './form/RsLaborsForm'
+import EquipmentWindow from './Windows/EquipmentWindow'
 
-const RsLabors = () => {
+const Equipment = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +22,8 @@ const RsLabors = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.RsLabors.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      extension: RepairAndServiceRepository.Equipment.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,64 +31,69 @@ const RsLabors = () => {
 
   const {
     query: { data },
-    labels,
     refetch,
-    invalidate,
+    labels,
+    access,
     paginationParameters,
-    access
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.RsLabors.page,
-    datasetId: ResourceIds.RsLabors
+    endpointId: RepairAndServiceRepository.Equipment.page,
+    datasetId: ResourceIds.Equipment
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: labels.ref,
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'firstName',
-      headerName: labels.firstName,
+      field: 'make',
+      headerName: labels.make,
       flex: 1
     },
     {
-      field: 'lastName',
-      headerName: labels.lastName,
+      field: 'year',
+      headerName: labels.year,
+      flex: 1
+    },
+    {
+      field: 'description',
+      headerName: labels.description,
       flex: 1
     }
   ]
+
+  function openForm(obj) {
+    stack({
+      Component: EquipmentWindow,
+      props: {
+        labels,
+        recordId: obj?.recordId,
+        maxAccess: access
+      },
+      width: 1000,
+      height: 700,
+      title: labels.Equipment
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
 
   const add = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.RsLabors.del,
+      extension: RepairAndServiceRepository.Equipment.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success(platformLabels.Deleted)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: RsLaborsForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 500,
-      title: labels.labor
-    })
+    invalidate()
   }
 
   return (
@@ -104,15 +109,16 @@ const RsLabors = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
-          maxAccess={access}
-          refetch={refetch}
           paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default RsLabors
+export default Equipment

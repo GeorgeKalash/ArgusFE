@@ -115,7 +115,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RepairAndServiceRepository.SparePartsCategory.qry}
+                endpointId={RepairAndServiceRepository.SpCategory.qry}
                 name='categoryId'
                 label={labels.categoryId}
                 values={formik.values}
@@ -150,7 +150,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={RepairAndServiceRepository.Manufacturer.qry}
+                endpointId={RepairAndServiceRepository.SpManufacturer.qry}
                 name='manufacturerId'
                 label={labels.manufacturerId}
                 values={formik.values}

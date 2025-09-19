@@ -9,20 +9,23 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import RsLaborsForm from './form/RsLaborsForm'
+import { ControlContext } from 'src/providers/ControlContext'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import WorkOrderWindow from './Window/WorkOrderWindow'
 
-const RsLabors = () => {
+const WorkOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: RepairAndServiceRepository.RsLabors.page,
+      extension: RepairAndServiceRepository.WorkOrder.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -31,37 +34,63 @@ const RsLabors = () => {
 
   const {
     query: { data },
-    labels,
-    refetch,
+    labels: labels,
     invalidate,
+    refetch,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.RsLabors.page,
-    datasetId: ResourceIds.RsLabors
+    endpointId: RepairAndServiceRepository.WorkOrder.page,
+    datasetId: ResourceIds.WorkOrder
   })
 
   const columns = [
     {
       field: 'reference',
-      headerName: labels.ref,
+      headerName: labels.reference,
       flex: 1
     },
     {
-      field: 'firstName',
-      headerName: labels.firstName,
+      field: 'equipmentName',
+      headerName: labels.equipment,
       flex: 1
     },
     {
-      field: 'lastName',
-      headerName: labels.lastName,
+      field: 'wotName',
+      headerName: labels.type,
+      flex: 1
+    },
+    {
+      field: 'priorityName',
+      headerName: labels.priority,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
+      flex: 1
+    },
+    {
+      field: 'progressName',
+      headerName: labels.progress,
       flex: 1
     }
   ]
 
-  const add = () => {
-    openForm()
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.WorkOrder,
+    action: openForm
+  })
+
+  const add = async () => {
+    proxyAction()
   }
 
   const edit = obj => {
@@ -70,7 +99,7 @@ const RsLabors = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.RsLabors.del,
+      extension: RepairAndServiceRepository.WorkOrder.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -79,15 +108,15 @@ const RsLabors = () => {
 
   function openForm(recordId) {
     stack({
-      Component: RsLaborsForm,
+      Component: WorkOrderWindow,
       props: {
         labels,
         recordId,
-        maxAccess: access
+        access
       },
-      width: 600,
-      height: 500,
-      title: labels.labor
+      width: 1000,
+      height: 710,
+      title: labels.workOrder
     })
   }
 
@@ -105,14 +134,14 @@ const RsLabors = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          paginationType='api'
-          maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default RsLabors
+export default WorkOrder

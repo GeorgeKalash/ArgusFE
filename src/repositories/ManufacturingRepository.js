@@ -6,6 +6,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryDRM',
     set2: service + 'set2DRM'
   },
+  JobOrdersItem: { qry: service + 'qryJIT', set2: service + 'set2JIT' },
   IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
@@ -33,6 +34,7 @@ export const ManufacturingRepository = {
   WorkCenter: {
     page: service + 'pageWCT',
     qry: service + 'qryWCT',
+    qry3: service + 'qryWCT3',
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT',
@@ -352,7 +354,9 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    qry: service + 'qryJWC'
+    qry: service + 'qryJWC',
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
