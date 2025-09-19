@@ -10,6 +10,7 @@ export const SaleRepository = {
   },
   CommissionSchedule: {
     qry: service + 'qryCSC',
+    page: service + 'pageCSC',
     get: service + 'getCSC',
     set: service + 'setCSC',
     del: service + 'delCSC',

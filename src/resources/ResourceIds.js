@@ -30,6 +30,7 @@ export const ResourceIds = {
   Alerts: 60307,
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
+  PayCode: 75104,
   LedgerGroup: 75114,
 
   // Authorization Dashboard
@@ -176,7 +177,6 @@ export const ResourceIds = {
   FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
-  CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
   CashCountTransaction: 37301,
   ExchangeRates: 32103,
@@ -572,6 +572,7 @@ export const ResourceIds = {
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
+  Equipment: 45200,
   SpManufacturer: 45110,
   JobPosition: 45103,
   SpCategory: 45111,
