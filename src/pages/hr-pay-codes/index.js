@@ -5,15 +5,15 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
-import RsLaborsForm from './form/RsLaborsForm'
+import { useWindow } from 'src/windows'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import PayCodesForm from './Forms/PayCodesForm'
 
-const RsLabors = () => {
+const PayCodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -21,41 +21,34 @@ const RsLabors = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const response = await getRequest({
-      extension: RepairAndServiceRepository.RsLabors.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    return await getRequest({
+      extension: PayrollRepository.Paycode.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
     labels,
-    refetch,
     invalidate,
+    refetch,
     paginationParameters,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.RsLabors.page,
-    datasetId: ResourceIds.RsLabors
+    endpointId: PayrollRepository.Paycode.qry,
+    datasetId: ResourceIds.PayCode
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.ref,
+      field: 'name',
+      headerName: labels.name,
       flex: 1
     },
     {
-      field: 'firstName',
-      headerName: labels.firstName,
-      flex: 1
-    },
-    {
-      field: 'lastName',
-      headerName: labels.lastName,
+      field: 'payCode',
+      headerName: labels.PayCode,
       flex: 1
     }
   ]
@@ -64,37 +57,37 @@ const RsLabors = () => {
     openForm()
   }
 
+  function openForm(payCode) {
+    stack({
+      Component: PayCodesForm,
+      props: {
+        labels,
+        recordId: payCode,
+        maxAccess: access
+      },
+      width: 500,
+      height: 300,
+      title: labels.PayCode
+    })
+  }
+
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj.payCode)
   }
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.RsLabors.del,
+      extension: PayrollRepository.Paycode.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
-    stack({
-      Component: RsLaborsForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 500,
-      title: labels.labor
-    })
-  }
-
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} labels={labels} />
       </Fixed>
       <Grow>
         <Table
@@ -105,14 +98,14 @@ const RsLabors = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          paginationType='api'
-          maxAccess={access}
           refetch={refetch}
+          paginationType='api'
           paginationParameters={paginationParameters}
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default RsLabors
+export default PayCodes

@@ -12,6 +12,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 const MCDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -24,7 +25,8 @@ const MCDefault = ({ _labels, access }) => {
     'mc_defaultRTFI',
     'mc_defaultRTTAX',
     'baseMetalCuId',
-    'baseSalesMetalId'
+    'baseSalesMetalId',
+    'mf_damageOperationId'
   ]
 
   const { formik } = useForm({
@@ -43,7 +45,7 @@ const MCDefault = ({ _labels, access }) => {
 
   useEffect(() => {
     const updated = {}
-    defaultsData.list.forEach(obj => {
+    defaultsData.list?.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         updated[obj.key] = obj.value ? parseFloat(obj.value) : null
         formik.setFieldValue(obj.key, updated[obj.key])
@@ -115,6 +117,23 @@ const MCDefault = ({ _labels, access }) => {
               onChange={(_, newValue) => formik.setFieldValue('baseSalesMetalId', newValue?.recordId || null)}
               error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
               readOnly={isReadOnly('baseSalesMetalId')}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={ManufacturingRepository.Operation.qry}
+              parameters='_workCenterId=0'
+              name='mf_damageOperationId'
+              label={_labels.operation}
+              valueField='recordId'
+              displayField={['reference', 'name']}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              values={formik.values}
+              onChange={(_, newValue) => formik.setFieldValue('mf_damageOperationId', newValue?.recordId || null)}
+              error={formik.touched.mf_damageOperationId && Boolean(formik.errors.mf_damageOperationId)}
             />
           </Grid>
         </Grid>

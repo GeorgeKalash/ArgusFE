@@ -134,7 +134,7 @@ const JTCheckout = () => {
       },
       width: 1200,
       height: 700,
-      title: labels.jtCheckout
+      title: labels.jobTransfer
     })
   }
 
