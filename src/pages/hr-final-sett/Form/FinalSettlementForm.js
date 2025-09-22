@@ -115,7 +115,8 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
           positionName: employeeRes?.record?.positionName,
           branch: employeeRes?.record?.branchName,
           serviceDuration: employeeRes?.record?.serviceDuration,
-          netSalary: employeeRes?.record?.salary
+          netSalary: employeeRes?.record?.salary,
+          employeeRef: employeeRes?.record?.reference,
         })
       })
     }
