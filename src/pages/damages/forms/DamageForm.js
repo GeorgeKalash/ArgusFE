@@ -481,6 +481,7 @@ export default function DamageForm({ recordId, jobId }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                displayFieldWidth={2}
                 required
                 values={formik.values.header}
                 onChange={(event, newValue) => {
