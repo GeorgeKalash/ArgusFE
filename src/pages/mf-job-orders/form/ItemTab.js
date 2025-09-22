@@ -14,11 +14,14 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { createConditionalSchema } from 'src/lib/validation'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useWindow } from 'src/windows'
+import SerialsLots from './SerialsLots'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
+  const { stack } = useWindow()
 
   const conditions = {
     sku: row => row?.sku,
@@ -63,6 +66,20 @@ export default function ItemTab({ labels, maxAccess, store }) {
       toast.success(platformLabels.Updated)
     }
   })
+
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
 
   const columns = [
     {
@@ -127,6 +144,27 @@ export default function ItemTab({ labels, maxAccess, store }) {
       props: {
         readOnly: true,
         decimalScale: 2
+      }
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      flex: 0.5,
+      props: {
+        onCondition
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: SerialsLots,
+          props: {
+            labels,
+            maxAccess,
+            recordId,
+            api: ManufacturingRepository.MFSerial.qry2,
+            parameters: `_jobId=${recordId}&_seqNo=${row.seqNo}`
+          }
+        })
       }
     }
   ]
