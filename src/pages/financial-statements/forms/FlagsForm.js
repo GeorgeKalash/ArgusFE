@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -13,21 +12,16 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 
-//copied from another form with check column and need changes
-
-const FlagsForm = () => {
+export default function FlagsForm({ labels, recordId, fsId, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const [search, setSearch] = useState('')
-
   async function getAllSystems() {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
-        _dataset: DataSets.SYSTEM_CHECKS,
+        _dataset: DataSets.GLFS_FLAGS,
         callback: result => {
           if (result) resolve(result)
           else reject()
@@ -84,18 +78,6 @@ const FlagsForm = () => {
     }
   ]
 
-  const filteredData = search
-    ? data?.list?.filter(
-        item =>
-          item.checkId.toString().includes(search.toLowerCase()) ||
-          (item.checkName && item.checkName.toLowerCase().includes(search.toLowerCase()))
-      )
-    : data?.list
-
-  const handleSearchChange = event => {
-    setSearch(event?.target?.value ?? '')
-  }
-
   const handleSubmit = () => {
     postChecks()
   }
@@ -127,7 +109,7 @@ const FlagsForm = () => {
       <Grow>
         <Table
           columns={columns}
-          gridData={{ list: filteredData }}
+          gridData={data}
           rowId={['checkId']}
           isLoading={false}
           maxAccess={access}
@@ -142,5 +124,3 @@ const FlagsForm = () => {
     </VertLayout>
   )
 }
-
-export default FlagsForm

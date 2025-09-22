@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -10,33 +10,29 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 
 const NodeList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: fsId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [gridData, setGridData] = useState()
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getGridData = fsId => {
-    setGridData([])
-    const defaultParams = `_fsId=${fsId}`
-    var parameters = defaultParams
-    getRequest({
-      extension: FinancialStatementRepository.Node.qry,
-      parameters: parameters
-    }).then(res => {
-      setGridData(res)
+  const {
+    query: { data },
+    invalidate
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    enabled: Boolean(fsId),
+    endpointId: FinancialStatementRepository.Node.qry,
+    datasetId: ResourceIds.FinancialStatements
+  })
 
-      /* const item = res.list.find(item => item?.recordId === rowSelectionModel)
-      item &&
-        setStore(prevStore => ({
-          ...prevStore,
-          nodeId: item.recordId,
-          nodeRef: item.reference
-        })) */
+  async function fetchGridData() {
+    return getRequest({
+      extension: FinancialStatementRepository.Node.qry,
+      parameters: `_fsId=${fsId}`
     })
   }
 
@@ -80,16 +76,12 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     }
   ]
 
-  useEffect(() => {
-    fsId && getGridData(fsId)
-  }, [fsId])
-
   const add = () => {
-    openForm('')
+    openForm()
   }
 
-  const edit = object => {
-    openForm(object.recordId)
+  const edit = obj => {
+    openForm(obj?.recordId)
   }
 
   const del = async obj => {
@@ -102,7 +94,7 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
       nodeId: null,
       nodeRef: ''
     }))
-    await getGridData(fsId)
+    invalidate()
     toast.success(platformLabels.Deleted)
   }
 
@@ -111,66 +103,37 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
       Component: NodeWindow,
       props: {
         labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         fsId,
-        maxAccess,
-        getGridData
+        maxAccess
       },
       width: 500,
-      title: labels?.node
-    })
-  }
-
-  const actions = [
-    {
-      key: 'Flag',
-      condition: true,
-      onClick: () => openFlags()
-    }
-  ]
-
-  async function openFlags() {
-    stack({
-      Component: FlagsForm,
-      props: {
-        endPoint: SaleRepository.DraftInvoiceSerial.batch,
-        header: {
-          draftId: formik?.values?.recordId
-        },
-        onCloseimport: fillGrids,
-        maxAccess: maxAccess
-      }
+      title: labels.node
     })
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} actions={actions} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
-        <Table //name
+        <Table
+          name='nodeTable'
           columns={columns}
-          gridData={gridData}
+          gridData={data}
           rowId={['recordId']}
-          api={getGridData}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
           onSelectionChange={row => {
-            console.log('row', row)
             if (row) {
               setStore(prevStore => ({
                 ...prevStore,
                 nodeId: row.recordId,
                 nodeRef: row.reference
               }))
-
-              //setRowSelectionModel(row.seqNo)
-
-              //ref.current = currencies.filter(item => item.countryId === row.countryId)
             }
           }}
         />

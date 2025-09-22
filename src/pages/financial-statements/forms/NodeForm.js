@@ -5,7 +5,6 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -13,17 +12,21 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import { DataSets } from 'src/resources/DataSets'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import FlagsForm from './FlagsForm'
 
-export default function NodeForm({ labels, maxAccess, setStore, store, getGridData, toggleUpdateTree }) {
+export default function NodeForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, fsId } = store
   const editMode = !!recordId
+  const { stack } = useWindow()
 
   const formik = useFormik({
     initialValues: {
-      recordId: null,
-      fsId: fsId,
+      recordId,
+      fsId,
       reference: '',
       parentId: null,
       TBAmount: null,
@@ -31,8 +34,6 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
       displayOrder: null,
       description: ''
     },
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       TBAmount: yup.number().required(),
@@ -45,16 +46,14 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
         record: JSON.stringify(obj)
       })
 
-      formik.setFieldValue('recordId', res.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: res.recordId
-      }))
-
-      toggleUpdateTree()
-      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-
-      getGridData(fsId)
+      if (!obj?.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+      }
+      toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
 
@@ -66,16 +65,14 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record
-        })
+        formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
     <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'
@@ -96,7 +93,6 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
             label={labels.parent}
             valueField='recordId'
             displayField='reference'
-            required
             values={formik.values}
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
@@ -116,7 +112,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('TBAmount', newValue?.key)
+              formik.setFieldValue('TBAmount', newValue?.key || null)
             }}
             error={formik.touched.TBAmount && Boolean(formik.errors.TBAmount)}
           />
@@ -132,7 +128,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
             required
             maxAccess={maxAccess}
             onChange={(event, newValue) => {
-              formik.setFieldValue('numberFormat', newValue?.key)
+              formik.setFieldValue('numberFormat', newValue?.key || null)
             }}
             error={formik.touched.numberFormat && Boolean(formik.errors.numberFormat)}
           />
@@ -153,16 +149,33 @@ export default function NodeForm({ labels, maxAccess, setStore, store, getGridDa
           />
         </Grid>
         <Grid item xs={12}>
-          <CustomTextField
+          <CustomTextArea
             name='description'
             label={labels.description}
             value={formik.values.description}
-            required
             rows={2}
             maxAccess={maxAccess}
             onChange={formik.handleChange}
             onClear={() => formik.setFieldValue('description', '')}
             error={formik.touched.description && Boolean(formik.errors.description)}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomButton
+            onClick={() => {
+              stack({
+                Component: FlagsForm,
+                props: {
+                  labels,
+                  recordId,
+                  fsId,
+                  maxAccess
+                },
+                width: 500,
+                title: labels.node
+              })
+            }}
+            label={labels.flag}
           />
         </Grid>
       </Grid>

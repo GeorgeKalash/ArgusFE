@@ -9,50 +9,55 @@ import { DataSets } from 'src/resources/DataSets'
 import Tree from 'src/components/Shared/Tree'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { Grid } from '@mui/material'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const TreeForm = ({ store, maxAccess, active }) => {
   const { recordId: fsId } = store
   const { getRequest } = useContext(RequestsContext)
-  const [dataTree, setDataTree] = useState([])
-  const [labelsTree, setLabelsTree] = useState([])
+  const [treeLabels, setTreeLabels] = useState([])
 
   const formik = useFormik({
     initialValues: {
-      language: '1'
+      languageId: 1
     },
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
-      language: yup.number().required()
+      languageId: yup.number().required()
     })
   })
 
-  useEffect(() => {
-    active && fsId && getTreeNodes(fsId)
-  }, [active])
-
-  const getTreeNodes = async fsId => {
-    const response = await getRequest({
+  async function getTreeNodes() {
+    return await getRequest({
       extension: FinancialStatementRepository.Node.qry,
       parameters: `_fsId=${fsId}`
     })
-    console.log('res', response)
-    setDataTree(response)
+  }
 
+  const {
+    query: { data }
+  } = useResourceQuery({
+    queryFn: getTreeNodes,
+    enabled: Boolean(fsId),
+    endpointId: FinancialStatementRepository.Node.qry,
+    datasetId: ResourceIds.FinancialStatements
+  })
+
+  const getTreelabels = async (languageId = formik?.values?.languageId || null) => {
     const labelsResponse = await getRequest({
       extension: FinancialStatementRepository.Title.qry,
       parameters: `_fsNodeId=0`
     })
 
-    console.log('labelsResponse', labelsResponse)
-
     const filteredLabelResp = labelsResponse?.list?.filter(
-      lable => lable.languageId?.toString() === formik?.values?.language
+      lable => lable.languageId?.toString() === languageId?.toString()
     )
 
-    console.log('FFlabelsResponse', filteredLabelResp, formik?.values?.language)
-    setLabelsTree(filteredLabelResp)
+    setTreeLabels(filteredLabelResp)
   }
+
+  useEffect(() => {
+    fsId && getTreelabels()
+  }, [fsId])
 
   return (
     <>
@@ -62,20 +67,21 @@ const TreeForm = ({ store, maxAccess, active }) => {
             <Grid item margin={3}>
               <ResourceComboBox
                 datasetId={DataSets.LANGUAGE}
-                name='language'
+                name='languageId'
                 valueField='key'
                 displayField='value'
                 defaultIndex={0}
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('language', newValue?.key)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('languageId', newValue ? newValue.key : 1)
+                  getTreelabels(newValue ? newValue.key : 1)
                 }}
-                error={formik.touched.language && Boolean(formik.errors.language)}
+                error={formik.touched.languageId && Boolean(formik.errors.languageId)}
               />
             </Grid>
-            <Tree data={dataTree} labels={labelsTree} printable={false} />
+            <Tree data={data} labels={treeLabels} printable={false} />
           </Grow>
         </VertLayout>
       )}

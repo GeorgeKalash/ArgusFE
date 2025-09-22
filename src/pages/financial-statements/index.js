@@ -40,11 +40,11 @@ const FinancialStatements = () => {
   ]
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: FinancialStatementRepository.FinancialStatement.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&&filter=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -89,13 +89,13 @@ const FinancialStatements = () => {
       </Fixed>
       <Grow>
         <Table
+          name='FiStatementTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           refetch={refetch}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           maxAccess={access}

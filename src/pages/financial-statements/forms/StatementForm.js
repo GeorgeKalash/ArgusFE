@@ -26,8 +26,6 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
       recordId: null,
       name: ''
     },
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required()
     }),
@@ -37,13 +35,14 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
         record: JSON.stringify(obj)
       })
 
-      formik.setFieldValue('recordId', res.recordId)
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: res.recordId
-      }))
-      toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
@@ -56,16 +55,14 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
           parameters: `_recordId=${recordId}`
         })
 
-        formik.setValues({
-          ...res.record
-        })
+        formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
     <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container>
         <Grid item xs={12}>
           <CustomTextField
             name='name'
