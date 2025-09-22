@@ -112,8 +112,7 @@ export default function JobOrderForm({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
-      workCenterId: yup.string().required(),
-      itemCategoryId: yup.string().required()
+      workCenterId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -512,7 +511,7 @@ export default function JobOrderForm({
         formik.setFieldValue('wcRef', null)
         formik.setFieldValue('wcName', null)
       }
-      
+
       return
     }
 
@@ -997,7 +996,6 @@ export default function JobOrderForm({
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
-                  required
                   valueField='recordId'
                   displayField={['caRef', 'name']}
                   values={formik.values}

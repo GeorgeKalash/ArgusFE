@@ -583,6 +583,7 @@ export const ResourceIds = {
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
   WorkCenterTransferMap: 42128,
+  RepairRequest: 45300,
 
   // GL
   GLSalesInvoice: 51604,
