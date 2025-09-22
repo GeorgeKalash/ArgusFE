@@ -579,6 +579,7 @@ export const ResourceIds = {
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
   WorkOrder: 45301,
+  FinalSettlement: 75203,
   SyncPurchaseTrx: 50602,
   IRPlantSettings: 46100,
   IssueOfMaterials: 42304,
