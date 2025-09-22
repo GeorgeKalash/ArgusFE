@@ -7,12 +7,11 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -269,14 +268,10 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
   }, [recordId, refetchRouting])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      form={formik}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-      isSavedClear={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -306,6 +301,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

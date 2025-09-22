@@ -142,7 +142,7 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+    <Form onSave={formik.handleSubmit} maxAccess={access} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

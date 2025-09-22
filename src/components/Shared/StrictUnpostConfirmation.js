@@ -1,10 +1,8 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
-import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { forwardRef, useImperativeHandle } from 'react'
 import Form from './Form'
 
 const StrictUnpostConfirmation = ({ window, onSuccess }) => {
@@ -57,9 +55,6 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
             autoFocus={true}
           />
         </Grid>
-        {/* <Grid item xs={12}>
-          <WindowToolbar actions={actions} smallBox={true} />
-        </Grid> */}
       </Grid>
     </Form>
   )

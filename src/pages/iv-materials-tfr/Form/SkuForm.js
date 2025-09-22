@@ -1,13 +1,12 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function SkuForm({ labels, maxAccess, plId, itemId }) {
   const { getRequest } = useContext(RequestsContext)
@@ -44,15 +43,7 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MaterialsTransfer}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={false}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form form={formik.handleSubmit} maxAccess={maxAccess} editMode={false} isSaved={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -90,6 +81,6 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

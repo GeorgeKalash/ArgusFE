@@ -5,9 +5,8 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { DataGrid } from './DataGrid'
-import { Fixed } from './Layouts/Fixed'
-import WindowToolbar from './WindowToolbar'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import Form from './Form'
 
 export default function Installments({ data, onOk, window }) {
   const isPosted = data.status === 3
@@ -91,22 +90,21 @@ export default function Installments({ data, onOk, window }) {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('installments', value)}
-          value={formik.values.installments}
-          error={formik.errors.installments}
-          columns={columns}
-          allowDelete={!isPosted}
-          allowAddNewLine={!isPosted}
-          maxAccess={maxAccess}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('installments', value)}
+            value={formik.values.installments}
+            error={formik.errors.installments}
+            columns={columns}
+            allowDelete={!isPosted}
+            allowAddNewLine={!isPosted}
+            maxAccess={maxAccess}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -302,15 +302,7 @@ export default function IRGenerateConsumption() {
   }, [formik.values.fromSiteId, formik.values.workCenterId])
 
   return (
-    <FormShell
-      form={formik}
-      isInfo={false}
-      isCleared={false}
-      isSaved={false}
-      actions={actions}
-      maxAccess={access}
-      resourceId={ResourceIds.GenerateConsumption}
-    >
+    <FormShell onSave={formik.handleSubmit} isSaved={false} actions={actions} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>

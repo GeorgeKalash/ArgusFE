@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ApprovalsDialog from 'src/components/Shared/ApprovalsDialog.js'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -124,7 +122,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   ]
 
   return (
-    <Form actions={actions} onSave={() => openConfirmation(2)} isSaved={false} maxAccess={maxAccess}>
+    <Form actions={actions} isSaved={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

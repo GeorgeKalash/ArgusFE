@@ -8,12 +8,12 @@ import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DeliveryRepository } from 'src/repositories/DeliveryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import Form from 'src/components/Shared/Form'
 
 const OutboundAssignDriver = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -147,7 +147,7 @@ const OutboundAssignDriver = () => {
   }, [])
 
   return (
-    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <GridToolbar actions={actions} />
@@ -165,7 +165,7 @@ const OutboundAssignDriver = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

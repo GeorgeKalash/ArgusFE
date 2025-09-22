@@ -99,13 +99,7 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.TaxCodes}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.TaxCodes} maxAccess={maxAccess} isInfo={false} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid

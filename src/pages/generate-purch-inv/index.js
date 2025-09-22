@@ -20,10 +20,10 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import PuDetailsForm from './forms/PuDetailsForm'
 import { formatDateToApi } from 'src/lib/date-helper'
 import toast from 'react-hot-toast'
+import Form from 'src/components/Shared/Form'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -245,14 +245,7 @@ const GeneratePurchaseInvoice = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GeneratePUInvoices}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSaved={false}
-      infoVisible={false}
-    >
+    <Form onSave={onGeneratePI} maxAccess={access} isSaved={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -397,7 +390,7 @@ const GeneratePurchaseInvoice = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

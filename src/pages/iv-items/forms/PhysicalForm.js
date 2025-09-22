@@ -128,7 +128,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       resourceId={ResourceIds.PhysicalProperty}
       maxAccess={maxAccess}
       editMode={editMode}
-      infoVisible={false}
+      isInfo={false}
       isCleared={false}
     >
       <VertLayout>

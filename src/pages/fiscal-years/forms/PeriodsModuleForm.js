@@ -140,7 +140,7 @@ const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} fullSize>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

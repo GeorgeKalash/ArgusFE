@@ -118,13 +118,7 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Users}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={!!recordId}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Users} maxAccess={maxAccess} isInfo={false} editMode={!!recordId}>
       <VertLayout>
         <Grow>
           <DataGrid

@@ -5,7 +5,6 @@ import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
@@ -42,14 +41,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SecurityGroup}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!recordId}
-      isCleared={false}
-      isInfo={false}
-    >
+    <FormShell onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!recordId}>
       <VertLayout>
         <Grow>
           <Grid item xs={12}>

@@ -106,7 +106,7 @@ export default function SalesSettingsForm({ _labels, access }) {
   }, [])
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <FormShell onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

@@ -15,6 +15,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
 
 const EmpSettings = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -115,13 +116,7 @@ const EmpSettings = () => {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.EmpSettings}
-      form={formik}
-      infoVisible={false}
-      isCleared={false}
-      maxAccess={access}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grid container spacing={2} xs={5}>
           <Grid item xs={12}>
@@ -238,7 +233,7 @@ const EmpSettings = () => {
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

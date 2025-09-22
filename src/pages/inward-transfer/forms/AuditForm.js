@@ -2,11 +2,10 @@ import { Box, Grid, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 export default function AuditForm({ labels, formik }) {
   const { getRequest } = useContext(RequestsContext)
@@ -79,7 +78,7 @@ export default function AuditForm({ labels, formik }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.InwardTransfer} form={formik} isCleared={false} isInfo={false} isSaved={false}>
+    <Form onSave={formik.handleSubmit}>
       <Grid container spacing={2}>
         <Grid item xs={12} sx={{ mx: 5, mt: 2 }}>
           <CustomTextField
@@ -295,6 +294,6 @@ export default function AuditForm({ labels, formik }) {
           />
         </Grid>
       </Grid>
-    </FormShell>
+    </Form>
   )
 }

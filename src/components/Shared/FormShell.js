@@ -32,7 +32,6 @@ export default function FormShell({
   editMode,
   disabledSubmit,
   disabledSavedClear,
-  infoVisible = true,
   postVisible = false,
   resourceId,
   functionId,
@@ -43,7 +42,6 @@ export default function FormShell({
   onClear,
   previewBtnClicked = () => {},
   setIDInfoAutoFilled,
-  visibleClear,
   actions,
   isParentWindow = true,
   fullSize = false
@@ -368,14 +366,12 @@ export default function FormShell({
       editMode={editMode}
       disabledSubmit={disabledSubmit}
       disabledSavedClear={disabledSavedClear || disabledSubmit}
-      infoVisible={infoVisible}
       postVisible={postVisible}
       isPosted={isPosted}
       isClosed={isClosed}
       resourceId={resourceId}
       recordId={form?.values?.recordId}
       previewReport={previewReport}
-      visibleClear={visibleClear}
       functionId={functionId}
       maxAccess={maxAccess}
       isParentWindow={isParentWindow}

@@ -94,8 +94,8 @@ const CorrespondentDispersal = () => {
     <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={4} sx={{ m: 3 }}>
+          <Grid container spacing={2} p={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={RemittanceSettingsRepository.Correspondent.qry2}
                 name='corId'

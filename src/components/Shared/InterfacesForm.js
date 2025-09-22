@@ -141,7 +141,7 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
       form={formik}
       resourceId={resourceId}
       maxAccess={access}
-      infoVisible={false}
+      isInfo={false}
       editMode={true}
       isSavedClear={false}
       isCleared={false}

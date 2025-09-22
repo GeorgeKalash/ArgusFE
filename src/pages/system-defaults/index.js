@@ -102,7 +102,7 @@ const SystemDefaults = () => {
       resourceId={ResourceIds.SystemDefaults}
       form={formik}
       maxAccess={access}
-      infoVisible={false}
+      isInfo={false}
       isSavedClear={false}
     >
       <VertLayout>

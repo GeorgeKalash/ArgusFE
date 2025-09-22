@@ -10,7 +10,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import FormShell from 'src/components/Shared/FormShell'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
@@ -18,6 +17,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useWindow } from 'src/windows'
 import DataForm from './form/DataForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const TrxDetails = () => {
   const [data, setData] = useState([])
@@ -114,15 +114,7 @@ const TrxDetails = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.TransactionLog}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSaved={false}
-      isSavedClear={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -263,7 +255,7 @@ const TrxDetails = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

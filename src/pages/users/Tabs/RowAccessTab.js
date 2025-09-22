@@ -19,6 +19,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import Form from 'src/components/Shared/Form'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -210,15 +211,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     : data
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!storeRecordId}
-      isSavedClear={false}
-      isCleared={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -268,7 +261,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

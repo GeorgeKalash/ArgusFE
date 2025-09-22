@@ -116,8 +116,8 @@ const UserDashboard = () => {
     <Form onSave={handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container xs={12}>
-            <Grid item xs={3} sx={{ m: 2 }}>
+          <Grid container xs={12} p={2}>
+            <Grid item xs={3}>
               <CustomTextField
                 name='search'
                 value={search}

@@ -305,7 +305,7 @@ const CTExchangeRates = () => {
     <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
-          <Grid container xs={12} sx={{ flexDirection: 'column', padding: '5px' }}>
+          <Grid container xs={12} sx={{ flexDirection: 'column' }} p={2}>
             <Fixed>
               <Grid container spacing={2}>
                 <Grid item xs={6}>

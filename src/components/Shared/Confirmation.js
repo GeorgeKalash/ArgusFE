@@ -91,7 +91,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   }
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false} infoVisible={false}>
+    <FormShell form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false} isInfo={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

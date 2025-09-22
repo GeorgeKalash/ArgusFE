@@ -10,7 +10,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useWindow } from 'src/windows'
@@ -25,6 +24,7 @@ import { formatDateToApi } from 'src/lib/date-helper'
 import toast from 'react-hot-toast'
 import SaleTransactionForm from '../sa-trx/[functionId]/forms/SaleTransactionForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import Form from 'src/components/Shared/Form'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -245,14 +245,7 @@ const GeneratePurchaseInvoice = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GenerateInvoices}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSaved={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -413,7 +406,7 @@ const GeneratePurchaseInvoice = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

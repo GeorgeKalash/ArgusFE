@@ -9,9 +9,8 @@ import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -132,27 +131,26 @@ export default function ItemTab({ labels, maxAccess, store }) {
   }, [recordId])
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          name='items'
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-          initialValues={formik?.initialValues?.items?.[0]}
-          maxAccess={maxAccess}
-          allowDelete={!store?.isPosted && !store?.isCancelled}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar
-          disabledSubmit={store?.isCancelled || store?.isPosted}
-          onSave={formik.submitForm}
-          isSaved
-          smallBox
-        />
-      </Fixed>
-    </VertLayout>
+    <Form
+      onSave={formik.handleSubmit}
+      maxAccess={maxAccess}
+      isParentWindow={false}
+      disabledSubmit={store?.isCancelled || store?.isPosted}
+    >
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='items'
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            initialValues={formik?.initialValues?.items?.[0]}
+            maxAccess={maxAccess}
+            allowDelete={!store?.isPosted && !store?.isCancelled}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }

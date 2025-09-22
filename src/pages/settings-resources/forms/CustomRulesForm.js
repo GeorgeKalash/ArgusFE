@@ -164,7 +164,7 @@ const CustomRulesForm = ({ labels, maxAccess, row, window }) => {
       form={formik}
       resourceId={ResourceIds.SettingsResources}
       isCleared={false}
-      infoVisible={false}
+      isInfo={false}
       maxAccess={maxAccess}
     >
       <VertLayout>

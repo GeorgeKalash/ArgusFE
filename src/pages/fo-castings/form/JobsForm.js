@@ -6,13 +6,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
+
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function JobsForm({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -337,13 +337,10 @@ export default function JobsForm({ labels, maxAccess, store }) {
   }, [store?.castingInfo, balanceWgt, assignedWgtBB])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.FoCastings}
-      form={formik}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={true}
-      isInfo={false}
-      isCleared={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -413,6 +410,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

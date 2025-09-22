@@ -1,7 +1,6 @@
 import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { useContext, useEffect, useState } from 'react'
 import { Button } from '@mui/material'
 import { useWindow } from 'src/windows'
@@ -171,7 +170,7 @@ const ProductsWindow = ({
         window.close()
       }}
       disabledSubmit={editMode}
-      maxAccess={access}
+      maxAccess={maxAccess}
       fullSize
     >
       <VertLayout>

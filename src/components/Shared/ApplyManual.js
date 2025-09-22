@@ -125,7 +125,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       form={formik}
       resourceId={ResourceIds.ApplyManual}
       maxAccess={access}
-      infoVisible={false}
+      isInfo={false}
       isCleared={false}
       disabledSubmit={readOnly}
     >
