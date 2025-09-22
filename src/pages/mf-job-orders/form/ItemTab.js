@@ -115,6 +115,24 @@ export default function ItemTab({ labels, maxAccess, store }) {
       }
     },
     {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.extendedCost,
+      name: 'extendedCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
+    },
+    {
       component: 'button',
       name: 'serials',
       label: platformLabels.serials,
@@ -133,24 +151,6 @@ export default function ItemTab({ labels, maxAccess, store }) {
             parameters: `_jobId=${recordId}&_seqNo=${row.seqNo}`
           }
         })
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.unitCost,
-      name: 'unitCost',
-      props: {
-        readOnly: true,
-        decimalScale: 2
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.extendedCost,
-      name: 'extendedCost',
-      props: {
-        readOnly: true,
-        decimalScale: 2
       }
     }
   ]
