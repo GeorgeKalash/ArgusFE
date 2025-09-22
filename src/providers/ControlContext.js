@@ -62,11 +62,16 @@ const ControlProvider = ({ children }) => {
 
         const newItem = { key: 'countryRef', value: res?.record?.reference }
 
-        setDefaultsData(prevState => ({
-          ...prevState,
-          list: [...prevState.list, newItem],
-          count: prevState.list.length + 1
-        }))
+        setDefaultsData(prev => {
+          const list = Array.isArray(prev?.list) ? prev.list : []
+          const nextList = [...list, newItem] // أو تأكد ما في undefined/تكرار
+
+          return {
+            ...prev,
+            list: nextList,
+            count: nextList.length
+          }
+        })
       }
     })()
   }, [countryId])

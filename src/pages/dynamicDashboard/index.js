@@ -13,7 +13,6 @@ import { getStorageData } from 'src/storage/storage'
 import { DashboardRepository } from 'src/repositories/DashboardRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import useResourceParams from 'src/hooks/useResourceParams'
-import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
@@ -122,16 +121,11 @@ const Value = styled.div`
 `
 
 const DashboardLayout = () => {
-  const { getRequest, LoadingOverlay } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
-  const [loading, setLoading] = useState(true)
   const userData = getStorageData('userData')
   const _userId = userData.userId
-
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
@@ -159,15 +153,10 @@ const DashboardLayout = () => {
             parameters: ``
           }).then(resDR => {
             setData({ dashboard: { ...res?.record }, sp: { ...resSP?.record }, authorization: { ...resDR } })
-            debouncedCloseLoading()
           })
         })
       })
   }, [])
-
-  if (loading) {
-    return <LoadingOverlay />
-  }
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false

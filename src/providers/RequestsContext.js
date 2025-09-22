@@ -32,6 +32,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
   const { user, setUser, apiUrl } = useContext(AuthContext)
   const errorModel = useError()
   const [activeRequests, setActiveRequests] = useState(0)
+  let isError = false
 
   let isRefreshingToken = false
   let tokenRefreshQueue = []
@@ -260,10 +261,12 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       try {
         if (user?.expiresAt !== null) {
           var dateNow = new Date()
+          const expDate = user?.expiresAt + (user?.timeZone || 0) * 3600
 
-          if (user?.expiresAt < Math.trunc(dateNow.getTime() / 1000)) {
-            if (!isRefreshingToken) {
+          if (expDate < Math.trunc(dateNow.getTime() / 1000)) {
+            if (!isRefreshingToken && !isError) {
               isRefreshingToken = true
+              isError = true
               var bodyFormData = new FormData()
               bodyFormData.append(
                 'record',
@@ -279,6 +282,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
                 },
                 data: bodyFormData
               })
+
+              isError = false
 
               let newUser = {
                 ...user,
@@ -310,6 +315,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
             // Clear the queue and reset the flag
             tokenRefreshQueue = []
             isRefreshingToken = false
+            isError = false
           }
         } else {
           // If no expiration information, resolve all pending requests with null
