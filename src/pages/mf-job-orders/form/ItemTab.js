@@ -12,11 +12,14 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { createConditionalSchema } from 'src/lib/validation'
+import SerialsLots from './SerialsLots'
+import { useWindow } from 'src/windows'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
+  const { stack } = useWindow()
 
   const conditions = {
     sku: row => row?.sku,
@@ -107,6 +110,21 @@ export default function ItemTab({ labels, maxAccess, store }) {
       props: {
         decimalScale: 0,
         maxLength: 5
+      }
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      flex: 0.5,
+      props: {
+        imgSrc: '/images/TableIcons/imgSerials.png'
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: SerialsLots,
+          props: { labels, maxAccess, recordId, seqNo: row.seqNo, api: ManufacturingRepository.MFSerial.qry2 },
+        })
       }
     }
   ]

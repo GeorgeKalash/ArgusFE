@@ -331,9 +331,6 @@ export default function JobOrderForm({
     stack({
       Component: SerialsLots,
       props: { labels, maxAccess, recordId: formik.values.recordId, itemId: formik.values.itemId },
-      width: 500,
-      height: 600,
-      title: labels.seriallot
     })
   }
   function openSample() {

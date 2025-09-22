@@ -236,6 +236,7 @@ export const ManufacturingRepository = {
   },
   MFSerial: {
     qry: service + 'qrySRL',
+    qry2: service + 'qrySRL2',
     set2: service + 'set2SRL',
     generate: service + 'generateSRL'
   },
