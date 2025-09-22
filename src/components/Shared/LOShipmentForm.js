@@ -27,7 +27,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
 
-  useSetWindow({ title: platformLabels.Shipment, window })
+  useSetWindow({ title: platformLabels.Transportation, window })
 
   const { formik } = useForm({
     initialValues: {
@@ -50,9 +50,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
         }
       ]
     },
-    enableReinitialize: true,
     validateOnChange: true,
-
     validationSchema: yup.object({
       carrierId: yup.string().required(),
       packages: yup
@@ -361,7 +359,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
                         },
                         {
                           component: 'textfield',
-                          label: labels.reference,
+                          label: labels.cellNumber,
                           name: 'reference',
                           props: {
                             maxLength: 20,

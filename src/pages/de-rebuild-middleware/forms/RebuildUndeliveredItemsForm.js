@@ -24,7 +24,6 @@ export default function RebuildUndeliveredItemsForm({ _labels, access }) {
       startDate: null,
       endDate: null
     },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({

@@ -1,15 +1,9 @@
-import { useState, useContext } from 'react'
-
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import { useWindow } from 'src/windows'
-
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
-
+import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -17,46 +11,63 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import FeesSceduleWindow from './window/FeesSceduleWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const FeeSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: RemittanceOutwardsRepository.FeeSchedule.qry
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
+
+    const response = await getRequest({
+      extension: RemittanceOutwardsRepository.FeeSchedule.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
-    invalidate,
-
+    filterBy,
     refetch,
-    access
+    labels,
+    access,
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: RemittanceOutwardsRepository.FeeSchedule.qry,
-    datasetId: ResourceIds.FeeSchedule
+    endpointId: RemittanceOutwardsRepository.FeeSchedule.snapshot,
+    datasetId: ResourceIds.FeeSchedule,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: RemittanceOutwardsRepository.FeeSchedule.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'originCurrencyName',
-      headerName: _labels.originCurrency,
+      headerName: labels.originCurrency,
       flex: 1
     }
   ]
@@ -69,13 +80,13 @@ const FeeSchedule = () => {
     stack({
       Component: FeesSceduleWindow,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 1000,
       height: 500,
-      title: _labels.feesScedule
+      title: labels.feesScedule
     })
   }
 
@@ -84,32 +95,31 @@ const FeeSchedule = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: RemittanceOutwardsRepository.FeeSchedule.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: RemittanceOutwardsRepository.FeeSchedule.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RTFSC'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='client'
           maxAccess={access}
         />
       </Grow>

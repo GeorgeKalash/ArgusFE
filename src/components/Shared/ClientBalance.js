@@ -32,7 +32,6 @@ export const ClientBalance = ({ recordId, window }) => {
       iwMTD: ''
     },
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true
   })
 

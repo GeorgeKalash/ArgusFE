@@ -44,7 +44,6 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       locationUrl: '',
       isInactive: false
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),

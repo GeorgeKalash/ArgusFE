@@ -18,7 +18,6 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',

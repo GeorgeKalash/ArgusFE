@@ -163,7 +163,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     documentType: { key: 'dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -1052,6 +1051,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       props: {
         address: address,
         setAddress: setAddress,
+        datasetId: ResourceIds.ADDSalesQuotations,
         isCleared: false
       }
     })

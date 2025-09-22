@@ -70,7 +70,8 @@ export const PurchaseRepository = {
     unpost: service + 'unpostIVC',
     generate: service + 'generateIVC',
     preview: service + 'previewIVC',
-    sync: service + 'syncIVC'
+    sync: service + 'syncIVC',
+    verify: service + 'verifyIVC'
   },
   Invoice: {
     snapshot: service + 'snapshotINV'
@@ -91,7 +92,8 @@ export const PurchaseRepository = {
   Serials: {
     qry: service + 'qrySRL',
     import: service + 'importSRL',
-    last: service + 'lastSRL'
+    last: service + 'lastSRL',
+    sync: service + 'syncSRL'
   },
   Shipment: {
     get: service + 'getSHP',
@@ -175,7 +177,13 @@ export const PurchaseRepository = {
     set2: service + 'set2QTN',
     get: service + 'getQTN',
     del: service + 'delQTN',
-    snapshot: service + 'snapshotQTN',
-    toOrder: service + 'gen2PO'
+    snapshot: service + 'snapshotQTN'
+  },
+  GenerateQTNPRPack: {
+    gen: service + 'genQTN'
+  },
+  GeneratePOPRPack: {
+    gen: service + 'genPO',
+    gen2: service + 'gen2PO'
   }
 }

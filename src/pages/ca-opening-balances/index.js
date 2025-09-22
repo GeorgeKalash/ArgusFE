@@ -11,7 +11,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import OpeningBalanceForm from './form/OpeningBalanceForm'
-import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const OpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -97,8 +96,7 @@ const OpeningBalance = () => {
       Component: OpeningBalanceForm,
       props: {
         labels: _labels,
-        record: record,
-
+        record,
         recordId: record
           ? String(record.fiscalYear * 1000) + String(record.accountId * 100) + String(record.currencyId * 10)
           : null

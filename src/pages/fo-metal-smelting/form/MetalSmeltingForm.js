@@ -88,7 +88,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .of(
           yup.object().shape({
             metalId: yup.string().required(),
-            qty: yup.number().required().moreThan(0),
+            qty: yup.number().required(),
             purity: yup.number().required().moreThan(0),
             sku: yup.string().required()
           })
@@ -274,7 +274,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false },
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
         update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })

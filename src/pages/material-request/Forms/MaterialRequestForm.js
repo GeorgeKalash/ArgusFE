@@ -27,6 +27,8 @@ import { companyStructureRepository } from 'src/repositories/companyStructureRep
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,6 +93,9 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       rsName: '',
       wipName: '',
       notes: '',
+      workCenterId: null,
+      wcName: '',
+      wcRef: '',
       status: 1,
       wip: 1,
       items: [
@@ -116,7 +121,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -589,6 +593,25 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
             </Grid>
             <Grid item xs={6}>
               <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.WorkCenter.snapshot}
+                    name='workCenterId'
+                    label={labels.workCenter}
+                    valueField='reference'
+                    displayField='name'
+                    valueShow='wcRef'
+                    secondValueShow='wcName'
+                    displayFieldWidth={2}
+                    form={formik}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                      formik.setFieldValue('wcRef', newValue?.reference || '')
+                      formik.setFieldValue('wcName', newValue?.name || '')
+                    }}
+                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}

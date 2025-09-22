@@ -97,14 +97,12 @@ const CashAccounts = () => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: CashBankRepository.CashAccount.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: CashBankRepository.CashAccount.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   const add = () => {

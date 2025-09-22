@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -7,81 +7,60 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    name: '',
-    type: ''
-  })
-
+export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
+  const { recordId } = store
+  const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionSchedule.qry
+    endpointId: SaleRepository.CommissionSchedule.page
   })
 
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
-    validateOnChange: true,
+    initialValues: {
+      recordId: null,
+      name: '',
+      type: null
+    },
     validationSchema: yup.object({
       name: yup.string().required(),
-      type: yup.string().required()
+      type: yup.number().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: SaleRepository.CommissionSchedule.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
-        })
-        setSelectedRecordId(response.recordId)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
-
+      if (!obj.recordId) {
+        setStore({ recordId: response.recordId })
+        formik.setFieldValue('recordId', response.recordId)
+      }
+      toast.success(!!obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-
-          const res = await getRequest({
-            extension: SaleRepository.CommissionSchedule.get,
-            parameters: `_recordId=${recordId}`
-          })
-
-          setInitialData(res.record)
-        }
-      } catch (exception) {
-        setErrorMessage(error)
+      if (recordId) {
+        const res = await getRequest({
+          extension: SaleRepository.CommissionSchedule.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues({ ...res.record })
       }
-      setIsLoading(false)
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -92,33 +71,32 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
-                label={labels[2]}
+                label={labels.name}
                 value={formik.values.name}
                 required
-                maxAccess={maxAccess}
                 maxLength='30'
+                maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.TYPE}
                 name='type'
-                label={labels[3]}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
+                label={labels.type}
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key)
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onClear={() => formik.setFieldValue('type', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('type', newValue?.key || null)
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
-                helperText={formik.touched.type && formik.errors.type}
               />
             </Grid>
           </Grid>

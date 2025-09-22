@@ -197,7 +197,6 @@ export default function RetailTransactionsForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -1000,7 +999,8 @@ export default function RetailTransactionsForm({
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDRetailInvoice
       }
     })
   }

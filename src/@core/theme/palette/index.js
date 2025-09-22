@@ -31,11 +31,13 @@ const DefaultPalette = (mode, skin, themeColor) => {
     } else return '#383838'
   }
 
+  const toRgb = ch => `rgb(${ch})`
+
   return {
     customColors: {
-      dark: darkColor,
-      main: mainColor,
-      light: lightColor,
+      dark: toRgb(darkColor),
+      main: toRgb(mainColor),
+      light: toRgb(lightColor),
       primaryGradient: primaryGradient(),
       bodyBg: mode === 'light' ? '#F4F5FA' : '#383838',
       trackBg: mode === 'light' ? '#F0F2F8' : '#474360',

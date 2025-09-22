@@ -25,7 +25,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import SerialsLots from './SerialsLots'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import Samples from './Samples'
@@ -47,7 +46,6 @@ export default function JobOrderForm({
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
-  const [plStore, setPlStore] = useState([])
   const recordId = store?.recordId
   const [imageSource, setImageSource] = useState(null)
   const [parentImage, setParentImage] = useState({ recordId: null, resourceId: null })
@@ -109,15 +107,12 @@ export default function JobOrderForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
-      workCenterId: yup.string().required(),
-      itemCategoryId: yup.string().required(),
-      routingId: yup.string().required()
+      workCenterId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -508,27 +503,14 @@ export default function JobOrderForm({
 
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
-  async function getAllLines() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry,
-      parameters: `_filter=`
-    })
-    setPlStore(res?.list)
-  }
-  async function getFilteredLines(itemId) {
-    if (!itemId) return null
 
-    const res = await getRequest({
-      extension: ManufacturingRepository.ProductionLine.qry2,
-      parameters: `_itemId=${itemId}`
-    })
-    setPlStore(res?.list)
-  }
-  async function updateWC(routingId) {
+  async function updateWC(routingId, isRouting) {
     if (!routingId) {
-      formik.setFieldValue('workCenterId', null)
-      formik.setFieldValue('wcRef', null)
-      formik.setFieldValue('wcName', null)
+      if (!isRouting) {
+        formik.setFieldValue('workCenterId', null)
+        formik.setFieldValue('wcRef', null)
+        formik.setFieldValue('wcName', null)
+      }
 
       return
     }
@@ -555,11 +537,6 @@ export default function JobOrderForm({
           : null
     })
   }
-  useEffect(() => {
-    ;(async function () {
-      !formik.values.itemId ? await getAllLines() : await getFilteredLines(formik.values.itemId)
-    })()
-  }, [formik.values.designId])
 
   useEffect(() => {
     ;(async function () {
@@ -586,7 +563,6 @@ export default function JobOrderForm({
       setImageSource(res?.record?.value || 3)
 
       if (recordId) await refetchForm(recordId, res?.record?.value || 3)
-      else await getAllLines()
     })()
   }, [])
 
@@ -796,7 +772,7 @@ export default function JobOrderForm({
                         readOnly={isCancelled || isReleased || isPosted}
                         onChange={async (event, newValue) => {
                           await fillDesignInfo(newValue)
-                          await updateWC(newValue?.routingId)
+                          await updateWC(newValue?.routingId, false)
                         }}
                       />
                     </Grid>
@@ -851,15 +827,15 @@ export default function JobOrderForm({
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <CustomComboBox
-                        store={plStore}
+                      <ResourceComboBox
+                        endpointId={ManufacturingRepository.ProductionLine.qry}
                         name='lineId'
                         label={labels.line}
+                        values={formik.values}
                         valueField='recordId'
+                        displayField='name'
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isReleased}
-                        displayField='name'
-                        value={formik.values.lineId}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                         }}
@@ -874,7 +850,6 @@ export default function JobOrderForm({
                         name='routingId'
                         label={labels.routing}
                         form={formik}
-                        required
                         minChars={2}
                         firstValue={formik.values.routingRef}
                         secondValue={formik.values.routingName}
@@ -887,7 +862,7 @@ export default function JobOrderForm({
                           { key: 'name', value: 'Name' }
                         ]}
                         onChange={async (event, newValue) => {
-                          await updateWC(newValue?.recordId)
+                          await updateWC(newValue?.recordId, true)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
                           formik.setFieldValue('routingId', newValue?.recordId || null)
@@ -907,7 +882,7 @@ export default function JobOrderForm({
                         secondValue={formik.values.wcName}
                         errorCheck={'workCenterId'}
                         maxAccess={maxAccess}
-                        readOnly={editMode ? true : formik?.values?.designId || formik?.values?.routingId}
+                        readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('workCenterId', newValue?.recordId)
@@ -1021,7 +996,6 @@ export default function JobOrderForm({
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
-                  required
                   valueField='recordId'
                   displayField={['caRef', 'name']}
                   values={formik.values}

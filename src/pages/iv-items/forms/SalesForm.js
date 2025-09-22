@@ -42,7 +42,6 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
       priceWithVat: '',
       minPrice: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),

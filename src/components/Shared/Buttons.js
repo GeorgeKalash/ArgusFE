@@ -305,14 +305,14 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Shipment',
-    label: platformLabels.Shipment,
+    label: platformLabels.Transportation,
     color: '#843c54',
     image: 'shipment.png',
     main: false
   },
   {
     key: 'Transportation',
-    label: platformLabels.Transportation,
+    label: platformLabels.Shipment,
     color: '#064b38',
     image: 'transportation.png',
     main: false
@@ -355,7 +355,8 @@ export const getButtons = platformLabels => [
   {
     key: 'Refresh',
     label: platformLabels.Refresh,
-    color: '#231F20',
+    image: 'exchange-refresh-icon.png',
+    color: '#D3D3D3',
     main: false
   },
   {
@@ -377,6 +378,20 @@ export const getButtons = platformLabels => [
     label: platformLabels.Generate,
     color: 'black',
     image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'generateQTN',
+    label: platformLabels.Quotation,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'generatePO',
+    label: platformLabels.PurchaseOrder,
+    color: 'black',
+    image: 'order.png',
     main: false
   },
   {
@@ -605,6 +620,20 @@ export const getButtons = platformLabels => [
     key: 'PV',
     label: platformLabels.PV,
     color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Installments',
+    label: platformLabels.Installments,
+    color: '#49732F',
+    image: 'invoice-installements.png',
+    main: false
+  },
+  {
+    key: 'Sync',
+    label: platformLabels.Sync,
+    color: '#231F20',
+    image: 'sync.png',
     main: false
   }
 ]

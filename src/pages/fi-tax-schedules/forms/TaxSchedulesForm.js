@@ -12,11 +12,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { MasterSource } from 'src/resources/MasterSource'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, editMode }) {
   const { recordId } = store
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.TaxSchedules.qry
@@ -25,15 +26,12 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', nonDeductible: false },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: FinancialRepository.TaxSchedules.set,
         record: JSON.stringify(obj)
@@ -44,29 +42,26 @@ export default function TaxSchedulesForm({ labels, maxAccess, setStore, store, e
           ...prevStore,
           recordId: response.recordId
         }))
-        toast.success('Record Added Successfully')
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
-
+      }
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: FinancialRepository.TaxSchedules.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.TaxSchedules.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

@@ -6,6 +6,7 @@ export const ManufacturingRepository = {
     qry: service + 'qryDRM',
     set2: service + 'set2DRM'
   },
+  JobOrdersItem: { qry: service + 'qryJIT', set2: service + 'set2JIT' },
   IssueOfMaterialsItems: { qry: service + 'qryIMI', qry2: service + 'qryIMI2' },
   LaborGroup: {
     snapshot: service + 'snapshotLBG',
@@ -33,6 +34,7 @@ export const ManufacturingRepository = {
   WorkCenter: {
     page: service + 'pageWCT',
     qry: service + 'qryWCT',
+    qry3: service + 'qryWCT3',
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT',
@@ -207,6 +209,8 @@ export const ManufacturingRepository = {
     set2: service + 'set2JRO',
     del: service + 'delJRO',
     sync: service + 'syncJRO',
+    close: service + 'closeJRO',
+    reopen: service + 'reopenJRO'
   },
   Worksheet: {
     snapshot: service + 'snapshotWST',
@@ -256,7 +260,7 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotPO',
     post: service + 'postPO',
     gen: service + 'genPO',
-    close: service + 'closePO',
+    close: service + 'closePO'
   },
   BillOfMaterials: {
     get: service + 'getBMA',
@@ -350,6 +354,7 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
+    qry: service + 'qryJWC',
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC'
   },
@@ -380,5 +385,11 @@ export const ManufacturingRepository = {
   IssueOfMaterialDimension: {
     set: service + 'setIMD',
     qry: service + 'qryIMD'
+  },
+  JobOrder: {
+    gen: service + 'genORD'
+  },
+  RefreshPoItem: {
+    refresh: service + 'refreshPOI'
   }
 }
