@@ -29,7 +29,8 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
           yup.object().shape({
             amount: yup.number().required(),
             actionName: yup.string().required(),
-            deductionType: yup.number().required()
+            deductionType: yup.number().required(),
+            expressionId: yup.number().required()
           })
         )
         .required()
@@ -114,7 +115,10 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
       component: 'numberfield',
       label: labels.deductionAmount,
       name: 'amount',
-      decimalScale: 2
+      props: {
+        decimalScale: 2,
+        allowNegative: false
+      }
     },
     {
       component: 'resourcecombobox',

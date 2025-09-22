@@ -11,13 +11,10 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import HrPenTypeWindow from './Window/HrPenTypeWindow'
-import { CommonContext } from 'src/providers/CommonContext'
-import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 
 const HrPenType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
   const { platformLabels } = useContext(ControlContext)
 
   const { stack } = useWindow()

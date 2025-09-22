@@ -90,11 +90,7 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, wind
     })()
   }, [])
 
-  const disabled =
-    formik.values.reason != 1 ||
-    formik.values.timeCode == 41 ||
-    formik.values.timeCode == 20 ||
-    formik.values.timeCode == 21
+  const disabled = formik.values.timeCode == 41 || formik.values.timeCode == 20 || formik.values.timeCode == 21
 
   return (
     <FormShell resourceId={ResourceIds.PenaltyType} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -177,6 +173,7 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, wind
                 value={formik.values.from}
                 maxAccess={maxAccess}
                 maxLength={7}
+                decimalScale={0}
                 readOnly={disabled}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('from', null)}
@@ -190,6 +187,7 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, wind
                 value={formik.values.to}
                 maxAccess={maxAccess}
                 maxLength={7}
+                decimalScale={0}
                 readOnly={disabled}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('to', null)}
