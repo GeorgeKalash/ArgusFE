@@ -67,6 +67,20 @@ export default function ItemTab({ labels, maxAccess, store }) {
     }
   })
 
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -138,7 +152,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
       label: platformLabels.serials,
       flex: 0.5,
       props: {
-        imgSrc: '/images/TableIcons/imgSerials.png'
+        onCondition
       },
       onClick: (e, row) => {
         stack({
