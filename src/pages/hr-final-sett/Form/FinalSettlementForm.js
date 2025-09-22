@@ -91,7 +91,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
         })
       }
     })()
-  }, [recordId])
+  }, [])
 
   const fillEmployee = async empId => {
     if (empId) {
