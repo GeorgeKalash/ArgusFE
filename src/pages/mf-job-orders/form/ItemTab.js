@@ -125,7 +125,13 @@ export default function ItemTab({ labels, maxAccess, store }) {
       onClick: (e, row) => {
         stack({
           Component: SerialsLots,
-          props: { labels, maxAccess, recordId, seqNo: row.seqNo, api: ManufacturingRepository.MFSerial.qry2 }
+          props: {
+            labels,
+            maxAccess,
+            recordId,
+            api: ManufacturingRepository.MFSerial.qry2,
+            parameters: `_jobId=${recordId}&_seqNo=${row.seqNo}`
+          }
         })
       }
     }

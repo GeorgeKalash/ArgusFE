@@ -13,7 +13,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function SerialsLots({ labels, maxAccess, recordId, seqNo, api, window }) {
+export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -56,8 +56,8 @@ export default function SerialsLots({ labels, maxAccess, recordId, seqNo, api, w
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: api ? api : ManufacturingRepository.MFSerial.qry,
-      parameters: api ? `_jobId=${recordId}&_seqNo=${seqNo}` : `_jobId=${recordId}`
+      extension: api,
+      parameters
     })
 
     const updateSerialsList =
