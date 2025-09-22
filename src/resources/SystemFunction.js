@@ -1,3 +1,4 @@
+import HrLoans from 'src/pages/hr-loans'
 import { Module } from './Module'
 
 export const SystemFunction = {
@@ -126,7 +127,8 @@ export const SystemFunction = {
   BalanceAdjustment: Module.LeaveReq * 100 + 4,
   EarnedLeaves: Module.LeaveReq * 100 + 3,
   Samples: Module.ProductModeling * 100 + 7,
-  MetalSmelting: Module.Foundry * 100 + 5
+  MetalSmelting: Module.Foundry * 100 + 5,
+  HrLoans: Module.Loans * 100 + 1
 }
 
 export const getSystemFunctionModule = functionId => {

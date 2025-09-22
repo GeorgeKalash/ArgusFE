@@ -1,0 +1,473 @@
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
+import * as yup from 'yup'
+import FormShell from 'src/components/Shared/FormShell'
+import toast from 'react-hot-toast'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { useInvalidate } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
+import { LoanTrackingRepository } from 'src/repositories/LoanTrackingRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { formatDateMDY, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { SystemFunction } from 'src/resources/SystemFunction'
+
+export default function LoansForm({ labels, maxAccess, store, setStore }) {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { recordId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: LoanTrackingRepository.Loans.page
+  })
+
+  const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value
+  const defaultMethod = defaultsData?.list?.find(({ key }) => key === 'ldMethod')?.value
+  const defaultLdValue = defaultsData?.list?.find(({ key }) => key === 'ldValue')?.value
+
+  const { formik } = useForm({
+    initialValues: {
+      recordId: null,
+      status: null,
+      releaseStatus: null,
+      wip: null,
+      reference: '',
+      date: new Date(),
+      employeeId: null,
+      branchId: null,
+      departmentName: '',
+      positionName: '',
+      ltId: null,
+      ltName: '',
+      loanBalance: null,
+      currencyId: defaultCurrency,
+      currencyRef: '',
+      amount: null,
+      purpose: '',
+      effectiveDate: new Date(),
+      ldMethod: defaultMethod,
+      ldmName: '',
+      ldValue: defaultLdValue
+    },
+    maxAccess,
+    validationSchema: yup.object({
+      reference: yup.string().required(),
+      employeeId: yup.number().required(),
+      date: yup.date().required(),
+      ltId: yup.number().required(),
+      currencyId: yup.number().required(),
+      amount: yup.number().min(1).required(),
+      purpose: yup.string().required(),
+      ldValue: yup.number().min(1).required(),
+      effectiveDate: yup.date().required()
+    }),
+    onSubmit: async obj => {
+      const data = {
+        ...obj,
+        date: formatDateToApi(obj.date) || null,
+        effectiveDate: formatDateToApi(obj.effectiveDate) || null
+      }
+
+      const response = await postRequest({
+        extension: LoanTrackingRepository.Loans.set,
+        record: JSON.stringify(data)
+      })
+
+      toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+
+      if (!obj.recordId) {
+        formik.setFieldValue('recordId', response.recordId)
+        setStore(prev => ({ ...prev, recordId: response.recordId }))
+      }
+      setStore(prev => ({ ...prev, loanAmount: obj.amount ?? 0 }))
+      invalidate()
+    }
+  })
+
+  const editMode = !!formik?.values?.recordId
+  const isRaw = formik.values.status == 1
+  const isClosed = formik.values.wip == 2
+
+  useEffect(() => {
+    if (recordId) {
+      fetchData(recordId)
+    }
+  }, [])
+
+  const fetchData = async id => {
+    const res = await getRequest({
+      extension: LoanTrackingRepository.Loans.get,
+      parameters: `_recordId=${id}`
+    })
+
+    if (res?.record) {
+      const { record } = res
+
+      formik.setValues({
+        ...record,
+        date: formatDateFromApi(record.date),
+        effectiveDate: formatDateFromApi(record.effectiveDate)
+      })
+
+      setStore(prev => ({
+        ...prev,
+        isClosed: record.wip === 2,
+        loanAmount: record.amount ?? 0
+      }))
+
+      if (record.employeeId) {
+        await fetchEmployee(record.employeeId)
+      }
+    }
+
+    return res
+  }
+
+  const fetchEmployee = async id => {
+    if (!id) {
+      resetEmployeeFields()
+
+      return
+    }
+
+    const result = await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${id}&_asOfDate=${formatDateMDY(new Date())}`
+    })
+
+    const { record } = result
+
+    formik.setValues(prev => ({
+      ...prev,
+      employeeId: id,
+      employeeRef: record?.reference || '',
+      employeeName: record?.fullName || '',
+      positionName: record?.positionName || '',
+      departmentName: record?.departmentName || '',
+      loanBalance: record?.loanBalance ?? 0,
+      branchId: record?.branchId || null
+    }))
+  }
+
+  const resetEmployeeFields = () => {
+    formik.setValues(prev => ({
+      ...prev,
+      employeeId: null,
+      employeeRef: '',
+      employeeName: '',
+      positionName: '',
+      departmentName: '',
+      loanBalance: 0,
+      branchId: null
+    }))
+  }
+
+  const refetchForm = async id => {
+    const res = await fetchData(id)
+
+    if (res?.record) {
+      formik.setValues(prev => ({
+        ...prev,
+        ...res.record,
+        date: formatDateFromApi(res.record.date),
+        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
+      }))
+
+      setStore(prev => ({
+        ...prev,
+        isClosed: res.record.wip === 2
+      }))
+    }
+  }
+
+  const onClose = async () => {
+    const res = await postRequest({
+      extension: LoanTrackingRepository.Loans.close,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Closed)
+    invalidate()
+    if (res?.recordId) refetchForm(res.recordId)
+  }
+
+  const onReopen = async () => {
+    const res = await postRequest({
+      extension: LoanTrackingRepository.Loans.reopen,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    if (res?.recordId) refetchForm(res.recordId)
+  }
+
+  const actions = [
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Approval',
+      condition: true,
+      onClick: 'onApproval',
+      disabled: !isClosed || !editMode
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+    }
+  ]
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.Loans}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+      disabledSubmit={isClosed}
+      functionId={SystemFunction.HrLoans}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='20'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='date'
+                required
+                label={labels.date}
+                value={formik?.values?.date}
+                onChange={formik.setFieldValue}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('date', null)}
+                error={formik.touched.date && Boolean(formik.errors.date)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceLookup
+                endpointId={EmployeeRepository.Employee.snapshot}
+                parameters={{ _branchId: 0 }}
+                valueField='reference'
+                displayField='fullName'
+                name='employeeId'
+                required
+                displayFieldWidth={2}
+                label={labels.employeeName}
+                form={formik}
+                valueShow='employeeRef'
+                secondValueShow='employeeName'
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'fullName', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  newValue && fetchEmployee(newValue.recordId)
+                }}
+                onClear={() => {
+                  fetchEmployee()
+                }}
+                errorCheck={'employeeId'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={companyStructureRepository.BranchFilters.qry}
+                name='branchId'
+                label={labels.branch}
+                readOnly
+                valueField='recordId'
+                displayField={['branchRef', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                error={formik.touched.branchId && Boolean(formik.errors.branchId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='positionName'
+                label={labels.position}
+                value={formik.values.positionName}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.positionName && Boolean(formik.errors.positionName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='departmentName'
+                label={labels.department}
+                value={formik.values.departmentName}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={LoanTrackingRepository.LoanType.qry}
+                name='ltId'
+                label={labels.ltype}
+                required
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
+                }}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='loanBalance'
+                label={labels.loanBalance}
+                value={formik?.values?.loanBalance}
+                maxAccess={maxAccess}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Currency.qry}
+                filter={item => item.currencyType === 1}
+                name='currencyId'
+                label={labels.currency}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
+                  formik.setFieldValue('currencyRef', newValue?.reference)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='amount'
+                label={labels.amount}
+                value={formik.values.amount}
+                required
+                maxAccess={maxAccess}
+                onChange={async e => {
+                  formik.setFieldValue('amount', e?.target?.value || null)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('amount', null)
+                }}
+                error={formik.touched.amount && Boolean(formik.errors.amount)}
+                maxLength={10}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextArea
+                name='purpose'
+                label={labels.purpose}
+                required
+                value={formik.values.purpose}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('purpose', e.target.value)}
+                onClear={() => formik.setFieldValue('purpose', '')}
+                error={formik.touched.purpose && Boolean(formik.errors.purpose)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='effectiveDate'
+                label={labels.effectiveDate}
+                value={formik?.values?.effectiveDate}
+                required
+                onChange={formik.setFieldValue}
+                editMode={editMode}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('effectiveDate', null)}
+                error={formik.touched.effectiveDate && Boolean(formik.errors.effectiveDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LOAN_DEDUCTION_METHOD}
+                name='ldMethod'
+                label={labels.ldMethod}
+                required
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('ldMethod', newValue?.key || null)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('ldMethod', null)
+                  formik.setFieldValue('ldValue', null)
+                }}
+                error={formik.touched.ldMethod && Boolean(formik.errors.ldMethod)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='ldValue'
+                label={labels.ldValue}
+                value={formik.values.ldValue}
+                required
+                maxAccess={maxAccess}
+                onChange={async e => {
+                  formik.setFieldValue('ldValue', e?.target?.value || null)
+                }}
+                onClear={async () => {
+                  formik.setFieldValue('ldValue', null)
+                }}
+                error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
+                maxLength={10}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
+      </VertLayout>
+    </FormShell>
+  )
+}
