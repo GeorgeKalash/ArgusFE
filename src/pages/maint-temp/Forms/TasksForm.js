@@ -249,7 +249,6 @@ export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
                 label={labels.labor}
                 value={formik?.values?.expectedLaborHrs}
                 maxAccess={maxAccess}
-                readOnly={!formik?.values?.tbh}
                 allowNegative={false}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('expectedLaborHrs', null)}

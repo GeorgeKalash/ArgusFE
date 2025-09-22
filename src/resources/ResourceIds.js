@@ -30,6 +30,7 @@ export const ResourceIds = {
   Alerts: 60307,
   PendingPunches: 60308,
   BalanceAdjustment: 73204,
+  PayCode: 75104,
   LedgerGroup: 75114,
 
   // Authorization Dashboard
@@ -176,7 +177,6 @@ export const ResourceIds = {
   FiOpeningBalances: 31301,
   SiteGroups: 41113,
   PriceLevels: 51101,
-  CommissionSchedule: 51118,
   ProductionRequestLog: 42321,
   CashCountTransaction: 37301,
   ExchangeRates: 32103,
@@ -572,11 +572,18 @@ export const ResourceIds = {
   Department: 45112,
   Warehouse: 45102,
   PreventiveMaintenanceTasks: 45107,
+  Equipment: 45200,
   SpManufacturer: 45110,
   JobPosition: 45103,
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
+  WorkOrder: 45301,
+  SyncPurchaseTrx: 50602,
+  IRPlantSettings: 46100,
+  IssueOfMaterials: 42304,
+  WorkCenterTransferMap: 42128,
+  RepairRequest: 45300,
 
   // GL
   GLSalesInvoice: 51604,
@@ -618,12 +625,9 @@ export const ResourceIds = {
   GLBalanceTransferSales: 31603,
   GLBalanceTransferBetweenAccounts: 31601,
   GLReturnOnInvoice: 51606,
-  IomProperties: 42606,
-  SyncPurchaseTrx: 50602,
-  IRPlantSettings: 46100,
-  IssueOfMaterials: 42304,
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
+  GLWorkOrder: 45600,
 
   //MCR
   MCRSalesInvoice: 51607,
