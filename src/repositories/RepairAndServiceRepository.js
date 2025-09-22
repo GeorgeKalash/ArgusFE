@@ -98,6 +98,7 @@ export const RepairAndServiceRepository = {
     del: service + 'delMTT'
   },
   RsLabors: {
+    qry: service + 'qryLBR',
     snapshot: service + 'snapshotLBR',
     page: service + 'pageLBR',
     set: service + 'setLBR',
