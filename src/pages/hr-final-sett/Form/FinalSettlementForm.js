@@ -47,7 +47,8 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
     },
     maxAccess,
     validationSchema: yup.object({
-      employeeId: yup.number().required()
+      employeeId: yup.number().required(),
+      date: yup.date().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -158,7 +159,8 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     value={formik.values.date}
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', '')}
+                    required
+                    onClear={() => formik.setFieldValue('date', null)}
                     error={formik.touched.date && Boolean(formik.errors.date)}
                   />
                 </Grid>
@@ -240,7 +242,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     onChange={formik.setFieldValue}
                     maxAccess={maxAccess}
                     readOnly
-                    onClear={() => formik.setFieldValue('hireDate', '')}
+                    onClear={() => formik.setFieldValue('hireDate', null)}
                     error={formik.touched.hireDate && Boolean(formik.errors.hireDate)}
                   />
                 </Grid>
@@ -278,7 +280,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     name='loanBalance'
                     label={labels.loanBalance}
                     value={formik.values.loanBalance}
-                    onBlur={formik.handleChange}
+                    onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('loanBalance', '')}
                     readOnly
                   />
@@ -312,8 +314,8 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     name='indemnity'
                     label={labels.indemnity}
                     value={formik.values.indemnity}
-                    onBlur={formik.handleChange}
-                    onClear={() => formik.setFieldValue('indemnity', '')}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('indemnity', null)}
                     readOnly
                   />
                 </Grid>
@@ -322,8 +324,8 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
                     name='salary'
                     label={labels.salary}
                     value={formik.values.salary}
-                    onBlur={formik.handleChange}
-                    onClear={() => formik.setFieldValue('salary', '')}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('salary', null)}
                     readOnly
                   />
                 </Grid>
