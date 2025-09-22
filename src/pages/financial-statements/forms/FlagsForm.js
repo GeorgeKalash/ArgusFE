@@ -1,24 +1,17 @@
-import { useContext, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import WindowToolbar from 'src/components/Shared/WindowToolbar'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
 
-export default function FlagsForm({ labels, recordId, fsId, maxAccess }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function FlagsForm({ recordId, fsId, labels, maxAccess }) {
   const { getAllKvsByDataset } = useContext(CommonContext)
-  const { platformLabels } = useContext(ControlContext)
 
-  async function getAllSystems() {
+  async function getAllFlags() {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
         _dataset: DataSets.GLFS_FLAGS,
@@ -31,95 +24,49 @@ export default function FlagsForm({ labels, recordId, fsId, maxAccess }) {
   }
 
   const {
-    query: { data },
-    labels: _labels,
-    access
+    query: { data }
   } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: SystemRepository.SystemChecks.qry,
-    datasetId: ResourceIds.SystemChecks
+    queryFn: getAllFlags
   })
-
-  async function fetchGridData() {
-    const systemCheckData = await getAllSystems()
-
-    const checkedSystems = await getRequest({
-      extension: SystemRepository.SystemChecks.qry,
-      parameters: `_scope=1`
-    })
-
-    const mergedSYCheckedList = systemCheckData.map(systemCheckItem => {
-      const item = {
-        checkId: systemCheckItem.key,
-        checkName: systemCheckItem.value,
-        checked: false,
-        value: false
-      }
-      const matchingTemplate = checkedSystems.list.find(y => item.checkId == y.checkId)
-      matchingTemplate && (item.checked = true)
-      matchingTemplate && (item.value = true)
-
-      return item
-    })
-
-    return { list: mergedSYCheckedList }
-  }
 
   const columns = [
     {
-      field: 'checkId',
-      headerName: _labels.checkId,
-      flex: 1
+      field: 'isChecked',
+      headerName: '',
+      type: 'checkbox',
+      editable: true
     },
     {
-      field: 'checkName',
-      headerName: _labels.checkName,
+      field: 'value',
+      headerName: labels.name,
       flex: 1
     }
   ]
 
-  const handleSubmit = () => {
-    postChecks()
-  }
+  const handleSubmit = () => {}
 
-  const postChecks = async () => {
-    const checkedObjects = data.list.filter(obj => obj.checked)
-    checkedObjects.forEach(obj => {
-      obj.scope = 1
-      obj.masterId = 0
-      obj.value = true
-    })
-
-    const resultObject = {
-      scope: 1,
-      masterId: 0,
-      items: checkedObjects
+  const actions = [
+    {
+      key: 'Ok',
+      condition: true,
+      onClick: () => handleSubmit()
     }
-
-    await postRequest({
-      extension: SystemRepository.SystemChecks.set,
-      record: JSON.stringify(resultObject)
-    }).then(() => {
-      toast.success(platformLabels.Updated)
-    })
-  }
+  ]
 
   return (
     <VertLayout>
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
-          rowId={['checkId']}
+          gridData={{ list: data }}
+          rowId={['key']}
           isLoading={false}
-          maxAccess={access}
-          showCheckboxColumn={true}
-          handleCheckedRows={() => {}}
+          maxAccess={maxAccess}
           pagination={false}
         />
       </Grow>
       <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
+        <WindowToolbar actions={actions} />
       </Fixed>
     </VertLayout>
   )

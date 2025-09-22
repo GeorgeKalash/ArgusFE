@@ -10,6 +10,8 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function StatementForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -62,21 +64,25 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
 
   return (
     <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            maxLength='50'
-            required
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                maxLength='50'
+                required
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

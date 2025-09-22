@@ -25,8 +25,7 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     enabled: Boolean(fsId),
-    endpointId: FinancialStatementRepository.Node.qry,
-    datasetId: ResourceIds.FinancialStatements
+    endpointId: FinancialStatementRepository.Node.qry
   })
 
   async function fetchGridData() {

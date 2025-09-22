@@ -12,6 +12,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
+import { useForm } from 'src/hooks/form'
 
 const NodesTitleForm = ({ labels, maxAccess, store }) => {
   const { recordId: nodeId } = store
@@ -19,15 +20,10 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues: {
-      titles: [
-        {
-          fsNodeId: nodeId,
-          languageId: null,
-          title: ''
-        }
-      ]
+      titles: []
     },
     onSubmit: async values => {
       const obj = values.titles.filter(line => line.title)
@@ -48,12 +44,14 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
     {
       component: 'textfield',
       label: labels.language,
-      name: 'languageName'
+      name: 'languageName',
+      props: { readOnly: true }
     },
     {
       component: 'textfield',
       label: labels.title,
-      name: 'title'
+      name: 'title',
+      props: { maxLength: 50 }
     }
   ]
 
@@ -100,8 +98,8 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
           <DataGrid
             name='nodeTitleTable'
             onChange={value => formik.setFieldValue('titles', value)}
-            value={formik.values.titles}
-            error={formik.errors.titles}
+            value={formik?.values?.titles}
+            error={formik?.errors?.titles}
             maxAccess={maxAccess}
             columns={columns}
             allowDelete={false}
