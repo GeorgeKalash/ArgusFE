@@ -580,28 +580,31 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       poBox: obj.poBox
     }
 
-    const obj6 = {
-      recordId: address.recordId,
-      name: address.name,
-      countryId: address.countryId,
-      stateId: address.stateId,
-      cityId: address.cityId,
-      cityName: address.cityName,
-      street1: address.street1,
-      street2: address.street2,
-      email1: address.email1,
-      email2: address.email2,
-      phone: address.phone,
-      phone2: address.phone2,
-      phone3: address.phone3,
-      addressId: address.addressId,
-      postalCode: address.postalCode,
-      cityDistrictId: address.cityDistrictId,
-      bldgNo: address.bldgNo,
-      poBox: address.poBox,
-      unitNo: address.unitNo,
-      subNo: address.subNo
-    }
+    const obj6 =
+      address.length > 0
+        ? {
+            recordId: address.recordId,
+            name: address.name,
+            countryId: address.countryId,
+            stateId: address.stateId,
+            cityId: address.cityId,
+            cityName: address.cityName,
+            street1: address.street1,
+            street2: address.street2,
+            email1: address.email1,
+            email2: address.email2,
+            phone: address.phone,
+            phone2: address.phone2,
+            phone3: address.phone3,
+            addressId: address.addressId,
+            postalCode: address.postalCode,
+            cityDistrictId: address.cityDistrictId,
+            bldgNo: address.bldgNo,
+            poBox: address.poBox,
+            unitNo: address.unitNo,
+            subNo: address.subNo
+          }
+        : null
 
     if (allowEdit) {
       obj1.status = -1
@@ -613,7 +616,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         clientRemittance: obj4,
         clientMaster: obj1, //CTCL
         address: obj5,
-        workAddress: obj6 ? obj6 : null
+        workAddress: obj6
       }
 
       await postRequest({
@@ -828,7 +831,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }, [formik?.values?.nationalityId])
 
   const handleFetchMobileOwner = async window => {
-    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${formik.values.cellPhone}`
+    const cleanMobile = formik.values.cellPhone.replace(/^\+/, '')
+    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${cleanMobile}`
 
     getRequest({
       extension: CurrencyTradingSettingsRepository.Mobile.get,
