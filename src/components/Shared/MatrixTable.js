@@ -56,7 +56,10 @@ const MatrixGrid = ({
         headerName: '',
         pinned: 'left',
         sortable: false,
-        headerStyle: { fontWeight: 'bold' },
+        lockPinned: true,
+        width: 250,
+        minWidth: 150,
+        maxWidth: 450,
         cellStyle: {
           fontWeight: 'bold',
           display: 'flex',
@@ -72,6 +75,7 @@ const MatrixGrid = ({
         headerName: colItem.colLabels,
         sortable: false,
         flex: 1,
+        minWidth: 100,
         headerComponent: props => (
           <div
             style={{
@@ -204,14 +208,15 @@ const MatrixGrid = ({
   }
 
   return (
-    <div style={{ height: 450, width: '100%' }} className='ag-theme-alpine'>
+    <div style={{ height: '100%', width: '100%' }} className='ag-theme-alpine'>
       <AgGridReact
         ref={gridRef}
         rowData={initialRowData}
         getRowId={params => params.data.id}
         columnDefs={columnDefs}
         headerHeight={100}
-        domLayout='autoHeight'
+        domLayout='normal'
+        suppressHorizontalScroll={false}
         defaultColDef={{
           sortable: false,
           headerClass: params => (selectedCol === params.column.getColId() ? 'highlight-col-header' : 'bold-header')
