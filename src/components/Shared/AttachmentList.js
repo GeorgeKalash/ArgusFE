@@ -38,7 +38,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
     {
       field: 'fileName',
       headerName: _labels.reference,
-      flex: 1
+      width: 'auto'
     },
     {
       width: 100,
@@ -50,7 +50,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
             <Button
               onClick={() => {
                 const url = row.data.url
-                window.open(url, '_blank')
+                globalThis.open(url, '_blank')
               }}
               variant='contained'
               sx={{
