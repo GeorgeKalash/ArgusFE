@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
@@ -14,8 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useForm } from 'src/hooks/form'
 
-const NodesTitleForm = ({ labels, maxAccess, store }) => {
-  const { recordId: nodeId } = store
+const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
@@ -27,7 +25,6 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
     },
     onSubmit: async values => {
       const obj = values.titles.filter(line => line.title)
-
       await postRequest({
         extension: FinancialStatementRepository.Title.set2,
         record: JSON.stringify({
@@ -83,7 +80,7 @@ const NodesTitleForm = ({ labels, maxAccess, store }) => {
 
   useEffect(() => {
     getTitles()
-  }, [])
+  }, [nodeId])
 
   return (
     <FormShell

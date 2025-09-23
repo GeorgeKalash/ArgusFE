@@ -14,47 +14,47 @@ import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
+import { createConditionalSchema } from 'src/lib/validation'
 
-const LedgerForm = ({ store, labels, maxAccess, active }) => {
+const LedgerForm = ({ store, labels, maxAccess }) => {
   const { nodeId, nodeRef } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
 
+  const conditions = {
+    sign: row => {
+      const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4
+
+      return hasSeg ? true : !!row.sign
+    }
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'ledgers')
+
   const formik = useFormik({
     initialValues: {
-      ledgers: [
-        {
-          id: 1,
-          seqNo: 1,
-          fsNodeId: nodeId,
-          seg0: '',
-          seg1: '',
-          seg2: '',
-          seg3: '',
-          seg4: '',
-          sign: null
-        }
-      ]
+      nodeRef,
+      ledgers: [{ id: 1, seqNo: 1, fsNodeId: nodeId, seg0: '', seg1: '', seg2: '', seg3: '', seg4: '', sign: null }]
     },
+    enableReinitialize: true,
+    conditionSchema: ['ledgers'],
     validationSchema: yup.object({
-      ledgers: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sign: yup.number().required()
-          })
-        )
-        .required()
+      nodeRef: yup.string().required(),
+      ledgers: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const data = {
         fsNodeId: nodeId,
-        ledgers: (obj || []).map((ledger, index) => ({
-          ...ledger,
-          seqNo: index + 1
-        }))
+        ledgers: obj?.ledgers
+          ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+          ?.map((ledger, index) => ({
+            ...ledger,
+            seqNo: index + 1,
+            fsNodeId: nodeId
+          }))
       }
+
       await postRequest({
         extension: FinancialStatementRepository.Ledger.set2,
         record: JSON.stringify(data)
@@ -67,27 +67,42 @@ const LedgerForm = ({ store, labels, maxAccess, active }) => {
     {
       component: 'textfield',
       label: labels.seg0,
-      name: 'seg0'
+      name: 'seg0',
+      props: {
+        maxLength: 8
+      }
     },
     {
       component: 'textfield',
       label: labels.seg1,
-      name: 'seg1'
+      name: 'seg1',
+      props: {
+        maxLength: 8
+      }
     },
     {
       component: 'textfield',
       label: labels.seg2,
-      name: 'seg2'
+      name: 'seg2',
+      props: {
+        maxLength: 8
+      }
     },
     {
       component: 'textfield',
       label: labels.seg3,
-      name: 'seg3'
+      name: 'seg3',
+      props: {
+        maxLength: 8
+      }
     },
     {
       component: 'textfield',
       label: labels.seg4,
-      name: 'seg4'
+      name: 'seg4',
+      props: {
+        maxLength: 8
+      }
     },
     {
       component: 'resourcecombobox',
@@ -123,17 +138,17 @@ const LedgerForm = ({ store, labels, maxAccess, active }) => {
     const titlesMap = new Map((titlesXML?.list ?? []).map(item => [item.key, item.value]))
 
     const updatedLedgers = ledgers.map((ledger, index) => ({
-      id: index,
+      id: index + 1,
       ...ledger,
       signName: titlesMap.get(ledger.sign.toString()) || ''
     }))
 
-    formik.setValues({ ledgers: updatedLedgers })
+    formik.setFieldValue('ledgers', updatedLedgers)
   }
 
   useEffect(() => {
-    if (active && nodeId) getLedgers(nodeId)
-  }, [nodeId, active])
+    if (nodeId) getLedgers(nodeId)
+  }, [nodeId])
 
   return (
     <FormShell
@@ -144,21 +159,26 @@ const LedgerForm = ({ store, labels, maxAccess, active }) => {
       editMode={true}
       isCleared={false}
     >
-      {nodeId && (
-        <VertLayout>
-          <Grow>
-            <CustomTextField name='nodeRef' label={labels.selectedNode} value={nodeRef} required readOnly />
-            <DataGrid
-              name='ledgerTable'
-              onChange={value => formik.setFieldValue('ledgers', value)}
-              value={formik.values.ledgers}
-              error={formik.errors.ledgers}
-              columns={columns}
-              maxAccess={maxAccess}
-            />
-          </Grow>
-        </VertLayout>
-      )}
+      <VertLayout>
+        <Grow>
+          <CustomTextField
+            name='nodeRef'
+            label={labels.selectedNode}
+            value={nodeRef}
+            required
+            readOnly
+            error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
+          />
+          <DataGrid
+            name='ledgerTable'
+            onChange={value => formik.setFieldValue('ledgers', value)}
+            value={formik.values.ledgers}
+            error={formik.errors.ledgers}
+            columns={columns}
+            maxAccess={maxAccess}
+          />
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

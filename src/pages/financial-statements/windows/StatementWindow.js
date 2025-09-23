@@ -12,8 +12,7 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [store, setStore] = useState({
     recordId,
     nodeRef: null,
-    nodeId: null,
-    seqNo: null
+    nodeId: null
   })
 
   const tabs = [
@@ -33,10 +32,10 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
         <NodeList maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} active={activeTab === 2} />
+        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <TreeForm maxAccess={maxAccess} store={store} active={activeTab === 3} />
+        <TreeForm maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>
   )

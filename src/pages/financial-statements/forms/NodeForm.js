@@ -20,11 +20,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 
-export default function NodeForm({ labels, maxAccess, setStore, store }) {
+export default function NodeForm({ labels, maxAccess, setStore, store, nodeId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId, fsId } = store
-  const editMode = !!recordId
+  const editMode = !!nodeId
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -34,14 +33,15 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
-      fsId,
+      recordId: nodeId,
+      fsId: store?.recordId,
       reference: '',
       parentId: null,
       TBAmount: null,
       numberFormat: null,
       displayOrder: null,
-      description: ''
+      description: '',
+      flags: 0
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -59,7 +59,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
         formik.setFieldValue('recordId', res.recordId)
         setStore(prevStore => ({
           ...prevStore,
-          recordId: res.recordId
+          nodeId: res.recordId
         }))
       }
       toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
@@ -69,19 +69,30 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (nodeId) {
         const res = await getRequest({
           extension: FinancialStatementRepository.Node.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_recordId=${nodeId}`
         })
-
+        setStore(prevStore => ({
+          ...prevStore,
+          nodeId: res?.record?.recordId,
+          nodeRef: res?.record?.reference
+        }))
         formik.setValues(res.record)
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.FinancialStatements}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isInfo={false}
+      isCleared={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -91,6 +102,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
+                maxLength='10'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('reference', '')}
@@ -100,14 +112,14 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={FinancialStatementRepository.Node.qry}
-                parameters={`_fsId=${fsId}`}
+                parameters={`_fsId=${store?.recordId}`}
                 name='parentId'
                 label={labels.parent}
                 valueField='recordId'
                 displayField='reference'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('parentId', newValue?.recordId || null)
                 }}
                 error={formik.touched.parentId && Boolean(formik.errors.parentId)}
@@ -123,7 +135,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('TBAmount', newValue?.key || null)
                 }}
                 error={formik.touched.TBAmount && Boolean(formik.errors.TBAmount)}
@@ -139,7 +151,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('numberFormat', newValue?.key || null)
                 }}
                 error={formik.touched.numberFormat && Boolean(formik.errors.numberFormat)}
@@ -179,8 +191,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
                   stack({
                     Component: FlagsForm,
                     props: {
-                      recordId,
-                      fsId,
+                      nodeForm: formik,
                       labels,
                       maxAccess
                     },
@@ -189,6 +200,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store }) {
                   })
                 }}
                 label={labels.flag}
+                sx={{ p: 1 }}
               />
             </Grid>
           </Grid>

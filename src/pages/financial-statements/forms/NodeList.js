@@ -11,7 +11,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 const NodeList = ({ store, setStore, labels, maxAccess }) => {
   const { recordId: fsId } = store
@@ -80,7 +79,7 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj.recordId)
   }
 
   const del = async obj => {
@@ -97,15 +96,17 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(recordId) {
+  function openForm(nodeId) {
     stack({
       Component: NodeWindow,
       props: {
         labels,
-        recordId,
-        fsId,
-        maxAccess
+        maxAccess,
+        store,
+        setStore,
+        nodeId
       },
+      height: 520,
       width: 500,
       title: labels.node
     })
@@ -127,13 +128,11 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
           maxAccess={maxAccess}
           pagination={false}
           onSelectionChange={row => {
-            if (row) {
-              setStore(prevStore => ({
-                ...prevStore,
-                nodeId: row.recordId,
-                nodeRef: row.reference
-              }))
-            }
+            setStore(prevStore => ({
+              ...prevStore,
+              nodeId: row?.recordId || null,
+              nodeRef: row?.reference || ''
+            }))
           }}
         />
       </Grow>

@@ -12,7 +12,7 @@ import { Grid } from '@mui/material'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const TreeForm = ({ store, maxAccess, active }) => {
+const TreeForm = ({ store, maxAccess }) => {
   const { recordId: fsId } = store
   const { getRequest } = useContext(RequestsContext)
   const [treeLabels, setTreeLabels] = useState([])
@@ -56,35 +56,33 @@ const TreeForm = ({ store, maxAccess, active }) => {
   }
 
   useEffect(() => {
-    fsId && getTreelabels()
+    if (fsId) getTreelabels()
   }, [fsId])
 
   return (
     <>
-      {active && (
-        <VertLayout>
-          <Grow>
-            <Grid item margin={3}>
-              <ResourceComboBox
-                datasetId={DataSets.LANGUAGE}
-                name='languageId'
-                valueField='key'
-                displayField='value'
-                defaultIndex={0}
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('languageId', newValue ? newValue.key : 1)
-                  getTreelabels(newValue ? newValue.key : 1)
-                }}
-                error={formik.touched.languageId && Boolean(formik.errors.languageId)}
-              />
-            </Grid>
-            <Tree data={data} labels={treeLabels} printable={false} />
-          </Grow>
-        </VertLayout>
-      )}
+      <VertLayout>
+        <Grow>
+          <Grid item margin={3}>
+            <ResourceComboBox
+              datasetId={DataSets.LANGUAGE}
+              name='languageId'
+              valueField='key'
+              displayField='value'
+              defaultIndex={0}
+              values={formik.values}
+              required
+              maxAccess={maxAccess}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('languageId', newValue ? newValue.key : 1)
+                getTreelabels(newValue ? newValue.key : 1)
+              }}
+              error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+            />
+          </Grid>
+          <Tree data={data} labels={treeLabels} printable={false} />
+        </Grow>
+      </VertLayout>
     </>
   )
 }

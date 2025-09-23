@@ -4,24 +4,19 @@ import NodesTitleForm from '../forms/NodesTitleForm'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
-const NodeWindow = ({ labels, maxAccess, recordId, fsId }) => {
+const NodeWindow = ({ labels, maxAccess, store, setStore, nodeId }) => {
   const [activeTab, setActiveTab] = useState(0)
 
-  const [store, setStore] = useState({
-    recordId,
-    fsId
-  })
-
-  const tabs = [{ label: labels.node }, { label: labels.nodesTitle, disabled: !store.recordId }]
+  const tabs = [{ label: labels.node }, { label: labels.nodesTitle, disabled: !nodeId }]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <NodeForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
+        <NodeForm labels={labels} maxAccess={maxAccess} nodeId={nodeId} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <NodesTitleForm maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
+        <NodesTitleForm maxAccess={maxAccess} labels={labels} nodeId={nodeId} />
       </CustomTabPanel>
     </>
   )
