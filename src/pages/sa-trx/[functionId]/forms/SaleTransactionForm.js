@@ -650,7 +650,7 @@ export default function SaleTransactionForm({
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update({
           ...data,
-          totalWeight: data.weight * newRow.qty
+          totalWeight: (data.weight || 0) * (newRow.qty || 0)
         })
       }
     },
@@ -1109,7 +1109,7 @@ export default function SaleTransactionForm({
           upo: item.upo,
           vatAmount: item.vatAmount,
           extendedPrice: item.extendedPrice,
-          totalWeight: item.weight * item.qty,
+          totalWeight: (item.weight || 0) * (item.qty || 0),
           serials: saTrxPack?.serials
             ?.filter(row => row.seqNo == item.seqNo)
             .map((serialDetail, index) => {

@@ -846,7 +846,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
                 serials: serials?.filter(s => s.seqNo == item.seqNo),
-                totalWeight: parseFloat(item.weight) * parseFloat(item.qty),
+                totalWeight: (parseFloat(item.weight || 0) * parseFloat(item.qty || 0)).toFixed(2),
                 isEditMode: true
               }
             })
@@ -1230,7 +1230,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   async function onValidationRequired() {
