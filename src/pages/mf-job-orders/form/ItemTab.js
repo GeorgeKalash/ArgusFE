@@ -117,6 +117,10 @@ export default function ItemTab({ labels, maxAccess, store }) {
       props: {
         allowNegative: false,
         maxLength: 9
+      },
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        update({ qty: newRow?.qty || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
       }
     },
     {
@@ -188,7 +192,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
       const updateItemsList = res.list.map((item, index) => ({
         ...item,
         id: index + 1,
-        extendedCost: item?.unitCost || 0 * item?.qty || 0
+        extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
       }))
 
       formik.setFieldValue('items', updateItemsList)
