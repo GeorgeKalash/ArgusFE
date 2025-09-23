@@ -19,6 +19,7 @@ export const LoanTrackingRepository = {
   LoanDeduction: {
     qry: service + 'qryLD',
     get: service + 'getLD',
-    set: service + 'setLD'
+    set: service + 'setLD',
+    del: service + 'delLD'
   }
 }

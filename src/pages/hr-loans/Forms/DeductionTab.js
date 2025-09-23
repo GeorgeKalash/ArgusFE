@@ -15,7 +15,7 @@ import DeductionForm from './DeductionForm'
 
 const DeductionTab = ({ store, labels }) => {
   const { recordId } = store
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   const columns = [
@@ -60,7 +60,8 @@ const DeductionTab = ({ store, labels }) => {
 
   const {
     query: { data },
-    access
+    access,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LoanTrackingRepository.LoanDeduction.qry,
@@ -93,6 +94,15 @@ const DeductionTab = ({ store, labels }) => {
   const deductedAmount = data?.list.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0
   const remainingBalance = (store.loanAmount || 0) - deductedAmount
 
+  const del = async obj => {
+    await postRequest({
+      extension: LoanTrackingRepository.LoanDeduction.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
   return (
     <VertLayout>
       <Fixed>
@@ -102,10 +112,10 @@ const DeductionTab = ({ store, labels }) => {
         <Table
           name='deductionTable'
           columns={columns}
+          onDelete={store.isClosed && del}
           gridData={data}
           rowId={'loanId'}
           onEdit={edit}
-          isLoading={false}
           pageSize={50}
           pagination={false}
           maxAccess={access}

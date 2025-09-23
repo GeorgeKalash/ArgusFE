@@ -1,4 +1,3 @@
-import HrLoans from 'src/pages/hr-loans'
 import { Module } from './Module'
 
 export const SystemFunction = {

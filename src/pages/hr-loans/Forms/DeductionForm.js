@@ -45,7 +45,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
     onSubmit: obj => {
       const data = {
         ...obj,
-        date: formatDateToApi(obj.date) || null
+        date: formatDateToApi(obj.date)
       }
 
       postRequest({
@@ -56,7 +56,6 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
         formik.setFieldValue('recordId', res.recordId)
 
         invalidate()
-        window.close()
       })
     }
   })
@@ -95,6 +94,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
             <Grid item xs={6}>
               <CustomCheckBox
                 name='payrollDeduction'
+                readOnly={!store.isClosed}
                 value={formik.values?.payrollDeduction}
                 onChange={event => formik.setFieldValue('payrollDeduction', event.target.checked)}
                 label={labels.payrollDeduction}
@@ -107,9 +107,10 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 label={labels.deductionAmount}
                 value={formik.values.amount}
                 required
+                readOnly={!store.isClosed}
                 maxAccess={maxAccess}
                 onChange={async e => {
-                  formik.setFieldValue('amount', e?.target?.value || 0)
+                  formik.setFieldValue('amount', e?.target?.value || null)
                 }}
                 onClear={async () => {
                   formik.setFieldValue('amount', 0)
@@ -123,9 +124,9 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 name='date'
                 label={labels.date}
                 required
+                readOnly={!store.isClosed}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
-                editMode={editMode}
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -137,6 +138,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 name='type'
                 label={labels.type}
                 required
+                readOnly={!store.isClosed}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
@@ -151,6 +153,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
+                readOnly={!store.isClosed}
                 value={formik.values.notes}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
