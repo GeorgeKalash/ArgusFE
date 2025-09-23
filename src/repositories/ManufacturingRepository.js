@@ -34,6 +34,7 @@ export const ManufacturingRepository = {
   WorkCenter: {
     page: service + 'pageWCT',
     qry: service + 'qryWCT',
+    qry3: service + 'qryWCT3',
     set: service + 'setWCT',
     get: service + 'getWCT',
     del: service + 'delWCT',
@@ -196,7 +197,9 @@ export const ManufacturingRepository = {
     del: service + 'delDMG',
     page: service + 'pageDMG',
     snapshot: service + 'snapshotDMG',
-    post: service + 'postDMG'
+    post: service + 'postDMG',
+    get2: service + 'get2DMG',
+    set2: service + 'set2DMG'
   },
   JobCategory: {
     qry: service + 'qryJCA'
@@ -236,6 +239,7 @@ export const ManufacturingRepository = {
   },
   MFSerial: {
     qry: service + 'qrySRL',
+    qry2: service + 'qrySRL2',
     set2: service + 'set2SRL',
     generate: service + 'generateSRL'
   },
@@ -353,7 +357,9 @@ export const ManufacturingRepository = {
     reopen: service + 'reopenTFR'
   },
   JobWorkCenter: {
-    qry: service + 'qryJWC'
+    qry: service + 'qryJWC',
+    close: service + 'closeJWC',
+    reopen: service + 'reopenJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
@@ -388,5 +394,12 @@ export const ManufacturingRepository = {
   },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
+  },
+  DamageReturnRawMaterial: {
+    preview: service + 'previewDMRM'
+  },
+  WorkCenterTransferMap: {
+    qry: service + 'qryWCTM',
+    set2: service + 'set2WCTM'
   }
 }

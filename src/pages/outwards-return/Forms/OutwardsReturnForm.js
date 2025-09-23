@@ -355,6 +355,7 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
       actions={actions}
       editMode={editMode}
       functionId={SystemFunction.OutwardsReturn}
+      previewReport={editMode}
       disabledSubmit={isOpenOutwards ? false : isPosted || isClosed}
     >
       <VertLayout>
