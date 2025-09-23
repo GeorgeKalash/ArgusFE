@@ -280,7 +280,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        installments: obj.installments.map((installment, index) => {
+        installments: obj?.installments?.map((installment, index) => {
           return {
             ...installment,
             id: index + 1,
@@ -493,7 +493,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({
+          ...data,
+          totalWeight: data.weight * newRow.qty
+        })
       }
     },
     {
@@ -518,6 +521,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       props: {
         decimalScale: 2,
         readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
+        readOnly: true,
+        decimalScale: 3,
       }
     },
     {
@@ -850,7 +862,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       key: 'Installments',
       condition: true,
       onClick: onClickInstallments,
-      disabled: !editMode,
+      disabled: !editMode
     },
     {
       key: 'Verify',
@@ -909,6 +921,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           basePrice: item.basePrice ? item.basePrice : 0,
           unitPrice: item.unitPrice ? item.unitPrice : 0,
           vatAmount: item.vatAmount ? item.vatAmount : 0,
+          totalWeight: item.weight * item.qty,
           extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
           puTrx: true,
           serials: puTrxSerials
