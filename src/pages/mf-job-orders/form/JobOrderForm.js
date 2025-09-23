@@ -328,10 +328,14 @@ export default function JobOrderForm({
   function openSerials() {
     stack({
       Component: SerialsLots,
-      props: { labels, maxAccess, recordId: formik.values.recordId, itemId: formik.values.itemId },
-      width: 500,
-      height: 600,
-      title: labels.seriallot
+      props: {
+        labels,
+        maxAccess,
+        recordId: formik.values.recordId,
+        itemId: formik.values.itemId,
+        api: ManufacturingRepository.MFSerial.qry,
+        parameters: `_jobId=${recordId}`
+      }
     })
   }
   function openSample() {
