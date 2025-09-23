@@ -283,6 +283,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         installments: obj.installments.map((installment, index) => {
           return {
             ...installment,
+            id: index + 1,
             seqNo: index + 1,
             reference: obj?.header?.reference,
             vendorId: obj?.header?.vendorId,
@@ -664,6 +665,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
+  console.log(formik)
+
   function checkMinMaxAmount(amount, type, modType) {
     let currentAmount = parseFloat(amount) || 0
 
@@ -902,6 +905,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
         return {
           ...item,
+          id: index + 1,
           basePrice: item.basePrice ? item.basePrice : 0,
           unitPrice: item.unitPrice ? item.unitPrice : 0,
           vatAmount: item.vatAmount ? item.vatAmount : 0,
