@@ -677,8 +677,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   ]
 
-  console.log(formik)
-
   function checkMinMaxAmount(amount, type, modType) {
     let currentAmount = parseFloat(amount) || 0
 
