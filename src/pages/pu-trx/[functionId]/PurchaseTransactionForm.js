@@ -527,7 +527,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       label: labels.totalWeight,
       name: 'totalWeight',
       props: {
-        readOnly: true
+        readOnly: true,
+        decimalScale: 3,
       }
     },
     {
