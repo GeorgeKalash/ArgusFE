@@ -665,7 +665,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount || 0)
+                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={async () => {
