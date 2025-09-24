@@ -22,8 +22,8 @@ const FeesSceduleWindow = ({ recordId, labels, maxAccess }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <FeesSceduleForm
           labels={labels}
           setStore={setStore}
@@ -32,7 +32,7 @@ const FeesSceduleWindow = ({ recordId, labels, maxAccess }) => {
           onChange={onStrategiesChange}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <FeesDetailsForm labels={labels} store={store} />
       </CustomTabPanel>
     </>

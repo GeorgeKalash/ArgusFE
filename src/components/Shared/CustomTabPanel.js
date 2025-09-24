@@ -7,7 +7,6 @@ const CustomTabPanel = props => {
   const { children, value, height, index, maxAccess, ...other } = props
   const name = `${props.name || 'tab'}.${index}`
 
-  console.log(name, maxAccess)
   const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId == name) ?? 0
 
   const hidden = accessLevel === HIDDEN
