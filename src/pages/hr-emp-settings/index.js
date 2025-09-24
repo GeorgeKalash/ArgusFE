@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { RequestsContext } from 'src/providers/RequestsContext'

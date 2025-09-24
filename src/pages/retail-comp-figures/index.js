@@ -9,7 +9,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ReportPSGeneratorRepository } from 'src/repositories/ReportPSGeneratorRepository'
@@ -23,7 +22,6 @@ import IconButton from '@mui/material/IconButton'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { CompBarChart } from 'src/components/Shared/dashboardApplets/charts'
-import Form from 'src/components/Shared/Form'
 
 const RetailCompFigures = () => {
   const { getRequest } = useContext(RequestsContext)
