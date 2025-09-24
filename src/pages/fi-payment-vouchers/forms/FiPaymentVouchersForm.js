@@ -652,7 +652,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 name='amount'
                 required
                 label={labels.amount}
-                maxLength={'10'}
+                maxLength={14}
                 decimalScale={2}
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}
@@ -665,7 +665,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                     rateCalcMethod: formik.values?.rateCalcMethod,
                     dirtyField: DIRTYFIELD_RATE
                   })
-                  formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
+                  formik.setFieldValue('baseAmount', updatedRateRow?.baseAmount || 0)
                   formik.setFieldValue('amount', e.target.value)
                 }}
                 onClear={async () => {
