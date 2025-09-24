@@ -172,7 +172,13 @@ export default function MaterialsForm({ store, labels, maxAccess }) {
   }, 0)
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} disabledSubmit={isClosed}>
+    <Form
+      onSave={formik.handleSubmit}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      disabledSubmit={isClosed}
+      isParentWindow={false}
+    >
       <VertLayout>
         <Grow>
           <DataGrid

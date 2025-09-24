@@ -12,7 +12,6 @@ import USDocTypeForm from './USDocTypeForm'
 import { useForm } from 'src/hooks/form'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import Form from 'src/components/Shared/Form'
 
 const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -101,37 +100,35 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   }
 
   return (
-    <Form maxAccess={maxAccess} editMode={!!storeRecordId} onSave={formik.handleSubmit}>
-      <VertLayout>
-        <Fixed>
-          <Grid container>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='search'
+              value={formik.values.search}
+              label={labels.search}
+              onClear={() => {
+                formik.setFieldValue('search', '')
+              }}
+              onChange={handleSearchChange}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table
-            name='docType'
-            columns={columns}
-            gridData={filteredData}
-            rowId={['userId', 'functionId']}
-            onEdit={edit}
-            isLoading={false}
-            maxAccess={maxAccess}
-            pagination={false}
-          />
-        </Grow>
-      </VertLayout>
-    </Form>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          name='docType'
+          columns={columns}
+          gridData={filteredData}
+          rowId={['userId', 'functionId']}
+          onEdit={edit}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

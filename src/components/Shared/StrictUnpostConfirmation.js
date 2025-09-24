@@ -4,6 +4,8 @@ import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 import Form from './Form'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 const StrictUnpostConfirmation = ({ window, onSuccess }) => {
   const [confirmationText, setConfirmationText] = useState('')
@@ -35,27 +37,36 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
   ]
 
   return (
-    <Form actions={actions} isSaved={false} onSave={confirmationText.toLowerCase() === 'unpost' && handleSubmit}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
-            {platformLabels.areYouSure}
-            <br />
-            {platformLabels.youAreAboutToUnpost}
-          </p>
-          <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeUnpost}</p>
-        </Grid>
-        <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
-          <CustomTextField
-            name='unpostConfirmation'
-            value={confirmationText}
-            onChange={handleChange}
-            onClear={handleClear}
-            placeholder={platformLabels.placeHolderUnpost}
-            autoFocus={true}
-          />
-        </Grid>
-      </Grid>
+    <Form
+      actions={actions}
+      isSaved={false}
+      onSave={confirmationText.toLowerCase() === 'unpost' && handleSubmit}
+      isParentWindow={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
+                {platformLabels.areYouSure}
+                <br />
+                {platformLabels.youAreAboutToUnpost}
+              </p>
+              <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeUnpost}</p>
+            </Grid>
+            <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+              <CustomTextField
+                name='unpostConfirmation'
+                value={confirmationText}
+                onChange={handleChange}
+                onClear={handleClear}
+                placeholder={platformLabels.placeHolderUnpost}
+                autoFocus={true}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </Form>
   )
 }

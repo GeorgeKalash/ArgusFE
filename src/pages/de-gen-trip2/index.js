@@ -491,10 +491,10 @@ const GenerateOutboundTransportation2 = () => {
   const balance = totalTrucksVolume - ordersVolume
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access}>
+    <Form onSave={formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={1.5}>
               <ResourceComboBox
                 endpointId={DeliveryRepository.GenerateTrip.root}
@@ -695,7 +695,7 @@ const GenerateOutboundTransportation2 = () => {
           </Grid>
         </Grow>
         <Fixed>
-          <Grid container spacing={2} mt={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={0.65}>
               <CustomButton
                 onClick={() => resetForm()}

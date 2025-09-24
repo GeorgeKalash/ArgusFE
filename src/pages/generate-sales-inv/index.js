@@ -245,10 +245,10 @@ const GeneratePurchaseInvoice = () => {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access}>
+    <Form onSave={onGenerateSI} isSaved={false} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={5}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}
@@ -352,7 +352,7 @@ const GeneratePurchaseInvoice = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}

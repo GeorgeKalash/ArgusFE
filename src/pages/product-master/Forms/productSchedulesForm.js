@@ -272,7 +272,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   }
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

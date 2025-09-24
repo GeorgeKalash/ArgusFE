@@ -400,7 +400,7 @@ const GenerateOutboundTransportation = () => {
   const filteredData = formik?.values?.salesZones?.list.length > 0 ? filteredSalesZones : formik?.values?.salesZones
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access}>
+    <Form onSave={formik.handleSubmit} isSaved={false} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>

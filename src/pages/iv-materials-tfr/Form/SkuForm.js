@@ -6,7 +6,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
-import Form from 'src/components/Shared/Form'
 
 export default function SkuForm({ labels, maxAccess, plId, itemId }) {
   const { getRequest } = useContext(RequestsContext)
@@ -43,44 +42,42 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
   }, [])
 
   return (
-    <Form form={formik.handleSubmit} maxAccess={maxAccess} editMode={false} isSaved={false}>
-      <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField name='sku' value={formik?.values?.sku} label={labels.sku} readOnly />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField name='name' value={formik?.values?.name} label={labels.name} readOnly />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='currentCost'
-                value={formik?.values?.currentCost}
-                label={labels.currentCost}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='defaultSalePrice'
-                value={formik?.values?.defaultSalePrice}
-                label={labels.defaultSalePrice}
-                readOnly
-              />
-            </Grid>
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={4} p={2}>
+          <Grid item xs={12}>
+            <CustomTextField name='sku' value={formik?.values?.sku} label={labels.sku} readOnly />
           </Grid>
-        </Grow>
-      </VertLayout>
-    </Form>
+          <Grid item xs={12}>
+            <CustomTextField name='name' value={formik?.values?.name} label={labels.name} readOnly />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='currentCost'
+              value={formik?.values?.currentCost}
+              label={labels.currentCost}
+              readOnly
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='defaultSalePrice'
+              value={formik?.values?.defaultSalePrice}
+              label={labels.defaultSalePrice}
+              readOnly
+            />
+          </Grid>
+        </Grid>
+      </Grow>
+    </VertLayout>
   )
 }

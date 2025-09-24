@@ -147,7 +147,7 @@ const OutboundAssignDriver = () => {
   }, [])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} fullSize>
       <VertLayout>
         <Fixed>
           <GridToolbar actions={actions} />

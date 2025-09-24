@@ -125,7 +125,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   ]
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

@@ -342,6 +342,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
       maxAccess={maxAccess}
       editMode={true}
       disabledSubmit={store?.isCancelled || store?.isPosted}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>

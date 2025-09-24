@@ -181,10 +181,10 @@ const OutwardsCorrespondent = () => {
   }
 
   return (
-    <Form actions={actions} onSave={openCorrespondent} maxAccess={maxAccess} isSaved={false}>
+    <Form actions={actions} onSave={openCorrespondent} maxAccess={maxAccess} isSaved={false} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={4}>
@@ -318,7 +318,7 @@ const OutwardsCorrespondent = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2 }}>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ p: 2 }}>
             <Grid item xs={1.2}>
               <CustomNumberField
                 name='totalFc'

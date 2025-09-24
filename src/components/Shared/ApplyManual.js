@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from 'react'
-import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,6 +11,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,14 +121,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.ApplyManual}
-      maxAccess={access}
-      isInfo={false}
-      isCleared={false}
-      disabledSubmit={readOnly}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} disabledSubmit={readOnly} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -144,7 +137,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -90,7 +90,7 @@ export default function Installments({ data, onOk, window }) {
   ]
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access}>
+    <Form onSave={formik.handleSubmit} actions={actions} isSaved={false} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

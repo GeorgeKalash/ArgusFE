@@ -156,6 +156,7 @@ export default function DisassemblyForm({ labels, maxAccess, store, setStore }) 
       maxAccess={maxAccess}
       editMode={true}
       disabledSubmit={store?.isCancelled || store?.isPosted}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>

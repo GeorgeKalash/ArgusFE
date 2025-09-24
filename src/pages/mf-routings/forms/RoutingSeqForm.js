@@ -160,7 +160,7 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
 
   return (
     <>
-      <Form onSave={formik.handleSubmit} editMode={editMode} maxAccess={maxAccess}>
+      <Form onSave={formik.handleSubmit} editMode={editMode} maxAccess={maxAccess} isParentWindow={false}>
         <VertLayout>
           <Grow>
             <DataGrid

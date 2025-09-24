@@ -108,13 +108,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   }, [])
 
   return (
-    <Form
-      resourceId={ResourceIds.DeliveriesOrders}
-      onSave={formik.handleSubmit}
-      maxAccess={maxAccess}
-      functionId={SystemFunction.DeliveryTrip}
-      actions={actions}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} actions={actions} isSaved={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>

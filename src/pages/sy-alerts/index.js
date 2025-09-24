@@ -100,7 +100,7 @@ const SyAlerts = () => {
   ]
 
   return (
-    <Form onSave={formik.handleSubmit} fullSize maxAccess={access}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid

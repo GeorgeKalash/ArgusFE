@@ -149,10 +149,10 @@ const BeneficiaryFields = () => {
   }
 
   return (
-    <Form onSave={formik.handleSubmit} initialValues={initialValues} maxAccess={access}>
+    <Form onSave={formik.handleSubmit} initialValues={initialValues} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}

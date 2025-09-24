@@ -2,7 +2,8 @@ import { Box, Grid, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import Form from 'src/components/Shared/Form'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -78,222 +79,230 @@ export default function AuditForm({ labels, formik }) {
   }, [])
 
   return (
-    <Form onSave={formik.handleSubmit}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sx={{ mx: 5, mt: 2 }}>
-          <CustomTextField
-            name='corCurrencyRef'
-            readOnly
-            label={labels.corCurrency}
-            value={iwiFields?.corCurrencyRef}
-          />
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={2} p={2}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='corCurrencyRef'
+              readOnly
+              label={labels.corCurrency}
+              value={iwiFields?.corCurrencyRef}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomNumberField
+              name='corExRate'
+              readOnly
+              label={labels.corExRate}
+              value={iwiFields?.corExRate}
+              decimalScale={5}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='corEvalExRate'
+              readOnly
+              label={labels.corEvalExRate}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.corEvalExRate}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {corCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomNumberField
+              name='taxAmount'
+              readOnly
+              label={labels.taxAmount}
+              value={iwiFields?.taxAmount}
+              decimalScale={2}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='corAmount'
+              readOnly
+              label={labels.corAmount}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.corAmount}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {corCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='corCommission'
+              readOnly
+              label={labels.corComission}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.corCommission}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {corCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='baseCorCommission'
+              readOnly
+              label={labels.baseCorCommission}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.baseCorCommission}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {baseCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='corBaseAmount'
+              readOnly
+              label={labels.corBaseAmount}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.corBaseAmount}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {baseCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomNumberField
+              name='exRate'
+              readOnly
+              label={labels.exRate}
+              value={iwiFields?.exRate}
+              decimalScale={5}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='amount'
+              readOnly
+              label={labels.amount}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.amount}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {baseCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='commission'
+              readOnly
+              label={labels.commission}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.commission}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {baseCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ mx: 5 }}>
+            <CustomTextField
+              name='netCommissionRevenue'
+              readOnly
+              label={labels.netCommissionRevenue}
+              InputProps={{
+                startAdornment: (
+                  <Box component='span'>
+                    <Typography component='span'>{iwiFields?.netCommissionRevenue}</Typography>
+                    <Typography
+                      component='span'
+                      sx={{
+                        color: 'red',
+                        ml: 1
+                      }}
+                    >
+                      {baseCurSymbol}
+                    </Typography>
+                  </Box>
+                )
+              }}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
-            name='corExRate'
-            readOnly
-            label={labels.corExRate}
-            value={iwiFields?.corExRate}
-            decimalScale={5}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corEvalExRate'
-            readOnly
-            label={labels.corEvalExRate}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.corEvalExRate}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField
-            name='taxAmount'
-            readOnly
-            label={labels.taxAmount}
-            value={iwiFields?.taxAmount}
-            decimalScale={2}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corAmount'
-            readOnly
-            label={labels.corAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.corAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corCommission'
-            readOnly
-            label={labels.corComission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.corCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {corCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='baseCorCommission'
-            readOnly
-            label={labels.baseCorCommission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.baseCorCommission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='corBaseAmount'
-            readOnly
-            label={labels.corBaseAmount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.corBaseAmount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomNumberField name='exRate' readOnly label={labels.exRate} value={iwiFields?.exRate} decimalScale={5} />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='amount'
-            readOnly
-            label={labels.amount}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.amount}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='commission'
-            readOnly
-            label={labels.commission}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.commission}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ mx: 5 }}>
-          <CustomTextField
-            name='netCommissionRevenue'
-            readOnly
-            label={labels.netCommissionRevenue}
-            InputProps={{
-              startAdornment: (
-                <Box component='span'>
-                  <Typography component='span'>{iwiFields?.netCommissionRevenue}</Typography>
-                  <Typography
-                    component='span'
-                    sx={{
-                      color: 'red',
-                      ml: 1
-                    }}
-                  >
-                    {baseCurSymbol}
-                  </Typography>
-                </Box>
-              )
-            }}
-          />
-        </Grid>
-      </Grid>
-    </Form>
+      </Grow>
+    </VertLayout>
   )
 }
