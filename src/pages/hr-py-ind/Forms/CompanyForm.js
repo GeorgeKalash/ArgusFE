@@ -23,10 +23,11 @@ const CompanyForm = ({ labels, maxAccess, store }) => {
   })
 
   const conditions = {
-    from: row => row?.from != null,
-    to: row => row?.to != null,
-    pct: row => row?.pct != null
+    from: row => (row?.from != 0 && row?.from < row?.to) || (!row?.from && row?.to),
+    to: row => (row?.to != 0 && row?.from < row?.to) || (!row?.to && row?.from),
+    pct: row => row?.pct != null && row?.pct <= 100
   }
+
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
@@ -99,7 +100,6 @@ const CompanyForm = ({ labels, maxAccess, store }) => {
       }
     }
   ]
-  console.log(formik)
 
   return (
     <VertLayout>

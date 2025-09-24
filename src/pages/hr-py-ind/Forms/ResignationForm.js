@@ -23,23 +23,23 @@ const ResignationForm = ({ labels, maxAccess, store }) => {
   })
 
   const conditions = {
-    from: row => row?.from != null,
-    to: row => row?.to != null,
-    pct: row => row?.pct != null
+    from: row => (row?.from != 0 && row?.from < row?.to) || (!row?.from && row?.to),
+    to: row => (row?.to != 0 && row?.from < row?.to) || (!row?.to && row?.from),
+    pct: row => row?.pct != null && row?.pct <= 100
   }
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'resignation')
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { items: [] },
-    conditionSchema: ['items'],
+    initialValues: { resignation: [] },
+    conditionSchema: ['resignation'],
     validationSchema: yup.object({
-      items: yup.array().of(schema)
+      resignation: yup.array().of(schema)
     }),
     onSubmit: async values => {
       const payload = {
         inId: recordId,
-        items: values.items
+        items: values.resignation
           .filter(row => Object.values(requiredFields)?.some(fn => fn(row)))
           .map((row, index) => ({
             ...row,
@@ -65,7 +65,7 @@ const ResignationForm = ({ labels, maxAccess, store }) => {
     })
     if (res.list?.length) {
       formik.setValues({
-        items: res.list.map((obj, index) => ({
+        resignation: res.list.map((obj, index) => ({
           id: index + 1,
           ...obj
         }))
@@ -99,18 +99,17 @@ const ResignationForm = ({ labels, maxAccess, store }) => {
       }
     }
   ]
-  console.log(formik)
 
   return (
     <VertLayout>
       <Grow>
         <DataGrid
-          name='items'
+          name='resignation'
           maxAccess={maxAccess}
-          value={formik.values.items}
-          error={formik.errors?.items}
+          value={formik.values.resignation}
+          error={formik.errors?.resignation}
           columns={columns}
-          onChange={value => formik.setFieldValue('items', value)}
+          onChange={value => formik.setFieldValue('resignation', value)}
         />
       </Grow>
       <Fixed>

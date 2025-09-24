@@ -61,7 +61,7 @@ export default function IndemnityForm({ labels, maxAccess, store, setStore }) {
           extension: PayrollRepository.Indemnity.get,
           parameters: `_recordId=${recordId}`
         })
-        formik.setValues({ ...res.record })
+        formik.setValues(res.record)
       }
     })()
   }, [])

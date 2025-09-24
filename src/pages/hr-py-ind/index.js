@@ -51,7 +51,8 @@ const CommissionSchedule = () => {
     {
       field: 'minResignationDays',
       headerName: labels.minResignationDays,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -77,7 +78,7 @@ const CommissionSchedule = () => {
         access
       },
       width: 650,
-      height: 300,
+      height: 320,
       title: labels.payrollIndemnity
     })
   }
@@ -93,6 +94,7 @@ const CommissionSchedule = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
