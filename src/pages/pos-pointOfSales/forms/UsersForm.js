@@ -130,7 +130,7 @@ const UsersForm = ({ store, labels, maxAccess }) => {
   }, [recordId])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

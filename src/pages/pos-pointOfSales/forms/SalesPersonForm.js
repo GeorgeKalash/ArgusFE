@@ -116,7 +116,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
   }, [recordId])
 
   return (
-    <Form form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess}>
+    <Form form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

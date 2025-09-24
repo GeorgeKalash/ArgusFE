@@ -10,10 +10,16 @@ import FormShell from 'src/components/Shared/FormShell'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function SerialsLots({ labels, maxAccess, recordId }) {
+export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!recordId
+
+  useSetWindow({ title: platformLabels.serials, window })
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -50,8 +56,8 @@ export default function SerialsLots({ labels, maxAccess, recordId }) {
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: ManufacturingRepository.MFSerial.qry,
-      parameters: `_jobId=${recordId}`
+      extension: api,
+      parameters
     })
 
     const updateSerialsList =
@@ -106,3 +112,6 @@ export default function SerialsLots({ labels, maxAccess, recordId }) {
     </FormShell>
   )
 }
+
+SerialsLots.width = 500
+SerialsLots.height = 600

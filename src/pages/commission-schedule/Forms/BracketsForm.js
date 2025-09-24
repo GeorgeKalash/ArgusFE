@@ -104,7 +104,7 @@ const BracketsForm = ({ labels, maxAccess, store }) => {
   ]
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={access}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid

@@ -10,12 +10,17 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { createConditionalSchema } from 'src/lib/validation'
+import { Grid } from '@mui/material'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useWindow } from 'src/windows'
+import SerialsLots from './SerialsLots'
 import Form from 'src/components/Shared/Form'
 
 export default function ItemTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const recordId = store?.recordId
+  const { stack } = useWindow()
 
   const conditions = {
     sku: row => row?.sku,
@@ -61,6 +66,20 @@ export default function ItemTab({ labels, maxAccess, store }) {
     }
   })
 
+  const onCondition = row => {
+    if (row.trackBy === 1) {
+      return {
+        imgSrc: '/images/TableIcons/imgSerials.png',
+        hidden: false
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true
+      }
+    }
+  }
+
   const columns = [
     {
       component: 'resourcelookup',
@@ -97,6 +116,10 @@ export default function ItemTab({ labels, maxAccess, store }) {
       props: {
         allowNegative: false,
         maxLength: 9
+      },
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        update({ qty: newRow?.qty || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
       }
     },
     {
@@ -107,8 +130,56 @@ export default function ItemTab({ labels, maxAccess, store }) {
         decimalScale: 0,
         maxLength: 5
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.unitCost,
+      name: 'unitCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.extendedCost,
+      name: 'extendedCost',
+      props: {
+        readOnly: true,
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      flex: 0.5,
+      props: {
+        onCondition
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: SerialsLots,
+          props: {
+            labels,
+            maxAccess,
+            recordId,
+            api: ManufacturingRepository.MFSerial.qry2,
+            parameters: `_jobId=${recordId}&_seqNo=${row.seqNo}`
+          }
+        })
+      }
     }
   ]
+
+  const totalCost =
+    formik?.values?.items?.length > 0
+      ? formik.values.items.reduce((extendedSum, row) => {
+          const extendedValue = parseFloat(row.extendedCost?.toString().replace(/,/g, '')) || 0
+
+          return extendedSum + extendedValue
+        }, 0)
+      : 0
 
   async function fetchGridData() {
     const res = await getRequest({
@@ -119,7 +190,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
     if (res?.list?.length > 0) {
       const updateItemsList = res.list.map((item, index) => ({
         ...item,
-        id: index + 1
+        id: index + 1,
+        extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
       }))
 
       formik.setFieldValue('items', updateItemsList)
@@ -150,6 +222,11 @@ export default function ItemTab({ labels, maxAccess, store }) {
             allowDelete={!store?.isPosted && !store?.isCancelled}
           />
         </Grow>
+        <Grid container p={4} justifyContent='flex-end'>
+          <Grid item xs={2}>
+            <CustomNumberField name='totalCost' label={labels.totalCost} value={totalCost} readOnly />
+          </Grid>
+        </Grid>
       </VertLayout>
     </Form>
   )
