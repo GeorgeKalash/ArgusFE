@@ -16,15 +16,15 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
 import { createConditionalSchema } from 'src/lib/validation'
 
-const LedgerForm = ({ store, labels, maxAccess }) => {
-  const { nodeId, nodeRef } = store
+const LedgerForm = ({ node, labels, maxAccess }) => {
+  const { nodeId, nodeRef } = node?.current
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
 
   const conditions = {
     sign: row => {
-      const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4
+      const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.ccRef || row?.ccgRef
 
       return hasSeg ? true : !!row.sign
     }
@@ -35,7 +35,21 @@ const LedgerForm = ({ store, labels, maxAccess }) => {
   const formik = useFormik({
     initialValues: {
       nodeRef,
-      ledgers: [{ id: 1, seqNo: 1, fsNodeId: nodeId, seg0: '', seg1: '', seg2: '', seg3: '', seg4: '', sign: null }]
+      ledgers: [
+        {
+          id: 1,
+          seqNo: 1,
+          fsNodeId: nodeId,
+          seg0: '',
+          seg1: '',
+          seg2: '',
+          seg3: '',
+          seg4: '',
+          ccgRef: '',
+          ccRef: '',
+          sign: null
+        }
+      ]
     },
     enableReinitialize: true,
     conditionSchema: ['ledgers'],
@@ -102,6 +116,22 @@ const LedgerForm = ({ store, labels, maxAccess }) => {
       name: 'seg4',
       props: {
         maxLength: 8
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.ccgRef,
+      name: 'ccgRef',
+      props: {
+        maxLength: 10
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.ccRef,
+      name: 'ccRef',
+      props: {
+        maxLength: 10
       }
     },
     {

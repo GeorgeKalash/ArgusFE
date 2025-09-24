@@ -4,38 +4,34 @@ import NodeList from '../forms/NodeList'
 import LedgerForm from '../forms/LedgerForm'
 import TreeForm from '../forms/TreeForm'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
-
-  const [store, setStore] = useState({
-    recordId,
-    nodeRef: null,
-    nodeId: null
-  })
+  const [mainRecordId, setRecId] = useState(recordId)
+  const node = useRef({ nodeId: null, nodeRef: null })
 
   const tabs = [
     { label: labels.financialStatement },
-    { label: labels.node, disabled: !store.recordId },
-    { label: labels.ledger, disabled: !store.recordId },
-    { label: labels.tree, disabled: !store.recordId }
+    { label: labels.node, disabled: !mainRecordId },
+    { label: labels.ledger, disabled: !mainRecordId },
+    { label: labels.tree, disabled: !mainRecordId }
   ]
 
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <StatementForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
+        <StatementForm labels={labels} maxAccess={maxAccess} setRecId={setRecId} mainRecordId={mainRecordId} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <NodeList maxAccess={maxAccess} labels={labels} store={store} setStore={setStore} />
+        <NodeList maxAccess={maxAccess} labels={labels} mainRecordId={mainRecordId} setRecId={setRecId} node={node} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <LedgerForm maxAccess={maxAccess} labels={labels} store={store} />
+        <LedgerForm maxAccess={maxAccess} labels={labels} node={node} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab}>
-        <TreeForm maxAccess={maxAccess} store={store} />
+        <TreeForm maxAccess={maxAccess} mainRecordId={mainRecordId} />
       </CustomTabPanel>
     </>
   )

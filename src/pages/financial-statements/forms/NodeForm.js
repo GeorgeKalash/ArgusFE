@@ -19,11 +19,12 @@ import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { node } from 'stylis'
 
-export default function NodeForm({ labels, maxAccess, setStore, store, nodeId }) {
+export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!nodeId
+  const editMode = !!node?.current?.recordId
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -33,8 +34,8 @@ export default function NodeForm({ labels, maxAccess, setStore, store, nodeId })
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: nodeId,
-      fsId: store?.recordId,
+      recordId: node?.current.nodeId,
+      fsId: mainRecordId,
       reference: '',
       parentId: null,
       TBAmount: null,
@@ -57,10 +58,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store, nodeId })
 
       if (!obj?.recordId) {
         formik.setFieldValue('recordId', res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          nodeId: res.recordId
-        }))
+        node.current.nodeId = res.recordId
       }
       toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
@@ -69,17 +67,13 @@ export default function NodeForm({ labels, maxAccess, setStore, store, nodeId })
 
   useEffect(() => {
     ;(async function () {
-      if (nodeId) {
+      if (node?.current?.nodeId) {
         const res = await getRequest({
           extension: FinancialStatementRepository.Node.get,
-          parameters: `_recordId=${nodeId}`
+          parameters: `_recordId=${node?.current?.nodeId}`
         })
-        setStore(prevStore => ({
-          ...prevStore,
-          nodeId: res?.record?.recordId,
-          nodeRef: res?.record?.reference
-        }))
         formik.setValues(res.record)
+        node.current.nodeRef = res?.record?.reference
       }
     })()
   }, [])
@@ -112,7 +106,7 @@ export default function NodeForm({ labels, maxAccess, setStore, store, nodeId })
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={FinancialStatementRepository.Node.qry}
-                parameters={`_fsId=${store?.recordId}`}
+                parameters={`_fsId=${mainRecordId}`}
                 name='parentId'
                 label={labels.parent}
                 valueField='recordId'

@@ -13,11 +13,10 @@ import { FinancialStatementRepository } from 'src/repositories/FinancialStatemen
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-export default function StatementForm({ labels, maxAccess, setStore, store }) {
+export default function StatementForm({ labels, maxAccess, setRecId, mainRecordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
-  const editMode = !!recordId
+  const editMode = !!mainRecordId
 
   const invalidate = useInvalidate({
     endpointId: FinancialStatementRepository.FinancialStatement.page
@@ -25,7 +24,7 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
 
   const formik = useFormik({
     initialValues: {
-      recordId,
+      recordId: mainRecordId,
       name: ''
     },
     validationSchema: yup.object({
@@ -39,10 +38,7 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
 
       if (!obj.recordId) {
         formik.setFieldValue('recordId', res.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
+        setRecId(res.recordId)
       }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
@@ -51,10 +47,10 @@ export default function StatementForm({ labels, maxAccess, setStore, store }) {
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (mainRecordId) {
         const res = await getRequest({
           extension: FinancialStatementRepository.FinancialStatement.get,
-          parameters: `_recordId=${recordId}`
+          parameters: `_recordId=${mainRecordId}`
         })
 
         formik.setValues(res.record)

@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useForm } from 'src/hooks/form'
 
-const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
+const NodesTitleForm = ({ labels, maxAccess, node }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
@@ -28,7 +28,7 @@ const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
       await postRequest({
         extension: FinancialStatementRepository.Title.set2,
         record: JSON.stringify({
-          fsNodeId: nodeId,
+          fsNodeId: node?.current?.nodeId,
           titles: obj
         })
       })
@@ -53,12 +53,12 @@ const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
   ]
 
   async function getTitles() {
-    if (!nodeId) return
+    if (!node?.current?.nodeId) return
 
     const [res, titlesXMLList] = await Promise.all([
       getRequest({
         extension: FinancialStatementRepository.Title.qry,
-        parameters: `_fsNodeId=${nodeId}`
+        parameters: `_fsNodeId=${node?.current?.nodeId}`
       }),
       getRequest({
         extension: SystemRepository.KeyValueStore,
@@ -71,7 +71,7 @@ const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
         id: index + 1,
         languageId: parseInt(node.key, 10),
         title: res?.list?.find(item => item.languageId.toString() === node.key)?.title,
-        fsNodeId: parseInt(nodeId, 10),
+        fsNodeId: parseInt(node?.current?.nodeId, 10),
         languageName: node.value
       })) ?? []
 
@@ -80,7 +80,7 @@ const NodesTitleForm = ({ labels, maxAccess, nodeId }) => {
 
   useEffect(() => {
     getTitles()
-  }, [nodeId])
+  }, [node?.current?.nodeId])
 
   return (
     <FormShell

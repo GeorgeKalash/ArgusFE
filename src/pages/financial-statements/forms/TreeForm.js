@@ -12,8 +12,7 @@ import { Grid } from '@mui/material'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const TreeForm = ({ store, maxAccess }) => {
-  const { recordId: fsId } = store
+const TreeForm = ({ mainRecordId, maxAccess }) => {
   const { getRequest } = useContext(RequestsContext)
   const [treeLabels, setTreeLabels] = useState([])
 
@@ -29,7 +28,7 @@ const TreeForm = ({ store, maxAccess }) => {
   async function getTreeNodes() {
     return await getRequest({
       extension: FinancialStatementRepository.Node.qry,
-      parameters: `_fsId=${fsId}`
+      parameters: `_fsId=${mainRecordId}`
     })
   }
 
@@ -37,7 +36,7 @@ const TreeForm = ({ store, maxAccess }) => {
     query: { data }
   } = useResourceQuery({
     queryFn: getTreeNodes,
-    enabled: Boolean(fsId),
+    enabled: Boolean(mainRecordId),
     endpointId: FinancialStatementRepository.Node.qry,
     datasetId: ResourceIds.FinancialStatements
   })
@@ -56,8 +55,8 @@ const TreeForm = ({ store, maxAccess }) => {
   }
 
   useEffect(() => {
-    if (fsId) getTreelabels()
-  }, [fsId])
+    if (mainRecordId) getTreelabels()
+  }, [mainRecordId])
 
   return (
     <>

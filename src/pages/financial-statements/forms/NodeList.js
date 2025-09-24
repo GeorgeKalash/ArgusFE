@@ -12,8 +12,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 
-const NodeList = ({ store, setStore, labels, maxAccess }) => {
-  const { recordId: fsId } = store
+const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -23,14 +22,14 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    enabled: Boolean(fsId),
+    enabled: Boolean(mainRecordId),
     endpointId: FinancialStatementRepository.Node.qry
   })
 
   async function fetchGridData() {
     return getRequest({
       extension: FinancialStatementRepository.Node.qry,
-      parameters: `_fsId=${fsId}`
+      parameters: `_fsId=${mainRecordId}`
     })
   }
 
@@ -74,37 +73,26 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
     }
   ]
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj.recordId)
-  }
-
   const del = async obj => {
     await postRequest({
       extension: FinancialStatementRepository.Node.del,
       record: JSON.stringify(obj)
     })
-    setStore(prevStore => ({
-      ...prevStore,
-      nodeId: null,
-      nodeRef: ''
-    }))
+    node.current.nodeId = null
+    node.current.reference = ''
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
-  function openForm(nodeId) {
+  function openForm() {
     stack({
       Component: NodeWindow,
       props: {
         labels,
         maxAccess,
-        store,
-        setStore,
-        nodeId
+        mainRecordId,
+        setRecId,
+        node
       },
       height: 520,
       width: 500,
@@ -115,7 +103,7 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
+        <GridToolbar onAdd={openForm} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
         <Table
@@ -123,16 +111,13 @@ const NodeList = ({ store, setStore, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={edit}
+          onEdit={openForm}
           onDelete={del}
           maxAccess={maxAccess}
           pagination={false}
           onSelectionChange={row => {
-            setStore(prevStore => ({
-              ...prevStore,
-              nodeId: row?.recordId || null,
-              nodeRef: row?.reference || ''
-            }))
+            node.current.nodeId = row?.recordId || null
+            node.current.reference = row?.reference || ''
           }}
         />
       </Grow>
