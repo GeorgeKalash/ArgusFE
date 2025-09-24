@@ -623,16 +623,42 @@ export default function SaleTransactionForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          await getItemConvertPrice(newRow.itemId, newRow?.muId)
-          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = newRow?.qty * filteredItems?.muQty
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
 
-          update({
-            qtyInBase,
-            muQty: newRow?.muQty
-          })
+          return
         }
+
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const qtyInBase = newRow?.qty * filteredItems?.muQty
+
+        const unitPrice =
+          ItemConvertPrice?.priceType === 3
+            ? (newRow?.weight || 0) *
+              ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
+                (ItemConvertPrice?.baseLaborPrice || 0))
+            : ItemConvertPrice?.unitPrice || 0
+
+        const data = getItemPriceRow(
+          {
+            ...newRow,
+            qtyInBase,
+            muQty: newRow?.muQty,
+            unitPrice,
+            minPrice: ItemConvertPrice?.minPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1,
+            basePrice:
+              newRow?.isMetal === false
+                ? ItemConvertPrice?.basePrice || 0
+                : newRow?.metalPurity > 0
+                ? basePriceValue
+                : 0
+          },
+          DIRTYFIELD_QTY
+        )
+        update(data)
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredMeasurements?.current }
