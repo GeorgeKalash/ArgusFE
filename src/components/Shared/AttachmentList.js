@@ -38,7 +38,8 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
     {
       field: 'fileName',
       headerName: _labels.reference,
-      width: 'auto'
+      width: 'auto',
+      flex: 1
     },
     {
       width: 100,
