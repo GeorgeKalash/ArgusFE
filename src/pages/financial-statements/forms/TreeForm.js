@@ -9,12 +9,11 @@ import { DataSets } from 'src/resources/DataSets'
 import Tree from 'src/components/Shared/Tree'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { Grid } from '@mui/material'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 
 const TreeForm = ({ mainRecordId, maxAccess }) => {
   const { getRequest } = useContext(RequestsContext)
   const [treeLabels, setTreeLabels] = useState([])
+  const [dataWithNodes, setData] = useState([])
 
   const formik = useFormik({
     initialValues: {
@@ -25,37 +24,33 @@ const TreeForm = ({ mainRecordId, maxAccess }) => {
     })
   })
 
-  async function getTreeNodes() {
-    return await getRequest({
-      extension: FinancialStatementRepository.Node.qry,
-      parameters: `_fsId=${mainRecordId}`
-    })
-  }
+  const fetchData = async (languageId = formik?.values?.languageId || null) => {
+    const [dataRes, labelsRes] = await Promise.all([
+      getRequest({
+        extension: FinancialStatementRepository.Node.qry,
+        parameters: `_fsId=${mainRecordId}`
+      }),
+      getRequest({
+        extension: FinancialStatementRepository.Title.qry,
+        parameters: `_fsNodeId=0`
+      })
+    ])
 
-  const {
-    query: { data }
-  } = useResourceQuery({
-    queryFn: getTreeNodes,
-    enabled: Boolean(mainRecordId),
-    endpointId: FinancialStatementRepository.Node.qry,
-    datasetId: ResourceIds.FinancialStatements
-  })
+    const filteredLabels =
+      labelsRes?.list?.filter(label => label.languageId?.toString() === languageId?.toString()) ?? []
 
-  const getTreelabels = async (languageId = formik?.values?.languageId || null) => {
-    const labelsResponse = await getRequest({
-      extension: FinancialStatementRepository.Title.qry,
-      parameters: `_fsNodeId=0`
-    })
+    const enrichedData =
+      dataRes?.list?.map(item => ({
+        ...item,
+        name: filteredLabels.find(f => f.fsNodeId === item.recordId)?.title || 'undefined'
+      })) ?? []
 
-    const filteredLabelResp = labelsResponse?.list?.filter(
-      lable => lable.languageId?.toString() === languageId?.toString()
-    )
-
-    setTreeLabels(filteredLabelResp)
+    setTreeLabels(filteredLabels)
+    setData(enrichedData)
   }
 
   useEffect(() => {
-    if (mainRecordId) getTreelabels()
+    if (mainRecordId) fetchData()
   }, [mainRecordId])
 
   return (
@@ -74,12 +69,12 @@ const TreeForm = ({ mainRecordId, maxAccess }) => {
               maxAccess={maxAccess}
               onChange={(_, newValue) => {
                 formik.setFieldValue('languageId', newValue ? newValue.key : 1)
-                getTreelabels(newValue ? newValue.key : 1)
+                fetchData(newValue ? newValue.key : 1)
               }}
               error={formik.touched.languageId && Boolean(formik.errors.languageId)}
             />
           </Grid>
-          <Tree data={data} labels={treeLabels} printable={false} />
+          <Tree data={{ list: dataWithNodes }} labels={treeLabels} printable={false} />
         </Grow>
       </VertLayout>
     </>
