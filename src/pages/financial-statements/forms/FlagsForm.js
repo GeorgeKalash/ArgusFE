@@ -94,6 +94,7 @@ export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
     <VertLayout>
       <Grow>
         <Table
+          name='flagsTable'
           columns={columns}
           gridData={{ list: data }}
           rowId={['key']}

@@ -73,13 +73,25 @@ const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
     }
   ]
 
+  const add = () => {
+    node.current.nodeId = null
+    node.current.nodeRef = ''
+    openForm()
+  }
+
+  const edit = obj => {
+    node.current.nodeId = obj?.recordId
+    node.current.nodeRef = obj?.reference
+    openForm()
+  }
+
   const del = async obj => {
     await postRequest({
       extension: FinancialStatementRepository.Node.del,
       record: JSON.stringify(obj)
     })
     node.current.nodeId = null
-    node.current.reference = ''
+    node.current.nodeRef = ''
     invalidate()
     toast.success(platformLabels.Deleted)
   }
@@ -91,7 +103,6 @@ const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
         labels,
         maxAccess,
         mainRecordId,
-        setRecId,
         node
       },
       height: 520,
@@ -103,7 +114,7 @@ const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={openForm} maxAccess={maxAccess} labels={labels} />
+        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
       </Fixed>
       <Grow>
         <Table
@@ -111,13 +122,13 @@ const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={openForm}
+          onEdit={edit}
           onDelete={del}
           maxAccess={maxAccess}
           pagination={false}
           onSelectionChange={row => {
             node.current.nodeId = row?.recordId || null
-            node.current.reference = row?.reference || ''
+            node.current.nodeRef = row?.reference || ''
           }}
         />
       </Grow>

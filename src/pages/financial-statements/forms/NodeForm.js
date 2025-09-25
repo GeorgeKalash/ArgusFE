@@ -19,7 +19,6 @@ import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { node } from 'stylis'
 
 export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -161,8 +160,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('displayOrder', '')}
                 error={formik.touched.displayOrder && Boolean(formik.errors.displayOrder)}
-                maxLength={2}
-                decimalScale={0}
                 allowNegative={false}
               />
             </Grid>

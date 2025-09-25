@@ -24,12 +24,16 @@ const NodesTitleForm = ({ labels, maxAccess, node }) => {
       titles: []
     },
     onSubmit: async values => {
-      const obj = values.titles.filter(line => line.title)
       await postRequest({
         extension: FinancialStatementRepository.Title.set2,
         record: JSON.stringify({
           fsNodeId: node?.current?.nodeId,
-          titles: obj
+          titles: values?.titles
+            ?.filter(line => line.title)
+            .map(item => ({
+              ...item,
+              fsNodeId: node?.current?.nodeId
+            }))
         })
       })
 

@@ -15,12 +15,14 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
 import { createConditionalSchema } from 'src/lib/validation'
+import { useError } from 'src/error'
 
 const LedgerForm = ({ node, labels, maxAccess }) => {
   const { nodeId, nodeRef } = node?.current
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
+  const { stack: stackError } = useError()
 
   const conditions = {
     sign: row => {
@@ -58,6 +60,16 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       ledgers: yup.array().of(schema)
     }),
     onSubmit: async obj => {
+      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
+
+      if (hasInvalidLedger) {
+        stackError({
+          message: labels.mandatorySeg
+        })
+
+        return
+      }
+
       const data = {
         fsNodeId: nodeId,
         ledgers: obj?.ledgers

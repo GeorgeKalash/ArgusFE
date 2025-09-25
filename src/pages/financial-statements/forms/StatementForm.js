@@ -24,7 +24,7 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
 
   const formik = useFormik({
     initialValues: {
-      recordId: mainRecordId,
+      recordId: null,
       name: ''
     },
     validationSchema: yup.object({
