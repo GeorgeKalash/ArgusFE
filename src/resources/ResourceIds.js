@@ -578,6 +578,7 @@ export const ResourceIds = {
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
+  AttendanceDay: 72202,
   WorkOrder: 45301,
   FinalSettlement: 75203,
   SyncPurchaseTrx: 50602,
