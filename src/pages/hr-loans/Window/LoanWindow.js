@@ -3,8 +3,11 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import LoansForm from '../Forms/LoansForm'
 import DeductionTab from '../Forms/DeductionTab'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const LoanWindow = ({ recordId, labels, access }) => {
+const LoanWindow = ({ recordId, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -12,6 +15,12 @@ const LoanWindow = ({ recordId, labels, access }) => {
     isClosed: false,
     loanAmount: 0
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.Loans,
+    editMode: !!recordId
+  })
+  useSetWindow({ title: labels.Loans, window })
 
   const tabs = [{ label: labels.LoanInfo }, { label: labels.Deduction, disabled: !store.recordId }]
 
@@ -27,5 +36,8 @@ const LoanWindow = ({ recordId, labels, access }) => {
     </>
   )
 }
+
+LoanWindow.width = 800
+LoanWindow.height = 600
 
 export default LoanWindow

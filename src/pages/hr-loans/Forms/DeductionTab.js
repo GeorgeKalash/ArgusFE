@@ -1,5 +1,6 @@
 import Table from 'src/components/Shared/Table'
 import { useContext } from 'react'
+import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -49,19 +50,23 @@ const DeductionTab = ({ store, labels }) => {
     }
   ]
 
-  async function fetchGridData() {
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
     const response = await getRequest({
       extension: LoanTrackingRepository.LoanDeduction.qry,
-      parameters: `_loanId=${recordId}`
+      parameters: `_loanId=${recordId}&_size=${_pageSize}&_startAt=${_startAt}`
     })
 
-    return response
+    return { ...response, _startAt }
   }
 
   const {
     query: { data },
     access,
-    invalidate
+    invalidate,
+    paginationParameters,
+    refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: LoanTrackingRepository.LoanDeduction.qry,
@@ -69,13 +74,12 @@ const DeductionTab = ({ store, labels }) => {
     enabled: !!recordId
   })
 
-  const add = () => {
-    openForm()
-  }
+  const deductedAmount = data?.list?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0
+  const remainingBalance = (store.loanAmount || 0) - deductedAmount
 
-  const edit = obj => {
-    openForm(obj.recordId)
-  }
+  const add = () => openForm()
+
+  const edit = obj => openForm(obj.recordId)
 
   function openForm(recordId) {
     stack({
@@ -84,6 +88,7 @@ const DeductionTab = ({ store, labels }) => {
         labels,
         store,
         maxAccess: access,
+        remainingBalance,
         recordId
       },
       width: 600,
@@ -91,8 +96,6 @@ const DeductionTab = ({ store, labels }) => {
       title: labels.Deduction
     })
   }
-  const deductedAmount = data?.list.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0
-  const remainingBalance = (store.loanAmount || 0) - deductedAmount
 
   const del = async obj => {
     await postRequest({
@@ -100,7 +103,7 @@ const DeductionTab = ({ store, labels }) => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success(platformLabels.Deleted)
+    toast.success(labels.Deleted)
   }
 
   return (
@@ -112,12 +115,14 @@ const DeductionTab = ({ store, labels }) => {
         <Table
           name='deductionTable'
           columns={columns}
-          onDelete={store.isClosed && del}
           gridData={data}
-          rowId={'loanId'}
+          rowId='recordId'
           onEdit={edit}
+          onDelete={store.isClosed && del}
           pageSize={50}
-          pagination={false}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>

@@ -53,14 +53,13 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
       ltName: '',
       loanBalance: null,
       currencyId: parseInt(defaultCurrency),
-      currencyRef: '',
-      currencyName: '',
       amount: null,
       purpose: '',
       effectiveDate: new Date(),
       ldMethod: parseInt(defaultMethod),
       ldmName: '',
-      ldValue: defaultLdValue
+      ldValue: defaultLdValue,
+      disableEditing: false
     },
     maxAccess,
     validationSchema: yup.object({
@@ -127,9 +126,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
         loanAmount: record.amount ?? 0
       }))
 
-      if (record.employeeId) {
-        await fetchEmployee(record.employeeId)
-      }
+      await fetchEmployee(record.employeeId)
     }
 
     return res
@@ -200,7 +197,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
 
     toast.success(platformLabels.Closed)
     invalidate()
-    if (res?.recordId) refetchForm(res.recordId)
+    refetchForm(res.recordId)
   }
 
   const onReopen = async () => {
@@ -211,7 +208,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
 
     toast.success(platformLabels.Reopened)
     invalidate()
-    if (res?.recordId) refetchForm(res.recordId)
+    refetchForm(res.recordId)
   }
 
   const actions = [
@@ -237,7 +234,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || (formik.values.releaseStatus === 3 && formik.values.status === 3)
+      disabled: !isClosed || !editMode || formik.values.status === 3
     }
   ]
 
@@ -249,7 +246,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
       editMode={editMode}
       actions={actions}
       disabledSubmit={isClosed}
-      functionId={SystemFunction.HrLoans}
+      functionId={SystemFunction.LoanRequest}
     >
       <VertLayout>
         <Fixed>
@@ -260,7 +257,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 label={labels.reference}
                 value={formik.values.reference}
                 required
-                readOnly={isClosed}
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 maxLength='20'
                 onChange={formik.handleChange}
@@ -272,6 +269,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
               <CustomDatePicker
                 name='date'
                 required
+                max={formik.values.effectiveDate}
                 readOnly={isClosed}
                 label={labels.date}
                 value={formik?.values?.date}
@@ -313,20 +311,10 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 label={labels.branch}
                 readOnly
                 valueField='recordId'
-                displayField={['branchRef', 'name']}
+                displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='positionName'
-                label={labels.position}
-                value={formik.values.positionName}
-                readOnly
-                maxAccess={maxAccess}
-                error={formik.touched.positionName && Boolean(formik.errors.positionName)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -340,17 +328,28 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
               />
             </Grid>
             <Grid item xs={12}>
+              <CustomTextField
+                name='positionName'
+                label={labels.position}
+                value={formik.values.positionName}
+                readOnly
+                maxAccess={maxAccess}
+                error={formik.touched.positionName && Boolean(formik.errors.positionName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={LoanTrackingRepository.LoanType.qry}
                 name='ltId'
                 label={labels.ltype}
                 required
-                readOnly={isClosed}
+                readOnly={isClosed || formik.values.disableEditing}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('ltId', newValue?.recordId || null)
+                  formik.setFieldValue('disableEditing', newValue.disableEditing)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
@@ -396,7 +395,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 required
                 readOnly={isClosed}
                 maxAccess={maxAccess}
-                onChange={formik.setFieldValue}
+                onChange={e => formik.setFieldValue('amount', e.target.value)}
                 onClear={async () => {
                   formik.setFieldValue('amount', null)
                 }}
@@ -409,10 +408,11 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 name='purpose'
                 label={labels.purpose}
                 required
+                rows={2}
                 readOnly={isClosed}
                 value={formik.values.purpose}
                 maxAccess={maxAccess}
-                onChange={formik.setFieldValue}
+                onChange={e => formik.setFieldValue('purpose', e.target.value)}
                 onClear={() => formik.setFieldValue('purpose', '')}
                 error={formik.touched.purpose && Boolean(formik.errors.purpose)}
               />
@@ -423,6 +423,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 label={labels.effectiveDate}
                 value={formik?.values?.effectiveDate}
                 required
+                min={formik.values.date}
                 readOnly={isClosed}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -436,7 +437,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 name='ldMethod'
                 label={labels.ldMethod}
                 required
-                readOnly={isClosed}
+                readOnly={isClosed || formik.values.disableEditing}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
@@ -457,7 +458,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 label={labels.ldValue}
                 value={formik.values.ldValue}
                 required
-                readOnly={isClosed}
+                readOnly={isClosed || formik.values.disableEditing}
                 maxAccess={maxAccess}
                 onChange={formik.setFieldValue}
                 onClear={async () => {

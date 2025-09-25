@@ -19,7 +19,7 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function DeductionForm({ labels, recordId, store, maxAccess }) {
+export default function DeductionForm({ labels, recordId, store, maxAccess, remainingBalance, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -34,20 +34,19 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
       amount: null,
       date: new Date(),
       type: null,
-      typeName: '',
       notes: ''
     },
     validationSchema: yup.object({
-      amount: yup.number().required(),
+      amount: yup.number().required().max(remainingBalance, `Amount cannot exceed ${remainingBalance}`),
       date: yup.date().required(),
       type: yup.string().required()
     }),
     onSubmit: obj => {
       const data = {
         ...obj,
-        date: formatDateToApi(obj.date)
+        date: formatDateToApi(obj.date),
+        payrollDeduction: obj.type === 1
       }
-
       postRequest({
         extension: LoanTrackingRepository.LoanDeduction.set,
         record: JSON.stringify(data)
@@ -56,6 +55,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
         formik.setFieldValue('recordId', res.recordId)
 
         invalidate()
+        window.close()
       })
     }
   })
@@ -83,7 +83,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
       resourceId={ResourceIds.Loans}
       form={formik}
       maxAccess={maxAccess}
-      disabledSubmit={!store.isClosed}
+      disabledSubmit={!store.isClosed || formik.values.payrollDeduction}
       editMode={editMode}
       isInfo={false}
       isCleared={false}
@@ -94,9 +94,8 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
             <Grid item xs={6}>
               <CustomCheckBox
                 name='payrollDeduction'
-                readOnly={!store.isClosed}
                 value={formik.values?.payrollDeduction}
-                onChange={event => formik.setFieldValue('payrollDeduction', event.target.checked)}
+                readOnly
                 label={labels.payrollDeduction}
                 maxAccess={maxAccess}
               />
@@ -107,7 +106,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 label={labels.deductionAmount}
                 value={formik.values.amount}
                 required
-                readOnly={!store.isClosed}
+                readOnly={!store.isClosed || formik.values.payrollDeduction}
                 maxAccess={maxAccess}
                 onChange={async e => {
                   formik.setFieldValue('amount', e?.target?.value || null)
@@ -124,7 +123,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 name='date'
                 label={labels.date}
                 required
-                readOnly={!store.isClosed}
+                readOnly={!store.isClosed || formik.values.payrollDeduction}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
@@ -138,7 +137,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
                 name='type'
                 label={labels.type}
                 required
-                readOnly={!store.isClosed}
+                readOnly={!store.isClosed || formik.values.payrollDeduction}
                 valueField='key'
                 displayField='value'
                 values={formik.values}
@@ -153,8 +152,9 @@ export default function DeductionForm({ labels, recordId, store, maxAccess }) {
               <CustomTextArea
                 name='notes'
                 label={labels.notes}
-                readOnly={!store.isClosed}
+                readOnly={!store.isClosed || formik.values.payrollDeduction}
                 value={formik.values.notes}
+                maxLength='100'
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}

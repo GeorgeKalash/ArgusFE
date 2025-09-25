@@ -111,7 +111,7 @@ const HrLoans = () => {
   ]
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.HrLoans,
+    functionId: SystemFunction.LoanRequest,
     action: openForm
   })
 
@@ -127,13 +127,8 @@ const HrLoans = () => {
     stack({
       Component: LoanWindow,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 600,
-      height: 600,
-      title: labels.Loans
+        recordId
+      }
     })
   }
 
