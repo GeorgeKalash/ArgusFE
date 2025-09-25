@@ -11,7 +11,10 @@ export const PayrollRepository = {
     qry: service + 'qryPT'
   },
   Paycode: {
-    qry: service + 'qryPC'
+    qry: service + 'qryPC',
+    set: service + 'setPC',
+    del: service + 'delPC',
+    get: service + 'getPC'
   },
   SecuritySchedule: {
     qry: service + 'qrySS'
@@ -45,5 +48,12 @@ export const PayrollRepository = {
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
+  },
+  FinalSettlement: {
+    page: service + 'pageFS',
+    get: service + 'getFS',
+    set: service + 'setFS',
+    del: service + 'delFS',
+    snapshot: service + 'snapshotFS'
   }
 }

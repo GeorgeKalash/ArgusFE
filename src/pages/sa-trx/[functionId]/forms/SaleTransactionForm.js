@@ -552,7 +552,7 @@ export default function SaleTransactionForm({
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
@@ -622,16 +622,42 @@ export default function SaleTransactionForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          await getItemConvertPrice(newRow.itemId, newRow?.muId)
-          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = newRow?.qty * filteredItems?.muQty
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
 
-          update({
-            qtyInBase,
-            muQty: newRow?.muQty
-          })
+          return
         }
+
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const qtyInBase = newRow?.qty * filteredItems?.muQty
+
+        const unitPrice =
+          ItemConvertPrice?.priceType === 3
+            ? (newRow?.weight || 0) *
+              ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
+                (ItemConvertPrice?.baseLaborPrice || 0))
+            : ItemConvertPrice?.unitPrice || 0
+
+        const data = getItemPriceRow(
+          {
+            ...newRow,
+            qtyInBase,
+            muQty: newRow?.muQty,
+            unitPrice,
+            minPrice: ItemConvertPrice?.minPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1,
+            basePrice:
+              newRow?.isMetal === false
+                ? ItemConvertPrice?.basePrice || 0
+                : newRow?.metalPurity > 0
+                ? basePriceValue
+                : 0
+          },
+          DIRTYFIELD_QTY
+        )
+        update(data)
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredMeasurements?.current }
@@ -1427,12 +1453,10 @@ export default function SaleTransactionForm({
     return iconClicked ? { changes: commonData } : commonData
   }
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -2155,7 +2179,7 @@ export default function SaleTransactionForm({
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             name='items'
             columns={columns}

@@ -279,6 +279,7 @@ export default function OutwardReturnSettlementForm({
       actions={actions}
       maxAccess={maxAccess}
       editMode={editMode}
+      previewReport={editMode}
       disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
