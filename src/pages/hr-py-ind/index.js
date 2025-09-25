@@ -46,7 +46,7 @@ const CommissionSchedule = () => {
     {
       field: 'name',
       headerName: labels.name,
-      flex: 1
+      flex: 0.5
     },
     {
       field: 'minResignationDays',
@@ -78,7 +78,7 @@ const CommissionSchedule = () => {
         access
       },
       width: 650,
-      height: 320,
+      height: 480,
       title: labels.payrollIndemnity
     })
   }
