@@ -304,7 +304,6 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         })
 
         update({
-          ...res.record,
           jobId: newRow?.jobId || null,
           jobRef: newRow?.jobRef || '',
           routingId: res.record?.routingId || null,
@@ -313,11 +312,12 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           itemName: res.record?.itemName || '',
           itemId: res.record?.itemId || null,
           category: res.record?.categoryName || '',
+          sku: res.record?.sku || '',
           jobPcs: newRow?.pcs || 0,
           routingSeqNo: res.record?.routingSeqNo || 1
         })
         const design = res.record?.designId ? await getDesign(res.record?.designId) : null
-        
+
         const jobRouting = res.record?.routingSeqNo
           ? await getJobRouting(newRow.jobId, res?.record?.routingSeqNo)
           : null
