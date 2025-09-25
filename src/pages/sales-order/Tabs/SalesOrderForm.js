@@ -323,7 +323,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
           return
         }
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
