@@ -27,7 +27,7 @@ const CommissionSchedule = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.Indemnity.page,
+    endpointId: PayrollRepository.IndemnitySchedule.page,
     datasetId: ResourceIds.Indemnity
   })
 
@@ -35,7 +35,7 @@ const CommissionSchedule = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PayrollRepository.Indemnity.page,
+      extension: PayrollRepository.IndemnitySchedule.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -58,7 +58,7 @@ const CommissionSchedule = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: PayrollRepository.Indemnity.del,
+      extension: PayrollRepository.IndemnitySchedule.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)

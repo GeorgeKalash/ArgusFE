@@ -22,7 +22,7 @@ export default function IndemnityForm({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: PayrollRepository.Indemnity.page
+    endpointId: PayrollRepository.IndemnitySchedule.page
   })
 
   const formik = useFormik({
@@ -39,7 +39,7 @@ export default function IndemnityForm({ labels, maxAccess, store, setStore }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: PayrollRepository.Indemnity.set,
+        extension: PayrollRepository.IndemnitySchedule.set,
         record: JSON.stringify(obj)
       })
 
@@ -58,7 +58,7 @@ export default function IndemnityForm({ labels, maxAccess, store, setStore }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: PayrollRepository.Indemnity.get,
+          extension: PayrollRepository.IndemnitySchedule.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)

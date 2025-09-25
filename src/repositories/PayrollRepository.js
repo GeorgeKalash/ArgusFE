@@ -20,7 +20,11 @@ export const PayrollRepository = {
     qry: service + 'qrySS'
   },
   IndemnitySchedule: {
-    qry: service + 'qryIS'
+    page: service + 'pageIS',
+    qry: service + 'qryIS',
+    get: service + 'getIS',
+    set: service + 'setIS',
+    del: service + 'delIS'
   },
   LedgerGroup: {
     qry: service + 'qryGLG',
@@ -56,12 +60,7 @@ export const PayrollRepository = {
     del: service + 'delFS',
     snapshot: service + 'snapshotFS'
   },
-  Indemnity: {
-    page: service + 'pageIS',
-    get: service + 'getIS',
-    set: service + 'setIS',
-    del: service + 'delIS'
-  },
+
   IndemnityCompany: {
     qry: service + 'qryID',
     set2: service + 'set2ID'
