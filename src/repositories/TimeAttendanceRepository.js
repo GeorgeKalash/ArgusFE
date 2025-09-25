@@ -27,7 +27,8 @@ export const TimeAttendanceRepository = {
     del: service + 'delLR'
   },
   ResetTV: {
-    reset: service + 'resetTV'
+    reset: service + 'resetTV',
+    qry: service + 'qryTV'
   },
   ShitLeave: {
     page: service + 'pageLQ',
@@ -51,5 +52,8 @@ export const TimeAttendanceRepository = {
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'
+  },
+  AttendanceDay: {
+    qry: service + 'qryAD'
   }
 }

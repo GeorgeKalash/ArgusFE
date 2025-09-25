@@ -285,31 +285,42 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         parameters: {
           _workCenterId: formik.values?.header?.workCenterId
         },
-        displayField: 'reference',
-        valueField: 'reference',
+        displayField: 'jobRef',
+        valueField: 'jobRef',
         mapping: [
-          { from: 'recordId', to: 'jobId' },
-          { from: 'reference', to: 'jobRef' },
-          { from: 'designRef', to: 'designRef' },
-          { from: 'designId', to: 'designId' },
-          { from: 'itemName', to: 'itemName' },
-          { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'pcs', to: 'jobPcs' },
-          { from: 'routingSeqNo', to: 'routingSeqNo' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'designRef', value: 'Design' },
-          { key: 'itemName', value: 'Item Name' }
+          { from: 'jobId', to: 'jobId' },
+          { from: 'jobRef', to: 'jobRef' }
         ],
         displayFieldWidth: 4,
         filter: { lineId: formik.values?.header?.lineId },
         readOnly: isClosed || !formik.values?.header?.workCenterId
       },
       async onChange({ row: { update, newRow } }) {
-        const design = newRow.designId ? await getDesign(newRow.designId) : null
-        const jobRouting = newRow?.routingSeqNo ? await getJobRouting(newRow.jobId, newRow?.routingSeqNo) : null
+        if (!newRow?.jobId) return
+
+        const res = await getRequest({
+          extension: ManufacturingRepository.MFJobOrder.get,
+          parameters: `_recordId=${newRow?.jobId}`
+        })
+
+        update({
+          jobId: newRow?.jobId || null,
+          jobRef: newRow?.jobRef || '',
+          routingId: res.record?.routingId || null,
+          designId: res.record?.designId || null,
+          designRef: res.record?.designRef || '',
+          itemName: res.record?.itemName || '',
+          itemId: res.record?.itemId || null,
+          category: res.record?.categoryName || '',
+          sku: res.record?.sku || '',
+          jobPcs: newRow?.pcs || 0,
+          routingSeqNo: res.record?.routingSeqNo || 1
+        })
+        const design = res.record?.designId ? await getDesign(res.record?.designId) : null
+
+        const jobRouting = res.record?.routingSeqNo
+          ? await getJobRouting(newRow.jobId, res?.record?.routingSeqNo)
+          : null
         update({
           classId: design?.classId,
           className: design?.className,
