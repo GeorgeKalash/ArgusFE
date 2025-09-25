@@ -14,11 +14,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 export default function CopyForm({ labels, maxAccess, values, window, setStore, refetchForm }) {
-  const { postRequest } = useContext(RequestsContext)
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.BillOfMaterials.page
+  })
+
+  const invalidateComponents = useInvalidate({
+    endpointId: ManufacturingRepository.Component.qry
   })
 
   const { formik } = useForm({
@@ -34,6 +38,11 @@ export default function CopyForm({ labels, maxAccess, values, window, setStore, 
       version: yup.string().required()
     }),
     onSubmit: async obj => {
+      const components = await getRequest({
+        extension: ManufacturingRepository.Component.qry,
+        parameters: `_bomId=${values.recordId}`
+      })
+
       const response = await postRequest({
         extension: ManufacturingRepository.BillOfMaterials.set,
         record: JSON.stringify({
@@ -42,13 +51,26 @@ export default function CopyForm({ labels, maxAccess, values, window, setStore, 
           recordId: null
         })
       })
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Added)
       formik.setFieldValue('recordId', response.recordId)
-      refetchForm(response.recordId)
       setStore(prevStore => ({
         ...prevStore,
         recordId: response.recordId
       }))
+
+      await postRequest({
+        extension: ManufacturingRepository.Component.set2,
+        record: JSON.stringify({
+          components: components.list.map(component => ({
+            ...component,
+            bomId: response.recordId
+          })),
+          bomId: response.recordId
+        })
+      })
+
+      refetchForm(response.recordId)
+      invalidateComponents()
       window.close()
 
       invalidate()

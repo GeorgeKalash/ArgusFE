@@ -93,16 +93,15 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     })
   }
 
-  async function onCopy(obj) {
+  async function onCopy() {
     stack({
       Component: CopyForm,
       props: {
         labels,
         maxAccess,
-        recordId: obj.recordId,
         setStore,
         values: formik.values,
-        refetchForm
+        refetchForm,
       },
       width: 500,
       height: 300,
@@ -126,7 +125,7 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
     {
       key: 'Copy',
       condition: true,
-      onClick: () => onCopy(formik?.values),
+      onClick: onCopy,
       disabled: !editMode
     }
   ]
