@@ -64,7 +64,7 @@ const StyledTreeItem = styled(TreeItem)(({ theme, depth }) => ({
   }
 }))
 
-function Tree({ data, window }) {
+function Tree({ data, window, printable = true }) {
   const { platformLabels } = useContext(ControlContext)
 
   const printComponentRef = useRef()
@@ -79,8 +79,8 @@ function Tree({ data, window }) {
 
   const treeData = useMemo(() => {
     if (data) {
-      const map = new Map(data.list.map(item => [item.recordId, { ...item, children: [] }]))
-      data.list.forEach(item => {
+      const map = new Map(data?.list?.map(item => [item.recordId, { ...item, children: [] }]))
+      data?.list?.forEach(item => {
         if (item.parentId) {
           const parent = map.get(item.parentId)
           if (parent) {
@@ -101,14 +101,16 @@ function Tree({ data, window }) {
     </StyledTreeItem>
   )
 
-  const actions = [
-    {
-      key: 'Print',
-      condition: true,
-      onClick: handlePrint,
-      disabled: false
-    }
-  ]
+  const actions = printable
+    ? [
+        {
+          key: 'Print',
+          condition: true,
+          onClick: handlePrint,
+          disabled: false
+        }
+      ]
+    : []
 
   return (
     <>
