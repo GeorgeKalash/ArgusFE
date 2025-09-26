@@ -73,7 +73,6 @@ function formatDateTimeForGetAPI(dateString) {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
 }
 
-
 function formatDateDefault(date) {
   //used for report params
   return formatDateandTime(date)
@@ -149,6 +148,17 @@ const formatDateToISO = date => {
 
   //format
   return localDate.toISOString().slice(0, 19) + '.000Z'
+}
+
+// ✅ Format date as MM/dd/yyyy
+export function formatDateMDY(date) {
+  if (!date) return null
+  const d = new Date(date)
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const year = d.getFullYear()
+
+  return `${month}/${day}/${year}`
 }
 
 export {
