@@ -17,11 +17,11 @@ const CbBanksWindow = ({ labels, maxAccess, recordId }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <CbBanksForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <InterfacesForm
           labels={labels}
           resourceId={ResourceIds.CbBanks}

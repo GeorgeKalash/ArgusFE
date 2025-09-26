@@ -14,23 +14,33 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
     isClosed: false
   })
 
-  const [refreshController, setRefreshController] = useState(false);
+  const [refreshController, setRefreshController] = useState(false)
   const editMode = !!store.recordId
 
-  const tabs = [{ label: labels.cycleCounts }, { label: labels.sites, disabled: !editMode }, { label: labels.controller, disabled: !editMode }]
+  const tabs = [
+    { label: labels.cycleCounts },
+    { label: labels.sites, disabled: !editMode },
+    { label: labels.controller, disabled: !editMode }
+  ]
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
 
-      <CustomTabPanel index={0} value={activeTab}>
-        <CycleCountsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} plantId={plantId}/>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
+        <CycleCountsForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} plantId={plantId} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
-        <Sites labels={labels} maxAccess={maxAccess} store={store} setRefreshController={setRefreshController} refreshController={refreshController}/>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
+        <Sites
+          labels={labels}
+          maxAccess={maxAccess}
+          store={store}
+          setRefreshController={setRefreshController}
+          refreshController={refreshController}
+        />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
-        <Controller labels={labels} maxAccess={maxAccess} store={store} key={refreshController}/>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
+        <Controller labels={labels} maxAccess={maxAccess} store={store} key={refreshController} />
       </CustomTabPanel>
     </>
   )

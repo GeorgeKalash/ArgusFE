@@ -5,30 +5,21 @@ import { useState } from 'react'
 import CharacteristicsForm from '../forms/CharacteristicsForm'
 import ValueFormList from '../forms/ValueFormList'
 
-const CharacteristicsWindow = ({
-  height,
-  recordId,
-  labels,
-  maxAccess,
-  expanded
-}) => {
-  const [activeTab , setActiveTab] = useState(0)
+const CharacteristicsWindow = ({ height, recordId, labels, maxAccess }) => {
+  const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
-  const [store , setStore] = useState({
-    recordId : recordId || null,
+  const [store, setStore] = useState({
+    recordId: recordId || null,
     countries: []
   })
 
-  const tabs = [
-    { label: labels.characteristics },
-    { label: labels.values, disabled: !store.recordId },
-  ]
+  const tabs = [{ label: labels.characteristics }, { label: labels.values, disabled: !store.recordId }]
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <CharacteristicsForm
           labels={labels}
           setEditMode={setEditMode}
@@ -38,14 +29,13 @@ const CharacteristicsWindow = ({
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <ValueFormList
           labels={labels}
           setEditMode={setEditMode}
           setStore={setStore}
           maxAccess={maxAccess}
           store={store}
-          expanded={expanded}
         />
       </CustomTabPanel>
     </>

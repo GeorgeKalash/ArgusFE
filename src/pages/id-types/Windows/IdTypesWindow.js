@@ -24,8 +24,8 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <IdTypesForm
           labels={labels}
           setEditMode={setEditMode}
@@ -35,7 +35,7 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <IdFieldsForm
           store={store}
           setStore={setStore}
@@ -46,7 +46,7 @@ const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <InterfacesForm
           recordId={store.recordId}
           resourceId={ResourceIds.IdTypes}

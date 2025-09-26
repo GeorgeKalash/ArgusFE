@@ -13,18 +13,15 @@ const MetalSettingsWindow = ({ recordId, metalColorId, labels, maxAccess, window
     scrap: []
   })
 
-  const tabs = [
-    { label: labels.MetalSettings },
-    { label: labels.Scrap, disabled: !store.recordId }
-  ]
+  const tabs = [{ label: labels.MetalSettings }, { label: labels.Scrap, disabled: !store.recordId }]
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <MetalSettingsForm labels={labels} setStore={setStore} store={store} access={maxAccess} window={window} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <ScrapForm labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>

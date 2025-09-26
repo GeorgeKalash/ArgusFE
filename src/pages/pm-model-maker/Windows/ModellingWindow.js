@@ -16,11 +16,11 @@ export default function ModellingWindow({ labels, access, recordId }) {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
         <ModellingForm labels={labels} access={access} setStore={setStore} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <MaterialsForm access={access} labels={labels} store={store} />
       </CustomTabPanel>
     </>

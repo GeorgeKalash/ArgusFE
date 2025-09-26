@@ -15,11 +15,11 @@ const FiscalYearWindow = ({ labels, maxAccess, recordId, window }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <FiscalYearForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} window={window} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <PeriodsForm maxAccess={maxAccess} labels={labels} store={store} />
       </CustomTabPanel>
     </>

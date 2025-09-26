@@ -1,12 +1,19 @@
 // ** MUI Imports
 import { Box } from '@mui/material'
-
 import PropTypes from 'prop-types'
+import { HIDDEN } from 'src/services/api/maxAccess'
 
 const CustomTabPanel = props => {
-  const { children, value, height, index, ...other } = props
+  const { children, value, height, index, maxAccess, ...other } = props
+  const name = `${props.name || 'tab'}.${index}`
 
-  return (
+  const { accessLevel } = (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId == name) ?? 0
+
+  const hidden = accessLevel === HIDDEN
+
+  return hidden ? (
+    <></>
+  ) : (
     <Box
       role='tabpanel'
       hidden={value !== index}

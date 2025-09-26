@@ -1,13 +1,18 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import React from 'react'
 
-export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
+export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name }) => {
+  const indexes =
+    maxAccess?.record?.controls
+      ?.filter(c => c.accessLevel === 4 && c.controlId?.startsWith(name || 'tab.'))
+      .map(c => c.controlId.split('.')[1]) || []
+
   return (
     <>
       <Box sx={{ backgroundColor: '#231f20', pt: '5px' }}>
         <Tabs
           value={activeTab}
-          onChange={(event, newValue) => setActiveTab(newValue)}
+          onChange={(_, newValue) => setActiveTab(newValue)}
           variant='scrollable'
           scrollButtons='auto'
           aria-label='scrollable auto tabs example'
@@ -34,24 +39,31 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
             }
           }}
         >
-          {tabs.map((tab, i) => (
-            <Tab
-              key={i}
-              label={tab.label}
-              disabled={tab?.disabled}
-              sx={{
-                minHeight: '35px !important',
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5,
-                py: '0px !important',
-                mb: '0px !important',
-                borderBottom: '0px !important',
-                mr: '2px !important',
-                fontWeight: '1.5rem',
-                px: '5px !important'
-              }}
-            />
-          ))}
+          {tabs
+            ?.map((tab, index) => ({
+              ...tab,
+              id: index
+            }))
+            ?.filter((_, index) => !indexes.includes(String(index)))
+            ?.map((tab, i) => (
+              <Tab
+                key={tab.id}
+                value={tab.id}
+                label={tab.label}
+                disabled={tab?.disabled}
+                sx={{
+                  minHeight: '35px !important',
+                  borderTopLeftRadius: 5,
+                  borderTopRightRadius: 5,
+                  py: '0px !important',
+                  mb: '0px !important',
+                  borderBottom: '0px !important',
+                  mr: '2px !important',
+                  fontWeight: '1.5rem',
+                  px: '5px !important'
+                }}
+              />
+            ))}
         </Tabs>
       </Box>
     </>
