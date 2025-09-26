@@ -55,7 +55,7 @@ const AttendanceDay = () => {
         ...item,
         employee: `<div style="text-align:center;">
              <b>${item.employeeName}</b><br>
-             ${dayjs(item.dayId).format('DD/MM/YYYY')}<br>
+             <b>${dayjs(item.dayId).format('DD/MM/YYYY')}</b><br>
              ${item.departmentName}<br>
              ${item.positionName}<br>
              ${item.branchName}
