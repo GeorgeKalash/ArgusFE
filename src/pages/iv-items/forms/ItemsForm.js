@@ -22,15 +22,22 @@ import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import HistoryTab from './HistoryTab'
 import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
+import { SCRepository } from 'src/repositories/SCRepository'
+import PrintConfirmationDialog from './PrintConfirmationDialog'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
   const [onKitItem, setOnKitItem] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
+
+  const currencyId = defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value
+  const plId = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -230,6 +237,58 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     })
   }
 
+  async function ConfirmationPrint() {
+    const barcode = await Print()
+    stack({
+      Component: PrintConfirmationDialog,
+      props: {
+        Print,
+        barcode
+      },
+      width: 400,
+      height: 200
+    })
+  }
+
+  async function Print() {
+    const obj = formik.values
+    if (!obj.labelTemplateId) {
+      stackError({ message: platformLabels.defaultTemplateError })
+
+      return
+    }
+
+    if (!currencyId) {
+      stackError({ message: platformLabels.DefaultSalesCurrency })
+
+      return
+    }
+
+    const templateRes = await getRequest({
+      extension: SCRepository.LabelTemplate.get,
+      parameters: `_recordId=${obj.labelTemplateId}`
+    })
+
+    if (!templateRes || !templateRes.record.format) {
+      stackError({ message: platformLabels.DefaultTemplateFormat })
+
+      return
+    }
+
+    if (!plId) {
+      stackError({ message: platformLabels.DefaultSalesPrice })
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: InventoryRepository.LabelString.md,
+      parameters: `_templateId=${obj.labelTemplateId}&_currencyId=${currencyId}&_printFormat=${templateRes.record.format}&_plId=${plId}&_items=${recordId},1`
+    })
+
+    return res.record.data
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -271,7 +330,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   }, [formik.values.kitItem])
 
   return (
-    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} printButton={ConfirmationPrint}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

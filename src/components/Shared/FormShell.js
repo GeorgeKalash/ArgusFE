@@ -69,7 +69,8 @@ export default function FormShell({
   setIDInfoAutoFilled,
   visibleClear,
   actions,
-  isParentWindow = true
+  isParentWindow = true,
+  printButton = false
 }) {
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
@@ -459,6 +460,7 @@ export default function FormShell({
               }
             })
           }
+          printButton={printButton}
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           isInfo={isInfo}
