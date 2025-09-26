@@ -105,7 +105,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
           }
 
           if (e.key === 'Enter') {
-            if (isSearchField) {
+            if (isSearchField || props.disabledSubmit) {
               return
             }
             const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
