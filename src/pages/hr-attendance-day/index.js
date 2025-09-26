@@ -40,10 +40,6 @@ const AttendanceDay = () => {
 
   const todayFormatted = format(new Date(), 'yyyyMMdd')
 
-  function convertYyyyMmDdToDdMmYyyy(dateString) {
-    return dayjs(dateString, 'YYYYMMDD').format('DD/MM/YYYY')
-  }
-
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 30, params } = options
 
@@ -59,7 +55,7 @@ const AttendanceDay = () => {
         ...item,
         employee: `<div style="text-align:center;">
              <b>${item.employeeName}</b><br>
-             ${convertYyyyMmDdToDdMmYyyy(item.dayId)}<br>
+             ${dayjs(item.dayId).format('DD/MM/YYYY')}<br>
              ${item.departmentName}<br>
              ${item.positionName}<br>
              ${item.branchName}
