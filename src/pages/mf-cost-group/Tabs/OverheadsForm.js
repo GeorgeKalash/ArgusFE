@@ -1,11 +1,9 @@
 import { useForm } from 'src/hooks/form'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -14,6 +12,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
 export default function OverheadsForm({ store, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -119,14 +118,7 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
   }, 0)
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.CostGroup}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -153,6 +145,6 @@ export default function OverheadsForm({ store, labels, maxAccess }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

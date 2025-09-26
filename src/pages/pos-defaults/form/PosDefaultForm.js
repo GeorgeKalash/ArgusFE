@@ -9,7 +9,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 const PosDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -60,7 +60,7 @@ const PosDefaultForm = ({ _labels, access }) => {
   }
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -81,7 +81,7 @@ const PosDefaultForm = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import React, { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
@@ -13,6 +12,7 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 export default function GenerateTransferForm({ cashCountId, fromPlantId, labels, maxAccess }) {
   const { postRequest } = useContext(RequestsContext)
@@ -51,7 +51,7 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
   })
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={4}>
@@ -109,6 +109,6 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

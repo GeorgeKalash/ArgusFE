@@ -1,19 +1,18 @@
 import { useEffect, useState, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
-const UserDefinedForm = ({ labels }) => {
+const UserDefinedForm = ({ labels, maxAccess }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
   const [errored, setErrored] = useState(false)
@@ -21,6 +20,7 @@ const UserDefinedForm = ({ labels }) => {
   const counter = 20
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       ivtDimCount: '',
       ...Object.fromEntries(Array.from({ length: counter }, (_, i) => [`ivtDimension${i + 1}`, '']))
@@ -87,13 +87,6 @@ const UserDefinedForm = ({ labels }) => {
     })
   }
 
-  const handleSubmit = () => {
-    if (errored) {
-      return
-    }
-    formik.handleSubmit()
-  }
-
   function clearExcessFields(currentCount) {
     for (let i = 1; i <= counter; i++) {
       const dimKey = `ivtDimension${i}`
@@ -118,75 +111,74 @@ const UserDefinedForm = ({ labels }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={3} width={'50%'} sx={{ marginLeft: '0.5rem', marginTop: '0.5rem' }}>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='ivtDimCount'
-              label={labels.propertiesCount}
-              value={formik.values.ivtDimCount}
-              maxLength={2}
-              decimalScale={0}
-              onBlur={handleDimCountBlur}
-              unClearable={true}
-              allowNegative={false}
-              error={errored || (formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount))}
-            />
-          </Grid>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={3} xs={6}>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='ivtDimCount'
+                label={labels.propertiesCount}
+                value={formik.values.ivtDimCount}
+                maxLength={2}
+                decimalScale={0}
+                onBlur={handleDimCountBlur}
+                unClearable={true}
+                allowNegative={false}
+                error={errored || (formik.touched.ivtDimCount && Boolean(formik.errors.ivtDimCount))}
+              />
+            </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Grid container spacing={2}>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Grid item xs={12} key={index}>
-                  <CustomTextField
-                    key={index}
-                    name={`ivtDimension${index + 1}`}
-                    label={`${labels.property} ${index + 1}`}
-                    value={formik.values[`ivtDimension${index + 1}`]}
-                    onClear={() => formik.setFieldValue(`ivtDimension${index + 1}`, '')}
-                    onChange={formik.handleChange}
-                    error={
-                      !errored &&
-                      formik.values.ivtDimCount > index &&
-                      Boolean(formik.errors[`ivtDimension${index + 1}`])
-                    }
-                    inputProps={{
-                      readOnly: errored || formik.values.ivtDimCount <= index || formik.values.ivtDimCount === 'null'
-                    }}
-                  />
-                </Grid>
-              ))}
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <Grid item xs={12} key={index}>
+                    <CustomTextField
+                      key={index}
+                      name={`ivtDimension${index + 1}`}
+                      label={`${labels.property} ${index + 1}`}
+                      value={formik.values[`ivtDimension${index + 1}`]}
+                      onClear={() => formik.setFieldValue(`ivtDimension${index + 1}`, '')}
+                      onChange={formik.handleChange}
+                      error={
+                        !errored &&
+                        formik.values.ivtDimCount > index &&
+                        Boolean(formik.errors[`ivtDimension${index + 1}`])
+                      }
+                      inputProps={{
+                        readOnly: errored || formik.values.ivtDimCount <= index || formik.values.ivtDimCount === 'null'
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <Grid item xs={12} key={1}>
+                    <CustomTextField
+                      key={index + 10}
+                      name={`ivtDimension${index + 11}`}
+                      label={`${labels.property} ${index + 11}`}
+                      value={formik.values[`ivtDimension${index + 11}`]}
+                      onClear={() => formik.setFieldValue(`ivtDimension${index + 11}`, '')}
+                      onChange={formik.handleChange}
+                      error={!errored && formik.errors[`ivtDimension${index + 11}`]}
+                      inputProps={{
+                        readOnly:
+                          errored || formik.values.ivtDimCount <= index + 10 || formik.values.ivtDimCount === 'null'
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
           </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Grid container spacing={2}>
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Grid item xs={12} key={1}>
-                  <CustomTextField
-                    key={index + 10}
-                    name={`ivtDimension${index + 11}`}
-                    label={`${labels.property} ${index + 11}`}
-                    value={formik.values[`ivtDimension${index + 11}`]}
-                    onClear={() => formik.setFieldValue(`ivtDimension${index + 11}`, '')}
-                    onChange={formik.handleChange}
-                    error={!errored && formik.errors[`ivtDimension${index + 11}`]}
-                    inputProps={{
-                      readOnly:
-                        errored || formik.values.ivtDimCount <= index + 10 || formik.values.ivtDimCount === 'null'
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

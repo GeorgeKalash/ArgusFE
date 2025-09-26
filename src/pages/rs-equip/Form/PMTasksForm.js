@@ -1,11 +1,9 @@
 import { Grid, Typography } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { useForm } from 'src/hooks/form'
@@ -15,6 +13,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Form from 'src/components/Shared/Form'
 
 export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -101,14 +100,7 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Equipment}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -285,6 +277,6 @@ export default function EquipmentTaskForm({ labels, maxAccess, recordId, pmtId, 
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

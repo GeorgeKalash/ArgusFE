@@ -1,7 +1,5 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -9,6 +7,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function InvDetailsForm({ labels, access, values, setValues, window }) {
   const { formik } = useForm({
@@ -35,13 +34,7 @@ export default function InvDetailsForm({ labels, access, values, setValues, wind
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GenerateInvoices}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -91,6 +84,6 @@ export default function InvDetailsForm({ labels, access, values, setValues, wind
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

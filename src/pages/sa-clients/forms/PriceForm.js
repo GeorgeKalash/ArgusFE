@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -15,6 +13,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function PriceForm({ labels, maxAccess, obj, recordId, window, fetchGridData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -64,14 +63,7 @@ export default function PriceForm({ labels, maxAccess, obj, recordId, window, fe
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Client}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      infoVisible={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -148,6 +140,6 @@ export default function PriceForm({ labels, maxAccess, obj, recordId, window, fe
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

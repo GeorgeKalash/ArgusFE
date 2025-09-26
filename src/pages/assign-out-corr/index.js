@@ -5,7 +5,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -16,6 +15,7 @@ import AssignCorrespondentForm from './AssignCorrespondentForm'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import Form from 'src/components/Shared/Form'
 
 const OutwardsCorrespondent = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -181,19 +181,10 @@ const OutwardsCorrespondent = () => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      isInfo={false}
-      isSaved={false}
-      isCleared={false}
-      isSavedClear={false}
-      actions={actions}
-      maxAccess={maxAccess}
-      resourceId={ResourceIds.CorrespondentOutwards}
-    >
+    <Form actions={actions} onSave={openCorrespondent} maxAccess={maxAccess} isSaved={false} fullSize>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={12}>
               <Grid container spacing={2}>
                 <Grid item xs={4}>
@@ -327,7 +318,7 @@ const OutwardsCorrespondent = () => {
           />
         </Grow>
         <Fixed>
-          <Grid container justifyContent='flex-end' spacing={2} sx={{ px: 2 }}>
+          <Grid container justifyContent='flex-end' spacing={2} sx={{ p: 2 }}>
             <Grid item xs={1.2}>
               <CustomNumberField
                 name='totalFc'
@@ -343,7 +334,7 @@ const OutwardsCorrespondent = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

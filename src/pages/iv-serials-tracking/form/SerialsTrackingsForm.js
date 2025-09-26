@@ -1,13 +1,12 @@
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
 
 export default function SerialsTrackingsForm({ _labels: labels, access }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -98,15 +97,9 @@ export default function SerialsTrackingsForm({ _labels: labels, access }) {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SerialsTrackings}
-      isInfo={false}
-      form={formik}
-      access={access}
-      editMode={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} editMode={false}>
       <DataGrid
+        name='rows'
         onChange={value => {
           formik.setFieldValue('rows', value)
         }}
@@ -116,6 +109,6 @@ export default function SerialsTrackingsForm({ _labels: labels, access }) {
         allowDelete={false}
         allowAddNewLine={false}
       />
-    </FormShell>
+    </Form>
   )
 }

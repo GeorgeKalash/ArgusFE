@@ -1,8 +1,6 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,6 +9,7 @@ import { CostAllocationRepository } from 'src/repositories/CostAllocationReposit
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId, isPosted, isClosed } = store
@@ -82,15 +81,12 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.TaxCodes}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
       disabledSubmit={isPosted || isClosed}
       editMode={editMode}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>
@@ -139,7 +135,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

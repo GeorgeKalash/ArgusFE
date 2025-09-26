@@ -124,9 +124,10 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
         form={formik}
         resourceId={ResourceIds.Correspondent}
         maxAccess={maxAccess}
-        infoVisible={false}
+        isInfo={false}
         editMode={editMode}
         isSavedClear={false}
+        isParentWindow={false}
       >
         <VertLayout>
           <Grow>

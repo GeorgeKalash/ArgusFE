@@ -1,12 +1,10 @@
 import { useForm } from 'src/hooks/form'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
 import PeriodsModuleForm from './PeriodsModuleForm'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -14,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const PeriodsForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -154,13 +153,7 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.FiscalYears}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -173,7 +166,7 @@ const PeriodsForm = ({ labels, maxAccess, store }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -18,6 +16,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,16 +87,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Shipments}
-      form={formik}
-      maxAccess={maxAccess}
-      functionId={SystemFunction.Shipment}
-      actions={actions}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} actions={actions} isSaved={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -186,6 +176,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

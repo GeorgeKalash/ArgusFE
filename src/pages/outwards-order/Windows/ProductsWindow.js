@@ -1,8 +1,6 @@
 import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useContext, useEffect, useState } from 'react'
 import { Button } from '@mui/material'
 import { useWindow } from 'src/windows'
@@ -10,6 +8,7 @@ import SelectAgent from '../Tabs/SelectAgent'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterface'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 const ProductsWindow = ({
   labels,
@@ -165,36 +164,35 @@ const ProductsWindow = ({
   }, [])
 
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          name='products'
-          columns={columns}
-          gridData={gridData}
-          rowId={['productId']}
-          rowSelection='single'
-          isLoading={false}
-          maxAccess={maxAccess}
-          pagination={false}
-          showCheckboxColumn={true}
-          ChangeCheckedRow={setGridData}
-          disable={() => {
-            return !!recordId
-          }}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar
-          onSave={() => {
-            onProductSubmit(gridData)
-            window.close()
-          }}
-          isSaved={true}
-          smallBox={true}
-          disabledSubmit={editMode}
-        />
-      </Fixed>
-    </VertLayout>
+    <Form
+      onSave={() => {
+        onProductSubmit(gridData)
+        window.close()
+      }}
+      disabledSubmit={editMode}
+      maxAccess={maxAccess}
+      fullSize
+    >
+      <VertLayout>
+        <Grow>
+          <Table
+            name='products'
+            columns={columns}
+            gridData={gridData}
+            rowId={['productId']}
+            rowSelection='single'
+            isLoading={false}
+            maxAccess={maxAccess}
+            pagination={false}
+            showCheckboxColumn={true}
+            ChangeCheckedRow={setGridData}
+            disable={() => {
+              return !!recordId
+            }}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

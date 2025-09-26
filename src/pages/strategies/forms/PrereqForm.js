@@ -68,7 +68,7 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   return (
     <FormShell
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       resourceId={ResourceIds.Strategies}
       maxAccess={maxAccess}
       editMode={editMode}

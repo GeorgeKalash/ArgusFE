@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -12,6 +11,7 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import Form from 'src/components/Shared/Form'
 
 export default function TransactionLogPerformance({ recordId }) {
   const { getRequest } = useContext(RequestsContext)
@@ -52,15 +52,7 @@ export default function TransactionLogPerformance({ recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.TransactionLogPerformance}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={false}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -140,6 +132,6 @@ export default function TransactionLogPerformance({ recordId }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

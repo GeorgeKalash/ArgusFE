@@ -148,13 +148,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   }, [formik.values.data])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Category}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Category} isCleared={false} isInfo={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <DataGrid

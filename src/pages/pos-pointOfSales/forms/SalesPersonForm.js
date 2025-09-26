@@ -1,6 +1,5 @@
 import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -11,6 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import Form from 'src/components/Shared/Form'
 
 const SalesPersonForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
@@ -116,13 +116,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
   }, [recordId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.PointOfSale}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -133,7 +127,7 @@ const SalesPersonForm = ({ store, labels, maxAccess }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

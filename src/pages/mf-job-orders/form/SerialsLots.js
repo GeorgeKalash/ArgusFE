@@ -83,12 +83,9 @@ export default function SerialsLots({ labels, maxAccess, recordId, api, paramete
   return (
     <FormShell
       resourceId={ResourceIds.MFJobOrders}
-      form={formik}
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-      isSaved={false}
     >
       <VertLayout>
         <Grow>

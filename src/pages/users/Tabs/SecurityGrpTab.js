@@ -124,7 +124,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
       form={formik}
       resourceId={ResourceIds.Users}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={!!storeRecordId}
     >
       <VertLayout>

@@ -146,13 +146,7 @@ const ItemPartForm = ({ labels, maxAccess, obj }) => {
   }, [obj.recordId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.IVMDParts}
-      isCleared={false}
-      maxAccess={maxAccess}
-      infoVisible={false}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.IVMDParts} isCleared={false} maxAccess={maxAccess} isInfo={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={1}>

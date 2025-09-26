@@ -14,7 +14,7 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import ComponentForm from './ComponentForm'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 const ComponentBOM = ({ store, labels }) => {
   const { recordId } = store
@@ -171,34 +171,33 @@ const ComponentBOM = ({ store, labels }) => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={'recordId'}
-          onEdit={edit}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          pagination={false}
-          maxAccess={access}
-        />
-      </Grow>
-      <Fixed>
-        <Grid container sx={{ p: 2 }}>
-          <Grid item xs={3}>
-            <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Fixed>
+          <GridToolbar onAdd={add} maxAccess={access} />
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={'recordId'}
+            onEdit={edit}
+            onDelete={del}
+            isLoading={false}
+            pageSize={50}
+            pagination={false}
+            maxAccess={access}
+          />
+        </Grow>
+        <Fixed>
+          <Grid container sx={{ p: 2 }}>
+            <Grid item xs={3}>
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-      <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+      </VertLayout>
+    </Form>
   )
 }
 

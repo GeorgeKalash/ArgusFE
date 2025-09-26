@@ -10,22 +10,20 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SCRepository } from 'src/repositories/SCRepository'
-import FormShell from 'src/components/Shared/FormShell'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { useWindow } from 'src/windows'
 import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
+import Form from 'src/components/Shared/Form'
 
 const PhysicalCountSerial = () => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
   const [siteStore, setSiteStore] = useState([])
-  const [editMode, setEditMode] = useState(false)
   const { stack } = useWindow()
 
   const { labels: _labels, maxAccess } = useResourceQuery({
@@ -178,7 +176,6 @@ const PhysicalCountSerial = () => {
           formik.resetForm()
           setData({ list: [] })
           setSiteStore([])
-          setEditMode(false)
         }
       }
     })
@@ -198,15 +195,11 @@ const PhysicalCountSerial = () => {
   )
 
   return (
-    <FormShell
-      form={formik}
-      isInfo={false}
+    <Form
       isSaved={false}
-      isCleared={false}
-      isSavedClear={false}
       maxAccess={maxAccess}
       resourceId={ResourceIds.PhysicalCountSerialSummary}
-      previewReport={editMode}
+      previewReport={data?.list?.length > 0}
     >
       <VertLayout>
         <Fixed>
@@ -378,7 +371,7 @@ const PhysicalCountSerial = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

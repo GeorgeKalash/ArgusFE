@@ -122,8 +122,9 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
       form={formik}
       resourceId={ResourceIds.Users}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={!!recordId}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>

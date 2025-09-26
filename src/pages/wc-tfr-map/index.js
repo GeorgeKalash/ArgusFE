@@ -5,11 +5,10 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 export default function WorkCenterTransferMap() {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -72,19 +71,18 @@ export default function WorkCenterTransferMap() {
   }, [])
 
   return (
-    <VertLayout>
-      <Grow>
-        <MatrixGrid
-          rows={data}
-          columns={data}
-          intersections={intersections}
-          setIntersections={setIntersections}
-          maxAccess={access}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar isSaved onSave={handleSubmit} smallBox />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Grow>
+          <MatrixGrid
+            rows={data}
+            columns={data}
+            intersections={intersections}
+            setIntersections={setIntersections}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }

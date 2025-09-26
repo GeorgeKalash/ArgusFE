@@ -96,12 +96,10 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   return (
     <>
       <FormShell
-        form={formik}
+        onSave={formik.handleSubmit}
         resourceId={ResourceIds.Metals}
         maxAccess={maxAccess}
-        infoVisible={false}
         editMode={!!recordId}
-        isCleared={false}
       >
         <VertLayout>
           <Grow>
