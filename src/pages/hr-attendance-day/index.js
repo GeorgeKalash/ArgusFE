@@ -1,5 +1,6 @@
 import { useContext } from 'react'
 import { format } from 'date-fns'
+import dayjs from 'dayjs'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -39,6 +40,10 @@ const AttendanceDay = () => {
 
   const todayFormatted = format(new Date(), 'yyyyMMdd')
 
+  function convertYyyyMmDdToDdMmYyyy(dateString) {
+    return dayjs(dateString, 'YYYYMMDD').format('DD/MM/YYYY')
+  }
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 30, params } = options
 
@@ -54,7 +59,7 @@ const AttendanceDay = () => {
         ...item,
         employee: `<div style="text-align:center;">
              <b>${item.employeeName}</b><br>
-             ${item.dayId}<br>
+             ${convertYyyyMmDdToDdMmYyyy(item.dayId)}<br>
              ${item.departmentName}<br>
              ${item.positionName}<br>
              ${item.branchName}
@@ -62,7 +67,6 @@ const AttendanceDay = () => {
         timeVariations: `<div style="text-align:center;">
                    ${item?.variationsList
                      ?.map(tv => {
-
                        if (tv.timeCodeName) {
                          let text =
                            tv.timeCode === 20 || tv.timeCode === 41
