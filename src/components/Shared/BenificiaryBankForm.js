@@ -505,7 +505,6 @@ export default function BenificiaryBankForm({
                     label={_labels.confirmAccountRef}
                     value={formik.values.accountRefRepeat}
                     onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
                     maxLength='50'
                     error={formik.touched.accountRefRepeat && Boolean(formik.errors.accountRefRepeat)}
                     maxAccess={maxAccess}
@@ -728,7 +727,6 @@ export default function BenificiaryBankForm({
                     readOnly={editMode}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
-                    onBlur={formik.handleBlur}
                     required={formik.values.cellPhone}
                   />
                 </FormGrid>
@@ -833,7 +831,6 @@ export default function BenificiaryBankForm({
                     readOnly={editMode}
                     onCopy={handleCopy}
                     onPaste={handleCopy}
-                    onBlur={formik.handleBlur}
                     required={formik.values.IBAN}
                   />
                 </FormGrid>

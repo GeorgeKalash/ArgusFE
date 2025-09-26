@@ -894,7 +894,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                     editMode={editMode}
                     value={formik.values?.reference}
                     setReferenceRequired={setReferenceRequired}
-                    onChange={formik.handleChange}
+                    onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
                     maxAccess={maxAccess}
@@ -956,12 +956,12 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          type={showAsPassword ? 'password' : ''}
+                          displayValue={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
-                          onChange={e => {
+                          onChange={(name, value) => {
                             setIsValidatePhoneClicked(false)
-                            formik.handleChange(e)
+                            formik.setFieldValue(name, value)
                           }}
                           onCopy={handleCopy}
                           onPaste={handleCopy}
@@ -1148,7 +1148,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           name='idIssuePlaceCode'
                           label={labels.issusPlace}
                           value={formik.values?.idIssuePlaceCode}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           readOnly={editMode && !allowEdit && true}
                           onClear={() => formik.setFieldValue('idIssuePlaceCode', '')}
                           error={formik.touched.idIssuePlaceCode && Boolean(formik.errors.idIssuePlaceCode)}
@@ -1163,9 +1163,9 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               label={labels.first}
                               value={formik.values?.firstName}
                               required
-                              onChange={e => {
-                                formik.handleChange(e)
-                                formik.setFieldValue('name', e.target.value + ' ' + formik.values?.lastName)
+                              onChange={(name, value) => {
+                                formik.setFieldValue(name, value)
+                                formik.setFieldValue('name', value + ' ' + formik.values?.lastName)
                               }}
                               language='english'
                               maxLength='10'
@@ -1180,7 +1180,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='middleName'
                               label={labels.middle}
                               value={formik.values?.middleName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               language='english'
                               maxLength='10'
                               readOnly={editMode && !allowEdit && true}
@@ -1195,9 +1195,9 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               label={labels.last}
                               value={formik.values?.lastName}
                               required
-                              onChange={e => {
-                                formik.handleChange(e),
-                                  formik.setFieldValue('name', formik.values?.firstName + ' ' + e.target.value)
+                              onChange={(name, value) => {
+                                formik.setFieldValue(name, value),
+                                  formik.setFieldValue('name', formik.values?.firstName + ' ' + value)
                               }}
                               language='english'
                               maxLength='10'
@@ -1212,7 +1212,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='familyName'
                               label={labels.family}
                               value={formik.values?.familyName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               language='english'
                               maxLength='10'
                               readOnly={editMode && !allowEdit && true}
@@ -1230,7 +1230,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='fl_firstName'
                               label={labels.fl_first}
                               value={formik.values?.fl_firstName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               maxLength='10'
                               readOnly={editMode && !allowEdit && true}
                               dir='rtl'
@@ -1246,7 +1246,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='fl_middleName'
                               label={labels.fl_middle}
                               value={formik.values?.fl_middleName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               readOnly={editMode && !allowEdit && true}
                               dir='rtl'
                               language='arabic'
@@ -1260,7 +1260,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='fl_lastName'
                               label={labels.fl_last}
                               value={formik.values?.fl_lastName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               maxLength='10'
                               dir='rtl'
                               language='arabic'
@@ -1275,7 +1275,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               name='fl_familyName'
                               label={labels.fl_family}
                               value={formik.values?.fl_familyName}
-                              onChange={formik.handleChange}
+                              onChange={formik.setFieldValue}
                               readOnly={editMode && !allowEdit && true}
                               dir='rtl'
                               language='arabic'
@@ -1331,7 +1331,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                             if (newValue) {
                               formik.setFieldValue('gender', newValue?.key)
                             } else {
-                              formik.setFieldValue('gender', '')
+                              formik.setFieldValue('gender', null)
                             }
                           }}
                           error={formik.touched.gender && Boolean(formik.errors.gender)}
@@ -1376,7 +1376,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.sponsorName}
                           value={formik.values?.sponsorName}
                           readOnly={editMode && !allowEdit && true}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           maxLength='200'
                           onClear={() => formik.setFieldValue('sponsorName', '')}
                           error={formik.touched.sponsorName && Boolean(formik.errors.sponsorName)}
@@ -1659,7 +1659,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.whatsapp}
                           value={formik.values?.whatsAppNo}
                           readOnly={editMode && !allowEdit && true}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           maxLength='15'
                           phone={true}
                           onClear={() => formik.setFieldValue('whatsAppNo', '')}
@@ -1781,10 +1781,9 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         <CustomTextField
                           name='relativeDiplomatInfo'
                           label={labels.relativeDiplomatInfo}
-                          onBlur={formik.handleBlur}
                           value={formik.values?.relativeDiplomatInfo}
                           readOnly={editMode || (!formik.values?.isRelativeDiplomat && true)}
-                          onChange={formik.handleChange}
+                          onChange={formik.setFieldValue}
                           maxLength='10'
                           required={formik.values.isRelativeDiplomat ? true : false}
                           onClear={() => formik.setFieldValue('relativeDiplomatInfo', '')}
