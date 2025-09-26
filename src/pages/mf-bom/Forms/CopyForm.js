@@ -51,7 +51,6 @@ export default function CopyForm({ labels, maxAccess, values, window, setStore, 
           recordId: null
         })
       })
-      toast.success(platformLabels.Added)
       formik.setFieldValue('recordId', response.recordId)
       setStore(prevStore => ({
         ...prevStore,
@@ -69,11 +68,13 @@ export default function CopyForm({ labels, maxAccess, values, window, setStore, 
         })
       })
 
+      toast.success(platformLabels.Added)
+
       refetchForm(response.recordId)
       invalidateComponents()
-      window.close()
 
       invalidate()
+      window.close()
     }
   })
 
