@@ -578,6 +578,7 @@ export const ResourceIds = {
   SpCategory: 45111,
   MaintenanceTemplates: 45106,
   RsLabors: 45104,
+  AttendanceDay: 72202,
   WorkOrder: 45301,
   FinalSettlement: 75203,
   SyncPurchaseTrx: 50602,
@@ -585,6 +586,7 @@ export const ResourceIds = {
   IssueOfMaterials: 42304,
   WorkCenterTransferMap: 42128,
   RepairRequest: 45300,
+  Indemnity: 75105,
 
   // GL
   GLSalesInvoice: 51604,

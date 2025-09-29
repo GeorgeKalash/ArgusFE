@@ -238,12 +238,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -324,17 +322,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
           return
         }
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
-        getFilteredMU(newRow?.itemId)
-
         const ItemConvertPrice = await getItemConvertPrice(
           newRow.itemId,
           update,
-          defaultMu?.recordId || filteredMeasurements?.[0]?.recordId
+          itemInfo?.defSaleMUId ? defaultMu?.recordId || filteredMeasurements?.[0]?.recordId : 0
         )
         let rowTax = null
         let rowTaxDetails = null
@@ -456,7 +453,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         )
         update(data)
       },
-      propsReducer({ row, props }) {
+      propsReducer({ props }) {
         return { ...props, store: filteredMeasurements?.current }
       }
     },
@@ -469,7 +466,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
-        getFilteredMU(newRow.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
 
@@ -1584,7 +1581,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
             error={formik.errors.items}
