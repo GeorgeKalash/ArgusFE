@@ -29,6 +29,9 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
     initialValues: {
       recordId: null,
       name: '',
+      showMetalCurrencyAmount: false,
+      showFiatCurrencyAmount: false,
+      showBaseAmount: false,
       sgId: null,
       isConfidential: false
     },

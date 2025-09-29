@@ -49,7 +49,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           seg4: '',
           ccgRef: '',
           ccRef: '',
-          sign: null
+          sign: ''
         }
       ]
     },
