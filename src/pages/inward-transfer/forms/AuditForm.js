@@ -81,7 +81,7 @@ export default function AuditForm({ labels, formik }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={2} p={2}>
+        <Grid container spacing={3} p={4}>
           <Grid item xs={12}>
             <CustomTextField
               name='corCurrencyRef'
@@ -90,7 +90,7 @@ export default function AuditForm({ labels, formik }) {
               value={iwiFields?.corCurrencyRef}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='corExRate'
               readOnly
@@ -99,7 +99,7 @@ export default function AuditForm({ labels, formik }) {
               decimalScale={5}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='corEvalExRate'
               readOnly
@@ -122,7 +122,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='taxAmount'
               readOnly
@@ -131,7 +131,7 @@ export default function AuditForm({ labels, formik }) {
               decimalScale={2}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='corAmount'
               readOnly
@@ -154,7 +154,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='corCommission'
               readOnly
@@ -177,7 +177,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='baseCorCommission'
               readOnly
@@ -200,7 +200,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='corBaseAmount'
               readOnly
@@ -223,7 +223,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomNumberField
               name='exRate'
               readOnly
@@ -232,7 +232,7 @@ export default function AuditForm({ labels, formik }) {
               decimalScale={5}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='amount'
               readOnly
@@ -255,7 +255,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='commission'
               readOnly
@@ -278,7 +278,7 @@ export default function AuditForm({ labels, formik }) {
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ mx: 5 }}>
+          <Grid item xs={12}>
             <CustomTextField
               name='netCommissionRevenue'
               readOnly
