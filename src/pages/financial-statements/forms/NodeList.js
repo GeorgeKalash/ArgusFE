@@ -13,7 +13,7 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const NodeList = ({ node, mainRecordId, labels, maxAccess, setRefetchTree }) => {
+const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -29,6 +29,8 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, setRefetchTree }) => 
   })
 
   async function fetchGridData() {
+    await fetchData()
+
     return getRequest({
       extension: FinancialStatementRepository.Node.qry,
       parameters: `_fsId=${mainRecordId}`
@@ -105,7 +107,8 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, setRefetchTree }) => 
         labels,
         maxAccess,
         mainRecordId,
-        node
+        node,
+        fetchData
       },
       height: 520,
       width: 500,

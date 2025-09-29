@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useForm } from 'src/hooks/form'
 
-const NodesTitleForm = ({ labels, maxAccess, node }) => {
+const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
@@ -38,6 +38,7 @@ const NodesTitleForm = ({ labels, maxAccess, node }) => {
       })
 
       toast.success(platformLabels.Edited)
+      fetchData()
     }
   })
 
