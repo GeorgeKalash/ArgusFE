@@ -12,6 +12,9 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 
 export default function StatementForm({ labels, maxAccess, setRecId, mainRecordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,10 +28,20 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
   const formik = useFormik({
     initialValues: {
       recordId: null,
-      name: ''
+      name: '',
+      sgId: null,
+      isConfidential: false
     },
     validationSchema: yup.object({
-      name: yup.string().required()
+      name: yup.string().required(),
+      sgId: yup
+        .number()
+        .nullable()
+        .test('sgId-required-if-confidential', 'sgId is required when confidential', function (value) {
+          const { isConfidential } = this.parent
+
+          return !(isConfidential && !value)
+        })
     }),
     onSubmit: async obj => {
       const res = await postRequest({
@@ -62,7 +75,7 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
     <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
@@ -74,6 +87,36 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isConfidential'
+                value={formik.values?.isConfidential}
+                onChange={event => {
+                  formik.setFieldValue('sgId', null)
+                  formik.setFieldValue('isConfidential', event.target.checked)
+                }}
+                label={labels.isConfidential}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={AccessControlRepository.SecurityGroup.qry}
+                parameters={`_startAt=0&_pageSize=1000&filter=`}
+                name='sgId'
+                label={labels.securityGrp}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sgId', newValue?.recordId || null)
+                }}
+                required={formik.values.isConfidential}
+                readOnly={!formik.values.isConfidential}
+                error={formik.touched.sgId && Boolean(formik.errors.sgId)}
               />
             </Grid>
           </Grid>

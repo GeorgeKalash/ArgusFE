@@ -158,7 +158,7 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                 value={formik.values.displayOrder}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('displayOrder', '')}
+                onClear={() => formik.setFieldValue('displayOrder', null)}
                 error={formik.touched.displayOrder && Boolean(formik.errors.displayOrder)}
                 allowNegative={false}
               />

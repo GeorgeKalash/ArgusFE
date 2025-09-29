@@ -98,7 +98,6 @@ export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
           columns={columns}
           gridData={{ list: data }}
           rowId={['key']}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />

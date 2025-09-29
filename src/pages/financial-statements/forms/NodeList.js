@@ -11,8 +11,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
+const NodeList = ({ node, mainRecordId, labels, maxAccess, setRefetchTree }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -22,8 +23,9 @@ const NodeList = ({ node, mainRecordId, setRecId, labels, maxAccess }) => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
+    endpointId: FinancialStatementRepository.Node.qry,
     enabled: Boolean(mainRecordId),
-    endpointId: FinancialStatementRepository.Node.qry
+    datasetId: ResourceIds.FinancialStatements
   })
 
   async function fetchGridData() {

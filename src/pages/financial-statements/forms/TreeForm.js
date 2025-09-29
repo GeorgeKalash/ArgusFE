@@ -25,6 +25,8 @@ const TreeForm = ({ mainRecordId, maxAccess }) => {
   })
 
   const fetchData = async (languageId = formik?.values?.languageId || null) => {
+    if (!mainRecordId) return
+
     const [dataRes, labelsRes] = await Promise.all([
       getRequest({
         extension: FinancialStatementRepository.Node.qry,
@@ -50,34 +52,32 @@ const TreeForm = ({ mainRecordId, maxAccess }) => {
   }
 
   useEffect(() => {
-    if (mainRecordId) fetchData()
+    fetchData()
   }, [mainRecordId])
 
   return (
-    <>
-      <VertLayout>
-        <Grow>
-          <Grid item margin={3}>
-            <ResourceComboBox
-              datasetId={DataSets.LANGUAGE}
-              name='languageId'
-              valueField='key'
-              displayField='value'
-              defaultIndex={0}
-              values={formik.values}
-              required
-              maxAccess={maxAccess}
-              onChange={(_, newValue) => {
-                formik.setFieldValue('languageId', newValue ? newValue.key : 1)
-                fetchData(newValue ? newValue.key : 1)
-              }}
-              error={formik.touched.languageId && Boolean(formik.errors.languageId)}
-            />
-          </Grid>
-          <Tree data={{ list: dataWithNodes }} labels={treeLabels} printable={false} />
-        </Grow>
-      </VertLayout>
-    </>
+    <VertLayout>
+      <Grow>
+        <Grid item margin={3}>
+          <ResourceComboBox
+            datasetId={DataSets.LANGUAGE}
+            name='languageId'
+            valueField='key'
+            displayField='value'
+            defaultIndex={0}
+            values={formik.values}
+            required
+            maxAccess={maxAccess}
+            onChange={(_, newValue) => {
+              formik.setFieldValue('languageId', newValue?.key || 1)
+              fetchData(newValue?.key || 1)
+            }}
+            error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+          />
+        </Grid>
+        <Tree data={{ list: dataWithNodes }} labels={treeLabels} printable={false} />
+      </Grow>
+    </VertLayout>
   )
 }
 
