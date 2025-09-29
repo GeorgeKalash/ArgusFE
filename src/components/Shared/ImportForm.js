@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Button, Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -130,7 +130,7 @@ const getImportData = (gridData, columns, stackError) => {
   return convertedData
 }
 
-const ImportForm = forwardRef(({ onSuccess, resourceId, access, window }, ref) => {
+const ImportForm = ({ onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -140,10 +140,6 @@ const ImportForm = forwardRef(({ onSuccess, resourceId, access, window }, ref) =
   const imageInputRef = useRef(null)
 
   useSetWindow({ title: platformLabels.import, window })
-
-  useImperativeHandle(ref, () => ({
-    submit: () => handleSubmit()
-  }))
 
   useEffect(() => {
     if (resourceId) {
@@ -221,7 +217,14 @@ const ImportForm = forwardRef(({ onSuccess, resourceId, access, window }, ref) =
   ]
 
   return (
-    <Form actions={actions} maxAccess={access} fullSize>
+    <Form
+      onSave={handleSubmit}
+      disabledSubmit={!file?.name}
+      isSaved={false}
+      actions={actions}
+      maxAccess={access}
+      fullSize
+    >
       <VertLayout>
         <Fixed>
           <GridToolbar
@@ -290,7 +293,7 @@ const ImportForm = forwardRef(({ onSuccess, resourceId, access, window }, ref) =
       </VertLayout>
     </Form>
   )
-})
+}
 
 ImportForm.width = 1000
 ImportForm.height = 600

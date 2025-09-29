@@ -298,7 +298,14 @@ const GenerateMaterialPlaning = () => {
   ]
 
   return (
-    <Form actions={actions} onSave={() => formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
+    <Form
+      actions={actions}
+      onSave={() => formik.handleSubmit}
+      disabedSubmit={!formik.values.mrpId}
+      isSaved={false}
+      maxAccess={access}
+      fullSize
+    >
       <VertLayout>
         <Fixed>
           <RPBGridToolbar

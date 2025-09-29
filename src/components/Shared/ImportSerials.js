@@ -100,7 +100,12 @@ const ImportSerials = ({ endPoint, header, onCloseimport, maxAccess, window }) =
   ]
 
   return (
-    <Form actions={actions} onSave={() => onImportConfirmation()} isSaved={false}>
+    <Form
+      actions={actions}
+      onSave={() => onImportConfirmation()}
+      disabledSubmit={!file?.name && !formik?.values?.serials}
+      isSaved={false}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

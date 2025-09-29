@@ -12,6 +12,7 @@ import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
   const { getRequest } = useContext(RequestsContext)
@@ -81,12 +82,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, api, paramete
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      onSave={formik.handleSubmit}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <Form resourceId={ResourceIds.MFJobOrders} onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -109,7 +105,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, api, paramete
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

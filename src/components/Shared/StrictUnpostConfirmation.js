@@ -40,8 +40,9 @@ const StrictUnpostConfirmation = ({ window, onSuccess }) => {
     <Form
       actions={actions}
       isSaved={false}
-      onSave={confirmationText.toLowerCase() === 'unpost' && handleSubmit}
+      onSave={handleSubmit}
       isParentWindow={false}
+      disabledSubmit={confirmationText.toLowerCase() !== 'unpost'}
     >
       <VertLayout>
         <Grow>

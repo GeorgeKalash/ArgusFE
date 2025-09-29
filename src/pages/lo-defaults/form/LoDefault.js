@@ -47,7 +47,7 @@ const LoDefault = ({ _labels, access }) => {
   })
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4} sx={{ p: 2 }}>

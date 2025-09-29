@@ -40,7 +40,8 @@ const StrictDeleteConfirmation = ({ window, action }) => {
     <Form
       actions={actions}
       isSaved={false}
-      onSave={confirmationText.toLowerCase() === 'delete' && handleSubmit}
+      onSave={handleSubmit}
+      disabledSubmit={confirmationText.toLowerCase() !== 'delete'}
       isParentWindow={false}
     >
       <VertLayout>

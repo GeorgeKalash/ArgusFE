@@ -135,7 +135,7 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
   }, [])
 
   return (
-    <Form isSaved={false} onSave={() => onReceived()} actions={actions}>
+    <Form isSaved={false} onSave={() => onReceived()} actions={actions} disabledSubmit={data?.viewPosButtons}>
       <Grow>
         <Grid container spacing={2}>
           <Grid item xs={12}>

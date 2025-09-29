@@ -264,7 +264,13 @@ const OpenPurchaseRequisition = () => {
   ]
 
   return (
-    <Form actions={actions} onSave={formik.handleSubmit} fullSize maxAccess={access}>
+    <Form
+      actions={actions}
+      onSave={formik.handleSubmit}
+      disabledSubmit={!vendorId || !currencyId}
+      fullSize
+      maxAccess={access}
+    >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>
