@@ -325,7 +325,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
       onClick: () => {
         viewOTP(null)
       },
-      disabled: !editMode
+      disabled: !editMode || formik?.values?.header?.status == 3
     },
     {
       key: 'GL',
