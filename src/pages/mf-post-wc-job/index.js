@@ -53,7 +53,9 @@ const PostWorkCenterJob = () => {
           record: JSON.stringify({
             jobId: formik.values.jobId,
             seqNo: formik.values.seqNo,
-            workCenterId: formik.values.workCenterId
+            workCenterId: formik.values.workCenterId,
+            qty: formik.values.qty,
+            pcs: formik.values.pcs,
           })
         })
         toast.success(platformLabels.Posted)
