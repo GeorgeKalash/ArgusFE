@@ -77,7 +77,6 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
               })
         }}
         onKeyDown={e => {
-          console.log('text', e.target)
           const target = e.target
 
           const role = target.getAttribute('role') || ''

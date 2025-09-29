@@ -23,7 +23,6 @@ import { useError } from 'src/error'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ReportPuGeneratorRepository } from 'src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
-import FormShell from 'src/components/Shared/FormShell'
 import Form from 'src/components/Shared/Form'
 
 const OpenPurchaseOrder = () => {
@@ -260,7 +259,14 @@ const OpenPurchaseOrder = () => {
   ]
 
   return (
-    <Form actions={actions} onSave={formik.handleSubmit} isSaved={false} maxAccess={access} fullSize>
+    <Form
+      actions={actions}
+      onSave={formik.handleSubmit}
+      disabledSubmit={!vendorId || !siteId}
+      isSaved={false}
+      maxAccess={access}
+      fullSize
+    >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} p={2}>

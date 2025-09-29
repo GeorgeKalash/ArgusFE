@@ -88,6 +88,7 @@ export function WindowProvider({ children }) {
 
   function addToStack(options) {
     const { Component } = options
+    document?.activeElement?.blur?.()
 
     setStack(stack => [
       ...stack,

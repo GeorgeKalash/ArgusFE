@@ -8,7 +8,6 @@ import { DataSets } from 'src/resources/DataSets'
 import toast from 'react-hot-toast'
 import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Form from 'src/components/Shared/Form'
 

@@ -1217,7 +1217,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   async function onValidationRequired() {

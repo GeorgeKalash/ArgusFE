@@ -1,5 +1,5 @@
 import { useEffect, useContext } from 'react'
-import { Grid, Box } from '@mui/material'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,7 +12,6 @@ import { useForm } from 'src/hooks/form'
 import i18n from 'src/configs/i18n'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import Form from 'src/components/Shared/Form'
 
 const PersonalSettings = ({ _labels, access }) => {
