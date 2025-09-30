@@ -45,6 +45,7 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  collabsable = true,
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -649,6 +650,10 @@ const Table = ({
     const isParent = data.level === 0
 
     const arrow = data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    if (!collabsable) {
+      return <div style={{ paddingLeft: indent }}>{value}</div>
+    }
 
     return (
       <div

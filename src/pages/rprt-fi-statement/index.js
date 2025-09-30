@@ -30,7 +30,7 @@ function formatFinancialData(groups) {
         nodeId: node.nodeId,
         parent: parentId,
         level,
-        isExpanded: false,
+        isExpanded: true,
         hasChildren,
         nodeName: node.nodeName,
         baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
@@ -48,7 +48,6 @@ function formatFinancialData(groups) {
 
   return listSorted
 }
-
 
 const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -80,11 +79,7 @@ const FinancialStatements = () => {
 
       fullRowData.current = treeData
 
-      const visibleRows = treeData.flatMap(row =>
-        row.level === 0 ? [row, ...(row.isExpanded ? treeData.filter(child => child.parent === row.nodeName) : [])] : []
-      )
-
-      setRowData(visibleRows)
+      setRowData(treeData)
 
       return treeData
     }
@@ -94,12 +89,7 @@ const FinancialStatements = () => {
     return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const {
-    labels,
-    filterBy,
-    refetch,
-    access
-  } = useResourceQuery({
+  const { labels, filterBy, refetch, access } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RGGeneralRepository.FinancialStatment.FS101,
     datasetId: ResourceIds.FinancialStatementsReport,
@@ -150,6 +140,7 @@ const FinancialStatements = () => {
             refetch={refetch}
             setRowData={setRowData}
             pagination={false}
+            collabsable={false}
             maxAccess={access}
             field='nodeName'
             fullRowData={fullRowData}
