@@ -45,7 +45,10 @@ const PrintConfirmationDialog = forwardRef(({ window, Print, barcode }) => {
     {
       key: 'Print',
       condition: true,
-      onClick: handlePrint,
+      onClick: () => {
+        handlePrint()
+        window.close()
+      },
       disabled: false
     }
   ]

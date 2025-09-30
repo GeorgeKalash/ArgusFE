@@ -7,7 +7,7 @@ import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const HistoryTab = ({ recordId }) => {
+const HistoryList = ({ recordId }) => {
   const { getRequest } = useContext(RequestsContext)
 
   const {
@@ -79,4 +79,4 @@ const HistoryTab = ({ recordId }) => {
   )
 }
 
-export default HistoryTab
+export default HistoryList

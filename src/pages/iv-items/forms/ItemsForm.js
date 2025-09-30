@@ -20,7 +20,7 @@ import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import HistoryTab from './HistoryTab'
+import HistoryList from './HistoryList'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { SCRepository } from 'src/repositories/SCRepository'
@@ -216,16 +216,16 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     postRequest({
       extension: InventoryRepository.Item.clone,
       record: JSON.stringify(obj)
-    }).then(async diRes => {
+    }).then( diRes => {
       toast.success(platformLabels.Saved)
-      await refetchForm(diRes.recordId)
+      refetchForm(diRes.recordId)
       invalidate()
     })
   }
 
   async function History(obj) {
     stack({
-      Component: HistoryTab,
+      Component: HistoryList,
       props: {
         labels,
         maxAccess,
@@ -238,7 +238,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   }
 
   async function ConfirmationPrint() {
-    const barcode = await Print()
+    const { barcode, error } = await Print()
+    if (!error && barcode)
     stack({
       Component: PrintConfirmationDialog,
       props: {
@@ -255,13 +256,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     if (!obj.labelTemplateId) {
       stackError({ message: platformLabels.defaultTemplateError })
 
-      return
+      return { error: true }
     }
 
     if (!currencyId) {
       stackError({ message: platformLabels.DefaultSalesCurrency })
 
-      return
+      return { error: true }
     }
 
     const templateRes = await getRequest({
@@ -272,13 +273,13 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     if (!templateRes || !templateRes.record.format) {
       stackError({ message: platformLabels.DefaultTemplateFormat })
 
-      return
+      return { error: true }
     }
 
     if (!plId) {
       stackError({ message: platformLabels.DefaultSalesPrice })
 
-      return
+      return { error: true }
     }
 
     const res = await getRequest({
@@ -286,7 +287,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       parameters: `_templateId=${obj.labelTemplateId}&_currencyId=${currencyId}&_printFormat=${templateRes.record.format}&_plId=${plId}&_items=${recordId},1`
     })
 
-    return res.record.data
+    return { barcode: res.record.data}
   }
 
   const actions = [

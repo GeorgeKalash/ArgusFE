@@ -9,8 +9,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { useResourceQuery } from 'src/hooks/resource'
 
 export default function CopyToClipboardForm({ barcode, window }) {
-  console.log(barcode)
-
   const { labels, access: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.Items
   })
@@ -20,8 +18,8 @@ export default function CopyToClipboardForm({ barcode, window }) {
       barcode
     },
     maxAccess,
-    onSubmit: async obj => {
-      await navigator.clipboard.writeText(obj.barcode)
+    onSubmit: obj => {
+      navigator.clipboard.writeText(obj.barcode)
 
       window.close()
     }
