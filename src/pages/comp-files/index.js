@@ -16,6 +16,7 @@ import FileForm from './Forms/FileForm'
 import FolderForm from './Forms/FolderForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useError } from 'src/error'
+import AttachmentPreview from './Forms/AttachmentPreview'
 
 const CompFile = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -83,20 +84,25 @@ const CompFile = () => {
       headerName: '',
       cellRenderer: row => {
         const handlePreview = () => {
-          const url = row.data.url
           const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
 
-          const isImage = imageExtensions.some(ext => url?.toLowerCase().includes(ext))
+          const isImage = imageExtensions.some(ext => row.data.url?.toLowerCase().includes(ext))
 
           if (!isImage) {
-            stackError({
+            return stackError({
               message: labels.preview
             })
-
-            return
+          } else {
+            stack({
+              Component: AttachmentPreview,
+              props: {
+                url: row.data.url,
+                labels
+              },
+              width: 500,
+              height: 400
+            })
           }
-
-          globalThis.open(url, '_blank')
         }
 
         return (
