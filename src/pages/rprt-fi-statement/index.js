@@ -9,81 +9,82 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RGGeneralRepository } from 'src/repositories/RGGeneralRepository'
 
-function formatFinancialData(groups) {
-  const listSorted = []
-  const childrenMap = {}
+const FinancialStatements = () => {
+  const { getRequest } = useContext(RequestsContext)
 
-  groups.forEach(node => {
-    const parent = node.parentId ?? null
-    if (!childrenMap[parent]) childrenMap[parent] = []
-    childrenMap[parent].push(node)
-  })
+  function formatFinancialData(groups) {
+    const listSorted = []
 
-  function buildTree(parentId = null, level = 0) {
-    const children = childrenMap[parentId] || []
+    const childrenMap = groups.reduce((map, node) => {
+      const parent = node.parentId ?? null
+      if (!map[parent]) map[parent] = []
+      map[parent].push(node)
+      
+      return map
+    }, {})
 
-    children.forEach(node => {
-      const hasChildren = !!childrenMap[node.nodeId]?.length
+    function buildTree(parentId = null, level = 0) {
+      const children = childrenMap[parentId] || []
 
-      const flags = node.flags ?? 0
-      const bits = []
-      for (let i = 0; i < 32; i++) {
-        bits.push((flags >> i) & 1)
-      }
+      children.forEach(node => {
+        const hasChildren = !!childrenMap[node.nodeId]?.length
 
-      listSorted.push({
-        nodeId: node.nodeId,
-        parent: parentId,
-        level,
-        isExpanded: true,
-        hasChildren,
-        nodeName: node.nodeName,
-        baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
-        baseFiatAmount: node.cellValues?.[0]?.baseFiatAmount ?? null,
-        reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null,
-        flags
-      })
+        const flags = node.flags ?? 0
+        const bits = []
+        for (let i = 0; i < 32; i++) {
+          bits.push((flags >> i) & 1)
+        }
 
-      if (hasChildren) {
-        buildTree(node.nodeId, level + 1)
-      }
-
-      if (bits[0] === 1 || bits[1] === 1) {
         listSorted.push({
-          nodeId: `${node.nodeId}_flags`,
-          parent: node.nodeId,
+          nodeId: node.nodeId,
+          parent: parentId,
           level,
-          isExpanded: false,
-          hasChildren: false,
-          nodeName: ' ',
-          baseAmount: null,
-          baseFiatAmount: null,
-          reportingMetalAmount: null,
+          isExpanded: true,
+          hasChildren,
+          nodeName: node.nodeName,
+          baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
+          baseFiatAmount: node.cellValues?.[0]?.baseFiatAmount ?? null,
+          reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null,
           flags
         })
 
-        if (bits[2] === 1 && node.cellValues?.[0]) {
-          const newValues = { ...node.cellValues[0] }
-          for (const key in newValues) {
-            if (typeof newValues[key] === 'number') {
-              newValues[key] = newValues[key] <= 0 ? -newValues[key] : -newValues[key]
-            }
-          }
-          node.cellValues[0] = newValues
+        if (hasChildren) {
+          buildTree(node.nodeId, level + 1)
         }
 
-        node.flags = 0
-      }
-    })
+        if (bits[0] === 1 || bits[1] === 1) {
+          listSorted.push({
+            nodeId: `${node.nodeId}_flags`,
+            parent: node.nodeId,
+            level,
+            isExpanded: false,
+            hasChildren: false,
+            nodeName: ' ',
+            baseAmount: null,
+            baseFiatAmount: null,
+            reportingMetalAmount: null,
+            flags
+          })
+
+          if (bits[2] === 1 && node.cellValues?.[0]) {
+            const newValues = { ...node.cellValues[0] }
+            for (const key in newValues) {
+              if (typeof newValues[key] === 'number') {
+                newValues[key] = newValues[key] <= 0 ? -newValues[key] : -newValues[key]
+              }
+            }
+            node.cellValues[0] = newValues
+          }
+
+          node.flags = 0
+        }
+      })
+    }
+
+    buildTree(null, 0)
+
+    return listSorted
   }
-
-  buildTree(null, 0)
-
-  return listSorted
-}
-
-const FinancialStatements = () => {
-  const { getRequest } = useContext(RequestsContext)
 
   async function fetchGridData(options = {}) {
     const { params } = options
@@ -98,17 +99,12 @@ const FinancialStatements = () => {
 
       let treeData = formatFinancialData(groups)
 
-      const idToName = {}
-      treeData.forEach(row => {
-        idToName[row.nodeId] = row.nodeName
-      })
+      const idToName = Object.fromEntries(treeData.map(({ nodeId, nodeName }) => [nodeId, nodeName]))
 
-      treeData = treeData.map(row => ({
+      return treeData.map(row => ({
         ...row,
         parent: row.parent != null ? idToName[row.parent] : null
       }))
-
-      return treeData
     }
   }
 
@@ -120,7 +116,6 @@ const FinancialStatements = () => {
     query: { data },
     labels,
     filterBy,
-    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
@@ -170,7 +165,6 @@ const FinancialStatements = () => {
             columns={columns}
             gridData={{ list: data }}
             rowId={['nodeId']}
-            refetch={refetch}
             pagination={false}
             collabsable={false}
             maxAccess={access}
