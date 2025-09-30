@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -14,8 +14,7 @@ function formatFinancialData(groups) {
   const childrenMap = {}
 
   groups.forEach(node => {
-    const parent = node.parentId || null
-
+    const parent = node.parentId ?? null
     if (!childrenMap[parent]) childrenMap[parent] = []
     childrenMap[parent].push(node)
   })
@@ -26,6 +25,12 @@ function formatFinancialData(groups) {
     children.forEach(node => {
       const hasChildren = !!childrenMap[node.nodeId]?.length
 
+      const flags = node.flags ?? 0
+      const bits = []
+      for (let i = 0; i < 32; i++) {
+        bits.push((flags >> i) & 1)
+      }
+
       listSorted.push({
         nodeId: node.nodeId,
         parent: parentId,
@@ -35,11 +40,39 @@ function formatFinancialData(groups) {
         nodeName: node.nodeName,
         baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
         baseFiatAmount: node.cellValues?.[0]?.baseFiatAmount ?? null,
-        reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null
+        reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null,
+        flags
       })
 
       if (hasChildren) {
         buildTree(node.nodeId, level + 1)
+      }
+
+      if (bits[0] === 1 || bits[1] === 1) {
+        listSorted.push({
+          nodeId: `${node.nodeId}_flags`,
+          parent: node.nodeId,
+          level,
+          isExpanded: false,
+          hasChildren: false,
+          nodeName: ' ',
+          baseAmount: null,
+          baseFiatAmount: null,
+          reportingMetalAmount: null,
+          flags
+        })
+
+        if (bits[2] === 1 && node.cellValues?.[0]) {
+          const newValues = { ...node.cellValues[0] }
+          for (const key in newValues) {
+            if (typeof newValues[key] === 'number') {
+              newValues[key] = newValues[key] <= 0 ? -newValues[key] : -newValues[key]
+            }
+          }
+          node.cellValues[0] = newValues
+        }
+
+        node.flags = 0
       }
     })
   }
@@ -51,8 +84,6 @@ function formatFinancialData(groups) {
 
 const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
-  const fullRowData = useRef([])
-  const [rowData, setRowData] = useState()
 
   async function fetchGridData(options = {}) {
     const { params } = options
@@ -77,10 +108,6 @@ const FinancialStatements = () => {
         parent: row.parent != null ? idToName[row.parent] : null
       }))
 
-      fullRowData.current = treeData
-
-      setRowData(treeData)
-
       return treeData
     }
   }
@@ -89,7 +116,13 @@ const FinancialStatements = () => {
     return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
-  const { labels, filterBy, refetch, access } = useResourceQuery({
+  const {
+    query: { data },
+    labels,
+    filterBy,
+    refetch,
+    access
+  } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: RGGeneralRepository.FinancialStatment.FS101,
     datasetId: ResourceIds.FinancialStatementsReport,
@@ -130,20 +163,19 @@ const FinancialStatements = () => {
       <Fixed>
         <RPBGridToolbar hasSearch={false} labels={labels} maxAccess={access} reportName={'FS01'} filterBy={filterBy} />
       </Fixed>
-      {rowData?.length > 0 && (
+      {data?.length > 0 && (
         <Grow>
           <Table
-            name='treeTable'
+            name='table'
             columns={columns}
-            gridData={{ list: rowData }}
+            gridData={{ list: data }}
             rowId={['nodeId']}
             refetch={refetch}
-            setRowData={setRowData}
             pagination={false}
             collabsable={false}
             maxAccess={access}
             field='nodeName'
-            fullRowData={fullRowData}
+            fullRowData={data}
           />
         </Grow>
       )}
