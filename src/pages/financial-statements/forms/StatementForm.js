@@ -122,6 +122,33 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
                 error={formik.touched.sgId && Boolean(formik.errors.sgId)}
               />
             </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='showBaseAmount'
+                value={formik.values?.showBaseAmount}
+                onChange={event => formik.setFieldValue('showBaseAmount', event.target.checked)}
+                label={labels.showBaseAmount}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='showMetalCurrencyAmount'
+                value={formik.values?.showMetalCurrencyAmount}
+                onChange={event => formik.setFieldValue('showMetalCurrencyAmount', event.target.checked)}
+                label={labels.showMetalCurrencyAmount}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='showFiatCurrencyAmount'
+                value={formik.values?.showFiatCurrencyAmount}
+                onChange={event => formik.setFieldValue('showFiatCurrencyAmount', event.target.checked)}
+                label={labels.showFiatCurrencyAmount}
+                maxAccess={maxAccess}
+              />
+            </Grid>
           </Grid>
         </Grow>
       </VertLayout>
