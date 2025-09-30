@@ -1,3 +1,5 @@
+import HrRightToWork from 'src/pages/hr-right-to-work'
+
 const service = 'SY.asmx/'
 
 export const SystemRepository = {
@@ -277,5 +279,11 @@ export const SystemRepository = {
   SystemAlerts: {
     qry: service + 'qryAA',
     arr: service + 'arrAA'
+  },
+  RightToWork: {
+    page: service + 'qryRW',
+    get: service + 'getRW',
+    set: service + 'setRW',
+    del: service + 'delRW'
   }
 }
