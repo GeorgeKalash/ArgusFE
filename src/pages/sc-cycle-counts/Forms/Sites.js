@@ -148,7 +148,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
   }, [recordId])
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={isPosted || isClosed}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={isClosed}>
       <VertLayout>
         <Grow>
           <Fixed>

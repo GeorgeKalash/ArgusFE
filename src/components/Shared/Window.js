@@ -81,11 +81,11 @@ const Window = React.memo(
       }
     }, [expanded])
 
-    // useEffect(() => {
-    //   if (paperRef.current) {
-    //     paperRef.current.focus()
-    //   }
-    // }, [])
+    useEffect(() => {
+      if (paperRef.current) {
+        paperRef.current.focus()
+      }
+    }, [])
 
     useEffect(() => {
       if (!loading) {

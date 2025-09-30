@@ -16,20 +16,6 @@ const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { labels, access } = useResourceQuery({
-    queryFn: getGridData,
-    datasetId: ResourceIds.SmsFunctionTemplates
-  })
-
-  const formik = useFormik({
-    maxAccess: access,
-    validateOnChange: true,
-    initialValues: { rows: [] },
-    onSubmit: async values => {
-      await postSmsFunctionTemplates(values.rows)
-    }
-  })
-
   const getGridData = async () => {
     const parameters = ''
 
@@ -73,6 +59,20 @@ const SmsFunctionTemplate = () => {
       }))
     })
   }
+
+  const { labels, access } = useResourceQuery({
+    queryFn: getGridData,
+    datasetId: ResourceIds.SmsFunctionTemplates
+  })
+
+  const formik = useFormik({
+    maxAccess: access,
+    validateOnChange: true,
+    initialValues: { rows: [] },
+    onSubmit: async values => {
+      await postSmsFunctionTemplates(values.rows)
+    }
+  })
 
   const columns = [
     {
