@@ -1,12 +1,13 @@
-import { Box, Typography, IconButton, Button } from '@mui/material'
+import { Box, Typography, IconButton, Button, Grid } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { ControlContext } from 'src/providers/ControlContext'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
-const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
+const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -161,19 +162,48 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
               <Box
                 key={index}
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
                   border: 'black solid 1px',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  p: 1,
+                  mb: 1
                 }}
               >
-                <Box sx={{ display: 'flex', gap: 1, mx: 3 }}>
-                  <Typography variant='body2'>{file.fileName}</Typography>
-                  <Typography variant='body2'>({Math.round(file.file.size / 1024)} KB)</Typography>
-                </Box>
-                <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
-                  <DeleteIcon />
-                </IconButton>
+                <Grid container alignItems='center' spacing={1} padding={1}>
+                  <Grid item xs={showFolder ? 8 : 11}>
+                    <Typography variant='body2' component='span'>
+                      {file.fileName}
+                    </Typography>
+                    <Typography variant='body2' component='span' sx={{ ml: 1 }}>
+                      ({Math.round(file.file.size / 1024)} KB)
+                    </Typography>
+                  </Grid>
+
+                  {showFolder && (
+                    <Grid item xs={3}>
+                      <ResourceComboBox
+                        endpointId={SystemRepository.Folders.qry}
+                        name={`files[${index}].folderId`}
+                        label={platformLabels.folder}
+                        valueField='recordId'
+                        displayField='name'
+                        values={formik.values}
+                        value={file.folderId || 1}
+                        onChange={(event, newValue) => {
+                          const updatedFiles = [...files]
+                          updatedFiles[index].folderId = newValue?.recordId || null
+                          setFiles(updatedFiles)
+                          formik.setFieldValue(`files[${index}].folderId`, newValue?.recordId || null)
+                        }}
+                      />
+                    </Grid>
+                  )}
+
+                  <Grid item xs={1}>
+                    <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
               </Box>
             ))}
           </Box>

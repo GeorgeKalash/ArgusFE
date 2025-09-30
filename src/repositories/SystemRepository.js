@@ -261,6 +261,7 @@ export const SystemRepository = {
   },
   Folders: {
     page: service + 'pageFO',
+    qry: service + 'qryFO',
     get: service + 'getFO',
     set: service + 'setFO',
     del: service + 'delFO'
