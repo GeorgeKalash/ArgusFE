@@ -3,7 +3,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -13,6 +12,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const SitesTab = ({ labels, maxAccess, recordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -195,7 +195,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
   }, [recordId])
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <CustomTextField
@@ -221,7 +221,7 @@ const SitesTab = ({ labels, maxAccess, recordId }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

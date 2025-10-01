@@ -80,7 +80,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       resourceId={ResourceIds.BPMasterData}
       form={formik}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={editMode}
     >
       <VertLayout>

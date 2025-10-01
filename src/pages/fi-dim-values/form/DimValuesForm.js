@@ -56,7 +56,7 @@ export default function DimValuesForm({ labels, maxAccess, recordId, dimValue })
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.DimensionsValues} form={formik} maxAccess={maxAccess} infoVisible={false}>
+    <FormShell resourceId={ResourceIds.DimensionsValues} form={formik} maxAccess={maxAccess} isInfo={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

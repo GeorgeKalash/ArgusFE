@@ -1,6 +1,5 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
@@ -17,6 +16,7 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 export const LOTransportationForm = ({ recordId, functionId, editMode, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -83,7 +83,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.LOTransportation} form={formik} editMode={true} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={true}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -280,7 +280,7 @@ export const LOTransportationForm = ({ recordId, functionId, editMode, window })
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

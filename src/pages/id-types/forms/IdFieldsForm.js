@@ -110,8 +110,9 @@ const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, max
       form={formik}
       resourceId={ResourceIds.IdTypes}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={editMode}
+      isParentWindow={false}
     >
       <DataGrid
         onChange={value => formik.setFieldValue('IdField', value)}

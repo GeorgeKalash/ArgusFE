@@ -9,7 +9,6 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -17,6 +16,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ProductionOrderForm from '../mf-prod-order/Forms/ProductionOrderForm'
 import { useWindow } from 'src/windows'
+import Form from 'src/components/Shared/Form'
 
 const GeneratePoductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -212,13 +212,10 @@ const GeneratePoductionOrder = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GenerateProductionOrder}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
+    <Form
+      onSave={formik.handleSubmit}
       isSaved={false}
-      infoVisible={false}
+      disabledSubmit={!formik.values.itemSummaries?.list?.some(item => item.checked)}
     >
       <VertLayout>
         <Fixed>
@@ -348,7 +345,7 @@ const GeneratePoductionOrder = () => {
           </Grid>
         </Grow>
         <Fixed>
-          <Grid container spacing={2} mt={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={1}>
               <CustomButton
                 onClick={resetForm}
@@ -374,7 +371,7 @@ const GeneratePoductionOrder = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

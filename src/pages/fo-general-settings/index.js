@@ -96,7 +96,7 @@ const FoGeneralSettings = () => {
     <FormShell
       resourceId={ResourceIds.GeneralSettings}
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       isCleared={false}
       maxAccess={access}
     >

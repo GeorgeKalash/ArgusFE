@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -52,94 +51,84 @@ export default function TransactionLogPerformance({ recordId }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.TransactionLogPerformance}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={false}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
-      <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='userName'
-                value={formik?.values?.userName}
-                label={labels.username}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='ttName'
-                value={formik?.values?.ttName}
-                label={labels.ttName}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='resourceId'
-                value={formik?.values?.resourceId}
-                label={labels.resourceId}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='resourceName'
-                value={formik?.values?.resourceName}
-                label={labels.resourceName}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='recordId'
-                value={formik?.values?.recordId}
-                label={labels.recordId}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='masterRef'
-                value={formik?.values?.masterRef}
-                label={labels.masterRef}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomDateTimePicker
-                name='eventDt'
-                label={labels.eventDt}
-                value={formik?.values?.eventDt}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextArea
-                name='data'
-                label={labels.data}
-                value={formik?.values?.data}
-                rows={6}
-                readOnly
-                maxAccess={maxAccess}
-              />
-            </Grid>
+    <VertLayout>
+      <Grow>
+        <Grid container spacing={4} p={4}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='userName'
+              value={formik?.values?.userName}
+              label={labels.username}
+              readOnly
+              maxAccess={maxAccess}
+            />
           </Grid>
-        </Grow>
-      </VertLayout>
-    </FormShell>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='ttName'
+              value={formik?.values?.ttName}
+              label={labels.ttName}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='resourceId'
+              value={formik?.values?.resourceId}
+              label={labels.resourceId}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='resourceName'
+              value={formik?.values?.resourceName}
+              label={labels.resourceName}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='recordId'
+              value={formik?.values?.recordId}
+              label={labels.recordId}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='masterRef'
+              value={formik?.values?.masterRef}
+              label={labels.masterRef}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomDateTimePicker
+              name='eventDt'
+              label={labels.eventDt}
+              value={formik?.values?.eventDt}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomTextArea
+              name='data'
+              label={labels.data}
+              value={formik?.values?.data}
+              rows={6}
+              readOnly
+              maxAccess={maxAccess}
+            />
+          </Grid>
+        </Grid>
+      </Grow>
+    </VertLayout>
   )
 }

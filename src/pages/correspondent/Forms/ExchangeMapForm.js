@@ -146,7 +146,7 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, labels }) => {
     <FormShell
       form={formik}
       resourceId={ResourceIds.Correspondent}
-      infoVisible={false}
+      isInfo={false}
       maxAccess={maxAccess}
       editMode={editMode}
     >

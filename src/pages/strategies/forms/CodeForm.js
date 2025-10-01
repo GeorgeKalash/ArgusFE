@@ -60,7 +60,7 @@ const CodeForm = ({ labels, editMode, maxAccess, recordId, store, window }) => {
   return (
     <FormShell
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       resourceId={ResourceIds.Strategies}
       maxAccess={maxAccess}
       editMode={editMode}

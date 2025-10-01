@@ -10,12 +10,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { IVReplenishementRepository } from 'src/repositories/IVReplenishementRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 const GenerateMaterialPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -298,70 +298,77 @@ const GenerateMaterialPlaning = () => {
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <RPBGridToolbar
-          maxAccess={access}
-          reportName={'previewMRP'}
-          filterBy={filterBy}
-          hasSearch={false}
-          middleSection={
-            <Grid item xs={3}>
-              <CustomTextField
-                name='search'
-                label={platformLabels.Search}
-                value={formik.values.searchValue}
-                search
-                onChange={e => {
-                  formik.setFieldValue('searchValue', e.target.value)
-                  formik.setFieldValue('search', e.target.value?.length > 0 ? false : true)
-                }}
-                onSearch={value => formik.setFieldValue('search', true)}
-                onClear={() => {
-                  formik.setFieldValue('searchValue', '')
-                  formik.setFieldValue('search', true)
+    <Form
+      actions={actions}
+      onSave={() => formik.handleSubmit}
+      disabedSubmit={!formik.values.mrpId}
+      isSaved={false}
+      maxAccess={access}
+      fullSize
+    >
+      <VertLayout>
+        <Fixed>
+          <RPBGridToolbar
+            maxAccess={access}
+            reportName={'previewMRP'}
+            filterBy={filterBy}
+            hasSearch={false}
+            middleSection={
+              <Grid item xs={3}>
+                <CustomTextField
+                  name='search'
+                  label={platformLabels.Search}
+                  value={formik.values.searchValue}
+                  search
+                  onChange={e => {
+                    formik.setFieldValue('searchValue', e.target.value)
+                    formik.setFieldValue('search', e.target.value?.length > 0 ? false : true)
+                  }}
+                  onSearch={value => formik.setFieldValue('search', true)}
+                  onClear={() => {
+                    formik.setFieldValue('searchValue', '')
+                    formik.setFieldValue('search', true)
+                  }}
+                  maxAccess={access}
+                />
+              </Grid>
+            }
+            rightSection={
+              <ResourceComboBox
+                endpointId={IVReplenishementRepository.MatPlanning.qry}
+                parameters='_params='
+                filter={item => item.status === 1}
+                label={labels.matReqPlan}
+                name='mrpId'
+                values={formik.values}
+                valueField='recordId'
+                displayField='reference'
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('mrpId', newValue?.recordId || null)
                 }}
                 maxAccess={access}
               />
-            </Grid>
-          }
-          rightSection={
-            <ResourceComboBox
-              endpointId={IVReplenishementRepository.MatPlanning.qry}
-              filter={item => item.status === 1}
-              label={labels.matReqPlan}
-              name='mrpId'
-              values={formik.values}
-              valueField='recordId'
-              displayField='reference'
-              onChange={(event, newValue) => {
-                formik.setFieldValue('mrpId', newValue?.recordId || null)
-              }}
-              maxAccess={access}
-            />
-          }
-        />
-      </Fixed>
-      <Grow>
-        <DataGrid
-          searchValue={searchValue}
-          onChange={value => {
-            console.log(value)
-            formik.setFieldValue('items', value)
-          }}
-          value={formik.values?.items}
-          error={formik.errors.items}
-          columns={columns}
-          name='items'
-          allowDelete={false}
-          allowAddNewLine={false}
-          maxAccess={access}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar smallBox={true} actions={actions} />
-      </Fixed>
-    </VertLayout>
+            }
+          />
+        </Fixed>
+        <Grow>
+          <DataGrid
+            searchValue={searchValue}
+            onChange={value => {
+              console.log(value)
+              formik.setFieldValue('items', value)
+            }}
+            value={formik.values?.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

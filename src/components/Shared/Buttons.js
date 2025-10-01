@@ -20,7 +20,7 @@ export const getButtons = platformLabels => [
   {
     key: 'Info',
     label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
+    condition: 'isInfo',
     onClick: 'onInfo',
     color: '#4355a5',
     disabled: '!editMode',

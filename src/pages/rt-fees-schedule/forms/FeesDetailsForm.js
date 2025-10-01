@@ -1,7 +1,6 @@
 import { useFormik } from 'formik'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -10,8 +9,9 @@ import * as yup from 'yup'
 import { DataSets } from 'src/resources/DataSets'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
-const FeesDetailsForm = ({ store, labels }) => {
+const FeesDetailsForm = ({ store, labels, maxAccess }) => {
   const { recordId: pId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -147,7 +147,7 @@ const FeesDetailsForm = ({ store, labels }) => {
   }
 
   return (
-    <FormShell form={formik} infoVisible={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -155,10 +155,12 @@ const FeesDetailsForm = ({ store, labels }) => {
             value={formik.values.FeeScheduleDetail}
             error={formik.errors.FeeScheduleDetail}
             columns={columns}
+            maxAccess={maxAccess}
+            name='FeeScheduleDetail'
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

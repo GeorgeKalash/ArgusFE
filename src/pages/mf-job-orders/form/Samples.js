@@ -6,12 +6,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 export default function Samples({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -92,15 +91,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-      isSavedClear={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -121,6 +112,6 @@ export default function Samples({ labels, maxAccess, recordId }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

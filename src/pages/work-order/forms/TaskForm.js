@@ -1,7 +1,5 @@
 import { useContext, useState } from 'react'
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -18,6 +16,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -85,13 +84,10 @@ const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
   const taskNotes = options?.list?.find(item => item.pmtId === formik?.values.pmtId)?.notes || ''
 
   return (
-    <FormShell
-      form={formik}
-      infoVisible={false}
-      resourceId={ResourceIds.WorkOrder}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={access}
       editMode={editMode}
-      isCleared={false}
       disabledSubmit={store.isPosted || isCompleted}
     >
       <VertLayout>
@@ -226,7 +222,7 @@ const TaskForm = ({ labels, access, store, seqNo, record, window }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

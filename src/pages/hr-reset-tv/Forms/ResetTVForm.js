@@ -2,13 +2,11 @@ import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
@@ -16,6 +14,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { formatDateToApi } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
 export default function ResetTVForm({ _labels, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
@@ -68,13 +67,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ResetTimeVariation}
-      isInfo={false}
-      isCleared={false}
-      form={formik}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -155,6 +148,6 @@ export default function ResetTVForm({ _labels, maxAccess }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -16,6 +15,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Form from 'src/components/Shared/Form'
 
 export default function InstantCash({
   onSubmit,
@@ -106,14 +106,7 @@ export default function InstantCash({
   }, [])
 
   return (
-    <FormShell
-      isInfo={false}
-      isCleared={false}
-      resourceId={ResourceIds.InstantCash}
-      form={formik}
-      maxAccess={maxAccess}
-      disabledSubmit={editMode}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -229,6 +222,6 @@ export default function InstantCash({
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

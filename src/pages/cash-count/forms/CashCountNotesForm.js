@@ -1,8 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -12,6 +10,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 export default function CashCountNotesForm({
   labels,
@@ -141,13 +140,7 @@ export default function CashCountNotesForm({
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CashCountTransaction}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container xs={6}>
@@ -244,6 +237,6 @@ export default function CashCountNotesForm({
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
