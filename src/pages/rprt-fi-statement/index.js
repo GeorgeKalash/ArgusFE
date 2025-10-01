@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -8,9 +8,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RGGeneralRepository } from 'src/repositories/RGGeneralRepository'
+import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
+import { useWindow } from 'src/windows'
+import PrintForm from './Form/PrintForm'
 
 const FinancialStatements = () => {
   const { getRequest } = useContext(RequestsContext)
+  const [columnVisibility, setColumnVisibility] = useState({})
+  const { stack } = useWindow()
 
   function formatFinancialData(groups) {
     const listSorted = []
@@ -19,7 +24,7 @@ const FinancialStatements = () => {
       const parent = node.parentId ?? null
       if (!map[parent]) map[parent] = []
       map[parent].push(node)
-      
+
       return map
     }, {})
 
@@ -45,6 +50,7 @@ const FinancialStatements = () => {
           baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
           baseFiatAmount: node.cellValues?.[0]?.baseFiatAmount ?? null,
           reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null,
+          currentRateBaseAmount: node.cellValues?.[0]?.currentRateBaseAmount ?? null,
           flags
         })
 
@@ -63,6 +69,7 @@ const FinancialStatements = () => {
             baseAmount: null,
             baseFiatAmount: null,
             reportingMetalAmount: null,
+            currentRateBaseAmount: null,
             flags
           })
 
@@ -89,23 +96,42 @@ const FinancialStatements = () => {
   async function fetchGridData(options = {}) {
     const { params } = options
 
-    if (params) {
-      const groupsRes = await getRequest({
-        extension: RGGeneralRepository.FinancialStatment.FS101,
-        parameters: `_params=${params || ''}`
+    if (!params) return
+
+    const paramPairs = params.split('^').map(p => p.split('|'))
+    const paramMap = Object.fromEntries(paramPairs)
+    const mainRecordId = paramMap['4']
+
+    const groupsRes = await getRequest({
+      extension: RGGeneralRepository.FinancialStatment.FS101,
+      parameters: `_params=${params}`
+    })
+
+    const groups = groupsRes?.record?.data || []
+    let treeData = formatFinancialData(groups)
+
+    const idToName = Object.fromEntries(treeData.map(({ nodeId, nodeName }) => [nodeId, nodeName]))
+
+    if (mainRecordId) {
+      const res = await getRequest({
+        extension: FinancialStatementRepository.FinancialStatement.get,
+        parameters: `_recordId=${mainRecordId}`
       })
 
-      const groups = groupsRes?.record?.data || []
-
-      let treeData = formatFinancialData(groups)
-
-      const idToName = Object.fromEntries(treeData.map(({ nodeId, nodeName }) => [nodeId, nodeName]))
-
-      return treeData.map(row => ({
-        ...row,
-        parent: row.parent != null ? idToName[row.parent] : null
-      }))
+      if (res?.record) {
+        setColumnVisibility({
+          baseAmount: !!res.record.showBaseAmount,
+          baseFiatAmount: !!res.record.showFiatCurrencyAmount,
+          reportingMetalAmount: !!res.record.showMetalCurrencyAmount,
+          currentRateBaseAmount: !!res.record.showCurrentRateBaseAmount
+        })
+      }
     }
+
+    return treeData.map(row => ({
+      ...row,
+      parent: row.parent != null ? idToName[row.parent] : null
+    }))
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -131,38 +157,74 @@ const FinancialStatements = () => {
       field: 'nodeName',
       headerName: '',
       flex: 1,
+      width: 'auto',
       isTree: true
     },
     {
       field: 'baseAmount',
       headerName: labels.baseAmount,
-      flex: 1,
+      width: 150,
       type: 'number'
     },
     {
       field: 'baseFiatAmount',
       headerName: labels.baseFiatAmount,
-      flex: 1,
+      width: 150,
       type: 'number'
     },
     {
       field: 'reportingMetalAmount',
       headerName: labels.reportingMetalAmount,
-      flex: 1,
+      width: 150,
+      type: 'number'
+    },
+    {
+      field: 'currentRateBaseAmount',
+      headerName: labels.currentRateBaseAmount,
+      width: 150,
       type: 'number'
     }
   ]
 
+  const baseColumns = columns.map(col => ({
+    ...col,
+    hide: columnVisibility[col.field] === false
+  }))
+
+  const Print = rpbParams => {
+    if (!data?.length) return
+
+    stack({
+      Component: PrintForm,
+      props: {
+        tableData: data,
+        rpbParams: rpbParams,
+        columns: baseColumns,
+        labels
+      },
+      width: 1000,
+      height: 800,
+      title: labels.Print
+    })
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar hasSearch={false} labels={labels} maxAccess={access} reportName={'FS01'} filterBy={filterBy} />
+        <RPBGridToolbar
+          hasSearch={false}
+          labels={labels}
+          maxAccess={access}
+          reportName={'FS01'}
+          filterBy={filterBy}
+          Print={Print}
+        />
       </Fixed>
-      {data?.length > 0 && (
+      {data?.length > 0 && baseColumns.length > 0 && (
         <Grow>
           <Table
             name='table'
-            columns={columns}
+            columns={baseColumns}
             gridData={{ list: data }}
             rowId={['nodeId']}
             pagination={false}
