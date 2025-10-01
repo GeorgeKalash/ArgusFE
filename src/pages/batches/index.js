@@ -68,7 +68,6 @@ const Batches = () => {
   const tabs = [{ label: 'Document Types' }, { label: 'Tab Two' }]
 
   const documentTypesValidation = useFormik({
-    enableReinitialize: false,
     validateOnChange: false,
 
     validationSchema: yup.object({

@@ -12,6 +12,7 @@ const CustomComboBox = ({
   fullName,
   label,
   value,
+  hidden = false,
   valueField = 'key',
   displayField = 'value',
   store = [],
@@ -43,7 +44,7 @@ const CustomComboBox = ({
     props.maxAccess,
     required,
     readOnly,
-    false,
+    hidden,
     disabled
   )
 
@@ -189,7 +190,14 @@ const CustomComboBox = ({
                   })}
                 </li>
               )}
-              <li {...props}>
+              <li {...props} style={{ display: 'flex', alignItems: 'center' }}>
+                {option.icon && (
+                  <img
+                    src={option.icon}
+                    alt={option[displayField]}
+                    style={{ width: 20, height: 20, marginRight: 8, objectFit: 'contain' }}
+                  />
+                )}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -204,7 +212,8 @@ const CustomComboBox = ({
                         width: widthPercent,
                         fontSize: '0.88rem',
                         height: '20px',
-                        display: 'flex'
+                        display: 'flex',
+                        alignItems: 'center'
                       }}
                     >
                       {displayValue}
@@ -217,8 +226,17 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li {...props}>
-                <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>{option[displayField]}</Box>
+              <li {...props} style={{ display: 'flex', alignItems: 'center' }}>
+                {option.icon && (
+                  <img
+                    src={option.icon}
+                    alt={option[displayField]}
+                    style={{ width: 20, height: 20, marginRight: 8, objectFit: 'contain' }}
+                  />
+                )}
+                <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', alignItems: 'center' }}>
+                  {option[displayField]}
+                </Box>
               </li>
             </Box>
           )
@@ -245,7 +263,15 @@ const CustomComboBox = ({
           }}
           InputProps={{
             ...params.InputProps,
-            startAdornment: props?.startAdornment || params.InputProps.startAdornment,
+            startAdornment: value?.icon ? (
+              <img
+                src={value.icon}
+                alt={value[displayField]}
+                style={{ width: 20, height: 20, marginRight: 4, marginLeft: 4, objectFit: 'contain' }}
+              />
+            ) : (
+              props?.startAdornment || params.InputProps.startAdornment
+            ),
             endAdornment: !_readOnly && (
               <React.Fragment>
                 {hover &&

@@ -128,5 +128,8 @@ export const EmployeeRepository = {
     get: service + 'getSD',
     set2: service + 'set2SD',
     del: service + 'delSD'
+  },
+  TerminationEmployee: {
+    get: service + 'getTE'
   }
 }

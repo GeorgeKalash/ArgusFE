@@ -1,5 +1,4 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-
 import FiscalYearForm from '../forms/FiscalYearForm'
 import PeriodsForm from '../forms/PeriodsForm'
 import { useState } from 'react'
@@ -7,8 +6,6 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 
 const FiscalYearWindow = ({ labels, maxAccess, recordId, window }) => {
   const [activeTab, setActiveTab] = useState(0)
-
-  const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null
@@ -20,7 +17,7 @@ const FiscalYearWindow = ({ labels, maxAccess, recordId, window }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <FiscalYearForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} window={window}/>
+        <FiscalYearForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} window={window} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
         <PeriodsForm maxAccess={maxAccess} labels={labels} store={store} />

@@ -43,7 +43,6 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
       rateTypeName: data?.rateTypeName
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true
   })
 

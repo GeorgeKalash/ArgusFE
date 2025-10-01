@@ -10,7 +10,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 import { formatDateToApi } from 'src/lib/date-helper'
@@ -22,26 +21,19 @@ export default function GenerateOpening({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: { fiscalYear: null, tbFiscalYear: null, recordId: 'N/A', tbendDate: null },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
-
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' '),
-      tbendDate: yup.string().required(' '),
-      tbFiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required(),
+      tbendDate: yup.string().required(),
+      tbFiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const { recordId, ...rest } = obj
-
-        const response = await postRequest({
-          extension: RGFinancialRepository.FiOpeningBalance.gen,
-          record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
-        })
-
-        toast.success(platformLabels.Generated)
-      } catch (error) {}
+      await postRequest({
+        extension: RGFinancialRepository.FiOpeningBalance.gen,
+        record: JSON.stringify({ ...obj, tbendDate: formatDateToApi(obj.tbendDate) })
+      })
+      toast.success(platformLabels.Generated)
     }
   })
 

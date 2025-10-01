@@ -49,7 +49,6 @@ export default function SalesSettingsForm({ _labels, access }) {
       allowSalesNoLinesTrx: false,
       salesTD: false
     },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({

@@ -32,7 +32,6 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
       smsTemplateId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       szId: yup.number().required(),

@@ -25,7 +25,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       rows: []
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required(),
@@ -55,9 +54,9 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
 
   const fetchSupervisors = async () => {
     if (!formik.values.plantId) {
-      formik.setFieldValue('rows', []); 
+      formik.setFieldValue('rows', [])
 
-      return;
+      return
     }
 
     if (formik.values.plantId) {

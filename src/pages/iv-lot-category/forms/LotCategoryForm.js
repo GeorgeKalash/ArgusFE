@@ -36,7 +36,6 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
       udn1: '',
       udn2: ''
     },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -44,20 +43,14 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const response = await postRequest({
-          extension: InventoryRepository.LotCategory.set,
-          record: JSON.stringify(obj)
-        })
+      const response = await postRequest({
+        extension: InventoryRepository.LotCategory.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', response.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
-      } catch (e) {}
+      !obj.recordId && formik.setFieldValue('recordId', response.recordId)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      invalidate()
     }
   })
 
@@ -65,16 +58,14 @@ export default function LotCategoryForm({ labels, maxAccess, recordId }) {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.LotCategory.get,
-            parameters: `_recordId=${recordId}`
-          })
+      if (recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.LotCategory.get,
+          parameters: `_recordId=${recordId}`
+        })
 
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 

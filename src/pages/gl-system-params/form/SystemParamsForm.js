@@ -22,7 +22,6 @@ const SystemParamsForm = ({ _labels, access }) => {
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       GLDOEGainAccountId: yup.string().required(),

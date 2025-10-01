@@ -24,7 +24,6 @@ export default function RawMaterialCategoryForm({ labels, maxAccess, recordId })
 
   const { formik } = useForm({
     initialValues: { recordId: null, reference: '', name: '', isMetal: false },
-    enableReinitialize: true,
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
