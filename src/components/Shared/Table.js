@@ -94,7 +94,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: { textAlign: 'right' },
+          cellStyle: { textAlign: languageId === 2 ? 'left' : 'right' },
           sortable: !disableSorting
         }
       }
@@ -935,6 +935,7 @@ const Table = ({
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
+            enableRtl={languageId === 2}
           />
         </Box>
       </Grow>
