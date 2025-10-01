@@ -22,7 +22,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { useWindow } from 'src/windows'
 import ClearDialog from 'src/components/Shared/ClearDialog'
-import FormShell from 'src/components/Shared/FormShell'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import Form from 'src/components/Shared/Form'
 
@@ -30,11 +29,10 @@ const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const [plantStore, setPlantsStore] = useState([])
-  const buttons = getButtons(platformLabels)
-  const clearButton = buttons.find(button => button.key === 'Clear')
+  const clearButton = getButtons(platformLabels)?.find(({ key }) => key === 'Clear') || null
   const { stack } = useWindow()
 
-  const raCurrencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+  const raCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value) || null
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.CtExchangeRates
@@ -73,11 +71,10 @@ const CTExchangeRates = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    validateOnChange: true,
     validationSchema: yup.object({
-      currencyId: yup.string().required(),
-      rateAgainst: yup.string().required(),
-      raCurrencyId: yup.string().required(),
+      currencyId: yup.number().required(),
+      rateAgainst: yup.number().required(),
+      raCurrencyId: yup.number().required(),
       purchases: yup
         .mixed()
         .when(['currencyId', 'puRateTypeId'], ([currencyId, puRateTypeId], schema) =>
@@ -93,7 +90,7 @@ const CTExchangeRates = () => {
     initialValues: {
       currencyId: null,
       rateAgainst: 1,
-      raCurrencyId: raCurrencyId ? parseInt(raCurrencyId) : null,
+      raCurrencyId: raCurrencyId,
       puRateTypeId: null,
       saRateTypeId: null,
       purchases: [
