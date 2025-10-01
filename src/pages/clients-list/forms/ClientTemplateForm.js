@@ -956,6 +956,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
+                          type={showAsPassword ? 'password' : ''}
                           label={labels.idNo}
                           value={formik.values?.idNo}
                           required
