@@ -102,7 +102,7 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container>
+        <Grid container p={4}>
           <Grid item xs={4}>
             <CustomTextField
               name='search'
