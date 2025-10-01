@@ -220,7 +220,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       formik.setValues({
         //clientIDView
         functionId: SystemFunction.KYC,
-        masterRecordId: obj.clientMaster?.recordId,
+        masterRecordId: obj?.clientMaster?.recordId,
         reference: obj.clientMaster?.reference,
         clientId: obj.clientIDView?.clientId,
         expiryDate: formatDateFromApi(obj.clientMaster?.expiryDate),
@@ -640,7 +640,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         ClientIndividual: obj3, //CTCLI
         clientRemittance: obj4,
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6?.name && obj6?.countryId && obj6?.cityId && obj6?.phone && obj6?.street1 ? obj6 : null
       }
 
       postRequest({
