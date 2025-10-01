@@ -394,6 +394,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       props: {
         recordId: formik.values.recordId,
         values: formik.values,
+        deviceId: formik.values.cellPhone,
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
@@ -1356,7 +1357,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
-                          displayFieldWidth={1.5}
+                          displayFieldWidth={3}
                           values={formik.values}
                           required
                           onChange={(event, newValue) => {
