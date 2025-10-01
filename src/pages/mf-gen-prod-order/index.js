@@ -16,6 +16,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ProductionOrderForm from '../mf-prod-order/Forms/ProductionOrderForm'
 import { useWindow } from 'src/windows'
+import Form from 'src/components/Shared/Form'
 
 const GeneratePoductionOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -211,160 +212,166 @@ const GeneratePoductionOrder = () => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container spacing={2} p={4}>
-          <Grid item xs={6}>
-            <ResourceLookup
-              endpointId={SaleRepository.Client.snapshot}
-              name='clientId'
-              label={labels.client}
-              valueField='reference'
-              displayField='name'
-              valueShow='clientRef'
-              secondValueShow='clientName'
-              form={formik}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('clientId', newValue?.recordId || null)
-                formik.setFieldValue('clientName', newValue?.name || '')
-                formik.setFieldValue('clientRef', newValue?.reference || '')
-                fillSummaryORD(newValue?.recordId)
+    <Form
+      onSave={formik.handleSubmit}
+      isSaved={false}
+      disabledSubmit={!formik.values.itemSummaries?.list?.some(item => item.checked)}
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <ResourceLookup
+                endpointId={SaleRepository.Client.snapshot}
+                name='clientId'
+                label={labels.client}
+                valueField='reference'
+                displayField='name'
+                valueShow='clientRef'
+                secondValueShow='clientName'
+                form={formik}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('clientId', newValue?.recordId || null)
+                  formik.setFieldValue('clientName', newValue?.name || '')
+                  formik.setFieldValue('clientRef', newValue?.reference || '')
+                  fillSummaryORD(newValue?.recordId)
 
-                formik.setFieldValue('orders', { list: [] })
-              }}
-              maxAccess={access}
-              autoSelectFistValue={!formik.values.clientId}
-              displayFieldWidth={3}
-              error={formik.touched?.clientId && Boolean(formik.errors?.clientId)}
-            />
+                  formik.setFieldValue('orders', { list: [] })
+                }}
+                maxAccess={access}
+                autoSelectFistValue={!formik.values.clientId}
+                displayFieldWidth={3}
+                error={formik.touched?.clientId && Boolean(formik.errors?.clientId)}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <CustomButton
+                onClick={() => fillSummaryORD(formik.values.clientId)}
+                label={platformLabels.Preview}
+                image={'preview.png'}
+                color='#231f20'
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={2}>
-            <CustomButton
-              onClick={() => fillSummaryORD(formik.values.clientId)}
-              label={platformLabels.Preview}
-              image={'preview.png'}
-              color='#231f20'
-            />
-          </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-          <Grid item xs={12} sx={{ display: 'flex' }}>
-            <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
-              <Grid item xs={12} sx={{ display: 'flex' }}>
-                <Table
-                  columns={columnsItemsSummary}
-                  gridData={formik?.values?.itemSummaries}
-                  rowId={['itemId']}
-                  pagination={false}
-                  maxAccess={access}
-                  disableSorting={true}
-                  showCheckboxColumn={true}
-                  showSelectAll={true}
-                  disable={disableCondition}
-                  handleCheckboxChange={row => {
-                    setOrders(row)
-                  }}
-                  onSelectionChange={row => {
-                    setOrders(row)
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Table
-                  columns={columnsOrders}
-                  gridData={formik?.values?.orders}
-                  rowId={['itemId']}
-                  isLoading={false}
-                  pagination={false}
-                  maxAccess={access}
-                  showCheckboxColumn={true}
-                  showSelectAll={false}
-                  handleCheckboxChange={() => {
-                    const allOrders = formik?.values?.orders?.list || []
-                    const checkedOrders = allOrders.filter(order => order.checked)
+        </Fixed>
+        <Grow>
+          <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+            <Grid item xs={12} sx={{ display: 'flex' }}>
+              <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
+                <Grid item xs={12} sx={{ display: 'flex' }}>
+                  <Table
+                    columns={columnsItemsSummary}
+                    gridData={formik?.values?.itemSummaries}
+                    rowId={['itemId']}
+                    pagination={false}
+                    maxAccess={access}
+                    disableSorting={true}
+                    showCheckboxColumn={true}
+                    showSelectAll={true}
+                    disable={disableCondition}
+                    handleCheckboxChange={row => {
+                      setOrders(row)
+                    }}
+                    onSelectionChange={row => {
+                      setOrders(row)
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Table
+                    columns={columnsOrders}
+                    gridData={formik?.values?.orders}
+                    rowId={['itemId']}
+                    isLoading={false}
+                    pagination={false}
+                    maxAccess={access}
+                    showCheckboxColumn={true}
+                    showSelectAll={false}
+                    handleCheckboxChange={() => {
+                      const allOrders = formik?.values?.orders?.list || []
+                      const checkedOrders = allOrders.filter(order => order.checked)
 
-                    const allOrderSums = allOrders.reduce((acc, order) => {
-                      const itemId = order.itemId
-                      if (!acc[itemId]) {
-                        acc[itemId] = { soQty: 0, remainingQty: 0 }
-                      }
-                      acc[itemId].soQty += order.soQty || 0
-                      acc[itemId].remainingQty += order.remainingQty || 0
-
-                      return acc
-                    }, {})
-
-                    const checkedOrderSums = checkedOrders.reduce((acc, order) => {
-                      const itemId = order.itemId
-                      if (!acc[itemId]) {
-                        acc[itemId] = { soQty: 0, remainingQty: 0 }
-                      }
-                      acc[itemId].soQty += order.soQty || 0
-                      acc[itemId].remainingQty += order.remainingQty || 0
-
-                      return acc
-                    }, {})
-
-                    const updatedItemSummaries = formik.values.itemSummaries.list.map(item => {
-                      const itemId = item.itemId
-
-                      if (allOrderSums[itemId]) {
-                        const checked = checkedOrderSums[itemId] || { soQty: 0, remainingQty: 0 }
-                        const deltaQty = item.onHand + item.inProduction - item.minQty - checked.remainingQty
-
-                        return {
-                          ...item,
-                          soQty: checked.soQty,
-                          deltaQty,
-                          remainingQty: checked.remainingQty,
-                          produceNow: Math.abs(deltaQty)
+                      const allOrderSums = allOrders.reduce((acc, order) => {
+                        const itemId = order.itemId
+                        if (!acc[itemId]) {
+                          acc[itemId] = { soQty: 0, remainingQty: 0 }
                         }
-                      }
+                        acc[itemId].soQty += order.soQty || 0
+                        acc[itemId].remainingQty += order.remainingQty || 0
 
-                      return item
-                    })
+                        return acc
+                      }, {})
 
-                    formik.setFieldValue(`itemSummaries`, { list: updatedItemSummaries })
-                  }}
-                />
+                      const checkedOrderSums = checkedOrders.reduce((acc, order) => {
+                        const itemId = order.itemId
+                        if (!acc[itemId]) {
+                          acc[itemId] = { soQty: 0, remainingQty: 0 }
+                        }
+                        acc[itemId].soQty += order.soQty || 0
+                        acc[itemId].remainingQty += order.remainingQty || 0
+
+                        return acc
+                      }, {})
+
+                      const updatedItemSummaries = formik.values.itemSummaries.list.map(item => {
+                        const itemId = item.itemId
+
+                        if (allOrderSums[itemId]) {
+                          const checked = checkedOrderSums[itemId] || { soQty: 0, remainingQty: 0 }
+                          const deltaQty = item.onHand + item.inProduction - item.minQty - checked.remainingQty
+
+                          return {
+                            ...item,
+                            soQty: checked.soQty,
+                            deltaQty,
+                            remainingQty: checked.remainingQty,
+                            produceNow: Math.abs(deltaQty)
+                          }
+                        }
+
+                        return item
+                      })
+
+                      formik.setFieldValue(`itemSummaries`, { list: updatedItemSummaries })
+                    }}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <Grid container spacing={2} p={2}>
-          <Grid item xs={1}>
-            <CustomButton
-              onClick={resetForm}
-              label={platformLabels.Clear}
-              tooltipText={platformLabels.Clear}
-              image={'clear.png'}
-              color='#f44336'
-            />
-          </Grid>
+        </Grow>
+        <Fixed>
+          <Grid container spacing={2} p={2}>
+            <Grid item xs={1}>
+              <CustomButton
+                onClick={resetForm}
+                label={platformLabels.Clear}
+                tooltipText={platformLabels.Clear}
+                image={'clear.png'}
+                color='#f44336'
+              />
+            </Grid>
 
-          <Grid item xs={10.5}></Grid>
+            <Grid item xs={10.5}></Grid>
 
-          <Grid item xs={0.5}>
-            <CustomButton
-              onClick={() => formik.handleSubmit()}
-              label={platformLabels.Generate}
-              color='#231f20'
-              tooltipText={platformLabels.Generate}
-              disabled={!formik.values.itemSummaries?.list?.some(item => item.checked)}
-              image={'generate.png'}
-            />
+            <Grid item xs={0.5}>
+              <CustomButton
+                onClick={() => formik.handleSubmit()}
+                label={platformLabels.Generate}
+                color='#231f20'
+                tooltipText={platformLabels.Generate}
+                disabled={!formik.values.itemSummaries?.list?.some(item => item.checked)}
+                image={'generate.png'}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+      </VertLayout>
+    </Form>
   )
 }
 

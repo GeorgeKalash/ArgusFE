@@ -90,7 +90,7 @@ const CTExchangeRates = () => {
     initialValues: {
       currencyId: null,
       rateAgainst: 1,
-      raCurrencyId: raCurrencyId,
+      raCurrencyId,
       puRateTypeId: null,
       saRateTypeId: null,
       purchases: [
@@ -100,9 +100,7 @@ const CTExchangeRates = () => {
           raCurrencyId: null,
           rateTypeId: null,
           plantId: null,
-          plantName: '',
           rateCalcMethod: null,
-          rateCalcMethodName: '',
           minRate: null,
           maxRate: null,
           rate: null
@@ -129,9 +127,12 @@ const CTExchangeRates = () => {
         await postExchangeMaps(values.purchases, values.currencyId, values.raCurrencyId, values.puRateTypeId)
       if (values.saRateTypeId)
         await postExchangeMaps(values.sales, values.currencyId, values.raCurrencyId, values.saRateTypeId)
+
       toast.success(platformLabels.Saved)
     }
   })
+
+  console.log(formik.values, raCurrencyId)
 
   const exchangeRatesInlineGridColumns = [
     {
@@ -174,9 +175,9 @@ const CTExchangeRates = () => {
 
   const postExchangeMaps = async (rows, currencyId, raCurrencyId, rateTypeId) => {
     const data = {
-      currencyId: currencyId,
-      rateTypeId: rateTypeId,
-      raCurrencyId: raCurrencyId,
+      currencyId,
+      rateTypeId,
+      raCurrencyId,
       exchangeMaps: rows
     }
 
@@ -187,18 +188,14 @@ const CTExchangeRates = () => {
   }
 
   useEffect(() => {
-    if (formik.values) {
-      if (formik.values.currencyId != null && formik.values.puRateTypeId != null) {
-        getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, 'purchases')
-      }
+    if (formik.values.currencyId && formik.values.puRateTypeId && formik.values.raCurrencyId) {
+      getExchangeRates(formik.values.currencyId, formik.values.puRateTypeId, formik.values.raCurrencyId, 'purchases')
     }
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.puRateTypeId])
 
   useEffect(() => {
-    if (formik.values) {
-      if (formik.values.currencyId != null && formik.values.saRateTypeId != null) {
-        getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, formik.values.raCurrencyId, 'sales')
-      }
+    if (formik.values.currencyId && formik.values.saRateTypeId && formik.values.raCurrencyId) {
+      getExchangeRates(formik.values.currencyId, formik.values.saRateTypeId, formik.values.raCurrencyId, 'sales')
     }
   }, [formik.values.currencyId, formik.values.raCurrencyId, formik.values.saRateTypeId])
 
@@ -211,14 +208,16 @@ const CTExchangeRates = () => {
     })
   }, [])
 
+  useEffect(() => {
+    formik.setFieldValue('raCurrencyId', raCurrencyId)
+  }, [raCurrencyId])
+
   const getExchangeRates = async (cuId, rateTypeId, raCurrencyId, tableName) => {
     formik.setFieldValue(tableName, [])
     if (cuId && raCurrencyId && rateTypeId) {
-      const parameters = `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
-
       const values = await getRequest({
         extension: CurrencyTradingSettingsRepository.ExchangeMap.qry,
-        parameters: parameters
+        parameters: `_currencyId=${cuId}&_rateTypeId=${rateTypeId}&_raCurrencyId=${raCurrencyId}`
       })
 
       const valuesMap = values.list?.reduce((acc, fee) => {
@@ -233,8 +232,8 @@ const CTExchangeRates = () => {
         return {
           id: index,
           currencyId: cuId,
-          raCurrencyId: raCurrencyId,
-          rateTypeId: rateTypeId,
+          raCurrencyId,
+          rateTypeId,
           plantId: plant.recordId,
           plantName: plant.name,
           rateCalcMethod: value.rateCalcMethod,
@@ -263,16 +262,13 @@ const CTExchangeRates = () => {
       }
     })
 
-    formik.setValues({
-      ...formik.values,
-      [tableName]: rows
-    })
+    formik.setFieldValue(tableName, rows)
   }
 
-  const emptyExchangeMapsRowValues = async (tableName, RateTypeId) => {
+  const emptyExchangeMapsRowValues = async (tableName, rateTypeId) => {
     const data = {
       currencyId: formik.values.currencyId,
-      rateTypeId: RateTypeId,
+      rateTypeId,
       raCurrencyId: formik.values.raCurrencyId,
       exchangeMaps: []
     }
@@ -280,20 +276,18 @@ const CTExchangeRates = () => {
       extension: CurrencyTradingSettingsRepository.ExchangeMap.set2,
       record: JSON.stringify(data)
     }).then(res => {
-      if (res) {
-        getExchangeRates(formik.values.currencyId, RateTypeId, formik.values.raCurrencyId, tableName)
-        toast.success(platformLabels.Saved)
-      }
+      getExchangeRates(formik.values.currencyId, rateTypeId, formik.values.raCurrencyId, tableName)
+      toast.success(platformLabels.Saved)
     })
   }
 
-  function openClear(tableName, RateTypeId) {
+  function openClear(tableName, rateTypeId) {
     stack({
       Component: ClearDialog,
       props: {
         open: [true, {}],
         fullScreen: false,
-        onConfirm: () => emptyExchangeMapsRowValues(tableName, RateTypeId)
+        onConfirm: () => emptyExchangeMapsRowValues(tableName, rateTypeId)
       }
     })
   }
@@ -360,10 +354,10 @@ const CTExchangeRates = () => {
                     ]}
                     values={formik.values}
                     required
-                    readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1' ? true : false}
+                    readOnly={!formik.values.rateAgainst || formik.values.rateAgainst === '1'}
                     maxAccess={access}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('raCurrencyId', newValue?.recordId)
+                      formik.setFieldValue('raCurrencyId', newValue?.recordId || null)
                     }}
                     error={formik.touched.raCurrencyId && Boolean(formik.errors.raCurrencyId)}
                   />
@@ -391,8 +385,8 @@ const CTExchangeRates = () => {
                             values={formik.values}
                             required
                             maxAccess={access}
-                            onChange={(event, newValue) => {
-                              formik && formik.setFieldValue('puRateTypeId', newValue?.recordId)
+                            onChange={(_, newValue) => {
+                              formik.setFieldValue('puRateTypeId', newValue?.recordId || null)
                             }}
                             error={formik.touched.puRateTypeId && Boolean(formik.errors.puRateTypeId)}
                           />
@@ -428,20 +422,18 @@ const CTExchangeRates = () => {
                       </Grid>
                     </Fixed>
                     <Grow>
-                      {formik.values.currencyId != null &&
-                        formik.values.raCurrencyId != null &&
-                        formik.values.puRateTypeId != null && (
-                          <DataGrid
-                            name='purchases'
-                            onChange={value => formik.setFieldValue('purchases', value)}
-                            value={formik.values.purchases}
-                            error={formik.errors.purchases}
-                            columns={exchangeRatesInlineGridColumns}
-                            allowDelete={false}
-                            allowAddNewLine={false}
-                            maxAccess={access}
-                          />
-                        )}
+                      {formik.values.currencyId && formik.values.raCurrencyId && formik.values.puRateTypeId && (
+                        <DataGrid
+                          name='purchases'
+                          onChange={value => formik.setFieldValue('purchases', value)}
+                          value={formik.values.purchases}
+                          error={formik.errors.purchases}
+                          columns={exchangeRatesInlineGridColumns}
+                          allowDelete={false}
+                          allowAddNewLine={false}
+                          maxAccess={access}
+                        />
+                      )}
                     </Grow>
                   </VertLayout>
                 </FieldSet>
