@@ -34,7 +34,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
             fontSize: '18pt'
           }}
         >
-          {labels.FinancialStatements}
+          {labels.FinancialStatement}
         </Typography>
 
         {rpbParams && rpbParams.length > 0 && (

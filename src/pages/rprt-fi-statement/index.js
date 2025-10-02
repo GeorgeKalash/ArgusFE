@@ -217,7 +217,7 @@ const FinancialStatements = () => {
         labels
       },
       width: 1200,
-      height: 800,
+      height: 600,
       title: labels.Print
     })
   }
