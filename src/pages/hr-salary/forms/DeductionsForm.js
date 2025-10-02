@@ -13,14 +13,16 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function DeductionsForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Machine.page
+    endpointId: EmployeeRepository.SalaryDetails.qry
   })
 
   const { formik } = useForm({
@@ -30,16 +32,20 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
       includeInTotal: false,
       deductionId: null,
       isPercentage: false,
-      PctOf: null,
+      pctOf: null,
       amount: 0,
-      percentage: 0,
+      pct: 0,
       isTaxable: false,
-      calculationType: null
+      edCalcType: null
     },
-    validateOnChange: false,
-    validationSchema: yup.object({}),
+    validationSchema: yup.object({
+      edId: yup.number().required(),
+      fixedAmount: yup.number().min(1).required(),
+      edCalcType: yup.number().required()
+    }),
     onSubmit: async values => {}
   })
+  console.log('formik', formik)
 
   const editMode = !!formik.values.recordId
 
@@ -51,94 +57,100 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.WorkCenter.qry}
-            name='deductionId'
-            label={labels.deductionId}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('deductionId', newValue?.recordId || null)
-            }}
-            error={formik.touched.deductionId && Boolean(formik.errors.deductionId)}
-          />
+    <FormShell resourceId={ResourceIds.Salaries} form={formik} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={EmployeeRepository.EmployeeDeduction.qry}
+              name='edId'
+              label={labels.deduction}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              filter={item => item.type == 2}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('edId', newValue?.recordId || null)
+              }}
+              required
+              error={formik.touched.edId && Boolean(formik.errors.edId)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='includeInTotal'
+              value={formik.values?.includeInTotal}
+              onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
+              label={labels.includeInTotal}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isPct'
+              value={formik.values?.isPct}
+              onChange={event => formik.setFieldValue('isPct', event.target.checked)}
+              label={labels.isPct}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='pctOf'
+              label={labels.pctOf}
+              value={formik.values.pctOf}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('pctOf', 0)}
+              error={formik.touched.pctOf && Boolean(formik.errors.pctOf)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='pct'
+              label={labels.pct}
+              value={formik.values.pct}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('pct', 0)}
+              error={formik.touched.pct && Boolean(formik.errors.pct)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomNumberField
+              name='amount'
+              label={labels.amount}
+              value={formik.values.amount}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('amount', 0)}
+              error={formik.touched.amount && Boolean(formik.errors.amount)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isTaxable'
+              value={formik.values?.isTaxable}
+              onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
+              label={labels.isTaxable}
+              maxAccess={maxAccess}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              datasetId={DataSets.ED_CALC_TYPE}
+              name='edCalcType'
+              label={labels.calculationType}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={maxAccess}
+              required
+              onChange={(event, newValue) => {
+                formik.setFieldValue('edCalcType', newValue?.key || null)
+              }}
+              error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='includeInTotal'
-            value={formik.values?.includeInTotal}
-            onChange={event => formik.setFieldValue('includeInTotal', event.target.checked)}
-            label={labels.includeInTotal}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='isPercentage'
-            value={formik.values?.isPercentage}
-            onChange={event => formik.setFieldValue('isPercentage', event.target.checked)}
-            label={labels.isPercentage}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='PctOf'
-            label={labels.PctOf}
-            value={formik.values.PctOf}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('PctOf', 0)}
-            error={formik.touched.PctOf && Boolean(formik.errors.PctOf)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='percentage'
-            label={labels.percentage}
-            value={formik.values.percentage}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('percentage', 0)}
-            error={formik.touched.percentage && Boolean(formik.errors.percentage)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomNumberField
-            name='amount'
-            label={labels.amount}
-            value={formik.values.amount}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('amount', 0)}
-            error={formik.touched.amount && Boolean(formik.errors.amount)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomCheckBox
-            name='isTaxable'
-            value={formik.values?.isTaxable}
-            onChange={event => formik.setFieldValue('isTaxable', event.target.checked)}
-            label={labels.isTaxable}
-            maxAccess={maxAccess}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.Operation.qry}
-            name='calculationType'
-            label={labels.calculationType}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('calculationType', newValue?.recordId || null)
-            }}
-            error={formik.touched.calculationType && Boolean(formik.errors.calculationType)}
-          />
-        </Grid>
-      </Grid>
+      </VertLayout>
     </FormShell>
   )
 }

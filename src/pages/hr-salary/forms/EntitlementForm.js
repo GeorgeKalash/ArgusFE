@@ -6,7 +6,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -41,9 +40,9 @@ export default function EntitlementForm({ labels, maxAccess, salaryId, seqNumber
       edCalcType: null
     },
     validationSchema: yup.object({
-      edId: yup.string().required(),
-      fixedAmount: yup.string().required(),
-      edCalcType: yup.string().required()
+      edId: yup.number().required(),
+      fixedAmount: yup.number().min(1).required(),
+      edCalcType: yup.number().required()
     }),
     onSubmit: async obj => {
       const newObj = {
@@ -82,7 +81,7 @@ export default function EntitlementForm({ labels, maxAccess, salaryId, seqNumber
 
   return (
     <FormShell
-      resourceId={ResourceIds.Machines}
+      resourceId={ResourceIds.Salaries}
       form={formik}
       maxAccess={maxAccess}
       isCleared={false}
