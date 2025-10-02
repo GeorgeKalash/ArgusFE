@@ -6,18 +6,17 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { DataSets } from 'src/resources/DataSets'
+import { calculateFixed } from 'src/utils/Payroll'
 
-export default function DeductionsForm({ labels, maxAccess, recordId }) {
+export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers, salaryInfo, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -28,13 +27,14 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
+      salaryId,
+      seqNo: seqNumbers?.current,
       includeInTotal: false,
-      deductionId: null,
-      isPercentage: false,
-      pctOf: null,
-      amount: 0,
+      edId: null,
+      isPct: false,
+      fixedAmount: null,
       pct: 0,
+      comments: '',
       isTaxable: false,
       edCalcType: null
     },
@@ -43,15 +43,37 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
       fixedAmount: yup.number().min(1).required(),
       edCalcType: yup.number().required()
     }),
-    onSubmit: async values => {}
-  })
-  console.log('formik', formik)
+    onSubmit: async obj => {
+      const newObj = {
+        ...obj,
+        seqNo: seqNumbers?.current || (seqNumbers?.maxSeqNo || 0) + 1
+      }
+      const updatedDetails = [...(salaryInfo?.details || []).filter(d => d.seqNo !== newObj.seqNo), newObj]
 
-  const editMode = !!formik.values.recordId
+      await postRequest({
+        extension: EmployeeRepository.SalaryDetails.set2,
+        record: JSON.stringify({
+          salary: salaryInfo?.header,
+          salaryDetails: updatedDetails
+        })
+      })
+      const actionMessage = obj.salaryId ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      window.close()
+      invalidate()
+    }
+  })
+
+  const editMode = !!formik.values.salaryId
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (salaryId && seqNumbers?.current) {
+        const res = await getRequest({
+          extension: EmployeeRepository.SalaryDetails.get,
+          parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
+        })
+        formik.setValues(res?.record)
       }
     })()
   }, [])
@@ -89,7 +111,11 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
             <CustomCheckBox
               name='isPct'
               value={formik.values?.isPct}
-              onChange={event => formik.setFieldValue('isPct', event.target.checked)}
+              onChange={event => {
+                formik.setFieldValue('isPct', event.target.checked)
+                if (event.target.checked) formik.setFieldValue('fixedAmount', 0)
+                else formik.setFieldValue('pct', 0)
+              }}
               label={labels.isPct}
               maxAccess={maxAccess}
             />
@@ -109,19 +135,27 @@ export default function DeductionsForm({ labels, maxAccess, recordId }) {
               name='pct'
               label={labels.pct}
               value={formik.values.pct}
-              onChange={formik.handleChange}
+              readOnly={!formik.values.isPct}
+              onBlur={e => {
+                let pctValue = Number(e.target.value)
+                formik.setFieldValue('pct', pctValue)
+                const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
+                formik.setFieldValue('fixedAmount', amount)
+              }}
               onClear={() => formik.setFieldValue('pct', 0)}
               error={formik.touched.pct && Boolean(formik.errors.pct)}
             />
           </Grid>
           <Grid item xs={12}>
             <CustomNumberField
-              name='amount'
+              name='fixedAmount'
               label={labels.amount}
-              value={formik.values.amount}
+              value={formik.values.fixedAmount}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('amount', 0)}
-              error={formik.touched.amount && Boolean(formik.errors.amount)}
+              required
+              readOnly={formik.values.isPct}
+              onClear={() => formik.setFieldValue('fixedAmount', null)}
+              error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
             />
           </Grid>
           <Grid item xs={12}>

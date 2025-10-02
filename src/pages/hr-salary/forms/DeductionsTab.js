@@ -15,7 +15,6 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
   const { postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
-  const maxSeqNo = data?.length > 0 ? Math.max(...data.map(r => r.seqNo ?? 0)) : 0
 
   const columns = [
     {
@@ -54,7 +53,7 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
         labels,
         maxAccess,
         salaryId: store?.recordId,
-        seqNumbers: { current: seqNo, maxSeqNo },
+        seqNumbers: { current: seqNo, maxSeqNo: store?.maxSeqNo },
         salaryInfo: { header: salaryInfo, details: data }
       },
       width: 800,
@@ -82,7 +81,7 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
         <Table
           name='deductionTable'
           columns={columns}
-          gridData={{ list: data }}
+          gridData={{ list: data?.filter(record => record.type == 2) }}
           rowId='salaryId'
           onEdit={edit}
           onDelete={del}

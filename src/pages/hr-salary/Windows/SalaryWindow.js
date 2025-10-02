@@ -35,6 +35,11 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
       parameters: `_salaryId=${recordId}&_type=0`
     })
 
+    setStore(prevStore => ({
+      ...prevStore,
+      maxSeqNo: response?.list?.length > 0 ? Math.max(...response?.list?.map(r => r.seqNo ?? 0)) : 0
+    }))
+
     return response.list.map(record => ({
       ...record,
       currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,
@@ -62,22 +67,10 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <EntitlementsTab
-          labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          salaryInfo={salaryInfo}
-          data={data?.filter(record => record.type == 1)}
-        />
+        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} data={data} />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <DeductionsTab
-          labels={labels}
-          maxAccess={maxAccess}
-          store={store}
-          salaryInfo={salaryInfo}
-          data={data?.filter(record => record.type == 2)}
-        />
+        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} data={data} />
       </CustomTabPanel>
     </>
   )
