@@ -41,35 +41,43 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   const columns = [
     {
       field: 'name',
-      headerName: labels.name
+      headerName: labels.name,
+      flex: 1
     },
     {
       field: 'addressLine1',
-      headerName: labels.addressLine1
+      headerName: labels.addressLine1,
+      flex: 1
     },
     {
       field: 'nationalityName',
-      headerName: labels.nationalityId
+      headerName: labels.nationalityId,
+      flex: 1
     },
     {
       field: 'currencyRef',
-      headerName: labels.Currency
+      headerName: labels.Currency,
+      flex: 1
     },
     {
       field: 'countryName',
-      headerName: labels.country
+      headerName: labels.country,
+      flex: 1
     },
     {
       field: 'accountReference',
-      headerName: labels.accountRef
+      headerName: labels.accountRef,
+      flex: 1
     },
     {
       field: 'branchName',
-      headerName: labels.branchName
+      headerName: labels.branchName,
+      flex: 1
     },
     {
       field: 'dispersalTypeName',
-      headerName: labels.dispersalType
+      headerName: labels.dispersalType,
+      flex: 1
     }
   ]
 
@@ -92,7 +100,6 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
         gridData={{ list: formik.values.benList }}
         rowId={['beneficiaryId']}
         rowSelection='single'
-        isLoading={false}
         pagination={false}
         maxAccess={maxAccess}
         showCheckboxColumn={true}
