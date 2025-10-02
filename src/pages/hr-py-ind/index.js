@@ -75,7 +75,7 @@ const PyIndemnity = () => {
       props: {
         labels,
         recordId,
-        access
+        maxAccess: access
       },
       width: 650,
       height: 480,

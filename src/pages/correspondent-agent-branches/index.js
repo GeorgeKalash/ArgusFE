@@ -14,6 +14,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
+import { max } from 'date-fns-jalali'
 
 const Agent = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -86,7 +87,8 @@ const Agent = () => {
       Component: AgentBranchWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 700,
       height: 500,
