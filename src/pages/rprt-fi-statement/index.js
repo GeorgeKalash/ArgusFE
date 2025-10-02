@@ -143,9 +143,9 @@ const FinancialStatements = () => {
     }
 
     return treeData.map(row => ({
-      ...row,
-      parent: row.parent != null ? idToName[row.parent] : null
-    }))
+    ...row,
+    parent: row.parent != null ? idToName[row.parent] : null
+  }))
   }
 
   async function fetchWithFilter({ filters, pagination }) {
@@ -216,8 +216,8 @@ const FinancialStatements = () => {
         columns: baseColumns,
         labels
       },
-      width: 1100,
-      height: 800,
+      width: 1200,
+      height: 600,
       title: labels.Print
     })
   }
@@ -246,6 +246,7 @@ const FinancialStatements = () => {
             collabsable={false}
             maxAccess={access}
             field='nodeName'
+            disableSorting
             fullRowData={data}
           />
         </Grow>

@@ -948,6 +948,9 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
+            {...(props?.domLayout == 'autoHeight' && {
+              domLayout: 'autoHeight'
+            })}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
             })}
