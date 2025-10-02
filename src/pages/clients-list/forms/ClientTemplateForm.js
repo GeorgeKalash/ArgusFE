@@ -189,18 +189,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     }
   }
 
-  async function getCountry() {
-    var parameters = `_filter=&_key=countryId`
-
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: parameters
-    })
-    const countryId = res.record.value
-
-    countryId && formik.setFieldValue('idCountry', parseInt(countryId))
-  }
-
   useEffect(() => {
     if (recordId) {
       getClient(recordId, true)
@@ -661,12 +649,25 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }
 
   useEffect(() => {
-    if (formik.values.idtId) {
-      const res = idTypes.list?.filter(item => item.recordId === formik.values.idtId)?.[0]
-      if (res && res['type'] && (res['type'] === 1 || res['type'] === 2)) {
-        getCountry()
+    ;(async function () {
+      if (formik?.values?.idtId) {
+        const res = idTypes.list?.find(item => item.recordId === formik.values.idtId)
+
+        if (!res || !res.type || (res.type !== 1 && res.type !== 2)) {
+          formik.setFieldValue('idCountry', null)
+          formik.setFieldValue('nationalityId', null)
+
+          return
+        }
+
+        const country = parseInt(defaultsData?.list?.find(obj => obj.key === 'countryId')?.value)
+        formik.setFieldValue('idCountry', country)
+        formik.setFieldValue('nationalityId', res.type == 1 ? country : null)
+      } else {
+        formik.setFieldValue('idCountry', null)
+        formik.setFieldValue('nationalityId', null)
       }
-    }
+    })()
   }, [formik.values.idtId])
 
   useEffect(() => {
