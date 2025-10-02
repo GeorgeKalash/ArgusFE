@@ -66,7 +66,6 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       parameters: parameters
     }).then(result => {
       const res = result.record
-
       if (!res.errorId) {
         clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
         clientformik.setFieldValue('firstName', res.fl_firstName)
@@ -78,7 +77,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
         clientformik.setFieldValue('fl_lastName', res.lastName)
         clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
         clientformik.setFieldValue('professionId', res.professionId)
-        clientformik.setFieldValue('nationalityId', res.nationalityId)
+        res.nationalityId && clientformik.setFieldValue('nationalityId', res.nationalityId)
         clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
         clientformik.setFieldValue('sponsorName', res.sponsorName)
 
