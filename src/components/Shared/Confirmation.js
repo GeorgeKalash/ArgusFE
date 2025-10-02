@@ -68,19 +68,27 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
       const res = result.record
       if (!res.errorId) {
         clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
-        clientformik.setFieldValue('firstName', res.fl_firstName)
-        clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_familyName || ''}`.trim())
-        clientformik.setFieldValue('lastName', res.fl_lastName)
         clientformik.setFieldValue('flName', res.flName)
-        clientformik.setFieldValue('fl_firstName', res.firstName)
-        clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.familyName || ''}`.trim())
-        clientformik.setFieldValue('fl_lastName', res.lastName)
         clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
         clientformik.setFieldValue('professionId', res.professionId)
         res.nationalityId && clientformik.setFieldValue('nationalityId', res.nationalityId)
         clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
         clientformik.setFieldValue('sponsorName', res.sponsorName)
-
+        if (clientformik.values.idtId == 2) {
+          clientformik.setFieldValue('fl_firstName', res.firstName)
+          clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.lastName || ''}`.trim())
+          clientformik.setFieldValue('fl_lastName', res.familyName)
+          clientformik.setFieldValue('firstName', res.fl_firstName)
+          clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_lastName || ''}`.trim())
+          clientformik.setFieldValue('lastName', res.fl_familyName)
+        } else {
+          clientformik.setFieldValue('fl_firstName', res.firstName)
+          clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.familyName || ''}`.trim())
+          clientformik.setFieldValue('fl_lastName', res.lastName)
+          clientformik.setFieldValue('firstName', res.fl_firstName)
+          clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_familyName || ''}`.trim())
+          clientformik.setFieldValue('lastName', res.fl_lastName)
+        }
         res.newProfessionMode && refreshProf()
         window.close()
       } else {
