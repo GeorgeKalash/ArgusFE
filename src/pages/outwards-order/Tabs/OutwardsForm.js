@@ -78,11 +78,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
     firstName: '',
     middleName: '',
     lastName: '',
-    familyName: '',
     fl_firstName: '',
     fl_middleName: '',
     fl_lastName: '',
-    fl_familyName: '',
     expiryDate: null,
     professionId: '',
     recordId: recordId,
@@ -534,8 +532,6 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
           firstName,
           middleName,
           lastName,
-          familyName,
-          fl_familyName,
           fl_firstName,
           fl_lastName,
           fl_middleName,
@@ -553,11 +549,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
         firstName,
         middleName,
         lastName,
-        familyName,
         fl_firstName,
         fl_middleName,
         fl_lastName,
-        fl_familyName,
         professionId,
         hiddenTrxCount: trxCountPerYear,
         hiddenTrxAmount: trxAmountPerYear,
@@ -1385,7 +1379,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           errorCheck={'header.clientId'}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='firstName'
                           label={labels.firstName}
@@ -1394,7 +1388,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='middleName'
                           label={labels.middleName}
@@ -1403,7 +1397,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='lastName'
                           label={labels.lastName}
@@ -1412,18 +1406,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='familyName'
-                          label={labels.familyName}
-                          value={formik.values?.familyName}
-                          readOnly
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.flFirstName}
@@ -1433,7 +1418,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.flMiddleName}
@@ -1443,24 +1428,13 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.flLastName}
                               value={formik.values?.fl_lastName}
                               readOnly
                               dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_familyName'
-                              label={labels.flFamilyName}
-                              value={formik.values?.fl_familyName}
-                              readOnly
-                              dir='rtl'
-                              error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
                           </Grid>
@@ -1502,7 +1476,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               name='header.cellPhone'
                               phone={true}
                               label={labels.cellPhone}
-                              value={formik.values?.cellPhone}
+                              value={formik.values?.header.cellPhone}
                               readOnly
                               maxLength='15'
                               autoComplete='off'
