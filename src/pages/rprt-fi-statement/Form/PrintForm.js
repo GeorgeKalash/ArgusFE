@@ -22,9 +22,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
         ref={printRef}
         className='print-container'
         style={{
-          all: 'inherit',
-          width: '100%',
-          height: '100%',
+          all: 'inherit'
         }}
       >
         <Typography
@@ -60,7 +58,9 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
             rowId={['nodeId']}
             pagination={false}
             collabsable={false}
+            domLayout={'autoHeight'}
             field='nodeName'
+            disableSorting
             fullRowData={tableData}
           />
         </div>
