@@ -18,6 +18,11 @@ import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { Box } from '@mui/material'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import { DataSets } from 'src/resources/DataSets'
+import { formatDateForGetApI } from 'src/lib/date-helper'
 
 const Frame = styled.div`
   display: flex;
@@ -126,8 +131,10 @@ const DashboardLayout = () => {
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState(0)
   const userData = getStorageData('userData')
   const _userId = userData.userId
+  const _languageId = userData.languageId
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -138,32 +145,64 @@ const DashboardLayout = () => {
   })
 
   useEffect(() => {
-    getRequest({
-      extension: SystemRepository.DynamicDashboard.qry,
-      parameters: `_userId=${_userId}`
-    })
-      .then(result => {
-        setApplets(result.list)
+    const fetchData = async () => {
+      try {
+        const appletsRes = await getRequest({
+          extension: SystemRepository.DynamicDashboard.qry,
+          parameters: `_userId=${_userId}`
+        })
+        setApplets(appletsRes.list)
 
-        return getRequest({
-          extension: DashboardRepository.dashboard
-        })
-      })
-      .then(res => {
-        return getRequest({
-          extension: DashboardRepository.SalesPersonDashboard.spDB,
-          parameters: ``
-        }).then(resSP => {
-          return getRequest({
-            extension: DocumentReleaseRepository.DocumentsOnHold.qry3,
-            parameters: ``
-          }).then(resDR => {
-            setData({ dashboard: { ...res?.record }, sp: { ...resSP?.record }, authorization: { ...resDR } })
-            debouncedCloseLoading()
+        const [resDashboard, resSP, resDR, resTV, resTimeCode] = await Promise.all([
+          getRequest({ extension: DashboardRepository.dashboard }),
+          getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+          getRequest({ extension: DocumentReleaseRepository.DocumentsOnHold.qry3 }),
+          getRequest({
+            extension: TimeAttendanceRepository.ResetTV.qry2,
+            parameters: `_dayId=${formatDateForGetApI(new Date())}`
+          }),
+          getRequest({
+            extension: SystemRepository.KeyValueStore,
+            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
           })
+        ])
+
+        const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+
+        const filteredTabs = resTimeCode.list
+          .filter(t => availableTimeCodes.has(Number(t.key)))
+          .map(t => ({
+            label: t.value,
+            timeCode: Number(t.key),
+            disabled: false
+          }))
+
+        const groupedData = filteredTabs.reduce((acc, tab) => {
+          acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+
+          return acc
+        }, {})
+
+        setData({
+          dashboard: { ...resDashboard?.record },
+          sp: { ...resSP?.record },
+          authorization: { ...resDR },
+          hr: {
+            headcountHistory: resHCH.list || [],
+            timeVariationDetails: resTV.list || [],
+            tabs: filteredTabs,
+            groupedData: groupedData
+          }
         })
-      })
-  }, [])
+      } catch (error) {
+        console.error('Error fetching dashboard data', error)
+      } finally {
+        debouncedCloseLoading()
+      }
+    }
+
+    fetchData()
+  }, [_userId, _languageId])
 
   if (loading) {
     return <LoadingOverlay />
@@ -587,6 +626,33 @@ const DashboardLayout = () => {
                   maxAccess={access}
                 />
               </Box>
+            </ChartCard>
+          )}
+          {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.todaysTimeVariationsDetails}</Title>
+              </SummaryCard>
+
+              <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+              {(data?.hr?.tabs || []).map((tab, idx) => (
+                <CustomTabPanel key={idx} index={idx} value={activeTab}>
+                  <Table
+                    name='TVtable'
+                    columns={[
+                      { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
+                      { field: 'branchName', headerName: labels.branchName, flex: 3 },
+                      { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
+                      { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
+                    ]}
+                    gridData={data?.hr?.groupedData?.[tab.timeCode] || []}
+                    rowId={['recordId']}
+                    pagination={false}
+                    maxAccess={access}
+                  />
+                </CustomTabPanel>
+              ))}
             </ChartCard>
           )}
         </MiddleRow>
