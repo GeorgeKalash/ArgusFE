@@ -65,7 +65,7 @@ export default function AuditForm({ labels, formik }) {
     <FormShell resourceId={ResourceIds.OutwardsOrder} form={formik} isCleared={false} isInfo={false} isSaved={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={4}>
             <Grid item xs={12}>
               <CustomTextField
                 name='corCurrencyRef'
