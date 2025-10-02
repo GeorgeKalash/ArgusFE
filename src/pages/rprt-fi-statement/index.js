@@ -17,6 +17,13 @@ const FinancialStatements = () => {
   const [columnVisibility, setColumnVisibility] = useState({})
   const { stack } = useWindow()
 
+  const [columnLabels, setColumnLabels] = useState({
+    baseAmount: '',
+    baseFiatAmount: '',
+    reportingMetalAmount: '',
+    currentRateBaseAmount: ''
+  })
+
   function formatFinancialData(groups) {
     const listSorted = []
 
@@ -107,6 +114,13 @@ const FinancialStatements = () => {
       parameters: `_params=${params}`
     })
 
+    setColumnLabels({
+      baseAmount: groupsRes?.record?.baseCurrencyRef || '',
+      baseFiatAmount: groupsRes?.record?.baseCurrencyRef || '',
+      reportingMetalAmount: groupsRes?.record?.reportingMetalCurrencyRef || '',
+      currentRateBaseAmount: groupsRes?.record?.reportingMetalCurrencyRef || ''
+    })
+
     const groups = groupsRes?.record?.data || []
     let treeData = formatFinancialData(groups)
 
@@ -162,25 +176,25 @@ const FinancialStatements = () => {
     },
     {
       field: 'baseAmount',
-      headerName: labels.baseAmount,
+      headerName: columnLabels.baseAmount,
       width: 150,
       type: 'number'
     },
     {
       field: 'baseFiatAmount',
-      headerName: labels.baseFiatAmount,
+      headerName: columnLabels.baseFiatAmount,
       width: 150,
       type: 'number'
     },
     {
       field: 'reportingMetalAmount',
-      headerName: labels.reportingMetalAmount,
+      headerName: columnLabels.reportingMetalAmount,
       width: 150,
       type: 'number'
     },
     {
       field: 'currentRateBaseAmount',
-      headerName: labels.currentRateBaseAmount,
+      headerName: columnLabels.currentRateBaseAmount,
       width: 150,
       type: 'number'
     }
@@ -202,7 +216,7 @@ const FinancialStatements = () => {
         columns: baseColumns,
         labels
       },
-      width: 1000,
+      width: 1100,
       height: 800,
       title: labels.Print
     })
@@ -218,9 +232,10 @@ const FinancialStatements = () => {
           reportName={'FS01'}
           filterBy={filterBy}
           Print={Print}
+          disablePrint={!data?.length}
         />
       </Fixed>
-      {data?.length > 0 && baseColumns.length > 0 && (
+      {data?.length > 0 && (
         <Grow>
           <Table
             name='table'
