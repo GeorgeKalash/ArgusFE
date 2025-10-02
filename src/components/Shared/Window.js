@@ -138,7 +138,8 @@ const Window = React.memo(
                   height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset'
+                  flexDirection: controlled ? 'column' : 'unset',
+                  '&:focus': { outline: 'none', boxShadow: 'none' }
                 }}
               >
                 <DialogTitle
