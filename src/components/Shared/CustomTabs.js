@@ -1,10 +1,10 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import React from 'react'
 
-export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name }) => {
+export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 'tab' }) => {
   const indexes =
     maxAccess?.record?.controls
-      ?.filter(c => c.accessLevel === 4 && c.controlId?.startsWith(name || 'tab.'))
+      ?.filter(c => c.accessLevel === 4 && c.controlId?.startsWith(`${name}.`))
       .map(c => c.controlId.split('.')[1]) || []
 
   return (

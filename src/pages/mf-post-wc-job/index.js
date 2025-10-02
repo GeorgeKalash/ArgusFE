@@ -53,7 +53,9 @@ const PostWorkCenterJob = () => {
           record: JSON.stringify({
             jobId: formik.values.jobId,
             seqNo: formik.values.seqNo,
-            workCenterId: formik.values.workCenterId
+            workCenterId: formik.values.workCenterId,
+            qty: formik.values.qty,
+            pcs: formik.values.pcs,
           })
         })
         toast.success(platformLabels.Posted)
@@ -270,7 +272,7 @@ const PostWorkCenterJob = () => {
                 endpointId={
                   formik?.values?.jobId
                     ? formik?.values?.routingId
-                      ? ManufacturingRepository.Routing.qry
+                      ? ManufacturingRepository.JobRouting.qry
                       : ManufacturingRepository.JobWorkCenter.qry
                     : null
                 }
@@ -284,26 +286,13 @@ const PostWorkCenterJob = () => {
                 name='workCenterId'
                 label={labels.fromWorkCenter}
                 readOnly={!!formik?.values?.routingId || !formik.values.jobId}
-                valueField={
-                  formik?.values?.jobId ? (formik?.values?.routingId ? 'recordId' : 'workCenterId') : 'recordId'
-                }
-                displayField={
-                  formik?.values?.jobId && !formik?.values?.routingId
-                    ? ['workCenterRef', 'workCenterName']
-                    : ['reference', 'name']
-                }
+                valueField='workCenterId'
+                displayField={['workCenterRef', 'workCenterName']}
                 values={formik.values}
-                columnsInDropDown={
-                  formik?.values?.jobId && !formik?.values?.routingId
-                    ? [
-                        { key: 'workCenterRef', value: 'Reference' },
-                        { key: 'workCenterName', value: 'Name' }
-                      ]
-                    : [
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]
-                }
+                columnsInDropDown={[
+                  { key: 'workCenterRef', value: 'Reference' },
+                  { key: 'workCenterName', value: 'Name' }
+                ]}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('workCenterId', newValue?.workCenterId || null)
                 }}
@@ -318,7 +307,7 @@ const PostWorkCenterJob = () => {
                 endpointId={
                   formik?.values?.jobId
                     ? formik?.values?.routingId
-                      ? ManufacturingRepository.Routing.qry
+                      ? ManufacturingRepository.JobRouting.qry
                       : ManufacturingRepository.JobWorkCenter.qry
                     : null
                 }
@@ -332,26 +321,13 @@ const PostWorkCenterJob = () => {
                 name='toWorkCenterId'
                 label={labels.toWorkCenter}
                 readOnly
-                valueField={
-                  formik?.values?.jobId ? (formik?.values?.routingId ? 'recordId' : 'workCenterId') : 'recordId'
-                }
-                displayField={
-                  formik?.values?.jobId && !formik?.values?.routingId
-                    ? ['workCenterRef', 'workCenterName']
-                    : ['reference', 'name']
-                }
+                valueField='workCenterId'
+                displayField={['workCenterRef', 'workCenterName']}
                 values={formik.values}
-                columnsInDropDown={
-                  formik?.values?.jobId && !formik?.values?.routingId
-                    ? [
-                        { key: 'workCenterRef', value: 'Reference' },
-                        { key: 'workCenterName', value: 'Name' }
-                      ]
-                    : [
-                        { key: 'reference', value: 'Reference' },
-                        { key: 'name', value: 'Name' }
-                      ]
-                }
+                columnsInDropDown={[
+                  { key: 'workCenterRef', value: 'Reference' },
+                  { key: 'workCenterName', value: 'Name' }
+                ]}
                 onChange={async (event, newValue) => {
                   formik.setFieldValue('toWorkCenterId', newValue?.workCenterId || null)
                 }}

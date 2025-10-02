@@ -586,6 +586,7 @@ export const ResourceIds = {
   IssueOfMaterials: 42304,
   WorkCenterTransferMap: 42128,
   RepairRequest: 45300,
+  Indemnity: 75105,
 
   // GL
   GLSalesInvoice: 51604,

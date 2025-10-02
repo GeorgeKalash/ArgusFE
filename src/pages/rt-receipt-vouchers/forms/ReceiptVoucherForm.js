@@ -137,7 +137,8 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
       Component: OTPPhoneVerification,
       props: {
         values: result || formik.values.header,
-        recordId: recordId,
+        recordId,
+        deviceId: result?.cellPhone?.replace(/^\+/, '') || null,
         functionId: SystemFunction.RemittanceReceiptVoucher,
         onSuccess: () => {
           onClose(recordId)
@@ -324,7 +325,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
       onClick: () => {
         viewOTP(null)
       },
-      disabled: !editMode
+      disabled: !editMode || formik?.values?.header?.status == 3
     },
     {
       key: 'GL',

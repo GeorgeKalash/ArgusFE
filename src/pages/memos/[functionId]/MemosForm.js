@@ -84,15 +84,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       accountId: yup.string().required(),
       subtotal: yup.number().required(),
       date: yup.string().required(),
-      dueDate: yup.string().required(),
-      vatAmount: yup
-        .number()
-        .nullable()
-        .test(function (value) {
-          const { subtotal, isSubjectToVAT } = this.parent
-
-          return isSubjectToVAT == true ? value != null && value <= subtotal : true
-        })
+      dueDate: yup.string().required()
     }),
     onSubmit: async obj => {
       if (!obj.recordId) {

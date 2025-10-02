@@ -9,7 +9,17 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const OTPPhoneVerification = ({ values, recordId, clientId, functionId, deviceId, onClose, getData, onSuccess, window }) => {
+const OTPPhoneVerification = ({
+  values,
+  recordId,
+  clientId,
+  functionId,
+  deviceId,
+  onClose,
+  getData,
+  onSuccess,
+  window
+}) => {
   const { postRequest } = useContext(RequestsContext)
   const { defaultsData, platformLabels } = useContext(ControlContext)
 

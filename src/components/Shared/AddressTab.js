@@ -23,7 +23,7 @@ const AddressTab = ({
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address,
-    DatasetIdAccess: props?.datasetId,
+    DatasetIdAccess: props?.datasetId
   })
 
   const lastRecordIdRef = useRef(null)
@@ -263,6 +263,7 @@ const AddressTab = ({
           readOnly={readOnly || !addressValidation.values.cityId}
           form={addressValidation}
           secondDisplayField={false}
+          valueShow='cityDistrict'
           onChange={(event, newValue) => {
             if (newValue) {
               addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)

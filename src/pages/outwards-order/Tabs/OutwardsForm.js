@@ -373,7 +373,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
     }
   }
 
-  const vatAmount = (header?.commission * header.vatRate) / 100 || 0
+  const vatAmount = (header?.commission * vatPctValue) / 100 || 0
 
   const amount = parseFloat(parseFloat(header.lcAmount) + (header.commission + vatAmount - header.tdAmount))
 
