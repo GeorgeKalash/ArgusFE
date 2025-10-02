@@ -27,7 +27,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   async function fetchGridData() {
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry3,
-      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}`
+      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}&_currencyId=${form.currencyId}`
     })
 
     res.list = res.list.map(item => {
@@ -50,6 +50,10 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
     {
       field: 'nationalityName',
       headerName: labels.nationalityId
+    },
+    {
+      field: 'currencyRef',
+      headerName: labels.Currency
     },
     {
       field: 'countryName',
@@ -83,6 +87,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
       isCleared={false}
     >
       <Table
+        name='benTable'
         columns={columns}
         gridData={{ list: formik.values.benList }}
         rowId={['beneficiaryId']}
