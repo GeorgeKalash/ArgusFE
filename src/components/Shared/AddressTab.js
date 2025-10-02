@@ -158,7 +158,7 @@ const AddressTab = ({
           readOnly={readOnly}
           maxLength='50'
           required={required}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('name', '')}
           error={addressValidation.touched?.name && Boolean(addressValidation.errors?.name)}
           maxAccess={maxAccess}
@@ -287,7 +287,7 @@ const AddressTab = ({
               required={required}
               readOnly={readOnly}
               maxLength='100'
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('street1', '')}
               error={addressValidation.touched.street1 && Boolean(addressValidation.errors.street1)}
               maxAccess={maxAccess}
@@ -300,7 +300,7 @@ const AddressTab = ({
               value={addressValidation.values.street2}
               maxLength='100'
               readOnly={readOnly}
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('street2', '')}
               error={addressValidation.touched.street2 && Boolean(addressValidation.errors.street2)}
               maxAccess={maxAccess}
@@ -315,7 +315,7 @@ const AddressTab = ({
           value={addressValidation.values.bldgNo}
           maxLength='10'
           readOnly={readOnly}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('bldgNo', '')}
           error={addressValidation.touched.bldgNo && Boolean(addressValidation.errors.bldgNo)}
           maxAccess={maxAccess}
@@ -328,7 +328,7 @@ const AddressTab = ({
           value={addressValidation.values.unitNo}
           maxLength='10'
           readOnly={readOnly}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('unitNo', '')}
           error={addressValidation.touched.unitNo && Boolean(addressValidation.errors.unitNo)}
           maxAccess={maxAccess}
@@ -341,7 +341,7 @@ const AddressTab = ({
           value={addressValidation.values.subNo}
           maxLength='10'
           readOnly={readOnly}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('subNo', '')}
           error={addressValidation.touched.subNo && Boolean(addressValidation.errors.subNo)}
           maxAccess={maxAccess}
@@ -354,7 +354,7 @@ const AddressTab = ({
           label={labels.postalCode}
           readOnly={readOnly}
           value={addressValidation.values.postalCode}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('postalCode', '')}
           error={addressValidation.touched.postalCode && Boolean(addressValidation.errors.postalCode)}
           maxAccess={maxAccess}
@@ -367,7 +367,7 @@ const AddressTab = ({
           value={addressValidation.values.poBox}
           maxLength='10'
           readOnly={readOnly}
-          onChange={addressValidation.handleChange}
+          onChange={addressValidation.setFieldValue}
           onClear={() => addressValidation.setFieldValue('poBox', '')}
           error={addressValidation.touched.poBox && Boolean(addressValidation.errors.poBox)}
           maxAccess={maxAccess}
@@ -384,7 +384,7 @@ const AddressTab = ({
               maxLength='40'
               required={required}
               phone={true}
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('phone', '')}
               error={addressValidation.touched.phone && Boolean(addressValidation.errors.phone)}
               maxAccess={maxAccess}
@@ -398,7 +398,7 @@ const AddressTab = ({
               maxLength='40'
               phone={true}
               readOnly={readOnly}
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('phone2', '')}
               error={addressValidation.touched.phone2 && Boolean(addressValidation.errors.phone2)}
               maxAccess={maxAccess}
@@ -412,7 +412,7 @@ const AddressTab = ({
               maxLength='15'
               phone={true}
               readOnly={readOnly}
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('phone3', '')}
               error={addressValidation.touched.phone3 && Boolean(addressValidation.errors.phone3)}
               maxAccess={maxAccess}
@@ -432,7 +432,7 @@ const AddressTab = ({
               onBlur={addressValidation.handleBlur}
               readOnly={readOnly}
               placeholder='johndoe@email.com'
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('email1', '')}
               error={addressValidation.touched.email1 && Boolean(addressValidation.errors.email1)}
               maxAccess={maxAccess}
@@ -448,7 +448,7 @@ const AddressTab = ({
               label={labels.email2}
               onBlur={addressValidation.handleBlur}
               value={addressValidation.values.email2}
-              onChange={addressValidation.handleChange}
+              onChange={addressValidation.setFieldValue}
               onClear={() => addressValidation.setFieldValue('email2', '')}
               error={addressValidation.touched.email2 && Boolean(addressValidation.errors.email2)}
               maxAccess={maxAccess}
