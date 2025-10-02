@@ -28,20 +28,20 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={670} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={670} index={0} value={activeTab} maxAccess={maxAccess}>
         <TRXForm labels={labels} setStore={setStore} store={store} access={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <InvoicesForm labels={labels} setStore={setStore} editMode={editMode} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <InvoicesItemsTab labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
         <TransactionTab store={store} labels={labels} access={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={4} value={activeTab}>
+      <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <DistributionTab labels={labels} access={maxAccess} store={store} />
       </CustomTabPanel>
     </>

@@ -51,11 +51,11 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <StatementForm labels={labels} maxAccess={maxAccess} setRecId={setRecId} mainRecordId={mainRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <NodeList
           maxAccess={maxAccess}
           labels={labels}
@@ -65,10 +65,10 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
           fetchData={fetchTreeData}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <LedgerForm maxAccess={maxAccess} labels={labels} node={node} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
         <TreeForm maxAccess={maxAccess} treeDataWithNodes={treeDataWithNodes} fetchData={fetchTreeData} />
       </CustomTabPanel>
     </>

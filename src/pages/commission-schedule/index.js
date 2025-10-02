@@ -74,7 +74,7 @@ const CommissionSchedule = () => {
       props: {
         labels,
         recordId,
-        access
+        maxAccess: access
       },
       width: 600,
       title: labels.CommissionSchedule

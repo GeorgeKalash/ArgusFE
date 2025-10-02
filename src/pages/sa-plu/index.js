@@ -97,7 +97,7 @@ const PriceListUpdate = () => {
       Component: PriceListUpdateWindow,
       props: {
         labels,
-        access,
+        maxAccess: access,
         recordId
       },
       width: 1000,

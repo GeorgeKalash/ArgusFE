@@ -77,11 +77,11 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <PlantForm _labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} editMode={store.recordId} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <AddressFormShell
           _labels={labels}
           maxAccess={maxAccess}
@@ -94,7 +94,7 @@ const PlantWindow = ({ labels, editMode, maxAccess, recordId, height }) => {
           isCleared={false}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <SchedulesTab
           _labels={labels}
           maxAccess={maxAccess}

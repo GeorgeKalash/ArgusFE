@@ -18,12 +18,12 @@ const TaxSchedulesWindow = ({ recordId, labels, maxAccess, expanded }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
 
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <TaxSchedulesForm labels={labels} setStore={setStore} store={store} editMode={editMode} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <DetailsForm
           labels={labels}
           setStore={setStore}
