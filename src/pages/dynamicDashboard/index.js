@@ -188,7 +188,6 @@ const DashboardLayout = () => {
           sp: { ...resSP?.record },
           authorization: { ...resDR },
           hr: {
-            headcountHistory: resHCH.list || [],
             timeVariationDetails: resTV.list || [],
             tabs: filteredTabs,
             groupedData: groupedData
