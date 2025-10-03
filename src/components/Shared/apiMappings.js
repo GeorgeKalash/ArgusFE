@@ -1186,5 +1186,15 @@ export const apiMappings = {
     endpoint: CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry,
     valueField: 'recordId',
     displayField: 'name'
+  },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }
