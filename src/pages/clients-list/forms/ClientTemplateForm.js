@@ -944,7 +944,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                     label={labels.birthDateHijri}
                     value={formik.values?.birthDate}
                     readOnly={editMode && !allowEdit}
-                    onChange={(name, value) => {
+                    onChange={(_, value) => {
                       formik.setFieldValue('birthDate', value)
                     }}
                     onClear={() => formik.setFieldValue('birthDate', '')}
@@ -957,7 +957,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
-                          type={showAsPassword ? 'password' : ''}
+                          forcePasswordLook
                           label={labels.idNo}
                           value={formik.values?.idNo}
                           required
@@ -968,7 +968,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
-                            if (e?.relatedTarget?.id === 'clearIdNo') return
                             formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)
                             !editMode && checkIdNumber(e.target.value)
@@ -976,7 +975,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           readOnly={editMode}
                           maxLength='15'
                           onFocus={() => setShowAsPassword(false)}
-                          ClearId='clearIdNo'
                           onClear={() => formik.setFieldValue('idNo', null)}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
@@ -993,7 +991,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           values={formik.values}
                           setData={setIdTypes}
                           required
-                          onChange={(event, newValue) => {
+                          onChange={(_, newValue) => {
                             if (newValue) {
                               fillFilterProfession(newValue.isDiplomat)
                             } else {
@@ -1076,7 +1074,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           name='issueDateHijri'
                           label={labels.issueDateHijri}
                           value={formik.values?.issueDate}
-                          onChange={(name, value) => {
+                          onChange={(_, value) => {
                             formik.setFieldValue('issueDate', value)
                           }}
                           readOnly={editMode && !allowEdit && true}
@@ -1101,7 +1099,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           ]}
                           values={formik.values}
                           required
-                          onChange={(event, newValue) => {
+                          onChange={(_, newValue) => {
                             if (newValue) {
                               formik.setFieldValue('idCountry', newValue?.recordId)
                               formik.setFieldValue('idCity', '')
@@ -1132,7 +1130,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           secondDisplayField={false}
                           readOnly={((editMode && !allowEdit) || !formik.values.idCountry) && true}
                           maxAccess={maxAccess}
-                          onChange={(event, newValue) => {
+                          onChange={(_, newValue) => {
                             if (newValue) {
                               formik.setFieldValue('idCity', newValue?.recordId)
                               formik.setFieldValue('cityName', newValue?.name)

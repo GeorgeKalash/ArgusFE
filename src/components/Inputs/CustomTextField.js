@@ -91,83 +91,95 @@ const CustomTextField = ({
   return _hidden ? (
     <></>
   ) : (
-    <TextField
-      key={(value?.length < 1 || readOnly || value === null) && value}
-      inputRef={inputRef}
-      type={type}
-      variant={variant}
-      defaultValue={value}
-      value={value ? value : null}
-      size={size}
-      fullWidth={fullWidth}
-      autoFocus={focus}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => {
-        setIsFocused(false), setFocus(false)
+    <div
+      onFocus={() => {
+        setIsFocused(true)
+        setFocus(true)
       }}
-      inputProps={{
-        autoComplete: 'off',
-        readOnly: _readOnly,
-        maxLength: maxLength,
-        dir: dir,
-        inputMode: numberField && 'numeric',
-        pattern: numberField && '[0-9]*',
-        style: {
-          textAlign: numberField && 'right',
-          '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
-        },
-        tabIndex: _readOnly ? -1 : 0,
-        'data-search': search ? 'true' : 'false'
-      }}
-      autoComplete={autoComplete}
-      onInput={handleInput}
-      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
-      InputProps={{
-        endAdornment: !_readOnly && (
-          <InputAdornment position='end'>
-            {search && (
-              <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
-              </IconButton>
-            )}
-            {!clearable && !readOnly && (value || value === 0) && (
-              <IconButton
-                tabIndex={-1}
-                id={props.ClearId}
-                edge='end'
-                onClick={e => {
-                  onClear(e)
-                  setFocus(true)
-                }}
-                aria-label='clear input'
-              >
-                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
-              </IconButton>
-            )}
-          </InputAdornment>
-        )
-      }}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            border: !hasBorder && 'none',
-            borderColor: '#959d9e',
-            borderRadius: '6px'
-          },
-          height: `33px !important`
-        },
-        '& .MuiInputLabel-root': {
-          fontSize: '0.90rem',
-          top: isFocused || value ? '0px' : '-3px'
-        },
-        '& .MuiInputBase-input': {
-          fontSize: '0.90rem'
+      onBlur={e => {
+        if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
+          return
         }
+        setIsFocused(false)
+        setFocus(false)
       }}
-      required={_required}
-      {...props}
-    />
+      style={{ width: fullWidth ? '100%' : 'auto' }}
+    >
+      <TextField
+        key={(value?.length < 1 || readOnly || value === null) && value}
+        inputRef={inputRef}
+        type={type}
+        variant={variant}
+        defaultValue={value}
+        value={value ? value : null}
+        size={size}
+        fullWidth={fullWidth}
+        autoFocus={focus}
+        inputProps={{
+          autoComplete: 'off',
+          readOnly: _readOnly,
+          maxLength: maxLength,
+          dir: dir,
+          inputMode: numberField && 'numeric',
+          pattern: numberField && '[0-9]*',
+          style: {
+            textAlign: numberField && 'right',
+            MozAppearance: 'textfield',
+            textTransform: forceUpperCase ? 'uppercase' : 'none',
+            WebkitTextSecurity: props?.forcePasswordLook && !isFocused ? 'disc' : 'none'
+          },
+          tabIndex: _readOnly ? -1 : 0,
+          'data-search': search ? 'true' : 'false'
+        }}
+        autoComplete={autoComplete}
+        onInput={handleInput}
+        onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
+        InputProps={{
+          endAdornment: !_readOnly && (
+            <InputAdornment position='end'>
+              {search && (
+                <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
+                  <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
+                </IconButton>
+              )}
+              {!clearable && !readOnly && (value || value === 0) && (
+                <IconButton
+                  tabIndex={-1}
+                  edge='end'
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={e => {
+                    onClear(e)
+                    setFocus(true)
+                  }}
+                  aria-label='clear input'
+                >
+                  <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                </IconButton>
+              )}
+            </InputAdornment>
+          )
+        }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              border: !hasBorder && 'none',
+              borderColor: '#959d9e',
+              borderRadius: '6px'
+            },
+            height: `33px !important`
+          },
+          '& .MuiInputLabel-root': {
+            fontSize: '0.90rem',
+            top: isFocused || value ? '0px' : '-3px'
+          },
+          '& .MuiInputBase-input': {
+            fontSize: '0.90rem'
+          }
+        }}
+        required={_required}
+        {...props}
+      />
+    </div>
   )
 }
 
