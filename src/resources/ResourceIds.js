@@ -22,13 +22,14 @@ export const ResourceIds = {
 
   // HR
   TodaysAttendance: 60300,
-  TodaysTimeVariations: 60301,
+  TodaysTimeVariationsSummary: 60301,
   TodaysLeaves: 60302,
   LatenessHistory: 60303,
   HeadcountHistory: 60304,
   BranchAvailability: 60306,
   Alerts: 60307,
   PendingPunches: 60308,
+  TodaysTimeVariationsDetails: 60309,
   BalanceAdjustment: 73204,
   PayCode: 75104,
   LedgerGroup: 75114,

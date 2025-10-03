@@ -28,7 +28,8 @@ export const TimeAttendanceRepository = {
   },
   ResetTV: {
     reset: service + 'resetTV',
-    qry: service + 'qryTV'
+    qry: service + 'qryTV',
+    qry2: service + 'qryTV2'
   },
   ShitLeave: {
     page: service + 'pageLQ',
