@@ -37,7 +37,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
       fsId: mainRecordId,
       reference: '',
       parentId: null,
-      TBAmount: null,
       numberFormat: null,
       displayOrder: null,
       description: '',
@@ -45,7 +44,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
-      TBAmount: yup.number().required(),
       numberFormat: yup.number().required(),
       displayOrder: yup.number().required().min(1).max(99)
     }),
@@ -116,22 +114,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                   formik.setFieldValue('parentId', newValue?.recordId || null)
                 }}
                 error={formik.touched.parentId && Boolean(formik.errors.parentId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.GLFS_TB_AMOUNT}
-                name='TBAmount'
-                label={labels.amount}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('TBAmount', newValue?.key || null)
-                }}
-                error={formik.touched.TBAmount && Boolean(formik.errors.TBAmount)}
               />
             </Grid>
             <Grid item xs={12}>
