@@ -54,11 +54,6 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
       flex: 1
     },
     {
-      field: 'TBAmountName',
-      headerName: labels.amount,
-      flex: 1
-    },
-    {
       field: 'displayOrder',
       headerName: labels.order,
       flex: 1,
