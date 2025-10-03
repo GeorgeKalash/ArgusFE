@@ -32,6 +32,7 @@ export const ResourceIds = {
   BalanceAdjustment: 73204,
   PayCode: 75104,
   LedgerGroup: 75114,
+  RightToWork: 70114,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
