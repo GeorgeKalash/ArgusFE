@@ -588,6 +588,7 @@ export const ResourceIds = {
   RepairRequest: 45300,
   Indemnity: 75105,
   FinancialStatementsReport: 30405,
+  BatchWorksheet: 42345,
 
   // GL
   GLSalesInvoice: 51604,

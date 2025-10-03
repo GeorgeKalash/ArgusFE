@@ -402,5 +402,15 @@ export const ManufacturingRepository = {
   WorkCenterTransferMap: {
     qry: service + 'qryWCTM',
     set2: service + 'set2WCTM'
+  },
+  BatchWorksheet: {
+    get2: service + 'get2BWST',
+    set2: service + 'set2BWST',
+    del: service + 'delBWST',
+    page: service + 'pageBWST',
+    snapshot: service + 'snapshotBWST',
+    post: service + 'postBWST',
+    gen: service + 'genBWST',
+    close: service + 'closeBWST'
   }
 }
