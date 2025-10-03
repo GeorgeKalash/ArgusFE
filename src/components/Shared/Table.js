@@ -46,6 +46,7 @@ const Table = ({
   rowDragManaged = false,
   onRowDragEnd = false,
   collabsable = true,
+  domLayout = 'normal',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -948,9 +949,7 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
-            {...(props?.domLayout == 'autoHeight' && {
-              domLayout: 'autoHeight'
-            })}
+            domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
             })}

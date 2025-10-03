@@ -143,9 +143,9 @@ const FinancialStatements = () => {
     }
 
     return treeData.map(row => ({
-    ...row,
-    parent: row.parent != null ? idToName[row.parent] : null
-  }))
+      ...row,
+      parent: row.parent != null ? idToName[row.parent] : null
+    }))
   }
 
   async function fetchWithFilter({ filters, pagination }) {

@@ -58,7 +58,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
             rowId={['nodeId']}
             pagination={false}
             collabsable={false}
-            domLayout={'autoHeight'}
+            domLayout='autoHeight'
             field='nodeName'
             disableSorting
             fullRowData={tableData}
