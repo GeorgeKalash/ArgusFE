@@ -494,7 +494,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
                     label={labels.inventory}
                     maxAccess={maxAccess}
-                    disabled={formik.values.kitItem}
+                    disabled={formik.values.kitItem || editMode}
                   />
                 </Grid>
                 <Grid item xs={4}>
