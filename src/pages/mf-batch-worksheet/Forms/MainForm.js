@@ -59,8 +59,6 @@ export default function MainForm({ labels, access, store, setStore }) {
     'batchWorksheetRawMaterials'
   )
 
-  console.log(documentType?.dtId)
-
   const formik = useFormik({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
