@@ -116,9 +116,9 @@ const FinancialStatements = () => {
 
     setColumnLabels({
       baseAmount: groupsRes?.record?.baseCurrencyRef || '',
-      baseFiatAmount: groupsRes?.record?.baseCurrencyRef || '',
+      baseFiatAmount: groupsRes?.record?.baseCurrencyFiat || '',
       reportingMetalAmount: groupsRes?.record?.reportingMetalCurrencyRef || '',
-      currentRateBaseAmount: groupsRes?.record?.reportingMetalCurrencyRef || ''
+      currentRateBaseAmount: groupsRes?.record?.baseCurrencyAtEndDateRate || ''
     })
 
     const groups = groupsRes?.record?.data || []
