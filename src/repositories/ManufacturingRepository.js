@@ -411,6 +411,7 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotBWST',
     post: service + 'postBWST',
     gen: service + 'genBWST',
-    close: service + 'closeBWST'
+    close: service + 'closeBWST',
+    reopen: service + 'reopenBWST'
   }
 }

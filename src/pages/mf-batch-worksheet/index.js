@@ -121,7 +121,7 @@ const MfBatchWorksheet = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIMEM'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'MFBWST'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -133,6 +133,7 @@ const MfBatchWorksheet = () => {
           refetch={refetch}
           onEdit={onEdit}
           onDelete={del}
+          deleteConfirmationType='strict'
           pageSize={50}
           maxAccess={access}
         />

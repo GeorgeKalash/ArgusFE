@@ -26,8 +26,8 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
       type: 'number'
     },
     {
-      field: 'issued',
-      headerName: labels.issued,
+      field: 'returned',
+      headerName: labels.returned,
       flex: 1,
       type: 'number'
     },

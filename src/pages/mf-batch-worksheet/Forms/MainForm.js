@@ -289,6 +289,17 @@ export default function MainForm({ labels, access, store, setStore }) {
     invalidate()
   }
 
+  const onReopen = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.BatchWorksheet.reopen,
+      record: JSON.stringify({ ...formik.values.header, date: formatDateToApi(formik.values.header.date) })
+    })
+
+    toast.success(platformLabels.Reopened)
+    refetchForm(recordId)
+    invalidate()
+  }
+
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.BatchWorksheet.post,
@@ -318,6 +329,12 @@ export default function MainForm({ labels, access, store, setStore }) {
       condition: !isClosed,
       onClick: onClose,
       disabled: isClosed || !editMode
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !editMode || isPosted
     }
   ]
 
