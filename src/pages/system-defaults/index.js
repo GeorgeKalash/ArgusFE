@@ -40,7 +40,12 @@ const SystemDefaults = () => {
         obj.key === 'dateFormat' ||
         obj.key === 'ActivityBlankQryDaysBack' ||
         obj.key === 'extentionsPath' ||
-        obj.key === 'passwordExpiryDays'
+        obj.key === 'passwordExpiryDays' ||
+        obj.key === 'postalZone' ||
+        obj.key === 'cityName' ||
+        obj.key === 'buildingNumber' ||
+        obj.key === 'streetName' ||
+        obj.key === 'citySubdivisionName'
       )
     })
     filteredList?.forEach(obj => {
@@ -69,7 +74,12 @@ const SystemDefaults = () => {
       timeZone: null,
       backofficeEmail: '',
       enableHijri: false,
-      passwordExpiryDays: null
+      passwordExpiryDays: null,
+      postalZone: '',
+      cityName: '',
+      buildingNumber: '',
+      streetName: '',
+      citySubdivisionName: ''
     },
     validationSchema: yup.object({
       baseCurrencyId: yup.string().required(' '),
@@ -120,6 +130,7 @@ const SystemDefaults = () => {
                 error={formik.touched.extentionsPath && Boolean(formik.errors.extentionsPath)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}
@@ -141,6 +152,7 @@ const SystemDefaults = () => {
                 error={formik.touched.baseCurrencyId && Boolean(formik.errors.baseCurrencyId)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Country.qry}
@@ -160,6 +172,7 @@ const SystemDefaults = () => {
                 error={formik.touched.countryId && Boolean(formik.errors.countryId)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 name='vatPct'
@@ -202,6 +215,67 @@ const SystemDefaults = () => {
                 error={formik.touched.dateFormat && Boolean(formik.errors.dateFormat)}
               />
             </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='postalZone'
+                label={_labels.postalZone}
+                value={formik.values.postalZone}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('postalZone', '')}
+                error={formik.touched.postalZone && Boolean(formik.errors.postalZone)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='cityName'
+                label={_labels.cityName}
+                value={formik.values.cityName}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('cityName', '')}
+                error={formik.touched.cityName && Boolean(formik.errors.cityName)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='buildingNumber'
+                label={_labels.buildingNumber}
+                value={formik.values.buildingNumber}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('buildingNumber', '')}
+                error={formik.touched.buildingNumber && Boolean(formik.errors.buildingNumber)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='streetName'
+                label={_labels.streetName}
+                value={formik.values.streetName}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('streetName', '')}
+                error={formik.touched.streetName && Boolean(formik.errors.streetName)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <CustomTextField
+                name='citySubdivisionName'
+                label={_labels.citySubdivisionName}
+                value={formik.values.citySubdivisionName}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('citySubdivisionName', '')}
+                error={formik.touched.citySubdivisionName && Boolean(formik.errors.citySubdivisionName)}
+                maxAccess={access}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 name='backofficeEmail'
@@ -212,6 +286,7 @@ const SystemDefaults = () => {
                 error={formik.touched.backofficeEmail && Boolean(formik.errors.backofficeEmail)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.OUTER_GRID_DAYS}
@@ -227,6 +302,7 @@ const SystemDefaults = () => {
                 error={formik.touched.ActivityBlankQryDaysBack && Boolean(formik.errors.ActivityBlankQryDaysBack)}
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomCheckBox
                 name='enableHijri'
@@ -236,6 +312,7 @@ const SystemDefaults = () => {
                 maxAccess={access}
               />
             </Grid>
+
             <Grid item xs={12}>
               <CustomNumberField
                 name='passwordExpiryDays'
