@@ -13,7 +13,8 @@ const LoanWindow = ({ recordId, window }) => {
   const [store, setStore] = useState({
     recordId,
     isClosed: false,
-    loanAmount: 0
+    loanAmount: 0,
+    effectiveDate: null
   })
 
   const { labels, access } = useResourceParams({

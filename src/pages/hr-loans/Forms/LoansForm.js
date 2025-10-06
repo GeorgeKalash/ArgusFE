@@ -24,7 +24,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateMDY, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
 
-export default function LoansForm({ labels, maxAccess, store, setStore }) {
+export default function LoansForm({ labels, maxAccess, store, setStore, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { recordId } = store
@@ -71,7 +71,8 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
       amount: yup.number().min(1).required(),
       purpose: yup.string().required(),
       ldValue: yup.number().min(1).required(),
-      effectiveDate: yup.date().required()
+      effectiveDate: yup.date().required(),
+      ldMethod: yup.number().required()
     }),
     onSubmit: async obj => {
       const data = {
@@ -80,19 +81,14 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
         effectiveDate: formatDateToApi(obj.effectiveDate)
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: LoanTrackingRepository.Loans.set,
         record: JSON.stringify(data)
       })
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-
-      if (!obj.recordId) {
-        formik.setFieldValue('recordId', response.recordId)
-        setStore(prev => ({ ...prev, recordId: response.recordId }))
-      }
-      setStore(prev => ({ ...prev, loanAmount: obj.amount ?? 0 }))
       invalidate()
+      window.close()
     }
   })
 
@@ -123,7 +119,8 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
       setStore(prev => ({
         ...prev,
         isClosed: record.wip === 2,
-        loanAmount: record.amount ?? 0
+        loanAmount: record.amount ?? 0,
+        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
       }))
 
       await fetchEmployee(record.employeeId)
@@ -184,7 +181,8 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
 
       setStore(prev => ({
         ...prev,
-        isClosed: res.record.wip === 2
+        isClosed: res.record.wip === 2,
+        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
       }))
     }
   }
@@ -314,6 +312,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('branchId', newValue?.recordId || null)}
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
               />
             </Grid>
@@ -343,13 +342,15 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 name='ltId'
                 label={labels.ltype}
                 required
-                readOnly={isClosed || formik.values.disableEditing}
+                readOnly={isClosed}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('ltId', newValue?.recordId || null)
-                  formik.setFieldValue('disableEditing', newValue.disableEditing)
+                  formik.setFieldValue('disableEditing', newValue?.disableEditing || false)
+                  formik.setFieldValue('ldMethod', newValue?.ldMethod || null)
+                  formik.setFieldValue('ldValue', newValue?.ldValue || 0)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
@@ -442,9 +443,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('ldMethod', newValue?.key || null)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('ldMethod', newValue?.key || null)}
                 onClear={async () => {
                   formik.setFieldValue('ldMethod', null)
                   formik.setFieldValue('ldValue', null)
@@ -460,10 +459,8 @@ export default function LoansForm({ labels, maxAccess, store, setStore }) {
                 required
                 readOnly={isClosed || formik.values.disableEditing}
                 maxAccess={maxAccess}
-                onChange={formik.setFieldValue}
-                onClear={async () => {
-                  formik.setFieldValue('ldValue', null)
-                }}
+                onChange={e => formik.setFieldValue('ldValue', e.target.value)}
+                onClear={() => formik.setFieldValue('ldValue', null)}
                 error={formik.touched.ldValue && Boolean(formik.errors.ldValue)}
                 maxLength={10}
               />

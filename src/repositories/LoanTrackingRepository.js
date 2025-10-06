@@ -17,7 +17,7 @@ export const LoanTrackingRepository = {
     reopen: service + 'reopenLR'
   },
   LoanDeduction: {
-    qry: service + 'qryLD',
+    page: service + 'pageLD',
     get: service + 'getLD',
     set: service + 'setLD',
     del: service + 'delLD'

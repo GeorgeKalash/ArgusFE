@@ -23,7 +23,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess, rema
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const invalidate = useInvalidate({ endpointId: LoanTrackingRepository.LoanDeduction.qry })
+  const invalidate = useInvalidate({ endpointId: LoanTrackingRepository.LoanDeduction.page })
 
   const { formik } = useForm({
     maxAccess,
@@ -112,7 +112,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess, rema
                   formik.setFieldValue('amount', e?.target?.value || null)
                 }}
                 onClear={async () => {
-                  formik.setFieldValue('amount', 0)
+                  formik.setFieldValue('amount', null)
                 }}
                 error={formik.touched.amount && Boolean(formik.errors.amount)}
                 maxLength={10}
@@ -123,6 +123,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess, rema
                 name='date'
                 label={labels.date}
                 required
+                min={store.effectiveDate}
                 readOnly={!store.isClosed || formik.values.payrollDeduction}
                 value={formik?.values?.date}
                 onChange={formik.setFieldValue}

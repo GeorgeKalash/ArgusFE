@@ -13,10 +13,12 @@ import { LoanTrackingRepository } from 'src/repositories/LoanTrackingRepository'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import DeductionForm from './DeductionForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const DeductionTab = ({ store, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const columns = [
@@ -54,8 +56,8 @@ const DeductionTab = ({ store, labels }) => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: LoanTrackingRepository.LoanDeduction.qry,
-      parameters: `_loanId=${recordId}&_size=${_pageSize}&_startAt=${_startAt}`
+      extension: LoanTrackingRepository.LoanDeduction.page,
+      parameters: `_loanId=${recordId}&_pageSize=${_pageSize}&_startAt=${_startAt}`
     })
 
     return { ...response, _startAt }
@@ -69,7 +71,7 @@ const DeductionTab = ({ store, labels }) => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: LoanTrackingRepository.LoanDeduction.qry,
+    endpointId: LoanTrackingRepository.LoanDeduction.page,
     datasetId: ResourceIds.Loans,
     enabled: !!recordId
   })
@@ -103,7 +105,7 @@ const DeductionTab = ({ store, labels }) => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success(labels.Deleted)
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -119,6 +121,7 @@ const DeductionTab = ({ store, labels }) => {
           rowId='recordId'
           onEdit={edit}
           onDelete={store.isClosed && del}
+          hideDeleteCondition={row => row.payrollDeduction}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
