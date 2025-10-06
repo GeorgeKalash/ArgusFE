@@ -27,7 +27,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   async function fetchGridData() {
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry3,
-      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}`
+      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}&_currencyId=${form.currencyId}`
     })
 
     res.list = res.list.map(item => {
@@ -41,31 +41,43 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   const columns = [
     {
       field: 'name',
-      headerName: labels.name
+      headerName: labels.name,
+      flex: 1
     },
     {
       field: 'addressLine1',
-      headerName: labels.addressLine1
+      headerName: labels.addressLine1,
+      flex: 1
     },
     {
       field: 'nationalityName',
-      headerName: labels.nationalityId
+      headerName: labels.nationalityId,
+      flex: 1
+    },
+    {
+      field: 'currencyRef',
+      headerName: labels.Currency,
+      flex: 1
     },
     {
       field: 'countryName',
-      headerName: labels.country
+      headerName: labels.country,
+      flex: 1
     },
     {
       field: 'accountReference',
-      headerName: labels.accountRef
+      headerName: labels.accountRef,
+      flex: 1
     },
     {
       field: 'branchName',
-      headerName: labels.branchName
+      headerName: labels.branchName,
+      flex: 1
     },
     {
       field: 'dispersalTypeName',
-      headerName: labels.dispersalType
+      headerName: labels.dispersalType,
+      flex: 1
     }
   ]
 
@@ -83,11 +95,11 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
       isCleared={false}
     >
       <Table
+        name='benTable'
         columns={columns}
         gridData={{ list: formik.values.benList }}
         rowId={['beneficiaryId']}
         rowSelection='single'
-        isLoading={false}
         pagination={false}
         maxAccess={maxAccess}
         showCheckboxColumn={true}

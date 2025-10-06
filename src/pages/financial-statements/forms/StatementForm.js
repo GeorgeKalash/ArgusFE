@@ -15,10 +15,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { useError } from 'src/error'
 
 export default function StatementForm({ labels, maxAccess, setRecId, mainRecordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack: stackError } = useError()
+
   const editMode = !!mainRecordId
 
   const invalidate = useInvalidate({
@@ -33,7 +36,8 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
       showFiatCurrencyAmount: false,
       showBaseAmount: false,
       sgId: null,
-      isConfidential: false
+      isConfidential: false,
+      showCurrentRateBaseAmount: false
     },
     validationSchema: yup.object({
       name: yup.string().required(),
@@ -47,6 +51,19 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
         })
     }),
     onSubmit: async obj => {
+      if (
+        !obj.showBaseAmount &&
+        !obj.showMetalCurrencyAmount &&
+        !obj.showFiatCurrencyAmount &&
+        !obj.showCurrentRateBaseAmount
+      ) {
+        stackError({
+          message: labels.checkBoxesError
+        })
+
+        return
+      }
+
       const res = await postRequest({
         extension: FinancialStatementRepository.FinancialStatement.set,
         record: JSON.stringify(obj)
@@ -146,6 +163,15 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
                 value={formik.values?.showFiatCurrencyAmount}
                 onChange={event => formik.setFieldValue('showFiatCurrencyAmount', event.target.checked)}
                 label={labels.showFiatCurrencyAmount}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='showCurrentRateBaseAmount'
+                value={formik.values?.showCurrentRateBaseAmount}
+                onChange={event => formik.setFieldValue('showCurrentRateBaseAmount', event.target.checked)}
+                label={labels.showCurrentRateBaseAmount}
                 maxAccess={maxAccess}
               />
             </Grid>
