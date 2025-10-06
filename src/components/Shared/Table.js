@@ -96,7 +96,10 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: { textAlign: 'right' },
+          cellStyle: params => ({
+            fontWeight: params.data?.isBold ? 'bold' : 'normal',
+            textAlign: 'right'
+          }),
           sortable: !disableSorting
         }
       }
@@ -153,7 +156,10 @@ const Table = ({
 
       return {
         ...col,
-        sortable: !disableSorting
+        sortable: !disableSorting,
+        cellStyle: params => ({
+          fontWeight: params.data?.isBold ? 'bold' : 'normal'
+        })
       }
     })
 

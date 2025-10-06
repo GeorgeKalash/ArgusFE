@@ -47,17 +47,32 @@ const FinancialStatements = () => {
           bits.push((flags >> i) & 1)
         }
 
+        const isBold = (flags & Math.pow(2, 3)) !== 0
+
+        let baseAmount = node.cellValues?.[0]?.baseAmount ?? null
+        let baseFiatAmount = node.cellValues?.[0]?.baseFiatAmount ?? null
+        let reportingMetalAmount = node.cellValues?.[0]?.reportingMetalAmount ?? null
+        let currentRateBaseAmount = node.cellValues?.[0]?.currentRateBaseAmount ?? null
+
+        if (hasChildren) {
+          if (baseAmount === 0) baseAmount = ''
+          if (baseFiatAmount === 0) baseFiatAmount = ''
+          if (reportingMetalAmount === 0) reportingMetalAmount = ''
+          if (currentRateBaseAmount === 0) currentRateBaseAmount = ''
+        }
+
         listSorted.push({
           nodeId: node.nodeId,
           parent: parentId,
           level,
           isExpanded: true,
           hasChildren,
+          isBold,
           nodeName: node.nodeName,
-          baseAmount: node.cellValues?.[0]?.baseAmount ?? null,
-          baseFiatAmount: node.cellValues?.[0]?.baseFiatAmount ?? null,
-          reportingMetalAmount: node.cellValues?.[0]?.reportingMetalAmount ?? null,
-          currentRateBaseAmount: node.cellValues?.[0]?.currentRateBaseAmount ?? null,
+          baseAmount,
+          baseFiatAmount,
+          reportingMetalAmount,
+          currentRateBaseAmount,
           flags
         })
 

@@ -957,8 +957,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
-                          label={labels.idNo}
                           type={showAsPassword ? 'password' : ''}
+                          label={labels.idNo}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
@@ -968,17 +968,16 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
+                            if (e?.relatedTarget?.id === 'idNo') return
+                            formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)
                             !editMode && checkIdNumber(e.target.value)
                           }}
                           readOnly={editMode}
                           maxLength='15'
-                          onFocus={e => {
-                            setShowAsPassword(false)
-                          }}
-                          onClear={() => {
-                            formik.setFieldValue('idNo', '')
-                          }}
+                          onFocus={() => setShowAsPassword(false)}
+                          ClearId='idNo'
+                          onClear={() => formik.setFieldValue('idNo', null)}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
                         />
