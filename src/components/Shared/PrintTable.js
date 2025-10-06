@@ -1,17 +1,20 @@
 import React from 'react'
+import { formatDateDefault, formatDateTimeDefault } from 'src/lib/date-helper'
 
 export default function PrintableTable({
   columns = [],
   rows = [],
-  treeField = 'nodeName',
+  treeField,
   indentSize = 20,
-  firstColWidth = '45%', 
+  firstColWidth = '',
   formatNumber,
   showOnScreen
 }) {
   const treeColField = columns.find(c => c.isTree)?.field || treeField
 
-  const treeIndex = Math.max(0, columns.findIndex(c => c.field === treeColField)
+  const treeIndex = Math.max(
+    0,
+    columns.findIndex(c => c.field === treeColField)
   )
 
   const colWidths = columns.map((_, i) => (i === treeIndex ? firstColWidth : null))
@@ -21,6 +24,14 @@ export default function PrintableTable({
   const formatCell = (col, value) => {
     if (col?.type === 'number' && typeof value === 'number') {
       return typeof formatNumber === 'function' ? formatNumber(value) : new Intl.NumberFormat().format(value)
+    }
+
+    if (col?.type === 'date') {
+      return typeof formatDateDefault === 'function' ? formatDateDefault(value) : value ?? ''
+    }
+
+    if (col?.type === 'dateTime') {
+      return typeof formatDateTimeDefault === 'function' ? formatDateTimeDefault(value, col?.dateFormat) : value ?? ''
     }
 
     return value ?? ''
@@ -78,9 +89,6 @@ export default function PrintableTable({
                 const rawVal = row?.[col.field]
                 const cellContent = formatCell(col, rawVal)
 
-                const renderAsHtml =
-                  typeof cellContent === 'string' && cellContent.includes('<') && cellContent.includes('>')
-
                 return (
                   <td
                     key={col.field}
@@ -97,14 +105,8 @@ export default function PrintableTable({
                   >
                     {isTreeCol ? (
                       <div style={{ paddingInlineStart: pad, whiteSpace: 'pre-wrap' }}>
-                        {renderAsHtml ? (
-                          <span dangerouslySetInnerHTML={{ __html: cellContent }} />
-                        ) : (
-                          <span>{cellContent}</span>
-                        )}
+                        <span>{cellContent}</span>
                       </div>
-                    ) : renderAsHtml ? (
-                      <span dangerouslySetInnerHTML={{ __html: cellContent }} />
                     ) : (
                       <span>{cellContent}</span>
                     )}
