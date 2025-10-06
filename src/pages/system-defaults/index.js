@@ -48,9 +48,21 @@ const SystemDefaults = () => {
         obj.key === 'citySubdivisionName'
       )
     })
+
     filteredList?.forEach(obj => {
-      if (obj.key === 'dateFormat' || obj.key === 'backofficeEmail' || obj.key === 'enableHijri') {
-        myObject[obj.key] = obj.value || null
+      const isStringLike =
+        obj.key === 'dateFormat' ||
+        obj.key === 'backofficeEmail' ||
+        obj.key === 'enableHijri' ||
+        obj.key === 'extentionsPath' ||
+        obj.key === 'postalZone' ||
+        obj.key === 'cityName' ||
+        obj.key === 'buildingNumber' ||
+        obj.key === 'streetName' ||
+        obj.key === 'citySubdivisionName'
+
+      if (isStringLike) {
+        myObject[obj.key] = obj.value ?? null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       }
@@ -93,7 +105,8 @@ const SystemDefaults = () => {
   const postSystemDefaults = obj => {
     var data = []
     Object.entries(obj).forEach(([key, value]) => {
-      const newObj = { key: key, value: value }
+      const normalized = value === '' ? null : value
+      const newObj = { key: key, value: normalized }
       data.push(newObj)
     })
     postRequest({
@@ -240,7 +253,6 @@ const SystemDefaults = () => {
                     error={formik.touched.ActivityBlankQryDaysBack && Boolean(formik.errors.ActivityBlankQryDaysBack)}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomCheckBox
                     name='enableHijri'
@@ -250,7 +262,6 @@ const SystemDefaults = () => {
                     maxAccess={access}
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='passwordExpiryDays'
