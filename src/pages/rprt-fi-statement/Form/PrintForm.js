@@ -14,6 +14,13 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
 
   return (
     <VertLayout>
+      <style type='text/css' media='print'>
+        {`
+          @page {
+            size: landscape;
+          }
+        `}
+      </style>
       <Grid item sx={{ m: 2 }}>
         <CustomButton onClick={handlePrint} image='print.png' />
       </Grid>

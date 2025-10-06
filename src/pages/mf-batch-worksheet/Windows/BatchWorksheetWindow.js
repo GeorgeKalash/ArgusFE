@@ -4,7 +4,7 @@ import { useState } from 'react'
 import MainForm from '../Forms/MainForm'
 import JobMaterialsForm from '../Forms/JobMaterialsForm'
 
-const BatchWorksheetWindow = ({ recordId, labels, maxAccess }) => {
+const BatchWorksheetWindow = ({ recordId, labels, access }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -17,10 +17,10 @@ const BatchWorksheetWindow = ({ recordId, labels, maxAccess }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       <CustomTabPanel index={0} value={activeTab}>
-        <MainForm labels={labels} setStore={setStore} store={store} access={maxAccess} />
+        <MainForm labels={labels} setStore={setStore} store={store} access={access} />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <JobMaterialsForm labels={labels} maxAccess={maxAccess} store={store} />
+        <JobMaterialsForm labels={labels} access={access} store={store} />
       </CustomTabPanel>
     </>
   )

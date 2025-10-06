@@ -5,7 +5,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function JobMaterialsForm({ store, maxAccess, labels }) {
+export default function JobMaterialsForm({ store, access, labels }) {
   const columns = [
     {
       field: 'jobRef',
@@ -74,7 +74,7 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
           columns={columns}
           gridData={{ list: store.batchWorksheetDistributions }}
           rowId={['itemId']}
-          maxAccess={maxAccess}
+          maxAccess={access}
           pagination={false}
         />
       </Grow>
@@ -87,7 +87,7 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
               name='totalIssued'
               label={labels.totalIssued}
               value={totalIssued}
-              maxAccess={maxAccess}
+              maxAccess={access}
               readOnly
             />
           </Grid>
@@ -96,7 +96,7 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
               name='totalReturned'
               label={labels.totalReturned}
               value={totalReturned}
-              maxAccess={maxAccess}
+              maxAccess={access}
               readOnly
             />
           </Grid>
@@ -105,7 +105,7 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
               name='totalLoss'
               label={labels.totalLoss}
               value={totalLoss}
-              maxAccess={maxAccess}
+              maxAccess={access}
               readOnly
             />
           </Grid>
