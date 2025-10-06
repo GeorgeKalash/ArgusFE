@@ -159,7 +159,7 @@ const DashboardLayout = () => {
           getRequest({ extension: DocumentReleaseRepository.DocumentsOnHold.qry3 }),
           getRequest({
             extension: TimeAttendanceRepository.ResetTV.qry2,
-            parameters: `_dayId=${formatDateForGetApI(new Date())}`
+            parameters: `_dayId=${formatDateForGetApI('2025-07-02')}`
           }),
           getRequest({
             extension: SystemRepository.KeyValueStore,
@@ -599,7 +599,7 @@ const DashboardLayout = () => {
               <SummaryCard>
                 <Title>{labels.authorization}</Title>
               </SummaryCard>
-              <Box style={{ height: '350px', display: 'flex' }}>
+              <Box sx={{ display: 'flex', height: '350px' }}>
                 <Table
                   name='table'
                   columns={[
@@ -637,19 +637,21 @@ const DashboardLayout = () => {
 
               {(data?.hr?.tabs || []).map((tab, idx) => (
                 <CustomTabPanel key={idx} index={idx} value={activeTab}>
-                  <Table
-                    name='TVtable'
-                    columns={[
-                      { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
-                      { field: 'branchName', headerName: labels.branchName, flex: 3 },
-                      { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
-                      { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
-                    ]}
-                    gridData={data?.hr?.groupedData?.[tab.timeCode] || []}
-                    rowId={['recordId']}
-                    pagination={false}
-                    maxAccess={access}
-                  />
+                  <Box sx={{ display: 'flex', height: '350px' }}>
+                    <Table
+                      name='TVtable'
+                      columns={[
+                        { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
+                        { field: 'branchName', headerName: labels.branchName, flex: 3 },
+                        { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
+                        { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
+                      ]}
+                      gridData={data?.hr?.groupedData?.[tab.timeCode] || { list: [] }}
+                      rowId={['recordId']}
+                      pagination={false}
+                      maxAccess={access}
+                    />
+                  </Box>
                 </CustomTabPanel>
               ))}
             </ChartCard>
