@@ -1,5 +1,3 @@
-import HrRightToWork from 'src/pages/hr-right-to-work'
-
 const service = 'SY.asmx/'
 
 export const SystemRepository = {

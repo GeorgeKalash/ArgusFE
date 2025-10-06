@@ -38,7 +38,6 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
       issueDate: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.number().required(),
       documentRef: yup.string().required(),
@@ -126,7 +125,6 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
                 onChange={(event, newValue) => {
                   formik.setFieldValue('branchId', newValue?.recordId || null)
                 }}
-                required
                 error={formik.touched.branchId && Boolean(formik.errors.branchId)}
               />
             </Grid>
@@ -141,8 +139,9 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId || null)
                 }}
+                required
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}
               />
             </Grid>
