@@ -3,24 +3,20 @@ import React, { useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import Table from 'src/components/Shared/Table'
+import PrintableTable from './PrintTable'
 
 const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
   const printRef = useRef()
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current
+    content: () => printRef.current,
+    pageStyle: `
+      @page { size: A4; margin: 12mm; }
+    `
   })
 
   return (
     <VertLayout>
-      <style type='text/css' media='print'>
-        {`
-          @page {
-            size: landscape;
-          }
-        `}
-      </style>
       <Grid item sx={{ m: 2 }}>
         <CustomButton onClick={handlePrint} image='print.png' />
       </Grid>
@@ -57,20 +53,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
           </Grid>
         )}
 
-        <div style={{ all: 'inherit' }}>
-          <Table
-            name='print'
-            columns={columns}
-            gridData={{ list: tableData }}
-            rowId={['nodeId']}
-            pagination={false}
-            collabsable={false}
-            domLayout='autoHeight'
-            field='nodeName'
-            disableSorting
-            fullRowData={tableData}
-          />
-        </div>
+        <PrintableTable columns={columns} rows={tableData} showOnScreen />
       </div>
     </VertLayout>
   )
