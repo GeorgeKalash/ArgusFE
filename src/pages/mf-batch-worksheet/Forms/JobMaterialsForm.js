@@ -9,17 +9,17 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
   const columns = [
     {
       field: 'jobRef',
-      headerName: labels.sku,
+      headerName: labels.job,
       flex: 1
     },
     {
       field: 'rawMaterialSku',
-      headerName: labels.rawMaterialSku,
+      headerName: labels.rmSku,
       flex: 1
     },
     {
       field: 'rawMaterialName',
-      headerName: labels.rawMaterialName,
+      headerName: labels.rmName,
       flex: 2
     },
     {
@@ -78,8 +78,9 @@ export default function JobMaterialsForm({ store, maxAccess, labels }) {
           pagination={false}
         />
       </Grow>
+
       <Fixed>
-        <Grid container spacing={1}>
+        <Grid container spacing={1} p={3}>
           <Grid item xs={7.5}></Grid>
           <Grid item xs={1.5}>
             <CustomNumberField

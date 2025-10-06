@@ -52,17 +52,17 @@ export default function MainForm({ labels, access, store, setStore }) {
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'batchWorksheetJobs')
 
-  const { schema: materialsSchema, requiredFields: requiredFields1 } = createConditionalSchema(
+  const { schema: materialsSchema, requiredFields: materialsRequiredFields } = createConditionalSchema(
     materialsConditions,
     true,
     maxAccess,
-    'batchWorksheetRawMaterials'
+    'batchWSRM'
   )
 
   const formik = useFormik({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
-    conditionSchema: ['batchWorksheetJobs', 'batchWorksheetRawMaterials'],
+    conditionSchema: ['batchWorksheetJobs', 'batchWSRM'],
     initialValues: {
       recordId: null,
       header: {
@@ -75,7 +75,7 @@ export default function MainForm({ labels, access, store, setStore }) {
         wip: 1
       },
       batchWorksheetJobs: [{ id: 1 }],
-      batchWorksheetRawMaterials: [{ id: 1 }]
+      batchWSRM: [{ id: 1 }]
     },
 
     validationSchema: yup.object({
@@ -84,7 +84,7 @@ export default function MainForm({ labels, access, store, setStore }) {
         workCenterId: yup.number().required()
       }),
       batchWorksheetJobs: yup.array().of(schema),
-      batchWorksheetRawMaterials: yup.array().of(materialsSchema)
+      batchWSRM: yup.array().of(materialsSchema)
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -100,8 +100,8 @@ export default function MainForm({ labels, access, store, setStore }) {
               ...item,
               seqNo: index + 1
             })),
-          batchWorksheetRawMaterials: obj.batchWorksheetRawMaterials
-            .filter(row => Object.values(requiredFields1)?.every(fn => fn(row)))
+          batchWorksheetRawMaterials: obj.batchWSRM
+            .filter(row => Object.values(materialsRequiredFields)?.every(fn => fn(row)))
             .map(({ id, ...item }, index) => ({
               ...item,
               seqNo: index + 1
@@ -115,6 +115,8 @@ export default function MainForm({ labels, access, store, setStore }) {
   })
 
   const editMode = !!formik.values.recordId
+  const isClosed = formik.values.header.wip == 2
+  const isPosted = formik?.values?.header?.status === 3
 
   async function refetchForm(recordId) {
     if (recordId) {
@@ -135,12 +137,12 @@ export default function MainForm({ labels, access, store, setStore }) {
                 id: index + 1
               }))
             : formik.initialValues?.batchWorksheetJobs,
-        batchWorksheetRawMaterials: res.record?.batchWorksheetRawMaterials.length
+        batchWSRM: res.record?.batchWorksheetRawMaterials.length
           ? res.record?.batchWorksheetRawMaterials?.map((item, index) => ({
               ...item,
               id: index + 1
             }))
-          : formik.initialValues?.batchWorksheetRawMaterials
+          : formik.initialValues?.batchWSRM
       })
       setStore(prevStore => ({
         ...prevStore,
@@ -153,13 +155,10 @@ export default function MainForm({ labels, access, store, setStore }) {
     refetchForm(recordId)
   }, [])
 
-  const isClosed = formik.values.header.wip == 2
-  const isPosted = formik?.values?.header?.status === 3
-
   const columns = [
     {
       component: 'resourcelookup',
-      label: labels.material,
+      label: labels.rawMaterials,
       name: 'rawMaterialId',
       props: {
         endpointId: InventoryRepository.RMSKU.snapshot,
@@ -179,12 +178,6 @@ export default function MainForm({ labels, access, store, setStore }) {
       async onChange({ row: { update, newRow } }) {
         update({ rate: newRow.rate || 0 })
       }
-    },
-    {
-      component: 'textfield',
-      label: labels.name,
-      name: 'itemName',
-      props: { readOnly: false }
     },
     {
       component: 'numberfield',
@@ -210,7 +203,7 @@ export default function MainForm({ labels, access, store, setStore }) {
     },
     {
       component: 'numberfield',
-      label: labels.netVariation,
+      label: labels.net,
       name: 'netVariation',
       props: {
         decimalScale: 3,
@@ -222,7 +215,7 @@ export default function MainForm({ labels, access, store, setStore }) {
   const batchWorksheetJobsColumns = [
     {
       component: 'resourcelookup',
-      label: labels.jobOrder,
+      label: labels.job,
       name: 'jobId',
       flex: 1,
       props: {
@@ -249,15 +242,20 @@ export default function MainForm({ labels, access, store, setStore }) {
     },
     {
       component: 'numberfield',
-      label: labels.pieces,
+      label: labels.pcs,
       name: 'pcs',
       props: { readOnly: true }
     },
     {
       component: 'numberfield',
-      label: labels.pctQty,
+      label: labels.pctOfBatch,
       name: 'pctOfBatch',
-      props: { readOnly: true }
+      props: {
+        readOnly: true,
+        iconKey: ({ data }) => {
+          return data?.pctOfBatch != null && '%'
+        }
+      }
     },
     {
       component: 'numberfield',
@@ -320,7 +318,7 @@ export default function MainForm({ labels, access, store, setStore }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
+      disabled: !isClosed
     },
     {
       key: 'Close',
@@ -417,7 +415,7 @@ export default function MainForm({ labels, access, store, setStore }) {
                   label={labels.workCenter}
                   required
                   valueField='recordId'
-                  readOnly={isClosed}
+                  readOnly={formik.values.batchWorksheetJobs.length > 0 && formik.values.batchWorksheetJobs[0].jobId}
                   displayField={['reference', 'name']}
                   columnsInDropDown={[
                     { key: 'reference', value: 'Reference' },
@@ -438,13 +436,13 @@ export default function MainForm({ labels, access, store, setStore }) {
           <Grid item xs={8} sx={{ display: 'flex', flex: 1, mt: -5 }}>
             <Grow>
               <DataGrid
-                name='batchWorksheetRawMaterials'
+                name='batchWSRM'
                 maxAccess={maxAccess}
-                value={formik.values.batchWorksheetRawMaterials}
-                error={formik.errors?.batchWorksheetRawMaterials}
+                value={formik.values.batchWSRM}
+                error={formik.errors?.batchWSRM}
                 columns={columns}
                 readOnly={isClosed}
-                onChange={value => formik.setFieldValue('batchWorksheetRawMaterials', value)}
+                onChange={value => formik.setFieldValue('batchWSRM', value)}
                 disabled={isClosed}
                 allowDelete={!isClosed}
               />

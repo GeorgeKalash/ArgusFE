@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -10,12 +9,11 @@ import { useWindow } from 'src/windows'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import BatchWorksheetWindow from './Windows/BatchWorksheetWindow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import BatchWorksheetWindow from './Windows/BatchWorksheetWindow'
 
 const MfBatchWorksheet = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,11 +47,11 @@ const MfBatchWorksheet = () => {
   }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.BatchWorksheet.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -110,7 +108,7 @@ const MfBatchWorksheet = () => {
         access
       },
       width: 1000,
-      title: labels.bachWorksheet
+      title: labels.batchWorksheet
     })
   }
 
@@ -125,6 +123,7 @@ const MfBatchWorksheet = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
