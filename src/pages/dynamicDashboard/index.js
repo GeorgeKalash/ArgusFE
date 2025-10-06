@@ -146,58 +146,54 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const appletsRes = await getRequest({
-          extension: SystemRepository.DynamicDashboard.qry,
-          parameters: `_userId=${_userId}`
+      const appletsRes = await getRequest({
+        extension: SystemRepository.DynamicDashboard.qry,
+        parameters: `_userId=${_userId}`
+      })
+      setApplets(appletsRes.list)
+
+      const [resDashboard, resSP, resDR, resTV, resTimeCode] = await Promise.all([
+        getRequest({ extension: DashboardRepository.dashboard }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+        getRequest({ extension: DocumentReleaseRepository.DocumentsOnHold.qry3 }),
+        getRequest({
+          extension: TimeAttendanceRepository.ResetTV.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`
+        }),
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
         })
-        setApplets(appletsRes.list)
+      ])
 
-        const [resDashboard, resSP, resDR, resTV, resTimeCode] = await Promise.all([
-          getRequest({ extension: DashboardRepository.dashboard }),
-          getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
-          getRequest({ extension: DocumentReleaseRepository.DocumentsOnHold.qry3 }),
-          getRequest({
-            extension: TimeAttendanceRepository.ResetTV.qry2,
-            parameters: `_dayId=${formatDateForGetApI('2025-07-02')}`
-          }),
-          getRequest({
-            extension: SystemRepository.KeyValueStore,
-            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-          })
-        ])
+      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
 
-        const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+      const filteredTabs = resTimeCode.list
+        .filter(t => availableTimeCodes.has(Number(t.key)))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
 
-        const filteredTabs = resTimeCode.list
-          .filter(t => availableTimeCodes.has(Number(t.key)))
-          .map(t => ({
-            label: t.value,
-            timeCode: Number(t.key),
-            disabled: false
-          }))
+      const groupedData = filteredTabs.reduce((acc, tab) => {
+        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
 
-        const groupedData = filteredTabs.reduce((acc, tab) => {
-          acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+        return acc
+      }, {})
 
-          return acc
-        }, {})
+      setData({
+        dashboard: resDashboard?.record,
+        sp: resSP?.record,
+        authorization: resDR,
+        hr: {
+          timeVariationDetails: resTV.list || [],
+          tabs: filteredTabs,
+          groupedData: groupedData
+        }
+      })
 
-        setData({
-          dashboard: { ...resDashboard?.record },
-          sp: { ...resSP?.record },
-          authorization: { ...resDR },
-          hr: {
-            timeVariationDetails: resTV.list || [],
-            tabs: filteredTabs,
-            groupedData: groupedData
-          }
-        })
-      } catch (error) {
-        console.error('Error fetching dashboard data', error)
-      } finally {
-        debouncedCloseLoading()
-      }
+      debouncedCloseLoading()
     }
 
     fetchData()
