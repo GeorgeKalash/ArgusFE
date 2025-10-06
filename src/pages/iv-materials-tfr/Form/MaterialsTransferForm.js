@@ -29,8 +29,10 @@ import { useError } from 'src/error'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import SkuForm from './SkuForm'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import useSetWindow from 'src/hooks/useSetWindow'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export default function MaterialsTransferForm({ labels, maxAccess: access, recordId, plantId }) {
+export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -40,12 +42,19 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
   const [measurements, setMeasurements] = useState([])
   const serials = useRef([])
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.MaterialsTransfer,
+    editMode: !!recordId
+  })
+  useSetWindow({ title: labels.MaterialsTransfer, window })
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialTransfer,
     access,
     enabled: !recordId
   })
   const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const initialValues = {
     recordId: null,
@@ -60,7 +69,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     toSiteId: null,
     notes: '',
     status: 1,
-    plantId: parseInt(plantId),
+    plantId,
     printStatus: null,
     qty: null,
     pcs: null,
@@ -275,7 +284,7 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
       formik.setFieldValue('toSiteId', res?.record?.toSiteId || null)
       formik.setFieldValue('fromSiteId', res?.record?.siteId ? res?.record?.siteId : siteId || null)
       formik.setFieldValue('carrierId', res?.record?.carrierId)
-      formik.setFieldValue('plantId', res?.record?.plantId ? res?.record?.plantId : plantId)
+      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
     }
   }
 
@@ -1110,3 +1119,6 @@ export default function MaterialsTransferForm({ labels, maxAccess: access, recor
     </FormShell>
   )
 }
+
+MaterialsTransferForm.width = 1000
+MaterialsTransferForm.height = 680

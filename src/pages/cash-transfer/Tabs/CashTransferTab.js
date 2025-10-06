@@ -33,7 +33,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => {
+const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, window }) => {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -225,6 +225,10 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
     if (res.recordId) {
       toast.success('Record Closed Successfully')
       invalidate()
+      if (refetch) {
+        refetch()
+        window.close()
+      }
       setIsClosed(false)
       setIsPosted(true)
     }

@@ -4,7 +4,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
 import { useWindow } from 'src/windows'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -16,23 +15,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useError } from 'src/error'
-import { getStorageData } from 'src/storage/storage'
 
 const CreditOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const userData = getStorageData('userData').userId
-
-  const getPlantId = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserDefaults.get,
-      parameters: `_userId=${userData}&_key=plantId`
-    })
-
-    return res?.record?.value
-  }
+  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -78,24 +67,17 @@ const CreditOrder = () => {
   })
 
   async function openForm(recordId) {
-    let plantId
+    if (!recordId && !plantId) {
+      stackError({
+        message: labels.defaultPlant
+      })
 
-    if (!recordId) {
-      plantId = await getPlantId()
-      if (!plantId) {
-        stackError({
-          message: labels.defaultPlant
-        })
-
-        return
-      }
+      return
     }
 
     stack({
       Component: CreditOrderForm,
       props: {
-        plantId: plantId,
-        userData: userData,
         recordId
       }
     })
@@ -186,7 +168,6 @@ const CreditOrder = () => {
           onEdit={edit}
           refetch={refetch}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}

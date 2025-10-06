@@ -405,6 +405,35 @@ export default function FormShell({
             pb: '0px !important'
           }
         }}
+        onKeyDown={e => {
+          const target = e.target
+          const role = target.getAttribute('role') || ''
+          const isSearchField = target.getAttribute('data-search') === 'true'
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault()
+            form?.submitForm?.()
+
+            return
+          }
+          if (e.key === 'Enter') {
+            if (target.tagName === 'TEXTAREA') {
+              return
+            }
+
+            if (isSearchField) {
+              return
+            }
+            const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
+
+            const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
+
+            if (!isEqual) {
+              e.preventDefault()
+              form?.submitForm?.()
+            }
+          }
+        }}
       >
         {!showOverlay && LoadingOverlay()}
         {children}

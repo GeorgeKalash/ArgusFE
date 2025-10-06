@@ -51,7 +51,7 @@ const ExchangeRates = () => {
   })
 
   const formatDate = dateStr => {
-    const year = dateStr.substring(2, 4)
+    const year = dateStr.substring(0, 4)
     const month = dateStr.substring(4, 6)
     const day = dateStr.substring(6, 8)
 
@@ -69,9 +69,8 @@ const ExchangeRates = () => {
       field: 'dayId',
       headerName: _labels.stDate,
       flex: 1,
-      valueFormatter: ({ value }) => formatDate(value)
+      valueGetter: ({ data }) => formatDate(data?.dayId)
     },
-    ,
     {
       field: 'rate',
       headerName: _labels.rate,

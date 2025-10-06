@@ -116,6 +116,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     rateCalcMethod: '',
     tdType: 2,
     tdPct: 0,
+    initialTdPct: 0,
     baseAmount: 0,
     volume: '',
     weight: '',
@@ -238,12 +239,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -299,7 +298,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -311,9 +311,29 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         if (!newRow.itemId) {
           return
         }
+        if (newRow.isInactive) {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+
+          stackError({
+            message: labels.inactiveItem
+          })
+
+          return
+        }
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update)
+        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+        const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
+        const ItemConvertPrice = await getItemConvertPrice(
+          newRow.itemId,
+          update,
+          itemInfo?.defSaleMUId ? defaultMu?.recordId || filteredMeasurements?.[0]?.recordId : 0
+        )
         let rowTax = null
         let rowTaxDetails = null
 
@@ -343,23 +363,21 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           rowTaxDetails = details
         }
 
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        getFilteredMU(newRow?.itemId)
-
         update({
-          volume: parseFloat(itemPhysProp?.volume) || 0,
-          weight: parseFloat(itemPhysProp?.weight || 0).toFixed(2),
-          vatAmount: parseFloat(itemInfo?.vatPct || 0).toFixed(2),
-          basePrice: parseFloat(ItemConvertPrice?.basePrice || 0).toFixed(5),
-          unitPrice: parseFloat(ItemConvertPrice?.unitPrice || 0).toFixed(3),
-          upo: parseFloat(ItemConvertPrice?.upo || 0).toFixed(2),
+          volume: itemPhysProp?.volume || 0,
+          weight: itemPhysProp?.weight || 0,
+          vatAmount: itemInfo?.vatPct || 0,
+          basePrice: ItemConvertPrice?.basePrice || 0,
+          unitPrice: ItemConvertPrice?.unitPrice || 0,
+          upo: ItemConvertPrice?.upo || 0,
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.tdPct ? parseFloat(formik.values.tdPct).toFixed(2) : 0,
+          mdAmount: formik.values.initialTdPct ? formik.values.initialTdPct : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: filteredMeasurements?.[0]?.reference,
-          muId: filteredMeasurements?.[0]?.recordId,
-          extendedPrice: parseFloat('0').toFixed(2),
+          muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
+          muId: defaultMu?.recordId || filteredMeasurements?.[0]?.recordId,
+          muQty: filteredMeasurements?.[0]?.qty,
+          extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
           taxDetails: formik.values.isVattable ? rowTaxDetails : null,
@@ -413,12 +431,30 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-        update({
-          baseQty: newRow?.qty * filteredItems?.qty
-        })
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
+
+          return
+        }
+
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, '', newRow?.muId)
+
+        const data = getItemPriceRow(
+          {
+            ...newRow,
+            baseQty: newRow?.qty * muQty,
+            basePrice: ItemConvertPrice?.basePrice || 0,
+            unitPrice: ItemConvertPrice?.unitPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1
+          },
+          DIRTYFIELD_QTY
+        )
+        update(data)
       },
-      propsReducer({ row, props }) {
+      propsReducer({ props }) {
         return { ...props, store: filteredMeasurements?.current }
       }
     },
@@ -427,9 +463,16 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.quantity,
       name: 'qty',
       updateOn: 'blur',
+      props: {
+        decimalScale: 2
+      },
       async onChange({ row: { update, newRow } }) {
+        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
+        const muQty = newRow?.muQty ?? filteredItems?.qty
+
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({ ...data, baseQty: newRow?.qty * muQty })
       }
     },
     {
@@ -437,6 +480,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.volume,
       name: 'volume',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -445,6 +489,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.weight,
       name: 'weight',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -479,6 +524,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.upo,
       name: 'upo',
       updateOn: 'blur',
+      props: {
+        decimalScale: 2
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_UPO)
         update(data)
@@ -489,6 +537,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.VAT,
       name: 'vatAmount',
       props: {
+        decimalScale: 2,
         readOnly: true
       }
     },
@@ -516,6 +565,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       updateOn: 'blur',
       flex: 2,
       props: {
+        decimalScale: 2,
         ShowDiscountIcons: true,
         iconsClicked: handleIconClick,
         type: 'numeric',
@@ -552,6 +602,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       label: labels.extendedprice,
       name: 'extendedPrice',
       updateOn: 'blur',
+      props: {
+        decimalScale: 2
+      },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
@@ -699,7 +752,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems) {
+  async function fillForm(soHeader, soItems, clientInfo) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -712,15 +765,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ? await Promise.all(
             soItems.list?.map(async (item, index) => {
               const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+              const itemInfo = await getItem(item?.itemId)
 
               return {
                 ...item,
                 id: index + 1,
-                basePrice: parseFloat(item.basePrice).toFixed(5),
-                unitPrice: parseFloat(item.unitPrice).toFixed(3),
-                upo: parseFloat(item.upo).toFixed(2),
-                vatAmount: parseFloat(item.vatAmount).toFixed(2),
-                extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                basePrice: item.basePrice,
+                unitPrice: item.unitPrice,
+                upo: item.upo,
+                vatAmount: item.vatAmount,
+                extendedPrice: item.extendedPrice,
+                msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
               }
             })
@@ -736,6 +791,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
+      tdPct: clientInfo?.record?.tdPct || 0,
+      initialTdPct: clientInfo?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -769,13 +826,18 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
-  async function fillClientData(clientId) {
+  const getClient = async clientId => {
     if (!clientId) return
 
-    const res = await getRequest({
+    return await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
     })
+  }
+  async function fillClientData(clientId) {
+    if (!clientId) return
+
+    const res = await getClient(clientId)
     formik.setFieldValue('currencyId', res?.record?.currencyId)
     formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
     formik.setFieldValue('ptId', res?.record?.ptId)
@@ -819,7 +881,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId, update) {
+  async function getItemConvertPrice(itemId, update, muId) {
     if (!formik.values.currencyId) {
       update({
         itemId: null,
@@ -836,7 +898,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${
+        formik.values.currencyId
+      }&_plId=${formik.values.plId}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -883,17 +947,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType || 0,
       basePrice: parseFloat(newRow?.basePrice) || 0,
-      volume: parseFloat(newRow?.volume) || 0,
-      weight: parseFloat(newRow?.weight),
-      unitPrice: parseFloat(newRow?.unitPrice || 0),
-      upo: parseFloat(newRow?.upo) ? parseFloat(newRow?.upo) : 0,
-      qty: parseFloat(newRow?.qty),
-      extendedPrice: parseFloat(newRow?.extendedPrice),
+      volume: newRow?.volume || 0,
+      weight: newRow?.weight,
+      unitPrice: newRow?.unitPrice || 0,
+      upo: parseFloat(newRow?.upo) || 0,
+      qty: newRow?.qty,
+      extendedPrice: newRow?.extendedPrice,
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
       baseLaborPrice: 0,
       totalWeightPerG: 0,
-      mdValue: parseFloat(newRow?.mdValue),
+      mdValue: newRow?.mdValue,
       tdPct: formik?.values?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -903,9 +967,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
       weight: itemPriceRow?.weight,
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
+      extendedPrice: itemPriceRow?.extendedPrice,
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
-      vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
+      vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.tdPct || 0,
       taxDetails: formik.values.isVattable ? newRow.taxDetails : null
     })
@@ -913,17 +977,17 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     let commonData = {
       ...newRow,
       id: newRow?.id,
-      qty: parseFloat(itemPriceRow?.qty).toFixed(2),
-      volume: parseFloat(itemPriceRow?.volume).toFixed(2),
-      weight: parseFloat(itemPriceRow?.weight).toFixed(2),
-      basePrice: parseFloat(itemPriceRow?.basePrice).toFixed(5),
-      unitPrice: parseFloat(itemPriceRow?.unitPrice).toFixed(3),
-      extendedPrice: parseFloat(itemPriceRow?.extendedPrice).toFixed(2),
-      upo: parseFloat(itemPriceRow?.upo).toFixed(2),
+      qty: itemPriceRow?.qty,
+      volume: itemPriceRow?.volume,
+      weight: itemPriceRow?.weight,
+      basePrice: itemPriceRow?.basePrice,
+      unitPrice: itemPriceRow?.unitPrice,
+      extendedPrice: itemPriceRow?.extendedPrice,
+      upo: itemPriceRow?.upo,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
-      mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
+      mdAmount: itemPriceRow?.mdAmount,
+      vatAmount: vatCalcRow?.vatAmount
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -933,13 +997,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     ?.filter(item => item.itemId !== undefined)
     .map(item => ({
       ...item,
-      basePrice: parseFloat(item.basePrice) || 0,
-      unitPrice: parseFloat(item.unitPrice) || 0,
-      upo: parseFloat(item.upo) || 0,
-      vatAmount: parseFloat(item.vatAmount) || 0,
-      weight: parseFloat(item.weight) || 0,
-      volume: parseFloat(item.volume) || 0,
-      extendedPrice: parseFloat(item.extendedPrice) || 0
+      basePrice: item.basePrice || 0,
+      unitPrice: item.unitPrice || 0,
+      upo: item.upo || 0,
+      vatAmount: item.vatAmount || 0,
+      weight: item.weight || 0,
+      volume: item.volume || 0,
+      extendedPrice: item.extendedPrice || 0
     }))
 
   const subTotal = getSubtotal(parsedItemsArray)
@@ -981,29 +1045,31 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
     formik.setFieldValue('tdType', _discountObj?.tdType)
     formik.setFieldValue('currentDiscount', _discountObj?.currentDiscount || 0)
-    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct)
+    formik.setFieldValue('tdPct', _discountObj?.hiddenTdPct || 0)
+
+    return _discountObj?.hiddenTdPct || 0
   }
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
-        basePrice: parseFloat(item?.basePrice),
+        basePrice: item?.basePrice,
         qty: item?.qty,
         weight: item?.weight,
-        extendedPrice: parseFloat(item?.extendedPrice),
+        extendedPrice: item?.extendedPrice,
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
-        vatAmount: parseFloat(item?.vatAmount),
+        vatAmount: item?.vatAmount,
         tdPct: tdPct,
         taxDetails: item.taxDetails
       })
-      formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
+      formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
   }
 
   function recalcGridVat(typeChange, tdPct, tdAmount, currentDiscount) {
-    checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
-    recalcNewVat(tdPct)
+    const currentHiddenTdPct = checkDiscount(typeChange, tdPct, tdAmount, currentDiscount)
+    recalcNewVat(currentHiddenTdPct)
   }
 
   function ShowMdValueErrorMessage(clientMaxDiscount, rowData, update) {
@@ -1054,7 +1120,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    await fillForm(soHeader, soItems)
+    const clientInfo = await getClient(soHeader?.record?.clientId)
+    fillForm(soHeader, soItems, clientInfo)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1081,7 +1148,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         address: address,
         setAddress: setAddress,
-        isCleared: false
+        isCleared: false,
+        datasetId: ResourceIds.ADDSalesOrder
       }
     })
   }
@@ -1179,9 +1247,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       setMeasurements(muList?.list)
       const defaultValues = await getDefaultData()
       if (recordId) {
-        const soItems = await getSalesOrderItems(recordId)
-        const soHeader = await getSalesOrder(recordId)
-        await fillForm(soHeader, soItems)
+        refetchForm(recordId)
       } else {
         const defaultSalesTD = defaultValues.systemDefaultsList.salesTD
         if (defaultSalesTD) {
@@ -1412,6 +1478,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('tdPct', newValue?.tdPct)
+                  formik.setFieldValue('initialTdPct', newValue?.tdPct)
                   formik.setFieldValue('taxId', newValue?.taxId)
                   setAddress({})
                   fillClientData(newValue?.recordId)
@@ -1515,7 +1582,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               action === 'delete' && setReCal(true)
             }}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             value={formik.values.items}
             error={formik.errors.items}

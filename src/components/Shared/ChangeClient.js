@@ -78,10 +78,8 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
       })
 
       return false
-    } else if (formValues?.maxDiscount <= values?.maxDiscount) {
-      stackError({
-        message: labels.mismatchDiscount
-      })
+    } else if ((formValues?.maxDiscount || 0) < (values?.maxDiscount || 0)) {
+      stackError({ message: labels.mismatchDiscount })
 
       return false
     }
@@ -172,7 +170,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
               ]}
               required
               onChange={(event, newValue) => {
-                const isValid = isValidClient(newValue)
+                const isValid = newValue ? isValidClient(newValue) : null
 
                 formik.setFieldValue('changeToId', isValid ? newValue?.recordId : null)
                 formik.setFieldValue('changeToName', isValid ? newValue?.name : '')
