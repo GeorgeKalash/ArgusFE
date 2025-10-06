@@ -58,13 +58,8 @@ const GeneratePoductionOrder = () => {
       stack({
         Component: ProductionOrderForm,
         props: {
-          labels: _labels,
-          access: maxAccess,
           recordId: res?.recordId
-        },
-        width: 850,
-        height: 680,
-        title: _labels.ProductionOrder
+        }
       })
 
       toast.success(platformLabels.Generated)

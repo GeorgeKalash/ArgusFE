@@ -402,5 +402,8 @@ export const ManufacturingRepository = {
   WorkCenterTransferMap: {
     qry: service + 'qryWCTM',
     set2: service + 'set2WCTM'
+  },
+  ProductionOrderFromSaleOrder: {
+    gen: service + 'generatePOFromSO'
   }
 }

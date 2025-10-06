@@ -29,5 +29,6 @@ export const commonResourceIds = [
   ResourceIds.PaymentVoucherExpenses,
   ResourceIds.PaymentOrderExpenses,
   ResourceIds.MaterialsTransfer,
-  ResourceIds.WorkCenterConsumptions
+  ResourceIds.WorkCenterConsumptions,
+  ResourceIds.ProductionOrder
 ]
