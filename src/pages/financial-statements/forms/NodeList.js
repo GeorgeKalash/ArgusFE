@@ -129,6 +129,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
           onSelectionChange={row => {
             node.current.nodeId = row?.recordId || null
             node.current.nodeRef = row?.reference || ''
+            node.current.nodedesc = row?.description || ''
           }}
         />
       </Grow>
