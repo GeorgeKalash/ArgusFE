@@ -62,7 +62,7 @@ const SystemDefaults = () => {
         obj.key === 'citySubdivisionName'
 
       if (isStringLike) {
-        myObject[obj.key] = obj.value || null
+        myObject[obj.key] = obj.value || ''
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       }
