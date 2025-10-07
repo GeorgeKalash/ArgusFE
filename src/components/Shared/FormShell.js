@@ -70,7 +70,7 @@ export default function FormShell({
   visibleClear,
   actions,
   isParentWindow = true,
-  printBtn = false
+  onPrint = false
 }) {
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
@@ -460,7 +460,7 @@ export default function FormShell({
               }
             })
           }
-          printBtn={printBtn}
+          onPrint={onPrint}
           isSaved={isSaved}
           isSavedClear={isSavedClearVisible}
           isInfo={isInfo}

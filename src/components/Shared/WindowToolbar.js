@@ -31,7 +31,7 @@ const WindowToolbar = ({
   form,
   previewBtnClicked,
   maxAccess,
-  printBtn,
+  onPrint,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -115,10 +115,10 @@ const WindowToolbar = ({
   return (
     <Box sx={{ padding: '8px !important' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-        {!!printBtn ? (
+        {!!onPrint ? (
           <Grid item xs={3} sx={{ display: 'flex', mr: 2 }}>
             <CustomButton
-              onClick={printBtn}
+              onClick={onPrint}
               image={'print.png'}
               disabled={!editMode}
             />
