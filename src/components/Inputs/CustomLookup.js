@@ -1,11 +1,12 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const CustomLookup = ({
   type = 'text',
@@ -50,6 +51,7 @@ const CustomLookup = ({
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
+  const { languageId } = useContext(AuthContext)
 
   const valueHighlightedOption = useRef(null)
 
@@ -266,8 +268,9 @@ const CustomLookup = ({
                       position: 'absolute',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      right: 5,
-                      display: 'flex'
+                      ...(languageId === 2 ? { left: 5 } : { right: 5 }),
+                      display: 'flex',
+                      direction: languageId === 2 ? 'ltr' : 'rtl'
                     }}
                   >
                     <InputAdornment sx={{ margin: '0px !important' }} position='end'>
