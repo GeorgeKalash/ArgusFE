@@ -1,0 +1,296 @@
+import { Grid } from '@mui/material'
+import toast from 'react-hot-toast'
+import * as yup from 'yup'
+import { useContext, useEffect } from 'react'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import FormShell from 'src/components/Shared/FormShell'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useInvalidate } from 'src/hooks/resource'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { DataSets } from 'src/resources/DataSets'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useForm } from 'src/hooks/form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { ControlContext } from 'src/providers/ControlContext'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+
+const HiringTab = ({ labels, maxAccess, setStore, store }) => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
+
+  const invalidate = useInvalidate({
+    endpointId: FinancialRepository.Account.page
+  })
+
+  const { formik } = useForm({
+    initialValues: {
+      employeeId: recordId,
+      probationEndDate: null,
+      nextReviewDate: null,
+      npId: null,
+      termEndDate: null,
+      recruitmentInfo: '',
+      recruitmentCost: '',
+      pyReference: '',
+      taReference: '',
+      pyActiveDate: null,
+      ssBranchId: null,
+      probationPeriod: null,
+      sponsorId: null,
+      otherRef: '',
+      bsId: null,
+      languageId: null
+    },
+    maxAccess,
+    validationSchema: yup.object({
+      probationEndDate: yup.date().required(),
+      pyActiveDate: yup.date().required()
+    }),
+    onSubmit: async values => {
+      const res = await postRequest({
+        extension: FinancialRepository.Account.set,
+        record: JSON.stringify(obj)
+      })
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res.recordId
+        }))
+        formik.setFieldValue('recordId', res.recordId)
+      }
+      invalidate()
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    }
+  })
+
+  useEffect(() => {
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: FinancialRepository.Account.get,
+          parameters: `_recordId=${recordId}`
+        })
+        formik.setValues(res.record)
+      }
+    })()
+  }, [])
+
+  const editMode = !!formik.values.recordId
+
+  return (
+    <FormShell
+      resourceId={ResourceIds.EmployeeFilter}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      isInfo={false}
+      isCleared={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesZone.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='npId'
+                    label={labels.noticePeriod}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('npId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.npId && Boolean(formik.errors.npId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='probationPeriod'
+                    label={labels.probationPeriod}
+                    value={formik.values.probationPeriod}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('probationPeriod', '')}
+                    error={formik.touched.probationPeriod && Boolean(formik.errors.probationPeriod)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='probationEndDate'
+                    label={labels.probationEndDate}
+                    value={formik.values?.probationEndDate}
+                    required
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('probationEndDate', '')}
+                    error={formik.touched.probationEndDate && Boolean(formik.errors.probationEndDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='nextReviewDate'
+                    label={labels.nextReviewDate}
+                    value={formik.values?.nextReviewDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('nextReviewDate', '')}
+                    error={formik.touched.nextReviewDate && Boolean(formik.errors.nextReviewDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='termEndDate'
+                    label={labels.termEndDate}
+                    value={formik.values?.termEndDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('termEndDate', '')}
+                    error={formik.touched.termEndDate && Boolean(formik.errors.termEndDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='pyActiveDate'
+                    label={labels.pyActiveDate}
+                    value={formik.values?.pyActiveDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('pyActiveDate', '')}
+                    error={formik.touched.pyActiveDate && Boolean(formik.errors.pyActiveDate)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    name='languageId'
+                    label={labels.language}
+                    datasetId={DataSets.FI_GROUP_TYPE} // Different KVS
+                    values={formik.values}
+                    valueField='key'
+                    displayField='value'
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('languageId', newValue?.key || null)
+                    }}
+                    error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='recruitmentInfo'
+                    label={labels.recruitmentInfo}
+                    value={formik?.values?.recruitmentInfo}
+                    maxLength='200'
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('recruitmentInfo', '')}
+                    error={formik.touched.recruitmentInfo && Boolean(formik.errors.recruitmentInfo)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='recruitmentCost'
+                    label={labels.recruitmentCost}
+                    value={formik.values.recruitmentCost}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('recruitmentCost', '')}
+                    error={formik.touched.recruitmentCost && Boolean(formik.errors.recruitmentCost)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='pyReference'
+                    label={labels.pyReference}
+                    value={formik.values.pyReference}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('pyReference', '')}
+                    error={formik.touched.pyReference && Boolean(formik.errors.pyReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='taReference'
+                    label={labels.taReference}
+                    value={formik.values.taReference}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('taReference', '')}
+                    error={formik.touched.taReference && Boolean(formik.errors.taReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesZone.qry}
+                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    name='ssBranchId'
+                    label={labels.ssBranch}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('ssBranchId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.ssBranchId && Boolean(formik.errors.ssBranchId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SaleRepository.SalesPerson.qry}
+                    name='sponsorId'
+                    label={labels.sponsor}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('sponsorId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.sponsorId && Boolean(formik.errors.sponsorId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='otherRef'
+                    label={labels.otherRef}
+                    value={formik.values.otherRef}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('otherRef', '')}
+                    error={formik.touched.otherRef && Boolean(formik.errors.otherRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={AccessControlRepository.SecurityGroup.qry}
+                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    name='bsId'
+                    label={labels.benefitSchedule}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField='name'
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('bsId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.bsId && Boolean(formik.errors.bsId)}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+  )
+}
+
+export default HiringTab

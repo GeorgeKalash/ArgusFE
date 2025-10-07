@@ -4,6 +4,7 @@ import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceTable from '../forms/AccountBalanceTable'
+import { Typography, Box } from '@mui/material'
 
 const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -22,32 +23,41 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
-        <AccountsForm
-          store={store}
-          setStore={setStore}
-          labels={labels}
-          maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
-          editMode={editMode}
-        />
-      </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
-        <CreditLimitsForm
-          store={store}
-          setStore={setStore}
-          labels={labels}
-          maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
-          editMode={editMode}
-        />
-      </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} />
-      </CustomTabPanel>
+      <Box display='flex' alignItems='center' justifyContent='space-between' mb={2}>
+        <Box>
+          <Typography>Hiiii</Typography>
+        </Box>
+
+        <Box>
+          <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+          <CustomTabPanel height={height} index={0} value={activeTab}>
+            <AccountsForm
+              store={store}
+              setStore={setStore}
+              labels={labels}
+              maxAccess={maxAccess}
+              height={height}
+              expanded={expanded}
+              editMode={editMode}
+            />
+          </CustomTabPanel>
+          <CustomTabPanel height={height} index={1} value={activeTab}>
+            <CreditLimitsForm
+              store={store}
+              setStore={setStore}
+              labels={labels}
+              maxAccess={maxAccess}
+              height={height}
+              expanded={expanded}
+              editMode={editMode}
+            />
+          </CustomTabPanel>
+          <CustomTabPanel height={height} index={2} value={activeTab}>
+            <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} />
+          </CustomTabPanel>
+        </Box>
+      </Box>
     </>
   )
 }
