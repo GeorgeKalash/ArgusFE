@@ -492,20 +492,18 @@ const CTExchangeRates = () => {
                       </Grid>
                     </Fixed>
                     <Grow>
-                      {formik.values.currencyId != null &&
-                        formik.values.raCurrencyId != null &&
-                        formik.values.saRateTypeId != null && (
-                          <DataGrid
-                            name='sales'
-                            onChange={value => formik.setFieldValue('sales', value)}
-                            value={formik.values.sales}
-                            error={formik.errors.sales}
-                            columns={exchangeRatesInlineGridColumns}
-                            allowDelete={false}
-                            allowAddNewLine={false}
-                            maxAccess={access}
-                          />
-                        )}
+                      {formik.values.currencyId && formik.values.raCurrencyId && formik.values.saRateTypeId && (
+                        <DataGrid
+                          name='sales'
+                          onChange={value => formik.setFieldValue('sales', value)}
+                          value={formik.values.sales}
+                          error={formik.errors.sales}
+                          columns={exchangeRatesInlineGridColumns}
+                          allowDelete={false}
+                          allowAddNewLine={false}
+                          maxAccess={access}
+                        />
+                      )}
                     </Grow>
                   </VertLayout>
                 </FieldSet>
