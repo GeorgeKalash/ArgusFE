@@ -57,8 +57,8 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
         formik.setFieldValue('recordId', res.recordId)
         node.current.nodeId = res.recordId
       }
-      node.current.nodeRef  = obj.reference
-      node.current.nodedesc = obj.description 
+       node.current.nodeRef  = obj.reference ?? ''
+       node.current.nodedesc = obj.description ?? ''
       toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -73,7 +73,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
         })
         formik.setValues(res.record)
         node.current.nodeRef = res?.record?.reference
-        node.current.nodedesc = res?.record?.description
       }
     })()
   }, [])
@@ -110,11 +109,7 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                 name='parentId'
                 label={labels.parent}
                 valueField='recordId'
-                displayField={['reference', 'description']}
-                columnsInDropDown={[
-                  { key: 'reference', value: labels.reference },
-                  { key: 'description', value: labels.description }
-                ]}
+                displayField='reference'
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
