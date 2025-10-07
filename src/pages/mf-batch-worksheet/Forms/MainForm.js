@@ -144,11 +144,10 @@ export default function MainForm({ labels, access, store, setStore }) {
             }))
           : formik.initialValues?.batchWSRM
       })
-      setStore(prevStore => ({
-        ...prevStore,
+      setStore({
         recordId: res.record.header.recordId,
         batchWorksheetDistributions: res.record?.batchWorksheetDistributions
-      }))
+      })
     }
   }
   useEffect(() => {
