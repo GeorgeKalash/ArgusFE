@@ -62,7 +62,7 @@ const SystemDefaults = () => {
         obj.key === 'citySubdivisionName'
 
       if (isStringLike) {
-        myObject[obj.key] = obj.value ?? null
+        myObject[obj.key] = obj.value || null
       } else {
         myObject[obj.key] = obj.value ? parseInt(obj.value, 10) : null
       }
@@ -187,14 +187,13 @@ const SystemDefaults = () => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='vatPct'
                     label={_labels.vatPct}
                     value={formik.values.vatPct}
-                    type='numeric'
                     numberField={true}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('vatPct', '')}
+                    onClear={() => formik.setFieldValue('vatPct', null)}
                     error={formik.touched.vatPct && Boolean(formik.errors.vatPct)}
                   />
                 </Grid>
