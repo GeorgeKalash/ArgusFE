@@ -18,12 +18,13 @@ import { createConditionalSchema } from 'src/lib/validation'
 import { useError } from 'src/error'
 
 const LedgerForm = ({ node, labels, maxAccess }) => {
-  const { nodeId, nodeRef } = node?.current
+  const { nodeId, nodeRef, nodedesc } = node?.current
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
   const { stack: stackError } = useError()
-
+  const data = `${nodeRef || ''}  ${nodedesc || ''}`
   const conditions = {
     sign: row => {
       const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.ccRef || row?.ccgRef
@@ -206,7 +207,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           <CustomTextField
             name='nodeRef'
             label={labels.selectedNode}
-            value={nodeRef}
+            value={data}
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
