@@ -6,13 +6,18 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { ControlContext } from 'src/providers/ControlContext'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useInvalidate } from 'src/hooks/resource'
 
-const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false }, ref) => {
+const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [files, setFiles] = useState([])
   const [initialValues, setInitialData] = useState({})
+
+  const invalidate = useInvalidate({
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`
+  })
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -61,7 +66,8 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false
           folderName: null,
           date: day + '/' + month + '/' + year,
           url: null,
-          file: selectedFile
+          file: selectedFile,
+          folderId: 1
         }
 
         const fileSizeInKB = Math.round(selectedFile.size / 1024)
@@ -99,23 +105,30 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false
   }
 
   const submit = () => {
-    if (formik.values?.files?.length) {
-      const filesToUpload = formik.values.files.map(file => ({
-        ...file,
-        recordId: ref.current.value || recordId
-      }))
+    if (files.length) {
+      const recId = ref?.current?.value ?? recordId
 
-      return filesToUpload
+      return files
         .reduce((promise, file) => {
           return promise.then(async () => {
             await postRequest({
               extension: SystemRepository.Attachment.set,
-              record: JSON.stringify(file),
+              record: JSON.stringify({
+                resourceId: file.resourceId,
+                recordId: recId,
+                seqNo: file.seqNo,
+                fileName: file.fileName,
+                date: file.date,
+                url: file.url,
+                folderId: file.folderId ?? 1
+              }),
               file: file.file
             })
           })
         }, Promise.resolve())
         .then(res => {
+          invalidate()
+
           return res
         })
     } else if (!files.length && initialValues?.url && !formik.values?.url) {
@@ -169,7 +182,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false
                 }}
               >
                 <Grid container alignItems='center' spacing={1} padding={1}>
-                  <Grid item xs={showFolder ? 8 : 11}>
+                  <Grid item xs={8}>
                     <Typography variant='body2' component='span'>
                       {file.fileName}
                     </Typography>
@@ -178,25 +191,27 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId, showFolder = false
                     </Typography>
                   </Grid>
 
-                  {showFolder && (
-                    <Grid item xs={3}>
-                      <ResourceComboBox
-                        endpointId={SystemRepository.Folders.qry}
-                        name={`files[${index}].folderId`}
-                        label={platformLabels.folder}
-                        valueField='recordId'
-                        displayField='name'
-                        values={formik.values}
-                        value={file.folderId || 1}
-                        onChange={(event, newValue) => {
-                          const updatedFiles = [...files]
-                          updatedFiles[index].folderId = newValue?.recordId || null
-                          setFiles(updatedFiles)
-                          formik.setFieldValue(`files[${index}].folderId`, newValue?.recordId || null)
-                        }}
-                      />
-                    </Grid>
-                  )}
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Folders.qry}
+                      name={`files[${index}].folderId`}
+                      label={platformLabels.folder}
+                      valueField='recordId'
+                      displayField='name'
+                      values={formik.values}
+                      value={file.folderId ?? 1}
+                      onChange={(_, newValue) => {
+                        const newFolderId = newValue?.recordId || 1
+                        setFiles(prev => {
+                          const copy = [...prev]
+                          copy[index] = { ...copy[index], folderId: newFolderId }
+
+                          return copy
+                        })
+                        formik.setFieldValue(`files[${index}].folderId`, newFolderId)
+                      }}
+                    />
+                  </Grid>
 
                   <Grid item xs={1}>
                     <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>

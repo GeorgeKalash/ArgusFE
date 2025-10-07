@@ -11,12 +11,12 @@ import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
-const FolderForm = ({ labels, values, maxAccess, window }) => {
+const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId }) => {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Attachment.qry
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`
   })
 
   const { formik } = useForm({
