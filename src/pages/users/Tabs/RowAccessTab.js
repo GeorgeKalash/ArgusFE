@@ -41,7 +41,6 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       recordId: '',

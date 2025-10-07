@@ -107,7 +107,6 @@ export default function BenificiaryBankForm({
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       clientId: yup.string().required(),

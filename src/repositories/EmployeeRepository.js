@@ -3,7 +3,7 @@ const service = 'EP.asmx/'
 export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
-    get1: service + 'getEM1'
+    get1: service + 'getEM1',
   },
   CertificateFilters: {
     qry: service + 'qryCL',
@@ -107,12 +107,15 @@ export const EmployeeRepository = {
     del: service + 'delED',
     get: service + 'getED',
     set: service + 'setED',
-    snapshot: service + 'snapshotED',
+    snapshot: service + 'snapshotED'
   },
   FullName: {
     sync: service + 'syncFullName'
   },
   EmployeeChart: {
     qry: service + 'qryES'
+  },
+  TerminationEmployee: {
+    get: service + 'getTE'
   }
 }

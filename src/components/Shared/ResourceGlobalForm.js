@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -38,7 +37,6 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, window, res
         unpost: false
       }
     },
-    enableReinitialize: true,
     validateOnChange: true,
 
     onSubmit: async obj => {

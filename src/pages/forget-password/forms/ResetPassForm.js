@@ -21,7 +21,6 @@ const ResetPassForm = ({ labels, username = '' }) => {
   const router = useRouter()
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       username: username ? username : auth?.user?.username,

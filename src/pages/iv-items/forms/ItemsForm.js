@@ -26,7 +26,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
   const [onKitItem, setOnKitItem] = useState(false)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -74,7 +73,6 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       isInactive: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       categoryId: yup.string().required(),
@@ -149,7 +147,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     }
   })
 
-  const editMode = !!recordId || formik.values.recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -496,7 +494,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
                     label={labels.inventory}
                     maxAccess={maxAccess}
-                    disabled={formik.values.kitItem}
+                    disabled={formik.values.kitItem || editMode}
                   />
                 </Grid>
                 <Grid item xs={4}>

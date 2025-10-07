@@ -48,7 +48,6 @@ const PhysicalCountSerial = () => {
       search: ''
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true
   })
 

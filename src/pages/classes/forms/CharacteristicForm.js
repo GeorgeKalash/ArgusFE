@@ -18,7 +18,6 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: { chId: null, seqNo: null, oper: null },
     validationSchema: yup.object({

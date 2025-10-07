@@ -27,7 +27,9 @@ export const TimeAttendanceRepository = {
     del: service + 'delLR'
   },
   ResetTV: {
-    reset: service + 'resetTV'
+    reset: service + 'resetTV',
+    qry: service + 'qryTV',
+    qry2: service + 'qryTV2'
   },
   ShitLeave: {
     page: service + 'pageLQ',
@@ -42,5 +44,17 @@ export const TimeAttendanceRepository = {
   },
   DSLReason: {
     qry: service + 'qryLR'
+  },
+  Calendar: {
+    qry: service + 'qryCA'
+  },
+  DayTypes: {
+    page: service + 'pageDT',
+    set: service + 'setDT',
+    get: service + 'getDT',
+    del: service + 'delDT'
+  },
+  AttendanceDay: {
+    qry: service + 'qryAD'
   }
 }

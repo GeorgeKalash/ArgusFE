@@ -45,6 +45,8 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  collabsable = true,
+  domLayout = 'normal',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -94,7 +96,10 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: { textAlign: languageId === 2 ? 'left' : 'right' },
+          cellStyle: params => ({
+            fontWeight: params.data?.isBold ? 'bold' : 'normal',
+            textAlign: languageId === 2 ? 'left' : 'right'
+          }),
           sortable: !disableSorting
         }
       }
@@ -125,10 +130,36 @@ const Table = ({
           }
         }
       }
+      if (col.type === 'colorCombo') {
+        return {
+          ...col,
+          cellRenderer: ({ data }) => {
+            const color = data?.[col.field]
+
+            return color ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: '4px',
+                    backgroundColor: color,
+                    border: '1px solid #ccc'
+                  }}
+                />
+                <span>{color}</span>
+              </div>
+            ) : null
+          }
+        }
+      }
 
       return {
         ...col,
-        sortable: !disableSorting
+        sortable: !disableSorting,
+        cellStyle: params => ({
+          fontWeight: params.data?.isBold ? 'bold' : 'normal'
+        })
       }
     })
 
@@ -625,7 +656,11 @@ const Table = ({
     const indent = data.level * 20
     const isParent = data.level === 0
 
-    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+    const arrow = data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    if (!collabsable) {
+      return <div style={{ paddingLeft: indent }}>{value}</div>
+    }
 
     return (
       <div
@@ -639,7 +674,7 @@ const Table = ({
 
   const handleRowClick = params => {
     props.fullRowData.current = props?.fullRowData.current.map(row => {
-      if (row?.[props?.field] === params?.[props?.field] && row.level === 0) {
+      if (row?.[props?.field] === params?.[props?.field] && row.hasChildren) {
         return { ...row, isExpanded: !row.isExpanded }
       }
 
@@ -647,15 +682,16 @@ const Table = ({
     })
 
     const updatedVisibleRows = []
-    for (const row of props?.fullRowData.current) {
-      if (row.level === 0) {
-        updatedVisibleRows.push(row)
-        if (row.isExpanded) {
-          const children = props?.fullRowData.current.filter(child => child.parent === row?.[props?.field])
-          updatedVisibleRows.push(...children)
-        }
+
+    function addWithChildren(parentRow) {
+      updatedVisibleRows.push(parentRow)
+      if (parentRow.isExpanded) {
+        const children = props?.fullRowData.current.filter(child => child.parent === parentRow?.[props?.field])
+        children.forEach(child => addWithChildren(child))
       }
     }
+
+    props?.fullRowData.current.filter(row => row.level === 0).forEach(root => addWithChildren(root))
 
     props?.setRowData(updatedVisibleRows)
   }
@@ -919,6 +955,7 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
+            domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
             })}

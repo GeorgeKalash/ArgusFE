@@ -203,14 +203,14 @@ export default function SaleTransactionForm({
           applyVat: false,
           taxId: null,
           taxDetails: null,
-          notes: ''
+          notes: '',
+          totalWeight: 0
         }
       ],
       serials: [],
       lots: [],
       taxes: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -674,7 +674,10 @@ export default function SaleTransactionForm({
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({
+          ...data,
+          totalWeight: (data.weight || 0) * (newRow.qty || 0)
+        })
       }
     },
     {
@@ -692,6 +695,14 @@ export default function SaleTransactionForm({
       name: 'weight',
       props: {
         decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
         readOnly: true
       }
     },
@@ -1124,6 +1135,7 @@ export default function SaleTransactionForm({
           upo: item.upo,
           vatAmount: item.vatAmount,
           extendedPrice: item.extendedPrice,
+          totalWeight: (item.weight || 0) * (item.qty || 0),
           serials: saTrxPack?.serials
             ?.filter(row => row.seqNo == item.seqNo)
             .map((serialDetail, index) => {

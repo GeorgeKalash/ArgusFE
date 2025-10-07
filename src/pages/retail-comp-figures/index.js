@@ -56,7 +56,6 @@ const RetailCompFigures = () => {
       posAnalysis: yup.number().required()
     }),
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true
   })
 

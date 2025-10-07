@@ -8,7 +8,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ConfirmationOnSubmit({ formik, labels, window }) {
   const fetchFormik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       idNo: formik.values.idNo,
