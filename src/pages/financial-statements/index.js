@@ -44,7 +44,7 @@ const FinancialStatements = () => {
       type: 'checkbox'
     },
     {
-      field: 'securityGroup',
+      field: 'sgName',
       headerName: labels.securityGrp,
       flex: 1
     }
