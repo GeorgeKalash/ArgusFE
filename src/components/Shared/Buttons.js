@@ -388,7 +388,7 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'generatePdO',
+    key: 'generateProdOrder',
     label: platformLabels.GenerateProductionOder,
     color: 'black',
     image: 'order.png',

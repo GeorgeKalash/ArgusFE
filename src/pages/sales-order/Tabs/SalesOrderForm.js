@@ -239,7 +239,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
-  const isReleased = formik.values.status == 4
 
   async function getFilteredMU(itemId, msId) {
     if (!itemId) return
@@ -709,7 +708,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
-  async function generatePdO() {
+  async function generateProdOrder() {
     const res = await postRequest({
       extension: ManufacturingRepository.ProductionOrderFromSaleOrder.gen,
       record: JSON.stringify({ soId: formik.values.recordId })
@@ -768,9 +767,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
     },
     {
-      key: 'generatePdO',
+      key: 'generateProdOrder',
       condition: true,
-      onClick: generatePdO,
+      onClick: generateProdOrder,
       disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
     }
   ]
