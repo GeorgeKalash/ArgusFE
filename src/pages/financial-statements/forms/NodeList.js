@@ -74,15 +74,14 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
 
   const add = () => {
     node.current.nodeId = null
-    node.current.nodeRef = ''
-     node.current.nodedesc = ''
+ 
     openForm()
   }
 
   const edit = obj => {
     node.current.nodeId = obj?.recordId
     node.current.nodeRef = obj?.reference
-    node.current.nodedesc = obj?.nodedesc
+    node.current.nodedesc = obj?.description
     openForm()
   }
 

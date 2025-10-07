@@ -57,8 +57,7 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
         formik.setFieldValue('recordId', res.recordId)
         node.current.nodeId = res.recordId
       }
-       node.current.nodeRef  = obj.reference ?? ''
-       node.current.nodedesc = obj.description ?? ''
+
       toast.success(!obj?.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
