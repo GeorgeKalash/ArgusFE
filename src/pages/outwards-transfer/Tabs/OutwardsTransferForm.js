@@ -98,15 +98,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
         return
       }
 
-      formik.setFieldValue('firstName', res?.record?.clientIndividual?.firstName)
-      formik.setFieldValue('middleName', res?.record?.clientIndividual?.middleName)
-      formik.setFieldValue('lastName', res?.record?.clientIndividual?.lastName)
-      formik.setFieldValue('familyName', res?.record?.clientIndividual?.familyName)
-      formik.setFieldValue('fl_firstName', res?.record?.clientIndividual?.fl_firstName)
-      formik.setFieldValue('fl_middleName', res?.record?.clientIndividual?.fl_middleName)
-      formik.setFieldValue('fl_lastName', res?.record?.clientIndividual?.fl_lastName)
-      formik.setFieldValue('fl_familyName', res?.record?.clientIndividual?.fl_familyName)
-      formik.setFieldValue('professionId', res?.record?.clientIndividual?.professionId)
+      return res?.record?.clientIndividual
     }
   }
 
@@ -140,14 +132,21 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
       extension: RemittanceOutwardsRepository.OutwardsTransfer.get,
       parameters: `_recordId=${recordId}`
     })
-    await chooseClient(res.record.clientId, res.record.category)
+    const client = await chooseClient(res.record.clientId, res.record.category)
     formik.setValues({
       ...res.record,
       date: formatDateFromApi(res.record.date),
       exRate: parseFloat(res.record.exRate).toFixed(5),
       defaultValueDate: formatDateFromApi(res.record.defaultValueDate),
       valueDate: formatDateFromApi(res.record.valueDate),
-      bankType: res.record.interfaceId
+      bankType: res.record.interfaceId,
+      firstName: client?.firstName || '',
+      middleName: client?.middleName || '',
+      lastName: client?.lastName || '',
+      fl_firstName: client?.fl_firstName || '',
+      fl_middleName: client?.fl_middleName || '',
+      fl_lastName: client?.fl_lastName || '',
+      professionId: client?.professionId || null
     })
   }
 
@@ -467,7 +466,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                     </Grid>
                     <Grid item xs={12}>
                       <Grid container xs={12} spacing={2}>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='firstName'
                             label={labels.firstName}
@@ -477,7 +476,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             maxAccess={maxAccess}
                           />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='middleName'
                             label={labels.middleName}
@@ -487,7 +486,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             maxAccess={maxAccess}
                           />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='lastName'
                             label={labels.lastName}
@@ -497,21 +496,11 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             maxAccess={maxAccess}
                           />
                         </Grid>
-                        <Grid item xs={3}>
-                          <CustomTextField
-                            name='familyName'
-                            label={labels.familyName}
-                            value={formik.values?.familyName}
-                            readOnly
-                            maxLength='20'
-                            maxAccess={maxAccess}
-                          />
-                        </Grid>
                       </Grid>
                     </Grid>
                     <Grid item xs={12}>
                       <Grid container xs={12} spacing={2}>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='fl_firstName'
                             label={labels.flFirstName}
@@ -522,7 +511,7 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             maxAccess={maxAccess}
                           />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='fl_middleName'
                             label={labels.flMiddleName}
@@ -533,22 +522,11 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             maxAccess={maxAccess}
                           />
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                           <CustomTextField
                             name='fl_lastName'
                             label={labels.flLastName}
                             value={formik.values?.fl_lastName}
-                            readOnly
-                            maxLength='20'
-                            dir='rtl'
-                            maxAccess={maxAccess}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <CustomTextField
-                            name='fl_familyName'
-                            label={labels.flFamilyName}
-                            value={formik.values?.fl_familyName}
                             readOnly
                             maxLength='20'
                             dir='rtl'

@@ -331,7 +331,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const ItemConvertPrice = await getItemConvertPrice(
           newRow.itemId,
           update,
-          defaultMu?.recordId || filteredMeasurements?.[0]?.recordId
+          itemInfo?.defSaleMUId ? defaultMu?.recordId || filteredMeasurements?.[0]?.recordId : 0
         )
         let rowTax = null
         let rowTaxDetails = null

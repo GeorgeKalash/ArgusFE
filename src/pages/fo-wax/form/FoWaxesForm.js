@@ -192,6 +192,17 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     return response?.record
   }
 
+  const getJobWorkCenter = async recordId => {
+    if (!recordId || !formik.values?.header?.workCenterId) return
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.JobWorkCenter.get,
+      parameters: `_jobId=${recordId}&_workCenterId=${formik.values?.header?.workCenterId}`
+    })
+
+    return response?.record
+  }
+
   const getMetalSetting = async (metalId, metalColorId) => {
     if (!metalId || !metalColorId) return
 
@@ -313,14 +324,14 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
           itemId: res.record?.itemId || null,
           category: res.record?.categoryName || '',
           sku: res.record?.sku || '',
-          jobPcs: newRow?.pcs || 0,
+          jobPcs: res.record?.pcs || 0,
           routingSeqNo: res.record?.routingSeqNo || 1
         })
         const design = res.record?.designId ? await getDesign(res.record?.designId) : null
 
         const jobRouting = res.record?.routingSeqNo
           ? await getJobRouting(newRow.jobId, res?.record?.routingSeqNo)
-          : null
+          : await getJobWorkCenter(newRow.jobId)
         update({
           classId: design?.classId,
           className: design?.className,
