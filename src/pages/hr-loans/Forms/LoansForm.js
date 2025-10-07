@@ -42,7 +42,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
       recordId: null,
       status: 1,
       releaseStatus: null,
-      wip: null,
+      wip: 1,
       reference: '',
       date: new Date(),
       employeeId: null,
@@ -58,7 +58,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
       effectiveDate: new Date(),
       ldMethod: parseInt(defaultMethod),
       ldmName: '',
-      ldValue: defaultLdValue,
+      ldValue: parseInt(defaultLdValue),
       disableEditing: false
     },
     maxAccess,
@@ -120,7 +120,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
         ...prev,
         isClosed: record.wip === 2,
         loanAmount: record.amount ?? 0,
-        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
+        effectiveDate: formatDateFromApi(res.record.effectiveDate)
       }))
 
       await fetchEmployee(record.employeeId)
@@ -176,13 +176,13 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
         ...prev,
         ...res.record,
         date: formatDateFromApi(res.record.date),
-        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
+        effectiveDate: formatDateFromApi(res.record.effectiveDate)
       }))
 
       setStore(prev => ({
         ...prev,
         isClosed: res.record.wip === 2,
-        effectiveDate: res.record.effectiveDate ? formatDateFromApi(res.record.effectiveDate) : null
+        effectiveDate: formatDateFromApi(res.record.effectiveDate)
       }))
     }
   }
@@ -232,7 +232,7 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || !editMode || formik.values.status === 3
+      disabled: !isClosed || !editMode
     }
   ]
 
@@ -347,10 +347,10 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
                 displayField='name'
                 values={formik.values}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('ltId', newValue?.recordId || null)
                   formik.setFieldValue('disableEditing', newValue?.disableEditing || false)
                   formik.setFieldValue('ldMethod', newValue?.ldMethod || null)
                   formik.setFieldValue('ldValue', newValue?.ldValue || 0)
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
               />
@@ -381,9 +381,9 @@ export default function LoansForm({ labels, maxAccess, store, setStore, window }
                 readOnly={isClosed}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                   formik.setFieldValue('currencyName', newValue?.name || '')
                   formik.setFieldValue('currencyRef', newValue?.reference || '')
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />

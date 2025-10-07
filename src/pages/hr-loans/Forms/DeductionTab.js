@@ -76,8 +76,8 @@ const DeductionTab = ({ store, labels }) => {
     enabled: !!recordId
   })
 
-  const deductedAmount = data?.list?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0
-  const remainingBalance = (store.loanAmount || 0) - deductedAmount
+  const deductedAmount = parseFloat(data?.list?.reduce((acc, curr) => acc + (curr.amount || 0), 0) || 0).toFixed(2)
+  const remainingBalance = parseFloat((store.loanAmount || 0) - deductedAmount).toFixed(2)
 
   const add = () => openForm()
 
@@ -121,7 +121,13 @@ const DeductionTab = ({ store, labels }) => {
           rowId='recordId'
           onEdit={edit}
           onDelete={store.isClosed && del}
-          hideDeleteCondition={row => row.payrollDeduction}
+          actionCondition={(row, actionType) => {
+            if (actionType === 'delete') {
+              return row.payrollDeduction === false
+            }
+
+            return true
+          }}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
@@ -132,7 +138,12 @@ const DeductionTab = ({ store, labels }) => {
       <Fixed>
         <Grid container sx={{ p: 2 }} spacing={2}>
           <Grid item xs={4}>
-            <CustomNumberField name='loanAmount' label={labels.loanAmount} value={store.loanAmount} readOnly />
+            <CustomNumberField
+              name='loanAmount'
+              label={labels.loanAmount}
+              value={parseFloat(store.loanAmount).toFixed(2)}
+              readOnly
+            />
           </Grid>
           <Grid item xs={4}>
             <CustomNumberField name='deductedAmount' label={labels.deductedAmount} value={deductedAmount} readOnly />

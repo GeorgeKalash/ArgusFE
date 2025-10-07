@@ -783,7 +783,6 @@ const Table = ({
                 !isStatusCanceled &&
                 deleteBtnVisible &&
                 !isWIP &&
-                (!props?.hideDeleteCondition || !props?.hideDeleteCondition(data)) &&
                 (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
                   <IconButton
                     size='small'

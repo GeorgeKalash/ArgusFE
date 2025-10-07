@@ -99,7 +99,7 @@ const HrLoans = () => {
       type: 'number'
     },
     {
-      field: 'releaseStatus',
+      field: 'rsName',
       headerName: labels.releaseStatus,
       flex: 1
     },
