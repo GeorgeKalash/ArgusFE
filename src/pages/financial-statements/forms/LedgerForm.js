@@ -26,7 +26,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
 
   const conditions = {
     sign: row => {
-      const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.ccRef || row?.ccgRef
+      const hasSeg = row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.seg5 || row?.ccRef || row?.ccgRef
 
       return hasSeg ? true : !!row.sign
     }
@@ -42,11 +42,11 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           id: 1,
           seqNo: 1,
           fsNodeId: nodeId,
-          seg0: '',
           seg1: '',
           seg2: '',
           seg3: '',
           seg4: '',
+          seg5: '',
           ccgRef: '',
           ccRef: '',
           sign: ''
@@ -60,7 +60,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       ledgers: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
+      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && !l.seg5 && l.sign)
 
       if (hasInvalidLedger) {
         stackError({
@@ -92,14 +92,6 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.seg0,
-      name: 'seg0',
-      props: {
-        maxLength: 8
-      }
-    },
-    {
-      component: 'textfield',
       label: labels.seg1,
       name: 'seg1',
       props: {
@@ -126,6 +118,14 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       component: 'textfield',
       label: labels.seg4,
       name: 'seg4',
+      props: {
+        maxLength: 8
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.seg5,
+      name: 'seg5',
       props: {
         maxLength: 8
       }
