@@ -113,9 +113,7 @@ const CTExchangeRates = () => {
           raCurrencyId: null,
           rateTypeId: null,
           plantId: null,
-          plantName: '',
           rateCalcMethod: null,
-          rateCalcMethodName: '',
           minRate: null,
           maxRate: null,
           rate: null
