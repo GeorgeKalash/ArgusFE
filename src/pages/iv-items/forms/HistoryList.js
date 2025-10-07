@@ -67,7 +67,7 @@ const HistoryList = ({ recordId }) => {
     <VertLayout>
       <Grow>
         <Table
-          table='historyTable'
+          table='history'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

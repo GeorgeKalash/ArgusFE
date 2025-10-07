@@ -331,7 +331,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   }, [formik.values.kitItem])
 
   return (
-    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} printButton={ConfirmationPrint}>
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} printBtn={ConfirmationPrint}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -356,7 +356,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     ]}
                     required
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={(event, newValue) => {
                       changeDT(newValue)
 
                       setStore(prevStore => ({
