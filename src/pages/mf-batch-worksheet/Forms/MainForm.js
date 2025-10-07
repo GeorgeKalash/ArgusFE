@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -23,6 +22,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { createConditionalSchema } from 'src/lib/validation'
+import { useForm } from 'src/hooks/form'
 
 export default function MainForm({ labels, access, store, setStore }) {
   const { recordId } = store
@@ -59,7 +59,7 @@ export default function MainForm({ labels, access, store, setStore }) {
     'batchWSRM'
   )
 
-  const formik = useFormik({
+  const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     conditionSchema: ['batchWorksheetJobs', 'batchWSRM'],
@@ -305,7 +305,6 @@ export default function MainForm({ labels, access, store, setStore }) {
     toast.success(platformLabels.Posted)
     refetchForm(recordId)
     invalidate()
-    window.close()
   }
 
   const actions = [
