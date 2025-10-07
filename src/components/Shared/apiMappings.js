@@ -254,6 +254,17 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.ExchangeTables]: {
     type: COMBOBOX,
     endpoint: MultiCurrencyRepository.ExchangeTable.qry,
@@ -978,6 +989,13 @@ export const apiMappings = {
   [ResourceIds.Metals]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Metals.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.MetalColor]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.MetalColor.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
     displayField: 'reference'
