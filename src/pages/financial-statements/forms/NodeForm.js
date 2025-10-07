@@ -109,8 +109,8 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                 valueField='recordId'
                 displayField={['reference', 'description']}
                 columnsInDropDown={[
-                  { key: 'reference', value: labels.reference || 'Reference' },
-                  { key: 'description', value: labels.description || 'Description' }
+                  { key: 'reference', value: labels.reference },
+                  { key: 'description', value: labels.description }
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
