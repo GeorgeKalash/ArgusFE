@@ -105,8 +105,7 @@ const SystemDefaults = () => {
   const postSystemDefaults = obj => {
     var data = []
     Object.entries(obj).forEach(([key, value]) => {
-      const normalized = value === '' ? null : value
-      const newObj = { key: key, value: normalized }
+      const newObj = { key: key, value: value }
       data.push(newObj)
     })
     postRequest({
@@ -117,7 +116,6 @@ const SystemDefaults = () => {
       updateDefaults(data)
     })
   }
-
   const editMode = formik.values.baseCurrencyId ? true : false
 
   return (
