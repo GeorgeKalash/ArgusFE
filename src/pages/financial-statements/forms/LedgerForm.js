@@ -24,7 +24,6 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
   const { stack: stackError } = useError()
-  const data = `${nodeRef || ''}  ${nodedesc || ''}`
 
   const conditions = {
     sign: row => {
@@ -208,7 +207,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           <CustomTextField
             name='nodeRef'
             label={labels.selectedNode}
-            value={data}
+            value={ `${nodeRef || ''}  ${nodedesc || ''}`}
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}

@@ -91,6 +91,8 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
     })
     node.current.nodeId = null
     node.current.nodeRef = ''
+    node.current.nodedesc = ''
+
     invalidate()
     toast.success(platformLabels.Deleted)
   }
