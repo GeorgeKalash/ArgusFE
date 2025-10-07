@@ -163,7 +163,6 @@ export default function HrRightToWorkForm({ labels, maxAccess, recordId }) {
                 name='remarks'
                 label={labels.remarks}
                 value={formik.values.remarks}
-                required
                 maxLength='255'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
