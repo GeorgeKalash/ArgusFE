@@ -92,7 +92,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.seg0,
+      label: labels.seg1,
       name: 'seg0',
       props: {
         maxLength: 8
@@ -100,7 +100,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg1,
+      label: labels.seg2,
       name: 'seg1',
       props: {
         maxLength: 8
@@ -108,7 +108,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg2,
+      label: labels.seg3,
       name: 'seg2',
       props: {
         maxLength: 8
@@ -116,7 +116,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg3,
+      label: labels.seg4,
       name: 'seg3',
       props: {
         maxLength: 8
@@ -124,7 +124,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg4,
+      label: labels.seg5,
       name: 'seg4',
       props: {
         maxLength: 8
