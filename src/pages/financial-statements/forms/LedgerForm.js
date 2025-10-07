@@ -25,6 +25,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
   const { user } = useContext(AuthContext)
   const { stack: stackError } = useError()
   const data = `${nodeRef || ''}  ${nodedesc || ''}`
+
   const conditions = {
     sign: row => {
       const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.ccRef || row?.ccgRef
