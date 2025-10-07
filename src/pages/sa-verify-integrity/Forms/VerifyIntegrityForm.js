@@ -59,7 +59,7 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
   ]
 
   return (
-    <Form actions={actions} isSaved={false} inSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form actions={actions} isSaved={false} onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
