@@ -120,6 +120,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           returnedQty,
           balanceQty,
           returnNowQty: itemPriceRow.qty,
+          totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
           taxDetails: form.values.isVattable ? taxDetailList : null
         }
       })

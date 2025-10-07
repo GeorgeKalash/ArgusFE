@@ -23,18 +23,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   const [responseValue, setResponseValue] = useState(null)
   const { platformLabels } = useContext(ControlContext)
 
-  const [initialValues, setInitialData] = useState({
-    recordId: null,
-    reference: '',
-    functionId: '',
-    seqNo: '',
-    thirdParty: '',
-    functionName: '',
-    date: '',
-    notes: '',
-    responseDate: '',
-    strategyName: ''
-  })
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -43,15 +31,23 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   const { stack } = useWindow()
 
   const formik = useFormik({
-    initialValues,
+    initialValues: {
+      recordId: null,
+      reference: '',
+      indicatorId: null,
+      functionId: null,
+      seqNo: '',
+      thirdParty: '',
+      date: null,
+      notes: '',
+      responseDate: null,
+      strategyName: ''
+    },
     validateOnChange: true,
     onSubmit: async obj => {
       const data = {
         ...obj,
         date: formatDateToApi(obj.date),
-        functionId: initialValues.functionId,
-        seqNo: initialValues.seqNo,
-        recordId: initialValues.recordId,
         response: responseValue
       }
       const checkModule = getSystemFunctionModule(functionId)
@@ -81,9 +77,9 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         extension: DocumentReleaseRepository.DocumentsOnHold.get,
         parameters: `_functionId=${functionId}&_seqNo=${seqNo}&_recordId=${recordId}`
       })
-      setInitialData({
+      formik.setValues({
         ...res.record,
-        date: formatDateFromApi(res.record.date)
+        date: formatDateFromApi(res?.record?.date)
       })
     })()
   }, [])

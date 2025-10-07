@@ -28,7 +28,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   async function fetchGridData() {
     const res = await getRequest({
       extension: RemittanceOutwardsRepository.Beneficiary.qry3,
-      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}`
+      parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}&_currencyId=${form.currencyId}`
     })
 
     res.list = res.list.map(item => {
@@ -47,33 +47,37 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
     },
     {
       field: 'addressLine1',
-      flex: 1,
-      headerName: labels.addressLine1
+      headerName: labels.addressLine1,
+      flex: 1
     },
     {
       field: 'nationalityName',
-      flex: 1,
-      headerName: labels.nationalityId
+      headerName: labels.nationalityId,
+      flex: 1
+    },
+    {
+      field: 'currencyRef',
+      headerName: labels.Currency,
+      flex: 1
     },
     {
       field: 'countryName',
-      flex: 1,
-      headerName: labels.country
+      headerName: labels.country,
+      flex: 1
     },
     {
       field: 'accountReference',
-      flex: 1,
-      headerName: labels.accountRef
+      flex: 1
     },
     {
       field: 'branchName',
-      flex: 1,
-      headerName: labels.branchName
+      headerName: labels.branchName,
+      flex: 1
     },
     {
       field: 'dispersalTypeName',
-      flex: 1,
-      headerName: labels.dispersalType
+      headerName: labels.dispersalType,
+      flex: 1
     }
   ]
 
@@ -86,11 +90,11 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
       <VertLayout>
         <Grow>
           <Table
+            name='benTable'
             columns={columns}
             gridData={{ list: formik.values.benList }}
             rowId={['beneficiaryId']}
             rowSelection='single'
-            isLoading={false}
             pagination={false}
             maxAccess={maxAccess}
             showCheckboxColumn={true}

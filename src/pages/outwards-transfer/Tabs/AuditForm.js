@@ -62,7 +62,7 @@ export default function AuditForm({ labels, formik }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={3} p={4}>
+        <Grid container spacing={4} p={4}>
           <Grid item xs={12}>
             <CustomTextField
               name='corCurrencyRef'

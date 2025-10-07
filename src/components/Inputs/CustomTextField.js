@@ -134,6 +134,7 @@ const CustomTextField = ({
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton
                 tabIndex={-1}
+                id={props.ClearId}
                 edge='end'
                 onClick={e => {
                   onClear(e)

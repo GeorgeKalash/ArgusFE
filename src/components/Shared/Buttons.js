@@ -206,13 +206,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Print',
-    label: platformLabels.Print,
-    color: '#231f20',
-    image: 'print.png',
-    main: false
-  },
-  {
     key: 'Invoice',
     label: platformLabels.Invoice,
     color: '#231f20',
@@ -399,6 +392,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Audit,
     color: '#231f20',
     image: 'info.png',
+    main: false
+  },
+  {
+    key: 'Print',
+    label: platformLabels.Print,
+    color: '#231f20',
+    image: 'print.png',
     main: false
   },
   {
