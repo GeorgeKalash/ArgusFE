@@ -54,7 +54,11 @@ const AuthProvider = ({ children }) => {
   const fetchData = async () => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
+<<<<<<< HEAD
     const accountName = matchHostname ? matchHostname[1] : 'neg-deploy'
+=======
+    const accountName = matchHostname ? matchHostname[1] : 'anthonys'
+>>>>>>> 118502cd685763e0456ac9e737df262c68068968
 
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
