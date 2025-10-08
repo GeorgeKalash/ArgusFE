@@ -126,7 +126,6 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     return files
       .reduce((promise, file) => {
         return promise.then(async () => {
-
           await postRequest({
             extension: SystemRepository.Attachment.set,
             record: JSON.stringify({
@@ -144,7 +143,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
       }, Promise.resolve())
       .then(res => {
         invalidate()
-        
+
         return res
       })
   }
