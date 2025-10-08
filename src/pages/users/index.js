@@ -20,20 +20,22 @@ const Users = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
+    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    var parameters = defaultParams
 
     const response = await getRequest({
       extension: SystemRepository.Users.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName&_params=${params || ''}`
+      parameters: parameters
     })
 
-    return { ...response, _startAt }
+    return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.page) {
+    if (filters?.qry) {
       return await getRequest({
         extension: SystemRepository.Users.snapshot,
-        parameters: `_filter=${filters.page}`
+        parameters: `_filter=${filters.qry}`
       })
     } else {
       return fetchGridData({
@@ -71,7 +73,7 @@ const Users = () => {
       title: _labels.users
     })
   }
-
+  
   const columns = [
     {
       field: 'fullName',
@@ -125,7 +127,7 @@ const Users = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar  labels={_labels}  onAdd={add}   maxAccess={access} reportName={'SYUS'}filterBy={filterBy} inputSearch={true} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SYUS'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
@@ -134,12 +136,11 @@ const Users = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
           paginationType='api'
-          refetch={refetch}
+          refetch={refetch}        
         />
       </Grow>
     </VertLayout>
