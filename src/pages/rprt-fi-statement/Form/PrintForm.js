@@ -3,7 +3,7 @@ import React, { useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import PrintableTable from './PrintTable'
+import PrintableTable from 'src/components/Shared/PrintTable'
 
 const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
   const printRef = useRef()
@@ -53,7 +53,7 @@ const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
           </Grid>
         )}
 
-        <PrintableTable columns={columns} rows={tableData} showOnScreen />
+        <PrintableTable columns={columns} rows={tableData} showOnScreen treeField='nodeName' firstColWidth='45%' />
       </div>
     </VertLayout>
   )
