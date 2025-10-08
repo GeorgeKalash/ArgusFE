@@ -21,11 +21,11 @@ const Users = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
-    var parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
 
     const response = await getRequest({
       extension: SystemRepository.Users.page,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+
     })
 
     return { ...response, _startAt: _startAt }
