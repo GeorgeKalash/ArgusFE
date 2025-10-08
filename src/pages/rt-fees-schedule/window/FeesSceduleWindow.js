@@ -33,7 +33,7 @@ const FeesSceduleWindow = ({ recordId, labels, maxAccess }) => {
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-        <FeesDetailsForm labels={labels} store={store} />
+        <FeesDetailsForm labels={labels} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -19,6 +18,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,13 +76,11 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   }, [])
 
   return (
-    <FormShell
+    <Form
       resourceId={ResourceIds.FinancialStatements}
-      form={formik}
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -179,6 +177,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

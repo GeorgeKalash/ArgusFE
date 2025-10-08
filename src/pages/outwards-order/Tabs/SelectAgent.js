@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import React from 'react'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -50,7 +50,7 @@ const SelectAgent = ({
   })
 
   return (
-    <FormShell form={formik} isCleared={false} infoVisible={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -84,7 +84,7 @@ const SelectAgent = ({
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

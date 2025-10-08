@@ -7,12 +7,11 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 export default function OverheadForm({ labels, maxAccess, store, setTotalOverhead }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -197,16 +196,7 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Assemblies}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={true}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
-      disabledSubmit={store?.isPosted}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={true} disabledSubmit={store?.isPosted}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -229,6 +219,6 @@ export default function OverheadForm({ labels, maxAccess, store, setTotalOverhea
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

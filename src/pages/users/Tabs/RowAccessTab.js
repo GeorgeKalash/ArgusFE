@@ -2,7 +2,6 @@ import Table from 'src/components/Shared/Table'
 import { Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -19,6 +18,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import Form from 'src/components/Shared/Form'
 
 const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
   const [data, setData] = useState([])
@@ -210,15 +210,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     : data
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!storeRecordId}
-      isSavedClear={false}
-      isCleared={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -268,7 +260,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

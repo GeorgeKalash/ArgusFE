@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { useFormik } from 'formik'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ApprovalsDialog from 'src/components/Shared/ApprovalsDialog.js'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -19,6 +17,7 @@ import { useWindow } from 'src/windows'
 import { getSystemFunctionModule } from 'src/resources/SystemFunction'
 import { Module } from 'src/resources/Module'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
   const [responseValue, setResponseValue] = useState(null)
@@ -119,15 +118,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
   ]
 
   return (
-    <FormShell
-      actions={actions}
-      resourceId={ResourceIds.DocumentsOnHold}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-      isSaved={false}
-    >
+    <Form actions={actions} isSaved={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -185,6 +176,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

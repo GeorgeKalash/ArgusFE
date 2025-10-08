@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -86,7 +86,7 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
   }, [])
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false} disabledSubmit={editMode}>
+    <Form onSave={formik.handleSubmit} disabledSubmit={editMode} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container xs={12} spacing={2}>
@@ -278,6 +278,6 @@ export default function MoreDetails({ labels, editMode, maxAccess, readOnly, cli
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
