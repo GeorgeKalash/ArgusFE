@@ -20,8 +20,8 @@ const Users = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
+
+    var parameters = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
 
     const response = await getRequest({
       extension: SystemRepository.Users.page,
@@ -131,8 +131,9 @@ const Users = () => {
       </Fixed>
       <Grow>
         <Table
+        name="table"
           columns={columns}
-          gridData={data ? data : { list: [] }}
+          gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
