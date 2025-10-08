@@ -18,7 +18,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentTypeMap.qry
+    endpointId: SystemRepository.DocumentTypeMap.page
   })
 
   const { formik } = useForm({

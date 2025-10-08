@@ -27,7 +27,6 @@ export const SystemRepository = {
     del: service + 'delDT'
   },
   DocumentTypeMap: {
-    qry: service + 'qryDTM',
     get: service + 'getDTM',
     set: service + 'setDTM',
     del: service + 'delDTM',
