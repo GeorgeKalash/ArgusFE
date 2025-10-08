@@ -10,10 +10,13 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import useSetWindow from 'src/hooks/useSetWindow'
 
 const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId }) => {
   const { platformLabels } = useContext(ControlContext)
   const { postRequest } = useContext(RequestsContext)
+
+  useSetWindow({ title: labels.folderName, window })
 
   const invalidate = useInvalidate({
     endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`
@@ -28,16 +31,13 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
       if (formik.values?.folderId) {
         const obj = { ...values, folderId: formik.values?.folderId }
 
-        return postRequest({
+        await postRequest({
           extension: SystemRepository.Attachment.set,
           record: JSON.stringify(obj)
-        }).then(res => {
-          invalidate()
-          toast.success(platformLabels.Added)
-          window.close()
-
-          return res
         })
+        invalidate()
+        toast.success(platformLabels.Added)
+        window.close()
       }
     }
   })
@@ -61,7 +61,7 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
             maxAccess={maxAccess}
             values={formik.values}
             onChange={(event, newValue) => {
-              formik.setFieldValue('folderId', newValue?.recordId || null)
+              formik.setFieldValue('folderId', newValue?.recordId || 1)
             }}
             error={formik.touched.folderId && Boolean(formik.errors.folderId)}
           />
@@ -70,5 +70,8 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
     </FormShell>
   )
 }
+
+FolderForm.width = 400
+FolderForm.height = 200
 
 export default FolderForm

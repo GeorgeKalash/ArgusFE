@@ -127,10 +127,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
                     maxAccess: access,
                     recordId,
                     resourceId
-                  },
-                  width: 400,
-                  height: 200,
-                  title: labels.folderName
+                  }
                 })
               }}
               label={platformLabels.Plus}
@@ -188,6 +185,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
       </Fixed>
       <Grow>
         <Table
+          name='attachmentTable'
           columns={columns}
           gridData={data}
           onDelete={del}
