@@ -1,16 +1,15 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -42,14 +41,8 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
     }
   })
 
-  return (
-    <FormShell
-      resourceId={ResourceIds.SystemAttachments}
-      form={formik}
-      isSavedClear={false}
-      isCleared={false}
-      isInfo={false}
-    >
+  return (    
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grid item xs={6}>
           <ResourceComboBox
@@ -67,7 +60,7 @@ const FolderForm = ({ labels, values, maxAccess, window, resourceId, recordId })
           />
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
