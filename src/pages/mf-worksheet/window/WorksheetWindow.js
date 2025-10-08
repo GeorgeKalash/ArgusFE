@@ -32,14 +32,21 @@ const WorksheetWindow = ({ recordId, window, joInvalidate }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
-        <WorksheetForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} joInvalidate={joInvalidate}/>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
+        <WorksheetForm
+          labels={labels}
+          setStore={setStore}
+          store={store}
+          maxAccess={access}
+          window={window}
+          joInvalidate={joInvalidate}
+        />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <MaterialsTab store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
         <OperationsTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>

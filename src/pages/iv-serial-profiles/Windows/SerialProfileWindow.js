@@ -8,18 +8,21 @@ export default function SerialProfileWindow({ labels, maxAccess, recordId }) {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
-    recordId: recordId || null,
+    recordId: recordId || null
   })
 
-  const tabs = [{ label: labels.SerialNumbersProfiles }, { label: labels.SerialProfileSequences, disabled: !store.recordId }]
+  const tabs = [
+    { label: labels.SerialNumbersProfiles },
+    { label: labels.SerialProfileSequences, disabled: !store.recordId }
+  ]
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <SerialProfilesForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <SerialProfileSequences labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

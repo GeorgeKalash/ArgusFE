@@ -1,5 +1,4 @@
 import React, { useEffect, useContext } from 'react'
-import FormShell from './FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import useResourceParams from 'src/hooks/useResourceParams'
@@ -13,6 +12,7 @@ import { CommonContext } from 'src/providers/CommonContext'
 import CustomTextField from '../Inputs/CustomTextField'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
+import Form from './Form'
 
 export const InterfacesForm = ({ recordId, resourceId, name }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -137,15 +137,7 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={resourceId}
-      maxAccess={access}
-      infoVisible={false}
-      editMode={true}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} editMode={true}>
       <VertLayout>
         <Grow>
           <Grid sx={{ width: '50%' }}>
@@ -160,6 +152,6 @@ export const InterfacesForm = ({ recordId, resourceId, name }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

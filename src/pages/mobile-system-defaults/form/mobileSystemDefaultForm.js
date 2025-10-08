@@ -9,10 +9,11 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 
 export default function MobileSystem() {
   const { postRequest } = useContext(RequestsContext)
@@ -83,83 +84,82 @@ export default function MobileSystem() {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={4} sx={{ p: 2 }}>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Plant.qry}
-              name='rt_mob_plantId'
-              label={labels.plant}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('rt_mob_plantId', newValue?.recordId || null)
-              }}
-              error={formik.touched.rt_mob_plantId && Boolean(formik.errors.rt_mob_plantId)}
-              maxAccess={access}
-            />
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.Plant.qry}
+                name='rt_mob_plantId'
+                label={labels.plant}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('rt_mob_plantId', newValue?.recordId || null)
+                }}
+                error={formik.touched.rt_mob_plantId && Boolean(formik.errors.rt_mob_plantId)}
+                maxAccess={access}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='rt_mob_whatsapp'
+                label={labels.whatsapp}
+                value={formik.values.rt_mob_whatsapp}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rt_mob_whatsapp', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='rt_mob_call_us'
+                label={labels.callUs}
+                value={formik.values.rt_mob_call_us}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rt_mob_call_us', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='rt_mob_email1'
+                label={labels.email1}
+                value={formik.values.rt_mob_email1}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rt_mob_email1', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='rt_mob_email2'
+                label={labels.email2}
+                value={formik.values.rt_mob_email2}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('rt_mob_email2', '')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='smsMobileProviderId'
+                label={labels.smsMobileProviderId}
+                value={formik.values.smsMobileProviderId}
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('smsMobileProviderId', null)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='rt_mob_whatsapp'
-              label={labels.whatsapp}
-              value={formik.values.rt_mob_whatsapp}
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_mob_whatsapp', '')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='rt_mob_call_us'
-              label={labels.callUs}
-              value={formik.values.rt_mob_call_us}
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_mob_call_us', '')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='rt_mob_email1'
-              label={labels.email1}
-              value={formik.values.rt_mob_email1}
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_mob_email1', '')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='rt_mob_email2'
-              label={labels.email2}
-              value={formik.values.rt_mob_email2}
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('rt_mob_email2', '')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='smsMobileProviderId'
-              label={labels.smsMobileProviderId}
-              value={formik.values.smsMobileProviderId}
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('smsMobileProviderId', null)}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }

@@ -24,14 +24,14 @@ const FOCastingWindow = ({ recordId, access, labels }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
         <CastingForm store={store} setStore={setStore} labels={labels} access={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <DisassemblyForm store={store} setStore={setStore} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
         <JobsForm store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>
