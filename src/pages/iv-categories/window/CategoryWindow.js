@@ -26,14 +26,14 @@ const CategoryWindow = ({ recordId, labels, maxAccess }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} disabledApply={!editMode && true} maxAccess={maxAccess}>
         <CategoryForm labels={labels} setStore={setStore} store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <CurrencyForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <CategorySiteForm labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

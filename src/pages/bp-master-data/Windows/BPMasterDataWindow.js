@@ -25,8 +25,8 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
 
   return (
     <VertLayout>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} height={height} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} height={height} value={activeTab} maxAccess={maxAccess}>
         <BPMasterDataForm
           labels={labels}
           maxAccess={maxAccess}
@@ -35,13 +35,13 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
           setEditMode={setEditMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <IDNumberForm store={store} maxAccess={maxAccess} labels={labels} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} height={height} value={activeTab}>
+      <CustomTabPanel index={2} height={height} value={activeTab} maxAccess={maxAccess}>
         <RelationList store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} height={height} value={activeTab}>
+      <CustomTabPanel index={3} height={height} value={activeTab} maxAccess={maxAccess}>
         <AddressMasterDataForm store={store} setStore={setStore} />
       </CustomTabPanel>
     </VertLayout>

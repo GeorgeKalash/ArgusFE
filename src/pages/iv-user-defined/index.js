@@ -18,11 +18,11 @@ const PropertiesWindow = () => {
   if (labels && Object.keys(labels).length > 0) {
     return (
       <VertLayout>
-        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-        <CustomTabPanel index={0} value={activeTab}>
+        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+        <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
           <UserDefinedForm maxAccess={access} labels={labels} />
         </CustomTabPanel>
-        <CustomTabPanel index={1} value={activeTab}>
+        <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
           <UserTextForm maxAccess={access} labels={labels} />
         </CustomTabPanel>
       </VertLayout>

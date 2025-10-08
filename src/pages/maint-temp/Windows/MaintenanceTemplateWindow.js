@@ -12,11 +12,11 @@ export default function MaintenanceTemplateWindow({ labels, recordId, maxAccess 
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <InfoTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <TasksTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>

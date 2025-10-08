@@ -112,7 +112,8 @@ const Plants = () => {
       props: {
         labels: _labels,
         recordId,
-        editMode: recordId && true
+        editMode: recordId && true,
+        maxAccess: access
       },
       width: 800,
       height: 640,
