@@ -47,7 +47,7 @@ const Users = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     refetch,
     filterBy,
     paginationParameters,
@@ -64,45 +64,45 @@ const Users = () => {
     stack({
       Component: UsersWindow,
       props: {
-        labels: _labels,
+        labels,
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
       width: 900,
       height: 650,
-      title: _labels.users
+      title: labels.users
     })
   }
   
   const columns = [
     {
       field: 'fullName',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'username',
-      headerName: _labels.username,
+      headerName: labels.username,
       flex: 1
     },
     {
       field: 'email',
-      headerName: _labels.email,
+      headerName: labels.email,
       flex: 1
     },
     {
       field: 'userTypeName',
-      headerName: _labels.username,
+      headerName: labels.username,
       flex: 1
     },
     {
       field: 'languageName',
-      headerName: _labels.language,
+      headerName: labels.language,
       flex: 1
     },
     {
       field: 'activeStatusName',
-      headerName: _labels.activeStatus,
+      headerName: labels.activeStatus,
       flex: 1
     }
   ]
