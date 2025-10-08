@@ -1,7 +1,6 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -9,11 +8,11 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import * as yup from 'yup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 const GLSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -161,10 +160,6 @@ const GLSettings = () => {
     })
   }
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   const segNumb = ['GLACSeg0', 'GLACSeg1', 'GLACSeg2', 'GLACSeg3', 'GLACSeg4']
 
   const segName = ['GLACSegName0', 'GLACSegName1', 'GLACSegName2', 'GLACSegName3', 'GLACSegName4']
@@ -192,71 +187,69 @@ const GLSettings = () => {
   const rows = [0, 1, 2, 3, 4]
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container sx={{ p: 3 }} spacing={2}>
-          <Grid item xs={12}>
-            <CustomNumberField
-              name='GLACSegments'
-              label={labels.segments}
-              value={formik.values.GLACSegments}
-              onChange={(_, value) => onChangeGLACSegments(value)}
-              onClear={() => formik.setFieldValue('GLACSegments', null)}
-              min={2}
-              max={5}
-              arrow
-              error={Boolean(formik.errors.GLACSegments)}
-              maxAccess={access}
-            />
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='GLACSegments'
+                label={labels.segments}
+                value={formik.values.GLACSegments}
+                onChange={(_, value) => onChangeGLACSegments(value)}
+                onClear={() => formik.setFieldValue('GLACSegments', null)}
+                min={2}
+                max={5}
+                arrow
+                error={Boolean(formik.errors.GLACSegments)}
+                maxAccess={access}
+              />
+            </Grid>
+
+            {rows.map(idx => {
+              const segKey = `GLACSeg${idx}`
+              const nameKey = `GLACSegName${idx}`
+              const isActive = (formik.values.GLACSegments ?? 0) > idx
+
+              return (
+                <Grid key={idx} container item xs={12} columnSpacing={2} rowSpacing={1} alignItems='flex-start'>
+                  <Grid item xs={12} lg={6}>
+                    <CustomNumberField
+                      name={segKey}
+                      label={labels['segment' + idx]}
+                      value={formik.values[segKey]}
+                      onClear={() => formik.setFieldValue(segKey, null)}
+                      numberField
+                      onChange={(_, value) => formik.setFieldValue(segKey, value)}
+                      error={isActive && Boolean(formik.errors[segKey])}
+                      readOnly={!isActive}
+                      min={1}
+                      max={8}
+                      arrow
+                      maxAccess={access}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} lg={6}>
+                    <CustomTextField
+                      name={nameKey}
+                      label={labels['segName' + idx]}
+                      value={formik.values?.[nameKey] || ''}
+                      onClear={() => formik.setFieldValue(nameKey, '')}
+                      onChange={formik.handleChange}
+                      error={isActive && Boolean(formik.errors[nameKey])}
+                      readOnly={!isActive}
+                      maxLength={20}
+                      maxAccess={access}
+                    />
+                  </Grid>
+                </Grid>
+              )
+            })}
           </Grid>
-
-          {rows.map(idx => {
-            const segKey = `GLACSeg${idx}`
-            const nameKey = `GLACSegName${idx}`
-            const isActive = (formik.values.GLACSegments ?? 0) > idx
-
-            return (
-              <Grid key={idx} container item xs={12} columnSpacing={2} rowSpacing={1} alignItems='flex-start'>
-                <Grid item xs={12} lg={6}>
-                  <CustomNumberField
-                    name={segKey}
-                    label={labels['segment' + idx]}
-                    value={formik.values[segKey]}
-                    onClear={() => formik.setFieldValue(segKey, null)}
-                    numberField
-                    onChange={(_, value) => formik.setFieldValue(segKey, value)}
-                    error={isActive && Boolean(formik.errors[segKey])}
-                    readOnly={!isActive}
-                    min={1}
-                    max={8}
-                    arrow
-                    maxAccess={access}
-                  />
-                </Grid>
-
-                <Grid item xs={12} lg={6}>
-                  <CustomTextField
-                    name={nameKey}
-                    label={labels['segName' + idx]}
-                    value={formik.values?.[nameKey] || ''}
-                    onClear={() => formik.setFieldValue(nameKey, '')}
-                    onChange={formik.handleChange}
-                    error={isActive && Boolean(formik.errors[nameKey])}
-                    readOnly={!isActive}
-                    maxLength={20}
-                    maxAccess={access}
-                  />
-                </Grid>
-              </Grid>
-            )
-          })}
-        </Grid>
-      </Grow>
-
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

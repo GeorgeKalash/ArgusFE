@@ -1,11 +1,10 @@
 import { useContext, useEffect, useState } from 'react'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { DataSets } from 'src/resources/DataSets'
 import { CommonContext } from 'src/providers/CommonContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
 export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
   const { getAllKvsByDataset } = useContext(CommonContext)
@@ -91,20 +90,19 @@ export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
   }, [])
 
   return (
-    <VertLayout>
-      <Grow>
-        <Table
-          name='flagsTable'
-          columns={columns}
-          gridData={{ list: data }}
-          rowId={['key']}
-          maxAccess={maxAccess}
-          pagination={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar actions={actions} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSubmit} actions={actions} maxAccess={maxAccess} isSaved={false} isParentWindow={false}>
+      <VertLayout>
+        <Grow>
+          <Table
+            name='flagsTable'
+            columns={columns}
+            gridData={{ list: data }}
+            rowId={['key']}
+            maxAccess={maxAccess}
+            pagination={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }

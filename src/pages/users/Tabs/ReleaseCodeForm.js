@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -12,6 +10,7 @@ import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -40,14 +39,7 @@ const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window 
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!storeRecordId}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
         <Grow>
           <Grid item xs={6}>
@@ -69,7 +61,7 @@ const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window 
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

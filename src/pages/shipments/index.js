@@ -106,13 +106,8 @@ const Shipments = () => {
     stack({
       Component: ShipmentsForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1300,
-      height: 700,
-      title: labels.shipment
+        recordId
+      }
     })
   }
 
