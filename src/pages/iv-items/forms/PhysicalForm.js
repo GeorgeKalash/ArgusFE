@@ -128,7 +128,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       resourceId={ResourceIds.PhysicalProperty}
       maxAccess={maxAccess}
       editMode={editMode}
-      infoVisible={false}
+      isInfo={false}
       isCleared={false}
     >
       <VertLayout>
@@ -302,7 +302,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               name='metalPurity'
               label={labels.metalPurity}
               readOnly
-              decimalScale={3}
+              decimalScale={5}
+              maxLength={10}
               value={formik.values.metalPurity}
               maxAccess={maxAccess}
               onChange={formik.handleChange}

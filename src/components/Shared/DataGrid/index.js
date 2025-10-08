@@ -718,10 +718,11 @@ export function DataGrid({
 
     const { colDef, rowIndex, api } = params
 
-    api.startEditingCell({
-      rowIndex: rowIndex,
-      colKey: colDef.field
-    })
+    if (colDef.component !== 'button')
+      api.startEditingCell({
+        rowIndex: rowIndex,
+        colKey: colDef.field
+      })
 
     if (params?.data.id !== rowSelectionModel) {
       const selectedRow = params?.data

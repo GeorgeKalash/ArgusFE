@@ -1,10 +1,8 @@
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,6 +14,7 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import Form from 'src/components/Shared/Form'
 
 export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -117,14 +116,7 @@ export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MaintenanceTemplates}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={true}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={true}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -271,6 +263,6 @@ export default function TasksForm({ taskInfo, maxAccess, labels, window }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

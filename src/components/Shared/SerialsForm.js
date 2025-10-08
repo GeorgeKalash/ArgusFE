@@ -1,6 +1,5 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import ResourceComboBox from './ResourceComboBox'
@@ -18,6 +17,7 @@ import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -188,15 +188,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Serial}
-      form={formik}
-      isCleared={false}
-      isInfo={false}
-      isSaved={false}
-      actions={actions}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} isSaved={false} actions={actions} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -277,7 +269,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

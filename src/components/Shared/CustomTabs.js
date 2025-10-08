@@ -1,13 +1,34 @@
 import { Box, Tab, Tabs } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 
-export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
+export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 'tab' }) => {
+  const indexes =
+    maxAccess?.record?.controls
+      ?.filter(c => c.accessLevel === 4 && c.controlId?.startsWith(`${name}.`))
+      .map(c => c.controlId.split('.')[1]) || []
+
+  const _tabs = tabs
+    ?.map((tab, index) => ({
+      ...tab,
+      id: index
+    }))
+    ?.filter((_, index) => !indexes.includes(String(index)))
+
+  const _activeTab = _tabs[activeTab]?.id
+  const _disabledTab = _tabs[activeTab]?.disabled
+
+  useEffect(() => {
+    if (_activeTab >= 0 && !_disabledTab && activeTab != _activeTab) {
+      setActiveTab(_activeTab)
+    }
+  }, [])
+
   return (
     <>
       <Box sx={{ backgroundColor: '#231f20', pt: '5px' }}>
         <Tabs
           value={activeTab}
-          onChange={(event, newValue) => setActiveTab(newValue)}
+          onChange={(_, newValue) => setActiveTab(newValue)}
           variant='scrollable'
           scrollButtons='auto'
           aria-label='scrollable auto tabs example'
@@ -34,9 +55,10 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab }) => {
             }
           }}
         >
-          {tabs.map((tab, i) => (
+          {_tabs?.map((tab, i) => (
             <Tab
-              key={i}
+              key={tab.id}
+              value={tab.id}
               label={tab.label}
               disabled={tab?.disabled}
               sx={{

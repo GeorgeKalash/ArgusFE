@@ -21,20 +21,20 @@ const GroupInfoWindow = ({ labels, maxAccess, recordId, height }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <GroupInfoTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <SGUsersTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <SGAccessLevelTab maxAccess={maxAccess} labels={labels} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
         <RowAccessTab maxAccess={maxAccess} labels={labels} recordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={4} value={activeTab}>
+      <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <ReleaseCodeTab maxAccess={maxAccess} labels={labels} recordId={storeRecordId} />
       </CustomTabPanel>
     </>

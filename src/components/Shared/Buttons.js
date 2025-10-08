@@ -20,7 +20,7 @@ export const getButtons = platformLabels => [
   {
     key: 'Info',
     label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
+    condition: 'isInfo',
     onClick: 'onInfo',
     color: '#4355a5',
     disabled: '!editMode',
@@ -203,13 +203,6 @@ export const getButtons = platformLabels => [
     label: platformLabels.Correspondent,
     image: 'person.png',
     color: '#CECECE',
-    main: false
-  },
-  {
-    key: 'Print',
-    label: platformLabels.Print,
-    color: '#231f20',
-    image: 'print.png',
     main: false
   },
   {
@@ -399,6 +392,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Audit,
     color: '#231f20',
     image: 'info.png',
+    main: false
+  },
+  {
+    key: 'Print',
+    label: platformLabels.Print,
+    color: '#231f20',
+    image: 'print.png',
     main: false
   },
   {
@@ -634,6 +634,13 @@ export const getButtons = platformLabels => [
     label: platformLabels.Sync,
     color: '#231F20',
     image: 'sync.png',
+    main: false
+  },
+  {
+    key: 'History',
+    label: platformLabels.History,
+    color: '#231f20',
+    image: 'history.png',
     main: false
   }
 ]

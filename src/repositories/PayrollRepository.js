@@ -20,7 +20,11 @@ export const PayrollRepository = {
     qry: service + 'qrySS'
   },
   IndemnitySchedule: {
-    qry: service + 'qryIS'
+    page: service + 'pageIS',
+    qry: service + 'qryIS',
+    get: service + 'getIS',
+    set: service + 'setIS',
+    del: service + 'delIS'
   },
   LedgerGroup: {
     qry: service + 'qryGLG',
@@ -29,7 +33,7 @@ export const PayrollRepository = {
     del: service + 'delGLG'
   },
   Arguments: {
-    page: service + 'pageAR',
+    page: service + 'pageAR'
   },
   CnssBranches: {
     page: service + 'pageSB',
@@ -48,5 +52,21 @@ export const PayrollRepository = {
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
+  },
+  FinalSettlement: {
+    page: service + 'pageFS',
+    get: service + 'getFS',
+    set: service + 'setFS',
+    del: service + 'delFS',
+    snapshot: service + 'snapshotFS'
+  },
+
+  IndemnityCompany: {
+    qry: service + 'qryID',
+    set2: service + 'set2ID'
+  },
+  IndemnityResignation: {
+    qry: service + 'qryIR',
+    set2: service + 'set2IR'
   }
 }

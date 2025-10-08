@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -16,6 +15,7 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
@@ -97,13 +97,7 @@ const AttSettings = () => {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.AttendanceSettings}
-      form={formik}
-      infoVisible={false}
-      isCleared={false}
-      maxAccess={access}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grid container spacing={2} xs={5}>
           <Grid item xs={12}>
@@ -281,7 +275,7 @@ const AttSettings = () => {
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -9,9 +9,9 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useResourceQuery } from 'src/hooks/resource'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
 
 const MfSettingForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -66,7 +66,7 @@ const MfSettingForm = () => {
   }, [])
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit}>
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -153,7 +153,7 @@ const MfSettingForm = () => {
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
