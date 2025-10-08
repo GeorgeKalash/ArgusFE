@@ -33,6 +33,7 @@ export const ResourceIds = {
   BalanceAdjustment: 73204,
   PayCode: 75104,
   LedgerGroup: 75114,
+  Loans: 74201,
   RightToWork: 70114,
 
   // Authorization Dashboard
@@ -590,6 +591,7 @@ export const ResourceIds = {
   RepairRequest: 45300,
   Indemnity: 75105,
   FinancialStatementsReport: 30405,
+  BatchWorksheet: 42345,
 
   // GL
   GLSalesInvoice: 51604,
