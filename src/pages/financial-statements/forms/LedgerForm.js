@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -18,12 +18,13 @@ import { createConditionalSchema } from 'src/lib/validation'
 import { useError } from 'src/error'
 
 const LedgerForm = ({ node, labels, maxAccess }) => {
-  const { nodeId, nodeRef, nodedesc } = node?.current
+  const { nodeId, nodeRef, nodedesc } = node?.current || {}
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
   const { stack: stackError } = useError()
+  const lastValidNodeId = useRef(nodeId || null)
 
   const conditions = {
     sign: row => {
@@ -35,26 +36,28 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'ledgers')
 
+  const makeInitialValues = fsNodeId => ({
+    nodeRef,
+    ledgers: [
+      {
+        id: 1,
+        seqNo: 1,
+        fsNodeId: fsNodeId || null,
+        seg0: '',
+        seg1: '',
+        seg2: '',
+        seg3: '',
+        seg4: '',
+        ccgRef: '',
+        ccRef: '',
+        sign: ''
+      }
+    ]
+  })
+
   const formik = useFormik({
-    initialValues: {
-      nodeRef,
-      ledgers: [
-        {
-          id: 1,
-          seqNo: 1,
-          fsNodeId: nodeId,
-          seg0: '',
-          seg1: '',
-          seg2: '',
-          seg3: '',
-          seg4: '',
-          ccgRef: '',
-          ccRef: '',
-          sign: ''
-        }
-      ]
-    },
-    enableReinitialize: true,
+    initialValues: makeInitialValues(nodeId),
+    enableReinitialize: false,
     conditionSchema: ['ledgers'],
     validationSchema: yup.object({
       nodeRef: yup.string().required(),
@@ -183,14 +186,22 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     const updatedLedgers = ledgers.map((ledger, index) => ({
       id: index + 1,
       ...ledger,
-      signName: titlesMap.get(ledger.sign.toString()) || ''
+      signName: ledger?.sign != null ? titlesMap.get(String(ledger.sign)) || '' : ''
     }))
 
     formik.setFieldValue('ledgers', updatedLedgers)
   }
 
   useEffect(() => {
-    if (nodeId) getLedgers(nodeId)
+    if (nodeId) {
+
+      lastValidNodeId.current = nodeId
+
+      formik.resetForm({ values: makeInitialValues(nodeId) })
+
+      getLedgers(nodeId)
+    }
+   
   }, [nodeId])
 
   return (
@@ -207,7 +218,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           <CustomTextField
             name='nodeRef'
             label={labels.selectedNode}
-            value={ `${nodeRef || ''}  ${nodedesc || ''}`}
+            value={`${nodeRef || ''}  ${nodedesc || ''}`}
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
