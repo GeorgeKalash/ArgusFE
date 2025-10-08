@@ -1225,7 +1225,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'

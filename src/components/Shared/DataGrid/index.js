@@ -11,6 +11,7 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import { AuthContext } from 'src/providers/AuthContext'
 
 export function DataGrid({
   name, // maxAccess
@@ -33,6 +34,8 @@ export function DataGrid({
   onValidationRequired
 }) {
   const gridApiRef = useRef(null)
+
+  const { user } = useContext(AuthContext)
 
   let lastCellStopped = useRef()
 
@@ -914,6 +917,7 @@ export function DataGrid({
               tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
               enableBrowserTooltips={true}
+              enableRtl={user?.languageId === 2}
             />
           )}
         </Box>

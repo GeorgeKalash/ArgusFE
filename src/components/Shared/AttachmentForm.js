@@ -17,7 +17,7 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   useSetWindow({ title: platformLabels.Attachment, window })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Attachment.qry
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`,
   })
 
   const { formik } = useForm({
