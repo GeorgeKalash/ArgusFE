@@ -5,9 +5,7 @@ export default function PrintableTable({
   columns = [],
   rows = [],
   treeField,
-  indentSize = 20,
   firstColWidth = '',
-  formatNumber,
   showOnScreen
 }) {
   const treeColField = columns.find(c => c.isTree)?.field || treeField
@@ -23,7 +21,7 @@ export default function PrintableTable({
 
   const formatCell = (col, value) => {
     if (col?.type === 'number' && typeof value === 'number') {
-      return typeof formatNumber === 'function' ? formatNumber(value) : new Intl.NumberFormat().format(value)
+      return new Intl.NumberFormat().format(value)
     }
 
     if (col?.type === 'date') {
@@ -85,7 +83,7 @@ export default function PrintableTable({
               {columns.map((col, i) => {
                 const isTreeCol = i === treeIndex
                 const level = Number(row?.level || 0)
-                const pad = `${level * indentSize}px`
+                const pad = `${level * 20}px`
                 const rawVal = row?.[col.field]
                 const cellContent = formatCell(col, rawVal)
 
