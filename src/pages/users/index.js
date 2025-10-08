@@ -22,7 +22,7 @@ const Users = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: SystemRepository.Users.qry,
+      extension: SystemRepository.Users.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName&_params=${params || ''}`
     })
 
@@ -30,10 +30,10 @@ const Users = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
+    if (filters?.page) {
       return await getRequest({
         extension: SystemRepository.Users.snapshot,
-        parameters: `_filter=${filters.qry}`
+        parameters: `_filter=${filters.page}`
       })
     } else {
       return fetchGridData({
@@ -53,7 +53,7 @@ const Users = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Users.qry,
+    endpointId: SystemRepository.Users.page,
     datasetId: ResourceIds.Users,
     filter: { filterFn: fetchWithFilter }
   })
