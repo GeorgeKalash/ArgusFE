@@ -12,9 +12,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
+import Form from 'src/components/Shared/Form'
 
 const PUSettingsForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -79,7 +79,7 @@ const PUSettingsForm = () => {
   }, [])
 
   return (
-    <FormShell form={formik} isSaved={true} editMode={false} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -152,7 +152,7 @@ const PUSettingsForm = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

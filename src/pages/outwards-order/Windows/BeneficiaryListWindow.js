@@ -1,10 +1,11 @@
 import Table from 'src/components/Shared/Table'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useFormik } from 'formik'
+import Form from 'src/components/Shared/Form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from '@mui/material'
 
 const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -66,7 +67,6 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
     },
     {
       field: 'accountReference',
-      headerName: labels.accountRef,
       flex: 1
     },
     {
@@ -86,25 +86,22 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Beneficiary}
-      height={480}
-      form={formik}
-      maxAccess={maxAccess}
-      isInfo={false}
-      isCleared={false}
-    >
-      <Table
-        name='benTable'
-        columns={columns}
-        gridData={{ list: formik.values.benList }}
-        rowId={['beneficiaryId']}
-        rowSelection='single'
-        pagination={false}
-        maxAccess={maxAccess}
-        showCheckboxColumn={true}
-      />
-    </FormShell>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} fullSize>
+      <VertLayout>
+        <Grow>
+          <Table
+            name='benTable'
+            columns={columns}
+            gridData={{ list: formik.values.benList }}
+            rowId={['beneficiaryId']}
+            rowSelection='single'
+            pagination={false}
+            maxAccess={maxAccess}
+            showCheckboxColumn={true}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

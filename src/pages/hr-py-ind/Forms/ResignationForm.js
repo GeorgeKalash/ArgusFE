@@ -7,11 +7,10 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useInvalidate } from 'src/hooks/resource'
 import { createConditionalSchema } from 'src/lib/validation'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import Form from 'src/components/Shared/Form'
 
 const ResignationForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -101,21 +100,20 @@ const ResignationForm = ({ labels, maxAccess, store }) => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          name='resignation'
-          maxAccess={maxAccess}
-          value={formik.values.resignation}
-          error={formik.errors?.resignation}
-          columns={columns}
-          onChange={value => formik.setFieldValue('resignation', value)}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved smallBox />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='resignation'
+            maxAccess={maxAccess}
+            value={formik.values.resignation}
+            error={formik.errors?.resignation}
+            columns={columns}
+            onChange={value => formik.setFieldValue('resignation', value)}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

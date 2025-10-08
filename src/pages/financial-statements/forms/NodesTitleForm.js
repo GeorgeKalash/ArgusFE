@@ -1,17 +1,16 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -88,13 +87,7 @@ const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
   }, [node?.current?.nodeId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.FinancialStatements}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -109,7 +102,7 @@ const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

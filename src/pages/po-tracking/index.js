@@ -16,8 +16,8 @@ import { useForm } from 'src/hooks/form'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
 const POTracking = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -179,14 +179,7 @@ const POTracking = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.POTracking}
-      isParentWindow={false}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form isParentWindow={false} onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <GridToolbar
@@ -242,7 +235,7 @@ const POTracking = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
