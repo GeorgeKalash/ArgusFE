@@ -90,7 +90,7 @@ const DeductionTab = ({ store, labels }) => {
         labels,
         store,
         maxAccess: access,
-        remainingBalance,
+        loanAmount: store.loanAmount,
         recordId
       },
       width: 600,

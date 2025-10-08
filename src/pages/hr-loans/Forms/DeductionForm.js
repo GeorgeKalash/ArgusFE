@@ -19,7 +19,7 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
-export default function DeductionForm({ labels, recordId, store, maxAccess, remainingBalance, window }) {
+export default function DeductionForm({ labels, recordId, store, maxAccess, loanAmount, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -37,7 +37,7 @@ export default function DeductionForm({ labels, recordId, store, maxAccess, rema
       notes: ''
     },
     validationSchema: yup.object({
-      amount: yup.number().required().max(remainingBalance, `Amount cannot exceed ${remainingBalance}`),
+      amount: yup.number().required().max(loanAmount),
       date: yup.date().required(),
       type: yup.string().required()
     }),
