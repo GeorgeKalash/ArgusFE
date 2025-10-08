@@ -44,6 +44,7 @@ export default function FormShell({
   setIDInfoAutoFilled,
   actions,
   isParentWindow = true,
+  onPrint = false,
   fullSize = false
 }) {
   const { stack } = useWindow()
@@ -375,6 +376,7 @@ export default function FormShell({
       functionId={functionId}
       maxAccess={maxAccess}
       isParentWindow={isParentWindow}
+      onPrint={onPrint}
       fullSize={fullSize}
     >
       {children}
