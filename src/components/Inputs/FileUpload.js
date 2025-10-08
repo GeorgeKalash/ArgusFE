@@ -67,7 +67,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
           date: day + '/' + month + '/' + year,
           url: null,
           file: selectedFile,
-          folderId: 1
+          folderId: null
         }
 
         const fileSizeInKB = Math.round(selectedFile.size / 1024)
@@ -104,42 +104,49 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     }))
   }
 
-  const submit = () => {
-    if (files.length) {
-      const recId = ref?.current?.value ?? recordId
-
-      return files
-        .reduce((promise, file) => {
-          return promise.then(async () => {
-            await postRequest({
-              extension: SystemRepository.Attachment.set,
-              record: JSON.stringify({
-                resourceId: file.resourceId,
-                recordId: recId,
-                seqNo: file.seqNo,
-                fileName: file.fileName,
-                date: file.date,
-                url: file.url,
-                folderId: file.folderId ?? 1
-              }),
-              file: file.file
-            })
-          })
-        }, Promise.resolve())
-        .then(res => {
-          invalidate()
-
-          return res
-        })
-    } else if (!files.length && initialValues?.url && !formik.values?.url) {
+  const submit = async () => {
+    if (!files.length && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues),
         file: initialValues?.url
-      }).then(res => {
-        return res
       })
     }
+
+    if (!files.length) return
+
+    const recId = ref?.current?.value ?? recordId
+
+    const folderResult = await getRequest({
+      extension: SystemRepository.Folders.qry,
+      parameters: `_params=&_filter=`
+    })
+    const defaultFolderId = folderResult?.list.length > 0 ? folderResult?.list[0].recordId : null
+
+    return files
+      .reduce((promise, file) => {
+        return promise.then(async () => {
+
+          await postRequest({
+            extension: SystemRepository.Attachment.set,
+            record: JSON.stringify({
+              resourceId: file.resourceId,
+              recordId: recId,
+              seqNo: file.seqNo,
+              fileName: file.fileName,
+              date: file.date,
+              url: file.url,
+              folderId: file.folderId ?? defaultFolderId
+            }),
+            file: file.file
+          })
+        })
+      }, Promise.resolve())
+      .then(res => {
+        invalidate()
+        
+        return res
+      })
   }
 
   useImperativeHandle(ref, () => ({
