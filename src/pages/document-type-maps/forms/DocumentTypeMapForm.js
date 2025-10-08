@@ -13,9 +13,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.DocumentTypeMap.page
