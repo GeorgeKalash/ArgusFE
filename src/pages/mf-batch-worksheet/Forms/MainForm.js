@@ -24,7 +24,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { createConditionalSchema } from 'src/lib/validation'
 import { useForm } from 'src/hooks/form'
 
-export default function MainForm({ labels, access, store, setStore }) {
+export default function MainForm({ labels, access, store, setStore, window }) {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -302,7 +302,7 @@ export default function MainForm({ labels, access, store, setStore }) {
     })
 
     toast.success(platformLabels.Posted)
-    refetchForm(recordId)
+    window.close()
     invalidate()
   }
 
@@ -460,8 +460,13 @@ export default function MainForm({ labels, access, store, setStore }) {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={4}>
-            <Grid item xs={3}></Grid>
+          <Grid
+            container
+            spacing={4}
+            sx={{
+              justifyContent: 'flex-end'
+            }}
+          >
             <Grid item xs={3}>
               <CustomNumberField
                 name='totalPctOfBatch'

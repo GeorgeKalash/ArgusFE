@@ -80,8 +80,14 @@ export default function JobMaterialsForm({ store, access, labels }) {
       </Grow>
 
       <Fixed>
-        <Grid container spacing={1} p={3}>
-          <Grid item xs={7.5}></Grid>
+        <Grid
+          container
+          spacing={1}
+          p={3}
+          sx={{
+            justifyContent: 'flex-end'
+          }}
+        >
           <Grid item xs={1.5}>
             <CustomNumberField
               name='totalIssued'
