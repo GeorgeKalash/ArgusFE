@@ -165,7 +165,7 @@ const KitForm = ({ store, labels, maxAccess }) => {
       form={formik}
       resourceId={ResourceIds.PointOfSale}
       isCleared={false}
-      infoVisible={false}
+      isInfo={false}
       maxAccess={maxAccess}
     >
       <VertLayout>

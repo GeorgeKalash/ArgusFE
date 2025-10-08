@@ -1,6 +1,5 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
@@ -10,6 +9,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ScrapForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -94,74 +94,65 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   }, [])
 
   return (
-    <>
-      <FormShell
-        form={formik}
-        resourceId={ResourceIds.Metals}
-        maxAccess={maxAccess}
-        infoVisible={false}
-        editMode={!!recordId}
-        isCleared={false}
-      >
-        <VertLayout>
-          <Grow>
-            <DataGrid
-              onChange={value => formik.setFieldValue('scrap', value)}
-              value={formik.values.scrap}
-              error={formik.errors.scrap}
-              columns={[
-                {
-                  component: 'resourcelookup',
-                  label: labels.sku,
-                  name: 'sku',
-                  props: {
-                    endpointId: InventoryRepository.Item.snapshot,
-                    valueField: 'recordId',
-                    displayField: 'sku',
-                    mapping: [
-                      { from: 'recordId', to: 'itemId' },
-                      { from: 'sku', to: 'sku' },
-                      { from: 'name', to: 'itemName' }
-                    ],
-                    columnsInDropDown: [
-                      { key: 'sku', value: 'SKU' },
-                      { key: 'name', value: 'Name' }
-                    ],
-                    displayFieldWidth: 1
-                  }
-                },
-                {
-                  component: 'textfield',
-                  label: labels.itemName,
-                  name: 'itemName',
-                  props: {
-                    readOnly: true
-                  }
-                },
-                {
-                  component: 'numberfield',
-                  label: labels.LaborValuePerGram,
-                  name: 'laborValuePerGram',
-                  props: {
-                    maxLength: 6,
-                    decimalScale: 2
-                  }
-                },
-                {
-                  component: 'numberfield',
-                  label: labels.purity,
-                  name: 'purity',
-                  props: {
-                    maxLength: 6,
-                    decimalScale: 5
-                  }
+    <Form onSave={formik.handleSubmit} resourceId={ResourceIds.Metals} maxAccess={maxAccess} editMode={!!recordId}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('scrap', value)}
+            value={formik.values.scrap}
+            error={formik.errors.scrap}
+            columns={[
+              {
+                component: 'resourcelookup',
+                label: labels.sku,
+                name: 'sku',
+                props: {
+                  endpointId: InventoryRepository.Item.snapshot,
+                  valueField: 'recordId',
+                  displayField: 'sku',
+                  mapping: [
+                    { from: 'recordId', to: 'itemId' },
+                    { from: 'sku', to: 'sku' },
+                    { from: 'name', to: 'itemName' }
+                  ],
+                  columnsInDropDown: [
+                    { key: 'sku', value: 'SKU' },
+                    { key: 'name', value: 'Name' }
+                  ],
+                  displayFieldWidth: 1
                 }
-              ]}
-            />
-          </Grow>
-        </VertLayout>
-      </FormShell>
-    </>
+              },
+              {
+                component: 'textfield',
+                label: labels.itemName,
+                name: 'itemName',
+                props: {
+                  readOnly: true
+                }
+              },
+              {
+                component: 'numberfield',
+                label: labels.LaborValuePerGram,
+                name: 'laborValuePerGram',
+                props: {
+                  maxLength: 6,
+                  decimalScale: 2
+                }
+              },
+              {
+                component: 'numberfield',
+                label: labels.purity,
+                name: 'purity',
+                props: {
+                  maxLength: 6,
+                  decimalScale: 5
+                }
+              }
+            ]}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

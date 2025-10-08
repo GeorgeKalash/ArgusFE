@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import { useFormik } from 'formik'
 import toast from 'react-hot-toast'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
@@ -11,18 +10,11 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const SmsFunctionTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const formik = useFormik({
-    validateOnChange: true,
-    initialValues: { rows: [] },
-    onSubmit: async values => {
-      await postSmsFunctionTemplates(values.rows)
-    }
-  })
 
   const getGridData = async () => {
     const parameters = ''
@@ -68,15 +60,24 @@ const SmsFunctionTemplate = () => {
     })
   }
 
-  const { labels: _labels } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SmsFunctionTemplates
+  })
+
+  const formik = useFormik({
+    maxAccess: access,
+    validateOnChange: true,
+    initialValues: { rows: [] },
+    onSubmit: async values => {
+      await postSmsFunctionTemplates(values.rows)
+    }
   })
 
   const columns = [
     {
       component: 'textfield',
-      label: _labels.FunctionId,
+      label: labels.FunctionId,
       name: 'functionId',
       props: {
         readOnly: true
@@ -84,7 +85,7 @@ const SmsFunctionTemplate = () => {
     },
     {
       component: 'textfield',
-      label: _labels.Name,
+      label: labels.Name,
       name: 'functionName',
       props: {
         readOnly: true
@@ -92,7 +93,7 @@ const SmsFunctionTemplate = () => {
     },
     {
       component: 'resourcelookup',
-      label: _labels.SmsTemplates,
+      label: labels.SmsTemplates,
       name: 'templateId',
       props: {
         endpointId: SystemRepository.SMSTemplate.snapshot,
@@ -110,7 +111,7 @@ const SmsFunctionTemplate = () => {
     },
     {
       component: 'resourcecombobox',
-      label: _labels.securityGrp,
+      label: labels.securityGrp,
       name: 'sgId',
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row?.templateId }
@@ -141,26 +142,22 @@ const SmsFunctionTemplate = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SmsFunctionTemplates}
-      form={formik}
-      isInfo={false}
-      isCleared={false}
-      isSavedClear={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Grow>
           <DataGrid
             onChange={value => formik.setFieldValue('rows', value)}
+            name='rows'
             value={formik.values.rows}
             error={formik.errors.rows}
             columns={columns}
             allowDelete={false}
             allowAddNewLine={false}
+            maxAccess={access}
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -531,6 +531,13 @@ const Table = ({
         checked={params.value}
         disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
+          e.preventDefault()
+          const rowIndex = params.node.rowIndex
+          const colId = params.column?.getColId?.() || params.colDef.field
+          params.api.setFocusedCell(rowIndex, colId)
+          params.api.ensureIndexVisible(rowIndex)
+          if (!params.node.isSelected()) params.node.setSelected(true)
+
           const checked = e.target.checked
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
@@ -718,7 +725,20 @@ const Table = ({
               showSelectAll && (
                 <Checkbox
                   checked={checked}
-                  onChange={e => selectAll(params, e)}
+                  onChange={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    const colId = params.column.getColId()
+                    params.api.ensureColumnVisible(colId)
+
+                    const root = params.api.getGui && params.api.getGui()
+                    const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+                    const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+                    const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+                    focusable && focusable.focus && focusable.focus()
+                    selectAll(params, e)
+                  }}
                   sx={{
                     width: '100%',
                     height: '100%'

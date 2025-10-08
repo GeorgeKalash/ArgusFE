@@ -278,5 +278,11 @@ export const SystemRepository = {
   SystemAlerts: {
     qry: service + 'qryAA',
     arr: service + 'arrAA'
+  },
+  RightToWork: {
+    page: service + 'qryRW',
+    get: service + 'getRW',
+    set: service + 'setRW',
+    del: service + 'delRW'
   }
 }

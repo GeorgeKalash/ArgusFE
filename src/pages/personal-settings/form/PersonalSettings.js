@@ -1,7 +1,6 @@
-import { useEffect, useState, useContext } from 'react'
-import { Grid, Box } from '@mui/material'
+import { useEffect, useContext } from 'react'
+import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SelfServiceRepository } from 'src/repositories/SelfServiceRepository'
@@ -13,6 +12,7 @@ import { useForm } from 'src/hooks/form'
 import i18n from 'src/configs/i18n'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
 const PersonalSettings = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -91,63 +91,58 @@ const PersonalSettings = ({ _labels, access }) => {
     }
   }
 
-  const handleSubmit = () => {
-    formik.handleSubmit()
-  }
-
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={3} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
-          <Grid item xs={12}>
-            <CustomTextField
-              name='fullName'
-              label={_labels.name}
-              value={formik.values.fullName}
-              required
-              maxAccess={access}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('fullName', '')}
-              error={formik.touched.fullName && Boolean(formik.errors.fullName)}
-            />
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='fullName'
+                label={_labels.name}
+                value={formik.values.fullName}
+                required
+                maxAccess={access}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('fullName', '')}
+                error={formik.touched.fullName && Boolean(formik.errors.fullName)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.LANGUAGE}
+                name='languageId'
+                label={_labels.lang}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={access}
+                required
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('languageId', newValue?.key ?? '')
+                }}
+                error={formik.touched.languageId && Boolean(formik.errors.languageId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.MENU_THEME}
+                name='menuTheme'
+                label={_labels.menuTheme}
+                valueField='key'
+                displayField='value'
+                maxAccess={access}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('menuTheme', newValue?.key)
+                }}
+                error={formik.touched.menuTheme && Boolean(formik.errors.menuTheme)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.LANGUAGE}
-              name='languageId'
-              label={_labels.lang}
-              valueField='key'
-              displayField='value'
-              values={formik.values}
-              maxAccess={access}
-              required
-              onChange={(event, newValue) => {
-                formik.setFieldValue('languageId', newValue?.key ?? '')
-              }}
-              error={formik.touched.languageId && Boolean(formik.errors.languageId)}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              datasetId={DataSets.MENU_THEME}
-              name='menuTheme'
-              label={_labels.menuTheme}
-              valueField='key'
-              displayField='value'
-              maxAccess={access}
-              values={formik.values}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('menuTheme', newValue?.key)
-              }}
-              error={formik.touched.menuTheme && Boolean(formik.errors.menuTheme)}
-            />
-          </Grid>
-          <Grid bottom={0} left={0} width='100%' position='fixed'>
-            <WindowToolbar onSave={handleSubmit} isSaved={true} />
-          </Grid>
-        </Grid>
-      </Grow>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 
