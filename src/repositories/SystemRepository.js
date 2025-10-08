@@ -30,7 +30,8 @@ export const SystemRepository = {
     qry: service + 'qryDTM',
     get: service + 'getDTM',
     set: service + 'setDTM',
-    del: service + 'delDTM'
+    del: service + 'delDTM',
+    page: service +'pageDTM'
   },
   RelationType: {
     qry: service + 'qryRT',
