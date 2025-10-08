@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import UsersWindow from './Windows/UsersWindow'
@@ -12,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Users = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,22 +19,35 @@ const Users = () => {
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: SystemRepository.Users.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_size=${_pageSize}&_filter=&_sortBy=fullName&_params=${params || ''}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: SystemRepository.Users.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({
+        _startAt: pagination._startAt || 0,
+        params: filters?.params
+      })
+    }
   }
 
   const {
     query: { data },
     labels: _labels,
     refetch,
-    search,
-    clear,
+    filterBy,
     paginationParameters,
     access,
     invalidate
@@ -42,19 +55,8 @@ const Users = () => {
     queryFn: fetchGridData,
     endpointId: SystemRepository.Users.qry,
     datasetId: ResourceIds.Users,
-    search: {
-      endpointId: SystemRepository.Users.snapshot,
-      searchFn: fetchWithSearch
-    }
+    filter: { filterFn: fetchWithFilter }
   })
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: SystemRepository.Users.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   function openForm(recordId) {
     stack({
@@ -123,7 +125,7 @@ const Users = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <RPBGridToolbar  labels={_labels}  onAdd={add}   maxAccess={access} reportName={'SYUS'}filterBy={filterBy} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
