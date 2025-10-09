@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -19,6 +18,7 @@ import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import Form from 'src/components/Shared/Form'
 
 export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -37,7 +37,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
       fsId: mainRecordId,
       reference: '',
       parentId: null,
-      TBAmount: null,
       numberFormat: null,
       displayOrder: null,
       description: '',
@@ -45,7 +44,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
     },
     validationSchema: yup.object({
       reference: yup.string().required(),
-      TBAmount: yup.number().required(),
       numberFormat: yup.number().required(),
       displayOrder: yup.number().required().min(1).max(99)
     }),
@@ -78,13 +76,11 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
   }, [])
 
   return (
-    <FormShell
+    <Form
       resourceId={ResourceIds.FinancialStatements}
-      form={formik}
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isCleared={false}
     >
       <VertLayout>
         <Grow>
@@ -116,22 +112,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
                   formik.setFieldValue('parentId', newValue?.recordId || null)
                 }}
                 error={formik.touched.parentId && Boolean(formik.errors.parentId)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.GLFS_TB_AMOUNT}
-                name='TBAmount'
-                label={labels.amount}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
-                required
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('TBAmount', newValue?.key || null)
-                }}
-                error={formik.touched.TBAmount && Boolean(formik.errors.TBAmount)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -197,6 +177,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

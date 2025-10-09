@@ -49,6 +49,8 @@ import { createConditionalSchema } from 'src/lib/validation'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 import AddressForm from 'src/components/Shared/AddressForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import ProductionOrderForm from 'src/pages/mf-prod-order/Forms/ProductionOrderForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -706,6 +708,21 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
+  async function generateProdOrder() {
+    const res = await postRequest({
+      extension: ManufacturingRepository.ProductionOrderFromSaleOrder.gen,
+      record: JSON.stringify({ soId: formik.values.recordId })
+    })
+
+    stack({
+      Component: ProductionOrderForm,
+      props: {
+        recordId: res.recordId
+      }
+    })
+    toast.success(platformLabels.Generated)
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -747,6 +764,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       key: 'Invoice',
       condition: true,
       onClick: toInvoice,
+      disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
+    },
+    {
+      key: 'generateProdOrder',
+      condition: true,
+      onClick: generateProdOrder,
       disabled: !(formik.values.deliveryStatus === 1 && formik.values.status !== 3 && isClosed)
     }
   ]

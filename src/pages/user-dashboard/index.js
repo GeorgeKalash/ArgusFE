@@ -2,7 +2,6 @@ import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Grid } from '@mui/material'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Module } from 'src/resources/Module'
@@ -15,6 +14,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { getStorageData } from 'src/storage/storage'
+import Form from 'src/components/Shared/Form'
 
 const UserDashboard = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -113,36 +113,35 @@ const UserDashboard = () => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container xs={12}>
-          <Grid item xs={3} sx={{ m: 2 }}>
-            <CustomTextField
-              name='search'
-              value={search}
-              label={platformLabels.Search}
-              onClear={() => setSearch('')}
-              onChange={handleSearchChange}
-              onSearch={e => setSearch(e)}
-              search={true}
-            />
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Fixed>
+          <Grid container xs={12} p={2}>
+            <Grid item xs={3}>
+              <CustomTextField
+                name='search'
+                value={search}
+                label={platformLabels.Search}
+                onClear={() => setSearch('')}
+                onChange={handleSearchChange}
+                onSearch={e => setSearch(e)}
+                search={true}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={{ list: filteredData }}
-          rowId={['appletId']}
-          maxAccess={access}
-          showCheckboxColumn={true}
-          pagination={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar isSaved={true} onSave={handleSubmit} />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={{ list: filteredData }}
+            rowId={['appletId']}
+            maxAccess={access}
+            showCheckboxColumn={true}
+            pagination={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

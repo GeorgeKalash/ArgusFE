@@ -1,17 +1,16 @@
 import { Grid, Typography } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -120,14 +119,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LeaveSchedule}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography>{labels.start}</Typography>
@@ -277,6 +269,6 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           </Grid>
         </Grid>
       </Grid>
-    </FormShell>
+    </Form>
   )
 }

@@ -10,7 +10,8 @@ export const InventoryRepository = {
     snapshot: service + 'snapshotIT',
     snapshot3: service + 'snapshotIT3',
     get: service + 'getIT',
-    quickView: service + 'quickViewIT'
+    quickView: service + 'quickViewIT',
+    clone: service + 'cloneIT',
   },
   Group: {
     qry: service + 'qryGRP',
@@ -349,5 +350,8 @@ export const InventoryRepository = {
   Catalogue: {
     page: service + 'pageCTG',
     snapshot: service + 'snapshotCTG'
+  },
+  LabelString: {
+    md: service + 'mdLBL'
   }
 }

@@ -1,16 +1,14 @@
-import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
-const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded, maxAccess }) => {
+const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId: accountId } = store
 
@@ -91,15 +89,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Accounts}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -112,7 +102,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, height, store, expanded,
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

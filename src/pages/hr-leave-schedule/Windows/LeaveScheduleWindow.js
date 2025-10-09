@@ -15,11 +15,11 @@ export default function LeaveScheduleWindow({ labels, maxAccess, recordId }) {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <LeaveScheduleForm labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <PeriodsTab labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

@@ -28,8 +28,8 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
         <JobOrderForm
           store={store}
           setStore={setStore}
@@ -41,7 +41,7 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
           window={window}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <RoutingTab
           store={store}
           labels={labels}
@@ -50,22 +50,22 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
           setRefetchRouting={setRefetchRouting}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={access}>
         <WorksheetTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={access}>
         <OverheadTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={4} value={activeTab}>
+      <CustomTabPanel index={4} value={activeTab} maxAccess={access}>
         <MaterialsTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={5} value={activeTab}>
+      <CustomTabPanel index={5} value={activeTab} maxAccess={access}>
         <SizesTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={6} value={activeTab}>
+      <CustomTabPanel index={6} value={activeTab} maxAccess={access}>
         <WorkCenterTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={7} value={activeTab}>
+      <CustomTabPanel index={7} value={activeTab} maxAccess={access}>
         <ItemTab store={store} labels={labels} maxAccess={access} />
       </CustomTabPanel>
     </>

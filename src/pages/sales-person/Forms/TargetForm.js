@@ -6,10 +6,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Form from 'src/components/Shared/Form'
 
 const TargetForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -98,23 +97,22 @@ const TargetForm = ({ labels, maxAccess, store }) => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

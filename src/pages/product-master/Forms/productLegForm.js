@@ -201,7 +201,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
       editMode={editMode}
       isCleared={false}
       isSaved={!!rowSelectionSaved}
-      infoVisible={!!rowSelectionSaved}
+      isInfo={!!rowSelectionSaved}
     >
       {rowSelectionSaved && active && (
         <VertLayout>
