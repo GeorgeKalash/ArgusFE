@@ -388,6 +388,13 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateProdOrder',
+    label: platformLabels.GenerateProductionOder,
+    color: 'black',
+    image: 'order.png',
+    main: false
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',
