@@ -18,7 +18,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import { useError } from 'src/error'
 
 const LedgerForm = ({ node, labels, maxAccess }) => {
-  const { nodeId, nodeRef, nodedesc } = node?.current || {}
+  const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc} = node?.current || {}
 
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -64,12 +64,12 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       ledgers: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
+       const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
 
       if (hasInvalidLedger) {
         stackError({
-          message: labels.mandatorySeg
-        })
+           message: labels.mandatorySeg
+           })
 
         return
       }
@@ -201,7 +201,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
 
       getLedgers(nodeId)
     }
-   
+
   }, [nodeId])
 
   return (

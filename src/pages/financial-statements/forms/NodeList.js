@@ -82,6 +82,11 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
     node.current.nodeId = obj?.recordId
     node.current.nodeRef = obj?.reference
     node.current.nodedesc = obj?.description
+
+    node.current.viewNodeId = obj?.recordId
+    node.current.viewNodeRef = obj?.reference
+    node.current.viewNodedesc = obj?.description
+
     openForm()
   }
 
@@ -93,6 +98,12 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
     node.current.nodeId = null
     node.current.nodeRef = ''
     node.current.nodedesc = ''
+
+    if (node.current.viewNodeId === obj?.recordId) {
+      node.current.viewNodeId = null
+      node.current.viewNodeRef = ''
+      node.current.viewNodedesc = ''
+    }
 
     invalidate()
     toast.success(platformLabels.Deleted)
@@ -133,6 +144,10 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
             node.current.nodeId = row?.recordId || null
             node.current.nodeRef = row?.reference || ''
             node.current.nodedesc = row?.description || ''
+
+            node.current.viewNodeId = row?.recordId || null
+            node.current.viewNodeRef = row?.reference || ''
+            node.current.viewNodedesc = row?.description || ''
           }}
         />
       </Grow>
