@@ -36,7 +36,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
       accountId: null,
       currencyId: null,
       sign: '',
-      costCenterId: null,
+      costCenterId: 0,
       amount: null,
       baseAmount: null
     },
@@ -193,10 +193,8 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('costCenterId', newValue?.recordId)
-                  formik.setFieldValue('costCenterRef', newValue?.reference)
-                  formik.setFieldValue('costCenterName', newValue?.name)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('costCenterId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
                 maxAccess={maxAccess}

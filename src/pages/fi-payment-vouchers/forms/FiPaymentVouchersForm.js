@@ -651,7 +651,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 name='amount'
                 required
                 label={labels.amount}
-                maxLength={'10'}
+                maxLength={14}
                 decimalScale={2}
                 readOnly={isPosted || isCancelled}
                 value={formik.values.amount}

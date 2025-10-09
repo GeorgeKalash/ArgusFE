@@ -2,10 +2,8 @@ import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -14,6 +12,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import Form from 'src/components/Shared/Form'
 
 export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getGridData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -87,14 +86,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.IntegrationLogics}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -214,6 +206,6 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

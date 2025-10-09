@@ -36,6 +36,7 @@ export const SystemFunction = {
   MaterialPlan: Module.Manufacturing * 100 + 7,
   Damage: Module.Manufacturing * 100 + 8,
   LeanProduction: Module.Manufacturing * 100 + 11,
+  BatchWorksheet: Module.Manufacturing * 100 + 15,
   PurchaseRequisition: Module.Purchase * 100 + 0,
   PurchaseQuotation: Module.Purchase * 100 + 1,
   PurchaseOrder: Module.Purchase * 100 + 2,

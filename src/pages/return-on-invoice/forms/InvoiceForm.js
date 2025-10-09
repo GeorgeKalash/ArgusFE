@@ -1,21 +1,19 @@
 import { Grid } from '@mui/material'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import FormShell from 'src/components/Shared/FormShell'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { getIPR, DIRTYFIELD_QTY } from 'src/utils/ItemPriceCalculator'
 import { getVatCalc } from 'src/utils/VatCalculator'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function InvoiceForm({ form, maxAccess, labels, setReCal, window }) {
   const { getRequest } = useContext(RequestsContext)
@@ -122,6 +120,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           returnedQty,
           balanceQty,
           returnNowQty: itemPriceRow.qty,
+          totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
           taxDetails: form.values.isVattable ? taxDetailList : null
         }
       })
@@ -321,17 +320,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.ReturnOnInvoice}
-      functionId={SystemFunction.SalesReturn}
-      form={formik}
-      isCleared={false}
-      isSaved={false}
-      isInfo={false}
-      actions={actions}
-      maxAccess={maxAccess}
-      editMode={true}
-    >
+    <Form isSaved={false} actions={actions} maxAccess={maxAccess} editMode={true}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -385,6 +374,6 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

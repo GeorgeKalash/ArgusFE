@@ -98,6 +98,7 @@ export const RepairAndServiceRepository = {
     del: service + 'delMTT'
   },
   RsLabors: {
+    qry: service + 'qryLBR',
     snapshot: service + 'snapshotLBR',
     page: service + 'pageLBR',
     set: service + 'setLBR',
@@ -120,7 +121,6 @@ export const RepairAndServiceRepository = {
   },
   EquipmentType: {
     qry: service + 'qryEQT',
-    qry: service + 'qryEQT',
     get: service + 'getEQT',
     set: service + 'setEQT',
     del: service + 'delEQT'
@@ -132,5 +132,17 @@ export const RepairAndServiceRepository = {
   WorkOrderLabors: {
     qry: service + 'qryWOL',
     set2: service + 'set2WOL'
+  },
+  RepairRequest: {
+    page: service + 'pageREQ',
+    get: service + 'getREQ',
+    set: service + 'setREQ',
+    del: service + 'delREQ'
+  },
+  Employee: {
+    snapshot: service + 'snapshotEMP'
+  },
+  RepairType: {
+    qry: service + 'qryRT'
   }
 }

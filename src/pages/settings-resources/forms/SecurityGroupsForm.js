@@ -1,5 +1,4 @@
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -15,6 +14,7 @@ import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import { useWindow } from 'src/windows'
 import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import Form from 'src/components/Shared/Form'
 
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,13 +121,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.SettingsResources}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -167,7 +161,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
