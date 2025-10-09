@@ -27,10 +27,10 @@ export const SystemRepository = {
     del: service + 'delDT'
   },
   DocumentTypeMap: {
-    qry: service + 'qryDTM',
     get: service + 'getDTM',
     set: service + 'setDTM',
-    del: service + 'delDTM'
+    del: service + 'delDTM',
+    page: service +'pageDTM'
   },
   RelationType: {
     qry: service + 'qryRT',

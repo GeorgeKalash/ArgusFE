@@ -413,5 +413,8 @@ export const ManufacturingRepository = {
     gen: service + 'genBWST',
     close: service + 'closeBWST',
     reopen: service + 'reopenBWST'
+  },
+  ProductionOrderFromSaleOrder: {
+    gen: service + 'generatePOFromSO'
   }
 }
