@@ -12,75 +12,53 @@ import { Fixed } from './Layouts/Fixed'
 import GridToolbar from './GridToolbar'
 import AttachmentForm from './AttachmentForm'
 import toast from 'react-hot-toast'
-import { Box, Button } from '@mui/material'
+import { Box } from '@mui/material'
 import useSetWindow from 'src/hooks/useSetWindow'
+import CustomButton from '../Inputs/CustomButton'
+import FolderForm from './FolderForm'
+import { useError } from 'src/error'
 
 const AttachmentList = ({ resourceId, recordId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const [maxSeqNo, setMaxSeqNo] = useState(0)
+  const { stack: stackError } = useError()
 
   useSetWindow({ title: platformLabels.Attachment, window })
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.Attachment.qry,
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`,
     datasetId: ResourceIds.SystemAttachments
   })
 
   const columns = [
     {
       field: 'fileName',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       width: 'auto',
       flex: 1
     },
     {
-      width: 100,
-      field: 'preview',
-      headerName: _labels.preview,
-      cellRenderer: row => {
-        return (
-          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <Button
-              onClick={() => {
-                const url = row.data.url
-                globalThis.open(url, '_blank')
-              }}
-              variant='contained'
-              sx={{
-                mr: 1,
-                backgroundColor: 'transparent',
-                '&:hover': {
-                  backgroundColor: 'transparent',
-                  opacity: 0.8
-                },
-                width: '50px',
-                height: '35px',
-                objectFit: 'contain',
-                minWidth: '30px'
-              }}
-            >
-              <img src='/images/buttonsIcons/preview-black.png' alt='Preview' />
-            </Button>
-          </Box>
-        )
-      }
+      field: 'folderName',
+      headerName: labels.folderName,
+      flex: 1,
+      width: 'auto'
     },
     {
       width: 100,
+      headerName: '',
       field: 'download',
-      headerName: _labels.download,
       cellRenderer: row => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-            <Button
+            <CustomButton
               onClick={() => {
                 const url = row.data.url
                 fetch(url)
@@ -92,22 +70,70 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
                     link.click()
                   })
               }}
-              variant='contained'
-              sx={{
-                mr: 1,
-                backgroundColor: 'transparent',
-                '&:hover': {
-                  backgroundColor: 'transparent',
-                  opacity: 0.8
-                },
-                width: '50px',
-                height: '35px',
-                objectFit: 'contain',
-                minWidth: '30px'
+              label={platformLabels.Download}
+              image='download-black.png'
+              color='transparent'
+            />
+          </Box>
+        )
+      }
+    },
+    {
+      width: 100,
+      field: 'preview',
+      headerName: '',
+      cellRenderer: row => {
+        const handlePreview = () => {
+          const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
+
+          const isImage = imageExtensions.some(ext => row.data.url?.toLowerCase().includes(ext))
+
+          if (!isImage) {
+            return stackError({
+              message: platformLabels.errorPreview
+            })
+          } else {
+            const url = row.data.url
+            globalThis.open(url, '_blank')
+          }
+        }
+
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <CustomButton
+              onClick={handlePreview}
+              label={platformLabels.Preview}
+              image='preview-black.png'
+              color='transparent'
+            />
+          </Box>
+        )
+      }
+    },
+    {
+      width: 100,
+      field: 'folder-plus-icon',
+      headerName: '',
+      cellRenderer: row => {
+        return (
+          <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <CustomButton
+              onClick={() => {
+                stack({
+                  Component: FolderForm,
+                  props: {
+                    labels,
+                    values: row.data,
+                    maxAccess: access,
+                    recordId,
+                    resourceId
+                  }
+                })
               }}
-            >
-              <img src='/images/buttonsIcons/download-black.png' alt='Download' />
-            </Button>
+              label={platformLabels.Plus}
+              image='folder-plus-icon.png'
+              color='transparent'
+            />
           </Box>
         )
       }
@@ -115,8 +141,6 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
   ]
 
   async function fetchGridData() {
-    if (!recordId || !resourceId) return
-
     return await getRequest({
       extension: SystemRepository.Attachment.qry,
       parameters: `_resourceId=${resourceId}&_recordId=${recordId}`
@@ -157,10 +181,11 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} labels={_labels} onAdd={add} />
+        <GridToolbar maxAccess={access} labels={labels} onAdd={add} />
       </Fixed>
       <Grow>
         <Table
+          name='attachmentTable'
           columns={columns}
           gridData={data}
           onDelete={del}

@@ -26,26 +26,26 @@ const UsersWindow = ({ labels, maxAccess, recordId }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <UsersTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} setRecordId={setRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <DefaultsTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId}></DefaultsTab>
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <SecurityGrpTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} value={activeTab}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
         <DocTypeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={4} value={activeTab}>
+      <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <SitesTab labels={labels} maxAccess={maxAccess} recordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={5} value={activeTab}>
+      <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
         <RowAccessTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
-      <CustomTabPanel index={6} value={activeTab}>
+      <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <ReleaseCodeTab labels={labels} maxAccess={maxAccess} storeRecordId={storeRecordId} />
       </CustomTabPanel>
     </>

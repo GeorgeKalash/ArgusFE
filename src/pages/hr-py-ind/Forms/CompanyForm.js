@@ -12,6 +12,7 @@ import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { useInvalidate } from 'src/hooks/resource'
 import { createConditionalSchema } from 'src/lib/validation'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import Form from 'src/components/Shared/Form'
 
 const CompanyForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -102,21 +103,20 @@ const CompanyForm = ({ labels, maxAccess, store }) => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          name='items'
-          maxAccess={maxAccess}
-          value={formik.values.items}
-          error={formik.errors?.items}
-          columns={columns}
-          onChange={value => formik.setFieldValue('items', value)}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved smallBox />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='items'
+            maxAccess={maxAccess}
+            value={formik.values.items}
+            error={formik.errors?.items}
+            columns={columns}
+            onChange={value => formik.setFieldValue('items', value)}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

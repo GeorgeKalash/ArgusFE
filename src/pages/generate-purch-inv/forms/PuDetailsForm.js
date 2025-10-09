@@ -1,12 +1,11 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import Form from 'src/components/Shared/Form'
 
 export default function PuDetailsForm({ labels, access, form, window }) {
   const { formik } = useForm({
@@ -31,13 +30,7 @@ export default function PuDetailsForm({ labels, access, form, window }) {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.GeneratePUInvoices}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -68,6 +61,6 @@ export default function PuDetailsForm({ labels, access, form, window }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

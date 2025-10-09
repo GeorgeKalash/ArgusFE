@@ -18,11 +18,11 @@ const WorkOrderWindow = ({ recordId, labels, access, window }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
         <WorkOrderForm labels={labels} setStore={setStore} store={store} access={access} window={window} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <TaskList labels={labels} access={access} store={store} />
       </CustomTabPanel>
     </>

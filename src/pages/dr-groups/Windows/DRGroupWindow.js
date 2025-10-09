@@ -5,7 +5,7 @@ import { useState } from 'react'
 import DRGroupForm from '../forms/DRGroupForm'
 import ApproverList from '../forms/ApproverList'
 
-const DRGroupWindow = ({ height, recordId, labels, maxAccess, approver }) => {
+const DRGroupWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [editMode, setEditMode] = useState(recordId)
 
@@ -17,8 +17,8 @@ const DRGroupWindow = ({ height, recordId, labels, maxAccess, approver }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <DRGroupForm
           labels={labels}
           setEditMode={setEditMode}
@@ -28,7 +28,7 @@ const DRGroupWindow = ({ height, recordId, labels, maxAccess, approver }) => {
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <ApproverList
           labels={labels}
           setEditMode={setEditMode}

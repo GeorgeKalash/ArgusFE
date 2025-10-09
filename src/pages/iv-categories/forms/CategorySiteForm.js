@@ -116,13 +116,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
   }, [recordId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Category}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Category} isCleared={false} isInfo={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

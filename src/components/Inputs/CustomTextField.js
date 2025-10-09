@@ -21,7 +21,7 @@ const CustomTextField = ({
   editMode = false,
   maxLength = '1000',
   position,
-  dir = 'ltr',
+  dir = '',
   hidden = false,
   phone = false,
   search = false,
@@ -109,7 +109,7 @@ const CustomTextField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
-        dir: dir,
+        ...(dir ? { dir } : {}),
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
         style: {
@@ -134,6 +134,7 @@ const CustomTextField = ({
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton
                 tabIndex={-1}
+                id={props.ClearId}
                 edge='end'
                 onClick={e => {
                   onClear(e)

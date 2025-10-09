@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -10,6 +9,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import Form from 'src/components/Shared/Form'
 
 export default function SyncJobOrderRoutingForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -45,7 +45,7 @@ export default function SyncJobOrderRoutingForm({ _labels, access }) {
   ]
 
   return (
-    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} actions={actions} isSaved={false} editMode={true}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -77,6 +77,6 @@ export default function SyncJobOrderRoutingForm({ _labels, access }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -3,15 +3,14 @@ import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, recordId, window }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -44,7 +43,7 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
   }
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Characteristics} maxAccess={maxAccess} isInfo={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -104,7 +103,7 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
