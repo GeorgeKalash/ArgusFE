@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
+import toast from 'react-hot-toast'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import FormShell from 'src/components/Shared/FormShell'
@@ -15,15 +15,22 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { useInvalidate } from 'src/hooks/resource'
 
-const SkillsForm = ({ recordId, labels, maxAccess, editMode }) => {
+const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: EmployeeRepository.Skills.qry
+  })
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: null,
+      recordId,
+      employeeId,
       institution: '',
       clId: null,
       dateFrom: null,
@@ -38,22 +45,39 @@ const SkillsForm = ({ recordId, labels, maxAccess, editMode }) => {
       grade: yup.string().required(),
       major: yup.string().required()
     }),
-    onSubmit: async values => {}
+    onSubmit: async values => {
+      const response = await postRequest({
+        extension: EmployeeRepository.Skills.set,
+        record: JSON.stringify({
+          ...values,
+          employeeId
+        })
+      })
+
+      toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
+      formik.setFieldValue('recordId', response.recordId)
+
+      invalidate()
+      window.close()
+    }
   })
 
   const getData = async recordId => {
     const res = await getRequest({
-      extension: BusinessPartnerRepository.Relation.get,
+      extension: EmployeeRepository.Skills.get,
       parameters: `_recordId=${recordId}`
     })
 
-    res.record.dateFrom = formatDateFromApi(res.record.dateFrom)
-    res.record.dateTo = formatDateFromApi(res.record.dateTo)
-    formik.setValues(res.record)
+    formik.setValues({
+      ...res.record,
+      dateFrom: formatDateFromApi(res.record.dateFrom),
+      dateTo: formatDateFromApi(res.record.dateTo),
+      employeeId
+    })
   }
 
   useEffect(() => {
-    recordId && getData(recordId)
+    if (recordId) getData(recordId)
   }, [])
 
   return (
@@ -82,15 +106,15 @@ const SkillsForm = ({ recordId, labels, maxAccess, editMode }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
+                endpointId={EmployeeRepository.CertificateFilters.qry}
                 name='clId'
                 label={labels.level}
-                datasetId={DataSets.FI_GROUP_TYPE} // Different KVS
+                valueField='recordId'
                 required
+                displayField='name'
                 values={formik.values}
-                valueField='key'
-                displayField='value'
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('clId', newValue?.key || null)
+                  formik.setFieldValue('clId', newValue?.recordId || null)
                 }}
                 error={formik.touched.clId && Boolean(formik.errors.clId)}
               />
@@ -101,7 +125,7 @@ const SkillsForm = ({ recordId, labels, maxAccess, editMode }) => {
                 label={labels.from}
                 value={formik.values?.dateFrom}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('dateFrom', '')}
+                onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
               />
             </Grid>
@@ -111,7 +135,7 @@ const SkillsForm = ({ recordId, labels, maxAccess, editMode }) => {
                 label={labels.to}
                 value={formik.values?.dateTo}
                 onChange={formik.setFieldValue}
-                onClear={() => formik.setFieldValue('dateTo', '')}
+                onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
             </Grid>

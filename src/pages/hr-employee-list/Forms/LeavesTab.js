@@ -5,11 +5,12 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
-import { Grid, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
+import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
 
 const LeavesTab = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -17,11 +18,31 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
   const { stack } = useWindow()
   const { recordId } = store
 
+  console.log(recordId)
+
   async function fetchGridData() {
+    console.log('hoj')
+
     const response = await getRequest({
-      extension: RepairAndServiceRepository.EquipmentType.qry,
-      parameters: `_filter=&_size=30_startAt=0&_equipmentId=${recordId}`
+      extension: LoanManagementRepository.Leaves.qry,
+      parameters: `_filter=&_size=30&_startAt=0&_lsId=0&_employeeId=${recordId}&_asOfDate=${
+        store?.date ? formatDateForGetApI(store?.date) : formatDateForGetApI(new Date())
+      }`
     })
+
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        name: item?.schedule.name,
+        type: item?.summary.leaveType,
+        earned: item?.summary.earned,
+        used: item?.summary.used,
+        lost: item?.summary.lost,
+        adjustments: item?.summary.adjustments,
+        balance: item?.summary.balance,
+        payments: item?.summary.payments
+      }))
+    }
 
     return response
   }
@@ -32,7 +53,7 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.EquipmentType.qry,
+    endpointId: LoanManagementRepository.Leaves.qry,
     datasetId: ResourceIds.EmployeeFilter
   })
 
@@ -63,12 +84,12 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
       flex: 1
     },
     {
-      field: 'adjustment',
+      field: 'adjustments',
       headerName: labels.adjustment,
       flex: 1
     },
     {
-      field: 'payment',
+      field: 'payments',
       headerName: labels.payment,
       flex: 1
     },
@@ -82,7 +103,9 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
   return (
     <VertLayout>
       <Fixed>
-        <Typography variant='h6' padding={2}>{labels.LeaveBalance}</Typography>
+        <Typography variant='h6' padding={2}>
+          {labels.LeaveBalance}
+        </Typography>
       </Fixed>
       <Grow>
         <Table

@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -8,11 +8,12 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
+import { Typography, Grid } from '@mui/material'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import EmploymentHistory from './EmploymentHistory'
-import { Typography } from '@mui/material'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 const JobTab = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -20,13 +21,21 @@ const JobTab = ({ labels, maxAccess, store }) => {
   const { stack } = useWindow()
   const { recordId } = store
 
-  async function fetchGridData() {
-    const response = await getRequest({
-      extension: RepairAndServiceRepository.EquipmentType.qry,
-      parameters: `_filter=&_size=30_startAt=0&_equipmentId=${recordId}`
-    })
+  const [searchEmployment, setSearchEmployment] = useState('')
+  const [searchJobInfo, setSearchJobInfo] = useState('')
 
-    return response
+  async function fetchGridData() {
+    return await getRequest({
+      extension: EmployeeRepository.EmployementHistory.qry,
+      parameters: `_filter=&_size=30&_startAt=0&_employeeId=${recordId}`
+    })
+  }
+
+  async function fetchGridJobInfoData() {
+    return await getRequest({
+      extension: EmployeeRepository.JobInfo.qry,
+      parameters: `_filter=&_size=30&_startAt=0&_params=&_employeeId=${recordId}&_sortBy=recordId desc`
+    })
   }
 
   const {
@@ -36,7 +45,7 @@ const JobTab = ({ labels, maxAccess, store }) => {
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.EquipmentType.qry,
+    endpointId: EmployeeRepository.EmployementHistory.qry,
     datasetId: ResourceIds.EmployeeFilter
   })
 
@@ -45,62 +54,44 @@ const JobTab = ({ labels, maxAccess, store }) => {
     refetch: refetchJobInfo
   } = useResourceQuery({
     enabled: !!recordId,
-    queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.EquipmentType.qry,
+    queryFn: fetchGridJobInfoData,
+    endpointId: EmployeeRepository.JobInfo.qry,
     datasetId: ResourceIds.EmployeeFilter
   })
 
+  const filteredEmploymentData = searchEmployment
+    ? {
+        list: data?.list?.filter(item => item.statusName?.toLowerCase().includes(searchEmployment.toLowerCase()))
+      }
+    : data
+
+  const filteredJobInfoData = searchJobInfo
+    ? {
+        list: jobInfo?.list?.filter(item =>
+          [item.positionName, item.branchName, item.departmentName]
+            .filter(Boolean)
+            .some(field => field.toLowerCase().includes(searchJobInfo.toLowerCase()))
+        )
+      }
+    : jobInfo
+
   const columns = [
-    {
-      field: 'status',
-      headerName: labels.status,
-      flex: 1
-    },
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
-    }
+    { field: 'statusName', headerName: labels.status, flex: 1 },
+    { field: 'date', headerName: labels.date, flex: 1, type: 'date' }
   ]
 
   const jobInfoColumns = [
-    {
-      field: 'date',
-      headerName: labels.date,
-      flex: 1,
-      type: 'date'
-    },
-    {
-      field: 'department',
-      headerName: labels.department,
-      flex: 1
-    },
-    {
-      field: 'branch',
-      headerName: labels.branch,
-      flex: 1
-    },
-    {
-      field: 'position',
-      headerName: labels.position,
-      flex: 1
-    },
-    {
-      field: 'reportTo',
-      headerName: labels.reportTo,
-      flex: 1
-    },
-    {
-      field: 'status',
-      headerName: labels.status,
-      flex: 1
-    }
+    { field: 'date', headerName: labels.date, flex: 1, type: 'date' },
+    { field: 'departmentName', headerName: labels.department, flex: 1 },
+    { field: 'branchName', headerName: labels.branch, flex: 1 },
+    { field: 'positionName', headerName: labels.position, flex: 1 },
+    { field: 'reportToName', headerName: labels.reportTo, flex: 1 },
+    { field: 'statusName', headerName: labels.status, flex: 1 }
   ]
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.EquipmentType.del,
+      extension: EmployeeRepository.EmployementHistory.del,
       record: JSON.stringify(obj)
     })
 
@@ -108,21 +99,14 @@ const JobTab = ({ labels, maxAccess, store }) => {
     invalidate()
   }
 
-  const add = () => {
-    openForm()
-  }
-
-  const edit = obj => {
-    openForm(obj)
-  }
-
-  const openForm = id => {
+  const openForm = obj => {
     stack({
       Component: EmploymentHistory,
       props: {
         labels,
         maxAccess,
-        recordId: id
+        employeeId: recordId,
+        recordId: obj?.recordId
       },
       width: 500,
       height: 400,
@@ -132,40 +116,69 @@ const JobTab = ({ labels, maxAccess, store }) => {
 
   return (
     <VertLayout>
-      <>
-        <Fixed>
-          <Typography variant='h6' padding={2}>
-            {labels.EmploymentHistory}
-          </Typography>
-        </Fixed>
-        <Fixed>
-          <GridToolbar onAdd={add} maxAccess={maxAccess} />
-        </Fixed>
-        <Grow>
-          <Table
-            name='EmploymentHistoryTable'
-            columns={columns}
-            gridData={data}
-            rowId={['recordId']}
-            onEdit={edit}
-            onDelete={del}
-            pageSize={50}
-            pagination={false}
-            refetch={refetch}
-            maxAccess={maxAccess}
-          />
-        </Grow>
-      </>
+      <Fixed>
+        <Typography variant='h6' padding={2}>
+          {labels.EmploymentHistory}
+        </Typography>
+      </Fixed>
+      <Fixed>
+        <Grid container xs={12}>
+          <Grid item xs={1.5}>
+            <GridToolbar onAdd={() => openForm()} maxAccess={maxAccess} />
+          </Grid>
+          <Grid item xs={3}>
+            <CustomTextField
+              name='searchEmployment'
+              value={searchEmployment}
+              label={platformLabels.Search}
+              onClear={() => setSearchEmployment('')}
+              onChange={e => setSearchEmployment(e.target.value)}
+              onSearch={val => setSearchEmployment(val)}
+              search
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          name='EmploymentHistoryTable'
+          columns={columns}
+          gridData={filteredEmploymentData}
+          rowId={['recordId']}
+          onEdit={openForm}
+          onDelete={del}
+          pageSize={50}
+          pagination={false}
+          refetch={refetch}
+          maxAccess={maxAccess}
+        />
+      </Grow>
+
       <Fixed>
         <Typography variant='h6' padding={2}>
           {labels.JobInfo}
         </Typography>
       </Fixed>
+      <Fixed>
+        <Grid container xs={12} paddingBottom={2}>
+          <Grid item xs={3}>
+            <CustomTextField
+              name='searchJobInfo'
+              value={searchJobInfo}
+              label={platformLabels.Search}
+              onClear={() => setSearchJobInfo('')}
+              onChange={e => setSearchJobInfo(e.target.value)}
+              onSearch={val => setSearchJobInfo(val)}
+              search
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
       <Grow>
         <Table
           name='JobInfoTable'
           columns={jobInfoColumns}
-          gridData={jobInfo}
+          gridData={filteredJobInfoData}
           rowId={['recordId']}
           pageSize={50}
           pagination={false}

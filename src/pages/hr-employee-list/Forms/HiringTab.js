@@ -1,5 +1,6 @@
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
+import { differenceInDays } from 'date-fns'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -19,18 +20,22 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 
 const HiringTab = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
+  const { recordId, hireDate } = store
 
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Account.page
+    endpointId: EmployeeRepository.EmployeeList.page
   })
 
   const { formik } = useForm({
     initialValues: {
+      recordId,
       employeeId: recordId,
       probationEndDate: null,
       nextReviewDate: null,
@@ -55,18 +60,17 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
     }),
     onSubmit: async values => {
       const res = await postRequest({
-        extension: FinancialRepository.Account.set,
-        record: JSON.stringify(obj)
+        extension: EmployeeRepository.Hiring.set,
+        record: JSON.stringify({
+          ...values,
+          pyActiveDate: formatDateToApi(values.pyActiveDate),
+          termEndDate: values.termEndDate ? formatDateToApi(values.termEndDate) : null,
+          nextReviewDate: values.nextReviewDate ? formatDateToApi(values.nextReviewDate) : null,
+          probationEndDate: formatDateToApi(values.probationEndDate)
+        })
       })
-      if (!obj.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-        formik.setFieldValue('recordId', res.recordId)
-      }
       invalidate()
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Edited)
     }
   })
 
@@ -74,10 +78,18 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: FinancialRepository.Account.get,
-          parameters: `_recordId=${recordId}`
+          extension: EmployeeRepository.Hiring.get,
+          parameters: `_employeeId=${recordId}`
         })
-        formik.setValues(res.record)
+
+        if (res.record)
+          formik.setValues({
+            ...res.record,
+            pyActiveDate: res?.record?.pyActiveDate ? formatDateFromApi(res.record.pyActiveDate) : null,
+            termEndDate: res.record.termEndDate ? formatDateFromApi(res.record.termEndDate) : null,
+            nextReviewDate: res.record.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
+            probationEndDate: res.record.probationEndDate ? formatDateFromApi(res.record.probationEndDate) : null
+          })
       }
     })()
   }, [])
@@ -100,8 +112,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    endpointId={EmployeeRepository.NoticePeriods.qry}
                     name='npId'
                     label={labels.noticePeriod}
                     valueField='recordId'
@@ -130,7 +141,30 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.probationEndDate}
                     value={formik.values?.probationEndDate}
                     required
-                    onChange={formik.setFieldValue}
+                    onChange={(e, newValue) => {
+                      console.log(newValue)
+                      formik.setFieldValue('probationEndDate', newValue)
+
+                      let start = null
+                      let end = null
+
+                      if (hireDate) {
+                        if (typeof hireDate === 'string' && hireDate.includes('/Date')) {
+                          start = formatDateFromApi(hireDate)
+                        } else {
+                          start = new Date(hireDate)
+                        }
+                      }
+
+                      if (newValue) {
+                        end = new Date(newValue)
+                      }
+
+                      if (end && start) {
+                        const days = differenceInDays(end, start)
+                        formik.setFieldValue('probationPeriod', days > 0 ? days : 0)
+                      }
+                    }}
                     onClear={() => formik.setFieldValue('probationEndDate', '')}
                     error={formik.touched.probationEndDate && Boolean(formik.errors.probationEndDate)}
                   />
@@ -169,7 +203,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                   <ResourceComboBox
                     name='languageId'
                     label={labels.language}
-                    datasetId={DataSets.FI_GROUP_TYPE} // Different KVS
+                    datasetId={DataSets.LANGUAGE}
                     values={formik.values}
                     valueField='key'
                     displayField='value'
@@ -230,8 +264,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesZone.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                    endpointId={PayrollRepository.CnssBranches.qry}
                     name='ssBranchId'
                     label={labels.ssBranch}
                     valueField='recordId'
@@ -245,7 +278,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
+                    endpointId={EmployeeRepository.SponsorFilters.qry}
                     name='sponsorId'
                     label={labels.sponsor}
                     valueField='recordId'
@@ -270,8 +303,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={AccessControlRepository.SecurityGroup.qry}
-                    parameters={`_startAt=0&_pageSize=1000&filter=`}
+                    endpointId={PayrollRepository.BankTransferFilters.qry}
                     name='bsId'
                     label={labels.benefitSchedule}
                     values={formik.values}

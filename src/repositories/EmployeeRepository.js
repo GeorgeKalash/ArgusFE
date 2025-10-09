@@ -4,6 +4,7 @@ export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
     get1: service + 'getEM1',
+    set: service + 'setEM1'
   },
   CertificateFilters: {
     qry: service + 'qryCL',
@@ -58,6 +59,7 @@ export const EmployeeRepository = {
     get: service + 'getNP',
     set: service + 'setNP',
     del: service + 'delNP',
+    qry: service + 'qryNP',
     page: service + 'pageNP'
   },
   CustomProperties: {
@@ -88,7 +90,8 @@ export const EmployeeRepository = {
     reopen: service + 'reopenJI',
     get: service + 'getJI',
     set: service + 'setJI',
-    del: service + 'delJI'
+    del: service + 'delJI',
+    qry: service + 'qryJI'
   },
   QuickView: {
     get: service + 'getQV'
@@ -117,5 +120,25 @@ export const EmployeeRepository = {
   },
   TerminationEmployee: {
     get: service + 'getTE'
+  },
+  EmployeeList: {
+    qry2: service + 'qryES2',
+    page: service + 'pageES1'
+  },
+  EmployementHistory: {
+    qry: service + 'qryEH',
+    del: service + 'delEH',
+    get: service + 'getEH',
+    set: service + 'setEH'
+  },
+  Hiring: {
+    get: service + 'getRE',
+    set: service + 'setRE'
+  },
+  Skills: {
+    qry: service + 'qryCE',
+    del: service + 'delCE',
+    get: service + 'getCE',
+    set: service + 'setCE'
   }
 }

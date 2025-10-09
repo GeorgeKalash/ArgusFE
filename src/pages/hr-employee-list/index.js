@@ -12,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import EmployeeListWindow from './Windows/EmployeeListWindow'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 const EmployeeList = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,7 +29,7 @@ const EmployeeList = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FinancialRepository.Account.page,
+    endpointId: EmployeeRepository.EmployeeList.page,
     datasetId: ResourceIds.EmployeeFilter,
     filter: {
       filterFn: fetchWithFilter
@@ -38,8 +39,8 @@ const EmployeeList = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.Account.snapshot,
-        parameters: `_filter=${filters.qry}`
+        extension: EmployeeRepository.EmployeeList.qry2,
+        parameters: `_filter=${filters.qry}&_branchId=0`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -48,22 +49,33 @@ const EmployeeList = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
 
     const response = await getRequest({
-      extension: FinancialRepository.Account.page,
-      parameters: parameters
+      extension: EmployeeRepository.EmployeeList.page,
+      parameters: `_startAt=${_startAt}&_size=30&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${params || ''}`
     })
+
+    if (response && response?.list) {
+      response.list = response?.list?.map(item => ({
+        ...item,
+        ref: item?.parent.reference,
+        fullName: item?.parent.fullName,
+        department: item?.department?.name,
+        position: item?.position?.name,
+        branch: item?.branch?.name,
+        hireDate: item?.parent?.hireDate,
+      }))
+    }
 
     return { ...response, _startAt: _startAt }
   }
 
   const columns = [
     {
-      field: 'image',
+      field: 'pictureUrl',
       headerName: '',
-      flex: 1
+      flex: 1,
+      type: 'image'
     },
     {
       field: 'ref',
@@ -71,32 +83,32 @@ const EmployeeList = () => {
       flex: 1
     },
     {
-      field: 'name',
+      field: 'fullName',
       headerName: labels.name,
       flex: 1
     },
     {
-      field: 'departmentName',
+      field: 'department',
       headerName: labels.department,
       flex: 1
     },
     {
-      field: 'positionName',
+      field: 'position',
       headerName: labels.position,
       flex: 1
     },
     {
-      field: 'branchName',
+      field: 'branch',
       headerName: labels.branch,
       flex: 1
     },
     {
-      field: 'schedule',
+      field: 'scName',
       headerName: labels.schedule,
       flex: 1
     },
     {
-      field: 'scheduleType',
+      field: 'scTypeName',
       headerName: labels.scheduleType,
       flex: 1
     },
@@ -136,7 +148,9 @@ const EmployeeList = () => {
   }
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    console.log(obj?.parent?.recordId)
+
+    openForm(obj?.parent?.recordId)
   }
 
   return (

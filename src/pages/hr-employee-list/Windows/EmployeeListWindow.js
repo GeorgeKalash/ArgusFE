@@ -1,4 +1,4 @@
-import { Grid, Box, Typography, Divider } from '@mui/material'
+import { Grid, Box, Typography } from '@mui/material'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useRef, useState } from 'react'
@@ -14,9 +14,11 @@ import ImageUpload from 'src/components/Inputs/ImageUpload'
 
 const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
-  const [store, setStore] = useState({ recordId: recordId || null })
+  const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
 
   const imageUploadRef = useRef(null)
+
+  console.log(recordId)
 
   const tabs = [
     { label: labels.Profile },
@@ -68,20 +70,20 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={3} value={activeTab}>
-          <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} />
+          <HiringTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={4} value={activeTab}>
-          <HiringTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+          <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={5} value={activeTab}>
           <SkillsTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
-
+        {/* 
         <CustomTabPanel height={height} index={6} value={activeTab}>
           <UserDefinedTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
-        </CustomTabPanel>
+        </CustomTabPanel> */}
       </Grid>
     </Grid>
   )

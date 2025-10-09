@@ -12,6 +12,7 @@ import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRep
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import SkillsForm from './SkillsForm'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 const SkillsTab = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,8 +22,8 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
 
   async function fetchGridData() {
     const response = await getRequest({
-      extension: RepairAndServiceRepository.EquipmentType.qry,
-      parameters: `_filter=&_size=30_startAt=0&_equipmentId=${recordId}`
+      extension: EmployeeRepository.Skills.qry,
+      parameters: `_filter=&_size=30_startAt=0&_employeeId=${recordId}`
     })
 
     return response
@@ -35,13 +36,13 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
-    endpointId: RepairAndServiceRepository.EquipmentType.qry,
+    endpointId: EmployeeRepository.Skills.qry,
     datasetId: ResourceIds.EmployeeFilter
   })
 
   const columns = [
     {
-      field: 'level',
+      field: 'clName',
       headerName: labels.level,
       flex: 1
     },
@@ -51,14 +52,16 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
       flex: 1
     },
     {
-      field: 'from',
+      field: 'dateFrom',
       headerName: labels.from,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
     {
-      field: 'to',
+      field: 'dateTo',
       headerName: labels.to,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'grade',
@@ -74,7 +77,7 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
 
   const del = async obj => {
     await postRequest({
-      extension: RepairAndServiceRepository.EquipmentType.del,
+      extension: EmployeeRepository.Skills.del,
       record: JSON.stringify(obj)
     })
 
@@ -87,7 +90,7 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
   }
 
   const edit = obj => {
-    openForm(obj)
+    openForm(obj?.recordId)
   }
 
   const openForm = id => {
@@ -96,7 +99,8 @@ const SkillsTab = ({ labels, maxAccess, store }) => {
       props: {
         labels,
         maxAccess,
-        recordId: id
+        recordId: id,
+        employeeId: recordId
       },
       width: 600,
       height: 500,
