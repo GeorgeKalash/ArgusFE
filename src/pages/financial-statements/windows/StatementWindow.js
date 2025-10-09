@@ -11,7 +11,7 @@ import { FinancialStatementRepository } from 'src/repositories/FinancialStatemen
 const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [mainRecordId, setRecId] = useState(recordId)
-  const node = useRef({ nodeId: null, nodeRef: null })
+  const node = useRef({ nodeId: null })
 
   const { getRequest } = useContext(RequestsContext)
   const [treeDataWithNodes, setTreeDataWithNodes] = useState([])

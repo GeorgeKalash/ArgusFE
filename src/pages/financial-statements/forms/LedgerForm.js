@@ -50,7 +50,8 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
         seg4: '',
         ccgRef: '',
         ccRef: '',
-        sign: ''
+        sign: '',
+        signName: ''
       }
     ]
   })
@@ -64,12 +65,12 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       ledgers: yup.array().of(schema)
     }),
     onSubmit: async obj => {
-       const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
+      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
 
       if (hasInvalidLedger) {
-        stackError({
-           message: labels.mandatorySeg
-           })
+        stackError({ 
+          message: labels.mandatorySeg
+         })
 
         return
       }
@@ -174,7 +175,11 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     })
 
     const ledgers = res?.list ?? []
-    if (ledgers.length === 0) return
+    if (ledgers.length === 0) {
+      formik.setFieldValue('ledgers', makeInitialValues(fsNodeId).ledgers)
+
+      return
+    }
 
     const titlesXML = await getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -200,9 +205,11 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       formik.resetForm({ values: makeInitialValues(nodeId) })
 
       getLedgers(nodeId)
-    }
 
-  }, [nodeId])
+      return
+    }
+    formik.resetForm({ values: makeInitialValues(null) })
+  }, [nodeId]) 
 
   return (
     <FormShell
