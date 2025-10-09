@@ -23,10 +23,10 @@ const PUFinancialIntegrators = () => {
     })
     formik.setValues({
       ...formik.values,
-      items: res.list.map(({ ...rest }, index) => ({
+      items: res.list.map(({ sameNumber, ...rest }, index) => ({
+        ...rest,
         id: index + 1,
-        sameNumber: false,
-        ...rest
+        sameNumber: sameNumber || false
       }))
     })
   }
