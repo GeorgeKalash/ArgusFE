@@ -3,7 +3,6 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { AdministrationRepository } from 'src/repositories/AdministrationRepository'
 import { CommonContext } from 'src/providers/CommonContext'
-
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
@@ -26,7 +25,7 @@ const ProcessNotification = () => {
   async function getAllNotificationType() {
     return new Promise((resolve, reject) => {
       getAllKvsByDataset({
-        _dataset: DataSets.PROCESS_NOTIFICATION_TYPE1, 
+        _dataset: DataSets.PROCESS_NOTIFICATION_TYPE, 
         callback: result => {
           if (result) resolve(result)
           else reject()
@@ -56,7 +55,7 @@ const ProcessNotification = () => {
       const processName = k.value
       const found = mappings.find(m => m.processId === processId)
       const templateId = found?.templateId ?? null
-    
+
       const templateName =
         templateId != null ? (templates.find(t => t.recordId === templateId)?.name ?? '') : ''
 
@@ -77,7 +76,7 @@ const ProcessNotification = () => {
 
   const { labels, access } = useResourceQuery({
     queryFn: getGridData,
-    datasetId: ResourceIds.SystemFunction 
+    datasetId: ResourceIds.AAPN 
   })
 
   const { formik } = useForm({
@@ -96,8 +95,8 @@ const ProcessNotification = () => {
     },
     onSubmit: async () => {
       const items = (formik.values.rows || [])
-        .filter(r => r.templateId != null)
-        .map(r => ({ typeId: r.processId, templateId: r.templateId }))
+      .filter(r => r.templateId != null)
+      .map(r => ({ processId: r.processId, templateId: r.templateId }));  
 
       await postRequest({
         extension: AdministrationRepository.PN.set2PN,
@@ -112,7 +111,7 @@ const ProcessNotification = () => {
   const columns = [
     {
       component: 'textfield',
-      label: labels?.name ,
+      label: labels.name ,
       name: 'processName',
       props: {
         readOnly: true
@@ -120,7 +119,7 @@ const ProcessNotification = () => {
     },
     {
       component: 'resourcecombobox',
-      label: labels?.template ,
+      label: labels.template ,
       name: 'Template', 
       props: {
         endpointId: AdministrationRepository.PN.qryTE,
