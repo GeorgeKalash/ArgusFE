@@ -93,7 +93,7 @@ const ProductDispersalList = ({ store, setStore, labels, maxAccess }) => {
       Component: ProductDispersalForm,
       props: {
         labels,
-        recordId: recordId ? recordId : null,
+        recordId,
         pId,
         maxAccess,
         getGridData

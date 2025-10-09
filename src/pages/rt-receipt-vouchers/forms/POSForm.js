@@ -74,6 +74,7 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
       }
       setSubmitting(true)
       const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
+
       if (res.data) {
         setSubmitting(false)
 

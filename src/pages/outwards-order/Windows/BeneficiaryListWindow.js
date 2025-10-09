@@ -31,7 +31,7 @@ const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) =>
       parameters: `_clientId=${form.clientId}&_dispersalId=${form.dispersalType}&_countryId=${form.countryId}&_currencyId=${form.currencyId}`
     })
 
-    res.list = res.list.map(item => {
+    res.list = (res?.list || []).map(item => {
       if (item.beneficiaryId == form.beneficiaryId) item.checked = true
 
       return item
