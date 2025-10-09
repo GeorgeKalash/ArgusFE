@@ -33,6 +33,7 @@ import SketchForm from '../pm-sketch/Forms/SketchForm'
 import ThreeDDesignForm from '../pm-3d-design/forms/ThreeDDesignForm'
 import SalesOrderForm from '../sales-order/Tabs/SalesOrderForm'
 import PurchaseRquisitionForm from '../purchase-requisition/form/PurchaseRquisitionForm'
+import LoanWindow from '../hr-loans/Window/LoanWindow'
 
 const DocumentsOnHold = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -172,7 +173,10 @@ const DocumentsOnHold = () => {
 
       case SystemFunction.ThreeDDesign:
         relevantComponent = ThreeDDesignForm
-
+        break
+      case SystemFunction.LoanRequest:
+        relevantComponent = LoanWindow
+        break
       case SystemFunction.PurchaseRequisition:
         relevantComponent = PurchaseRquisitionForm
       default:

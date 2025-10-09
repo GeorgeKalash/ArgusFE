@@ -13,9 +13,8 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import { useForm } from 'src/hooks/form'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
+import Form from 'src/components/Shared/Form'
 
 const CtDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -125,150 +124,149 @@ const CtDefaults = ({ _labels, access }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={2} sx={{ p: 2 }}>
-          <Grid item xs={6}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={SystemRepository.NumberRange.snapshot}
-                  form={formik}
-                  valueField='reference'
-                  displayField='description'
-                  name='ct-nra-individual-ref'
-                  firstValue={formik.values['ct-nra-individual-ref']}
-                  label={_labels['ct-nra-individual']}
-                  secondDisplayField
-                  secondValue={formik.values['ct-nra-individual-description']}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('ct-nra-individual', newValue?.recordId || null)
-                    formik.setFieldValue('ct-nra-individual-ref', newValue?.reference || '')
-                    formik.setFieldValue('ct-nra-individual-description', newValue?.description || '')
-                  }}
-                  error={formik.touched['ct-nra-individual'] && Boolean(formik.errors['ct-nra-individual'])}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={SystemRepository.NumberRange.snapshot}
-                  name='ct-nra-corporate-ref'
-                  form={formik}
-                  label={_labels['ct-nra-corporate']}
-                  valueField='reference'
-                  displayField='description'
-                  secondDisplayField
-                  firstValue={formik.values['ct-nra-corporate-ref']}
-                  secondValue={formik.values['ct-nra-corporate-description']}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('ct-nra-corporate', newValue?.recordId || null)
-                    formik.setFieldValue('ct-nra-corporate-ref', newValue?.reference || '')
-                    formik.setFieldValue('ct-nra-corporate-description', newValue?.description || '')
-                  }}
-                  error={formik.touched['ct-nra-corporate'] && Boolean(formik.errors['ct-nra-corporate'])}
-                />
-              </Grid>
-              {[
-                { name: 'ct_cash_sales_ratetype_id', label: _labels.cash_sales_ratetype },
-                { name: 'ct_cash_purchase_ratetype_id', label: _labels.cash_purchase_ratetype },
-                { name: 'ct_credit_sales_ratetype_id', label: _labels.credit_sales_ratetype },
-                { name: 'ct_credit_purchase_ratetype_id', label: _labels.credit_purchase_ratetype },
-                { name: 'ct_credit_eval_ratetype_id', label: _labels.credit_eval_ratetype }
-              ].map(item => (
-                <Grid item xs={12} key={item.name}>
-                  <ResourceComboBox
-                    endpointId={MultiCurrencyRepository.RateType.qry}
-                    values={formik.values}
-                    name={item.name}
-                    label={item.label}
-                    valueField='recordId'
-                    displayField='name'
-                    maxAccess={access}
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={SystemRepository.NumberRange.snapshot}
+                    form={formik}
+                    valueField='reference'
+                    displayField='description'
+                    name='ct-nra-individual-ref'
+                    firstValue={formik.values['ct-nra-individual-ref']}
+                    label={_labels['ct-nra-individual']}
+                    secondDisplayField
+                    secondValue={formik.values['ct-nra-individual-description']}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue(item.name, newValue?.recordId || null)
+                      formik.setFieldValue('ct-nra-individual', newValue?.recordId || null)
+                      formik.setFieldValue('ct-nra-individual-ref', newValue?.reference || '')
+                      formik.setFieldValue('ct-nra-individual-description', newValue?.description || '')
                     }}
-                    error={formik.touched[item.name] && Boolean(formik.errors[item.name])}
+                    error={formik.touched['ct-nra-individual'] && Boolean(formik.errors['ct-nra-individual'])}
                   />
                 </Grid>
-              ))}
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='otp-expiry-time'
-                  label={_labels['otp-expiry-time']}
-                  value={formik.values['otp-expiry-time']}
-                  decimalScale={0}
-                  maxAccess={access}
-                  onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
-                  onClear={() => formik.setFieldValue('otp-expiry-time', null)}
-                  error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
-                />
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={SystemRepository.NumberRange.snapshot}
+                    name='ct-nra-corporate-ref'
+                    form={formik}
+                    label={_labels['ct-nra-corporate']}
+                    valueField='reference'
+                    displayField='description'
+                    secondDisplayField
+                    firstValue={formik.values['ct-nra-corporate-ref']}
+                    secondValue={formik.values['ct-nra-corporate-description']}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('ct-nra-corporate', newValue?.recordId || null)
+                      formik.setFieldValue('ct-nra-corporate-ref', newValue?.reference || '')
+                      formik.setFieldValue('ct-nra-corporate-description', newValue?.description || '')
+                    }}
+                    error={formik.touched['ct-nra-corporate'] && Boolean(formik.errors['ct-nra-corporate'])}
+                  />
+                </Grid>
+                {[
+                  { name: 'ct_cash_sales_ratetype_id', label: _labels.cash_sales_ratetype },
+                  { name: 'ct_cash_purchase_ratetype_id', label: _labels.cash_purchase_ratetype },
+                  { name: 'ct_credit_sales_ratetype_id', label: _labels.credit_sales_ratetype },
+                  { name: 'ct_credit_purchase_ratetype_id', label: _labels.credit_purchase_ratetype },
+                  { name: 'ct_credit_eval_ratetype_id', label: _labels.credit_eval_ratetype }
+                ].map(item => (
+                  <Grid item xs={12} key={item.name}>
+                    <ResourceComboBox
+                      endpointId={MultiCurrencyRepository.RateType.qry}
+                      values={formik.values}
+                      name={item.name}
+                      label={item.label}
+                      valueField='recordId'
+                      displayField='name'
+                      maxAccess={access}
+                      onChange={(event, newValue) => {
+                        formik.setFieldValue(item.name, newValue?.recordId || null)
+                      }}
+                      error={formik.touched[item.name] && Boolean(formik.errors[item.name])}
+                    />
+                  </Grid>
+                ))}
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='otp-expiry-time'
+                    label={_labels['otp-expiry-time']}
+                    value={formik.values['otp-expiry-time']}
+                    decimalScale={0}
+                    maxAccess={access}
+                    onChange={e => formik.setFieldValue('otp-expiry-time', e.target.value)}
+                    onClear={() => formik.setFieldValue('otp-expiry-time', null)}
+                    error={formik.touched['otp-expiry-time'] && Boolean(formik.errors['otp-expiry-time'])}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='ct-client-trial-days'
+                    label={_labels.phone}
+                    value={formik.values['ct-client-trial-days']}
+                    maxAccess={access}
+                    onChange={e => formik.setFieldValue('ct-client-trial-days', e.target.value)}
+                    onClear={() => formik.setFieldValue('ct-client-trial-days', null)}
+                    error={formik.touched['ct-client-trial-days'] && Boolean(formik.errors['ct-client-trial-days'])}
+                    allowNegative={false}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='ct-client-trial-days'
-                  label={_labels.phone}
-                  value={formik.values['ct-client-trial-days']}
-                  maxAccess={access}
-                  onChange={e => formik.setFieldValue('ct-client-trial-days', e.target.value)}
-                  onClear={() => formik.setFieldValue('ct-client-trial-days', null)}
-                  error={formik.touched['ct-client-trial-days'] && Boolean(formik.errors['ct-client-trial-days'])}
-                  allowNegative={false}
-                />
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='ct_minOtp_CIVAmount'
+                    label={_labels.minimumOtp}
+                    value={formik.values.ct_minOtp_CIVAmount}
+                    maxAccess={access}
+                    onChange={e => formik.setFieldValue('ct_minOtp_CIVAmount', e.target.value)}
+                    onClear={() => formik.setFieldValue('ct_minOtp_CIVAmount', '')}
+                    error={formik.touched.ct_minOtp_CIVAmount && Boolean(formik.errors.ct_minOtp_CIVAmount)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='ct_min_client_CIVAmount'
+                    label={_labels.minMandatory}
+                    value={formik.values.ct_min_client_CIVAmount}
+                    maxAccess={access}
+                    onChange={e => formik.setFieldValue('ct_min_client_CIVAmount', e.target.value)}
+                    onClear={() => formik.setFieldValue('ct_min_client_CIVAmount', '')}
+                    allowNegative={false}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={CTCLRepository.CtClientIndividual.snapshot}
+                    parameters={{ _category: 1 }}
+                    name='ct_default_civ_client'
+                    label={_labels.client}
+                    valueField='reference'
+                    displayField='name'
+                    displayFieldWidth={2}
+                    valueShow='ct_default_civ_clientRef'
+                    secondValueShow='ct_default_civ_clientName'
+                    form={formik}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('ct_default_civ_client', newValue ? newValue.recordId : '')
+                      formik.setFieldValue('ct_default_civ_clientRef', newValue ? newValue.reference : '')
+                      formik.setFieldValue('ct_default_civ_clientName', newValue ? newValue.name : '')
+                    }}
+                    maxAccess={access}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='ct_minOtp_CIVAmount'
-                  label={_labels.minimumOtp}
-                  value={formik.values.ct_minOtp_CIVAmount}
-                  maxAccess={access}
-                  onChange={e => formik.setFieldValue('ct_minOtp_CIVAmount', e.target.value)}
-                  onClear={() => formik.setFieldValue('ct_minOtp_CIVAmount', '')}
-                  error={formik.touched.ct_minOtp_CIVAmount && Boolean(formik.errors.ct_minOtp_CIVAmount)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomNumberField
-                  name='ct_min_client_CIVAmount'
-                  label={_labels.minMandatory}
-                  value={formik.values.ct_min_client_CIVAmount}
-                  maxAccess={access}
-                  onChange={e => formik.setFieldValue('ct_min_client_CIVAmount', e.target.value)}
-                  onClear={() => formik.setFieldValue('ct_min_client_CIVAmount', '')}
-                  allowNegative={false}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={CTCLRepository.CtClientIndividual.snapshot}
-                  parameters={{ _category: 1 }}
-                  name='ct_default_civ_client'
-                  label={_labels.client}
-                  valueField='reference'
-                  displayField='name'
-                  displayFieldWidth={2}
-                  valueShow='ct_default_civ_clientRef'
-                  secondValueShow='ct_default_civ_clientName'
-                  form={formik}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('ct_default_civ_client', newValue ? newValue.recordId : '')
-                    formik.setFieldValue('ct_default_civ_clientRef', newValue ? newValue.reference : '')
-                    formik.setFieldValue('ct_default_civ_clientName', newValue ? newValue.name : '')
-                  }}
-                  maxAccess={access}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

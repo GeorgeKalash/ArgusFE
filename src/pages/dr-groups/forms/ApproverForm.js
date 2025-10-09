@@ -63,13 +63,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      infoVisible={false}
-      resourceId={ResourceIds.DRGroups}
-      maxAccess={maxAccess}
-      editMode={editMode}
-    >
+    <FormShell form={formik} isInfo={false} resourceId={ResourceIds.DRGroups} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>

@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -11,6 +10,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import Form from 'src/components/Shared/Form'
 
 const ProductionRequestLog = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -118,27 +118,26 @@ const ProductionRequestLog = () => {
   }
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
-      </Fixed>
-      <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId', 'itemId', 'functionId']}
-          onDelete={del}
-          isLoading={false}
-          maxAccess={access}
-          pageSize={2000}
-          paginationType='client'
-          refetch={refetch}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={handleSubmit} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Fixed>
+          <GridToolbar onSearch={search} onSearchClear={clear} labels={_labels} inputSearch={true} />
+        </Fixed>
+        <Grow>
+          <Table
+            columns={columns}
+            gridData={data}
+            rowId={['recordId', 'itemId', 'functionId']}
+            onDelete={del}
+            isLoading={false}
+            maxAccess={access}
+            pageSize={2000}
+            paginationType='client'
+            refetch={refetch}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 
