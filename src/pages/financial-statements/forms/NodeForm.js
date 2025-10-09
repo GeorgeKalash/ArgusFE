@@ -71,7 +71,6 @@ export default function NodeForm({ labels, maxAccess, mainRecordId, node }) {
           parameters: `_recordId=${node?.current?.nodeId}`
         })
         formik.setValues(res.record)
-        node.current.nodeRef = res?.record?.reference
       }
     })()
   }, [])
