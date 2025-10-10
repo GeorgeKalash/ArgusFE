@@ -18,7 +18,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId }) {
+export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId, data, store, onSubmit }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -52,20 +52,20 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
       })
     }),
     onSubmit: async obj => {
-      await postRequest({
+      const res = await postRequest({
         extension: CostAllocationRepository.TrxCostType.set,
         record: JSON.stringify(obj)
-      }).then(res => {
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', res.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
       })
+
+      await onSubmit(obj)
+
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      formik.setFieldValue('recordId', res.recordId)
+
+      invalidate()
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
