@@ -8,6 +8,7 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
   variant = 'outlined', //outlined, standard, filled
+  displayType,
   value,
   onClear,
   onSearch,
@@ -16,12 +17,12 @@ const CustomTextField = ({
   autoFocus = false,
   readOnly = false,
   clearable = false,
-  autoComplete = 'off',
+  autoComplete = 'new-password',
   numberField = false,
   editMode = false,
   maxLength = '1000',
   position,
-  dir = 'ltr',
+  dir = '',
   hidden = false,
   phone = false,
   search = false,
@@ -116,17 +117,17 @@ const CustomTextField = ({
         fullWidth={fullWidth}
         autoFocus={focus}
         inputProps={{
-          autoComplete: 'off',
+          autoComplete,
           readOnly: _readOnly,
           maxLength: maxLength,
-          dir: dir,
+          ...(dir ? { dir } : {}),
           inputMode: numberField && 'numeric',
           pattern: numberField && '[0-9]*',
           style: {
             textAlign: numberField && 'right',
-            MozAppearance: 'textfield',
+            '-moz-appearance': 'textfield',
             textTransform: forceUpperCase ? 'uppercase' : 'none',
-            WebkitTextSecurity: props?.forcePasswordLook && !isFocused ? 'disc' : 'none'
+            WebkitTextSecurity: displayType == 'password' && !isFocused ? 'disc' : 'none'
           },
           tabIndex: _readOnly ? -1 : 0,
           'data-search': search ? 'true' : 'false'
@@ -145,8 +146,8 @@ const CustomTextField = ({
               {!clearable && !readOnly && (value || value === 0) && (
                 <IconButton
                   tabIndex={-1}
+                  id={props.ClearId}
                   edge='end'
-                  onMouseDown={e => e.preventDefault()}
                   onClick={e => {
                     onClear(e)
                     setFocus(true)
