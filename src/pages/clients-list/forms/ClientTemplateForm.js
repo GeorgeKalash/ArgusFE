@@ -640,6 +640,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
           if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
 
           toast.success(platformLabels.Submit)
+          invalidate()
           setOtpShow(true)
           getClient(res.recordId)
           setEditMode(true)
@@ -957,8 +958,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
-                          type={showAsPassword ? 'password' : ''}
                           label={labels.idNo}
+                          displayType={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
