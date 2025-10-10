@@ -442,7 +442,8 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
         ...headerView,
         valueDate: formatDateFromApi(headerView.valueDate),
         defaultValueDate: formatDateFromApi(headerView.defaultValueDate),
-        date: formatDateFromApi(headerView.date)
+        date: formatDateFromApi(headerView.date),
+        exRate: parseFloat(headerView.exRate).toFixed(5)
       },
       ICRequest:
         headerView.interfaceId == 1 && dataRequest?.requestLog
@@ -1253,7 +1254,13 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                       name='header.exRate2'
                       decimalScale={5}
                       label={labels.exRateDivide}
-                      value={header?.exRate ? 1 / header.exRate : ''}
+                      value={
+                        formik?.values?.header?.exRate
+                          ? formik?.values?.header.exRate != 0
+                            ? 1 / formik?.values?.header.exRate
+                            : '0.00000'
+                          : '0.00000'
+                      }
                       readOnly
                       maxAccess={maxAccess}
                       maxLength={10}

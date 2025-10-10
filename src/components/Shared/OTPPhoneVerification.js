@@ -194,7 +194,7 @@ const OTPPhoneVerification = ({
         </button>
         <button
           className={styles.verifyButton}
-          onClick={handleVerifyOtp}
+          onClick={() => handleVerifyOtp()}
           disabled={timer === 0 || disabled < 5 ? true : false}
         >
           {labels.verifyOTP}
