@@ -1,7 +1,7 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
@@ -47,6 +47,8 @@ const CustomComboBox = ({
     hidden,
     disabled
   )
+
+  const id = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [])
 
   const [hover, setHover] = useState(false)
 
@@ -245,7 +247,13 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
-          inputProps={{ ...params.inputProps, tabIndex: _readOnly ? -1 : 0, ...(neverPopulate && { value: '' }) }}
+          inputProps={{
+            ...params.inputProps,
+            tabIndex: _readOnly ? -1 : 0,
+            ...(neverPopulate && { value: '' }),
+            autoComplete: 'new-password',
+            id
+          }}
           type={type}
           variant={variant}
           label={label}

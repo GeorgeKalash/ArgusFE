@@ -74,13 +74,18 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
 
   const add = () => {
     node.current.nodeId = null
-    node.current.nodeRef = ''
+ 
     openForm()
   }
 
   const edit = obj => {
     node.current.nodeId = obj?.recordId
-    node.current.nodeRef = obj?.reference
+
+
+    node.current.viewNodeId = obj?.recordId
+    node.current.viewNodeRef = obj?.reference
+    node.current.viewNodedesc = obj?.description
+
     openForm()
   }
 
@@ -90,7 +95,14 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
       record: JSON.stringify(obj)
     })
     node.current.nodeId = null
-    node.current.nodeRef = ''
+
+  
+    if (node.current.viewNodeId === obj?.recordId) {
+      node.current.viewNodeId = null
+      node.current.viewNodeRef = ''
+      node.current.viewNodedesc = ''
+    }
+
     invalidate()
     toast.success(platformLabels.Deleted)
   }
@@ -126,9 +138,10 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
           onDelete={del}
           maxAccess={maxAccess}
           pagination={false}
-          onSelectionChange={row => {
-            node.current.nodeId = row?.recordId || null
-            node.current.nodeRef = row?.reference || ''
+          onSelectionChange={row => { 
+            node.current.viewNodeId = row?.recordId || null
+            node.current.viewNodeRef = row?.reference || ''
+            node.current.viewNodedesc = row?.description || ''
           }}
         />
       </Grow>
