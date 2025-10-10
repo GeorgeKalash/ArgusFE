@@ -69,7 +69,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         recordId: null,
         reference: '',
         workCenterId: null,
-        date: null,
+        date: new Date(),
         dtId: null,
         status: 1,
         wip: 1
