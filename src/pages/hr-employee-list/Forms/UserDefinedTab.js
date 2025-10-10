@@ -1,75 +1,163 @@
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import * as yup from 'yup'
-import { useContext, useEffect } from 'react'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { useContext, useEffect, useState } from 'react'
 import FormShell from 'src/components/Shared/FormShell'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 const UserDefinedTab = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
 
+  const [fields, setFields] = useState([])
+
   const invalidate = useInvalidate({
-    endpointId: FinancialRepository.Account.page
+    endpointId: EmployeeRepository.UserDefined.qry
   })
 
   const { formik } = useForm({
-    initialValues: {
-      recordId: null,
-      hair: '',
-      weight: null,
-      value: false,
-      test1: null
-    },
-    maxAccess: maxAccess,
-    validateOnChange: true,
-    validationSchema: yup.object({}),
+    initialValues: {},
+    maxAccess,
     onSubmit: async values => {
-      await postAccount(values)
+      const payloadList = {
+        items: Object.entries(values).map(([propertyId, value]) => ({
+          propertyId: Number(propertyId),
+          employeeId: recordId,
+          value: value ?? ''
+        }))
+      }
+
+      await postRequest({
+        extension: EmployeeRepository.UserDefined.set2,
+        record: JSON.stringify(payloadList)
+      })
+
+      toast.success(platformLabels.Edited)
+      invalidate()
     }
   })
 
-  const postAccount = async obj => {
-    const res = await postRequest({
-      extension: FinancialRepository.Account.set,
-      record: JSON.stringify(obj)
-    })
-    if (!obj.recordId) {
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: res.recordId
-      }))
-      formik.setFieldValue('recordId', res.recordId)
-    }
-    invalidate()
-    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-  }
-
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: FinancialRepository.Account.get,
-          parameters: `_recordId=${recordId}`
-        })
-        formik.setValues(res.record)
-      }
+    ;(async function fetchUserDefined() {
+      if (!recordId) return
+
+      const userValues = await getRequest({
+        extension: EmployeeRepository.UserDefined.qry,
+        parameters: `_employeeId=${recordId}`
+      })
+
+      const fieldDefs = await getRequest({
+        extension: EmployeeRepository.CustomProperties.qry,
+        parameters: `_employeeId=${recordId}`
+      })
+
+      const merged = fieldDefs?.list?.map(def => {
+        const matchingValue = userValues?.list?.find(v => v.propertyId === def.recordId)
+
+        return {
+          ...def,
+          value: matchingValue?.value ?? '',
+          employeeId: recordId
+        }
+      })
+
+      setFields(merged)
+
+      const initialValues = merged?.reduce((acc, field) => {
+        acc[field.recordId] = field.value
+
+        return acc
+      }, {})
+
+      formik.setValues(initialValues)
     })()
-  }, [])
+  }, [recordId])
 
-  const editMode = !!formik.values.recordId
+  const editMode = true
 
+  const renderField = field => {
+    const fieldId = field.recordId
+    const value = formik.values[fieldId] ?? ''
+
+    switch (field.mask) {
+      case 1:
+        return (
+          <CustomTextField
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            value={value || ''}
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue(String(fieldId), '')}
+          />
+        )
+
+      case 2:
+        return (
+          <CustomNumberField
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            value={value || ''}
+            maxAccess={maxAccess}
+            onChange={formik.handleChange}
+            onClear={() => formik.setFieldValue(String(fieldId), '')}
+          />
+        )
+
+      case 3:
+        return (
+          <CustomDateTimePicker
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            value={value ? new Date(value) : null}
+            onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
+            onClear={() => formik.setFieldValue(String(fieldId), '')}
+          />
+        )
+
+      case 4:
+        return (
+          <CustomDatePicker
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            value={value ? new Date(value) : null}
+            onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
+            onClear={() => formik.setFieldValue(String(fieldId), '')}
+          />
+        )
+
+      case 5:
+        return (
+          <CustomCheckBox
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            value={Boolean(value)}
+            onChange={event => formik.setFieldValue(String(fieldId), event.target.checked)}
+            maxAccess={maxAccess}
+          />
+        )
+
+      default:
+        return null
+    }
+  }
 
   return (
     <FormShell
@@ -83,49 +171,11 @@ const UserDefinedTab = ({ labels, maxAccess, setStore, store }) => {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='hair'
-                label={labels.hair}
-                value={formik.values.hair}
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('hair', '')}
-                error={formik.touched.hair && Boolean(formik.errors.hair)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='weight'
-                label={labels.weight}
-                value={formik.values.weight}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('weight', '')}
-                error={formik.touched.weight && Boolean(formik.errors.weight)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomCheckBox
-                name='ableToTravel'
-                value={formik.values?.ableToTravel}
-                onChange={event => formik.setFieldValue('ableToTravel', event.target.checked)}
-                label={labels.ableToTravel}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='test1'
-                label={labels.test1}
-                value={formik.values.test1}
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('test1', '')}
-                error={formik.touched.test1 && Boolean(formik.errors.test1)}
-              />
-            </Grid>
+            {fields?.map(field => (
+              <Grid item xs={12} key={field.recordId}>
+                {renderField(field)}
+              </Grid>
+            ))}
           </Grid>
         </Grow>
       </VertLayout>

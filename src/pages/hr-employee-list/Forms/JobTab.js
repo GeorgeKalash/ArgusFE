@@ -123,10 +123,10 @@ const JobTab = ({ labels, maxAccess, store }) => {
       </Fixed>
       <Fixed>
         <Grid container xs={12}>
-          <Grid item xs={1.5}>
-            <GridToolbar onAdd={() => openForm()} maxAccess={maxAccess} />
+          <Grid item xs={1.3}>
+            <GridToolbar onAdd={openForm} maxAccess={maxAccess} />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={3} paddingTop={1}>
             <CustomTextField
               name='searchEmployment'
               value={searchEmployment}

@@ -7,23 +7,19 @@ import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { formatDateFromApi } from 'src/lib/date-helper'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, submitImage }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -31,8 +27,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.Employee.page
   })
-
-  console.log(recordId)
 
   const { formik } = useForm({
     initialValues: {
@@ -52,39 +46,45 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
       lastName: '',
       religion: null,
       nationalityId: null,
-      citizenshipId: null,
       bloodType: null,
       scId: null,
+      scType: null,
       placeOfBirth: '',
       hireDate: null,
       gender: 2,
-      hasSpecialNeeds: false
+      activeStatus: 1
     },
     maxAccess: maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       firstName: yup.string().required(),
       lastName: yup.string().required(),
       birthDate: yup.date().required(),
       scId: yup.number().required(),
-      hireDate: yup.date().required()
+      hireDate: yup.date().required(),
+      scId: yup.number().when('scType', {
+        is: value => value == 2,
+        then: () => yup.number().required(),
+        otherwise: () => yup.number().nullable()
+      })
     }),
     onSubmit: async values => {
       const res = await postRequest({
         extension: EmployeeRepository.Employee.set,
         record: JSON.stringify(values)
       })
-      if (!obj.recordId) {
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId,
-          hireDate: values.hireDate
-        }))
+      if (!values.recordId) {
         formik.setFieldValue('recordId', res.recordId)
       }
+      setStore(prevStore => ({
+        ...prevStore,
+        recordId: res.recordId,
+        hireDate: values.hireDate
+      }))
+
+      submitImage()
       invalidate()
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
 
@@ -95,8 +95,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
           extension: EmployeeRepository.Employee.get1,
           parameters: `_recordId=${recordId}`
         })
-
-        console.log(res)
 
         formik.setValues({
           ...res.record,
@@ -111,8 +109,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
       }
     })()
   }, [])
-
-  console.log(formik?.values?.recordId, 'formik?.values?.recordId')
 
   const editMode = !!formik?.values?.recordId
 
@@ -145,6 +141,8 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.reference}
                     value={formik.values.reference}
                     required
+                    maxLength='10'
+                    readOnly={editMode}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
@@ -158,7 +156,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     value={formik.values.firstName}
                     maxAccess={maxAccess}
                     required
-                    maxLength='10'
+                    maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('firstName', '')}
                     error={formik.touched.firstName && Boolean(formik.errors.firstName)}
@@ -170,6 +168,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.middleName}
                     value={formik.values.middleName}
                     maxAccess={maxAccess}
+                    maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('middleName', '')}
                     error={formik.touched.nmiddleNameame && Boolean(formik.errors.middleName)}
@@ -181,6 +180,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.lastName}
                     value={formik.values.lastName}
                     maxAccess={maxAccess}
+                    maxLength='20'
                     required
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('lastName', '')}
@@ -193,6 +193,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.familyName}
                     value={formik.values.familyName}
                     maxAccess={maxAccess}
+                    maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('familyName', '')}
                     error={formik.touched.familyName && Boolean(formik.errors.familyName)}
@@ -204,6 +205,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.idRef}
                     value={formik.values.idRef}
                     maxAccess={maxAccess}
+                    maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('idRef', '')}
                     error={formik.touched.idRef && Boolean(formik.errors.idRef)}
@@ -215,6 +217,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.homeMail}
                     value={formik.values.homeMail}
                     maxAccess={maxAccess}
+                    maxLength='40'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('homeMail', '')}
                     error={formik.touched.homeMail && Boolean(formik.errors.homeMail)}
@@ -226,6 +229,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.workMail}
                     value={formik.values.workMail}
                     maxAccess={maxAccess}
+                    maxLength='40'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('workMail', '')}
                     error={formik.touched.workMail && Boolean(formik.errors.workMail)}
@@ -248,6 +252,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.homePhone}
                     value={formik.values.phone}
                     maxAccess={maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('phone', '')}
                     error={formik.touched.phone && Boolean(formik.errors.phone)}
@@ -258,7 +263,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     name='civilStatus'
                     label={labels.civilStatus}
                     datasetId={DataSets.CIVIL_STATUS}
-                    required
                     values={formik.values}
                     valueField='key'
                     displayField='value'
@@ -328,20 +332,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
-                    name='citizenshipId'
-                    label={labels.citizenship}
-                    valueField='recordId'
-                    displayField='name'
-                    values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('citizenshipId', newValue?.recordId || null)
-                    }}
-                    error={formik.touched.citizenshipId && Boolean(formik.errors.citizenshipId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
                     name='bloodType'
                     label={labels.bloodType}
                     datasetId={DataSets.BLOOD_TYPE}
@@ -356,7 +346,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    name='scId'
+                    name='scType'
                     label={labels.scheduleType}
                     datasetId={DataSets.SCHEDULE_TYPE}
                     values={formik.values}
@@ -364,7 +354,28 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     valueField='key'
                     displayField='value'
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('scId', newValue?.key || null)
+                      formik.setFieldValue('scType', newValue?.key ?? null)
+
+                      if (newValue?.key == 1 || newValue?.key == 3 || newValue?.key == 4) {
+                        formik.setFieldValue('scId', null)
+                      }
+                    }}
+                    error={formik.touched.scType && Boolean(formik.errors.scType)}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={TimeAttendanceRepository.Schedule.qry}
+                    name='scId'
+                    label={labels.schedule}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    required={formik.values.scType == 2}
+                    readOnly={formik.values.scType == 1 || formik.values.scType == 3 || formik.values.scType == 4}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('scId', newValue?.recordId || null)
                     }}
                     error={formik.touched.scId && Boolean(formik.errors.scId)}
                   />
@@ -376,6 +387,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                     value={formik.values.placeOfBirth}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
+                    maxLength='30'
                     onClear={() => formik.setFieldValue('placeOfBirth', '')}
                     error={formik.touched.placeOfBirth && Boolean(formik.errors.placeOfBirth)}
                   />
@@ -392,19 +404,15 @@ const ProfileForm = ({ labels, maxAccess, setStore, store }) => {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <RadioGroup row value={formik.values.gender} defaultValue={2} onChange={formik.setFieldValue}>
+                  <RadioGroup
+                    row
+                    name='gender'
+                    value={formik.values.gender}
+                    onChange={e => formik.setFieldValue('gender', Number(e.target.value))}
+                  >
                     <FormControlLabel value={2} control={<Radio />} label={labels.male} />
                     <FormControlLabel value={1} control={<Radio />} label={labels.female} />
                   </RadioGroup>
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomCheckBox
-                    name='hasSpecialNeeds'
-                    value={formik.values?.hasSpecialNeeds}
-                    onChange={event => formik.setFieldValue('hasSpecialNeeds', event.target.checked)}
-                    label={labels.hasSpecialNeeds}
-                    maxAccess={maxAccess}
-                  />
                 </Grid>
               </Grid>
             </Grid>

@@ -4,7 +4,10 @@ export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
     get1: service + 'getEM1',
-    set: service + 'setEM1'
+    set: service + 'setEM',
+    qry: service + 'qryEM',
+    del: service + 'delEM',
+    page: service + 'pageEM',
   },
   CertificateFilters: {
     qry: service + 'qryCL',
@@ -66,7 +69,8 @@ export const EmployeeRepository = {
     get: service + 'getUP',
     set: service + 'setUP',
     del: service + 'delUP',
-    page: service + 'pageUP'
+    page: service + 'pageUP',
+    qry: service + 'qryUP'
   },
   ResignationRequest: {
     get: service + 'getRR',
@@ -123,7 +127,9 @@ export const EmployeeRepository = {
   },
   EmployeeList: {
     qry2: service + 'qryES2',
-    page: service + 'pageES1'
+    page1: service + 'pageES1',
+    del: service + 'delES',
+    page: service + 'pageES'
   },
   EmployementHistory: {
     qry: service + 'qryEH',
@@ -140,5 +146,12 @@ export const EmployeeRepository = {
     del: service + 'delCE',
     get: service + 'getCE',
     set: service + 'setCE'
+  },
+  UserDefined: {
+    qry: service + 'qryUV',
+    set2: service + 'set2UV'
+  },
+  Leaves: {
+    set: service + 'setLS',
   }
 }

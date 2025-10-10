@@ -14,7 +14,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { DataSets } from 'src/resources/DataSets'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
@@ -98,6 +97,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 label={labels.institution}
                 value={formik.values.institution}
                 required
+                maxLength={50}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('institution', '')}
@@ -144,7 +144,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 name='remarks'
                 label={labels.remarks}
                 value={formik?.values?.remarks}
-                maxLength='200'
+                maxLength='100'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('remarks', '')}
@@ -158,6 +158,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 value={formik.values.grade}
                 required
                 maxAccess={maxAccess}
+                maxLength={20}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('grade', '')}
                 error={formik.touched.grade && Boolean(formik.errors.grade)}
@@ -169,6 +170,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 label={labels.major}
                 value={formik.values.major}
                 required
+                maxLength={50}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('major', '')}

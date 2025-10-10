@@ -1,28 +1,24 @@
 import { useContext } from 'react'
+import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Typography } from '@mui/material'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
-import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateForGetApI } from 'src/lib/date-helper'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 const LeavesTab = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
   const { recordId } = store
 
-  console.log(recordId)
-
   async function fetchGridData() {
-    console.log('hoj')
-
     const response = await getRequest({
       extension: LoanManagementRepository.Leaves.qry,
       parameters: `_filter=&_size=30&_startAt=0&_lsId=0&_employeeId=${recordId}&_asOfDate=${
@@ -114,6 +110,17 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
           gridData={data}
           rowId={['recordId']}
           showCheckboxColumn={true}
+          handleCheckboxChange={async data => {
+            await postRequest({
+              extension: EmployeeRepository.Leaves.set,
+              record: JSON.stringify({
+                ...data,
+                employeeId: recordId
+              })
+            })
+
+            toast.success(platformLabels.Updated)
+          }}
           pageSize={50}
           pagination={false}
           refetch={refetch}

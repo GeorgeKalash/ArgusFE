@@ -57,5 +57,8 @@ export const TimeAttendanceRepository = {
   },
   AttendanceDay: {
     qry: service + 'qryAD'
+  },
+  Schedule: {
+    qry: service + 'qrySC'
   }
 }

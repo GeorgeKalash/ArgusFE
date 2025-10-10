@@ -29,7 +29,7 @@ const EmployeeList = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.EmployeeList.page,
+    endpointId: EmployeeRepository.Employee.page,
     datasetId: ResourceIds.EmployeeFilter,
     filter: {
       filterFn: fetchWithFilter
@@ -122,7 +122,7 @@ const EmployeeList = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FinancialRepository.Account.del,
+      extension: EmployeeRepository.Employee.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -148,15 +148,13 @@ const EmployeeList = () => {
   }
 
   const edit = obj => {
-    console.log(obj?.parent?.recordId)
-
     openForm(obj?.parent?.recordId)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FIACC'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'RT108'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

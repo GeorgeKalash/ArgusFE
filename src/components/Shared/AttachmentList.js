@@ -33,6 +33,7 @@ const AttachmentList = ({ resourceId, recordId, window }) => {
     access,
     invalidate
   } = useResourceQuery({
+    enabled: recordId !== null && recordId !== undefined,
     queryFn: fetchGridData,
     endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`,
     datasetId: ResourceIds.SystemAttachments

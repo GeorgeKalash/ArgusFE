@@ -45,7 +45,8 @@ export default function FormShell({
   actions,
   isParentWindow = true,
   onPrint = false,
-  fullSize = false
+  fullSize = false,
+  expand = false
 }) {
   const { stack } = useWindow()
   const { clear, open, setRecord } = useGlobalRecord() || {}
@@ -378,6 +379,7 @@ export default function FormShell({
       isParentWindow={isParentWindow}
       onPrint={onPrint}
       fullSize={fullSize}
+      expand={expand}
     >
       {children}
     </Form>

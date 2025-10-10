@@ -16,7 +16,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
-const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId }) => {
+const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -48,6 +48,7 @@ const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId }
 
       toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
       formik.setFieldValue('recordId', response.recordId)
+      window.close()
       invalidate()
     }
   })
@@ -110,9 +111,9 @@ const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId }
             <Grid item xs={12}>
               <CustomTextArea
                 name='comment'
-                label={labels.comment}
+                label={labels.comments}
                 value={formik?.values?.comment}
-                maxLength='200'
+                maxLength='100'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('comment', '')}

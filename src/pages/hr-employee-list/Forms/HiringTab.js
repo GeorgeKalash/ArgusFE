@@ -8,9 +8,6 @@ import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
@@ -59,10 +56,11 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
       pyActiveDate: yup.date().required()
     }),
     onSubmit: async values => {
-      const res = await postRequest({
+      await postRequest({
         extension: EmployeeRepository.Hiring.set,
         record: JSON.stringify({
           ...values,
+          employeeId: recordId,
           pyActiveDate: formatDateToApi(values.pyActiveDate),
           termEndDate: values.termEndDate ? formatDateToApi(values.termEndDate) : null,
           nextReviewDate: values.nextReviewDate ? formatDateToApi(values.nextReviewDate) : null,
@@ -85,6 +83,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
         if (res.record)
           formik.setValues({
             ...res.record,
+            employeeId: recordId,
             pyActiveDate: res?.record?.pyActiveDate ? formatDateFromApi(res.record.pyActiveDate) : null,
             termEndDate: res.record.termEndDate ? formatDateFromApi(res.record.termEndDate) : null,
             nextReviewDate: res.record.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
@@ -130,6 +129,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.probationPeriod}
                     value={formik.values.probationPeriod}
                     maxAccess={maxAccess}
+                    maxLength={9}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('probationPeriod', '')}
                     error={formik.touched.probationPeriod && Boolean(formik.errors.probationPeriod)}
@@ -142,9 +142,6 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     value={formik.values?.probationEndDate}
                     required
                     onChange={(e, newValue) => {
-                      console.log(newValue)
-                      formik.setFieldValue('probationEndDate', newValue)
-
                       let start = null
                       let end = null
 
@@ -164,6 +161,8 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                         const days = differenceInDays(end, start)
                         formik.setFieldValue('probationPeriod', days > 0 ? days : 0)
                       }
+
+                      formik.setFieldValue('probationEndDate', newValue)
                     }}
                     onClear={() => formik.setFieldValue('probationEndDate', '')}
                     error={formik.touched.probationEndDate && Boolean(formik.errors.probationEndDate)}
@@ -194,6 +193,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     name='pyActiveDate'
                     label={labels.pyActiveDate}
                     value={formik.values?.pyActiveDate}
+                    required
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('pyActiveDate', '')}
                     error={formik.touched.pyActiveDate && Boolean(formik.errors.pyActiveDate)}
@@ -218,7 +218,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     name='recruitmentInfo'
                     label={labels.recruitmentInfo}
                     value={formik?.values?.recruitmentInfo}
-                    maxLength='200'
+                    maxLength='255'
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('recruitmentInfo', '')}
@@ -230,11 +230,12 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
             <Grid item xs={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='recruitmentCost'
                     label={labels.recruitmentCost}
                     value={formik.values.recruitmentCost}
                     maxAccess={maxAccess}
+                    maxLength='10'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('recruitmentCost', '')}
                     error={formik.touched.recruitmentCost && Boolean(formik.errors.recruitmentCost)}
@@ -246,6 +247,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.pyReference}
                     value={formik.values.pyReference}
                     maxAccess={maxAccess}
+                    maxLength='10'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('pyReference', '')}
                     error={formik.touched.pyReference && Boolean(formik.errors.pyReference)}
@@ -257,6 +259,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.taReference}
                     value={formik.values.taReference}
                     maxAccess={maxAccess}
+                    maxLength='10'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('taReference', '')}
                     error={formik.touched.taReference && Boolean(formik.errors.taReference)}
@@ -296,6 +299,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
                     label={labels.otherRef}
                     value={formik.values.otherRef}
                     maxAccess={maxAccess}
+                    maxLength={15}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('otherRef', '')}
                     error={formik.touched.otherRef && Boolean(formik.errors.otherRef)}

@@ -1,7 +1,7 @@
 import { Grid, Box, Typography } from '@mui/material'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import ProfileForm from '../Forms/ProfileForm'
 import JobTab from '../Forms/JobTab'
 import HiringTab from '../Forms/HiringTab'
@@ -11,14 +11,17 @@ import UserDefinedTab from '../Forms/UserDefinedTab'
 import AttachmentList from 'src/components/Shared/AttachmentList'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { formatDateMDY } from 'src/lib/date-helper'
 
 const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
+  const { getRequest } = useContext(RequestsContext)
+  const [quickView, setQuickView] = useState(null)
 
   const imageUploadRef = useRef(null)
-
-  console.log(recordId)
 
   const tabs = [
     { label: labels.Profile },
@@ -30,8 +33,36 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
     { label: labels.UserDefined, disabled: !store.recordId }
   ]
 
+  const getData = async recordId => {
+    const res = await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${recordId}&_asOfDate=${formatDateMDY(new Date())}`
+    })
+
+    if (res?.record) {
+      setQuickView(res.record)
+
+      setStore(prev => ({
+        ...prev,
+        hireDate: res.record.hireDate
+      }))
+    }
+  }
+
+  useEffect(() => {
+    if (recordId) getData(recordId)
+  }, [recordId])
+
+  const submitImage = async () => {
+    if (imageUploadRef.current) {
+      imageUploadRef.current.value = parseInt(recordId)
+
+      await imageUploadRef.current.submit()
+    }
+  }
+
   return (
-    <Grid container spacing={2} sx={{ height: '100%' }}>
+    <Grid container sx={{ height: '100%' }}>
       <Grid item xs={3} sx={{ height: '100%' }}>
         <Box
           sx={{
@@ -45,12 +76,14 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
         >
           <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.EmployeeFilter} seqNo={0} recordId={recordId} />
 
-          <Typography variant='subtitle1'>ID: {store.recordId || '-'}</Typography>
+          <Typography variant='subtitle1'>{quickView?.fullName || '-'}</Typography>
+
           <Typography variant='body2' color='text.secondary'>
-            Manager: John Doe
+            {labels.Manager}: {quickView?.reportToName || ''}
           </Typography>
+
           <Typography variant='body2' color='text.secondary'>
-            Service: 3y 1m 2d
+            {quickView?.serviceDuration || '-'}
           </Typography>
         </Box>
       </Grid>
@@ -58,32 +91,38 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
         <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         <CustomTabPanel height={height} index={0} value={activeTab}>
-          <ProfileForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+          <ProfileForm
+            store={store}
+            setStore={setStore}
+            labels={labels}
+            maxAccess={maxAccess}
+            submitImage={submitImage}
+          />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={1} value={activeTab}>
           <JobTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
-
+{/* 
         <CustomTabPanel height={height} index={2} value={activeTab}>
           <LeavesTab store={store} labels={labels} maxAccess={maxAccess} />
-        </CustomTabPanel>
+        </CustomTabPanel> */}
 
         <CustomTabPanel height={height} index={3} value={activeTab}>
           <HiringTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={4} value={activeTab}>
-          <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} />
+          <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} isNotTab={recordId} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={5} value={activeTab}>
           <SkillsTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
-        {/* 
+
         <CustomTabPanel height={height} index={6} value={activeTab}>
           <UserDefinedTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
-        </CustomTabPanel> */}
+        </CustomTabPanel>
       </Grid>
     </Grid>
   )
