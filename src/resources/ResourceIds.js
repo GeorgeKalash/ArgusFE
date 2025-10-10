@@ -593,6 +593,7 @@ export const ResourceIds = {
   Files: 71209,
   FinancialStatementsReport: 30405,
   BatchWorksheet: 42345,
+  ProcessNotifications:76102,
 
   // GL
   GLSalesInvoice: 51604,
@@ -669,8 +670,4 @@ export const ResourceIds = {
   ADDNationalClientMaster: 35601,
   ADDWorkClientMaster: 35602,
   ADDClientCorporate: 35603,
-
-
-  // 
-  AAPN:76102,
 }
