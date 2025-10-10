@@ -82,7 +82,7 @@ const CustomComboBox = ({
   ) : (
     <Autocomplete
       ref={autocompleteRef}
-      name={name}
+      id={id}
       value={value}
       size={size}
       options={store}
@@ -251,8 +251,7 @@ const CustomComboBox = ({
             ...params.inputProps,
             tabIndex: _readOnly ? -1 : 0,
             ...(neverPopulate && { value: '' }),
-            autoComplete: 'new-password',
-            id
+            autoComplete: 'new-password'
           }}
           type={type}
           variant={variant}

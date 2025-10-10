@@ -87,10 +87,10 @@ const CustomLookup = ({
     <Grid container spacing={0} sx={{ width: '100%' }}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
+          id={id}
           ref={autocompleteRef}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          name={name}
           key={firstValue || null}
           value={firstValue}
           {...(!firstValue && { inputValue: inputValue })}
@@ -256,8 +256,7 @@ const CustomLookup = ({
               inputProps={{
                 ...params.inputProps,
                 autoComplete: 'new-password',
-                tabIndex: _readOnly ? -1 : 0, // Prevent focus if readOnly
-                id
+                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
               }}
               autoFocus={focus}
               error={error}
