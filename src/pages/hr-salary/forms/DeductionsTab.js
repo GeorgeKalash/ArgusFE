@@ -10,6 +10,7 @@ import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import toast from 'react-hot-toast'
 
 const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
   const { postRequest } = useContext(RequestsContext)
