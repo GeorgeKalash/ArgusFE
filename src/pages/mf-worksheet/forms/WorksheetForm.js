@@ -150,12 +150,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
 
   useEffect(() => {
     ;(async function () {
-      if (!recordId && formik.values.dtId) {
-        fillDocumentTypeFields(formik.values.dtId)
-      }
       recordId && (await getData(recordId))
     })()
-  }, [formik.values.dtId])
+  }, [])
 
   const isPosted = formik.values.status === 3
 
@@ -263,6 +260,14 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       formik.setFieldValue('workCenterName', '')
     }
   }
+
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId && formik.values.dtId) {
+        fillDocumentTypeFields(formik.values.dtId)
+      }
+    })()
+  }, [formik.values.dtId])
 
   return (
     <FormShell
