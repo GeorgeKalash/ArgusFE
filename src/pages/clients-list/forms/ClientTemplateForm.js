@@ -959,7 +959,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          displayType={showAsPassword ? 'password' : ''}
+                          type={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {

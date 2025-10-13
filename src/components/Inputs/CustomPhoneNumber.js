@@ -5,7 +5,6 @@ import 'react-phone-input-2/lib/material.css'
 import { ControlContext } from 'src/providers/ControlContext'
 import ClearIcon from '@mui/icons-material/Clear'
 import { checkAccess } from 'src/lib/maxAccess'
-import { AutoComplete } from 'primereact/autocomplete'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {
   const prefix = '+'
@@ -40,6 +39,14 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     if (onBlur) onBlur(event)
   }
 
+  useEffect(() => {
+    const inputElement = document.querySelector(`[name="${name}"]`)
+
+    if (inputElement) {
+      inputElement.type = type
+    }
+  }, [type])
+
   return _hidden ? (
     <></>
   ) : (
@@ -73,7 +80,6 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
         onBlur={handlePhoneBlur}
         disableDropdown={_readOnly}
         inputProps={{
-          autoComplete: 'new-password',
           name: name,
           onPaste: props.onPaste,
           onCopy: props.onCopy,
@@ -87,8 +93,7 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
         }}
         inputStyle={{
           width: '100%',
-          border: 'none',
-          WebkitTextSecurity: type === 'password' ? 'disc' : 'none'
+          border: 'none'
         }}
         specialLabel={''}
         {...props}
