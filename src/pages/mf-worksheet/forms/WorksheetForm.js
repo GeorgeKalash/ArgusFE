@@ -246,11 +246,13 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
           parameters: `_recordId=${res?.record?.workCenterId}`
         }))
       formik.setFieldValue('dtId', dtId || null)
-      formik.setFieldValue('siteId', res2?.record?.siteId || null)
       formik.setFieldValue('siteName', res2?.record?.siteName || '')
-      formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
       formik.setFieldValue('workCenterRef', res?.record?.workCenterRef || '')
       formik.setFieldValue('workCenterName', res?.record?.workCenterName || '')
+
+      
+      formik.setFieldValue('siteId', res2?.record?.siteId || null)
+      formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
     } else {
       formik.setFieldValue('dtId', null)
       formik.setFieldValue('siteId', null)
@@ -263,7 +265,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
 
   useEffect(() => {
     ;(async function () {
-      if (!recordId && formik.values.dtId) {
+      if (formik.values.dtId) {
         fillDocumentTypeFields(formik.values.dtId)
       }
     })()
@@ -300,8 +302,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     values={formik.values}
                     maxAccess={access}
                     onChange={async (event, newValue) => {
-                      fillDocumentTypeFields(newValue?.recordId)
-                      changeDT(newValue)
+                      await changeDT(newValue)
+
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
