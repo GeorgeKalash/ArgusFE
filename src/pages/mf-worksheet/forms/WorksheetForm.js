@@ -300,6 +300,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={access}
+                    displayFieldWidth={1.5}
                     onChange={async (event, newValue) => {
                       await fillDocumentTypeFields(newValue?.recordId)
 
