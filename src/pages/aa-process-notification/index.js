@@ -72,22 +72,22 @@ const ProcessNotification = () => {
     ])
 
     const rows = (kvsList ?? []).map((k, index) => {
+      const mapping = (pnRes?.list || []).find(m => m.processId === Number(k.key))
+    
       const templateName =
         (teRes?.list || []).find(
-          t =>
-            t.recordId ===
-            ((pnRes?.list || []).find(m => m.processId === Number(k.key))?.templateId ?? null)
+          t => t.recordId === (mapping?.templateId ?? null)
         )?.name || ''
-
+    
       return {
         id: index + 1,
         processId: Number(k.key),
         processName: k.value,
-        templateId: (pnRes?.list || []).find(m => m.processId === Number(k.key))?.templateId ?? null,
+        templateId: mapping?.templateId ?? null,
         templateName
       }
     })
-    formik.setFieldValue('rows',rows)
+        formik.setFieldValue('rows',rows)
   }
 
   const columns = [
