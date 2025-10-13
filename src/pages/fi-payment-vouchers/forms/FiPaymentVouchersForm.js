@@ -90,7 +90,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       paymentReasonId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       accountType: yup.string().required(),

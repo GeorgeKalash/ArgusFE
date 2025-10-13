@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -10,9 +10,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function AccountGroupsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
     initialValues: {
@@ -21,27 +23,23 @@ export default function AccountGroupsForm({ labels, maxAccess, recordId, invalid
       name: ''
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: GeneralLedgerRepository.GLAccountGroups.set,
         record: JSON.stringify(obj)
       })
 
-      if (!obj.recordId) {
-        toast.success('Record Added Successfully')
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success('Record Edited Successfully')
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

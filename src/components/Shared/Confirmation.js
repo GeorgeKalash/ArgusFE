@@ -1,7 +1,6 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import * as yup from 'yup'
-import FormShell from './FormShell'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useState, useContext } from 'react'
 import { formatDateForGetApI, formatDateFromApi } from 'src/lib/date-helper'
@@ -16,6 +15,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
@@ -31,7 +31,6 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   }
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
@@ -92,7 +91,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
   }
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false} infoVisible={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -127,7 +126,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 sx={{ color: 'white' }}
                 name='idNo'
                 label={labels.id_number}
-                type={showAsPassword && 'password'}
+                displayType={showAsPassword && 'password'}
                 value={formik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
                 required
                 onChange={e => {
@@ -157,7 +156,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 label={labels.confirmIdNumber}
                 value={formik.values?.idNoRepeat}
                 required
-                type={showAsPasswordRepeat && 'password'}
+                displayType={showAsPasswordRepeat && 'password'}
                 onChange={e => {
                   formik.handleChange(e)
                 }}
@@ -191,7 +190,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

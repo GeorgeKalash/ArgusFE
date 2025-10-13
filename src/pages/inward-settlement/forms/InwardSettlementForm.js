@@ -97,7 +97,6 @@ const InwardSettlementForm = ({ recordId, plantId, cashAccountId, dtId, window }
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),

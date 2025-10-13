@@ -439,7 +439,6 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
       return errors.parameters.length > 0 ? errors : {}
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
@@ -516,7 +515,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   }, [reportName])
 
   return (
-    <FormShell form={formik} infoVisible={false} isSavedClear={false}>
+    <FormShell form={formik} isInfo={false} isSavedClear={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {

@@ -171,7 +171,6 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
     validate: values => {
@@ -942,7 +941,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
+                          displayType={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : ''}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required={total >= 5000}
@@ -1106,7 +1105,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'

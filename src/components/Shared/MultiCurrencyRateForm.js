@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
@@ -15,6 +14,7 @@ import { RateDivision } from 'src/resources/RateDivision'
 import { useResourceQuery } from 'src/hooks/resource'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, window }) {
   const { getRequest } = useContext(RequestsContext)
@@ -43,7 +43,6 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
       rateTypeName: data?.rateTypeName
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true
   })
 
@@ -69,37 +68,30 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
     })()
   }, [])
 
+  const ok = () => {
+    if (onOk) {
+      const updatedValues = {
+        ...formik.values,
+        exRate: formik.values.exRate,
+        baseAmount: formik.values.baseAmount,
+        amount: formik.values.amount
+      }
+      onOk(updatedValues)
+      window.close()
+    }
+  }
+
   const actions = [
     {
       key: 'Ok',
       condition: true,
-      onClick: () => {
-        if (onOk) {
-          const updatedValues = {
-            ...formik.values,
-            exRate: formik.values.exRate,
-            baseAmount: formik.values.baseAmount,
-            amount: formik.values.amount
-          }
-          onOk(updatedValues)
-          window.close()
-        }
-      },
+      onClick: ok,
       disabled: false
     }
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MultiCurrencyRate}
-      form={formik}
-      actions={actions}
-      maxAccess={maxAccess}
-      editMode={false}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={ok} actions={actions} maxAccess={maxAccess} editMode={false} isSaved={false}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -218,7 +210,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

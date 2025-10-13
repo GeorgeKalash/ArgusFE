@@ -77,7 +77,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),

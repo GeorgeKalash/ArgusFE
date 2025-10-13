@@ -9,8 +9,8 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import toast from 'react-hot-toast'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import Form from 'src/components/Shared/Form'
 
 const Controller = ({ store, maxAccess, labels }) => {
   const { recordId, isPosted, isClosed } = store
@@ -19,7 +19,6 @@ const Controller = ({ store, maxAccess, labels }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       stockCountId: '',
@@ -137,7 +136,7 @@ const Controller = ({ store, maxAccess, labels }) => {
   }
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false} disabledSubmit={isPosted || isClosed}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={isPosted || isClosed}>
       <VertLayout>
         <Grow>
           <Fixed>
@@ -171,7 +170,7 @@ const Controller = ({ store, maxAccess, labels }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -1,7 +1,7 @@
 import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
@@ -78,6 +78,8 @@ const CustomLookup = ({
       setInputValue('')
     }
   }, [firstValue])
+
+  const id = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [])
 
   return _hidden ? (
     <></>
@@ -253,7 +255,9 @@ const CustomLookup = ({
               }}
               inputProps={{
                 ...params.inputProps,
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+                autoComplete: 'new-password',
+                tabIndex: _readOnly ? -1 : 0, // Prevent focus if readOnly
+                id
               }}
               autoFocus={focus}
               error={error}
@@ -261,49 +265,37 @@ const CustomLookup = ({
               InputProps={{
                 ...params.InputProps,
                 endAdornment: !_readOnly && (
-                  <div
-                    style={{
+                  <Box
+                    sx={{
                       position: 'absolute',
-                      top: '50%',
+                      top: hasBorder ? '42%' : '52%',
                       transform: 'translateY(-50%)',
-                      right: 5,
+                      insetInlineEnd: 4,
                       display: 'flex'
                     }}
                   >
-                    <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                      <IconButton
-                        sx={{ margin: '0px !important', padding: '0px !important' }}
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={() => {
-                          setInputValue('')
-                          onChange(name, '')
-                          setStore([])
-                          setFreeSolo(true)
-                        }}
-                        aria-label='clear input'
-                      >
-                        <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
-                      </IconButton>
-                    </InputAdornment>
-
                     {!isLoading ? (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <IconButton
-                          sx={{ margin: '0px !important', padding: '0px !important' }}
-                          tabIndex={-1}
-                          edge='end'
-                          style={{ pointerEvents: 'none' }}
-                        >
-                          <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
-                        </IconButton>
-                      </InputAdornment>
+                      <IconButton sx={{ m: 0, p: 0 }} tabIndex={-1} style={{ pointerEvents: 'none' }}>
+                        <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
+                      </IconButton>
                     ) : (
-                      <InputAdornment sx={{ margin: '0px !important' }} position='end'>
-                        <CircularProgress size={15} style={{ marginLeft: 5 }} />
-                      </InputAdornment>
+                      <CircularProgress size={15} sx={{ my: 5 }} />
                     )}
-                  </div>
+                    <IconButton
+                      sx={{ my: 0, mx: 0.5, p: 0 }}
+                      tabIndex={-1}
+                      edge='end'
+                      onClick={() => {
+                        setInputValue('')
+                        onChange(name, '')
+                        setStore([])
+                        setFreeSolo(true)
+                      }}
+                      aria-label='clear input'
+                    >
+                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                    </IconButton>
+                  </Box>
                 )
               }}
               sx={{

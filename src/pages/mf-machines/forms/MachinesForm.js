@@ -12,6 +12,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 export default function MachinesForms({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
@@ -38,9 +39,9 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
       minLoadQty: 0,
       maxLoadQty: 0,
       defaultLoadQty: 0,
+      costCenterId: null,
       lineId: null
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -159,6 +160,26 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
               formik.setFieldValue('workCenterId', newValue?.recordId || null)
             }}
             error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <ResourceComboBox
+            endpointId={GeneralLedgerRepository.CostCenter.qry}
+            parameters={`_params=&_startAt=0&_pageSize=200`}
+            name='costCenterId'
+            label={labels.costCenter}
+            columnsInDropDown={[
+              { key: 'reference', value: 'Reference' },
+              { key: 'name', value: 'Name' }
+            ]}
+            valueField='recordId'
+            displayField={['reference', 'name']}
+            values={formik.values}
+            maxAccess={maxAccess}
+            onChange={(_, newValue) => {
+              formik.setFieldValue('costCenterId', newValue?.recordId || null)
+            }}
+            error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
           />
         </Grid>
         <Grid item xs={6}>

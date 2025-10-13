@@ -5,7 +5,6 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -13,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
+import { Grid } from '@mui/material'
 
 const SystemFunction = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -34,15 +35,13 @@ const SystemFunction = () => {
     })
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels: labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SystemFunction
   })
 
   const { formik } = useForm({
-    maxAccess,
-    enableReinitialize: true,
-    validateOnChange: true,
+    maxAccess: access,
     initialValues: {
       search: '',
       rows: [
@@ -148,22 +147,25 @@ const SystemFunction = () => {
   }
 
   return (
-    <FormShell form={formik} infoVisible={false} visibleClear={false} isCleared={false} isSavedClear={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
       <VertLayout>
         <Fixed>
-          <CustomTextField
-            name='search'
-            value={formik.values.search}
-            label={platformLabels.Search}
-            onClear={() => {
-              formik.setFieldValue('search', '')
-            }}
-            sx={{ width: '20%' }}
-            onChange={handleSearchChange}
-            onSearch={e => formik.setFieldValue('search', e)}
-            search={true}
-            height={35}
-          />
+          <Grid container>
+            <Grid item xs={3} spacing={4} p={2}>
+              <CustomTextField
+                name='search'
+                value={formik.values.search}
+                label={platformLabels.Search}
+                onClear={() => {
+                  formik.setFieldValue('search', '')
+                }}
+                onChange={handleSearchChange}
+                onSearch={e => formik.setFieldValue('search', e)}
+                search={true}
+                height={35}
+              />
+            </Grid>
+          </Grid>
         </Fixed>
         <Grow>
           <DataGrid
@@ -176,7 +178,7 @@ const SystemFunction = () => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

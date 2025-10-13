@@ -2,8 +2,6 @@ import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import FormShell from 'src/components/Shared/FormShell'
-
-// ** Custom Imports
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -23,7 +21,6 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       countries: yup
@@ -127,9 +124,10 @@ const CorrespondentCountriesForm = ({ store, setStore, maxAccess, labels, expand
         form={formik}
         resourceId={ResourceIds.Correspondent}
         maxAccess={maxAccess}
-        infoVisible={false}
+        isInfo={false}
         editMode={editMode}
         isSavedClear={false}
+        isParentWindow={false}
       >
         <VertLayout>
           <Grow>

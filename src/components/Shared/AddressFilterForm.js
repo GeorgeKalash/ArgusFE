@@ -2,8 +2,6 @@ import Table from 'src/components/Shared/Table'
 import { Button, Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useContext, useEffect, useState } from 'react'
@@ -15,6 +13,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 export default function AddressFilterForm({
   labels,
@@ -34,9 +33,8 @@ export default function AddressFilterForm({
 
   const { formik } = useForm({
     initialValues: { search: '', cityId: null, countryId: null },
-    enableReinitialize: true,
     validateOnChange: true,
-    onSubmit: async obj => {
+    onSubmit: async () => {
       const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD?.addressId) {
         handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
@@ -160,14 +158,7 @@ export default function AddressFilterForm({
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SalesOrder}
-      form={formik}
-      editMode={true}
-      isSavedClear={false}
-      infoVisible={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -248,7 +239,7 @@ export default function AddressFilterForm({
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

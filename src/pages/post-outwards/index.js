@@ -12,11 +12,11 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import FormShell from 'src/components/Shared/FormShell'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 const Postoutwards = () => {
   const [dataFilter, setDataFilter] = useState({})
@@ -79,7 +79,6 @@ const Postoutwards = () => {
       toDate: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
       const checkedOwoIds = dataTable.list?.filter(row => row.checked).map(row => row.recordId)
@@ -188,14 +187,7 @@ const Postoutwards = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PostOutwards}
-      form={formik}
-      maxAccess={access}
-      isCleared={false}
-      isSavedClear={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -367,7 +359,7 @@ const Postoutwards = () => {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

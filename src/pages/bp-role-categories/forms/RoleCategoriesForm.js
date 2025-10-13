@@ -32,33 +32,29 @@ export default function RoleCategoriesForm({ labels, maxAccess, recordId }) {
       group: false
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       reference: yup.string().required()
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: BusinessPartnerRepository.RoleCategory.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
       invalidate()
     }
   })
 
-  const editMode = !!formik.values.recordId || !!recordId
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {

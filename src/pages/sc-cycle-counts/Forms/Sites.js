@@ -8,8 +8,8 @@ import { SCRepository } from 'src/repositories/SCRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
+import Form from 'src/components/Shared/Form'
 
 const Sites = ({ store, maxAccess, labels, setRefreshController, refreshController }) => {
   const { recordId, isPosted, isClosed } = store
@@ -18,7 +18,6 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',
@@ -149,13 +148,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
   }, [recordId])
 
   return (
-    <FormShell
-      form={formik}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
-      disabledSubmit={isPosted || isClosed}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={isClosed}>
       <VertLayout>
         <Grow>
           <Fixed>
@@ -184,7 +177,7 @@ const Sites = ({ store, maxAccess, labels, setRefreshController, refreshControll
           </Grow>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -8,7 +8,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function ConfirmationOnSubmit({ formik, labels, window }) {
   const fetchFormik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       idNo: formik.values.idNo,
@@ -43,7 +42,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
 
   return (
     <>
-      <FormShell form={fetchFormik} infoVisible={false}>
+      <FormShell form={fetchFormik} isInfo={false}>
         <VertLayout>
           <Grow>
             <Grid container spacing={4}>

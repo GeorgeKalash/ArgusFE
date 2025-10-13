@@ -3,7 +3,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useFormik } from 'formik'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import FormShell from 'src/components/Shared/FormShell'
 import { DataSets } from 'src/resources/DataSets'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useContext, useEffect } from 'react'
@@ -13,6 +12,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SCRepository } from 'src/repositories/SCRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,7 +33,6 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
       fontSize: 0,
       font: ''
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       seqNo: yup.string().required(),
@@ -83,7 +82,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
   }, [])
 
   return (
-    <FormShell form={formik} maxAccess={maxAccess} infoVisible={false} isSavedClear={false} isCleared={false}>
+    <Form form={formik} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container gap={2}>
@@ -250,7 +249,7 @@ const ItemForm = ({ tlId, labels, seqNo, getGridData, maxAccess, window }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

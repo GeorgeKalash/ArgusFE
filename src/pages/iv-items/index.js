@@ -41,7 +41,7 @@ const IvItems = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Items.snapshot,
+    endpointId: InventoryRepository.Items.qry,
     datasetId: ResourceIds.Items,
     filter: {
       filterFn: fetchWithFilter

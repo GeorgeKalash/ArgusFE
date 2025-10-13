@@ -91,7 +91,6 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         }
       ]
     },
-    enableReinitialize: false,
     validationSchema: yup.object({
       glTransactions: yup
         .array()
@@ -312,7 +311,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
       form={formik2}
       maxAccess={access}
       disabledSubmit={baseGridData.balance !== 0 || isProcessed}
-      infoVisible={false}
+      isInfo={false}
       previewReport={true}
       actions={actions}
     >

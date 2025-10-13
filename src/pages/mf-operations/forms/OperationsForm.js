@@ -35,7 +35,6 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
       maxLossPct: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -44,22 +43,17 @@ export default function OperationsForms({ labels, maxAccess, recordId }) {
       maxLossPct: yup.number().min(0, 'min').max(100, 'max').required(' ')
     }),
     onSubmit: async obj => {
-      const recordId = obj.recordId
-
       const response = await postRequest({
         extension: ManufacturingRepository.Operation.set,
         record: JSON.stringify(obj)
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
+      !obj.recordId &&
         formik.setValues({
           ...obj,
           recordId: response.recordId
         })
-      } else toast.success(platformLabels.Edited)
-      setEditMode(true)
-
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

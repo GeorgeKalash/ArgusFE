@@ -3,10 +3,8 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -19,6 +17,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 export default function ItemDetailsForm({
   recordId,
@@ -153,15 +152,7 @@ export default function ItemDetailsForm({
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PurchaseRequisition}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={true}
-      isInfo={false}
-      isCleared={false}
-      disabledSubmit={readOnlyField}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={true} disabledSubmit={readOnlyField}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -416,6 +407,6 @@ export default function ItemDetailsForm({
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

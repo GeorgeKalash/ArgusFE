@@ -3,7 +3,6 @@ import Table from 'src/components/Shared/Table'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -13,6 +12,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import toast from 'react-hot-toast'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidate, window }) => {
   const editMode = !!storeRecordId
@@ -21,7 +21,6 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
   const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       userId: storeRecordId || null,
@@ -111,14 +110,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!storeRecordId}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
         <Fixed>
           <Grid item xs={6}>
@@ -155,7 +147,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -13,14 +13,14 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function DocumentTypeMapForm({ labels, maxAccess, recordId, record }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentTypeMap.qry
+    endpointId: SystemRepository.DocumentTypeMap.page
   })
 
   const { formik } = useForm({
@@ -43,54 +43,47 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
       ...record
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      fromFunctionId: yup.string().required(' '),
-      fromDTId: yup.string().required(' '),
-      toFunctionId: yup.string().required(' '),
-      dtId: yup.string().required(' ')
+      fromFunctionId: yup.string().required(),
+      fromDTId: yup.string().required(),
+      toFunctionId: yup.string().required(),
+      dtId: yup.string().required()
     }),
     onSubmit: async obj => {
       const fromFunctionId = formik.values.fromFunctionId
       const fromDTId = formik.values.fromDTId
       const toFunctionId = formik.values.toFunctionId
 
-      const response = await postRequest({
+      await postRequest({
         extension: SystemRepository.DocumentTypeMap.set,
         record: JSON.stringify(obj)
       })
 
-      if (!fromFunctionId && !fromDTId && !toFunctionId) {
-        toast.success('Record Added Successfully')
-        setEditMode(false)
-      } else toast.success('Record Edited Successfully')
-      setEditMode(true)
+      toast.success(!fromFunctionId && !fromDTId && !toFunctionId ? platformLabels.Added : platformLabels.Edited)
       formik.setValues({
         ...obj,
         recordId: String(obj.fromFunctionId) + String(obj.fromDTId) + String(obj.toFunctionId)
       })
-
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
-          setEditMode(true)
+      if (record && record.fromFunctionId && record.fromDTId && record.toFunctionId) {
+        const res = await getRequest({
+          extension: SystemRepository.DocumentTypeMap.get,
+          parameters: `_fromFunctionId=${record.fromFunctionId}&_fromDTId=${record.fromDTId}&_toFunctionId=${record.toFunctionId}`
+        })
 
-          const res = await getRequest({
-            extension: SystemRepository.DocumentTypeMap.get,
-            parameters: `_fromFunctionId=${fromFunctionId}&_fromDTId=${fromDTId}&_toFunctionId=${toFunctionId}`
-          })
-
-          formik.setValues({
-            ...res.record,
-            recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
-          })
-        }
-      } catch (exception) {}
+        formik.setValues({
+          ...res.record,
+          recordId: String(res.record.fromFunctionId) + String(res.record.fromDTId) + String(res.record.toFunctionId)
+        })
+      }
     })()
   }, [])
 

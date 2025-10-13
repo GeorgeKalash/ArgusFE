@@ -7,12 +7,11 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import Form from 'src/components/Shared/Form'
 
 export default function OverheadTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -21,7 +20,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       items: [
@@ -213,14 +211,12 @@ export default function OverheadTab({ labels, maxAccess, store }) {
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      form={formik}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isSavedClear={false}
       actions={actions}
+      isCleared
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -244,6 +240,6 @@ export default function OverheadTab({ labels, maxAccess, store }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
