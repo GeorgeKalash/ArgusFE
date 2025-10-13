@@ -40,7 +40,7 @@ import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
-import { AuthContext } from 'src/providers/AuthContext'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -56,7 +56,6 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const [fId, setFId] = useState(SystemFunction.CurrencyPurchase)
   const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
-  const { languageId } = useContext(AuthContext)
 
   const resetAutoFilled = () => {
     setIDInfoAutoFilled(false)
@@ -1107,13 +1106,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid
-                          container
-                          spacing={2}
-                          rap='wrap'
-                          direction='row-reverse'
-                          sx={{ direction: languageId == 2 ? 'rtl' : 'ltr' }}
-                        >
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1159,7 +1152,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <CustomTextField

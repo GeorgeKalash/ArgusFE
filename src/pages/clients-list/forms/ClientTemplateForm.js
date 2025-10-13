@@ -42,7 +42,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 import AddressForm from 'src/components/Shared/AddressForm'
-import { AuthContext } from 'src/providers/AuthContext'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -66,7 +66,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
-  const { languageId } = useContext(AuthContext)
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
@@ -961,7 +960,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          displayType={showAsPassword ? 'password' : ''}
+                          type={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
@@ -1228,13 +1227,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid
-                          container
-                          spacing={2}
-                          rap='wrap'
-                          direction='row-reverse'
-                          sx={{ direction: languageId == 2 ? 'rtl' : 'ltr' }}
-                        >
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1294,7 +1287,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               maxAccess={maxAccess}
                             />
                           </Grid> */}
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <ResourceComboBox
