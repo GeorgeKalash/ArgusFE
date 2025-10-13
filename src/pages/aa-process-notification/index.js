@@ -26,7 +26,6 @@ const ProcessNotification = () => {
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
-      search: '',
       rows: [
         {
           id: 1,
@@ -72,27 +71,22 @@ const ProcessNotification = () => {
       })
     ])
 
-    const mappings = pnRes?.list ?? []
-    const templates = teRes?.list ?? []
-
     const rows = (kvsList ?? []).map((k, index) => {
-      const processId = Number(k.key)
-      const templateId = mappings.find(m => m.processId === processId)?.templateId ?? null
-      
-      const templateName = templateId
-        ? (templates.find(t => t.recordId === templateId)?.name ?? '')
-        : ''
-    
+      const templateName =
+        (teRes?.list || []).find(
+          t =>
+            t.recordId ===
+            ((pnRes?.list || []).find(m => m.processId === Number(k.key))?.templateId ?? null)
+        )?.name || ''
+
       return {
         id: index + 1,
-        processId,
+        processId: Number(k.key),
         processName: k.value,
-        templateId,
+        templateId: (pnRes?.list || []).find(m => m.processId === Number(k.key))?.templateId ?? null,
         templateName
       }
     })
-    
-
     formik.setFieldValue('rows',rows)
   }
 
