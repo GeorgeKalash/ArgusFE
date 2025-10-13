@@ -529,7 +529,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeight',
       props: {
         readOnly: true,
-        decimalScale: 3
+        decimalScale: 3,
       }
     },
     {
@@ -891,6 +891,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function fillForm(puTrxPack) {
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
+    const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
 
@@ -930,7 +931,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 id: index
               }
             }),
-          taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
+          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
         }
       })
     )
