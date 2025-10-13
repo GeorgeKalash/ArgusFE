@@ -264,11 +264,11 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
 
   useEffect(() => {
     ;(async function () {
-      if (formik.values.dtId) {
-        fillDocumentTypeFields(formik.values.dtId)
+      if (!recordId && documentType?.dtId) {
+        fillDocumentTypeFields(documentType?.dtId)
       }
     })()
-  }, [formik.values.dtId])
+  }, [documentType?.dtId])
 
   return (
     <FormShell
@@ -300,8 +300,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={access}
-                    displayFieldWidth={2}
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
+                      await fillDocumentTypeFields(newValue?.recordId)
+
                       changeDT(newValue)
 
                       formik.setFieldValue('dtId', newValue?.recordId || null)
