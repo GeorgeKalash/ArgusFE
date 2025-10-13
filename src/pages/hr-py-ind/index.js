@@ -13,7 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import IndemnityWindow from './Windows/IndemnityWindow'
 
-const CommissionSchedule = () => {
+const PyIndemnity = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -75,7 +75,7 @@ const CommissionSchedule = () => {
       props: {
         labels,
         recordId,
-        access
+        maxAccess: access
       },
       width: 650,
       height: 480,
@@ -111,4 +111,4 @@ const CommissionSchedule = () => {
   )
 }
 
-export default CommissionSchedule
+export default PyIndemnity

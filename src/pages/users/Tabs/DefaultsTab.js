@@ -1,20 +1,18 @@
 import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import FormShell from 'src/components/Shared/FormShell'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import Form from 'src/components/Shared/Form'
 
 const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   const editMode = !!storeRecordId
@@ -111,15 +109,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
   }, [storeRecordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-      infoVisible={false}
-    >
+    <Form maxAccess={maxAccess} editMode={editMode} onSave={formik.handleSubmit}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -229,7 +219,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

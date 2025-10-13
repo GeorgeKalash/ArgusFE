@@ -189,18 +189,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     }
   }
 
-  async function getCountry() {
-    var parameters = `_filter=&_key=countryId`
-
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: parameters
-    })
-    const countryId = res.record.value
-
-    countryId && formik.setFieldValue('idCountry', parseInt(countryId))
-  }
-
   useEffect(() => {
     if (recordId) {
       getClient(recordId, true)
@@ -220,7 +208,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       formik.setValues({
         //clientIDView
         functionId: SystemFunction.KYC,
-        masterRecordId: obj.clientMaster?.recordId,
+        masterRecordId: obj?.clientMaster?.recordId,
         reference: obj.clientMaster?.reference,
         clientId: obj.clientIDView?.clientId,
         expiryDate: formatDateFromApi(obj.clientMaster?.expiryDate),
@@ -394,6 +382,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       props: {
         recordId: formik.values.recordId,
         values: formik.values,
+        deviceId: formik.values.cellPhone,
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
@@ -640,7 +629,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         ClientIndividual: obj3, //CTCLI
         clientRemittance: obj4,
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6?.name && obj6?.countryId && obj6?.cityId && obj6?.phone && obj6?.street1 ? obj6 : null
       }
 
       postRequest({
@@ -651,6 +640,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
           if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
 
           toast.success(platformLabels.Submit)
+          invalidate()
           setOtpShow(true)
           getClient(res.recordId)
           setEditMode(true)
@@ -660,12 +650,25 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }
 
   useEffect(() => {
-    if (formik.values.idtId) {
-      const res = idTypes.list?.filter(item => item.recordId === formik.values.idtId)?.[0]
-      if (res && res['type'] && (res['type'] === 1 || res['type'] === 2)) {
-        getCountry()
+    ;(async function () {
+      if (formik?.values?.idtId) {
+        const res = idTypes.list?.find(item => item.recordId === formik.values.idtId)
+
+        if (!res || !res.type || (res.type !== 1 && res.type !== 2)) {
+          formik.setFieldValue('idCountry', null)
+          formik.setFieldValue('nationalityId', null)
+
+          return
+        }
+
+        const country = parseInt(defaultsData?.list?.find(obj => obj.key === 'countryId')?.value)
+        formik.setFieldValue('idCountry', country)
+        formik.setFieldValue('nationalityId', res.type == 1 ? country : null)
+      } else {
+        formik.setFieldValue('idCountry', null)
+        formik.setFieldValue('nationalityId', null)
       }
-    }
+    })()
   }, [formik.values.idtId])
 
   useEffect(() => {
@@ -966,17 +969,16 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
+                            if (e?.relatedTarget?.id === 'idNo') return
+                            formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)
                             !editMode && checkIdNumber(e.target.value)
                           }}
                           readOnly={editMode}
                           maxLength='15'
-                          onFocus={e => {
-                            setShowAsPassword(false)
-                          }}
-                          onClear={() => {
-                            formik.setFieldValue('idNo', '')
-                          }}
+                          onFocus={() => setShowAsPassword(false)}
+                          ClearId='idNo'
+                          onClear={() => formik.setFieldValue('idNo', null)}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
                         />
@@ -1224,7 +1226,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1356,7 +1358,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
-                          displayFieldWidth={1.5}
+                          displayFieldWidth={3}
                           values={formik.values}
                           required
                           onChange={(event, newValue) => {

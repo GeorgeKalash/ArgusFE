@@ -42,7 +42,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
 
   return (
     <>
-      <FormShell form={fetchFormik} infoVisible={false}>
+      <FormShell form={fetchFormik} isInfo={false}>
         <VertLayout>
           <Grow>
             <Grid container spacing={4}>

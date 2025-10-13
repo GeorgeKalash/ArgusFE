@@ -9,5 +9,8 @@ export const RGGeneralRepository = {
   },
   EoyClosing: {
     GLEOY: service + 'GLEOY'
+  },
+  FinancialStatment: {
+    FS101: service + 'FS101'
   }
 }

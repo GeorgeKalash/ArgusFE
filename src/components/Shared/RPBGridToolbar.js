@@ -100,6 +100,12 @@ const RPBGridToolbar = ({
             search: search
           })
       }
+    },
+    {
+      key: 'Print',
+      condition: !!rest?.Print,
+      onClick: () => rest?.Print(rpbParams),
+      disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
 

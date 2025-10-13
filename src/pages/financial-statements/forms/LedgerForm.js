@@ -1,7 +1,6 @@
 import { useFormik } from 'formik'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import * as yup from 'yup'
@@ -9,20 +8,22 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AuthContext } from 'src/providers/AuthContext'
 import { createConditionalSchema } from 'src/lib/validation'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 const LedgerForm = ({ node, labels, maxAccess }) => {
-  const { nodeId, nodeRef } = node?.current
+  const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc} = node?.current || {}
+
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
   const { stack: stackError } = useError()
+  const lastValidNodeId = useRef(nodeId || null)
 
   const conditions = {
     sign: row => {
@@ -34,26 +35,29 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'ledgers')
 
+  const makeInitialValues = fsNodeId => ({
+    nodeRef,
+    ledgers: [
+      {
+        id: 1,
+        seqNo: 1,
+        fsNodeId: fsNodeId || null,
+        seg0: '',
+        seg1: '',
+        seg2: '',
+        seg3: '',
+        seg4: '',
+        ccgRef: '',
+        ccRef: '',
+        sign: '',
+        signName: ''
+      }
+    ]
+  })
+
   const formik = useFormik({
-    initialValues: {
-      nodeRef,
-      ledgers: [
-        {
-          id: 1,
-          seqNo: 1,
-          fsNodeId: nodeId,
-          seg0: '',
-          seg1: '',
-          seg2: '',
-          seg3: '',
-          seg4: '',
-          ccgRef: '',
-          ccRef: '',
-          sign: ''
-        }
-      ]
-    },
-    enableReinitialize: true,
+    initialValues: makeInitialValues(nodeId),
+    enableReinitialize: false,
     conditionSchema: ['ledgers'],
     validationSchema: yup.object({
       nodeRef: yup.string().required(),
@@ -63,9 +67,9 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
 
       if (hasInvalidLedger) {
-        stackError({
+        stackError({ 
           message: labels.mandatorySeg
-        })
+         })
 
         return
       }
@@ -92,7 +96,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
   const columns = [
     {
       component: 'textfield',
-      label: labels.seg0,
+      label: labels.seg1,
       name: 'seg0',
       props: {
         maxLength: 8
@@ -100,7 +104,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg1,
+      label: labels.seg2,
       name: 'seg1',
       props: {
         maxLength: 8
@@ -108,7 +112,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg2,
+      label: labels.seg3,
       name: 'seg2',
       props: {
         maxLength: 8
@@ -116,7 +120,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg3,
+      label: labels.seg4,
       name: 'seg3',
       props: {
         maxLength: 8
@@ -124,7 +128,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     },
     {
       component: 'textfield',
-      label: labels.seg4,
+      label: labels.seg5,
       name: 'seg4',
       props: {
         maxLength: 8
@@ -170,7 +174,11 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     })
 
     const ledgers = res?.list ?? []
-    if (ledgers.length === 0) return
+    if (ledgers.length === 0) {
+      formik.setFieldValue('ledgers', makeInitialValues(fsNodeId).ledgers)
+
+      return
+    }
 
     const titlesXML = await getRequest({
       extension: SystemRepository.KeyValueStore,
@@ -182,31 +190,34 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
     const updatedLedgers = ledgers.map((ledger, index) => ({
       id: index + 1,
       ...ledger,
-      signName: titlesMap.get(ledger.sign.toString()) || ''
+      signName: ledger?.sign != null ? titlesMap.get(String(ledger.sign)) || '' : ''
     }))
 
     formik.setFieldValue('ledgers', updatedLedgers)
   }
 
   useEffect(() => {
-    if (nodeId) getLedgers(nodeId)
-  }, [nodeId])
+    if (nodeId) {
+
+      lastValidNodeId.current = nodeId
+
+      formik.resetForm({ values: makeInitialValues(nodeId) })
+
+      getLedgers(nodeId)
+
+      return
+    }
+    formik.resetForm({ values: makeInitialValues(null) })
+  }, [nodeId]) 
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.FinancialStatements}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={true}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <CustomTextField
             name='nodeRef'
             label={labels.selectedNode}
-            value={nodeRef}
+            value={`${nodeRef || ''}  ${nodedesc || ''}`}
             required
             readOnly
             error={formik.touched.nodeRef && Boolean(formik.errors.nodeRef)}
@@ -221,7 +232,7 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

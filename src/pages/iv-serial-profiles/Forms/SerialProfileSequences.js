@@ -1,14 +1,13 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
+import Form from 'src/components/Shared/Form'
 
 const SerialProfileSequences = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -184,22 +183,16 @@ const SerialProfileSequences = ({ store, maxAccess, labels }) => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.SerialNumber}
-      maxAccess={maxAccess}
-      isCleared={false}
-      editMode={editMode}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <DataGrid
         onChange={value => formik.setFieldValue('components', value)}
         value={formik.values.components}
         error={formik.errors.components}
         columns={columns}
         maxAccess={maxAccess}
+        name='components'
       />
-    </FormShell>
+    </Form>
   )
 }
 
