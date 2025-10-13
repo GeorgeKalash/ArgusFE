@@ -250,7 +250,6 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       formik.setFieldValue('workCenterRef', res?.record?.workCenterRef || '')
       formik.setFieldValue('workCenterName', res?.record?.workCenterName || '')
 
-      
       formik.setFieldValue('siteId', res2?.record?.siteId || null)
       formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
     } else {
@@ -301,8 +300,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={access}
-                    onChange={async (event, newValue) => {
-                      await changeDT(newValue)
+                    displayFieldWidth={2}
+                    onChange={(event, newValue) => {
+                      changeDT(newValue)
 
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
