@@ -891,7 +891,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function fillForm(puTrxPack) {
     const puTrxHeader = puTrxPack?.header
     const puTrxItems = puTrxPack?.items
-    const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
 
