@@ -150,8 +150,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
 
   useEffect(() => {
     ;(async function () {
-      if (!recordId && formik.values.dtId) {
-        fillDocumentTypeFields(formik.values.dtId)
+      if (!recordId && documentType?.dtId) {
+        fillDocumentTypeFields(documentType?.dtId)
       }
       recordId && (await getData(recordId))
     })()
