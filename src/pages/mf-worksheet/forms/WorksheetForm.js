@@ -303,9 +303,9 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     onChange={async (event, newValue) => {
                       await fillDocumentTypeFields(newValue?.recordId)
 
-                      changeDT(newValue)
-
                       formik.setFieldValue('dtId', newValue?.recordId || null)
+
+                      changeDT(newValue)
                     }}
                     readOnly={editMode}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
