@@ -795,7 +795,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 basePrice: item.basePrice,
                 unitPrice: item.unitPrice,
                 upo: item.upo,
-                vatAmount: parseFloat(item.vatAmount || 0),
+                vatAmount: item.vatAmount,
                 extendedPrice: item.extendedPrice,
                 msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
