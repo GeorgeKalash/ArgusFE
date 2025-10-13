@@ -150,9 +150,12 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
 
   useEffect(() => {
     ;(async function () {
+      if (!recordId && formik.values.dtId) {
+        fillDocumentTypeFields(formik.values.dtId)
+      }
       recordId && (await getData(recordId))
     })()
-  }, [])
+  }, [formik.values.dtId])
 
   const isPosted = formik.values.status === 3
 
@@ -232,6 +235,35 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
     }
   ]
 
+  const fillDocumentTypeFields = async dtId => {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      const res2 =
+        res.record &&
+        (await getRequest({
+          extension: ManufacturingRepository.WorkCenter.get,
+          parameters: `_recordId=${res?.record?.workCenterId}`
+        }))
+      formik.setFieldValue('dtId', dtId || null)
+      formik.setFieldValue('siteId', res2?.record?.siteId || null)
+      formik.setFieldValue('siteName', res2?.record?.siteName || '')
+      formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
+      formik.setFieldValue('workCenterRef', res?.record?.workCenterRef || '')
+      formik.setFieldValue('workCenterName', res?.record?.workCenterName || '')
+    } else {
+      formik.setFieldValue('dtId', null)
+      formik.setFieldValue('siteId', null)
+      formik.setFieldValue('siteName', '')
+      formik.setFieldValue('workCenterId', null)
+      formik.setFieldValue('workCenterRef', '')
+      formik.setFieldValue('workCenterName', '')
+    }
+  }
+
   return (
     <FormShell
       resourceId={resourceId}
@@ -263,33 +295,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     values={formik.values}
                     maxAccess={access}
                     onChange={async (event, newValue) => {
-                      if (newValue) {
-                        const res = await getRequest({
-                          extension: ManufacturingRepository.DocumentTypeDefault.get,
-                          parameters: `_dtId=${newValue?.recordId}`
-                        })
-
-                        const res2 =
-                          res.record &&
-                          (await getRequest({
-                            extension: ManufacturingRepository.WorkCenter.get,
-                            parameters: `_recordId=${res?.record?.workCenterId}`
-                          }))
-                        formik.setFieldValue('dtId', newValue?.recordId || null)
-                        formik.setFieldValue('siteId', res2?.record?.siteId || null)
-                        formik.setFieldValue('siteName', res2?.record?.siteName || '')
-                        formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
-                        formik.setFieldValue('workCenterRef', res?.record?.workCenterRef || '')
-                        formik.setFieldValue('workCenterName', res?.record?.workCenterName || '')
-                      } else {
-                        formik.setFieldValue('dtId', null)
-                        formik.setFieldValue('siteId', null)
-                        formik.setFieldValue('siteName', '')
-                        formik.setFieldValue('workCenterId', null)
-                        formik.setFieldValue('workCenterRef', '')
-                        formik.setFieldValue('workCenterName', '')
-                      }
-
+                      fillDocumentTypeFields(newValue?.recordId)
                       changeDT(newValue)
                     }}
                     readOnly={editMode}
