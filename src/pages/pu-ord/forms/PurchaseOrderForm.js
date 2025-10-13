@@ -924,10 +924,10 @@ export default function PurchaseOrderForm({ recordId, window }) {
     }
   }
 
-  async function getDataRow(itemId, showVendorUnitPrice = true) {
+  async function getDataRow(itemId, hideVendorUnitPrice) {
     const phycialProperty = await getItemPhysProp(itemId)
     const itemInfo = await getItem(itemId)
-    const vendorPrice = showVendorUnitPrice ? await getVendorPrice(itemId) : ''
+    const vendorPrice = !hideVendorUnitPrice ? await getVendorPrice(itemId) : ''
 
     return await itemObject(phycialProperty, itemInfo, vendorPrice)
   }
@@ -1230,7 +1230,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
     const itemInfoArray = await Promise.all(
       response.list.map(async item => {
-        const itemInfo = await getDataRow(item.itemId, false)
+        const itemInfo = await getDataRow(item.itemId, true)
 
         const keysToExclude = [
           'muId',
