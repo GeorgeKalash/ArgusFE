@@ -18,6 +18,7 @@ class VatCalcRow {
 }
 
 const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
+  console.log(vatCalcRow, taxDetail)
   let vatAmount = 0
 
   switch (taxDetail.taxBase) {
@@ -54,6 +55,7 @@ const calcVatAmount = vatCalcRow => {
   let vatAmount = 0
 
   if (vatCalcRow.taxDetails != null) {
+    console.log(vatCalcRow.taxDetails)
     for (let i = 0; i < vatCalcRow.taxDetails.length; i++) {
       vatAmount += calcVatAmountPerTaxDetail(vatCalcRow, vatCalcRow.taxDetails[i])
     }

@@ -774,7 +774,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems, clientInfo) {
+  async function fillForm(soHeader, soItems) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -795,7 +795,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 basePrice: item.basePrice,
                 unitPrice: item.unitPrice,
                 upo: item.upo,
-                vatAmount: item.vatAmount,
+                vatAmount: parseFloat(item.vatAmount || 0),
                 extendedPrice: item.extendedPrice,
                 msId: itemInfo?.msId || item.msId,
                 taxDetails: taxDetailsResponse
@@ -813,8 +813,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      tdPct: clientInfo?.record?.tdPct || 0,
-      initialTdPct: clientInfo?.record?.tdPct || 0,
+      tdPct: soHeader?.record?.tdPct || 0,
+      initialTdPct: soHeader?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -1142,8 +1142,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    const clientInfo = await getClient(soHeader?.record?.clientId)
-    fillForm(soHeader, soItems, clientInfo)
+    fillForm(soHeader, soItems)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
