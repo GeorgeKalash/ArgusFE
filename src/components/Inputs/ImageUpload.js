@@ -28,12 +28,12 @@ const ImageUpload = forwardRef(
     const { getRequest, postRequest } = useContext(RequestsContext)
     const { platformLabels } = useContext(ControlContext)
     const [image, setImage] = useState()
-    const [initialValues, setInitialData] = useState({})
+
+    // const [initialValues, setInitialData] = useState({})
+    const hasSavedImage = useRef({ presentUrl: false, presentFileName: false })
 
     const { formik } = useForm({
-      validateOnChange: true,
-      enableReinitialize: true,
-      initialValues
+      initialValues: {}
     })
     const parentRecordId = parentImage?.recordId
     const parentResourceId = parentImage?.resourceId
@@ -51,7 +51,7 @@ const ImageUpload = forwardRef(
           extension: SystemRepository.Attachment.get2,
           parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
         })
-        setInitialData({ ...result?.record, resourceId })
+        formik.setValues({ ...result?.record, resourceId })
         setImage(result?.record?.fileName)
       } else {
         const result = await getRequest({
@@ -61,7 +61,7 @@ const ImageUpload = forwardRef(
           }`
         })
 
-        setInitialData({ ...result?.record, resourceId: parentResourceId || resourceId })
+        formik.setValues({ ...result?.record, resourceId: parentResourceId || resourceId })
         setImage(result?.record?.url)
       }
     }
@@ -128,7 +128,8 @@ const ImageUpload = forwardRef(
           }).then(res => {
             return res
           })
-        } else if (!image && initialValues?.fileName && !formik.values?.fileName) {
+        } else if (!image && !formik.values?.fileName) {
+          //else if (!image && initialValues?.fileName && !formik.values?.fileName) {
           return postRequest({
             extension: SystemRepository.Attachment.del,
             record: JSON.stringify(initialValues)
@@ -147,7 +148,8 @@ const ImageUpload = forwardRef(
           }).then(res => {
             return res
           })
-        } else if (!image && initialValues?.url && !formik.values?.url) {
+        } else if (!image && !formik.values?.url) {
+          //else if (!image && initialValues?.url && !formik.values?.url) {
           return postRequest({
             extension: SystemRepository.Attachment.del,
             record: JSON.stringify(initialValues),
