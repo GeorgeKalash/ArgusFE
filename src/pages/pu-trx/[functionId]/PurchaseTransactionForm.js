@@ -529,7 +529,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeight',
       props: {
         readOnly: true,
-        decimalScale: 3,
+        decimalScale: 3
       }
     },
     {
@@ -901,6 +901,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
+        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
         const taxDetailsResponse = []
 
         const updatedpuTrxTaxes =
