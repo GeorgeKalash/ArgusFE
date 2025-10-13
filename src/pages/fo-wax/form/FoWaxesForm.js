@@ -298,12 +298,8 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         },
         displayField: 'jobRef',
         valueField: 'jobRef',
-        mapping: [
-          { from: 'jobId', to: 'jobId' },
-          { from: 'jobRef', to: 'jobRef' }
-        ],
+        mapping: [{ from: 'jobRef', to: 'jobRef' }],
         displayFieldWidth: 4,
-        filter: { lineId: formik.values?.header?.lineId },
         readOnly: isClosed || !formik.values?.header?.workCenterId
       },
       async onChange({ row: { update, newRow } }) {
@@ -488,6 +484,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    displayFieldWidth={1.5}
                     values={formik.values.header}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
@@ -576,7 +573,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     name='header.lineId'
-                    readOnly={isClosed || (formik.values.items.length > 0 && formik.values.items[0].jobId)}
+                    readOnly={isClosed}
                     required
                     label={labels.prodLine}
                     valueField='recordId'
@@ -721,7 +718,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             value={formik.values.items}
             error={formik.errors.items}
             allowDelete={!isClosed}
-            disabled={!formik.values.header.lineId}
+            disabled={isClosed}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
