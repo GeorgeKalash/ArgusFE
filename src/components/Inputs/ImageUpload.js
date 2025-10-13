@@ -32,6 +32,7 @@ const ImageUpload = forwardRef(
 
     const { formik } = useForm({
       validateOnChange: true,
+      enableReinitialize: true,
       initialValues
     })
     const parentRecordId = parentImage?.recordId
