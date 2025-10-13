@@ -298,7 +298,10 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         },
         displayField: 'jobRef',
         valueField: 'jobRef',
-        mapping: [{ from: 'jobRef', to: 'jobRef' }],
+        mapping: [
+          { from: 'jobId', to: 'jobId' },
+          { from: 'jobRef', to: 'jobRef' }
+        ],
         displayFieldWidth: 4,
         readOnly: isClosed || !formik.values?.header?.workCenterId
       },
