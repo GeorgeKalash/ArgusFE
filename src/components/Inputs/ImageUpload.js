@@ -28,41 +28,73 @@ const ImageUpload = forwardRef(
     const { getRequest, postRequest } = useContext(RequestsContext)
     const { platformLabels } = useContext(ControlContext)
     const [image, setImage] = useState()
+    const SavedImageInfo = useRef({})
 
-    // const [initialValues, setInitialData] = useState({})
-    const hasSavedImage = useRef({ presentUrl: false, presentFileName: false })
+    const parentRecordId = parentImage?.recordId
+    const parentResourceId = parentImage?.resourceId
 
     const { formik } = useForm({
       initialValues: {}
     })
-    const parentRecordId = parentImage?.recordId
-    const parentResourceId = parentImage?.resourceId
 
-    useEffect(() => {
-      if (parentRecordId || recordId) {
-        getData()
-      } else handleInputImageReset()
-    }, [parentImage, recordId])
+    useImperativeHandle(ref, () => ({
+      submit
+    }))
 
-    async function getData() {
-      if (!resourceId) return
-      if (isAbsolutePath && recordId) {
-        const result = await getRequest({
-          extension: SystemRepository.Attachment.get2,
-          parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${recordId}`
-        })
-        formik.setValues({ ...result?.record, resourceId })
-        setImage(result?.record?.fileName)
+    const submit = () => {
+      if (disabled) return
+      if (isAbsolutePath) {
+        if (formik?.values?.file?.name || formik.values.url) {
+          const obj = {
+            ...formik.values,
+            fileName: formik?.values?.file?.name || formik.values.url,
+            resourceId,
+            recordId: ref?.current?.value || recordId
+          }
+
+          return postRequest({
+            extension: SystemRepository.Attachment.set2,
+            record: JSON.stringify(obj),
+            file: formik.values?.file
+          }).then(res => {
+            getData(ref?.current?.value || recordId)
+
+            return res
+          })
+        } else if (!image && SavedImageInfo?.current?.fileName && !formik.values?.fileName) {
+          return postRequest({
+            extension: SystemRepository.Attachment.del,
+            record: JSON.stringify(SavedImageInfo?.current)
+          }).then(res => {
+            getData()
+
+            return res
+          })
+        }
       } else {
-        const result = await getRequest({
-          extension: SystemRepository.Attachment.get,
-          parameters: `_resourceId=${parentResourceId || resourceId}&_seqNo=${seqNo}&_recordId=${
-            parentRecordId || recordId
-          }`
-        })
+        if (formik.values?.file) {
+          const obj = { ...formik.values, recordId: ref?.current?.value || recordId }
 
-        formik.setValues({ ...result?.record, resourceId: parentResourceId || resourceId })
-        setImage(result?.record?.url)
+          return postRequest({
+            extension: SystemRepository.Attachment.set,
+            record: JSON.stringify(obj),
+            file: formik.values?.file
+          }).then(res => {
+            getData()
+
+            return res
+          })
+        } else if (!image && SavedImageInfo?.current?.url && !formik.values?.url) {
+          return postRequest({
+            extension: SystemRepository.Attachment.del,
+            record: JSON.stringify(SavedImageInfo?.current),
+            file: SavedImageInfo?.current?.url
+          }).then(res => {
+            getData()
+
+            return res
+          })
+        }
       }
     }
 
@@ -110,59 +142,38 @@ const ImageUpload = forwardRef(
       setImage('')
     }
 
-    const submit = () => {
-      if (disabled) return
-      if (isAbsolutePath) {
-        if (formik?.values?.file?.name || formik.values.url) {
-          const obj = {
-            ...formik.values,
-            fileName: formik?.values?.file?.name || formik.values.url,
-            resourceId,
-            recordId: ref?.current?.value || recordId
-          }
-
-          return postRequest({
-            extension: SystemRepository.Attachment.set2,
-            record: JSON.stringify(obj),
-            file: formik.values?.file
-          }).then(res => {
-            return res
-          })
-        } else if (!image && !formik.values?.fileName) {
-          //else if (!image && initialValues?.fileName && !formik.values?.fileName) {
-          return postRequest({
-            extension: SystemRepository.Attachment.del,
-            record: JSON.stringify(initialValues)
-          }).then(res => {
-            return res
-          })
-        }
+    async function getData(currenctRecordId) {
+      const updatedRecordId = currenctRecordId || recordId
+      if (!resourceId) return
+      if (isAbsolutePath && updatedRecordId) {
+        const result = await getRequest({
+          extension: SystemRepository.Attachment.get2,
+          parameters: `_resourceId=${resourceId}&_seqNo=${seqNo}&_recordId=${updatedRecordId}`
+        })
+        formik.setValues({ ...result?.record, resourceId })
+        SavedImageInfo.current = { ...result?.record, resourceId }
+        setImage(result?.record?.fileName)
       } else {
-        if (formik.values?.file) {
-          const obj = { ...formik.values, recordId: ref?.current?.value || recordId }
+        if (!parentRecordId && !updatedRecordId) return
 
-          return postRequest({
-            extension: SystemRepository.Attachment.set,
-            record: JSON.stringify(obj),
-            file: formik.values?.file
-          }).then(res => {
-            return res
-          })
-        } else if (!image && !formik.values?.url) {
-          //else if (!image && initialValues?.url && !formik.values?.url) {
-          return postRequest({
-            extension: SystemRepository.Attachment.del,
-            record: JSON.stringify(initialValues),
-            file: initialValues?.url
-          }).then(res => {
-            return res
-          })
-        }
+        const result = await getRequest({
+          extension: SystemRepository.Attachment.get,
+          parameters: `_resourceId=${parentResourceId || resourceId}&_seqNo=${seqNo}&_recordId=${
+            parentRecordId || updatedRecordId
+          }`
+        })
+
+        formik.setValues({ ...result?.record, resourceId: parentResourceId || resourceId })
+        SavedImageInfo.current = { ...result?.record, resourceId: parentResourceId || resourceId }
+        setImage(result?.record?.url)
       }
     }
-    useImperativeHandle(ref, () => ({
-      submit
-    }))
+
+    useEffect(() => {
+      if (parentRecordId || recordId) {
+        getData()
+      } else handleInputImageReset()
+    }, [parentRecordId, recordId])
 
     return (
       <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
