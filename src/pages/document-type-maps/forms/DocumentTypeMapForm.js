@@ -163,7 +163,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 name='dtId'
                 label={labels.toDocument}
                 valueField='recordId'
-                displayField='reference'
+                displayField='name'
                 maxAccess={maxAccess}
                 values={formik.values}
                 parameters={
