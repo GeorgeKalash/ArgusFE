@@ -343,7 +343,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       key: 'generateIV',
       condition: true,
       onClick: openGenerateInvoiceForm,
-      disabled: !isPosted && !isCancelled
+      disabled: (!isPosted && !isCancelled) || !!formik.values.invoiceId
     }
   ]
 
