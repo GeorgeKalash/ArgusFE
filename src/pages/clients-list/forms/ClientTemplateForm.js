@@ -42,6 +42,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 import AddressForm from 'src/components/Shared/AddressForm'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -640,6 +641,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
           if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
 
           toast.success(platformLabels.Submit)
+          invalidate()
           setOtpShow(true)
           getClient(res.recordId)
           setEditMode(true)
@@ -957,8 +959,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       <Grid item xs={5}>
                         <CustomTextField
                           name='idNo'
-                          type={showAsPassword ? 'password' : ''}
                           label={labels.idNo}
+                          type={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
@@ -1225,7 +1227,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1285,7 +1287,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               maxAccess={maxAccess}
                             />
                           </Grid> */}
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <ResourceComboBox

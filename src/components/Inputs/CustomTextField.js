@@ -115,7 +115,7 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
+          textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
         'data-search': search ? 'true' : 'false'

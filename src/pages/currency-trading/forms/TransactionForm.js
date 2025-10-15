@@ -40,6 +40,7 @@ import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import CustomRadioButtonGroup from 'src/components/Inputs/CustomRadioButtonGroup'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -941,7 +942,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : 'text'}
+                          type={showAsPasswordIDNumber && formik.values['idNo'] ? 'password' : ''}
                           value={formik.values.idNo}
                           readOnly={editMode || isClosed || idInfoAutoFilled}
                           required={total >= 5000}
@@ -1105,7 +1106,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         />
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1151,7 +1152,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <CustomTextField

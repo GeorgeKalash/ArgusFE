@@ -15,6 +15,7 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
     recordId: recordId || null,
     isPosted: false,
     isClosed: false,
+    baseAmount: 0,
     invoicesItemsData: []
   })
 
@@ -39,7 +40,7 @@ const PuCostAllocationWindow = ({ recordId, labels, maxAccess }) => {
         <InvoicesItemsTab labels={labels} maxAccess={maxAccess} setStore={setStore} store={store} />
       </CustomTabPanel>
       <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
-        <TransactionTab store={store} labels={labels} access={maxAccess} />
+        <TransactionTab store={store} labels={labels} access={maxAccess} setStore={setStore} />
       </CustomTabPanel>
       <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <DistributionTab labels={labels} access={maxAccess} store={store} />
