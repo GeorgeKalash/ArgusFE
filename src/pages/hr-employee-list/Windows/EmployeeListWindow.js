@@ -53,14 +53,6 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
     if (recordId) getData(recordId)
   }, [recordId])
 
-  const submitImage = async () => {
-    if (imageUploadRef.current) {
-      imageUploadRef.current.value = parseInt(recordId)
-
-      await imageUploadRef.current.submit()
-    }
-  }
-
   return (
     <Grid container sx={{ height: '100%' }}>
       <Grid item xs={3} sx={{ height: '100%' }}>
@@ -74,16 +66,25 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
             alignItems: 'left'
           }}
         >
-          <ImageUpload ref={imageUploadRef} resourceId={ResourceIds.EmployeeFilter} seqNo={0} recordId={recordId} />
+          <ImageUpload
+            ref={imageUploadRef}
+            resourceId={ResourceIds.EmployeeFilter}
+            seqNo={0}
+            recordId={recordId}
+            disabled={!!recordId}
+          />
 
-          <Typography variant='subtitle1'>{quickView?.fullName || '-'}</Typography>
+          <Typography variant='subtitle1'>{quickView?.fullName || ''}</Typography>
+          <Typography variant='subtitle1'>{quickView?.departmentName || ''}</Typography>
+          <Typography variant='subtitle1'>{quickView?.branchName || ''}</Typography>
+          <Typography variant='subtitle1'>{quickView?.positionName || ''}</Typography>
 
           <Typography variant='body2' color='text.secondary'>
             {labels.Manager}: {quickView?.reportToName || ''}
           </Typography>
 
           <Typography variant='body2' color='text.secondary'>
-            {quickView?.serviceDuration || '-'}
+            {quickView?.serviceDuration || ''}
           </Typography>
         </Box>
       </Grid>
@@ -96,17 +97,17 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
             setStore={setStore}
             labels={labels}
             maxAccess={maxAccess}
-            submitImage={submitImage}
+            imageUploadRef={imageUploadRef}
           />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={1} value={activeTab}>
           <JobTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
-{/* 
+
         <CustomTabPanel height={height} index={2} value={activeTab}>
           <LeavesTab store={store} labels={labels} maxAccess={maxAccess} />
-        </CustomTabPanel> */}
+        </CustomTabPanel>
 
         <CustomTabPanel height={height} index={3} value={activeTab}>
           <HiringTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
@@ -121,7 +122,7 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={6} value={activeTab}>
-          <UserDefinedTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+          <UserDefinedTab store={store} maxAccess={maxAccess} />
         </CustomTabPanel>
       </Grid>
     </Grid>

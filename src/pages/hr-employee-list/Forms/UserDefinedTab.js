@@ -16,7 +16,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
-const UserDefinedTab = ({ labels, maxAccess, setStore, store }) => {
+const UserDefinedTab = ({  maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store

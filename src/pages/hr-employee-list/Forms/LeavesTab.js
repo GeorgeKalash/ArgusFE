@@ -36,7 +36,8 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
         lost: item?.summary.lost,
         adjustments: item?.summary.adjustments,
         balance: item?.summary.balance,
-        payments: item?.summary.payments
+        payments: item?.summary.payments,
+        checked: item?.isEnrolled
       }))
     }
 
@@ -114,8 +115,9 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
             await postRequest({
               extension: EmployeeRepository.Leaves.set,
               record: JSON.stringify({
-                ...data,
-                employeeId: recordId
+                employeeId: recordId,
+                ltId: data?.schedule?.ltId,
+                lsId: data?.schedule?.recordId,
               })
             })
 
