@@ -96,6 +96,18 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           { from: 'currencyId', to: 'toCurrencyId' }
         ]
       }
+    },
+    {
+      component: 'numberfield',                   
+      label: labels.amount,
+      name: 'amount',
+      props: {
+        readOnly,
+        thousandSeparator: false,
+        decimalScale: 2,
+        allowNegative: false,
+        min: 0
+      }
     }
   ]
 
