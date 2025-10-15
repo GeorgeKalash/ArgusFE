@@ -1,6 +1,5 @@
 import { Box } from '@mui/material'
-import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
-import { useRef } from 'react'
+import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -117,7 +116,7 @@ const ImageUpload = forwardRef(
           fileName: file.name,
           folderId: null,
           folderName: null,
-          date: day + '/' + month + '/' + year,
+          date: `${day}/${month}/${year}`,
           url: null,
           file: null
         }
@@ -142,8 +141,8 @@ const ImageUpload = forwardRef(
       setImage('')
     }
 
-    async function getData(currenctRecordId) {
-      const updatedRecordId = currenctRecordId || recordId
+    async function getData(currentRecordId) {
+      const updatedRecordId = currentRecordId || recordId
       if (!resourceId) return
       if (isAbsolutePath && updatedRecordId) {
         const result = await getRequest({
@@ -152,7 +151,9 @@ const ImageUpload = forwardRef(
         })
         formik.setValues({ ...result?.record, resourceId })
         SavedImageInfo.current = { ...result?.record, resourceId }
-        setImage(result?.record?.fileName)
+
+        const fileName = result?.record?.fileName
+        setImage(fileName ? `${fileName}?t=${Date.now()}` : '')
       } else {
         if (!parentRecordId && !updatedRecordId) return
 
@@ -163,26 +164,24 @@ const ImageUpload = forwardRef(
           }`
         })
 
-        formik.setValues({ ...result?.record, resourceId: parentResourceId || resourceId })
-        SavedImageInfo.current = { ...result?.record, resourceId: parentResourceId || resourceId }
-        setImage(result?.record?.url)
+        const effectiveResourceId = parentResourceId || resourceId
+        formik.setValues({ ...result?.record, resourceId: effectiveResourceId })
+        SavedImageInfo.current = { ...result?.record, resourceId: effectiveResourceId }
+
+        const url = result?.record?.url
+        setImage(url ? `${url}?t=${Date.now()}` : '')
       }
     }
 
     useEffect(() => {
-      if (parentRecordId || recordId) {
-        getData()
-      } else handleInputImageReset()
+      if (parentRecordId || recordId) getData()
+      else handleInputImageReset()
     }, [parentRecordId, recordId])
 
     return (
       <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
         <img
-          src={`${
-            image ||
-            (formik?.values?.fileName && formik?.values?.fileName + `?${new Date().getTime()}`) ||
-            '/images/emptyPhoto.jpg'
-          }`}
+          src={image || '/images/emptyPhoto.jpg'}
           alt=''
           style={{
             width: customWidth || width,
