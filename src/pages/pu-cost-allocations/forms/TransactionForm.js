@@ -88,6 +88,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
       maxAccess={maxAccess}
       editMode={editMode}
       isInfo={false}
+      isCleared={false}
     >
       <VertLayout>
         <Grow>
