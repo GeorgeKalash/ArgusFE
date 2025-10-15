@@ -88,10 +88,11 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
         record: JSON.stringify(obj)
       })
 
-      !res.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
       await refetchForm(res.recordId)
       invalidate()
       window.close()
+
+      !res.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
     }
   })
 
