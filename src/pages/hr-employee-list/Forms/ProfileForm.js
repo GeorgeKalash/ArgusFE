@@ -27,7 +27,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.Employee.page
+    endpointId: EmployeeRepository.EmployeeList.page
   })
 
   const { formik } = useForm({

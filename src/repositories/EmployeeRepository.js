@@ -5,7 +5,6 @@ export const EmployeeRepository = {
     snapshot: service + 'snapshotEM',
     get1: service + 'getEM1',
     set: service + 'setEM',
-    qry: service + 'qryEM',
     del: service + 'delEM',
     page: service + 'pageEM',
   },
@@ -127,8 +126,7 @@ export const EmployeeRepository = {
   },
   EmployeeList: {
     qry2: service + 'qryES2',
-    page: service + 'pageES1',
-    del: service + 'delES'
+    page: service + 'pageES1'
   },
   EmployementHistory: {
     qry: service + 'qryEH',

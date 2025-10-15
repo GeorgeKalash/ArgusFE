@@ -28,7 +28,7 @@ const EmployeeList = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.Employee.page,
+    endpointId: EmployeeRepository.EmployeeList.page,
     datasetId: ResourceIds.EmployeeFilter,
     filter: {
       filterFn: fetchWithFilter
@@ -122,7 +122,9 @@ const EmployeeList = () => {
   const del = async obj => {
     await postRequest({
       extension: EmployeeRepository.Employee.del,
-      record: JSON.stringify(obj)
+      record: JSON.stringify({
+        recordId: obj?.parent?.recordId
+      })
     })
     invalidate()
     toast.success(platformLabels.Deleted)

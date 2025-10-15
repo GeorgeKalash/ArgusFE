@@ -51,7 +51,7 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
 
   useEffect(() => {
     if (recordId) getData(recordId)
-  }, [recordId])
+  }, [])
 
   return (
     <Grid container sx={{ height: '100%' }}>
