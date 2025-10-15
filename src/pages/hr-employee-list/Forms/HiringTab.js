@@ -4,12 +4,10 @@ import { differenceInDays } from 'date-fns'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DataSets } from 'src/resources/DataSets'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -20,8 +18,9 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
-const HiringTab = ({ labels, maxAccess, setStore, store }) => {
+const HiringTab = ({ labels, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, hireDate } = store
@@ -96,14 +95,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
   const editMode = !!formik.values.recordId
 
   return (
-    <FormShell
-      resourceId={ResourceIds.EmployeeFilter}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -325,7 +317,7 @@ const HiringTab = ({ labels, maxAccess, setStore, store }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

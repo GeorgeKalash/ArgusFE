@@ -4,7 +4,6 @@ import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceTable from '../forms/AccountBalanceTable'
-import { Typography, Box } from '@mui/material'
 
 const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
   const [activeTab, setActiveTab] = useState(0)

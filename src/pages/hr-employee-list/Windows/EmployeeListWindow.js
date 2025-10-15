@@ -110,7 +110,7 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={3} value={activeTab}>
-          <HiringTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+          <HiringTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
         <CustomTabPanel height={height} index={4} value={activeTab}>

@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import { useContext, useEffect, useState } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { useInvalidate } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -15,6 +13,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import Form from 'src/components/Shared/Form'
 
 const UserDefinedTab = ({  maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -160,14 +159,7 @@ const UserDefinedTab = ({  maxAccess, store }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.EmployeeFilter}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -179,7 +171,7 @@ const UserDefinedTab = ({  maxAccess, store }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -4,8 +4,6 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import toast from 'react-hot-toast'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,6 +14,7 @@ import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
+import Form from 'src/components/Shared/Form'
 
 const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -80,14 +79,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.EmployeeFilter}
-      form={formik}
-      maxAccess={maxAccess}
-      isInfo={false}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -180,7 +172,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
