@@ -127,9 +127,8 @@ export const EmployeeRepository = {
   },
   EmployeeList: {
     qry2: service + 'qryES2',
-    page1: service + 'pageES1',
-    del: service + 'delES',
-    page: service + 'pageES'
+    page: service + 'pageES1',
+    del: service + 'delES'
   },
   EmployementHistory: {
     qry: service + 'qryEH',
