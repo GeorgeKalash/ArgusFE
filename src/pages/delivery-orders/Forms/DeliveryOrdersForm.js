@@ -304,7 +304,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           form: formik,
           labels,
           maxAccess,
-          recordId
+          recordId,
+          refetchForm
         },
         width: 500,
         height: 550,

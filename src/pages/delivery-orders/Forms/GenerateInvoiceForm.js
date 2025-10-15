@@ -20,8 +20,9 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
 import Form from 'src/components/Shared/Form'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form }) {
+export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, refetchForm, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -30,6 +31,10 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     functionId: SystemFunction.SalesInvoice,
     access,
     enabled: !recordId
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: DeliveryRepository.DeliveriesOrders.qry
   })
 
   const getDataResult = () => {
@@ -84,6 +89,9 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       })
 
       !res.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      await refetchForm(res.recordId)
+      invalidate()
+      window.close()
     }
   })
 
