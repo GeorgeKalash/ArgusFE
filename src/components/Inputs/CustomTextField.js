@@ -12,6 +12,7 @@ const CustomTextField = ({
   onClear,
   onSearch,
   onChange,
+  onBlur,
   name,
   size = 'small', //small, medium
   fullWidth = true,
@@ -73,20 +74,28 @@ const CustomTextField = ({
     }
   }
 
-  const handleChangeProxy = e => {
-    onChange?.({
+  function getElement(e) {
+    return {
       ...e,
       target: {
         ...e.target,
         name,
-        value: e.target.value,
-        type: e.target.type
+        value: e.target?.value,
+        type: e.target?.type
       },
       currentTarget: {
-        ...e.currentTarget,
+        ...e?.currentTarget,
         name
       }
-    })
+    }
+  }
+
+  const handleChange = e => {
+    onChange?.(getElement(e))
+  }
+
+  const handleBlur = e => {
+    onBlur?.(getElement(e))
   }
 
   useEffect(() => {
@@ -111,10 +120,12 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
-      onBlur={() => {
-        setIsFocused(false), setFocus(false)
+      onBlur={e => {
+        setIsFocused(false)
+        setFocus(false)
+        if (onBlur) handleBlur(e)
       }}
-      onChange={handleChangeProxy}
+      onChange={handleChange}
       inputProps={{
         autoComplete,
         readOnly: _readOnly,

@@ -969,6 +969,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
+                            console.log(e?.relatedTarget?.id)
                             if (e?.relatedTarget?.id === 'idNo') return
                             formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)
