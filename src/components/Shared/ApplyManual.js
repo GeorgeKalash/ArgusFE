@@ -13,7 +13,7 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 import Form from './Form'
 
-export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window }) => {
+export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window , accountRef, fromFunctionName,fromCurrencyRef}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -35,7 +35,17 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           toFunctionId: null,
           toRecordId: null,
           toCurrencyId: null,
-          amount: 0
+          amount: 0,
+          toFunctionName: null,
+          toReference: null,
+          toCurrencyRef: null,
+          applyAmount: 0,
+          fromFunctionId: functionId,
+          fromFunctionName: fromFunctionName ,
+          fromCurrencyId: currencyId,
+          fromCurrencyRef: fromCurrencyRef ,
+          accountId: accountId ,
+          accountRef: accountRef ,
         }
       ]
     },
@@ -45,7 +55,11 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         .array()
         .of(
           yup.object().shape({
-            toRecordId: yup.number().required()
+            toRecordId: yup.number().required(),
+            toFunctionId: yup.number().required(),
+            toCurrencyId: yup.number().required(),
+            amount: yup.number().required().min(0),
+            applyAmount: yup.number().required().min(0)
           })
         )
         .required()
@@ -58,7 +72,19 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           fromFunctionId: functionId,
           accountId,
           fromRecordId: recordId,
-          fromCurrencyId: currencyId
+          fromCurrencyId: currencyId,
+          fromFunctionName: fromFunctionName ,
+          fromCurrencyRef: fromCurrencyRef ,
+          accountId: accountId,
+          accountRef: accountRef || null,
+          toFunctionId:item.toFunctionId,
+          toFunctionName: item.toFunctionName ,
+          toRecordId: item.toRecordId,
+          toReference: item.toReference ,
+          toCurrencyId: item.toCurrencyId,
+          toCurrencyRef: item.toCurrencyRef ,
+          amount: item.amount,
+          applyAmount: item.applyAmount
         }
       })
 
@@ -93,7 +119,10 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
           { from: 'reference', to: 'toReference' },
           { from: 'amount', to: 'amount' },
           { from: 'functionId', to: 'toFunctionId' },
-          { from: 'currencyId', to: 'toCurrencyId' }
+          { from: 'currencyId', to: 'toCurrencyId' },
+          { from: 'functionName', to: 'toFunctionName' },
+          { from: 'currencyRef', to: 'toCurrencyRef' },
+          { from: 'amount',     to: 'applyAmount' } 
         ]
       }
     },
