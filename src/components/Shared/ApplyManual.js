@@ -55,11 +55,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         .array()
         .of(
           yup.object().shape({
-            toRecordId: yup.number().required(),
-            toFunctionId: yup.number().required(),
-            toCurrencyId: yup.number().required(),
-            amount: yup.number().required().min(0),
-            applyAmount: yup.number().required().min(0)
+            toRecordId: yup.number().required()
           })
         )
         .required()
