@@ -1255,10 +1255,8 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                       decimalScale={5}
                       label={labels.exRateDivide}
                       value={
-                        formik?.values?.header?.exRate
-                          ? formik?.values?.header.exRate != 0
-                            ? 1 / formik?.values?.header.exRate
-                            : '0.00000'
+                        formik?.values?.header?.exRate && formik?.values?.header.exRate != 0
+                          ? 1 / formik?.values?.header.exRate
                           : '0.00000'
                       }
                       readOnly
