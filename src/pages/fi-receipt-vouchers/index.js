@@ -87,7 +87,7 @@ export default function CurrencyTrading() {
   }
 
   const del = async obj => {
-    await postRequest({
+    await postRequestt({
       extension: FinancialRepository.ReceiptVouchers.del,
       record: JSON.stringify(obj)
     })
