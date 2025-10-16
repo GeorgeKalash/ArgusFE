@@ -112,12 +112,12 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
 
     if (i > -1) {
       const next = list.slice()
-      next[i] = { ...list[i], ...obj }
-
+      next[i] = obj
       newData = next
+    } else {
+      newData = [...list, obj]
     }
 
-    newData = [...list, obj]
     saveTRX(newData)
   }
 
