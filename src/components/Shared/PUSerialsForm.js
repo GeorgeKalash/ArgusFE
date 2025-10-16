@@ -41,7 +41,10 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
       itemId: row?.itemId,
       siteId,
       totalWeight: row?.qty || 0,
-      items: row?.serials || []
+      items: row?.serials.map((item, index) => ({
+        ...item,
+        id: index + 1
+      })) || []
     },
     conditionSchema: ['items'],
     validationSchema: yup.object({
@@ -52,7 +55,6 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
 
       const serials = items.map((item, index) => ({
         ...item,
-        id: index + 1,
         srlSeqNo: index + 1,
         srlNo: item.srlNo,
         seqNo: row.id
@@ -185,7 +187,6 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
             columns={columns}
             maxAccess={maxAccess}
             disabled={disabled}
-            initialValues={formik?.initialValues?.items?.[0]}
             allowDelete={!disabled}
             allowAddNewLine={!disabled}
           />
