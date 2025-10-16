@@ -104,7 +104,15 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       label: labels.amount,
       name: 'amount',
       props: {
-        readOnly,
+        readOnly: true,      
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.applyAmoun,
+      name: 'applyAmount',
+      props: {
+        readOnly,       
         thousandSeparator: false,
         decimalScale: 2,
         allowNegative: false,
