@@ -89,7 +89,9 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
   })
 
   async function saveTRX(data) {
-    const baseAmount = data?.reduce((acc, item) => acc + item.baseAmount, 0) || 0
+    const baseAmount = data?.reduce((curSum, item) => {
+      return curSum + parseFloat(item.baseAmount) || 0
+    }, 0)
 
     await postRequest({
       extension: CostAllocationRepository.PuCostAllocations.set,
