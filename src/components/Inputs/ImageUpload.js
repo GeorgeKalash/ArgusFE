@@ -183,7 +183,7 @@ const ImageUpload = forwardRef(
         formik.setValues({ ...record, resourceId: effectiveResourceId })
         SavedImageInfo.current = { ...record, resourceId: effectiveResourceId }
 
-        setImage(record?.url || '')
+        setImage(record?.url ? `${record?.url}?t=${Date.now()}` : '')
       }
     }
 
