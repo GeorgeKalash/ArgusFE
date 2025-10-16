@@ -62,6 +62,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import Installments from 'src/components/Shared/Installments'
+import { PUSerialsForm } from 'src/components/Shared/PUSerialsForm'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1532,6 +1533,31 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
+  if (functionId == SystemFunction.PurchaseInvoice) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        console.log(row?.serials)
+        if (row?.trackBy === 1) {
+          stack({
+            Component: PUSerialsForm,
+            props: {
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              updateRow
+            }
+          })
+        }
+      }
+    })
+  }
+
   async function getMultiCurrencyFormData(currencyId, date) {
     if (currencyId && date) {
       const res = await getRequest({
@@ -1887,6 +1913,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}
           />
         </Grow>
