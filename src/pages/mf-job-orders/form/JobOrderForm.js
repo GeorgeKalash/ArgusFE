@@ -363,7 +363,7 @@ export default function JobOrderForm({
       title: titleText
     })
   }
-  async function refetchForm(recordId, imgSource) {
+  async function refetchForm(recordId) {
     if (!recordId) return
 
     const res = await getRequest({
@@ -380,25 +380,15 @@ export default function JobOrderForm({
 
     setStore(prevStore => ({
       ...prevStore,
-      recordId: res?.record.recordId,
+      recordId: res?.record?.recordId,
       isPosted: res?.record.status == 3,
       jobReference: res?.record.reference,
       isCancelled: res?.record.status == -1
     }))
-    updateParent(
-      imgSource == 1
-        ? res?.record.designId
-        : imgSource == 2
-        ? res?.record?.itemId
-        : imgSource == 3
-        ? res?.record?.recordId
-        : null,
-      imgSource
-    )
 
     !formik.values.recordId &&
       lockRecord({
-        recordId: res?.record.recordId,
+        recordId: res?.record?.recordId,
         reference: res?.record.reference,
         resourceId: ResourceIds.MFJobOrders,
         onSuccess: () => {
@@ -566,7 +556,7 @@ export default function JobOrderForm({
       })
       setImageSource(res?.record?.value || 3)
 
-      if (recordId) await refetchForm(recordId, res?.record?.value || 3)
+      if (recordId) await refetchForm(recordId)
     })()
   }, [])
 
