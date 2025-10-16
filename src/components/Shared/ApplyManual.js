@@ -12,8 +12,9 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 import Form from './Form'
+import { createConditionalSchema } from 'src/lib/validation'
 
-export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window}) => {
+export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -22,6 +23,14 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
   })
 
   useSetWindow({ title: platformLabels.ApplyManual, window })
+
+  const conditions = {
+    toRecordId: row => !!row?.toRecordId,
+    applyAmount: row => Number(row?.applyAmount) > 0,
+    toReference: row => !!row?.toReference
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
 
   const { formik } = useForm({
     initialValues: {
@@ -42,14 +51,24 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       items: yup
         .array()
         .of(
-          yup.object().shape({
-            toRecordId: yup.number().required()
+          schema.shape({
+            applyAmount: yup
+              .number()
+              .typeError()
+              .moreThan(0)
+              .test( function (value) {
+                const { amount } = this.parent
+                if (value == null || isNaN(value)) return true
+
+                return value <= (amount ?? 0)
+              })
           })
         )
-        .required()
     }),
     onSubmit: async values => {
-      const items = values.items.map(item => ({
+      const items = (values.items || [])
+      .filter(row => Object.values(requiredFields).every(fn => fn(row)))
+      .map(item => ({
         toReference: item.toReference,
         fromFunctionId: functionId,
         toFunctionId: item.toFunctionId,
@@ -112,11 +131,23 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       label: labels.applyAmount,
       name: 'applyAmount',
       props: {
-        readOnly,       
-        thousandSeparator: false,
         decimalScale: 2,
         allowNegative: false,
-        min: 0
+        min: 0,
+        maxLength: 10,
+        onValidate: (value, row) => {
+          const numericValue = Number(value)
+          if (numericValue <= 0) {
+
+            return 0
+          }
+          if (numericValue > Number(row.amount)) {
+            return row.amount
+          }
+          
+          return numericValue
+
+        }
       }
     }
   ]
