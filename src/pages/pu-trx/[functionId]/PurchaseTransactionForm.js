@@ -1542,7 +1542,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         onCondition
       },
       onClick: (e, row, update, updateRow) => {
-        console.log(row?.serials)
         if (row?.trackBy === 1) {
           stack({
             Component: PUSerialsForm,
