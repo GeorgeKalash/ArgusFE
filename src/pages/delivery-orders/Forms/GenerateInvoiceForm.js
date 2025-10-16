@@ -88,7 +88,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
         record: JSON.stringify(obj)
       })
 
-      await refetchForm(res.recordId)
+      await refetchForm(recordId)
       invalidate()
       window.close()
 
