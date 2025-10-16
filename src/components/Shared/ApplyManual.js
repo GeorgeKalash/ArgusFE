@@ -13,7 +13,7 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 import Form from './Form'
 
-export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window , accountRef, fromFunctionName,fromCurrencyRef}) => {
+export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window}) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -28,24 +28,12 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       items: [
         {
           id: 1,
-          fromFunctionId: functionId,
-          fromRecordId: recordId,
-          fromCurrencyId: currencyId,
-          seqNo: 1,
-          toFunctionId: null,
-          toRecordId: null,
-          toCurrencyId: null,
-          amount: 0,
-          toFunctionName: null,
-          toReference: null,
-          toCurrencyRef: null,
-          applyAmount: 0,
-          fromFunctionId: functionId,
-          fromFunctionName: fromFunctionName ,
-          fromCurrencyId: currencyId,
-          fromCurrencyRef: fromCurrencyRef ,
-          accountId: accountId ,
-          accountRef: accountRef ,
+      toRecordId: null,
+      toFunctionId: null,
+      toCurrencyId: null,
+      toReference: null,
+      amount: 0,
+      applyAmount: 0
         }
       ]
     },
@@ -61,28 +49,19 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         .required()
     }),
     onSubmit: async values => {
-      const items = values.items.map((item, index) => {
-        return {
-          ...item,
-          seqNo: index + 1,
-          fromFunctionId: functionId,
-          accountId,
-          fromRecordId: recordId,
-          fromCurrencyId: currencyId,
-          fromFunctionName: fromFunctionName ,
-          fromCurrencyRef: fromCurrencyRef ,
-          accountId: accountId,
-          accountRef: accountRef || null,
-          toFunctionId:item.toFunctionId,
-          toFunctionName: item.toFunctionName ,
-          toRecordId: item.toRecordId,
-          toReference: item.toReference ,
-          toCurrencyId: item.toCurrencyId,
-          toCurrencyRef: item.toCurrencyRef ,
-          amount: item.amount,
-          applyAmount: item.applyAmount
-        }
-      })
+      const items = values.items.map(item => ({
+        toReference: item.toReference,
+        fromFunctionId: functionId,
+        toFunctionId: item.toFunctionId,
+        fromRecordId: recordId,
+        toRecordId: item.toRecordId, 
+        fromCurrencyId: currencyId,
+        toCurrencyId: item.toCurrencyId,    
+        amount: item.amount,           
+        accountId: accountId,        
+        applyAmount: item.applyAmount
+      }
+    ))
 
       const resultObject = {
         fromRecordId: recordId,
@@ -113,12 +92,10 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         mapping: [
           { from: 'recordId', to: 'toRecordId' },
           { from: 'reference', to: 'toReference' },
-          { from: 'amount', to: 'amount' },
           { from: 'functionId', to: 'toFunctionId' },
           { from: 'currencyId', to: 'toCurrencyId' },
-          { from: 'functionName', to: 'toFunctionName' },
-          { from: 'currencyRef', to: 'toCurrencyRef' },
-          { from: 'amount',     to: 'applyAmount' } 
+          { from: 'amount', to: 'amount' },
+          { from: 'amount',     to: 'applyAmount' }
         ]
       }
     },

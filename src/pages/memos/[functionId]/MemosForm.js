@@ -263,11 +263,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       props: {
         recordId: formik.values.recordId,
         accountId: formik.values.accountId,
-        accountRef: formik.values.accountRef,                 
         currencyId: formik.values.currencyId,
-        fromCurrencyRef: formik.values.currencyName,         
         functionId,
-        fromFunctionName: formik.values.functionName,
         readOnly: isPosted || isCancelled
       }
     })
