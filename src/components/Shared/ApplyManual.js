@@ -36,7 +36,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
     initialValues: {
       items: [
         {
-          id: 1,
+      id: 1,
       toRecordId: null,
       toFunctionId: null,
       toCurrencyId: null,
@@ -77,7 +77,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         fromCurrencyId: currencyId,
         toCurrencyId: item.toCurrencyId,    
         amount: item.amount,           
-        accountId: accountId,        
+        accountId,        
         applyAmount: item.applyAmount
       }
     ))
