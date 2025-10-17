@@ -125,8 +125,8 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 parameters={
                   formik.values.fromFunctionId &&
                   (formik.values.fromFunctionId
-                    ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${50}`
-                    : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
+                    ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${1000}`
+                    : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
@@ -169,8 +169,8 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 parameters={
                   formik.values.toFunctionId &&
                   (formik.values.toFunctionId
-                    ? `_dgId=${formik.values.toFunctionId}&_startAt=${0}&_pageSize=${50}`
-                    : `_dgId=0&_startAt=${0}&_pageSize=${50}`)
+                    ? `_dgId=${formik.values.toFunctionId}&_startAt=${0}&_pageSize=${1000}`
+                    : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
                 onChange={(event, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
