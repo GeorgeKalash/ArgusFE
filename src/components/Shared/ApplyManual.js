@@ -117,6 +117,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       label: labels.applyAmount,
       name: 'applyAmount',
       props: {
+        readOnly,
         decimalScale: 2,
         maxLength: 10,
       
