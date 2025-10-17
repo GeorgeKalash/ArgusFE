@@ -37,10 +37,24 @@ const EmployeeList = () => {
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
-      return await getRequest({
+      const res = await getRequest({
         extension: EmployeeRepository.EmployeeList.qry2,
         parameters: `_filter=${filters.qry}&_branchId=0`
       })
+
+      if (res && res?.list) {
+        res.list = res?.list?.map(item => ({
+          ...item,
+          ref: item?.parent.reference,
+          fullName: item?.parent.fullName,
+          department: item?.department?.name,
+          position: item?.position?.name,
+          branch: item?.branch?.name,
+          hireDate: item?.parent?.hireDate
+        }))
+      }
+
+      return res
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
@@ -62,7 +76,7 @@ const EmployeeList = () => {
         department: item?.department?.name,
         position: item?.position?.name,
         branch: item?.branch?.name,
-        hireDate: item?.parent?.hireDate,
+        hireDate: item?.parent?.hireDate
       }))
     }
 
@@ -159,6 +173,7 @@ const EmployeeList = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

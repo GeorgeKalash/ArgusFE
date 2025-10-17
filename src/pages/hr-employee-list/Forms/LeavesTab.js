@@ -30,7 +30,7 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
       response.list = response?.list?.map(item => ({
         ...item,
         name: item?.schedule.name,
-        type: item?.summary.leaveType,
+        type: item?.summary.lttName,
         earned: item?.summary.earned,
         used: item?.summary.used,
         lost: item?.summary.lost,
@@ -51,7 +51,8 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
     enabled: !!recordId,
     queryFn: fetchGridData,
     endpointId: LoanManagementRepository.Leaves.qry,
-    datasetId: ResourceIds.EmployeeFilter
+    datasetId: ResourceIds.EmployeeFilter,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const columns = [

@@ -33,15 +33,15 @@ const HiringTab = ({ labels, maxAccess, store }) => {
     initialValues: {
       recordId,
       employeeId: recordId,
-      probationEndDate: null,
+      probationEndDate: hireDate ? formatDateFromApi(hireDate) : null,
       nextReviewDate: null,
       npId: null,
       termEndDate: null,
       recruitmentInfo: '',
-      recruitmentCost: '',
+      recruitmentCost: null,
       pyReference: '',
       taReference: '',
-      pyActiveDate: null,
+      pyActiveDate: hireDate ? formatDateFromApi(hireDate) : null,
       ssBranchId: null,
       probationPeriod: null,
       sponsorId: null,
@@ -79,18 +79,26 @@ const HiringTab = ({ labels, maxAccess, store }) => {
           parameters: `_employeeId=${recordId}`
         })
 
-        if (res.record)
+        if (res?.record) {
           formik.setValues({
-            ...res.record,
+            ...res?.record,
             employeeId: recordId,
             pyActiveDate: res?.record?.pyActiveDate ? formatDateFromApi(res.record.pyActiveDate) : null,
-            termEndDate: res.record.termEndDate ? formatDateFromApi(res.record.termEndDate) : null,
-            nextReviewDate: res.record.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
-            probationEndDate: res.record.probationEndDate ? formatDateFromApi(res.record.probationEndDate) : null
+            termEndDate: res?.record?.termEndDate ? formatDateFromApi(res.record.termEndDate) : null,
+            nextReviewDate: res?.record?.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
+            probationEndDate: res?.record?.probationEndDate ? formatDateFromApi(res.record.probationEndDate) : null
           })
+        } else {
+          formik.setValues({
+            ...formik.initialValues,
+            employeeId: recordId,
+            probationEndDate: hireDate ? formatDateFromApi(hireDate) : null,
+            pyActiveDate: hireDate ? formatDateFromApi(hireDate) : null
+          })
+        }
       }
     })()
-  }, [])
+  }, [hireDate])
 
   const editMode = !!formik.values.recordId
 

@@ -15,7 +15,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { formatDateMDY } from 'src/lib/date-helper'
 
-const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
+const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId: recordId || null, hireDate: null })
   const { getRequest } = useContext(RequestsContext)
@@ -74,24 +74,28 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
             disabled={!!recordId}
           />
 
-          <Typography variant='subtitle1'>{quickView?.fullName || ''}</Typography>
-          <Typography variant='subtitle1'>{quickView?.departmentName || ''}</Typography>
-          <Typography variant='subtitle1'>{quickView?.branchName || ''}</Typography>
-          <Typography variant='subtitle1'>{quickView?.positionName || ''}</Typography>
+          {recordId && (
+            <>
+              <Typography variant='subtitle1'>{quickView?.fullName || ''}</Typography>
+              <Typography variant='subtitle1'>{quickView?.departmentName || ''}</Typography>
+              <Typography variant='subtitle1'>{quickView?.branchName || ''}</Typography>
+              <Typography variant='subtitle1'>{quickView?.positionName || ''}</Typography>
 
-          <Typography variant='body2' color='text.secondary'>
-            {labels.Manager}: {quickView?.reportToName || ''}
-          </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {labels.Manager}: {quickView?.reportToName || ''}
+              </Typography>
 
-          <Typography variant='body2' color='text.secondary'>
-            {quickView?.serviceDuration || ''}
-          </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {quickView?.serviceDuration || ''}
+              </Typography>
+            </>
+          )}
         </Box>
       </Grid>
       <Grid item xs={9} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
 
-        <CustomTabPanel height={height} index={0} value={activeTab}>
+        <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
           <ProfileForm
             store={store}
             setStore={setStore}
@@ -101,27 +105,27 @@ const EmployeeListWindow = ({ height, recordId, labels, maxAccess }) => {
           />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={1} value={activeTab}>
+        <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
           <JobTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={2} value={activeTab}>
+        <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
           <LeavesTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={3} value={activeTab}>
+        <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
           <HiringTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={4} value={activeTab}>
+        <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
           <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} isNotTab={recordId} />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={5} value={activeTab}>
+        <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
           <SkillsTab store={store} labels={labels} maxAccess={maxAccess} />
         </CustomTabPanel>
 
-        <CustomTabPanel height={height} index={6} value={activeTab}>
+        <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
           <UserDefinedTab store={store} maxAccess={maxAccess} />
         </CustomTabPanel>
       </Grid>

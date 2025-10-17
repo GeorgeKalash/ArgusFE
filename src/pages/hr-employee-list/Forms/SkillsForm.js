@@ -44,7 +44,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
       major: yup.string().required()
     }),
     onSubmit: async values => {
-      const response = await postRequest({
+      await postRequest({
         extension: EmployeeRepository.Skills.set,
         record: JSON.stringify({
           ...values,
@@ -53,7 +53,6 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
       })
 
       toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
-      formik.setFieldValue('recordId', response.recordId)
 
       invalidate()
       window.close()

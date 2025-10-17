@@ -97,7 +97,7 @@ const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId, 
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 required
-                onClear={() => formik.setFieldValue('date', '')}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>

@@ -58,14 +58,17 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
       isConfidential: false,
       sgId: null
     },
-    maxAccess: maxAccess,
+    maxAccess,
     validationSchema: yup.object({
       reference: yup.string().required(),
       firstName: yup.string().required(),
+      middleName: yup.string().required(),
       lastName: yup.string().required(),
       birthDate: yup.date().required(),
-      scId: yup.number().required(),
+      scType: yup.number().required(),
       hireDate: yup.date().required(),
+      homeMail: yup.string().email().nullable(),
+      workMail: yup.string().email().nullable(),
       scId: yup.number().when('scType', {
         is: value => value == 2,
         then: () => yup.number().required(),
@@ -95,10 +98,10 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
       }))
 
       if (imageUploadRef.current) {
-      imageUploadRef.current.value = parseInt(res.recordId)
+        imageUploadRef.current.value = parseInt(res.recordId)
 
-      await imageUploadRef.current.submit()
-    }
+        await imageUploadRef.current.submit()
+      }
       invalidate()
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
@@ -188,7 +191,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('middleName', '')}
-                    error={formik.touched.nmiddleNameame && Boolean(formik.errors.middleName)}
+                    error={formik.touched.middleName && Boolean(formik.errors.middleName)}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -314,7 +317,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     value={formik.values?.birthDate}
                     required
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('birthDate', '')}
+                    onClear={() => formik.setFieldValue('birthDate', null)}
                     error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
                   />
                 </Grid>
@@ -371,11 +374,11 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     valueField='key'
                     displayField='value'
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('scType', newValue?.key ?? null)
-
                       if (newValue?.key == 1 || newValue?.key == 3 || newValue?.key == 4) {
                         formik.setFieldValue('scId', null)
                       }
+
+                      formik.setFieldValue('scType', newValue?.key || null)
                     }}
                     error={formik.touched.scType && Boolean(formik.errors.scType)}
                   />

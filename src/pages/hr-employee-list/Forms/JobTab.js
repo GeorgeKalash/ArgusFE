@@ -34,7 +34,7 @@ const JobTab = ({ labels, maxAccess, store }) => {
   async function fetchGridJobInfoData() {
     return await getRequest({
       extension: EmployeeRepository.JobInfo.qry,
-      parameters: `_filter=&_size=30&_startAt=0&_params=&_employeeId=${recordId}&_sortBy=recordId desc`
+      parameters: `_filter=&_size=30&_startAt=0&_params=1|${recordId}&_employeeId=&_sortBy=recordId desc`
     })
   }
 
@@ -46,7 +46,8 @@ const JobTab = ({ labels, maxAccess, store }) => {
     enabled: !!recordId,
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.EmployementHistory.qry,
-    datasetId: ResourceIds.EmployeeFilter
+    datasetId: ResourceIds.EmployeeFilter,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const {
@@ -56,7 +57,8 @@ const JobTab = ({ labels, maxAccess, store }) => {
     enabled: !!recordId,
     queryFn: fetchGridJobInfoData,
     endpointId: EmployeeRepository.JobInfo.qry,
-    datasetId: ResourceIds.EmployeeFilter
+    datasetId: ResourceIds.EmployeeFilter,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const filteredEmploymentData = searchEmployment
