@@ -18,11 +18,24 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { ChangeDeductionsAmount, ChangeEntitlementsAmount } from 'src/utils/Payroll'
 
-export default function SalaryTab({ labels, maxAccess, store, setStore, employeeInfo, setSalaryInfo }) {
+export default function SalaryTab({
+  labels,
+  maxAccess,
+  store,
+  setStore,
+  employeeInfo,
+  setSalaryInfo,
+  data,
+  refetchSalaryTab
+}) {
   const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const entitlements = data?.filter(record => record.type == 1) || []
+  const deductions = data?.filter(record => record.type == 2) || []
 
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.EmployeeSalary.qry
@@ -54,12 +67,14 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
       paymentFrequency: yup.string().required(),
       paymentMethod: yup.string().required(),
       basicAmount: yup.number().required(),
-      bankId: yup.string().test('bank-required', 'Bank is required', function (value) {
-        const { paymentMethod } = this.parent
+      bankId: yup
+        .string()
+        .nullable()
+        .test('bank-required', 'Bank is required', function (value) {
+          const { paymentMethod } = this.parent
 
-        return paymentMethod == 2 ? !!value : true
-      }),
-
+          return paymentMethod == 2 ? !!value : true
+        }),
       accountNumber: yup.string().test('account-required', 'Account number is required', function (value) {
         const { paymentMethod } = this.parent
 
@@ -67,46 +82,50 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
       })
     }),
     onSubmit: async obj => {
-      await postRequest({
+      const res = await postRequest({
         extension: EmployeeRepository.EmployeeSalary.set,
         record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
       })
       const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       invalidate()
+      getSalaryInfo(res?.recordId)
+      if (!obj.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: res?.recordId
+        }))
     }
   })
   const editMode = !!formik?.values?.recordId
 
-  async function ChangeDeductionsAmount(offset) {}
-
-  async function ReCalculateFinal() {}
-
-  async function ChangeEntitlementsAmount(amountOffset) {
-    let sum = 0
-
-    const updatedEntitlements = entitlements.map(record => {
-      if (record.includeInTotal) {
-        if (record.pct === '0') {
-          sum += parseFloat(record.fixedAmount)
-
-          return record
-        } else {
-          const x = (parseFloat(record.pct) / 100) * parseFloat(String(basicSalary).replace(/,/g, ''))
-          sum += x
-
-          return { ...record, fixedAmount: x }
-        }
-      }
-
-      return record
-    })
-
-    // setEntitlements(updatedEntitlements)
-    // setEAmount(sum)
-    // ChangeDeductionsAmount(0)
-    // ReCalculateFinal()
+  async function updateAmountFields(basicAmount) {
+    const totalEN = basicAmount != 0 ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0
+    const totalDE = basicAmount != 0 ? await ChangeDeductionsAmount(deductions, basicAmount) : 0
+    const finalAmount = basicAmount != 0 ? totalEN - totalDE + basicAmount : 0
+    formik.setFieldValue('basicAmount', basicAmount)
+    formik.setFieldValue('finalAmount', parseFloat(finalAmount).toFixed(2))
+    formik.setFieldValue('eAmount', parseFloat(totalEN).toFixed(2))
+    formik.setFieldValue('dAmount', parseFloat(totalDE).toFixed(2))
   }
+
+  async function getSalaryInfo(recordId) {
+    const res = await getRequest({
+      extension: EmployeeRepository.EmployeeSalary.get,
+      parameters: `_recordId=${recordId}`
+    })
+    formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
+    setSalaryInfo({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
+    setStore(prevStore => ({
+      ...prevStore,
+      currency: res?.record?.currencyRef
+    }))
+    refetchSalaryTab.current = false
+  }
+
+  useEffect(() => {
+    if (recordId && refetchSalaryTab.current) getSalaryInfo(recordId)
+  }, [refetchSalaryTab.current])
 
   useEffect(() => {
     ;(async function () {
@@ -141,18 +160,7 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
           })
           formik.setFieldValue('effectiveDate', res.record.hireDate ? formatDateFromApi(res.record.hireDate) : null)
         }
-      } else {
-        const res = await getRequest({
-          extension: EmployeeRepository.EmployeeSalary.get,
-          parameters: `_recordId=${recordId}`
-        })
-        formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
-        setSalaryInfo({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
-        setStore(prevStore => ({
-          ...prevStore,
-          currency: res?.record?.currencyRef
-        }))
-      }
+      } else getSalaryInfo(recordId)
     })()
   }, [])
 
@@ -235,9 +243,10 @@ export default function SalaryTab({ labels, maxAccess, store, setStore, employee
               name='basicAmount'
               label={labels.basicAmount}
               value={formik?.values?.basicAmount}
-              onChange={formik.handleChange}
+              onChange={e => updateAmountFields(Number(e.target.value.replace(/,/g, '')))}
               required
-              onClear={() => formik.setFieldValue('basicAmount', '')}
+              allowNegative={false}
+              onClear={() => updateAmountFields(0)}
               error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
             />
           </Grid>

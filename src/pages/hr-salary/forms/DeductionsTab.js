@@ -12,7 +12,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
 
-const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
+const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSalaryTab }) => {
   const { postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
@@ -24,8 +24,8 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
       flex: 1
     },
     {
-      field: 'pct',
-      headerName: labels.percentage,
+      field: 'concatenatedPct',
+      headerName: labels.pct,
       flex: 1
     },
     {
@@ -55,7 +55,8 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
         maxAccess,
         salaryId: store?.recordId,
         seqNumbers: { current: seqNo, maxSeqNo: store?.maxSeqNo },
-        salaryInfo: { header: salaryInfo, details: data }
+        salaryInfo: { header: salaryInfo, details: data },
+        refetchSalaryTab
       },
       width: 800,
       height: 500,
@@ -68,7 +69,7 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
       extension: EmployeeRepository.SalaryDetails.del,
       record: JSON.stringify(obj)
     })
-
+    refetchSalaryTab.current = true
     invalidate()
     toast.success(platformLabels.Deleted)
   }

@@ -1,5 +1,5 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import { useContext, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import SalaryTab from '../forms/SalaryTab'
 import EntitlementsTab from '../forms/EntitlementsTab'
@@ -14,6 +14,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
   const [activeTab, setActiveTab] = useState(0)
   const [salaryInfo, setSalaryInfo] = useState({})
   const { getRequest } = useContext(RequestsContext)
+  const refetchSalaryTab = useRef(false)
 
   const [store, setStore] = useState({
     recordId,
@@ -23,7 +24,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
   const {
     query: { data }
   } = useResourceQuery({
-    enabled: !!recordId,
+    enabled: !!recordId && store.currency,
     datasetId: ResourceIds.Salaries,
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.SalaryDetails.qry
@@ -43,7 +44,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
     return response.list.map(record => ({
       ...record,
       currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,
-      pct: record?.pct ? `${parseFloat(record.pct).toFixed(2)}%` : null
+      concatenatedPct: record?.pct ? `${parseFloat(record.pct).toFixed(2)}%` : `0.00%`
     }))
   }
 
@@ -64,13 +65,29 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           store={store}
           employeeInfo={employeeInfo}
           setSalaryInfo={setSalaryInfo}
+          data={data}
+          refetchSalaryTab={refetchSalaryTab}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
-        <EntitlementsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} data={data} />
+        <EntitlementsTab
+          labels={labels}
+          maxAccess={maxAccess}
+          store={store}
+          salaryInfo={salaryInfo}
+          data={data}
+          refetchSalaryTab={refetchSalaryTab}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab}>
-        <DeductionsTab labels={labels} maxAccess={maxAccess} store={store} salaryInfo={salaryInfo} data={data} />
+        <DeductionsTab
+          labels={labels}
+          maxAccess={maxAccess}
+          store={store}
+          salaryInfo={salaryInfo}
+          data={data}
+          refetchSalaryTab={refetchSalaryTab}
+        />
       </CustomTabPanel>
     </>
   )

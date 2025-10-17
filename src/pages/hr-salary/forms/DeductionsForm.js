@@ -16,7 +16,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { DataSets } from 'src/resources/DataSets'
 import { calculateFixed } from 'src/utils/Payroll'
 
-export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers, salaryInfo, window }) {
+export default function DeductionsForm({
+  labels,
+  maxAccess,
+  salaryId,
+  seqNumbers,
+  salaryInfo,
+  refetchSalaryTab,
+  window
+}) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -40,8 +48,17 @@ export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers
     },
     validationSchema: yup.object({
       edId: yup.number().required(),
-      fixedAmount: yup.number().min(1).required(),
-      edCalcType: yup.number().required()
+      fixedAmount: yup.number().min(0).required(),
+      edCalcType: yup.number().required(),
+      pct: yup
+        .number()
+        .min(0)
+        .max(100)
+        .test('pct-required', 'Percentage is required', function (value) {
+          const { isPct } = this.parent
+
+          return isPct ? !!value : true
+        })
     }),
     onSubmit: async obj => {
       const newObj = {
@@ -57,6 +74,7 @@ export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers
           salaryDetails: updatedDetails
         })
       })
+      refetchSalaryTab.current = true
       const actionMessage = obj.salaryId ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       window.close()
@@ -73,7 +91,7 @@ export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers
           extension: EmployeeRepository.SalaryDetails.get,
           parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
         })
-        formik.setValues(res?.record)
+        formik.setValues({ ...res?.record, isPct: res?.record?.pct > 0 })
       }
     })()
   }, [])
@@ -112,21 +130,28 @@ export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers
               name='isPct'
               value={formik.values?.isPct}
               onChange={event => {
-                formik.setFieldValue('isPct', event.target.checked)
+                formik.setFieldValue('pctOf', 1)
                 if (event.target.checked) formik.setFieldValue('fixedAmount', 0)
                 else formik.setFieldValue('pct', 0)
+                formik.setFieldValue('isPct', event.target.checked)
               }}
               label={labels.isPct}
               maxAccess={maxAccess}
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomNumberField
+            <ResourceComboBox
+              datasetId={DataSets.APPLY_TO_SALARY}
               name='pctOf'
               label={labels.pctOf}
-              value={formik.values.pctOf}
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('pctOf', 0)}
+              valueField='key'
+              displayField='value'
+              values={formik.values}
+              maxAccess={maxAccess}
+              readOnly={!formik.values.isPct}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('pctOf', newValue?.key || null)
+              }}
               error={formik.touched.pctOf && Boolean(formik.errors.pctOf)}
             />
           </Grid>
@@ -136,11 +161,12 @@ export default function DeductionsForm({ labels, maxAccess, salaryId, seqNumbers
               label={labels.pct}
               value={formik.values.pct}
               readOnly={!formik.values.isPct}
+              required={formik.values.isPct}
               onBlur={e => {
                 let pctValue = Number(e.target.value)
-                formik.setFieldValue('pct', pctValue)
                 const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
                 formik.setFieldValue('fixedAmount', amount)
+                formik.setFieldValue('pct', pctValue)
               }}
               onClear={() => formik.setFieldValue('pct', 0)}
               error={formik.touched.pct && Boolean(formik.errors.pct)}

@@ -10,11 +10,16 @@ import EntitlementForm from './EntitlementForm'
 import { useWindow } from 'src/windows'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import { useInvalidate } from 'src/hooks/resource'
 
-const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
+const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSalaryTab }) => {
   const { postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+
+  const invalidate = useInvalidate({
+    endpointId: EmployeeRepository.SalaryDetails.qry
+  })
 
   const columns = [
     {
@@ -23,8 +28,8 @@ const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
       flex: 1
     },
     {
-      field: 'pct',
-      headerName: labels.percentage,
+      field: 'concatenatedPct',
+      headerName: labels.pct,
       flex: 1
     },
     {
@@ -50,7 +55,8 @@ const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
         maxAccess,
         salaryId: store?.recordId,
         seqNumbers: { current: seqNo, maxSeqNo: store?.maxSeqNo },
-        salaryInfo: { header: salaryInfo, details: data }
+        salaryInfo: { header: salaryInfo, details: data },
+        refetchSalaryTab
       },
       width: 800,
       height: 500,
@@ -63,7 +69,7 @@ const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data }) => {
       extension: EmployeeRepository.SalaryDetails.del,
       record: JSON.stringify(obj)
     })
-
+    refetchSalaryTab.current = true
     invalidate()
     toast.success(platformLabels.Deleted)
   }
