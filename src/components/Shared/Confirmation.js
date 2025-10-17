@@ -126,7 +126,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 sx={{ color: 'white' }}
                 name='idNo'
                 label={labels.id_number}
-                displayType={showAsPassword && 'password'}
+                type={showAsPassword && 'password'}
                 value={formik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
                 required
                 onChange={e => {
@@ -156,7 +156,7 @@ const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refr
                 label={labels.confirmIdNumber}
                 value={formik.values?.idNoRepeat}
                 required
-                displayType={showAsPasswordRepeat && 'password'}
+                type={showAsPasswordRepeat && 'password'}
                 onChange={e => {
                   formik.handleChange(e)
                 }}

@@ -176,7 +176,6 @@ const LoginPage = () => {
                     label={platformLabels.Username}
                     value={validation.values.username}
                     type='text'
-                    autoComplete='on'
                     onChange={validation.handleChange}
                     onClear={() => validation.setFieldValue('username', '')}
                     error={validation.touched.username && Boolean(validation.errors.username)}
@@ -194,7 +193,6 @@ const LoginPage = () => {
                     onChange={validation.handleChange}
                     error={validation.touched.password && validation.errors.password}
                     helperText={validation.touched.password && validation.errors.password}
-                    autoComplete='on'
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position='end'>
