@@ -1082,8 +1082,8 @@ export default function JobOrderForm({
                   ]}
                   onChange={async (event, newValue) => {
                     await fillBillingInfo(newValue)
-                    formik.setFieldValue('clientName', newValue?.name || null)
-                    formik.setFieldValue('clientRef', newValue?.reference || null)
+                    formik.setFieldValue('clientName', newValue?.name || '')
+                    formik.setFieldValue('clientRef', newValue?.reference || '')
 
                     formik.setFieldValue('clientId', newValue?.recordId || null)
                   }}
