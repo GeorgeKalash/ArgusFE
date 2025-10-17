@@ -26,8 +26,7 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
 
   const conditions = {
     toRecordId: row => !!row?.toRecordId,
-    applyAmount: row => Number(row?.applyAmount) > 0,
-    toReference: row => !!row?.toReference
+    applyAmount: row => Number(row?.applyAmount) > 0 && Number(row?.applyAmount) <= Number(row?.amount)
   }
 
   const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
@@ -48,23 +47,10 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          schema.shape({
-            applyAmount: yup
-              .number()
-              .typeError()
-              .moreThan(0)
-              .test( function (value) {
-                const { amount } = this.parent
-                if (value == null || isNaN(value)) return true
-
-                return value <= (amount ?? 0)
-              })
-          })
-        )
+      items: yup.array().of(schema)
     }),
+    conditionSchema: ['items'],
+
     onSubmit: async values => {
       const items = (values.items || [])
       .filter(row => Object.values(requiredFields).every(fn => fn(row)))
@@ -133,21 +119,9 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       props: {
         decimalScale: 2,
         allowNegative: false,
-        min: 0,
+
         maxLength: 10,
-        onValidate: (value, row) => {
-          const numericValue = Number(value)
-          if (numericValue <= 0) {
-
-            return 0
-          }
-          if (numericValue > Number(row.amount)) {
-            return row.amount
-          }
-          
-          return numericValue
-
-        }
+      
       }
     }
   ]
