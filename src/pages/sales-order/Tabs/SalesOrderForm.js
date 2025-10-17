@@ -1345,6 +1345,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     name='spId'
                     label={labels.salesPerson}
                     columnsInDropDown={[

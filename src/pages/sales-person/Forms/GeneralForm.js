@@ -16,6 +16,7 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import * as yup from 'yup'
+import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 
 export default function GeneralForm({ labels, maxAccess, store, setStore }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -215,6 +216,15 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                   formik.setFieldValue('targetType', newValue?.key || null)
                 }}
                 error={formik.touched.targetType && Boolean(formik.errors.targetType)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isInactive'
+                value={formik.values?.isInactive}
+                onChange={event => formik.setFieldValue('isInactive', event.target.checked)}
+                label={labels.isInactive}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
