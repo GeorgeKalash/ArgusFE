@@ -20,7 +20,7 @@ export const getButtons = platformLabels => [
   {
     key: 'Info',
     label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
+    condition: 'isInfo',
     onClick: 'onInfo',
     color: '#4355a5',
     disabled: '!editMode',
@@ -206,13 +206,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Print',
-    label: platformLabels.Print,
-    color: '#231f20',
-    image: 'print.png',
-    main: false
-  },
-  {
     key: 'Invoice',
     label: platformLabels.Invoice,
     color: '#231f20',
@@ -395,10 +388,24 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateProdOrder',
+    label: platformLabels.GenerateProductionOder,
+    color: 'black',
+    image: 'order.png',
+    main: false
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',
     image: 'info.png',
+    main: false
+  },
+  {
+    key: 'Print',
+    label: platformLabels.Print,
+    color: '#231f20',
+    image: 'print.png',
     main: false
   },
   {
@@ -620,6 +627,27 @@ export const getButtons = platformLabels => [
     key: 'PV',
     label: platformLabels.PV,
     color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Installments',
+    label: platformLabels.Installments,
+    color: '#49732F',
+    image: 'invoice-installements.png',
+    main: false
+  },
+  {
+    key: 'Sync',
+    label: platformLabels.Sync,
+    color: '#231F20',
+    image: 'sync.png',
+    main: false
+  },
+  {
+    key: 'History',
+    label: platformLabels.History,
+    color: '#231f20',
+    image: 'history.png',
     main: false
   }
 ]

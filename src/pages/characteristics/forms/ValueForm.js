@@ -4,14 +4,13 @@ import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, window, chId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -61,14 +60,7 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Characteristics}
-      maxAccess={maxAccess}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -88,7 +80,7 @@ const ValueForm = ({ labels, maxAccess, getValueGridData, recordId, seqNo, windo
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

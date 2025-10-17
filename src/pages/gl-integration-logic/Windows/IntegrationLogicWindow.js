@@ -16,9 +16,9 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
 
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <IntegrationLogicForm
           labels={labels}
           setStore={setStore}
@@ -27,7 +27,7 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <IntegrationLogicDetails labels={labels} maxAccess={maxAccess} store={store} />
       </CustomTabPanel>
     </>

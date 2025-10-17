@@ -3,14 +3,13 @@ import { useEffect, useContext, useState, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -161,14 +160,7 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
 
   return (
     <>
-      <FormShell
-        resourceId={ResourceIds.Routings}
-        form={formik}
-        editMode={editMode}
-        maxAccess={maxAccess}
-        isCleared={false}
-        isInfo={false}
-      >
+      <Form onSave={formik.handleSubmit} editMode={editMode} maxAccess={maxAccess} isParentWindow={false}>
         <VertLayout>
           <Grow>
             <DataGrid
@@ -184,7 +176,7 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
             />
           </Grow>
         </VertLayout>
-      </FormShell>
+      </Form>
     </>
   )
 }

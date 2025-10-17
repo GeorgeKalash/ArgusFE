@@ -29,17 +29,25 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import ImportForm from 'src/components/Shared/ImportForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ProductionOrderForm({ labels, access, recordId, window }) {
+export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.ProductionOrder
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionOrder,
     access,
     enabled: !recordId
   })
+
+  useSetWindow({ title: labels.ProductionOrder, window })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
@@ -679,3 +687,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     </FormShell>
   )
 }
+
+ProductionOrderForm.width = 1200
+ProductionOrderForm.height = 680

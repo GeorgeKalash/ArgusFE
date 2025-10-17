@@ -19,14 +19,25 @@ import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 import { MasterSource } from 'src/resources/MasterSource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { DataSets } from 'src/resources/DataSets'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import HistoryList from './HistoryList'
+import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
+import { SCRepository } from 'src/repositories/SCRepository'
+import PrintConfirmationDialog from './PrintConfirmationDialog'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
   const [onKitItem, setOnKitItem] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { stack: stackError } = useError()
+
+  const currencyId = defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value
+  const plId = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry
@@ -70,7 +81,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       pgId: '',
       productionLevel: '',
       collectionId: null,
-      isInactive: false
+      isInactive: false,
+      isExternal: false
     },
     maxAccess,
     validateOnChange: true,
@@ -147,43 +159,136 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     }
   })
 
+  const getData = async nraId => {
+    if (!nraId) return
+    if (nraId) {
+      const res = await getRequest({
+        extension: SystemRepository.NumberRange.get,
+        parameters: `_recordId=${nraId}`
+      })
+
+      return res.record.external
+    }
+  }
+
   const editMode = !!formik.values.recordId
 
+  const refetchForm = async recordId => {
+    const res = await getRequest({
+      extension: InventoryRepository.Items.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const res2 = await getRequest({
+      extension: InventoryRepository.Category.get,
+      parameters: `_recordId=${res?.record?.categoryId}`
+    })
+
+    const isExternal = await getData(res2.record.nraId)
+
+    res.record.isInactive = res.record.isInactive || false
+
+    setFormikInitial(res.record)
+
+    formik.setValues({ ...res.record, kitItem: !!res.record.kitItem, isExternal })
+    setShowLotCategories(res.record.trackBy === 2)
+    setShowSerialProfiles(res.record.trackBy === 1)
+    setStore(prevStore => ({
+      ...prevStore,
+      nraId: res2?.record?.nraId,
+      _msId: res.record.msId,
+      _kit: res.record.kitItem,
+      productionLevel: res.record.productionLevel,
+      measurementId: res.record.defSaleMUId,
+      priceGroupId: res.record.pgId,
+      returnPolicy: res.record.returnPolicyId,
+      _name: res.record.name,
+      _reference: res.record.sku
+    }))
+  }
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: InventoryRepository.Items.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        const res2 = await getRequest({
-          extension: InventoryRepository.Category.get,
-          parameters: `_recordId=${res?.record?.categoryId}`
-        })
-
-        res.record.isInactive = res.record.isInactive || false
-
-        setFormikInitial(res.record)
-
-        formik.setValues({ ...res.record, kitItem: !!res.record.kitItem })
-        setShowLotCategories(res.record.trackBy === 2)
-        setShowSerialProfiles(res.record.trackBy === 1)
-        setStore(prevStore => ({
-          ...prevStore,
-          nraId: res2?.record?.nraId,
-          _msId: res.record.msId,
-          _kit: res.record.kitItem,
-          productionLevel: res.record.productionLevel,
-          measurementId: res.record.defSaleMUId,
-          priceGroupId: res.record.pgId,
-          returnPolicy: res.record.returnPolicyId,
-          _name: res.record.name,
-          _reference: res.record.sku
-        }))
-      }
-    })()
+    if (recordId) {
+      refetchForm(recordId)
+    }
   }, [])
+
+  async function onCopy(obj) {
+    postRequest({
+      extension: InventoryRepository.Item.clone,
+      record: JSON.stringify(obj)
+    }).then( diRes => {
+      toast.success(platformLabels.Saved)
+      refetchForm(diRes.recordId)
+      invalidate()
+    })
+  }
+
+  async function History(obj) {
+    stack({
+      Component: HistoryList,
+      props: {
+        labels,
+        maxAccess,
+        recordId: obj.recordId
+      },
+      width: 700,
+      height: 500,
+      title: labels.history
+    })
+  }
+
+  async function ConfirmationPrint() {
+    const { barcode, error } = await Print()
+    if (!error && barcode)
+    stack({
+      Component: PrintConfirmationDialog,
+      props: {
+        Print,
+        barcode
+      },
+      width: 400,
+      height: 200
+    })
+  }
+
+  async function Print() {
+    const obj = formik.values
+    if (!obj.labelTemplateId) {
+      stackError({ message: platformLabels.defaultTemplateError })
+
+      return { error: true }
+    }
+
+    if (!currencyId) {
+      stackError({ message: platformLabels.DefaultSalesCurrency })
+
+      return { error: true }
+    }
+
+    const templateRes = await getRequest({
+      extension: SCRepository.LabelTemplate.get,
+      parameters: `_recordId=${obj.labelTemplateId}`
+    })
+
+    if (!templateRes || !templateRes.record.format) {
+      stackError({ message: platformLabels.DefaultTemplateFormat })
+
+      return { error: true }
+    }
+
+    if (!plId) {
+      stackError({ message: platformLabels.DefaultSalesPrice })
+
+      return { error: true }
+    }
+
+    const res = await getRequest({
+      extension: InventoryRepository.LabelString.md,
+      parameters: `_templateId=${obj.labelTemplateId}&_currencyId=${currencyId}&_printFormat=${templateRes.record.format}&_plId=${plId}&_items=${recordId},1`
+    })
+
+    return { barcode: res.record.data}
+  }
 
   const actions = [
     {
@@ -197,6 +302,18 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
       condition: true,
       onClick: 'onClickGIA',
       masterSource: MasterSource.Item,
+      disabled: !editMode
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: () => onCopy(formik?.values),
+      disabled: !(store?.nraId && !formik.values.isExternal)
+    },
+    {
+      key: 'History',
+      condition: true,
+      onClick: () => History(formik?.values),
       disabled: !editMode
     }
   ]
@@ -214,7 +331,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   }, [formik.values.kitItem])
 
   return (
-    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
+    <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} onPrint={ConfirmationPrint}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -241,6 +358,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
+
                       setStore(prevStore => ({
                         ...prevStore,
                         nraId: newValue?.nraId
@@ -494,7 +612,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
                     onChange={event => formik.setFieldValue('ivtItem', event.target.checked)}
                     label={labels.inventory}
                     maxAccess={maxAccess}
-                    disabled={formik.values.kitItem}
+                    disabled={formik.values.kitItem || editMode}
                   />
                 </Grid>
                 <Grid item xs={4}>

@@ -85,7 +85,7 @@ export const AddressFormShell = ({
     <FormShell
       form={formik}
       maxAccess={formikSettings.maxAccess}
-      infoVisible={false}
+      isInfo={false}
       disabledSubmit={readOnly}
       editMode={editMode}
       isSavedClear={isSavedClear}

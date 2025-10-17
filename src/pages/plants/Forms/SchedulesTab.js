@@ -1,17 +1,16 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { CommonContext } from 'src/providers/CommonContext'
+import Form from 'src/components/Shared/Form'
 
 const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
   const { recordId } = store
@@ -171,15 +170,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
   }, [recordId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Plants}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -192,7 +183,7 @@ const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

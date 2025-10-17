@@ -15,24 +15,24 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 
-export default function ScheduleForm({ labels, maxAccess, recordId, editMode, setEditMode, setSelectedRecordId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function ScheduleForm({ labels, maxAccess, store, setStore }) {
+  const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionSchedule.qry
+    endpointId: SaleRepository.CommissionSchedule.page
   })
 
   const formik = useFormik({
     initialValues: {
       recordId: null,
       name: '',
-      type: ''
+      type: null
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      type: yup.string().required()
+      type: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -40,18 +40,16 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
-      !obj.recordId && setSelectedRecordId(response.recordId)
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
-      setEditMode(true)
-
+      if (!obj.recordId) {
+        setStore({ recordId: response.recordId })
+        formik.setFieldValue('recordId', response.recordId)
+      }
+      toast.success(!!obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   useEffect(() => {
     ;(async function () {
@@ -60,8 +58,7 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
           extension: SaleRepository.CommissionSchedule.get,
           parameters: `_recordId=${recordId}`
         })
-
-        formik.setValues(res.record)
+        formik.setValues({ ...res.record })
       }
     })()
   }, [])
@@ -74,33 +71,32 @@ export default function ScheduleForm({ labels, maxAccess, recordId, editMode, se
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
-                label={labels[2]}
+                label={labels.name}
                 value={formik.values.name}
                 required
-                maxAccess={maxAccess}
                 maxLength='30'
+                maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
                 error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.TYPE}
                 name='type'
-                label={labels[3]}
-                valueField='key'
-                displayField='value'
-                values={formik.values}
+                label={labels.type}
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('type', newValue?.key)
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onClear={() => formik.setFieldValue('type', null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('type', newValue?.key || null)
                 }}
                 error={formik.touched.type && Boolean(formik.errors.type)}
-                helperText={formik.touched.type && formik.errors.type}
               />
             </Grid>
           </Grid>

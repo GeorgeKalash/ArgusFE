@@ -29,7 +29,6 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
       isDefault: false,
       isInactive: false
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       productId: yup.string().required(),
       reference: yup.string().required(),
@@ -50,6 +49,7 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
     }).then(res => {
       toast.success(!obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited))
       window.close()
+      getGridData(pId)
     })
   }
 

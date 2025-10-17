@@ -92,7 +92,7 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
           <CustomTextField
             name='name'
             label={labels.name}
-            value={formik.values.name}
+            value={formik?.values?.name}
             required
             maxLength='50'
             maxAccess={maxAccess}

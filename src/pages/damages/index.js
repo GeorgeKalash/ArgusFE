@@ -127,7 +127,7 @@ const Damages = () => {
       </Fixed>
       <Grow>
         <Table
-          name='damageTable'
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

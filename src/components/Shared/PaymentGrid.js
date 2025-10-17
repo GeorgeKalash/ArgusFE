@@ -96,8 +96,18 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   }
 
   const onCondition = row => {
-    return {
-      disabled: !editMode || row.type != 3
+    if (row.type == 3) {
+      return {
+        imgSrc: '/images/buttonsIcons/open-external.png',
+        hidden: false,
+        disabled: !editMode || row.type != 3
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true,
+        disabled: !editMode || row.type != 3
+      }
     }
   }
 
@@ -229,7 +239,6 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'button',
       name: 'pos',
       props: {
-        imgSrc: '/images/buttonsIcons/open-external.png',
         onCondition
       },
       label: labels.pos,

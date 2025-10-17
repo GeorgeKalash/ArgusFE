@@ -10,8 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 const SystemFunctionIntegration = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -50,13 +49,13 @@ const SystemFunctionIntegration = () => {
     formik.setFieldValue('rows', rows)
   }
 
-  const { labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     queryFn: getGridData,
     datasetId: ResourceIds.SystemFunctionIntegrations
   })
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: access,
     validateOnChange: true,
     initialValues: {
       rows: [
@@ -125,23 +124,24 @@ const SystemFunctionIntegration = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+            name='rows'
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -254,6 +254,17 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
   [ResourceIds.ExchangeTables]: {
     type: COMBOBOX,
     endpoint: MultiCurrencyRepository.ExchangeTable.qry,
@@ -982,6 +993,13 @@ export const apiMappings = {
     valueField: 'recordId',
     displayField: 'reference'
   },
+  [ResourceIds.MetalColor]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.MetalColor.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
   [ResourceIds.ProductionClass]: {
     type: COMBOBOX,
     endpoint: ManufacturingRepository.ProductionClass.qry,
@@ -1186,5 +1204,15 @@ export const apiMappings = {
     endpoint: CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry,
     valueField: 'recordId',
     displayField: 'name'
+  },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

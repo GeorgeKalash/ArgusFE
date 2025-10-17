@@ -56,6 +56,11 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
       flex: 1
     },
     {
+      field: 'costCenterSourceName',
+      headerName: labels.costCenterSourceName,
+      flex: 1
+    },
+    {
       field: 'description',
       headerName: labels.description,
       wrapText: true,

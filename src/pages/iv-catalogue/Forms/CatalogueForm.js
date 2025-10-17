@@ -121,7 +121,6 @@ export default function CatalogueForm({ labels, maxAccess, record }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={!!itemId}
-      infoVisible={false}
       actions={actions}
       isInfo={false}
       isCleared={false}

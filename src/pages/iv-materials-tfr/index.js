@@ -21,6 +21,7 @@ const IvMaterialsTransfer = () => {
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
+  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
@@ -167,40 +168,21 @@ const IvMaterialsTransfer = () => {
     openForm(obj?.recordId)
   }
 
-  async function getPlantId() {
-    const myObject = {}
-
-    const filteredList = userDefaultsData?.list?.filter(obj => {
-      return obj.key === 'plantId'
-    })
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-
-    return myObject.plantId
-  }
-
-  function openOutWardsWindow(plantId, recordId) {
+  function openOutWardsWindow(recordId) {
     stack({
       Component: MaterialsTransferForm,
       props: {
-        labels: _labels,
-        recordId,
-        plantId,
-        maxAccess: access
-      },
-      width: 1000,
-      height: 680,
-      title: _labels.MaterialsTransfer
+        recordId
+      }
     })
   }
 
   async function openForm(recordId) {
-    const plantId = await getPlantId()
-
-    plantId !== ''
-      ? openOutWardsWindow(plantId, recordId)
-      : stackError({
+    !plantId && !recordId
+      ? stackError({
           message: platformLabels.noDefaultPlant
         })
+      : openOutWardsWindow(recordId)
   }
 
   const del = async obj => {

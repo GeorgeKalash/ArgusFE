@@ -9,7 +9,6 @@ import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import ResourceComboBox from './ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
-import FormShell from './FormShell'
 import CustomButton from '../Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -143,90 +142,80 @@ export default function AccountSummary({ accountId, moduleId, window }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.AccountSummary}
-      form={formik}
-      maxAccess={access}
-      editMode={true}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
-      <VertLayout>
-        <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={FinancialRepository.Account.snapshot}
-                name='accountId'
-                label={labels.account}
-                valueField='reference'
-                displayField='name'
-                valueShow='accountRef'
-                secondValueShow='accountName'
-                form={formik}
-                readOnly={formik.values.accountId && formik.values.moduleId}
-                required
-                maxAccess={access}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={async (event, newValue) => {
-                  formik.setFieldValue('accountId', newValue?.recordId || null)
-                  formik.setFieldValue('accountName', newValue?.name || '')
-                  formik.setFieldValue('accountRef', newValue?.reference || '')
-                }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={FinancialRepository.AgingProfile.qry}
-                parameters={`_startAt=0&_pageSize=1000&filter=`}
-                name='agpId'
-                label={labels.agingProfile}
-                values={formik.values}
-                valueField='recordId'
-                displayField={'name'}
-                maxAccess={access}
-                required
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('agpId', newValue?.recordId || null)
-                  if (!newValue?.recordId) setData({ list: [] })
-                }}
-              />
-            </Grid>
-            <Grid item xs={5}>
-              <ResourceComboBox
-                datasetId={DataSets.FI_AGING_MODULE}
-                label={labels.module}
-                name='moduleId'
-                values={formik.values}
-                valueField='key'
-                displayField='value'
-                maxAccess={access}
-                required
-                readOnly={formik.values.moduleId}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('moduleId', newValue?.key || null)
-                }}
-              />
-            </Grid>
-            <Grid item xs={1}>
-              <CustomButton
-                onClick={getDynamicColumns}
-                image={'preview.png'}
-                disabled={!formik.values.agpId || !formik.values.moduleId || !formik.values.accountId}
-                tooltipText={platformLabels.Preview}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container spacing={2} p={2}>
+          <Grid item xs={12}>
+            <ResourceLookup
+              endpointId={FinancialRepository.Account.snapshot}
+              name='accountId'
+              label={labels.account}
+              valueField='reference'
+              displayField='name'
+              valueShow='accountRef'
+              secondValueShow='accountName'
+              form={formik}
+              readOnly={formik.values.accountId && formik.values.moduleId}
+              required
+              maxAccess={access}
+              columnsInDropDown={[
+                { key: 'reference', value: 'Reference' },
+                { key: 'name', value: 'Name' }
+              ]}
+              onChange={async (event, newValue) => {
+                formik.setFieldValue('accountId', newValue?.recordId || null)
+                formik.setFieldValue('accountName', newValue?.name || '')
+                formik.setFieldValue('accountRef', newValue?.reference || '')
+              }}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table columns={columns} gridData={data} isLoading={false} pagination={false} />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+          <Grid item xs={6}>
+            <ResourceComboBox
+              endpointId={FinancialRepository.AgingProfile.qry}
+              parameters={`_startAt=0&_pageSize=1000&filter=`}
+              name='agpId'
+              label={labels.agingProfile}
+              values={formik.values}
+              valueField='recordId'
+              displayField={'name'}
+              maxAccess={access}
+              required
+              onChange={(event, newValue) => {
+                formik.setFieldValue('agpId', newValue?.recordId || null)
+                if (!newValue?.recordId) setData({ list: [] })
+              }}
+            />
+          </Grid>
+          <Grid item xs={5}>
+            <ResourceComboBox
+              datasetId={DataSets.FI_AGING_MODULE}
+              label={labels.module}
+              name='moduleId'
+              values={formik.values}
+              valueField='key'
+              displayField='value'
+              maxAccess={access}
+              required
+              readOnly={formik.values.moduleId}
+              onChange={(event, newValue) => {
+                formik.setFieldValue('moduleId', newValue?.key || null)
+              }}
+            />
+          </Grid>
+          <Grid item xs={1}>
+            <CustomButton
+              onClick={getDynamicColumns}
+              image={'preview.png'}
+              disabled={!formik.values.agpId || !formik.values.moduleId || !formik.values.accountId}
+              tooltipText={platformLabels.Preview}
+            />
+          </Grid>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table columns={columns} gridData={data} isLoading={false} pagination={false} />
+      </Grow>
+    </VertLayout>
   )
 }
 

@@ -1,59 +1,36 @@
-// ** Custom Imports
-import Window from 'src/components/Shared/Window'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import GeneralForm from 'src/pages/sales-person/Forms/GeneralForm'
-import TargetForm from 'src/pages/sales-person/Forms/TargetForm'
+import { useState } from 'react'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import TargetForm from '../Forms/TargetForm'
 import MonthlyTargetForm from '../Forms/MonthlyTargetForm'
 
-const SalesPersonWindow = ({
-  onClose,
-  labels,
-  maxAccess,
-  recordId,
-  setErrorMessage,
-  tabs,
-  editMode,
-  setEditMode,
-  setSelectedRecordId,
-  activeTab,
-  setActiveTab
-}) => {
-  return (
-      <Window
-        id='SalesPerson'
-        Title={labels[1]}
-        onClose={onClose}
-        tabs={tabs}
-        width={600}
-        height={500}
-        controlled={true}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      >
-        <CustomTabPanel index={0} value={activeTab}>
-          <GeneralForm
-            editMode={editMode}
-            setEditMode={setEditMode}
-            labels={labels}
-            maxAccess={maxAccess}
-            setErrorMessage={setErrorMessage}
-            setSelectedRecordId={setSelectedRecordId}
-            recordId={recordId}
-          />
-        </CustomTabPanel>
+const SalesPersonWindow = ({ labels, maxAccess, recordId }) => {
+  const [store, setStore] = useState({
+    recordId
+  })
 
-        <CustomTabPanel index={1} value={activeTab}>
-          <TargetForm labels={labels} setErrorMessage={setErrorMessage} maxAccess={maxAccess} recordId={recordId} />
-        </CustomTabPanel>
-        <CustomTabPanel index={2} value={activeTab}>
-          <MonthlyTargetForm
-            labels={labels}
-            setErrorMessage={setErrorMessage}
-            maxAccess={maxAccess}
-            recordId={recordId}
-          />
-        </CustomTabPanel>
-      </Window>
+  const [activeTab, setActiveTab] = useState(0)
+
+  const tabs = [
+    { label: labels.general },
+    { label: labels.target, disabled: !store.recordId },
+    { label: labels.monthlyTarget, disabled: !store.recordId }
+  ]
+
+  return (
+    <>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
+        <GeneralForm labels={labels} maxAccess={maxAccess} store={store} setStore={setStore} />
+      </CustomTabPanel>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
+        <TargetForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
+        <MonthlyTargetForm labels={labels} maxAccess={maxAccess} store={store} />
+      </CustomTabPanel>
+    </>
   )
 }
 

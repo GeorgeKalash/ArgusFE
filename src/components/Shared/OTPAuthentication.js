@@ -147,8 +147,15 @@ const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = fal
   }
 
   useEffect(() => {
-    document.getElementById(`otp-input-${0}`).focus()
-    document.getElementById(`otp-input-${0}`).select()
+    const t = setTimeout(() => {
+      const el = document.getElementById('otp-input-0')
+      if (el) {
+        el.focus()
+        el.select()
+      }
+    }, 0)
+
+    return () => clearTimeout(t)
   }, [])
 
   return (

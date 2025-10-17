@@ -192,10 +192,11 @@ const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editM
     <FormShell
       form={formik}
       resourceId={ResourceIds.Correspondent}
-      infoVisible={false}
+      isInfo={false}
       maxAccess={maxAccess}
       editMode={editMode}
       isSavedClear={false}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>

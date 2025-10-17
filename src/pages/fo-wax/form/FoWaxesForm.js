@@ -192,6 +192,17 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     return response?.record
   }
 
+  const getJobWorkCenter = async recordId => {
+    if (!recordId || !formik.values?.header?.workCenterId) return
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.JobWorkCenter.get,
+      parameters: `_jobId=${recordId}&_workCenterId=${formik.values?.header?.workCenterId}`
+    })
+
+    return response?.record
+  }
+
   const getMetalSetting = async (metalId, metalColorId) => {
     if (!metalId || !metalColorId) return
 
@@ -285,31 +296,41 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
         parameters: {
           _workCenterId: formik.values?.header?.workCenterId
         },
-        displayField: 'reference',
-        valueField: 'reference',
+        displayField: 'jobRef',
+        valueField: 'jobRef',
         mapping: [
-          { from: 'recordId', to: 'jobId' },
-          { from: 'reference', to: 'jobRef' },
-          { from: 'designRef', to: 'designRef' },
-          { from: 'designId', to: 'designId' },
-          { from: 'itemName', to: 'itemName' },
-          { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'pcs', to: 'jobPcs' },
-          { from: 'routingSeqNo', to: 'routingSeqNo' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'designRef', value: 'Design' },
-          { key: 'itemName', value: 'Item Name' }
+          { from: 'jobId', to: 'jobId' },
+          { from: 'jobRef', to: 'jobRef' }
         ],
         displayFieldWidth: 4,
-        filter: { lineId: formik.values?.header?.lineId },
         readOnly: isClosed || !formik.values?.header?.workCenterId
       },
       async onChange({ row: { update, newRow } }) {
-        const design = newRow.designId ? await getDesign(newRow.designId) : null
-        const jobRouting = newRow?.routingSeqNo ? await getJobRouting(newRow.jobId, newRow?.routingSeqNo) : null
+        if (!newRow?.jobId) return
+
+        const res = await getRequest({
+          extension: ManufacturingRepository.MFJobOrder.get,
+          parameters: `_recordId=${newRow?.jobId}`
+        })
+
+        update({
+          jobId: newRow?.jobId || null,
+          jobRef: newRow?.jobRef || '',
+          routingId: res.record?.routingId || null,
+          designId: res.record?.designId || null,
+          designRef: res.record?.designRef || '',
+          itemName: res.record?.itemName || '',
+          itemId: res.record?.itemId || null,
+          category: res.record?.categoryName || '',
+          sku: res.record?.sku || '',
+          jobPcs: res.record?.pcs || 0,
+          routingSeqNo: res.record?.routingSeqNo || 1
+        })
+        const design = res.record?.designId ? await getDesign(res.record?.designId) : null
+
+        const jobRouting = res.record?.routingSeqNo
+          ? await getJobRouting(newRow.jobId, res?.record?.routingSeqNo)
+          : await getJobWorkCenter(newRow.jobId)
         update({
           classId: design?.classId,
           className: design?.className,
@@ -466,6 +487,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    displayFieldWidth={1.5}
                     values={formik.values.header}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
@@ -554,7 +576,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     name='header.lineId'
-                    readOnly={isClosed || (formik.values.items.length > 0 && formik.values.items[0].jobId)}
+                    readOnly={isClosed}
                     required
                     label={labels.prodLine}
                     valueField='recordId'
@@ -699,7 +721,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
             value={formik.values.items}
             error={formik.errors.items}
             allowDelete={!isClosed}
-            disabled={!formik.values.header.lineId}
+            disabled={isClosed}
             name='items'
             columns={columns}
             maxAccess={maxAccess}

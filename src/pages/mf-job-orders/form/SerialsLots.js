@@ -10,10 +10,17 @@ import FormShell from 'src/components/Shared/FormShell'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
-export default function SerialsLots({ labels, maxAccess, recordId }) {
+export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
   const { getRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!recordId
+
+  useSetWindow({ title: platformLabels.serials, window })
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -50,8 +57,8 @@ export default function SerialsLots({ labels, maxAccess, recordId }) {
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: ManufacturingRepository.MFSerial.qry,
-      parameters: `_jobId=${recordId}`
+      extension: api,
+      parameters
     })
 
     const updateSerialsList =
@@ -75,15 +82,7 @@ export default function SerialsLots({ labels, maxAccess, recordId }) {
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-      isSaved={false}
-    >
+    <Form resourceId={ResourceIds.MFJobOrders} onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -106,6 +105,9 @@ export default function SerialsLots({ labels, maxAccess, recordId }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
+
+SerialsLots.width = 500
+SerialsLots.height = 600

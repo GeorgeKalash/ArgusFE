@@ -73,15 +73,8 @@ export default function TRXForm({ labels, access, setStore, store }) {
         extension: CostAllocationRepository.PuCostAllocations.set,
         record: JSON.stringify(data)
       }).then(res => {
-        if (!recordId) {
-          setStore(prevStore => ({
-            ...prevStore,
-            recordId: res?.recordId,
-            isPosted: res?.status == 3
-          }))
-          formik.setFieldValue('recordId', res.recordId)
-          fetchData(res.recordId)
-        }
+        fetchData(res.recordId)
+
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
       })
@@ -112,8 +105,10 @@ export default function TRXForm({ labels, access, setStore, store }) {
     }).then(res => {
       setStore(prevStore => ({
         ...prevStore,
+        recordId,
         isPosted: res?.record?.status === 3,
-        isClosed: res?.record?.wip === 2
+        isClosed: res?.record?.wip === 2,
+        result: res?.record
       }))
       formik.setValues({
         ...res.record,
@@ -303,7 +298,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
               <CustomNumberField
                 name='baseAmount'
                 label={labels.amount}
-                value={formik.values.baseAmount}
+                value={store.result?.baseAmount}
                 maxAccess={maxAccess}
                 readOnly
                 decimalScale={2}

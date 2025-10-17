@@ -1,11 +1,11 @@
-import { useState, useContext } from 'react'
+
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
-
 import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -15,30 +15,42 @@ import DocumentTypeMapForm from './forms/DocumentTypeMapForm'
 
 const DocumentTypeMaps = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
   const { stack } = useWindow()
 
-  async function fetchGridData() {
-    return await getRequest({
-      extension: SystemRepository.DocumentTypeMap.qry,
-      parameters: `_filter=&_params=`
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: SystemRepository.DocumentTypeMap.page,
+      parameters: `_filter=&_params=${params || ''}&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
+
+    return { ...response, _startAt }
   }
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.DocumentTypeMap.qry
+    endpointId: SystemRepository.DocumentTypeMap.page
   })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({
+      _startAt: pagination?._startAt || 0,
+      params: filters?.params
+    })
+  }
 
   const {
     query: { data },
     labels: _labels,
     paginationParameters,
     refetch,
-    access
+    access,
+    filterBy
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: SystemRepository.DocumentTypeMap.qry,
-    datasetId: ResourceIds.DocumentTypeMaps
+    endpointId: SystemRepository.DocumentTypeMap.page,
+    datasetId: ResourceIds.DocumentTypeMaps,
+    filter: { filterFn: fetchWithFilter }
   })
 
   const columns = [
@@ -86,7 +98,7 @@ const DocumentTypeMaps = () => {
       Component: DocumentTypeMapForm,
       props: {
         labels: _labels,
-        record: record,
+        record,
         maxAccess: access,
         recordId: record
           ? String(record.fromFunctionId) + String(record.fromDTId) + String(record.toFunctionId)
@@ -101,7 +113,7 @@ const DocumentTypeMaps = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <RPBGridToolbar  hasSearch={false} labels={_labels} onAdd={add}  maxAccess={access}  reportName={'SYDTM'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table

@@ -6,13 +6,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
+
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function JobsForm({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -200,11 +200,14 @@ export default function JobsForm({ labels, maxAccess, store }) {
       name: 'damagedPcs',
       width: 130,
       props: {
-        decimalScale: 0
+        decimalScale: 0,
+        readOnly: true
       },
-      updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        update({ outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2) })
+        update({
+          damagedPcs: newRow?.damagedPcs || 0,
+          outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2)
+        })
       }
     },
     {
@@ -212,9 +215,13 @@ export default function JobsForm({ labels, maxAccess, store }) {
       label: labels.damageWgt,
       name: 'damagedQty',
       width: 130,
-      updateOn: 'blur',
+      props: {
+        decimalScale: 0,
+        readOnly: true
+      },
       async onChange({ row: { update, newRow } }) {
         update({
+          damagedQty: parseFloat(newRow?.damagedQty || 0).toFixed(2),
           netWgt: parseFloat(
             (
               parseFloat(newRow?.currentWgt || 0) +
@@ -300,6 +307,8 @@ export default function JobsForm({ labels, maxAccess, store }) {
             return {
               ...item,
               id: index + 1,
+              damagedPcs: item?.damagedPcs || 0,
+              damagedQty: parseFloat(item?.damagedQty || 0).toFixed(2),
               currentWgt: parseFloat(item?.currentWgt || 0).toFixed(3),
               metalWgt: parseFloat(item?.metalWgt || 0).toFixed(3),
               jobPct:
@@ -337,14 +346,12 @@ export default function JobsForm({ labels, maxAccess, store }) {
   }, [store?.castingInfo, balanceWgt, assignedWgtBB])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.FoCastings}
-      form={formik}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={true}
-      isInfo={false}
-      isCleared={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>
@@ -413,6 +420,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

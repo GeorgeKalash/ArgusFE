@@ -101,7 +101,7 @@ const Routings = () => {
       Component: RoutingWindow,
       props: {
         labels,
-        access,
+        maxAccess: access,
         recordId
       },
       width: 800,

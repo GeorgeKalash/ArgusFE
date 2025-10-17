@@ -8,9 +8,9 @@ import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import FormShell from 'src/components/Shared/FormShell'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import toast from 'react-hot-toast'
+import Form from 'src/components/Shared/Form'
 
 const IomProperties = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -81,14 +81,7 @@ const IomProperties = () => {
   }, [propertyStore])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.IomProperties}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container>
@@ -127,7 +120,7 @@ const IomProperties = () => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

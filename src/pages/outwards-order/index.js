@@ -13,7 +13,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { useError } from 'src/error'
 import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
@@ -174,6 +173,7 @@ const OutwardsOrder = () => {
       </Fixed>
       <Grow>
         <Table
+          name='owoTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

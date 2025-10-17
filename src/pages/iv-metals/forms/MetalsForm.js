@@ -26,7 +26,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
   })
 
   const { formik } = useForm({
-    initialValues: { recordId: store.recordId, reference: '', purity: '', reportingPurity: '', currencyId: '' },
+    initialValues: { recordId: store.recordId, reference: '', purity: '', reportingPurity: '', currencyId: null },
     maxAccess,
     validateOnChange: true,
     validateOnBlur: true,
@@ -122,12 +122,17 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 name='currencyId'
                 label={labels.currency}
                 valueField='recordId'
-                displayField='reference'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('currencyId', newValue?.key)
-                }}
                 maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('currencyId', newValue?.recordId || null)
+                }}
+                error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
               />
             </Grid>
             <Grid item xs={12}>

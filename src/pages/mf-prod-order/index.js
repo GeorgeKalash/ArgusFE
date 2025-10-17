@@ -103,13 +103,8 @@ const ProductionOrder = () => {
     stack({
       Component: ProductionOrderForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1200,
-      height: 680,
-      title: labels.ProductionOrder
+      }
     })
   }
 

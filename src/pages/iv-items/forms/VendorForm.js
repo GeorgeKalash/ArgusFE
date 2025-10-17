@@ -95,7 +95,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
   return (
     <FormShell
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       resourceId={ResourceIds.PriceList}
       maxAccess={maxAccess}
       editMode={editMode}

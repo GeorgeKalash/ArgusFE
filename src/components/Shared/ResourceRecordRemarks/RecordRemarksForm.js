@@ -26,6 +26,7 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
       eventDate: data?.eventDate,
       userId: data?.userId ?? userId
     },
+    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async values => {
       const date = new Date()

@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -16,6 +15,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { DataSets } from 'src/resources/DataSets'
 import FieldSet from 'src/components/Shared/FieldSet'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import Form from 'src/components/Shared/Form'
 
 export default function SalesSettingsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -106,7 +106,7 @@ export default function SalesSettingsForm({ _labels, access }) {
   }, [])
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -263,6 +263,6 @@ export default function SalesSettingsForm({ _labels, access }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

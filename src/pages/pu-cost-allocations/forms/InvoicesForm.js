@@ -1,8 +1,6 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -11,15 +9,25 @@ import { CostAllocationRepository } from 'src/repositories/CostAllocationReposit
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
+import { createConditionalSchema } from 'src/lib/validation'
+import * as yup from 'yup'
 
 const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId, isPosted, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const conditions = {
+    invoiceId: row => row?.invoiceId
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
+    conditionSchema: ['items'],
     initialValues: {
       caId: recordId,
       items: [
@@ -36,14 +44,19 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         }
       ]
     },
+    validationSchema: yup.object({
+      items: yup.array().of(schema)
+    }),
     onSubmit: async values => {
-      const item = formik.values.items.map((item, index) => ({
-        ...item,
-        id: index + 1,
-        date: formatDateToApi(item.date)
-      }))
+      const item = values.items
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map(({ id, ...item }) => ({
+          ...item,
+          caId: recordId,
+          date: formatDateToApi(item.date)
+        }))
 
-      const data = { ...values, items: item }
+      const data = { caId: recordId, items: item }
 
       await postRequest({
         extension: CostAllocationRepository.Invoice.set2,
@@ -82,15 +95,12 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.TaxCodes}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
       disabledSubmit={isPosted || isClosed}
       editMode={editMode}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>
@@ -139,7 +149,7 @@ const InvoicesForm = ({ store, setStore, maxAccess, labels, editMode }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

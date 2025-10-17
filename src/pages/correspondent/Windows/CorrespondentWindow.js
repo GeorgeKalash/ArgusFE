@@ -23,9 +23,9 @@ const CorrespondentWindow = ({ height, recordId, labels, maxAccess, expanded }) 
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
 
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <CorrespondentForm
           labels={labels}
           setEditMode={setEditMode}
@@ -35,7 +35,7 @@ const CorrespondentWindow = ({ height, recordId, labels, maxAccess, expanded }) 
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <CorrespondentCountriesForm
           labels={labels}
           setEditMode={setEditMode}
@@ -45,7 +45,7 @@ const CorrespondentWindow = ({ height, recordId, labels, maxAccess, expanded }) 
           expanded={expanded}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <CorrespondentCurrenciesForm
           labels={labels}
           setEditMode={setEditMode}
