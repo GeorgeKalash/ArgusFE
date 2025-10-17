@@ -36,7 +36,8 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
       commissionPct: null,
       plantId: null,
       sptId: null,
-      targetType: null
+      targetType: null,
+      isInactive: false
     },
     maxAccess,
     validationSchema: yup.object({
