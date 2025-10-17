@@ -41,7 +41,7 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
       itemId: row?.itemId,
       siteId,
       totalWeight: row?.qty || 0,
-      items: row?.serials.map((item, index) => ({
+      items: row?.serials?.map((item, index) => ({
         ...item,
         id: index + 1
       })) || []

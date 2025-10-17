@@ -530,7 +530,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeight',
       props: {
         readOnly: true,
-        decimalScale: 3,
+        decimalScale: 3
       }
     },
     {
@@ -1782,9 +1782,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
                 }
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                  formik.setFieldValue('header.siteRef', newValue?.reference || null)
+                  formik.setFieldValue('header.siteName', newValue?.name || null)
+                  formik.setFieldValue('header.siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
               />
