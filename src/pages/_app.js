@@ -76,6 +76,7 @@ import { ErrorProvider } from 'src/error'
 import { useContext } from 'react'
 import { LabelsAccessContextProvider } from 'src/providers/LabelsAccessContext'
 import { LockedScreensProvider } from 'src/providers/LockedScreensContext'
+import GlobalErrorHandlers from 'src/providers/GlobalErrorHandlers'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -144,6 +145,7 @@ const App = props => {
           <meta name='google' content='notranslate' />
         </Head>
         <AuthProvider>
+          <GlobalErrorHandlers />
           <GuestGuard fallback={<Spinner />}>
             <RequestsProvider>
               <ErrorProvider>
