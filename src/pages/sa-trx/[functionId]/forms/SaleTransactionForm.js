@@ -795,7 +795,7 @@ export default function SaleTransactionForm({
     },
     {
       component: 'button',
-      name: 'taxDetailsButton',
+      name: 'taxDetails',
       props: {
         onCondition: row => {
           if (row.itemId && row.taxId) {
