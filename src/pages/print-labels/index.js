@@ -86,7 +86,7 @@ const PrintLabels = () => {
     },
     {
       component: 'textfield',
-      label: labels.itemName,
+      label: labels.name,
       name: 'itemName',
       props: {
         readOnly: true
@@ -191,7 +191,7 @@ const PrintLabels = () => {
                     <ResourceComboBox
                       endpointId={SCRepository.LabelTemplate.qry}
                       name='labelTemplateId'
-                      label={labels.templateLable}
+                      label={labels.templateLabel}
                       valueField='recordId'
                       displayField='name'
                       values={formik.values}
