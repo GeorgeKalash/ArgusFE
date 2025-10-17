@@ -118,8 +118,6 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
       name: 'applyAmount',
       props: {
         decimalScale: 2,
-        allowNegative: false,
-
         maxLength: 10,
       
       }
