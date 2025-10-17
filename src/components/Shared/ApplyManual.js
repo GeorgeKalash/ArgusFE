@@ -12,6 +12,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
 import Form from './Form'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readOnly, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,44 +24,49 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
 
   useSetWindow({ title: platformLabels.ApplyManual, window })
 
+  const conditions = {
+    toRecordId: row => !!row?.toRecordId,
+    applyAmount: row => Number(row?.applyAmount) > 0 && Number(row?.applyAmount) <= Number(row?.amount)
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, access, 'items')
+
   const { formik } = useForm({
     initialValues: {
       items: [
         {
-          id: 1,
-          fromFunctionId: functionId,
-          fromRecordId: recordId,
-          fromCurrencyId: currencyId,
-          seqNo: 1,
-          toFunctionId: null,
-          toRecordId: null,
-          toCurrencyId: null,
-          amount: 0
+      id: 1,
+      toRecordId: null,
+      toFunctionId: null,
+      toCurrencyId: null,
+      toReference: null,
+      amount: 0,
+      applyAmount: 0
         }
       ]
     },
     validateOnChange: true,
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            toRecordId: yup.number().required()
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
+    conditionSchema: ['items'],
+
     onSubmit: async values => {
-      const items = values.items.map((item, index) => {
-        return {
-          ...item,
-          seqNo: index + 1,
-          fromFunctionId: functionId,
-          accountId,
-          fromRecordId: recordId,
-          fromCurrencyId: currencyId
-        }
-      })
+      const items = (values.items || [])
+      .filter(row => Object.values(requiredFields).every(fn => fn(row)))
+      .map(item => ({
+        toReference: item.toReference,
+        fromFunctionId: functionId,
+        toFunctionId: item.toFunctionId,
+        fromRecordId: recordId,
+        toRecordId: item.toRecordId, 
+        fromCurrencyId: currencyId,
+        toCurrencyId: item.toCurrencyId,    
+        amount: item.amount,           
+        accountId,        
+        applyAmount: item.applyAmount
+      }
+    ))
 
       const resultObject = {
         fromRecordId: recordId,
@@ -91,10 +97,30 @@ export const ApplyManual = ({ recordId, accountId, currencyId, functionId, readO
         mapping: [
           { from: 'recordId', to: 'toRecordId' },
           { from: 'reference', to: 'toReference' },
-          { from: 'amount', to: 'amount' },
           { from: 'functionId', to: 'toFunctionId' },
-          { from: 'currencyId', to: 'toCurrencyId' }
+          { from: 'currencyId', to: 'toCurrencyId' },
+          { from: 'amount', to: 'amount' },
+          { from: 'amount',     to: 'applyAmount' }
         ]
+      }
+    },
+    {
+      component: 'numberfield',                   
+      label: labels.amount,
+      name: 'amount',
+      props: {
+        readOnly: true,      
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.applyAmount,
+      name: 'applyAmount',
+      props: {
+        readOnly,
+        decimalScale: 2,
+        maxLength: 10,
+      
       }
     }
   ]
