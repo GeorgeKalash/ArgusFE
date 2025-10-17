@@ -60,6 +60,7 @@ export const ManufacturingRepository = {
   Labor: {
     page: service + 'pageLBR',
     qry: service + 'qryLBR',
+    qry2: service + 'qry2LBR',
     set: service + 'setLBR',
     get: service + 'getLBR',
     del: service + 'delLBR',
