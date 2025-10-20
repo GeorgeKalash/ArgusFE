@@ -115,7 +115,7 @@ const PrintLabels = () => {
           itemId: null,
           sku: '',
           itemName: '',
-          qty: null
+          qty: 0
         }
       ])
   }
