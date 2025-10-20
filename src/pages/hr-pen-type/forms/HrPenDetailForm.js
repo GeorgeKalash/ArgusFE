@@ -13,7 +13,7 @@ import { MathExpressionRepository } from 'src/repositories/MathExpressionReposit
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -37,19 +37,21 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
     }),
     initialValues: {
       damage: 1,
-      items: []
+      items: [{ id: 1 }]
     },
     onSubmit: async values => {
-      const items = values?.items.map(
-        ({ id, expressionName, deductionTypeName, actionName, recordId, ...rest }) => rest
-      )
+      const items = values?.items.map(({ id, expressionName, deductionTypeName, actionName, ...rest }, index) => ({
+        ...rest,
+        sequence: index + 1,
+        damage: values.damage,
+        ptId: recordId
+      }))
 
-      const data = {
-        items: items
-      }
       await postRequest({
         extension: PayrollRepository.PenaltyDetail.set2,
-        record: JSON.stringify(data)
+        record: JSON.stringify({
+          items: items
+        })
       })
       toast.success(platformLabels.Edited)
     }
@@ -65,22 +67,18 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
 
         formik.setFieldValue(
           'items',
-          res?.list?.map((item, index) => ({
-            ...item,
-            id: index + 1
-          })) || []
+          res.list?.length > 0
+            ? res?.list?.map((item, index) => ({
+                ...item,
+                id: index + 1
+              }))
+            : formik.initialValues.items
         )
       })()
     }
   }, [formik.values.damage])
 
   const columns = [
-    {
-      component: 'numberfield',
-      label: labels.seq,
-      name: 'sequence',
-      props: { readOnly: true }
-    },
     {
       component: 'resourcecombobox',
       name: 'actionName',
@@ -142,42 +140,39 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container>
-          <Grid item xs={4} p={2}>
-            <ResourceComboBox
-              name='damage'
-              label={labels.damage}
-              datasetId={DataSets.DAMAGE_LEVEL}
-              values={formik.values}
-              valueField='key'
-              displayField='value'
-              maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('damage', newValue?.key || null)
-              }}
-              error={formik.touched.damage && Boolean(formik.errors.damage)}
-            />
+    <Form maxAccess={maxAccess} onSave={formik.handleSubmit}>
+      <VertLayout>
+        <Fixed>
+          <Grid container>
+            <Grid item xs={4} p={2}>
+              <ResourceComboBox
+                name='damage'
+                label={labels.damage}
+                datasetId={DataSets.DAMAGE_LEVEL}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('damage', newValue?.key || null)
+                }}
+                error={formik.touched.damage && Boolean(formik.errors.damage)}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          name='items'
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-          maxAccess={maxAccess}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved smallBox />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            name='items'
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            maxAccess={maxAccess}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 
