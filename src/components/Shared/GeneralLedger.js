@@ -136,10 +136,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
 
   useEffect(() => {
     if (formValues) {
-      setformik({
-        ...formValues,
-        notes: formValues.notes || formValues.description || ''
-      })
+      setformik(formValues)
     }
   }, [formValues])
 
@@ -232,7 +229,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         sign: row.sign,
         signName: row.signName,
         sourceReference: row.sourceReference,
-        notes: row.notes,
+        notes: row.notes || formValues.notes,
         exRate: row.exRate,
         rateCalcMethod: row.rateCalcMethod,
         amount: row.amount,
@@ -364,7 +361,15 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         <Grow>
           <DataGrid
             onChange={value => {
-              formik2.setFieldValue('glTransactions', value)
+              let updatedRows = value
+              if (formik?.notes) {
+                updatedRows = value.map(row => ({
+                  ...row,
+                  notes: row.notes || formik.notes
+                }))
+              }
+
+              formik2.setFieldValue('glTransactions', updatedRows)
               formik2.setFieldValue('editStatus', 2)
             }}
             allowDelete={!isProcessed}
