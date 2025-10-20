@@ -404,6 +404,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       idtId: yup.string().required(),
       idNo: yup.string().required(),
       expiryDate: yup.date().required(),
+      issueDate: yup.date().required(),
       countryId: yup.string().required(),
       cityId: yup.string().required(),
       idCountry: yup.string().required(),
@@ -1052,7 +1053,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.expiryDate}
                           value={formik.values?.expiryDate}
                           readOnly={editMode && !allowEdit && true}
-                          required={true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('expiryDate', '')}
                           disabledDate={!editMode && '<'}
@@ -1066,6 +1067,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.issueDate}
                           value={formik.values?.issueDate}
                           readOnly={editMode && !allowEdit && true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('issueDate', '')}
                           disabledDate={!editMode && '>'}
