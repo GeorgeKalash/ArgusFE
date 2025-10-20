@@ -52,10 +52,8 @@ const ImageUpload = forwardRef(
             extension: SystemRepository.Attachment.set2,
             record: JSON.stringify(payload),
             file: formik.values?.file
-          }).then(res => {
+          }).then(() => {
             getData(currentRecordId)
-
-            return res
           })
         }
 
@@ -63,10 +61,8 @@ const ImageUpload = forwardRef(
           return postRequest({
             extension: SystemRepository.Attachment.del,
             record: JSON.stringify(SavedImageInfo.current)
-          }).then(res => {
+          }).then(() => {
             getData(currentRecordId)
-
-            return res
           })
         }
 
@@ -82,10 +78,8 @@ const ImageUpload = forwardRef(
           extension: SystemRepository.Attachment.set,
           record: JSON.stringify(payload),
           file: formik.values?.file
-        }).then(res => {
+        }).then(() => {
           getData(currentRecordId)
-
-          return res
         })
       }
 
@@ -94,10 +88,8 @@ const ImageUpload = forwardRef(
           extension: SystemRepository.Attachment.del,
           record: JSON.stringify(SavedImageInfo.current),
           file: SavedImageInfo.current?.url
-        }).then(res => {
+        }).then(() => {
           getData(currentRecordId)
-
-          return res
         })
       }
     }
