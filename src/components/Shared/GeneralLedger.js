@@ -229,7 +229,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         sign: row.sign,
         signName: row.signName,
         sourceReference: row.sourceReference,
-        notes: row.notes || formValues.notes,
+        notes: row.notes,
         exRate: row.exRate,
         rateCalcMethod: row.rateCalcMethod,
         amount: row.amount,
@@ -361,12 +361,19 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         <Grow>
           <DataGrid
             onChange={value => {
-              let updatedRows = value
-              if (formik?.notes) {
-                updatedRows = value.map(row => ({
-                  ...row,
-                  notes: row.notes || formik.notes
-                }))
+              let updatedRows = [...value]
+              if (value.length > formik2.values.glTransactions.length) {
+                const newRows = value.slice(formik2.values.glTransactions.length)
+
+                const mappedNewRows = newRows.map(row => {
+                  if (!row.notes && formik?.notes) {
+                    return { ...row, notes: formik.notes }
+                  }
+
+                  return row
+                })
+
+                updatedRows = [...formik2.values.glTransactions, ...mappedNewRows]
               }
 
               formik2.setFieldValue('glTransactions', updatedRows)
