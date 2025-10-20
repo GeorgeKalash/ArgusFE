@@ -136,7 +136,10 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
 
   useEffect(() => {
     if (formValues) {
-      setformik(formValues)
+      setformik({
+        ...formValues,
+        notes: formValues.notes || formValues.description || ''
+      })
     }
   }, [formValues])
 
