@@ -450,6 +450,8 @@ export default function SaleTransactionForm({
       mdValue: 0,
       taxId: rowTax,
       minPrice,
+      siteId: formik.values?.header?.siteId || null,
+      siteRef: formik.values?.header?.siteRef || null,
       taxDetails: rowTaxDetails,
       taxDetailsButton: true
     })
@@ -1688,6 +1690,18 @@ export default function SaleTransactionForm({
     const { value } = event.target
     formik.setFieldValue('search', value)
   }
+
+  async function getSiteInfo(siteId) {
+    if (!siteId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${siteId}`
+    })
+
+    return res?.record?.reference
+  }
+
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -1698,13 +1712,19 @@ export default function SaleTransactionForm({
       formik.setFieldValue('header.KGmetalPrice', 0)
       setmetalPriceVisibility(false)
     }
+    const currentSiteId = dtd?.record?.siteId || userDefaultsDataState?.siteId || null
+    const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
+    formik.setFieldValue('header.siteId', currentSiteId)
+    formik.setFieldValue('header.siteRef', siteRef || '')
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
-    if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
+    if (dtd?.record?.commitItems == false) {
+      formik.setFieldValue('header.siteId', null)
+      formik.setFieldValue('header.siteRef', siteRef || '')
+    }
   }
 
   useEffect(() => {
@@ -1846,7 +1866,7 @@ export default function SaleTransactionForm({
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='header.dtId'
-                readOnly={editMode}
+                readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1992,7 +2012,11 @@ export default function SaleTransactionForm({
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
+                readOnly={
+                  isPosted ||
+                  formik.values.items?.some(item => item.sku) ||
+                  (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)
+                }
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -2199,7 +2223,12 @@ export default function SaleTransactionForm({
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!formik.values.search}
-            disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
+            disabled={
+              isPosted ||
+              !formik.values?.header?.currencyId ||
+              !formik.values?.header?.clientId ||
+              (!(formik.values?.header?.dtId && !formik.values?.header?.commitItems) && !formik.values?.header?.siteId)
+            }
           />
         </Grow>
         <Fixed>
