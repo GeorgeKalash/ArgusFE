@@ -35,7 +35,15 @@ const PrintLabels = () => {
       labelTemplateId: null,
       format: null,
       plId: null,
-      items: []
+      items: [
+        {
+          id: 1,
+          itemId: null,
+          sku: '',
+          itemName: '',
+          qty: 0
+        }
+      ]
     },
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -63,8 +71,8 @@ const PrintLabels = () => {
     }
   })
 
-  const isReadOnly =
-    !formik.values.currencyId && !formik.values.labelTemplateId && !formik.values.format && !formik.values.plId
+  const isEnabled =
+    formik.values.currencyId && formik.values.labelTemplateId && formik.values.format && formik.values.plId
 
   const columns = [
     {
@@ -85,7 +93,7 @@ const PrintLabels = () => {
           { key: 'name', value: 'Name' },
           { key: 'flName', value: 'FlName' }
         ],
-        readOnly: isReadOnly
+        readOnly: !isEnabled
       }
     },
     {
@@ -102,22 +110,13 @@ const PrintLabels = () => {
       label: labels.qty,
       props: {
         allowNegative: false,
-        readOnly: isReadOnly
+        readOnly: !isEnabled
       }
     }
   ]
 
   const clearGrid = () => {
-    if (formik.values.currencyId && formik.values.labelTemplateId && formik.values.format && formik.values.plId)
-      formik.setFieldValue('items', [
-        {
-          id: 1,
-          itemId: null,
-          sku: '',
-          itemName: '',
-          qty: 0
-        }
-      ])
+    if (isEnabled) formik.setFieldValue('items', formik.initialValues.items)
   }
 
   async function Print() {
@@ -226,11 +225,12 @@ const PrintLabels = () => {
           <DataGrid
             name='items'
             onChange={value => formik.setFieldValue('items', value)}
+            initialValues={formik.initialValues.items[0]}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
             maxAccess={access}
-            allowDelete={!isReadOnly}
+            allowDelete={isEnabled}
           />
         </Grow>
       </VertLayout>
