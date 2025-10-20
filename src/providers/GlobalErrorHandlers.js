@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
 
-export default function GlobalErrorHandlers() {
+export default function GlobalErrorHandlers({ children }) {
   const [err, setErr] = useState(null)
 
   useEffect(() => {
@@ -17,5 +17,10 @@ export default function GlobalErrorHandlers() {
     }
   }, [])
 
-  return <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
+  return (
+    <>
+      {children}
+      <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
+    </>
+  )
 }
