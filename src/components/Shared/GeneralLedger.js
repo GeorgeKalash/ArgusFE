@@ -137,6 +137,15 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
   useEffect(() => {
     if (formValues) {
       setformik(formValues)
+
+      // ✅ Also copy header notes value into each DataGrid row
+      if (formValues.notes && formik2?.values?.glTransactions?.length) {
+        const updatedRows = formik2.values.glTransactions.map(row => ({
+          ...row,
+          notes: formValues.notes
+        }))
+        formik2.setFieldValue('glTransactions', updatedRows)
+      }
     }
   }, [formValues])
 
