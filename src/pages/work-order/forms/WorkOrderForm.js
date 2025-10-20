@@ -129,6 +129,7 @@ export default function WorkOrderForm({ labels, access, setStore, store, window 
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode,
+      valuesPath: { ...formik.values, notes: formik.values.description },
       datasetId: ResourceIds.GLWorkOrder
     },
     {
