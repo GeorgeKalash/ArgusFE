@@ -24,6 +24,7 @@ export default function EntitlementForm({
   seqNumbers,
   salaryInfo,
   refetchSalaryTab,
+  fixedAmount,
   window
 }) {
   const { platformLabels } = useContext(ControlContext)
@@ -92,7 +93,11 @@ export default function EntitlementForm({
           extension: EmployeeRepository.SalaryDetails.get,
           parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
         })
-        formik.setValues({ ...res?.record, isPct: res?.record?.pct > 0 })
+        formik.setValues({
+          ...res?.record,
+          fixedAmount: fixedAmount || res?.record?.fixedAmount,
+          isPct: res?.record?.pct > 0
+        })
       }
     })()
   }, [])
@@ -107,7 +112,7 @@ export default function EntitlementForm({
       editMode={editMode}
     >
       <VertLayout>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={EmployeeRepository.EmployeeDeduction.qry}

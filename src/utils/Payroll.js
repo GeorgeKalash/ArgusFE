@@ -29,7 +29,7 @@ async function ChangeEntitlementsAmount(entitlements, basicSalary) {
 
   return sum
 }
-async function ChangeDeductionsAmount(deductions, basicSalary) {
+async function ChangeDeductionsAmount(deductions, basicSalary, eAmount) {
   let sum = 0
 
   deductions?.map(record => {

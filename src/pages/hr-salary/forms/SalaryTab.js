@@ -28,7 +28,9 @@ export default function SalaryTab({
   employeeInfo,
   setSalaryInfo,
   data,
-  refetchSalaryTab
+  refetchSalaryTab,
+  reCalcNewAmounts,
+  saveWholePack
 }) {
   const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -82,31 +84,45 @@ export default function SalaryTab({
       })
     }),
     onSubmit: async obj => {
-      const res = await postRequest({
-        extension: EmployeeRepository.EmployeeSalary.set,
-        record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
-      })
-      const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
-      invalidate()
-      getSalaryInfo(res?.recordId)
-      if (!obj.recordId)
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res?.recordId
-        }))
+      if (obj.recordId && saveWholePack.current && data.length > 0) {
+        await postRequest({
+          extension: EmployeeRepository.SalaryDetails.set2,
+          record: JSON.stringify({
+            salary: obj,
+            salaryDetails: data
+          })
+        })
+        toast.success(platformLabels.Edited)
+        invalidate()
+        saveWholePack.current = false
+      } else {
+        const res = await postRequest({
+          extension: EmployeeRepository.EmployeeSalary.set,
+          record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
+        })
+        const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
+        toast.success(actionMessage)
+        invalidate()
+        getSalaryInfo(res?.recordId)
+        if (!obj.recordId)
+          setStore(prevStore => ({
+            ...prevStore,
+            recordId: res?.recordId
+          }))
+      }
     }
   })
   const editMode = !!formik?.values?.recordId
 
   async function updateAmountFields(basicAmount) {
     const totalEN = basicAmount != 0 ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0
-    const totalDE = basicAmount != 0 ? await ChangeDeductionsAmount(deductions, basicAmount) : 0
+    const totalDE = basicAmount != 0 ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0
     const finalAmount = basicAmount != 0 ? totalEN - totalDE + basicAmount : 0
     formik.setFieldValue('basicAmount', basicAmount)
     formik.setFieldValue('finalAmount', parseFloat(finalAmount).toFixed(2))
     formik.setFieldValue('eAmount', parseFloat(totalEN).toFixed(2))
     formik.setFieldValue('dAmount', parseFloat(totalDE).toFixed(2))
+    reCalcNewAmounts(basicAmount, totalEN)
   }
 
   async function getSalaryInfo(recordId) {

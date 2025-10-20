@@ -23,6 +23,7 @@ export default function DeductionsForm({
   seqNumbers,
   salaryInfo,
   refetchSalaryTab,
+  fixedAmount,
   window
 }) {
   const { platformLabels } = useContext(ControlContext)
@@ -91,15 +92,26 @@ export default function DeductionsForm({
           extension: EmployeeRepository.SalaryDetails.get,
           parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
         })
-        formik.setValues({ ...res?.record, isPct: res?.record?.pct > 0 })
+        formik.setValues({
+          ...res?.record,
+          fixedAmount: fixedAmount || res?.record?.fixedAmount,
+          isPct: res?.record?.pct > 0
+        })
       }
     })()
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Salaries} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.Salaries}
+      form={formik}
+      maxAccess={maxAccess}
+      isInfo={false}
+      isCleared={false}
+      editMode={editMode}
+    >
       <VertLayout>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={EmployeeRepository.EmployeeDeduction.qry}

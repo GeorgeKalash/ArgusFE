@@ -15,6 +15,8 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
   const [salaryInfo, setSalaryInfo] = useState({})
   const { getRequest } = useContext(RequestsContext)
   const refetchSalaryTab = useRef(false)
+  const saveWholePack = useRef(false)
+  const [modifiedData, setModifiedData] = useState(null)
 
   const [store, setStore] = useState({
     recordId,
@@ -40,12 +42,33 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
       ...prevStore,
       maxSeqNo: response?.list?.length > 0 ? Math.max(...response?.list?.map(r => r.seqNo ?? 0)) : 0
     }))
-
+    setModifiedData(null)
     return response.list.map(record => ({
       ...record,
       currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,
       concatenatedPct: record?.pct ? `${parseFloat(record.pct).toFixed(2)}%` : `0.00%`
     }))
+  }
+
+  function reCalcNewAmounts(basicSalary, eAmount) {
+    const updatedData = (data || []).map(record => {
+      if (!record.includeInTotal) return record
+
+      const salary = parseFloat(String(basicSalary).replace(/,/g, ''))
+      const entitlement = parseFloat(String(eAmount || 0).replace(/,/g, ''))
+
+      if (!record.pct || record.pct == 0) return record
+
+      let fixedAmount
+      const pctValue = parseFloat(record.pct) / 100
+
+      if (record.type === 1) fixedAmount = pctValue * salary
+      else if (record.type === 2) fixedAmount = pctValue * (salary + (record.pctOf == 1 ? 0 : entitlement))
+
+      return { ...record, fixedAmount, currencyAmount: `${store.currency} ${getFormattedNumber(fixedAmount, 2)}` }
+    })
+    setModifiedData(updatedData)
+    saveWholePack.current = true
   }
 
   const tabs = [
@@ -65,8 +88,10 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           store={store}
           employeeInfo={employeeInfo}
           setSalaryInfo={setSalaryInfo}
-          data={data}
+          data={modifiedData || data}
           refetchSalaryTab={refetchSalaryTab}
+          reCalcNewAmounts={reCalcNewAmounts}
+          saveWholePack={saveWholePack}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab}>
@@ -75,7 +100,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           maxAccess={maxAccess}
           store={store}
           salaryInfo={salaryInfo}
-          data={data}
+          data={modifiedData || data}
           refetchSalaryTab={refetchSalaryTab}
         />
       </CustomTabPanel>
@@ -85,7 +110,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           maxAccess={maxAccess}
           store={store}
           salaryInfo={salaryInfo}
-          data={data}
+          data={modifiedData || data}
           refetchSalaryTab={refetchSalaryTab}
         />
       </CustomTabPanel>

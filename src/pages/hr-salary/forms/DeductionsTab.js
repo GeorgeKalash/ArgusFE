@@ -44,18 +44,19 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSala
   }
 
   const edit = obj => {
-    openForm(obj.seqNo)
+    openForm(obj)
   }
 
-  function openForm(seqNo) {
+  function openForm(obj) {
     stack({
       Component: DeductionsForm,
       props: {
         labels,
         maxAccess,
         salaryId: store?.recordId,
-        seqNumbers: { current: seqNo, maxSeqNo: store?.maxSeqNo },
+        seqNumbers: { current: obj?.seqNo, maxSeqNo: store?.maxSeqNo },
         salaryInfo: { header: salaryInfo, details: data },
+        fixedAmount: obj?.fixedAmount,
         refetchSalaryTab
       },
       width: 800,
