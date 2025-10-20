@@ -15,6 +15,7 @@ import RetailTransactionsForm from './forms/RetailTransactionsForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 import { getStorageData } from 'src/storage/storage'
 import { Router } from 'src/lib/useRouter'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
@@ -209,10 +210,10 @@ const RetailTrx = () => {
       await lockRecord({
         recordId: recordId,
         reference: reference,
-        resourceId: getResourceId(parseInt(functionId)),
+        resourceId: getResourceId[parseInt(functionId)],
         onSuccess: () => {
           addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
+            resourceId: getResourceId[parseInt(functionId)],
             recordId,
             reference
           })

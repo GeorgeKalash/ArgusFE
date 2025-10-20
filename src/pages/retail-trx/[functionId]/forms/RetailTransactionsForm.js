@@ -433,10 +433,10 @@ export default function RetailTransactionsForm({
       lockRecord({
         recordId: res.recordId,
         reference: formik.values.header.reference,
-        resourceId: getResourceId(parseInt(functionId)),
+        resourceId: getResourceId[parseInt(functionId)],
         onSuccess: () => {
           addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
+            resourceId: getResourceId[parseInt(functionId)],
             recordId,
             reference: formik.values.header.reference
           })
@@ -562,10 +562,10 @@ export default function RetailTransactionsForm({
       lockRecord({
         recordId: retailTrxHeader.recordId,
         reference: retailTrxHeader.reference,
-        resourceId: getResourceId(parseInt(functionId)),
+        resourceId: getResourceId[parseInt(functionId)],
         onSuccess: () => {
           addLockedScreen({
-            resourceId: getResourceId(parseInt(functionId)),
+            resourceId: getResourceId[parseInt(functionId)],
             recordId: retailTrxHeader.recordId,
             reference: retailTrxHeader.reference
           })
