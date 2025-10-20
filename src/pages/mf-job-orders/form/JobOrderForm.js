@@ -112,8 +112,7 @@ export default function JobOrderForm({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
-      workCenterId: yup.string().required(),
-      itemCategoryId: yup.string().required()
+      workCenterId: yup.string().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -329,10 +328,14 @@ export default function JobOrderForm({
   function openSerials() {
     stack({
       Component: SerialsLots,
-      props: { labels, maxAccess, recordId: formik.values.recordId, itemId: formik.values.itemId },
-      width: 500,
-      height: 600,
-      title: labels.seriallot
+      props: {
+        labels,
+        maxAccess,
+        recordId: formik.values.recordId,
+        itemId: formik.values.itemId,
+        api: ManufacturingRepository.MFSerial.qry,
+        parameters: `_jobId=${recordId}`
+      }
     })
   }
   function openSample() {
@@ -512,7 +515,7 @@ export default function JobOrderForm({
         formik.setFieldValue('wcRef', null)
         formik.setFieldValue('wcName', null)
       }
-      
+
       return
     }
 
@@ -997,7 +1000,6 @@ export default function JobOrderForm({
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
-                  required
                   valueField='recordId'
                   displayField={['caRef', 'name']}
                   values={formik.values}
@@ -1080,6 +1082,10 @@ export default function JobOrderForm({
                   ]}
                   onChange={async (event, newValue) => {
                     await fillBillingInfo(newValue)
+                    formik.setFieldValue('clientName', newValue?.name || '')
+                    formik.setFieldValue('clientRef', newValue?.reference || '')
+
+                    formik.setFieldValue('clientId', newValue?.recordId || null)
                   }}
                   secondFieldName={'clientName'}
                   errorCheck={'clientId'}

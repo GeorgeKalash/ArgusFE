@@ -45,6 +45,8 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  collabsable = true,
+  domLayout = 'normal',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -94,7 +96,10 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: { textAlign: 'right' },
+          cellStyle: params => ({
+            fontWeight: params.data?.isBold ? 'bold' : 'normal',
+            textAlign: languageId === 2 ? 'left' : 'right'
+          }),
           sortable: !disableSorting
         }
       }
@@ -151,7 +156,10 @@ const Table = ({
 
       return {
         ...col,
-        sortable: !disableSorting
+        sortable: !disableSorting,
+        cellStyle: params => ({
+          fontWeight: params.data?.isBold ? 'bold' : 'normal'
+        })
       }
     })
 
@@ -523,6 +531,13 @@ const Table = ({
         checked={params.value}
         disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
+          e.preventDefault()
+          const rowIndex = params.node.rowIndex
+          const colId = params.column?.getColId?.() || params.colDef.field
+          params.api.setFocusedCell(rowIndex, colId)
+          params.api.ensureIndexVisible(rowIndex)
+          if (!params.node.isSelected()) params.node.setSelected(true)
+
           const checked = e.target.checked
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
@@ -648,7 +663,11 @@ const Table = ({
     const indent = data.level * 20
     const isParent = data.level === 0
 
-    const arrow = isParent && data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+    const arrow = data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    if (!collabsable) {
+      return <div style={{ paddingLeft: indent }}>{value}</div>
+    }
 
     return (
       <div
@@ -662,7 +681,7 @@ const Table = ({
 
   const handleRowClick = params => {
     props.fullRowData.current = props?.fullRowData.current.map(row => {
-      if (row?.[props?.field] === params?.[props?.field] && row.level === 0) {
+      if (row?.[props?.field] === params?.[props?.field] && row.hasChildren) {
         return { ...row, isExpanded: !row.isExpanded }
       }
 
@@ -670,15 +689,16 @@ const Table = ({
     })
 
     const updatedVisibleRows = []
-    for (const row of props?.fullRowData.current) {
-      if (row.level === 0) {
-        updatedVisibleRows.push(row)
-        if (row.isExpanded) {
-          const children = props?.fullRowData.current.filter(child => child.parent === row?.[props?.field])
-          updatedVisibleRows.push(...children)
-        }
+
+    function addWithChildren(parentRow) {
+      updatedVisibleRows.push(parentRow)
+      if (parentRow.isExpanded) {
+        const children = props?.fullRowData.current.filter(child => child.parent === parentRow?.[props?.field])
+        children.forEach(child => addWithChildren(child))
       }
     }
+
+    props?.fullRowData.current.filter(row => row.level === 0).forEach(root => addWithChildren(root))
 
     props?.setRowData(updatedVisibleRows)
   }
@@ -705,7 +725,20 @@ const Table = ({
               showSelectAll && (
                 <Checkbox
                   checked={checked}
-                  onChange={e => selectAll(params, e)}
+                  onChange={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    const colId = params.column.getColId()
+                    params.api.ensureColumnVisible(colId)
+
+                    const root = params.api.getGui && params.api.getGui()
+                    const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+                    const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+                    const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+                    focusable && focusable.focus && focusable.focus()
+                    selectAll(params, e)
+                  }}
                   sx={{
                     width: '100%',
                     height: '100%'
@@ -942,6 +975,7 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
+            domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
             })}
@@ -958,6 +992,7 @@ const Table = ({
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
+            enableRtl={languageId === 2}
           />
         </Box>
       </Grow>

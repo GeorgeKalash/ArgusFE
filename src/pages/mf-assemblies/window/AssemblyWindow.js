@@ -12,8 +12,8 @@ const AssemblyWindow = ({ recordId, access, labels }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
         <AssemblyForm
           store={store}
           setStore={setStore}
@@ -22,7 +22,7 @@ const AssemblyWindow = ({ recordId, access, labels }) => {
           totalOverhead={totalOverhead}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <OverheadForm store={store} labels={labels} maxAccess={access} setTotalOverhead={setTotalOverhead} />
       </CustomTabPanel>
     </>

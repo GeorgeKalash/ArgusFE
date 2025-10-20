@@ -12,10 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import TransactionForm from './TransactionForm'
 import { useWindow } from 'src/windows'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const TransactionTab = ({ store, labels, access }) => {
+const TransactionTab = ({ store, labels, access, setStore }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -79,7 +79,48 @@ const TransactionTab = ({ store, labels, access }) => {
       record: JSON.stringify(obj)
     })
     invalidate()
+    saveTRX(data.list.filter(x => x.seqNo !== obj.seqNo))
+
     toast.success(platformLabels.Deleted)
+  }
+
+  const invalidateOuterGrid = useInvalidate({
+    endpointId: CostAllocationRepository.PuCostAllocations.page
+  })
+
+  async function saveTRX(data) {
+    const baseAmount = data?.reduce((curSum, item) => {
+      return curSum + parseFloat(item.baseAmount) || 0
+    }, 0)
+
+    await postRequest({
+      extension: CostAllocationRepository.PuCostAllocations.set,
+      record: JSON.stringify({ ...store?.result, baseAmount })
+    })
+
+    setStore(prevStore => ({
+      ...prevStore,
+      result: { ...prevStore?.result, baseAmount }
+    }))
+    invalidateOuterGrid()
+
+    return true
+  }
+
+  async function onSubmit(obj) {
+    const list = data?.list || []
+    const i = list.findIndex(x => x.seqNo === obj.seqNo)
+    let newData
+
+    if (i > -1) {
+      const next = list.slice()
+      next[i] = obj
+      newData = next
+    } else {
+      newData = [...list, obj]
+    }
+
+    saveTRX(newData)
   }
 
   function openForm(obj) {
@@ -90,6 +131,7 @@ const TransactionTab = ({ store, labels, access }) => {
         recordId: obj?.caId,
         caId: recordId,
         seqNo: obj?.seqNo ?? maxSeqNo,
+        onSubmit,
         maxAccess: access
       },
       width: 600,

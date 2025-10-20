@@ -83,7 +83,6 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      infoVisible={false}
       isInfo={false}
     >
       <VertLayout>

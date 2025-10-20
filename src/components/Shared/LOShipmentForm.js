@@ -1,7 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import FormShell from './FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'
@@ -20,6 +19,7 @@ import FieldSet from './FieldSet'
 import { useError } from 'src/error'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -206,7 +206,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.LOShipments} form={formik} editMode={true} isCleared={false} isInfo={false}>
+    <Form onSave={formik.handleSubmit} editMode={true}>
       <VertLayout>
         <Fixed>
           <Grid container wrap='nowrap' spacing={2}>
@@ -378,7 +378,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

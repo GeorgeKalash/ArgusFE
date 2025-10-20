@@ -117,9 +117,11 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const isCancelled = formik.values.status === -1
   const isPosted = formik.values.status === 3
 
-  const netInputWgt = recal
-    ? (Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)
-    : Number(formik?.values?.netInputWgt) || 0
+  const netInputWgt = (
+    recal
+      ? (Number(formik?.values?.inputWgt) || 0) + (Number(formik?.values?.rmWgt) || 0)
+      : Number(formik?.values?.netInputWgt) || 0
+  ).toFixed(2)
 
   const loss = recal ? netInputWgt - (Number(formik?.values?.outputWgt) || 0) : Number(formik?.values?.loss) || 0
 

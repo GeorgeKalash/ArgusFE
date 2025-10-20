@@ -280,9 +280,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           date: formatDateToApi(obj.header.date),
           dueDate: formatDateToApi(obj.header.dueDate)
         },
-        installments: obj.installments.map((installment, index) => {
+        installments: obj?.installments?.map((installment, index) => {
           return {
             ...installment,
+            id: index + 1,
             seqNo: index + 1,
             reference: obj?.header?.reference,
             vendorId: obj?.header?.vendorId,
@@ -492,7 +493,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({
+          ...data,
+          totalWeight: data.weight * newRow.qty
+        })
       }
     },
     {
@@ -517,6 +521,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       props: {
         decimalScale: 2,
         readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
+        readOnly: true,
+        decimalScale: 3,
       }
     },
     {
@@ -847,7 +860,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       key: 'Installments',
       condition: true,
       onClick: onClickInstallments,
-      disabled: !editMode,
+      disabled: !editMode
     },
     {
       key: 'Verify',
@@ -888,6 +901,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
+        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
         const taxDetailsResponse = []
 
         const updatedpuTrxTaxes =
@@ -902,9 +916,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
         return {
           ...item,
+          id: index + 1,
           basePrice: item.basePrice ? item.basePrice : 0,
           unitPrice: item.unitPrice ? item.unitPrice : 0,
           vatAmount: item.vatAmount ? item.vatAmount : 0,
+          totalWeight: item.weight * item.qty,
           extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
           puTrx: true,
           serials: puTrxSerials
@@ -915,7 +931,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 id: index
               }
             }),
-          taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
+          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
         }
       })
     )
@@ -1161,7 +1177,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       formik.setFieldValue('header.currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
-        formik.values.header.currentDiscount < 0 || formik.values.header.subtotal < formik.values.header.currentDiscount
+        formik.values.header.currentDiscount < 0 || subtotal < formik.values.header.currentDiscount
           ? 0
           : formik.values.header.currentDiscount
       currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.header.subtotal)) * 100
@@ -1284,14 +1300,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue(
-      'header.tdAmount',
-      formik.values?.header?.currentDiscount
-        ? formik.values?.header?.currentDiscount
-        : _discountObj?.hiddenTdAmount
-        ? _discountObj?.hiddenTdAmount?.toFixed(2)
-        : 0
-    )
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1929,7 +1939,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   name='header.tdAmount'
                   maxAccess={maxAccess}
                   label={labels.discount}
-                  value={formik.values.header.tdAmount}
+                  value={formik.values.header.currentDiscount}
                   displayCycleButton={true}
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
@@ -1943,7 +1953,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       if (discount < 0 || discount > 100) discount = 0
                       formik.setFieldValue('header.tdPct', discount)
                     } else {
-                      if (discount < 0 || formik.values.header.subtotal < discount) {
+                      if (discount < 0 || subtotal < discount) {
                         discount = 0
                       }
                       formik.setFieldValue('header.tdAmount', discount)
@@ -1951,6 +1961,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     formik.setFieldValue('header.currentDiscount', discount)
                   }}
                   onBlur={async e => {
+                    setReCal(true)
                     let discountAmount = Number(e.target.value.replace(/,/g, ''))
                     let tdPct = Number(e.target.value.replace(/,/g, ''))
                     let tdAmount = Number(e.target.value.replace(/,/g, ''))
@@ -1962,7 +1973,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                       formik.setFieldValue('header.tdAmount', tdAmount)
                     }
-                    setReCal(true)
+
                     await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
                   }}
                   onClear={() => {

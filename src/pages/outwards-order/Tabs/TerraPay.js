@@ -1,7 +1,6 @@
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useError } from 'src/error'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -14,6 +13,7 @@ import { RemittanceBankInterface } from 'src/repositories/RemittanceBankInterfac
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Form from 'src/components/Shared/Form'
 
 export default function TerraPay({ onSubmit, terraPay = {}, window, data }) {
   const { getRequest } = useContext(RequestsContext)
@@ -78,14 +78,7 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, data }) {
   }, [])
 
   return (
-    <FormShell
-      isInfo={false}
-      isCleared={false}
-      resourceId={ResourceIds.Terrapay}
-      form={formik}
-      maxAccess={maxAccess}
-      disabledSubmit={editMode}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -184,6 +177,6 @@ export default function TerraPay({ onSubmit, terraPay = {}, window, data }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

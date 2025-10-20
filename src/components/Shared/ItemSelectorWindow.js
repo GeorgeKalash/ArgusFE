@@ -136,7 +136,7 @@ const ItemSelectorWindow = ({
   }
 
   return (
-    <FormShell form={formik} infoVisible={false} isCleared={false}>
+    <FormShell form={formik} isInfo={false} isCleared={false}>
       <VertLayout>
         <Fixed>
           <Grid container xs={12}>

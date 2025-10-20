@@ -197,7 +197,9 @@ export const ManufacturingRepository = {
     del: service + 'delDMG',
     page: service + 'pageDMG',
     snapshot: service + 'snapshotDMG',
-    post: service + 'postDMG'
+    post: service + 'postDMG',
+    get2: service + 'get2DMG',
+    set2: service + 'set2DMG'
   },
   JobCategory: {
     qry: service + 'qryJCA'
@@ -237,6 +239,7 @@ export const ManufacturingRepository = {
   },
   MFSerial: {
     qry: service + 'qrySRL',
+    qry2: service + 'qrySRL2',
     set2: service + 'set2SRL',
     generate: service + 'generateSRL'
   },
@@ -356,7 +359,8 @@ export const ManufacturingRepository = {
   JobWorkCenter: {
     qry: service + 'qryJWC',
     close: service + 'closeJWC',
-    reopen: service + 'reopenJWC'
+    reopen: service + 'reopenJWC',
+    get: service + 'getJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
@@ -391,5 +395,26 @@ export const ManufacturingRepository = {
   },
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
+  },
+  DamageReturnRawMaterial: {
+    preview: service + 'previewDMRM'
+  },
+  WorkCenterTransferMap: {
+    qry: service + 'qryWCTM',
+    set2: service + 'set2WCTM'
+  },
+  BatchWorksheet: {
+    get2: service + 'get2BWST',
+    set2: service + 'set2BWST',
+    del: service + 'delBWST',
+    page: service + 'pageBWST',
+    snapshot: service + 'snapshotBWST',
+    post: service + 'postBWST',
+    gen: service + 'genBWST',
+    close: service + 'closeBWST',
+    reopen: service + 'reopenBWST'
+  },
+  ProductionOrderFromSaleOrder: {
+    gen: service + 'generatePOFromSO'
   }
 }

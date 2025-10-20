@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -10,6 +9,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import Form from 'src/components/Shared/Form'
 
 export default function AUDefaultsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -58,7 +58,7 @@ export default function AUDefaultsForm({ _labels, access }) {
   }, [])
 
   return (
-    <FormShell form={formik} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -97,6 +97,6 @@ export default function AUDefaultsForm({ _labels, access }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

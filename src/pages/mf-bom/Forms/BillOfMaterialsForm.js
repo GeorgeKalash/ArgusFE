@@ -19,11 +19,14 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import CopyForm from './CopyForm'
+import { useWindow } from 'src/windows'
 
 export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.BillOfMaterials.page
@@ -76,20 +79,35 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: ManufacturingRepository.BillOfMaterials.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues({
-          ...res.record,
-          date: formatDateFromApi(res.record.date)
-        })
-      }
-    })()
+    if (recordId) refetchForm(recordId)
   }, [])
+
+  async function refetchForm(recordId) {
+    const res = await getRequest({
+      extension: ManufacturingRepository.BillOfMaterials.get,
+      parameters: `_recordId=${recordId}`
+    })
+    formik.setValues({
+      ...res.record,
+      date: formatDateFromApi(res.record.date)
+    })
+  }
+
+  async function onCopy() {
+    stack({
+      Component: CopyForm,
+      props: {
+        labels,
+        maxAccess,
+        setStore,
+        values: formik.values,
+        refetchForm,
+      },
+      width: 500,
+      height: 300,
+      title: platformLabels.Copy
+    })
+  }
 
   const actions = [
     {
@@ -102,6 +120,12 @@ export default function BillOfMaterialsForm({ labels, maxAccess, setStore, store
       key: 'RecordRemarks',
       condition: true,
       onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
       disabled: !editMode
     }
   ]

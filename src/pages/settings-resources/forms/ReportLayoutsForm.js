@@ -1,7 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material'
 import Table from 'src/components/Shared/Table'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
@@ -13,6 +11,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import Form from 'src/components/Shared/Form'
 
 const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -159,13 +158,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.SettingsResources}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -194,7 +187,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
           <Table columns={columns} gridData={data} rowId={['id']} pagination={false} />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
