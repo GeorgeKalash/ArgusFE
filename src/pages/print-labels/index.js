@@ -50,9 +50,9 @@ const PrintLabels = () => {
             qty: yup
               .number()
               .nullable()
-              .transform((v, o) => (o === '' ? null : v))
+              .transform((v, o) => (o === '' || v === 0 ? null : v))
               .typeError('Invalid quantity')
-              .min(1)
+              .min(1, 'Quantity must be greater than 0')
           })
         )
         .test('validate-qty', function (items) {
@@ -62,16 +62,19 @@ const PrintLabels = () => {
             const hasQty = !!items[0].qty
             if (!hasQty) {
               return this.createError({
-                path: `items[0].qty`
+                path: `items[0].qty`,
+                message: 'Quantity is required'
               })
             }
 
             return true
           }
+
           const anyHasQty = items.some(i => !!i.qty)
           if (!anyHasQty) {
             return this.createError({
-              path: `items[0].qty`
+              path: `items[0].qty`,
+              message: 'At least one item must have quantity'
             })
           }
 
@@ -157,8 +160,8 @@ const PrintLabels = () => {
       extension: InventoryRepository.LabelString.md,
       parameters: (() => {
         const itemsParam = (obj.items || [])
-          .filter(i => i && i.itemId && i.qty > 0)
-          .map(i => `${i.itemId},${i.qty}`)
+          .filter(i => i && i.itemId)
+          .map(i => `${i.itemId},${i.qty || 0}`)
           .join(',')
 
         return (
