@@ -42,57 +42,24 @@ const PrintLabels = () => {
       labelTemplateId: yup.string().required(),
       format: yup.string().required(),
       plId: yup.string().required(),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().required(),
-            qty: yup
-              .number()
-              .nullable()
-              .transform((v, o) => (o === '' || v === 0 ? null : v))
-              .typeError('Invalid quantity')
-              .min(1, 'Quantity must be greater than 0')
-          })
-        )
-        .test('validate-qty', function (items) {
-          if (!items || items.length === 0) return false
-
-          if (items.length === 1) {
-            const hasQty = !!items[0].qty
-            if (!hasQty) {
-              return this.createError({
-                path: `items[0].qty`,
-                message: 'Quantity is required'
-              })
-            }
-
-            return true
-          }
-
-          const anyHasQty = items.some(i => !!i.qty)
-          if (!anyHasQty) {
-            return this.createError({
-              path: `items[0].qty`,
-              message: 'At least one item must have quantity'
-            })
-          }
-
-          return true
+      items: yup.array().of(
+        yup.object().shape({
+          sku: yup.string().required(),
+          qty: yup.number().nullable()
         })
+      )
     }),
     onSubmit: async () => {
       const barcode = await Print()
-      if (barcode)
-        stack({
-          Component: PrintConfirmationDialog,
-          props: {
-            Print,
-            barcode
-          },
-          width: 400,
-          height: 200
-        })
+      stack({
+        Component: PrintConfirmationDialog,
+        props: {
+          Print,
+          barcode
+        },
+        width: 400,
+        height: 200
+      })
     }
   })
 
