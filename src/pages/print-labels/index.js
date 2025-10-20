@@ -46,11 +46,37 @@ const PrintLabels = () => {
         .array()
         .of(
           yup.object().shape({
-            qty: yup.number().required().typeError().min(1),
-            sku: yup.string().required()
+            sku: yup.string().required(),
+            qty: yup
+              .number()
+              .nullable()
+              .transform((v, o) => (o === '' ? null : v))
+              .typeError('Invalid quantity')
+              .min(1)
           })
         )
-        .required()
+        .test('validate-qty', function (items) {
+          if (!items || items.length === 0) return false
+
+          if (items.length === 1) {
+            const hasQty = !!items[0].qty
+            if (!hasQty) {
+              return this.createError({
+                path: `items[0].qty`
+              })
+            }
+
+            return true
+          }
+          const anyHasQty = items.some(i => !!i.qty)
+          if (!anyHasQty) {
+            return this.createError({
+              path: `items[0].qty`
+            })
+          }
+
+          return true
+        })
     }),
     onSubmit: async () => {
       const barcode = await Print()
@@ -66,6 +92,9 @@ const PrintLabels = () => {
         })
     }
   })
+
+  const isReadOnly =
+    !formik.values.currencyId && !formik.values.labelTemplateId && !formik.values.format && !formik.values.plId
 
   const columns = [
     {
@@ -86,8 +115,7 @@ const PrintLabels = () => {
           { key: 'name', value: 'Name' },
           { key: 'flName', value: 'FlName' }
         ],
-        readOnly:
-          !formik.values.currencyId && !formik.values.labelTemplateId && !formik.values.format && !formik.values.plId
+        readOnly: isReadOnly
       }
     },
     {
@@ -104,8 +132,7 @@ const PrintLabels = () => {
       label: labels.qty,
       props: {
         allowNegative: false,
-        readOnly:
-          !formik.values.currencyId && !formik.values.labelTemplateId && !formik.values.format && !formik.values.plId
+        readOnly: isReadOnly
       }
     }
   ]
@@ -130,13 +157,17 @@ const PrintLabels = () => {
       extension: InventoryRepository.LabelString.md,
       parameters: (() => {
         const itemsParam = (obj.items || [])
-          .filter(i => i && i.itemId)
+          .filter(i => i && i.itemId && i.qty > 0)
           .map(i => `${i.itemId},${i.qty}`)
           .join(',')
 
-        return `_templateId=${obj.labelTemplateId}&_currencyId=${obj.currencyId}&_printFormat=${encodeURIComponent(
-          obj.format
-        )}&_plId=${obj.plId}&_items=${itemsParam}`
+        return (
+          `_templateId=${obj.labelTemplateId}` +
+          `&_currencyId=${obj.currencyId}` +
+          `&_printFormat=${encodeURIComponent(obj.format)}` +
+          `&_plId=${obj.plId}` +
+          `&_items=${itemsParam}`
+        )
       })()
     })
 
@@ -229,9 +260,7 @@ const PrintLabels = () => {
             error={formik.errors.items}
             columns={columns}
             maxAccess={access}
-            allowDelete={
-              formik.values.currencyId && formik.values.labelTemplateId && formik.values.format && formik.values.plId
-            }
+            allowDelete={!isReadOnly}
           />
         </Grow>
       </VertLayout>
