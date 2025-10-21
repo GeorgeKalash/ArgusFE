@@ -586,8 +586,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_RATE
                   })
                   update({
-                    amount: updatedRateRow.amount,
-                    baseAmount: updatedRateRow.baseAmount
+                    amount: updatedRateRow.amount || null,
+                    baseAmount: updatedRateRow.baseAmount || null
                   })
                 }
               },
@@ -608,8 +608,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_AMOUNT
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
-                    baseAmount: updatedRateRow.baseAmount
+                    exRate: updatedRateRow.exRate || null,
+                    baseAmount: updatedRateRow.baseAmount || null
                   })
                 }
               },
@@ -630,8 +630,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_BASE_AMOUNT
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount
+                    exRate: updatedRateRow.exRate || null,
+                    amount: updatedRateRow.amount || null
                   })
                 }
               }
