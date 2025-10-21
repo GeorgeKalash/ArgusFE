@@ -123,6 +123,10 @@ export default function SalaryTab({
     formik.setFieldValue('eAmount', parseFloat(totalEN).toFixed(2))
     formik.setFieldValue('dAmount', parseFloat(totalDE).toFixed(2))
     reCalcNewAmounts(basicAmount, totalEN)
+    setSalaryInfo(prev => ({
+      ...prev,
+      basicAmount
+    }))
   }
 
   async function getSalaryInfo(recordId) {

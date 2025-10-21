@@ -56,7 +56,7 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSala
         salaryId: store?.recordId,
         seqNumbers: { current: obj?.seqNo, maxSeqNo: store?.maxSeqNo },
         salaryInfo: { header: salaryInfo, details: data },
-        fixedAmount: obj?.fixedAmount,
+        fixedAmount: obj?.fixedAmount ? (Math.trunc(obj.fixedAmount * 100) / 100).toFixed(2) : 0,
         refetchSalaryTab
       },
       width: 800,

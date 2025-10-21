@@ -43,6 +43,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
       maxSeqNo: response?.list?.length > 0 ? Math.max(...response?.list?.map(r => r.seqNo ?? 0)) : 0
     }))
     setModifiedData(null)
+
     return response.list.map(record => ({
       ...record,
       currencyAmount: `${store.currency} ${getFormattedNumber(record.fixedAmount, 2)}`,

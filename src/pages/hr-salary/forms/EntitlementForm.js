@@ -93,6 +93,8 @@ export default function EntitlementForm({
           extension: EmployeeRepository.SalaryDetails.get,
           parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
         })
+        console.log('debug 1', res?.record?.pct)
+        console.log('debug 2', res?.record?.pct > 0)
         formik.setValues({
           ...res?.record,
           fixedAmount: fixedAmount || res?.record?.fixedAmount,
