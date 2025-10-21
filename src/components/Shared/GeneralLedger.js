@@ -85,9 +85,9 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
           sourceReference: '',
           notes: '',
           functionId: functionId,
-          exRate: '',
-          amount: '',
-          baseAmount: ''
+          exRate: null,
+          amount: null,
+          baseAmount: null
         }
       ]
     },
@@ -361,8 +361,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         <Grow>
           <DataGrid
             onChange={value => {
-              formik2.setFieldValue('glTransactions', value)
               formik2.setFieldValue('editStatus', 2)
+              formik2.setFieldValue('glTransactions', value)
             }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
@@ -576,6 +576,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   readOnly: isProcessed
                 },
                 name: 'exRate',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
@@ -597,6 +598,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   readOnly: isProcessed
                 },
                 name: 'amount',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
@@ -618,6 +620,7 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                   readOnly: isProcessed
                 },
                 name: 'baseAmount',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
