@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
@@ -18,6 +17,7 @@ import { formatDateFromApi } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import SalaryWindow from '../Windows/SalaryWindow'
 import { useWindow } from 'src/windows'
+import Form from 'src/components/Shared/Form'
 
 export default function SalaryForm({ employeeInfo }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -126,15 +126,7 @@ export default function SalaryForm({ employeeInfo }) {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Salaries}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={true}
-      isCleared={false}
-      isInfo={false}
-      isSaved={false}
-    >
+    <Form isSaved={false} maxAccess={maxAccess} editMode={true}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2} alignItems='center'>
@@ -204,6 +196,7 @@ export default function SalaryForm({ employeeInfo }) {
         </Fixed>
         <Grow>
           <Table
+            name='salaryTable'
             columns={columns}
             gridData={{ list: data }}
             rowId={['recordId']}
@@ -215,6 +208,6 @@ export default function SalaryForm({ employeeInfo }) {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

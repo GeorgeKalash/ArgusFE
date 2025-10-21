@@ -11,6 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import toast from 'react-hot-toast'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSalaryTab }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -53,10 +54,9 @@ const DeductionsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSala
       props: {
         labels,
         maxAccess,
-        salaryId: store?.recordId,
         seqNumbers: { current: obj?.seqNo, maxSeqNo: store?.maxSeqNo },
         salaryInfo: { header: salaryInfo, details: data },
-        fixedAmount: obj?.fixedAmount ? (Math.trunc(obj.fixedAmount * 100) / 100).toFixed(2) : 0,
+        fixedAmount: obj?.fixedAmount ? getFormattedNumber(obj.fixedAmount, 2) : 0,
         refetchSalaryTab
       },
       width: 800,

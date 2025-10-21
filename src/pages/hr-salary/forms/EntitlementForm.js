@@ -1,11 +1,9 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -16,19 +14,20 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { DataSets } from 'src/resources/DataSets'
 import { calculateFixed } from 'src/utils/Payroll'
+import Form from 'src/components/Shared/Form'
 
 export default function EntitlementForm({
   labels,
   maxAccess,
-  salaryId,
   seqNumbers,
   salaryInfo,
-  refetchSalaryTab,
   fixedAmount,
+  refetchSalaryTab,
   window
 }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const salaryId = salaryInfo?.header.recordId
 
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.SalaryDetails.qry
@@ -83,9 +82,7 @@ export default function EntitlementForm({
       invalidate()
     }
   })
-
   const editMode = !!formik.values.salaryId
-
   useEffect(() => {
     ;(async function () {
       if (salaryId && seqNumbers?.current) {
@@ -93,11 +90,9 @@ export default function EntitlementForm({
           extension: EmployeeRepository.SalaryDetails.get,
           parameters: `_salaryId=${salaryId}&_seqNo=${seqNumbers?.current}`
         })
-        console.log('debug 1', res?.record?.pct)
-        console.log('debug 2', res?.record?.pct > 0)
         formik.setValues({
           ...res?.record,
-          fixedAmount: fixedAmount || res?.record?.fixedAmount,
+          fixedAmount: Number(fixedAmount) || res?.record?.fixedAmount,
           isPct: res?.record?.pct > 0
         })
       }
@@ -105,14 +100,7 @@ export default function EntitlementForm({
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Salaries}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-      editMode={editMode}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -124,10 +112,9 @@ export default function EntitlementForm({
               displayField='name'
               values={formik.values}
               filter={item => item.type == 1}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('edId', newValue?.recordId || null)
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('edId', newValue?.recordId || null)}
               required
+              maxAccess={maxAccess}
               error={formik.touched.edId && Boolean(formik.errors.edId)}
             />
           </Grid>
@@ -166,6 +153,7 @@ export default function EntitlementForm({
                 formik.setFieldValue('fixedAmount', amount)
                 formik.setFieldValue('pct', pctValue)
               }}
+              maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('pct', 0)}
               error={formik.touched.pct && Boolean(formik.errors.pct)}
             />
@@ -177,6 +165,7 @@ export default function EntitlementForm({
               value={formik.values.fixedAmount}
               onChange={formik.handleChange}
               required
+              maxAccess={maxAccess}
               readOnly={formik.values.isPct}
               onClear={() => formik.setFieldValue('fixedAmount', null)}
               error={formik.touched.fixedAmount && Boolean(formik.errors.fixedAmount)}
@@ -214,14 +203,12 @@ export default function EntitlementForm({
               values={formik.values}
               maxAccess={maxAccess}
               required
-              onChange={(event, newValue) => {
-                formik.setFieldValue('edCalcType', newValue?.key || null)
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
               error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
             />
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

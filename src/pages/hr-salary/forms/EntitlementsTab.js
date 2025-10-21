@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -11,6 +11,7 @@ import { useWindow } from 'src/windows'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useInvalidate } from 'src/hooks/resource'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSalaryTab }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -53,10 +54,9 @@ const EntitlementsTab = ({ store, labels, maxAccess, salaryInfo, data, refetchSa
       props: {
         labels,
         maxAccess,
-        salaryId: store?.recordId,
         seqNumbers: { current: obj?.seqNo, maxSeqNo: store?.maxSeqNo },
         salaryInfo: { header: salaryInfo, details: data },
-        fixedAmount: obj?.fixedAmount ? (Math.trunc(obj.fixedAmount * 100) / 100).toFixed(2) : 0,
+        fixedAmount: obj?.fixedAmount ? getFormattedNumber(obj.fixedAmount, 2) : 0,
         refetchSalaryTab
       },
       width: 800,

@@ -47,6 +47,7 @@ export default function SalaryTab({
     maxAccess,
     initialValues: {
       recordId: null,
+      employeeId: employeeInfo?.recordId,
       currencyId: null,
       scrId: null,
       effectiveDate: null,
@@ -62,26 +63,29 @@ export default function SalaryTab({
       dAmount: ''
     },
     validationSchema: yup.object({
-      currencyId: yup.string().required(),
-      scrId: yup.string().required(),
+      currencyId: yup.number().required(),
+      scrId: yup.number().required(),
       effectiveDate: yup.date().required(),
-      salaryType: yup.string().required(),
-      paymentFrequency: yup.string().required(),
-      paymentMethod: yup.string().required(),
+      salaryType: yup.number().required(),
+      paymentFrequency: yup.number().required(),
+      paymentMethod: yup.number().required(),
       basicAmount: yup.number().required(),
       bankId: yup
-        .string()
+        .number()
         .nullable()
         .test('bank-required', 'Bank is required', function (value) {
           const { paymentMethod } = this.parent
 
           return paymentMethod == 2 ? !!value : true
         }),
-      accountNumber: yup.string().test('account-required', 'Account number is required', function (value) {
-        const { paymentMethod } = this.parent
+      accountNumber: yup
+        .number()
+        .nullable()
+        .test('account-required', 'Account number is required', function (value) {
+          const { paymentMethod } = this.parent
 
-        return paymentMethod == 2 ? !!value : true
-      })
+          return paymentMethod == 2 ? !!value : true
+        })
     }),
     onSubmit: async obj => {
       if (obj.recordId && saveWholePack.current && data.length > 0) {
@@ -115,8 +119,14 @@ export default function SalaryTab({
   const editMode = !!formik?.values?.recordId
 
   async function updateAmountFields(basicAmount) {
-    const totalEN = basicAmount != 0 ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0
-    const totalDE = basicAmount != 0 ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0
+    const totalEN = recordId ? (basicAmount != 0 ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
+
+    const totalDE = recordId
+      ? basicAmount != 0
+        ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN)
+        : 0
+      : 0
+
     const finalAmount = basicAmount != 0 ? totalEN - totalDE + basicAmount : 0
     formik.setFieldValue('basicAmount', basicAmount)
     formik.setFieldValue('finalAmount', parseFloat(finalAmount).toFixed(2))
@@ -134,7 +144,13 @@ export default function SalaryTab({
       extension: EmployeeRepository.EmployeeSalary.get,
       parameters: `_recordId=${recordId}`
     })
-    formik.setValues({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
+    formik.setValues({
+      ...res?.record,
+      effectiveDate: formatDateFromApi(res.record.effectiveDate),
+      finalAmount: parseFloat(res?.record?.finalAmount).toFixed(2),
+      eAmount: parseFloat(res?.record?.eAmount).toFixed(2),
+      dAmount: parseFloat(res?.record?.dAmount).toFixed(2)
+    })
     setSalaryInfo({ ...res?.record, effectiveDate: formatDateFromApi(res.record.effectiveDate) })
     setStore(prevStore => ({
       ...prevStore,
@@ -185,7 +201,7 @@ export default function SalaryTab({
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.Salaries} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grid container spacing={2}>
           <Grid item xs={6}>
@@ -202,7 +218,7 @@ export default function SalaryTab({
               values={formik.values}
               required
               maxAccess={maxAccess}
-              onChange={(event, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || '')}
+              onChange={(_, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || '')}
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
             />
           </Grid>
@@ -229,9 +245,7 @@ export default function SalaryTab({
               values={formik.values}
               required
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('scrId', newValue?.recordId || null)
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('scrId', newValue?.recordId || null)}
               error={formik.touched.scrId && Boolean(formik.errors.scrId)}
             />
           </Grid>
@@ -265,6 +279,8 @@ export default function SalaryTab({
               value={formik?.values?.basicAmount}
               onChange={e => updateAmountFields(Number(e.target.value.replace(/,/g, '')))}
               required
+              maxLength={10}
+              maxAccess={maxAccess}
               allowNegative={false}
               onClear={() => updateAmountFields(0)}
               error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
@@ -280,7 +296,7 @@ export default function SalaryTab({
               values={formik.values}
               maxAccess={maxAccess}
               required
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('salaryType', newValue?.key || null)
               }}
               error={formik.touched.salaryType && Boolean(formik.errors.salaryType)}
@@ -292,6 +308,7 @@ export default function SalaryTab({
               label={labels.finalAmount}
               value={formik?.values?.finalAmount}
               readOnly
+              maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('finalAmount', '')}
               error={formik.touched.finalAmount && Boolean(formik.errors.finalAmount)}
@@ -307,9 +324,7 @@ export default function SalaryTab({
               values={formik.values}
               maxAccess={maxAccess}
               required
-              onChange={(event, newValue) => {
-                formik.setFieldValue('paymentFrequency', newValue?.key || null)
-              }}
+              onChange={(event, newValue) => formik.setFieldValue('paymentFrequency', newValue?.key || null)}
               error={formik.touched.paymentFrequency && Boolean(formik.errors.paymentFrequency)}
             />
           </Grid>
@@ -320,6 +335,7 @@ export default function SalaryTab({
               value={formik?.values?.eAmount}
               onChange={formik.handleChange}
               readOnly
+              maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('eAmount', '')}
               error={formik.touched.eAmount && Boolean(formik.errors.eAmount)}
             />
@@ -333,7 +349,7 @@ export default function SalaryTab({
               displayField='value'
               values={formik.values}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
+              onChange={(_, newValue) => {
                 formik.setFieldValue('paymentMethod', newValue?.key || null)
                 if (newValue?.key != 2) {
                   formik.setFieldValue('bankId', '')
@@ -351,6 +367,7 @@ export default function SalaryTab({
               value={formik?.values?.dAmount}
               onChange={formik.handleChange}
               readOnly
+              maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('dAmount', '')}
               error={formik.touched.dAmount && Boolean(formik.errors.dAmount)}
             />
@@ -370,9 +387,7 @@ export default function SalaryTab({
               readOnly={formik.values.paymentMethod != 2}
               required={formik.values.paymentMethod == 2}
               maxAccess={maxAccess}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('bankId', newValue?.recordId || null)
-              }}
+              onChange={(_, newValue) => formik.setFieldValue('bankId', newValue?.recordId || null)}
               error={formik.touched.bankId && Boolean(formik.errors.bankId)}
             />
           </Grid>

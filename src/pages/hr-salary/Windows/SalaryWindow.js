@@ -11,11 +11,10 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo }) {
-  const [activeTab, setActiveTab] = useState(0)
-  const [salaryInfo, setSalaryInfo] = useState({})
   const { getRequest } = useContext(RequestsContext)
-  const refetchSalaryTab = useRef(false)
-  const saveWholePack = useRef(false)
+
+  const [activeTab, setActiveTab] = useState(0)
+  const [salaryInfo, setSalaryInfo] = useState({ recordId })
   const [modifiedData, setModifiedData] = useState(null)
 
   const [store, setStore] = useState({
@@ -23,10 +22,13 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
     currency: ''
   })
 
+  const refetchSalaryTab = useRef(false)
+  const saveWholePack = useRef(false)
+
   const {
     query: { data }
   } = useResourceQuery({
-    enabled: !!recordId && store.currency,
+    enabled: !!(recordId && store.currency),
     datasetId: ResourceIds.Salaries,
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.SalaryDetails.qry
