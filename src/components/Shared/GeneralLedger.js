@@ -573,7 +573,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.exRate,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 5
                 },
                 name: 'exRate',
                 async onChange({ row: { update, oldRow, newRow } }) {
