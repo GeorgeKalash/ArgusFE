@@ -1723,7 +1723,7 @@ export default function SaleTransactionForm({
     fillMetalPrice()
     if (dtd?.record?.commitItems == false) {
       formik.setFieldValue('header.siteId', null)
-      formik.setFieldValue('header.siteRef', siteRef || '')
+      formik.setFieldValue('header.siteRef', '')
     }
   }
 
@@ -1822,11 +1822,14 @@ export default function SaleTransactionForm({
     return myObject
   }
 
-  const setDefaultFields = () => {
+  const setDefaultFields = async () => {
     if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
     formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
     formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
+    const currentSiteId = userDefaultsDataState?.siteId || null
+    const siteRef = await getSiteInfo(currentSiteId)
+    formik.setFieldValue('header.siteId', currentSiteId)
+    formik.setFieldValue('header.siteRef', siteRef || '')
   }
 
   async function previewBtnClicked() {
