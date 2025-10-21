@@ -225,7 +225,6 @@ export default function DamageForm({ recordId, jobId }) {
 
     formik.setFieldValue('items', items?.list || [])
   }
-  console.log(formik)
 
   return (
     <FormShell
