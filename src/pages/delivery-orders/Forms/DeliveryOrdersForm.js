@@ -304,7 +304,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           form: formik,
           labels,
           maxAccess,
-          recordId
+          recordId,
+          refetchForm
         },
         width: 500,
         height: 550,
@@ -343,7 +344,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       key: 'generateIV',
       condition: true,
       onClick: openGenerateInvoiceForm,
-      disabled: !isPosted && !isCancelled
+      disabled: (!isPosted && !isCancelled) || !!formik.values.invoiceId
     }
   ]
 
