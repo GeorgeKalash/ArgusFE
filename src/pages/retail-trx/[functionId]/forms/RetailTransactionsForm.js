@@ -482,7 +482,7 @@ export default function RetailTransactionsForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },

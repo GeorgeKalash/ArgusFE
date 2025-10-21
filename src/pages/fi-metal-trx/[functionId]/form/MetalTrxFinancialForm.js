@@ -496,6 +496,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onClickGL',
       datasetId: getGLResourceId(functionId),
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       onReset,
       disabled: !editMode
     },
