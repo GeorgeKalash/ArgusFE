@@ -77,6 +77,8 @@ import { useContext } from 'react'
 import { LabelsAccessContextProvider } from 'src/providers/LabelsAccessContext'
 import { LockedScreensProvider } from 'src/providers/LockedScreensContext'
 import GlobalErrorHandlers from 'src/providers/GlobalErrorHandlers'
+import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import { ErrorBoundary } from 'next/dist/client/components/error-boundary'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -120,12 +122,20 @@ const App = props => {
   // Variables
   const contentHeightFixed = Component.contentHeightFixed ?? false
 
+  function Fallback({ error, resetErrorBoundary }) {
+    const [err, setErr] = useState(error.message)
+
+    return <ErrorWindow open={err} message={{ message: error.message }} onClose={() => setErr(null)} />
+  }
+
   const getLayout =
     Component.getLayout ??
     (page => (
       <MenuProvider>
         <UserLayout contentHeightFixed={contentHeightFixed}>
-          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>{page}</TabsProvider>
+          <TabsProvider pageTitle={Component.pageTitle ?? pageProps.pageTitle}>
+            <ErrorBoundary FallbackComponent={Fallback}>{page}</ErrorBoundary>
+          </TabsProvider>
         </UserLayout>
       </MenuProvider>
     ))
