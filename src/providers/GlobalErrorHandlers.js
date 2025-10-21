@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react'
 import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { ErrorBoundary } from 'react-error-boundary'
 
-function Fallback({ error, resetErrorBoundary }) {
-  const [err, setErr] = useState(error.message)
-
-  return <ErrorWindow open={err} message={{ message: error.message }} onClose={() => setErr(null)} />
-}
-
-export default function GlobalErrorHandlers({ children }) {
+export default function GlobalErrorHandlers() {
   const [err, setErr] = useState(null)
 
   useEffect(() => {
@@ -24,10 +17,5 @@ export default function GlobalErrorHandlers({ children }) {
     }
   }, [])
 
-  return (
-    <>
-      {children}
-      <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
-    </>
-  )
+  return <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
 }
