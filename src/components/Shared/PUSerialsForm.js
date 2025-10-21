@@ -41,10 +41,11 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
       itemId: row?.itemId,
       siteId,
       totalWeight: row?.qty || 0,
-      items: row?.serials?.map((item, index) => ({
-        ...item,
-        id: index + 1
-      })) || []
+      items:
+        row?.serials?.map((item, index) => ({
+          ...item,
+          id: index + 1
+        })) || []
     },
     conditionSchema: ['items'],
     validationSchema: yup.object({
@@ -53,7 +54,7 @@ export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
     onSubmit: async values => {
       const items = values.items.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
-      const serials = items.map((item, index) => ({
+      const serials = items.map(({ id, ...item }, index) => ({
         ...item,
         srlSeqNo: index + 1,
         srlNo: item.srlNo,
