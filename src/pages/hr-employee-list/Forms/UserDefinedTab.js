@@ -123,6 +123,7 @@ const UserDefinedTab = ({  maxAccess, store }) => {
             key={fieldId}
             name={String(fieldId)}
             label={field.name}
+            maxAccess={maxAccess}
             value={value ? new Date(value) : null}
             onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
@@ -135,6 +136,7 @@ const UserDefinedTab = ({  maxAccess, store }) => {
             key={fieldId}
             name={String(fieldId)}
             label={field.name}
+            maxAccess={maxAccess}
             value={value ? new Date(value) : null}
             onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
             onClear={() => formik.setFieldValue(String(fieldId), '')}

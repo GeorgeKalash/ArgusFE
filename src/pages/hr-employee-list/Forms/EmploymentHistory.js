@@ -15,7 +15,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import Form from 'src/components/Shared/Form'
 
-const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId, window }) => {
+const EmploymentHistory = ({ recordId, labels, maxAccess, employeeId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -46,11 +46,13 @@ const EmploymentHistory = ({ recordId, labels, maxAccess, editMode, employeeId, 
       })
 
       toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
-      formik.setFieldValue('recordId', response.recordId)
+
       window.close()
       invalidate()
     }
   })
+
+  const editMode = !!formik.values.recordId
 
   const getData = async recordId => {
     const res = await getRequest({

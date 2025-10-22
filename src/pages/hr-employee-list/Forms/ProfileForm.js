@@ -17,9 +17,10 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -27,7 +28,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
   const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.EmployeeList.page
+    endpointId: EmployeeRepository.EmployeeChart.page
   })
 
   const { formik } = useForm({
@@ -69,6 +70,8 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
       hireDate: yup.date().required(),
       homeMail: yup.string().email().nullable(),
       workMail: yup.string().email().nullable(),
+      mobile: yup.number().min(999999).nullable(),
+      phone: yup.number().min(999999).nullable(),
       scId: yup.number().when('scType', {
         is: value => value == 2,
         then: () => yup.number().required(),
@@ -86,7 +89,11 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
     onSubmit: async values => {
       const res = await postRequest({
         extension: EmployeeRepository.Employee.set,
-        record: JSON.stringify(values)
+        record: JSON.stringify({
+          ...values,
+          hireDate: formatDateToApi(values.hireDate),
+          birthDate: formatDateToApi(values.birthDate)
+        })
       })
       if (!values.recordId) {
         formik.setFieldValue('recordId', res.recordId)
@@ -188,6 +195,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     label={labels.middleName}
                     value={formik.values.middleName}
                     maxAccess={maxAccess}
+                    required
                     maxLength='20'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('middleName', '')}
@@ -256,25 +264,26 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='mobile'
                     label={labels.mobile}
                     value={formik.values.mobile}
                     maxAccess={maxAccess}
+                    maxLength={15}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('mobile', '')}
+                    onClear={() => formik.setFieldValue('mobile', null)}
                     error={formik.touched.mobile && Boolean(formik.errors.mobile)}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomTextField
+                  <CustomNumberField
                     name='phone'
                     label={labels.homePhone}
                     value={formik.values.phone}
                     maxAccess={maxAccess}
-                    maxLength='15'
+                    maxLength={15}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('phone', '')}
+                    onClear={() => formik.setFieldValue('phone', null)}
                     error={formik.touched.phone && Boolean(formik.errors.phone)}
                   />
                 </Grid>
@@ -344,7 +353,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     displayField='name'
                     values={formik.values}
                     onChange={(event, newValue) => {
-                      formik && formik.setFieldValue('nationalityId', newValue?.recordId || 0)
+                      formik.setFieldValue('nationalityId', newValue?.recordId || 0)
                     }}
                     maxAccess={maxAccess}
                     error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
@@ -358,6 +367,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     values={formik.values}
                     valueField='key'
                     displayField='value'
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('bloodType', newValue?.key || null)
                     }}
@@ -373,6 +383,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     required
                     valueField='key'
                     displayField='value'
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       if (newValue?.key == 1 || newValue?.key == 3 || newValue?.key == 4) {
                         formik.setFieldValue('scId', null)
@@ -392,6 +403,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    maxAccess={maxAccess}
                     required={formik.values.scType == 2}
                     readOnly={formik.values.scType == 1 || formik.values.scType == 3 || formik.values.scType == 4}
                     onChange={(event, newValue) => {
@@ -418,8 +430,9 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                     label={labels.hireDate}
                     value={formik.values?.hireDate}
                     required
+                    maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('hireDate', '')}
+                    onClear={() => formik.setFieldValue('hireDate', null)}
                     error={formik.touched.hireDate && Boolean(formik.errors.hireDate)}
                   />
                 </Grid>

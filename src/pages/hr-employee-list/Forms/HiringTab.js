@@ -26,14 +26,14 @@ const HiringTab = ({ labels, maxAccess, store }) => {
   const { recordId, hireDate } = store
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.EmployeeList.page
+    endpointId: EmployeeRepository.EmployeeChart.page
   })
 
   const { formik } = useForm({
     initialValues: {
       recordId,
       employeeId: recordId,
-      probationEndDate: hireDate ? formatDateFromApi(hireDate) : null,
+      probationEndDate: hireDate,
       nextReviewDate: null,
       npId: null,
       termEndDate: null,
@@ -41,9 +41,9 @@ const HiringTab = ({ labels, maxAccess, store }) => {
       recruitmentCost: null,
       pyReference: '',
       taReference: '',
-      pyActiveDate: hireDate ? formatDateFromApi(hireDate) : null,
+      pyActiveDate: hireDate,
       ssBranchId: null,
-      probationPeriod: null,
+      probationPeriod: 0,
       sponsorId: null,
       otherRef: '',
       bsId: null,
@@ -71,6 +71,8 @@ const HiringTab = ({ labels, maxAccess, store }) => {
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -88,19 +90,16 @@ const HiringTab = ({ labels, maxAccess, store }) => {
             nextReviewDate: res?.record?.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
             probationEndDate: res?.record?.probationEndDate ? formatDateFromApi(res.record.probationEndDate) : null
           })
+        } else if (editMode) {
+          formik.setFieldValue('probationEndDate', hireDate ? formatDateFromApi(hireDate) : null)
+          formik.setFieldValue('pyActiveDate', hireDate ? formatDateFromApi(hireDate) : null)
         } else {
-          formik.setValues({
-            ...formik.initialValues,
-            employeeId: recordId,
-            probationEndDate: hireDate ? formatDateFromApi(hireDate) : null,
-            pyActiveDate: hireDate ? formatDateFromApi(hireDate) : null
-          })
+          formik.setFieldValue('probationEndDate', hireDate)
+          formik.setFieldValue('pyActiveDate', hireDate)
         }
       }
     })()
   }, [hireDate])
-
-  const editMode = !!formik.values.recordId
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
@@ -117,6 +116,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('npId', newValue?.recordId || null)
                     }}
@@ -131,6 +131,23 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     maxAccess={maxAccess}
                     maxLength={9}
                     onChange={formik.handleChange}
+                    allowNegative={false}
+                    onBlur={e => {
+                      const value = e.target.value
+                      formik.setFieldValue('probationPeriod', value)
+
+                      if (hireDate && value) {
+                        const start =
+                          typeof hireDate === 'string' && hireDate.includes('/Date')
+                            ? formatDateFromApi(hireDate)
+                            : new Date(hireDate)
+
+                        const endDate = new Date(start)
+                        endDate.setDate(endDate.getDate() + Number(value))
+
+                        formik.setFieldValue('probationEndDate', endDate)
+                      }
+                    }}
                     onClear={() => formik.setFieldValue('probationPeriod', '')}
                     error={formik.touched.probationPeriod && Boolean(formik.errors.probationPeriod)}
                   />
@@ -143,18 +160,13 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     required
                     onChange={(e, newValue) => {
                       let start = null
-                      let end = null
+                      let end = newValue ? new Date(newValue) : null
 
                       if (hireDate) {
-                        if (typeof hireDate === 'string' && hireDate.includes('/Date')) {
-                          start = formatDateFromApi(hireDate)
-                        } else {
-                          start = new Date(hireDate)
-                        }
-                      }
-
-                      if (newValue) {
-                        end = new Date(newValue)
+                        start =
+                          typeof hireDate === 'string' && hireDate.includes('/Date')
+                            ? formatDateFromApi(hireDate)
+                            : new Date(hireDate)
                       }
 
                       if (end && start) {
@@ -164,6 +176,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
 
                       formik.setFieldValue('probationEndDate', newValue)
                     }}
+                    maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('probationEndDate', '')}
                     error={formik.touched.probationEndDate && Boolean(formik.errors.probationEndDate)}
                   />
@@ -174,6 +187,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     label={labels.nextReviewDate}
                     value={formik.values?.nextReviewDate}
                     onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('nextReviewDate', '')}
                     error={formik.touched.nextReviewDate && Boolean(formik.errors.nextReviewDate)}
                   />
@@ -183,6 +197,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     name='termEndDate'
                     label={labels.termEndDate}
                     value={formik.values?.termEndDate}
+                    maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('termEndDate', '')}
                     error={formik.touched.termEndDate && Boolean(formik.errors.termEndDate)}
@@ -194,6 +209,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     label={labels.pyActiveDate}
                     value={formik.values?.pyActiveDate}
                     required
+                    maxAccess={maxAccess}
                     onChange={formik.setFieldValue}
                     onClear={() => formik.setFieldValue('pyActiveDate', '')}
                     error={formik.touched.pyActiveDate && Boolean(formik.errors.pyActiveDate)}
@@ -205,6 +221,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     label={labels.language}
                     datasetId={DataSets.LANGUAGE}
                     values={formik.values}
+                    maxAccess={maxAccess}
                     valueField='key'
                     displayField='value'
                     onChange={(event, newValue) => {
@@ -267,11 +284,12 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={PayrollRepository.CnssBranches.qry}
+                    endpointId={PayrollRepository.BankTransferFilters.qry}
                     name='ssBranchId'
                     label={labels.ssBranch}
                     valueField='recordId'
                     displayField='name'
+                    maxAccess={maxAccess}
                     values={formik.values}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('ssBranchId', newValue?.recordId || null)
@@ -287,6 +305,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
+                    maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       formik.setFieldValue('sponsorId', newValue?.recordId || null)
                     }}

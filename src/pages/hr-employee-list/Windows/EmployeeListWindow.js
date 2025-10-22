@@ -39,14 +39,12 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
       parameters: `_recordId=${recordId}&_asOfDate=${formatDateMDY(new Date())}`
     })
 
-    if (res?.record) {
-      setQuickView(res.record)
+    setQuickView(res?.record || {})
 
-      setStore(prev => ({
-        ...prev,
-        hireDate: res.record.hireDate
-      }))
-    }
+    setStore(prev => ({
+      ...prev,
+      hireDate: res?.record?.hireDate || null
+    }))
   }
 
   useEffect(() => {
@@ -118,7 +116,7 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
         </CustomTabPanel>
 
         <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
-          <AttachmentList resourceId={ResourceIds.EmployeeFilter} recordId={recordId} isNotTab={recordId} />
+          <AttachmentList resourceId={ResourceIds.Files} recordId={recordId} isNotTab={recordId} />
         </CustomTabPanel>
 
         <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>

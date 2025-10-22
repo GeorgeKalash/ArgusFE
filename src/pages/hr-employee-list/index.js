@@ -28,7 +28,7 @@ const EmployeeList = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.EmployeeList.page,
+    endpointId: EmployeeRepository.EmployeeChart.page,
     datasetId: ResourceIds.EmployeeFilter,
     filter: {
       filterFn: fetchWithFilter
@@ -38,18 +38,13 @@ const EmployeeList = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       const res = await getRequest({
-        extension: EmployeeRepository.EmployeeList.qry2,
+        extension: EmployeeRepository.EmployeeChart.qry2,
         parameters: `_filter=${filters.qry}&_branchId=0`
       })
-
+      
       if (res && res?.list) {
-        res.list = res?.list?.map(item => ({
+        res.list = res?.list.map(item => ({
           ...item,
-          ref: item?.parent.reference,
-          fullName: item?.parent.fullName,
-          department: item?.department?.name,
-          position: item?.position?.name,
-          branch: item?.branch?.name,
           hireDate: item?.parent?.hireDate
         }))
       }
@@ -64,18 +59,13 @@ const EmployeeList = () => {
     const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: EmployeeRepository.EmployeeList.page,
+      extension: EmployeeRepository.EmployeeChart.page,
       parameters: `_startAt=${_startAt}&_size=30&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
+      response.list = response.list.map(item => ({
         ...item,
-        ref: item?.parent.reference,
-        fullName: item?.parent.fullName,
-        department: item?.department?.name,
-        position: item?.position?.name,
-        branch: item?.branch?.name,
         hireDate: item?.parent?.hireDate
       }))
     }
@@ -91,27 +81,31 @@ const EmployeeList = () => {
       type: 'image'
     },
     {
-      field: 'ref',
+      field: 'parent.reference',
       headerName: labels.ref,
       flex: 1
     },
     {
-      field: 'fullName',
+      field: 'parent.fullName',
       headerName: labels.name,
-      flex: 1
+      flex: 1,
+      wrapText: true,
+      autoHeight: true
     },
     {
-      field: 'department',
+      field: 'department.name',
       headerName: labels.department,
       flex: 1
     },
     {
-      field: 'position',
+      field: 'position.name',
       headerName: labels.position,
-      flex: 1
+      flex: 1,
+      wrapText: true,
+      autoHeight: true
     },
     {
-      field: 'branch',
+      field: 'branch.name',
       headerName: labels.branch,
       flex: 1
     },

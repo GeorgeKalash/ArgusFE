@@ -16,7 +16,7 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import Form from 'src/components/Shared/Form'
 
-const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window }) => {
+const SkillsForm = ({ recordId, employeeId, labels, maxAccess, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -39,7 +39,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
     },
     validationSchema: yup.object({
       institution: yup.string().required(),
-      clId: yup.date().required(),
+      clId: yup.number().required(),
       grade: yup.string().required(),
       major: yup.string().required()
     }),
@@ -58,6 +58,8 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
       window.close()
     }
   })
+
+  const editMode = !!recordId
 
   const getData = async recordId => {
     const res = await getRequest({
@@ -101,6 +103,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 name='clId'
                 label={labels.level}
                 valueField='recordId'
+                maxAccess={maxAccess}
                 required
                 displayField='name'
                 values={formik.values}
@@ -115,6 +118,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 name='dateFrom'
                 label={labels.from}
                 value={formik.values?.dateFrom}
+                maxAccess={maxAccess}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('dateFrom', null)}
                 error={formik.touched.dateFrom && Boolean(formik.errors.dateFrom)}
@@ -126,6 +130,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 label={labels.to}
                 value={formik.values?.dateTo}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('dateTo', null)}
                 error={formik.touched.dateTo && Boolean(formik.errors.dateTo)}
               />
@@ -136,6 +141,7 @@ const SkillsForm = ({ recordId, employeeId, labels, maxAccess, editMode, window 
                 label={labels.remarks}
                 value={formik?.values?.remarks}
                 maxLength='100'
+                rows={2}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('remarks', '')}
