@@ -93,7 +93,6 @@ export default function DamageForm({ recordId, jobId }) {
     }),
     onSubmit: async obj => {
       const payload = {
-        pcs: obj.header.pcs || 0,
         header: {
           ...formik.values.header,
           date: formatDateToApi(obj.header.date),
@@ -133,7 +132,6 @@ export default function DamageForm({ recordId, jobId }) {
     }).then(jobRes => {
       formik.setValues({
         recordId: res?.header.recordId || null,
-        ...formik.values.header,
         header: {
           ...res?.header,
           date: formatDateFromApi(res?.header.date),
