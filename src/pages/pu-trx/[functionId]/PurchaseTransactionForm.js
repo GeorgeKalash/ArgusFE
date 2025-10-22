@@ -529,7 +529,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeight',
       props: {
         readOnly: true,
-        decimalScale: 3,
+        decimalScale: 3
       }
     },
     {
