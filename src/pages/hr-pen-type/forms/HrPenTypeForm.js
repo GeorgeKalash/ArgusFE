@@ -16,7 +16,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-export default function HrPenTypeForm({ labels, maxAccess, setStore, store, window }) {
+export default function HrPenTypeForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -73,7 +73,6 @@ export default function HrPenTypeForm({ labels, maxAccess, setStore, store, wind
       }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
-      window.close()
     }
   })
 

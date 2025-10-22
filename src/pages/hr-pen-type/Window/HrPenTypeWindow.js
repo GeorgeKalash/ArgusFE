@@ -4,7 +4,7 @@ import { useState } from 'react'
 import HrPenTypeForm from '../forms/HrPenTypeForm'
 import HrPenDetailForm from '../forms/HrPenDetailForm'
 
-const HrPenTypeWindow = ({ recordId, labels, access, window }) => {
+const HrPenTypeWindow = ({ recordId, labels, access }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -15,12 +15,12 @@ const HrPenTypeWindow = ({ recordId, labels, access, window }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
 
-      <CustomTabPanel index={0} value={activeTab}>
-        <HrPenTypeForm labels={labels} setStore={setStore} store={store} maxAccess={access} window={window} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
+        <HrPenTypeForm labels={labels} setStore={setStore} store={store} maxAccess={access} />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
         <HrPenDetailForm labels={labels} maxAccess={access} store={store} />
       </CustomTabPanel>
     </>

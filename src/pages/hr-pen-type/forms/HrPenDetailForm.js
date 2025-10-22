@@ -14,43 +14,47 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import Form from 'src/components/Shared/Form'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const conditions = {
+    amount: row => row?.amount,
+    actionName: row => row?.actionName,
+    deductionType: row => row?.deductionType,
+    expressionId: row => row?.expressionId
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
+    conditionSchema: ['items'],
     validationSchema: yup.object({
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            amount: yup.number().required(),
-            actionName: yup.string().required(),
-            deductionType: yup.number().required(),
-            expressionId: yup.number().required()
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
     initialValues: {
       damage: 1,
       items: [{ id: 1 }]
     },
     onSubmit: async values => {
-      const items = values?.items.map(({ id, expressionName, deductionTypeName, actionName, ...rest }, index) => ({
-        ...rest,
-        sequence: index + 1,
-        damage: values.damage,
-        ptId: recordId
-      }))
+      const items = values?.items
+        ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map(({ id, expressionName, deductionTypeName, actionName, ...rest }, index) => ({
+          ...rest,
+          sequence: index + 1,
+          damage: values.damage,
+          ptId: recordId
+        }))
 
       await postRequest({
         extension: PayrollRepository.PenaltyDetail.set2,
         record: JSON.stringify({
-          items: items
+          ...values,
+          ptId: recordId,
+          items
         })
       })
       toast.success(platformLabels.Edited)
@@ -114,7 +118,6 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
       label: labels.deductionAmount,
       name: 'amount',
       props: {
-        decimalScale: 2,
         allowNegative: false
       }
     },
@@ -144,7 +147,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
       <VertLayout>
         <Fixed>
           <Grid container>
-            <Grid item xs={4} p={2}>
+            <Grid item xs={4}>
               <ResourceComboBox
                 name='damage'
                 label={labels.damage}
