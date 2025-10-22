@@ -573,7 +573,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.exRate,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 5
                 },
                 name: 'exRate',
                 updateOn: 'blur',
@@ -595,7 +596,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.amount,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 2
                 },
                 name: 'amount',
                 updateOn: 'blur',
@@ -617,7 +619,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.baseAmount,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 2
                 },
                 name: 'baseAmount',
                 updateOn: 'blur',
