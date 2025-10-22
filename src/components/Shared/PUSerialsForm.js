@@ -20,7 +20,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 export const PUSerialsForm = ({ row, siteId, window, updateRow, disabled }) => {
   const { platformLabels } = useContext(ControlContext)
 
-  const { labels, maxAccess } = useResourceQuery({
+  const { labels, access: maxAccess } = useResourceQuery({
     datasetId: ResourceIds.Serial
   })
 
