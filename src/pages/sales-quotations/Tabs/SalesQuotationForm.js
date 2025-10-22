@@ -169,13 +169,13 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       clientId: yup
         .string()
         .nullable()
-        .test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
+        .test(function (value) {
           return this.parent.bpId ? true : !!value
         }),
       bpId: yup
         .string()
         .nullable()
-        .test('bpId-required', 'Lead is required if clientId is empty', function (value) {
+        .test(function (value) {
           return this.parent.clientId ? true : !!value
         }),
 
