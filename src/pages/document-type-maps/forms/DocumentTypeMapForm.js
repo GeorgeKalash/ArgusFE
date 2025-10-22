@@ -127,7 +127,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 parameters={
                   formik.values.fromFunctionId &&
                   (formik.values.fromFunctionId
-                    ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${1000}`
+                    ? `_dgId=${editMode ? '0' : formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${1000}`
                     : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
                 maxAccess={maxAccess}
