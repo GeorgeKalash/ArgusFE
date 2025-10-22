@@ -82,8 +82,8 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <SalaryTab
           labels={labels}
           maxAccess={maxAccess}
@@ -97,7 +97,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           saveWholePack={saveWholePack}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={1} value={activeTab}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <EntitlementsTab
           labels={labels}
           maxAccess={maxAccess}
@@ -107,7 +107,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           refetchSalaryTab={refetchSalaryTab}
         />
       </CustomTabPanel>
-      <CustomTabPanel index={2} value={activeTab}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <DeductionsTab
           labels={labels}
           maxAccess={maxAccess}
