@@ -19,7 +19,7 @@ import { Module } from 'src/resources/Module'
 import { ControlContext } from 'src/providers/ControlContext'
 import Form from 'src/components/Shared/Form'
 
-export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, setWindowOpen }) {
+export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, recordId, window: w }) {
   const [responseValue, setResponseValue] = useState(null)
   const { platformLabels } = useContext(ControlContext)
 
@@ -66,7 +66,6 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
         !functionId && !seqNo && !obj.recordId && responseValue !== null ? platformLabels.Added : platformLabels.Edited
       )
 
-      setWindowOpen(false)
       invalidate()
     }
   })
@@ -91,7 +90,9 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
       props: {
         fullScreen: false,
         responseValue: responseValue,
+        w,
         onConfirm: () => {
+          console.log('submit')
           formik.submitForm()
         }
       }

@@ -23,6 +23,7 @@ import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { formatDateForGetApI } from 'src/lib/date-helper'
+import ApprovalsTable from 'src/components/Shared/ApprovalsTable'
 
 const Frame = styled.div`
   display: flex;
@@ -152,10 +153,9 @@ const DashboardLayout = () => {
       })
       setApplets(appletsRes.list)
 
-      const [resDashboard, resSP, resDR, resTV, resTimeCode] = await Promise.all([
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
         getRequest({ extension: DashboardRepository.dashboard }),
         getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
-        getRequest({ extension: DocumentReleaseRepository.DocumentsOnHold.qry3 }),
         getRequest({
           extension: TimeAttendanceRepository.ResetTV.qry2,
           parameters: `_dayId=${formatDateForGetApI(new Date())}`
@@ -185,7 +185,6 @@ const DashboardLayout = () => {
       setData({
         dashboard: resDashboard?.record,
         sp: resSP?.record,
-        authorization: resDR,
         hr: {
           timeVariationDetails: resTV.list || [],
           tabs: filteredTabs,
@@ -212,6 +211,18 @@ const DashboardLayout = () => {
   return (
     <Frame>
       <Container>
+        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.authorization}</Title>
+              </SummaryCard>
+              <Box sx={{ display: 'flex', height: '350px' }}>
+                <ApprovalsTable pageSize={10} />
+              </Box>
+            </ChartCard>
+          </TopRow>
+        )}
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <TopRow>
             <ChartCard>
@@ -492,6 +503,7 @@ const DashboardLayout = () => {
               )}
             </SummaryGrid>
           )}
+
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
             <ChartCard>
               <SummaryCard>
@@ -590,39 +602,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.authorization}</Title>
-              </SummaryCard>
-              <Box sx={{ display: 'flex', height: '350px' }}>
-                <Table
-                  name='table'
-                  columns={[
-                    {
-                      field: 'reference',
-                      headerName: labels.reference,
-                      flex: 1
-                    },
-                    {
-                      field: 'functionName',
-                      headerName: labels.functionName,
-                      flex: 1
-                    },
-                    {
-                      field: 'thirdParty',
-                      headerName: labels.thirdParty,
-                      flex: 1
-                    }
-                  ]}
-                  gridData={data?.authorization}
-                  rowId={['recordId']}
-                  pagination={false}
-                  maxAccess={access}
-                />
-              </Box>
-            </ChartCard>
-          )}
+
           {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
             <ChartCard>
               <SummaryCard>
