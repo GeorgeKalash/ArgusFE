@@ -14,6 +14,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import JobOrderWizardForm from './Forms/JobOrderWizardForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const JobOrderWizard = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,11 +22,11 @@ const JobOrderWizard = () => {
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.JobOrderWizard.page,
-      parameters: `_filter=&_startAt=${_startAt}&&_pageSize=${_pageSize}`
+      parameters: `_filter=&_startAt=${_startAt}&&_pageSize=${_pageSize}&_params=${params}`
     })
 
     if (response && response?.list) {
@@ -38,44 +39,44 @@ const JobOrderWizard = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: ManufacturingRepository.JobOrderWizard.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    if (response && response?.list) {
-      response.list = response?.list?.map(item => ({
-        ...item,
-        producedWeight: item.pcs * item.avgWeight
-      }))
-    }
+  async function fetchWithFilter({ filters, pagination }) {
+    let response = null
+    if (filters.qry) {
+      response = await getRequest({
+        extension: ManufacturingRepository.JobOrderWizard.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+      if (response && response?.list) {
+        response.list = response?.list?.map(item => ({
+          ...item,
+          producedWeight: item.pcs * item.avgWeight
+        }))
+      }
+    } else response = fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
 
     return response
   }
 
   const {
     query: { data },
-    labels,
-    search,
-    clear,
-    paginationParameters,
+    filterBy,
     refetch,
+    labels,
     access,
+    paginationParameters,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.JobOrderWizard.page,
     datasetId: ResourceIds.JobOrderWizard,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.JobOrderWizard,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -158,17 +159,11 @@ const JobOrderWizard = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          labels={labels}
-          inputSearch={true}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFJOZ'} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

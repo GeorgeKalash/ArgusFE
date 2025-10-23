@@ -22,11 +22,20 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { getStorageData } from 'src/storage/storage'
+import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const userData = getStorageData('userData').userId
+
+  const { documentType, maxAccess, changeDT } = useDocumentType({
+    functionId: SystemFunction.JobOrderWizard,
+    access: access,
+    enabled: !recordId,
+    objectName: 'header'
+  })
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.JobOrderWizard.page
@@ -34,9 +43,12 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
 
   const { formik } = useForm({
     maxAccess: access,
+    documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues: {
       recordId,
       header: {
+        dtId: null,
+        reference: '',
         recordId: null,
         jobId: null,
         avgWeight: 0,
@@ -286,7 +298,61 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={SystemRepository.DocumentType.qry}
+                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JobOrderWizard}`}
+                name='header.dtId'
+                readOnly={editMode}
+                label={labels.documentType}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values.header}
+                displayFieldWidth={2}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  const recordId = newValue ? newValue.recordId : null
+
+                  if (newValue) {
+                    formik.setFieldValue('header.dtId', recordId)
+                  } else {
+                    formik.setFieldValue('header.dtId', null)
+                  }
+                  changeDT(newValue)
+                }}
+                error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='header.reference'
+                label={labels.reference}
+                value={formik?.values?.header?.reference}
+                maxAccess={!editMode && maxAccess}
+                readOnly={editMode}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.reference', '')}
+                error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomDatePicker
+                name='header.date'
+                label={labels.date}
+                readOnly={isPosted}
+                value={formik?.values?.header.date}
+                onChange={formik.setFieldValue}
+                required
+                maxAccess={access}
+                onClear={() => formik.setFieldValue('header.date', null)}
+                error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
+              />
+            </Grid>
+            <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={ManufacturingRepository.MFJobOrder.qry2}
                 name='header.jobId'
@@ -295,12 +361,13 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'date', value: 'Date', type: 'date' },
-                  { key: 'sku', value: 'sku' },
-                  { key: 'itemName', value: 'Item Name' },
-                  { key: 'productionLineName', value: 'Production Line' }
+                  { key: 'reference', value: 'Reference', width: 1 },
+                  { key: 'date', value: 'Date', type: 'date', width: 1 },
+                  { key: 'sku', value: 'sku', width: 1 },
+                  { key: 'itemName', value: 'Item Name', width: 2 },
+                  { key: 'productionLineName', value: 'Prod Line', width: 1 }
                 ]}
+                displayFieldWidth={2.5}
                 required
                 readOnly={editMode}
                 maxAccess={access}
@@ -316,20 +383,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 error={formik?.touched?.header?.jobId && Boolean(formik?.errors?.header?.jobId)}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomDatePicker
-                name='header.date'
-                label={labels.date}
-                readOnly={isPosted}
-                value={formik?.values?.header.date}
-                onChange={formik.setFieldValue}
-                required
-                maxAccess={access}
-                onClear={() => formik.setFieldValue('header.date', null)}
-                error={formik?.touched?.header?.date && Boolean(formik?.errors?.header?.date)}
-              />
-            </Grid>
-            <Grid item xs={12}>
+
+            <Grid item xs={8}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='header.itemId'
@@ -343,7 +398,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='header.expectedPcs'
                 label={labels.expectedPcs}
@@ -352,7 +407,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 readOnly
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='header.pcs'
                 label={labels.producedPcs}
@@ -365,7 +420,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 error={formik?.touched?.header?.pcs && Boolean(formik?.errors?.header?.pcs)}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='header.avgWeight'
                 label={labels.avgWeight}
@@ -374,8 +429,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 readOnly
               />
             </Grid>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={12}>
+            <Grid item xs={8}>
               <ResourceLookup
                 endpointId={InventoryRepository.SFSKU.snapshot}
                 name='header.sfItemId'
@@ -387,6 +441,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 required
                 secondValueShow='sfItemName'
                 formObject={formik.values.header}
+                displayFieldWidth={2}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.sfItemId', newValue?.recordId || null)
                   formik.setFieldValue('header.sfItemSku', newValue?.sku || '')
@@ -396,7 +451,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 maxAccess={access}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <CustomNumberField
                 name='header.producedWeight'
                 label={labels.producedWeight}
