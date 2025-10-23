@@ -1513,14 +1513,14 @@ export default function SaleTransactionForm({
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: parseFloat(currentDiscount) || 0,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
-      hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdPct: tdPct || 0,
+      hiddenTdAmount: parseFloat(tdAmount) || 0,
       typeChange: typeChange
     })
     formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
@@ -1748,7 +1748,7 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (parseFloat(formik.values?.header?.tdPct || 0) * parseFloat(subtotal)) / 100
       recalcGridVat(
         formik.values.header.tdType,
         formik.values.header.tdPct,
