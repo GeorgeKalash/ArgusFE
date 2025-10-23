@@ -29,11 +29,23 @@ const HiringTab = ({ labels, maxAccess, store }) => {
     endpointId: EmployeeRepository.EmployeeChart.page
   })
 
+  function normalizeDate(date) {
+    if (!date) return null
+    if (typeof date === 'string' && date.includes('/Date')) {
+      return formatDateFromApi(date)
+    }
+
+    return new Date(date)
+  }
+  
+  const normalizedHireDate = normalizeDate(hireDate)
+
   const { formik } = useForm({
     initialValues: {
       recordId,
       employeeId: recordId,
-      probationEndDate: hireDate,
+      probationEndDate: normalizedHireDate,
+      pyActiveDate: normalizedHireDate,
       nextReviewDate: null,
       npId: null,
       termEndDate: null,
@@ -41,7 +53,6 @@ const HiringTab = ({ labels, maxAccess, store }) => {
       recruitmentCost: null,
       pyReference: '',
       taReference: '',
-      pyActiveDate: hireDate,
       ssBranchId: null,
       probationPeriod: 0,
       sponsorId: null,
@@ -94,8 +105,8 @@ const HiringTab = ({ labels, maxAccess, store }) => {
           formik.setFieldValue('probationEndDate', hireDate ? formatDateFromApi(hireDate) : null)
           formik.setFieldValue('pyActiveDate', hireDate ? formatDateFromApi(hireDate) : null)
         } else {
-          formik.setFieldValue('probationEndDate', hireDate)
-          formik.setFieldValue('pyActiveDate', hireDate)
+          formik.setFieldValue('probationEndDate', normalizedHireDate)
+          formik.setFieldValue('pyActiveDate', normalizedHireDate)
         }
       }
     })()
