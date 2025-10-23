@@ -211,18 +211,6 @@ const DashboardLayout = () => {
   return (
     <Frame>
       <Container>
-        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <TopRow>
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.authorization}</Title>
-              </SummaryCard>
-              <Box sx={{ display: 'flex', height: '350px' }}>
-                <ApprovalsTable pageSize={10} />
-              </Box>
-            </ChartCard>
-          </TopRow>
-        )}
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <TopRow>
             <ChartCard>
@@ -541,6 +529,18 @@ const DashboardLayout = () => {
                 label={labels.monthlySales}
               />
             </ChartCard>
+          )}
+          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+            <TopRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.authorization}</Title>
+                </SummaryCard>
+                <Box sx={{ display: 'flex', height: '350px' }}>
+                  <ApprovalsTable pageSize={10} />
+                </Box>
+              </ChartCard>
+            </TopRow>
           )}
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
             <ChartCard>
