@@ -32,7 +32,7 @@ const WindowToolbar = ({
   previewBtnClicked,
   maxAccess,
   onPrint,
-  expand,
+  size,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -136,7 +136,7 @@ const WindowToolbar = ({
             reportStore={reportStore}
             getReportLayout={getReportLayout}
             recordId={recordId}
-            expand={expand}
+            size={size}
             previewBtnClicked={previewBtnClicked}
           />
         ) : (

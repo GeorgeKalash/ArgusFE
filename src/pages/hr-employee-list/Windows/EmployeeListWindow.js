@@ -98,6 +98,7 @@ const EmployeeListWindow = ({ recordId, labels, maxAccess }) => {
             store={store}
             setStore={setStore}
             labels={labels}
+            getData={getData}
             maxAccess={maxAccess}
             imageUploadRef={imageUploadRef}
           />

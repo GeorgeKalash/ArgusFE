@@ -20,9 +20,8 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => {
+const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -110,6 +109,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
         await imageUploadRef.current.submit()
       }
       invalidate()
+      getData(res.recordId)
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
     }
   })
@@ -153,7 +153,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      expand={true}
+      size={5}
       previewReport={editMode}
       actions={actions}
     >
@@ -264,24 +264,26 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef }) => 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
+                  <CustomTextField
                     name='mobile'
                     label={labels.mobile}
                     value={formik.values.mobile}
                     maxAccess={maxAccess}
                     maxLength={15}
+                    phone={true}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('mobile', null)}
                     error={formik.touched.mobile && Boolean(formik.errors.mobile)}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
+                  <CustomTextField
                     name='phone'
                     label={labels.homePhone}
                     value={formik.values.phone}
                     maxAccess={maxAccess}
                     maxLength={15}
+                    phone={true}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('phone', null)}
                     error={formik.touched.phone && Boolean(formik.errors.phone)}

@@ -15,7 +15,7 @@ import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import Form from 'src/components/Shared/Form'
 
-const UserDefinedTab = ({  maxAccess, store }) => {
+const UserDefinedTab = ({ maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId } = store
@@ -119,26 +119,25 @@ const UserDefinedTab = ({  maxAccess, store }) => {
 
       case 3:
         return (
-          <CustomDateTimePicker
-            key={fieldId}
-            name={String(fieldId)}
-            label={field.name}
-            maxAccess={maxAccess}
-            value={value ? new Date(value) : null}
-            onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
-            onClear={() => formik.setFieldValue(String(fieldId), '')}
-          />
-        )
-
-      case 4:
-        return (
           <CustomDatePicker
             key={fieldId}
             name={String(fieldId)}
             label={field.name}
             maxAccess={maxAccess}
             value={value ? new Date(value) : null}
-            onChange={(name, newValue) => formik.setFieldValue(String(fieldId), newValue?.toISOString() || '')}
+            onChange={(_, newValue) => formik.setFieldValue(String(fieldId), newValue || '')}
+            onClear={() => formik.setFieldValue(String(fieldId), '')}
+          />
+        )
+      case 4:
+        return (
+          <CustomDateTimePicker
+            key={fieldId}
+            name={String(fieldId)}
+            label={field.name}
+            maxAccess={maxAccess}
+            value={value ? new Date(value) : null}
+            onChange={(_, newValue) => formik.setFieldValue(String(fieldId), newValue || '')}
             onClear={() => formik.setFieldValue(String(fieldId), '')}
           />
         )
