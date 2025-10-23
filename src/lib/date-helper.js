@@ -162,7 +162,7 @@ export function formatDateMDY(date) {
 }
 
 // from yyyymmdd to Day, Month dd, yyyy
-export function formatDayId(dayId) {
+const formatDayId = (dayId) => {
   if (!dayId || dayId.length !== 8) return dayId
   const year = dayId.slice(0, 4)
   const month = dayId.slice(4, 6)
@@ -183,5 +183,6 @@ export {
   formatDate,
   formatDateTimeDefault,
   formatDateToISO,
-  formatDateTimeForGetAPI
+  formatDateTimeForGetAPI,
+  formatDayId
 }
