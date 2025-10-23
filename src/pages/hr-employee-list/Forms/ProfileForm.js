@@ -153,7 +153,7 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      size={5}
+      reportSize={5}
       previewReport={editMode}
       actions={actions}
     >
