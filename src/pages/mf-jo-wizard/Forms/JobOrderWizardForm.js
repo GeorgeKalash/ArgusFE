@@ -21,14 +21,12 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { getStorageData } from 'src/storage/storage'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const userData = getStorageData('userData').userId
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrderWizard,
@@ -123,14 +121,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       refetchForm(res?.recordId)
     }
   })
-
-  const getDefaultDT = async () => {
-    const res = await getRequest({
-      extension: SystemRepository.UserFunction.get,
-      parameters: `_userId=${userData}&_functionId=${SystemFunction.JobOrderWizard}`
-    })
-    formik.setFieldValue('header.dtId', res?.record?.dtId)
-  }
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
@@ -249,16 +239,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
 
     return returned + returnedValue
   }, 0)
-
-  useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        await refetchForm(recordId)
-      } else {
-        await getDefaultDT()
-      }
-    })()
-  }, [])
 
   const actions = [
     {
