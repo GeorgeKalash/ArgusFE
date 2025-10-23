@@ -58,9 +58,9 @@ export default function SalaryTab({
       accountNumber: null,
       comments: '',
       basicAmount: '',
-      finalAmount: '',
-      eAmount: '',
-      dAmount: ''
+      finalAmount: null,
+      eAmount: null,
+      dAmount: null
     },
     validationSchema: yup.object({
       currencyId: yup.number().required(),
@@ -104,8 +104,7 @@ export default function SalaryTab({
           extension: EmployeeRepository.EmployeeSalary.set,
           record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
         })
-        const actionMessage = obj.recordId ? platformLabels.Edited : platformLabels.Added
-        toast.success(actionMessage)
+        toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
         invalidate()
         getSalaryInfo(res?.recordId)
         if (!obj.recordId)
@@ -119,24 +118,20 @@ export default function SalaryTab({
   const editMode = !!formik?.values?.recordId
 
   async function updateAmountFields(basicAmount) {
-    const totalEN = recordId ? (basicAmount != 0 ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
+    const totalEN = recordId ? (!basicAmount ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
+    const totalDE = recordId ? (!basicAmount ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0) : 0
+    const finalAmount = !basicAmount ? totalEN - totalDE + basicAmount : 0
 
-    const totalDE = recordId
-      ? basicAmount != 0
-        ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN)
-        : 0
-      : 0
+    setSalaryInfo(prev => ({
+      ...prev,
+      basicAmount: basicAmount || 0
+    }))
+    reCalcNewAmounts(basicAmount, totalEN)
 
-    const finalAmount = basicAmount != 0 ? totalEN - totalDE + basicAmount : 0
-    formik.setFieldValue('basicAmount', basicAmount)
     formik.setFieldValue('finalAmount', parseFloat(finalAmount).toFixed(2))
     formik.setFieldValue('eAmount', parseFloat(totalEN).toFixed(2))
     formik.setFieldValue('dAmount', parseFloat(totalDE).toFixed(2))
-    reCalcNewAmounts(basicAmount, totalEN)
-    setSalaryInfo(prev => ({
-      ...prev,
-      basicAmount
-    }))
+    formik.setFieldValue('basicAmount', basicAmount)
   }
 
   async function getSalaryInfo(recordId) {
@@ -173,7 +168,14 @@ export default function SalaryTab({
         let lastSalary = null
 
         if (res?.list?.length > 0) {
-          lastSalary = res.list.sort((a, b) => new Date(a.effectiveDate) - new Date(b.effectiveDate)).at(-1)
+          lastSalary = res.list
+            .sort((a, b) => {
+              const dateA = new Date(parseInt(a.effectiveDate.match(/\d+/)[0]))
+              const dateB = new Date(parseInt(b.effectiveDate.match(/\d+/)[0]))
+
+              return dateA - dateB
+            })
+            .at(-1)
 
           const updatedSalary = {
             ...lastSalary,
@@ -218,7 +220,7 @@ export default function SalaryTab({
               values={formik.values}
               required
               maxAccess={maxAccess}
-              onChange={(_, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || '')}
+              onChange={(_, newValue) => formik.setFieldValue('currencyId', newValue?.recordId || null)}
               error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
             />
           </Grid>
@@ -277,12 +279,12 @@ export default function SalaryTab({
               name='basicAmount'
               label={labels.basicAmount}
               value={formik?.values?.basicAmount}
-              onChange={e => updateAmountFields(Number(e.target.value.replace(/,/g, '')))}
+              onChange={e => updateAmountFields(e?.target?.value ? Number(e.target.value.replace(/,/g, '')) : null)}
               required
               maxLength={10}
               maxAccess={maxAccess}
               allowNegative={false}
-              onClear={() => updateAmountFields(0)}
+              onClear={() => updateAmountFields(null)}
               error={formik.touched.basicAmount && Boolean(formik.errors.basicAmount)}
             />
           </Grid>
@@ -310,7 +312,7 @@ export default function SalaryTab({
               readOnly
               maxAccess={maxAccess}
               onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('finalAmount', '')}
+              onClear={() => formik.setFieldValue('finalAmount', null)}
               error={formik.touched.finalAmount && Boolean(formik.errors.finalAmount)}
             />
           </Grid>
@@ -324,7 +326,7 @@ export default function SalaryTab({
               values={formik.values}
               maxAccess={maxAccess}
               required
-              onChange={(event, newValue) => formik.setFieldValue('paymentFrequency', newValue?.key || null)}
+              onChange={(_, newValue) => formik.setFieldValue('paymentFrequency', newValue?.key || null)}
               error={formik.touched.paymentFrequency && Boolean(formik.errors.paymentFrequency)}
             />
           </Grid>
@@ -336,7 +338,7 @@ export default function SalaryTab({
               onChange={formik.handleChange}
               readOnly
               maxAccess={maxAccess}
-              onClear={() => formik.setFieldValue('eAmount', '')}
+              onClear={() => formik.setFieldValue('eAmount', null)}
               error={formik.touched.eAmount && Boolean(formik.errors.eAmount)}
             />
           </Grid>
@@ -368,7 +370,7 @@ export default function SalaryTab({
               onChange={formik.handleChange}
               readOnly
               maxAccess={maxAccess}
-              onClear={() => formik.setFieldValue('dAmount', '')}
+              onClear={() => formik.setFieldValue('dAmount', null)}
               error={formik.touched.dAmount && Boolean(formik.errors.dAmount)}
             />
           </Grid>

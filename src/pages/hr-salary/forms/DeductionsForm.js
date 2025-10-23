@@ -93,7 +93,8 @@ export default function DeductionsForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount: Number(fixedAmount) || res?.record?.fixedAmount,
+          fixedAmount:
+            parseFloat(Number(fixedAmount || 0)).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
           isPct: res?.record?.pct > 0
         })
       }
@@ -166,7 +167,7 @@ export default function DeductionsForm({
               onBlur={e => {
                 let pctValue = Number(e.target.value)
                 const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
-                formik.setFieldValue('fixedAmount', amount)
+                formik.setFieldValue('fixedAmount', parseFloat(amount || 0).toFixed(2))
                 formik.setFieldValue('pct', pctValue)
               }}
               maxAccess={maxAccess}
@@ -179,7 +180,7 @@ export default function DeductionsForm({
               name='fixedAmount'
               label={labels.amount}
               value={formik.values.fixedAmount}
-              onChange={formik.handleChange}
+              onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(Number(e?.target?.value || 0)).toFixed(2))}
               required
               maxAccess={maxAccess}
               readOnly={formik.values.isPct}
