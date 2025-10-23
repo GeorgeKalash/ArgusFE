@@ -644,6 +644,12 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'Preview',
+    label: platformLabels.PreviewDays,
+    color: '#231f20',
+    main: false
+  },
+  {
     key: 'History',
     label: platformLabels.History,
     color: '#231f20',
