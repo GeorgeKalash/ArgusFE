@@ -138,7 +138,7 @@ const JobOrderWizard = () => {
       props: {
         labels,
         recordId,
-        maxAccess: access
+        access
       },
       width: 1000,
       height: 700,

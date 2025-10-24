@@ -264,6 +264,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
   const producedWeight = formik.values.header.pcs * formik.values.header.avgWeight
   const totalUsedSemiFinished = producedWeight - totalConsumed
 
+  useEffect(() => {
+    if (recordId) refetchForm(recordId)
+  }, [])
+
   return (
     <FormShell
       resourceId={ResourceIds.JobOrderWizard}
