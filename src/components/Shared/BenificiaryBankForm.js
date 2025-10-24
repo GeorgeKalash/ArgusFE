@@ -47,6 +47,7 @@ export default function BenificiaryBankForm({
   submitMainForm = true,
   forceDisable,
   recordId,
+  forceEditMode = null,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -107,7 +108,6 @@ export default function BenificiaryBankForm({
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    validateOnChange: true,
     validationSchema: yup.object({
       clientId: yup.string().required(),
       countryId: yup.string().required(),
@@ -191,11 +191,11 @@ export default function BenificiaryBankForm({
     }
   })
 
-  const editMode = !!formik.values.recordId
+  const editMode = forceEditMode == null ? !!formik.values.recordId : forceEditMode
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (recordId && client?.clientId && beneficiary?.beneficiaryId && beneficiary?.beneficiarySeqNo) {
         const RTBEB = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryBank.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -212,11 +212,7 @@ export default function BenificiaryBankForm({
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
 
-          recordId:
-            (RTBEN?.record.clientId * 100).toString() +
-            (RTBEN?.record.beneficiaryId * 10).toString() +
-            RTBEN?.record?.seqNo,
-          dispersalType: dispersalType,
+          recordId,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
           isInactive: RTBEN?.record?.isInactive,
@@ -258,7 +254,7 @@ export default function BenificiaryBankForm({
         formik.setValues(obj)
       }
     })()
-  }, [])
+  }, [recordId])
 
   useEffect(() => {
     ;(async function () {

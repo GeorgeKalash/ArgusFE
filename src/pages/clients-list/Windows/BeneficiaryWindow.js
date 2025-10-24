@@ -120,7 +120,11 @@ const BeneficiaryWindow = ({ clientId }) => {
           dispersalType: dispersalType,
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
-          countryId: nationalityId
+          countryId: nationalityId,
+          recordId:
+            obj?.clientId && obj?.beneficiaryId && obj?.seqNo
+              ? (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj.seqNo
+              : null
         }
       })
     } else if (dispersalType === 2) {
@@ -131,7 +135,11 @@ const BeneficiaryWindow = ({ clientId }) => {
           dispersalType: dispersalType,
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
-          countryId: nationalityId
+          countryId: nationalityId,
+          recordId:
+            obj?.clientId && obj?.beneficiaryId && obj?.seqNo
+              ? (obj.clientId * 100).toString() + (obj.beneficiaryId * 10).toString() + obj.seqNo
+              : null
         }
       })
     }
