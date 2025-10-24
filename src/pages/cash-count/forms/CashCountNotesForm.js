@@ -55,7 +55,7 @@ export default function CashCountNotesForm({
         }))
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
-        return acc + (subTotal || 0)
+        return acc + (Number(subTotal) || 0)
       }, 0)
 
       forceNoteCount
@@ -123,7 +123,7 @@ export default function CashCountNotesForm({
   }
 
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
-    return acc + (subTotal || 0)
+    return acc + (Number(subTotal) || 0)
   }, 0)
 
   function sumQty({ update, newRow }) {
