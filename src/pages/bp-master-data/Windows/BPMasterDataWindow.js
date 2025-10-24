@@ -6,6 +6,7 @@ import IDNumberForm from '../forms/IDNumberForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import RolesTab from '../forms/RolesTab'
 
 const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -20,7 +21,8 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
     { label: labels.general },
     { label: labels.idNumber, disabled: !editMode },
     { label: labels.relation, disabled: !editMode },
-    { label: labels.address, disabled: !editMode }
+    { label: labels.address, disabled: !editMode },
+    { label: labels.role, disabled: !editMode }
   ]
 
   return (
@@ -43,6 +45,9 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
       </CustomTabPanel>
       <CustomTabPanel index={3} height={height} value={activeTab} maxAccess={maxAccess}>
         <AddressMasterDataForm store={store} setStore={setStore} />
+      </CustomTabPanel>
+      <CustomTabPanel index={4} height={height} value={activeTab} maxAccess={maxAccess}>
+        <RolesTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </VertLayout>
   )

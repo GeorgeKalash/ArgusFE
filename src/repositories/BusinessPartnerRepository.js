@@ -84,5 +84,11 @@ export const BusinessPartnerRepository = {
     get: service + 'getROL',
     set: service + 'setROL',
     del: service + 'delROL'
+  },
+  MasterDataRole: {
+    qry: service + 'qryMRO',
+    del: service + 'delMRO',
+    get: service + 'getMRO',
+    set: service + 'setMRO'
   }
 }
