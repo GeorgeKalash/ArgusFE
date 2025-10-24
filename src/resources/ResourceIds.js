@@ -594,8 +594,9 @@ export const ResourceIds = {
   Files: 71209,
   FinancialStatementsReport: 30405,
   BatchWorksheet: 42345,
-  ProcessNotifications:76102,
-
+  ProcessNotifications: 76102,
+  LeaveRequestODOM: 73201,
+  
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
