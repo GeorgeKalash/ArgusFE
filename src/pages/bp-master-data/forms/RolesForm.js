@@ -55,7 +55,7 @@ const RolesForm = ({ roleId, recordId, labels, window, maxAccess }) => {
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container gap={2}>
+          <Grid container>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={BusinessPartnerRepository.Role.qry}
@@ -71,7 +71,7 @@ const RolesForm = ({ roleId, recordId, labels, window, maxAccess }) => {
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik && formik.setFieldValue('roleId', newValue?.recordId || null)
+                  formik.setFieldValue('roleId', newValue?.recordId || null)
                 }}
                 error={formik.touched.roleId && Boolean(formik.errors.roleId)}
               />
