@@ -76,8 +76,7 @@ export default function EntitlementForm({
         })
       })
       refetchSalaryTab.current = true
-      const actionMessage = obj.salaryId ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
+      toast.success(obj.salaryId ? platformLabels.Edited : platformLabels.Added)
       window.close()
       invalidate()
     }
@@ -92,8 +91,7 @@ export default function EntitlementForm({
         })
         formik.setValues({
           ...res?.record,
-          fixedAmount:
-            parseFloat(Number(fixedAmount || 0)).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
+          fixedAmount: parseFloat(fixedAmount || 0).toFixed(2) || parseFloat(res?.record?.fixedAmount || 0).toFixed(2),
           isPct: res?.record?.pct > 0
         })
       }
@@ -103,7 +101,7 @@ export default function EntitlementForm({
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={EmployeeRepository.EmployeeDeduction.qry}

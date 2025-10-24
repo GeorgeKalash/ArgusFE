@@ -9,7 +9,6 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import SalaryForm from './forms/SalaryForm'
-import { formatDateFromApi } from 'src/lib/date-helper'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 export default function HrSalary() {
@@ -42,7 +41,7 @@ export default function HrSalary() {
       branchName: record?.branch?.name || null,
       scName: record?.scName || null,
       scTypeName: record?.scTypeName || null,
-      hireDate: record?.parent?.hireDate ? formatDateFromApi(record?.parent?.hireDate) : null
+      hireDate: record?.parent?.hireDate || null
     }))
   }
 
@@ -132,7 +131,9 @@ export default function HrSalary() {
     stack({
       Component: SalaryForm,
       props: {
-        employeeInfo
+        employeeInfo,
+        maxAccess: access,
+        labels
       },
       width: 1000,
       height: 700,

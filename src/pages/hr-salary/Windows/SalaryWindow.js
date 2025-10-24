@@ -10,7 +10,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 
-export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo }) {
+export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo, window }) {
   const { getRequest } = useContext(RequestsContext)
 
   const [activeTab, setActiveTab] = useState(0)
@@ -31,7 +31,8 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
     enabled: !!(recordId && store.currency),
     datasetId: ResourceIds.Salaries,
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.SalaryDetails.qry
+    endpointId: EmployeeRepository.SalaryDetails.qry,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   async function fetchGridData() {
@@ -95,6 +96,7 @@ export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo
           refetchSalaryTab={refetchSalaryTab}
           reCalcNewAmounts={reCalcNewAmounts}
           saveWholePack={saveWholePack}
+          window={window}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>

@@ -30,7 +30,8 @@ export default function SalaryTab({
   data,
   refetchSalaryTab,
   reCalcNewAmounts,
-  saveWholePack
+  saveWholePack,
+  window
 }) {
   const { recordId } = store
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -99,6 +100,7 @@ export default function SalaryTab({
         toast.success(platformLabels.Edited)
         invalidate()
         saveWholePack.current = false
+        window.close()
       } else {
         const res = await postRequest({
           extension: EmployeeRepository.EmployeeSalary.set,
@@ -112,6 +114,7 @@ export default function SalaryTab({
             ...prevStore,
             recordId: res?.recordId
           }))
+        else window.close()
       }
     }
   })
@@ -120,7 +123,7 @@ export default function SalaryTab({
   async function updateAmountFields(basicAmount) {
     const totalEN = recordId ? (!basicAmount ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
     const totalDE = recordId ? (!basicAmount ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0) : 0
-    const finalAmount = !basicAmount ? totalEN - totalDE + basicAmount : 0
+    const finalAmount = basicAmount ? totalEN - totalDE + basicAmount : 0
 
     setSalaryInfo(prev => ({
       ...prev,

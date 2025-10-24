@@ -18,21 +18,20 @@ import { getFormattedNumber } from 'src/lib/numberField-helper'
 import SalaryWindow from '../Windows/SalaryWindow'
 import { useWindow } from 'src/windows'
 
-export default function SalaryForm({ employeeInfo }) {
+export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   const {
     query: { data },
-    labels,
     refetch,
-    invalidate,
-    access: maxAccess
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: EmployeeRepository.EmployeeSalary.qry,
-    datasetId: ResourceIds.Salaries
+    datasetId: ResourceIds.Salaries,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const { formik } = useForm({
