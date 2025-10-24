@@ -1336,6 +1336,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     endpointId={SaleRepository.SalesPerson.qry}
                     name='spId'
                     label={labels.salesPerson}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     columnsInDropDown={[
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
