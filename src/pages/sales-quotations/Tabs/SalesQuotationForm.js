@@ -163,13 +163,22 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     documentType: { key: 'dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues,
-    validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
       date: yup.string().required(),
-      clientId: yup.string().test('clientId-required', 'Client ID is required if bpId is empty', function (value) {
-        return this.parent.bpId ? true : !!value
-      }),
+      clientId: yup
+        .string()
+        .nullable()
+        .test(function (value) {
+          return this.parent.bpId ? true : !!value
+        }),
+      bpId: yup
+        .string()
+        .nullable()
+        .test(function (value) {
+          return this.parent.clientId ? true : !!value
+        }),
+
       items: yup.array().of(schema)
     }),
     onSubmit: async obj => {
@@ -373,6 +382,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       name: 'qty',
       updateOn: 'blur',
       onChange({ row: { update, newRow } }) {
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
 
@@ -714,6 +724,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
   async function getClientInfo(clientId) {
+    if (!clientId) return
+
     const res = await getRequest({
       extension: SaleRepository.Client.get,
       parameters: `_recordId=${clientId}`
@@ -794,7 +806,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
-      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${formik.values.currencyId}&_plId=${formik.values.plId}&_muId=0`
+      parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId || 0}&_currencyId=${
+        formik.values.currencyId
+      }&_plId=${formik.values.plId}&_muId=0`
     })
 
     return res?.record
@@ -1180,17 +1194,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     })()
   }, [])
 
-  async function previewBtnClicked() {
-    const data = { printStatus: 2, recordId: formik.values.recordId }
-
-    await postRequest({
-      extension: SaleRepository.PrintedSA.printed,
-      record: JSON.stringify(data)
-    })
-
-    invalidate()
-  }
-
   return (
     <FormShell
       resourceId={ResourceIds.SalesQuotations}
@@ -1198,7 +1201,6 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       form={formik}
       maxAccess={maxAccess}
       previewReport={editMode}
-      previewBtnClicked={previewBtnClicked}
       actions={actions}
       editMode={editMode}
       disabledSubmit={!isRaw}
@@ -1258,19 +1260,19 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     secondValueShow='clientName'
                     maxAccess={maxAccess}
                     editMode={editMode}
-                    required={!formik.values.dpId}
+                    required={!formik.values.bpId}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('clientId', newValue?.recordId)
-                      formik.setFieldValue('clientName', newValue?.name)
-                      formik.setFieldValue('clientRef', newValue?.reference)
+                    onChange={async (_, newValue) => {
+                      fillClientData(newValue?.recordId)
                       formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                       formik.setFieldValue('taxId', newValue?.taxId)
                       formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
-                      fillClientData(newValue?.recordId)
+                      formik.setFieldValue('clientName', newValue?.name)
+                      formik.setFieldValue('clientRef', newValue?.reference)
+                      formik.setFieldValue('clientId', newValue?.recordId || null)
                     }}
                     errorCheck={'clientId'}
                   />
@@ -1305,6 +1307,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     name='bpId'
                     label={labels.lead}
                     form={formik}
+                    required={!formik.values.clientId}
                     readOnly={formik?.values?.clientId || formik?.values?.items?.some(item => item.itemId)}
                     displayFieldWidth={3}
                     valueShow='bpRef'
@@ -1315,11 +1318,11 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('bpId', newValue?.recordId)
-                      formik.setFieldValue('bpName', newValue?.name)
-                      formik.setFieldValue('bpRef', newValue?.reference)
+                    onChange={async (_, newValue) => {
                       fillShipment(newValue?.recordId)
+                      formik.setFieldValue('bpName', newValue?.name || '')
+                      formik.setFieldValue('bpRef', newValue?.reference || '')
+                      formik.setFieldValue('bpId', newValue?.recordId || null)
                     }}
                     errorCheck={'bpId'}
                   />
@@ -1418,9 +1421,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     readOnly={formik?.values?.items?.some(item => item.itemId)}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('currencyId', newValue?.recordId || null)
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('items', [{ id: 1 }])
+                      formik.setFieldValue('currencyId', newValue?.recordId || null)
                     }}
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
@@ -1556,7 +1559,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
             columns={columns}
             name='items'
             maxAccess={maxAccess}
-            disabled={!formik.values.clientId || !isRaw}
+            disabled={(!formik.values.clientId && !formik.values.bpId) || !isRaw}
             allowDelete={isRaw}
           />
         </Grow>
