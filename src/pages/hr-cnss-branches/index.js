@@ -22,7 +22,7 @@ const CnssBranches = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PayrollRepository.CnssBranches.page,
+      extension: PayrollRepository.BankTransferFilters.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
@@ -38,7 +38,7 @@ const CnssBranches = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.CnssBranches.page,
+    endpointId: PayrollRepository.BankTransferFilters.page,
     datasetId: ResourceIds.CnssBranches
   })
 
@@ -60,7 +60,7 @@ const CnssBranches = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: PayrollRepository.CnssBranches.del,
+      extension: PayrollRepository.BankTransferFilters.del,
       record: JSON.stringify(obj)
     })
     invalidate()
