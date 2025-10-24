@@ -469,8 +469,8 @@ export default function DamageForm({ recordId, jobId }) {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.Labor.qry2}
-                parameters={`_workCenterId=${formik?.values?.header?.workCenterId || 0}`}
+                endpointId={ManufacturingRepository.Labor.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
                 name='header.laborId'
                 label={labels.labor}
                 valueField='recordId'
