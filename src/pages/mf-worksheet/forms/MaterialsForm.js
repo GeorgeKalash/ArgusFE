@@ -30,6 +30,21 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
   const functionId = SystemFunction.IssueOfMaterial
   const resourceId = ResourceIds.IssueOfMaterials
 
+  const getValueFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+
+    return defaultValue?.value
+  }
+
+  const getLabelFromDefaultsData = key => {
+    const defaultValue = defaultsData.list.find(item => item.key === key)
+
+    return getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
+  }
+
+  const dimensionKeys = ['mfimd1', 'mfimd2']
+  const dimensions = dimensionKeys.map(key => Number(getValueFromDefaultsData(key)))
+
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId,
     access,
@@ -113,27 +128,24 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
         extension: ManufacturingRepository.WorksheetMaterials.set2,
         record: JSON.stringify(data)
       })
+
       const dimensionRecords = []
       for (const item of obj.items) {
-        const { seqNo, dim1Id, dim1, dim2, dim2Id, dimension1, dimension2 } = item
+        const { seqNo } = item
 
-        if (dim1 && dim1Id) {
-          dimensionRecords.push({
-            imaId: res.recordId,
-            seqNo,
-            dimension: dimension1,
-            id: dim1Id
-          })
-        }
-
-        if (dim2 && dim2Id) {
-          dimensionRecords.push({
-            imaId: res.recordId,
-            seqNo,
-            dimension: dimension2,
-            id: dim2Id
-          })
-        }
+        dimensions.forEach((dimension, index) => {
+          const dimIdKey = `dim${index + 1}Id`
+          const dimNameKey = `dimensionName${index + 1}`
+          if (item[dimIdKey]) {
+            dimensionRecords.push({
+              imaId: res.recordId,
+              seqNo,
+              dimension,
+              dimensionName: item[dimNameKey],
+              id: item[dimIdKey]
+            })
+          }
+        })
       }
 
       for (const record of dimensionRecords) {
@@ -145,7 +157,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
 
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
       invalidate()
-
       await getData(res.recordId)
     }
   })
@@ -155,19 +166,6 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
       getData(recordId)
     })()
   }, [])
-
-  const getValueFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return defaultValue?.value
-  }
-
-  const getLabelFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-    getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
-
-    return getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
-  }
 
   const getData = async recordId => {
     if (!recordId) return
@@ -191,19 +189,22 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
           parameters: `_imaId=${recordId}&_seqNo=${item.seqNo}`
         })
 
-        const dims = dimRes?.list || []
+        const dims = (dimRes?.list || []).sort((a, b) => a.dimension - b.dimension)
+        const dimData = {}
 
-        const matchedDims = dims.filter(d => d.seqNo === item.seqNo && d.imaId === item.imaId)
+        dims.forEach(d => {
+          const dimIndex = dimensions.findIndex(dim => dim === d.dimension)
+          if (dimIndex !== -1) {
+            const dimNumber = dimIndex + 1
+            dimData[`dim${dimNumber}Id`] = d.id
+            dimData[`dimensionName${dimNumber}`] = d.dimensionName
+          }
+        })
 
         return {
           id: index + 1,
           ...item,
-          dim1Id: matchedDims[0]?.id,
-          dim2Id: matchedDims[1]?.id,
-          dimension1: matchedDims[0]?.dimension,
-          dimension2: matchedDims[1]?.dimension,
-          dimensionName1: matchedDims[0]?.dimensionName,
-          dimensionName2: matchedDims[1]?.dimensionName
+          ...dimData
         }
       })
     )
@@ -250,20 +251,34 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
 
   const editMode = !!formik?.values?.header?.recordId
 
-  const totalQty = formik.values?.items?.reduce((qty, row) => {
-    const qtyValue = parseFloat(row.qty) || 0
-
-    return qty + qtyValue
-  }, 0)
-
-  const totalPcs = formik.values?.items?.reduce((pcs, row) => {
-    const pcsValue = parseFloat(row.pcs) || 0
-
-    return pcs + pcsValue
-  }, 0)
+  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
+  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
 
   const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + designQty, 0) ?? 0
   const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
+
+  const dimensionComponents = dimensions
+    .map((dimension, index) => {
+      if (!dimension) return null
+
+      return {
+        component: 'resourcecombobox',
+        label: getLabelFromDefaultsData(['mfimd1', 'mfimd2'][index]),
+        name: `dimensionName${index + 1}`,
+        props: {
+          endpointId: InventoryRepository.Dimension.qry,
+          dynamicParams: `_dimension=${dimension}`,
+          valueField: 'id',
+          displayField: 'name',
+          mapping: [
+            { from: 'id', to: `dim${index + 1}Id` },
+            { from: 'name', to: `dimensionName${index + 1}` }
+          ],
+          displayFieldWidth: 2
+        }
+      }
+    })
+    .filter(Boolean)
 
   return (
     <FormShell
@@ -291,7 +306,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('header.dtId', newValue?.recordId || ''), changeDT(newValue)
+                  formik.setFieldValue('header.dtId', newValue?.recordId || '')
+                  changeDT(newValue)
                 }}
                 readOnly={editMode}
                 error={formik.touched.header?.dtId && Boolean(formik.errors.dtId)}
@@ -364,9 +380,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 readOnly={isPosted}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.operationId', newValue?.recordId || null)
-                  newValue?.recordId &&
-                    formik.values.header.type &&
+                  if (newValue?.recordId && formik.values.header.type) {
                     fillGrid(formik.values.header.type, newValue?.recordId)
+                  }
                 }}
                 error={formik.touched.header?.operationId && Boolean(formik.errors.header?.operationId)}
               />
@@ -402,9 +418,9 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.type', newValue?.key || null)
-                  newValue?.key &&
-                    formik.values.header.operationId &&
+                  if (newValue?.key && formik.values.header.operationId) {
                     fillGrid(newValue?.key, formik.values.header.operationId)
+                  }
                 }}
                 error={formik.touched.header?.type && Boolean(formik.errors.header?.type)}
               />
@@ -467,105 +483,43 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                   }
                 }
               },
-              {
-                component: 'textfield',
-                label: labels.item,
-                name: 'itemName',
-                props: {
-                  readOnly: true
-                }
-              },
+              { component: 'textfield', label: labels.item, name: 'itemName', props: { readOnly: true } },
               {
                 component: 'textfield',
                 label: labels.rawCategory,
                 name: 'rmCategoryName',
-                props: {
-                  readOnly: true
-                }
+                props: { readOnly: true }
               },
               {
                 component: 'numberfield',
                 label: labels.lot,
                 name: 'lotCategoryId',
-                props: {
-                  readOnly: true
-                }
+                props: { readOnly: true }
               },
               {
                 component: 'numberfield',
                 label: labels.expectedQty,
                 name: 'designQty',
-                props: {
-                  readOnly: true
-                }
+                props: { readOnly: true }
               },
               {
                 component: 'numberfield',
                 label: labels.expectedPcs,
                 name: 'designPcs',
-                props: {
-                  readOnly: true
-                }
+                props: { readOnly: true }
               },
-              ...(getValueFromDefaultsData('mfimd1')
-                ? [
-                    {
-                      component: 'resourcecombobox',
-                      label: getLabelFromDefaultsData('mfimd1'),
-                      name: 'dimensionName1',
-                      props: {
-                        endpointId: InventoryRepository.Dimension.qry,
-                        dynamicParams: `_dimension=${getValueFromDefaultsData('mfimd1')}`,
-                        valueField: 'id',
-                        displayField: 'name',
-                        mapping: [
-                          { from: 'id', to: 'dim1Id' },
-                          { from: 'name', to: 'dimensionName1' },
-                          { from: 'dimension', to: 'dimension1' }
-                        ],
-                        displayFieldWidth: 2
-                      }
-                    }
-                  ]
-                : []),
-              ...(getValueFromDefaultsData('mfimd2')
-                ? [
-                    {
-                      component: 'resourcecombobox',
-                      label: getLabelFromDefaultsData('mfimd2'),
-                      name: 'dimensionName2',
-                      props: {
-                        endpointId: InventoryRepository.Dimension.qry,
-                        dynamicParams: `_dimension=${getValueFromDefaultsData('mfimd2')}`,
-                        valueField: 'id',
-                        displayField: 'name',
-                        mapping: [
-                          { from: 'id', to: 'dim2Id' },
-                          { from: 'name', to: 'dimensionName2' },
-                          { from: 'dimension', to: 'dimension2' }
-                        ],
-                        displayFieldWidth: 2
-                      }
-                    }
-                  ]
-                : []),
+              ...dimensionComponents,
               {
                 component: 'numberfield',
                 label: labels.quantity,
                 name: 'qty',
-                props: {
-                  maxLength: 10,
-                  decimalScale: 2
-                }
+                props: { maxLength: 10, decimalScale: 2 }
               },
               {
                 component: 'numberfield',
                 label: labels.pieces,
                 name: 'pcs',
-                props: {
-                  maxLength: 4,
-                  decimalScale: 0
-                }
+                props: { maxLength: 4, decimalScale: 0 }
               }
             ]}
             disabled={isPosted}
