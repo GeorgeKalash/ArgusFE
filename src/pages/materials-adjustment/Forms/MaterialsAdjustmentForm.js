@@ -680,7 +680,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       condition: true,
       onClick: 'onClickGL',
       disabled: !editMode,
-      valuesPath: formik.values,
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       datasetId: ResourceIds.GLMaterialAdjustment
     },
     {
