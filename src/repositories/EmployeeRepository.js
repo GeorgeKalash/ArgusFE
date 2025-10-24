@@ -3,7 +3,7 @@ const service = 'EP.asmx/'
 export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
-    get1: service + 'getEM1',
+    get1: service + 'getEM1'
   },
   CertificateFilters: {
     qry: service + 'qryCL',
@@ -15,7 +15,7 @@ export const EmployeeRepository = {
   HRDocTypeFilters: {
     qry: service + 'qryDT'
   },
-  SalaryChangeReasonFilters: {
+  SalaryChangeReason: {
     qry: service + 'qrySC',
     get: service + 'getSC',
     set: service + 'setSC',
@@ -113,7 +113,21 @@ export const EmployeeRepository = {
     sync: service + 'syncFullName'
   },
   EmployeeChart: {
-    qry: service + 'qryES'
+    page: service + 'pageES',
+    qry: service + 'qryES',
+    qry2: service + 'qryES2'
+  },
+  EmployeeSalary: {
+    qry: service + 'qrySA',
+    get: service + 'getSA',
+    set: service + 'setSA',
+    del: service + 'delSA'
+  },
+  SalaryDetails: {
+    qry: service + 'qrySD',
+    get: service + 'getSD',
+    set2: service + 'set2SD',
+    del: service + 'delSD'
   },
   TerminationEmployee: {
     get: service + 'getTE'
