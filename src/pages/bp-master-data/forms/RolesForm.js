@@ -71,7 +71,7 @@ const RolesForm = ({ roleId, recordId, labels, window, maxAccess }) => {
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik && formik.setFieldValue('roleId', newValue?.recordId || '')
+                  formik && formik.setFieldValue('roleId', newValue?.recordId || null)
                 }}
                 error={formik.touched.roleId && Boolean(formik.errors.roleId)}
               />

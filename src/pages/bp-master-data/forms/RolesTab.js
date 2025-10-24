@@ -30,7 +30,7 @@ const RolesTab = ({ store, maxAccess, labels }) => {
 
   const {
     query: { data },
-    refetch
+    invalidate
   } = useResourceQuery({
     enabled: !!recordId,
     queryFn: fetchGridData,
@@ -58,7 +58,7 @@ const RolesTab = ({ store, maxAccess, labels }) => {
         roleId
       },
       width: 500,
-      height: 500,
+      height: 400,
       title: labels.role
     })
   }
@@ -68,7 +68,7 @@ const RolesTab = ({ store, maxAccess, labels }) => {
       extension: BusinessPartnerRepository.MasterDataRole.del,
       record: JSON.stringify(obj)
     })
-    refetch()
+    invalidate()
     toast.success(platformLabels.Deleted)
   }
 
