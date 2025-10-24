@@ -1899,6 +1899,7 @@ export default function SaleTransactionForm({
                 name='header.spId'
                 readOnly={isPosted}
                 label={labels.salesPerson}
+                filter={!editMode ? item => !item.isInactive : undefined}
                 columnsInDropDown={[
                   { key: 'spRef', value: 'Reference' },
                   { key: 'name', value: 'Name' }

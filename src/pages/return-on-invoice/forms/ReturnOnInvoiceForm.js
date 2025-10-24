@@ -1542,6 +1542,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     readOnly={isPosted}
                     valueField='recordId'
                     displayField='name'
