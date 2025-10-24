@@ -37,7 +37,7 @@ const EmploymentHistory = ({ recordId, labels, maxAccess, employeeId, window }) 
       date: yup.date().required()
     }),
     onSubmit: async values => {
-      const response = await postRequest({
+      await postRequest({
         extension: EmployeeRepository.EmployementHistory.set,
         record: JSON.stringify({
           ...values,

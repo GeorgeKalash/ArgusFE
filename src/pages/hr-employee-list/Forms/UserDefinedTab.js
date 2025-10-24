@@ -148,7 +148,7 @@ const UserDefinedTab = ({ maxAccess, store }) => {
             key={fieldId}
             name={String(fieldId)}
             label={field.name}
-            value={Boolean(value)}
+            checked={value === true || value === 'true'}
             onChange={event => formik.setFieldValue(String(fieldId), event.target.checked)}
             maxAccess={maxAccess}
           />

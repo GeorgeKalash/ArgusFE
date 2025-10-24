@@ -101,9 +101,6 @@ const HiringTab = ({ labels, maxAccess, store }) => {
             nextReviewDate: res?.record?.nextReviewDate ? formatDateFromApi(res.record.nextReviewDate) : null,
             probationEndDate: res?.record?.probationEndDate ? formatDateFromApi(res.record.probationEndDate) : null
           })
-        } else if (editMode) {
-          formik.setFieldValue('probationEndDate', hireDate ? formatDateFromApi(hireDate) : null)
-          formik.setFieldValue('pyActiveDate', hireDate ? formatDateFromApi(hireDate) : null)
         } else {
           formik.setFieldValue('probationEndDate', normalizedHireDate)
           formik.setFieldValue('pyActiveDate', normalizedHireDate)
