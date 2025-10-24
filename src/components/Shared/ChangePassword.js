@@ -123,7 +123,7 @@ const ChangePassword = ({
               size='small'
               fullWidth
               label={_labels.password}
-              type={showPassword ? 'text' : 'password'}
+              displayType={showPassword ? 'text' : 'password'}
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && formik.errors.password}
