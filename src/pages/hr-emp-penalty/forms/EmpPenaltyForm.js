@@ -193,7 +193,7 @@ export default function EmpPenaltyForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={PayrollRepository.Penalty.qry}
+                endpointId={PayrollRepository.PenaltyType.qry}
                 name='penaltyId'
                 label={labels.penalty}
                 required
