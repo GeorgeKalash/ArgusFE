@@ -31,15 +31,11 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
   const resourceId = ResourceIds.IssueOfMaterials
 
   const getValueFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return defaultValue?.value
+    return defaultsData.list.find(item => item.key === key)?.value || 0
   }
 
   const getLabelFromDefaultsData = key => {
-    const defaultValue = defaultsData.list.find(item => item.key === key)
-
-    return getValueFromDefaultsData(`ivtDimension${defaultValue?.value}`)
+    return getValueFromDefaultsData(`ivtDimension${defaultsData.list.find(item => item.key === key)?.value}`)
   }
 
   const dimensionKeys = ['mfimd1', 'mfimd2']
@@ -130,7 +126,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
       })
 
       const dimensionRecords = []
-      for (const item of obj.items) {
+      for (const item of data.items) {
         const { seqNo } = item
 
         dimensions.forEach((dimension, index) => {
@@ -263,7 +259,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
 
       return {
         component: 'resourcecombobox',
-        label: getLabelFromDefaultsData(['mfimd1', 'mfimd2'][index]),
+        label: getLabelFromDefaultsData(dimensionKeys[index]),
         name: `dimensionName${index + 1}`,
         props: {
           endpointId: InventoryRepository.Dimension.qry,
@@ -305,7 +301,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 displayField={['reference', 'name']}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.dtId', newValue?.recordId || '')
                   changeDT(newValue)
                 }}
@@ -378,7 +374,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 readOnly={isPosted}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.operationId', newValue?.recordId || null)
                   if (newValue?.recordId && formik.values.header.type) {
                     fillGrid(formik.values.header.type, newValue?.recordId)
@@ -416,7 +412,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.type', newValue?.key || null)
                   if (newValue?.key && formik.values.header.operationId) {
                     fillGrid(newValue?.key, formik.values.header.operationId)
@@ -513,7 +509,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 component: 'numberfield',
                 label: labels.quantity,
                 name: 'qty',
-                props: { maxLength: 10, decimalScale: 2 }
+                props: { maxLength: 10 }
               },
               {
                 component: 'numberfield',
