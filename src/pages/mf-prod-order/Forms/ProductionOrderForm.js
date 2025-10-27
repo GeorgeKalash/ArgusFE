@@ -693,6 +693,7 @@ export default function ProductionOrderForm({ recordId, window }) {
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
+            initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
