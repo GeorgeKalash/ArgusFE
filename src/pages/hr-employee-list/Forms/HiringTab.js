@@ -227,7 +227,7 @@ const HiringTab = ({ labels, maxAccess, store }) => {
                   <ResourceComboBox
                     name='languageId'
                     label={labels.language}
-                    datasetId={DataSets.LANGUAGE}
+                    datasetId={DataSets.LANGUAGE_EMPLOYEE}
                     values={formik.values}
                     maxAccess={maxAccess}
                     valueField='key'
