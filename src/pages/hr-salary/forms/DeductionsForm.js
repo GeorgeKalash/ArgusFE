@@ -178,7 +178,7 @@ export default function DeductionsForm({
               name='fixedAmount'
               label={labels.amount}
               value={formik.values.fixedAmount}
-              onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(Number(e?.target?.value || 0)).toFixed(2))}
+              onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
               required
               maxAccess={maxAccess}
               readOnly={formik.values.isPct}

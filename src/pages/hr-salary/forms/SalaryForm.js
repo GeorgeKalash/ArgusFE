@@ -12,11 +12,11 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import Table from 'src/components/Shared/Table'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import CustomButton from 'src/components/Inputs/CustomButton'
 import { formatDateFromApi } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import SalaryWindow from '../Windows/SalaryWindow'
 import { useWindow } from 'src/windows'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -126,70 +126,64 @@ export default function SalaryForm({ employeeInfo, maxAccess, labels }) {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container spacing={2} alignItems='center' sx={{ p: 2 }}>
-          <Grid item xs={1}>
-            <CustomButton
-              onClick={add}
-              style={{ border: '1px solid #4eb558' }}
-              color={'transparent'}
-              image={'add.png'}
-              tooltipText={platformLabels.add}
-            />
-          </Grid>
-
-          <Grid item xs={11}>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <CustomTextField
-                  name='employeeName'
-                  label={labels.employee}
-                  value={formik?.values?.employeeName}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('employeeName', '')}
-                  error={formik.touched.employeeName && Boolean(formik.errors.employeeName)}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <CustomTextField
-                  name='positionName'
-                  label={labels.position}
-                  value={formik?.values?.positionName}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('positionName', '')}
-                  error={formik.touched.positionName && Boolean(formik.errors.positionName)}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <CustomTextField
-                  name='departmentName'
-                  label={labels.department}
-                  value={formik?.values?.departmentName}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('departmentName', '')}
-                  error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <CustomTextField
-                  name='branchName'
-                  label={labels.branch}
-                  value={formik?.values?.branchName}
-                  maxAccess={maxAccess}
-                  readOnly
-                  onChange={formik.handleChange}
-                  onClear={() => formik.setFieldValue('branchName', '')}
-                  error={formik.touched.branchName && Boolean(formik.errors.branchName)}
-                />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={maxAccess}
+          leftSection={
+            <Grid item xs={11} sx={{ mt: 1 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='employeeName'
+                    label={labels.employee}
+                    value={formik?.values?.employeeName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('employeeName', '')}
+                    error={formik.touched.employeeName && Boolean(formik.errors.employeeName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='positionName'
+                    label={labels.position}
+                    value={formik?.values?.positionName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('positionName', '')}
+                    error={formik.touched.positionName && Boolean(formik.errors.positionName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='departmentName'
+                    label={labels.department}
+                    value={formik?.values?.departmentName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('departmentName', '')}
+                    error={formik.touched.departmentName && Boolean(formik.errors.departmentName)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomTextField
+                    name='branchName'
+                    label={labels.branch}
+                    value={formik?.values?.branchName}
+                    maxAccess={maxAccess}
+                    readOnly
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('branchName', '')}
+                    error={formik.touched.branchName && Boolean(formik.errors.branchName)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Grid>
+          }
+        />
       </Fixed>
       <Grow>
         <Table

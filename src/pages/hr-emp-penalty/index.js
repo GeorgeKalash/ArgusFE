@@ -154,7 +154,7 @@ const EmpPenalty = () => {
           hasSearch={false}
           filterBy={filterBy}
           leftSection={
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <ResourceLookup
                 endpointId={EmployeeRepository.Employee.snapshot}
                 parameters={{ _branchId: 0 }}

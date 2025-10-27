@@ -121,10 +121,9 @@ export default function SalaryTab({
   const editMode = !!formik?.values?.recordId
 
   async function updateAmountFields(basicAmount) {
-    const totalEN = recordId ? (!basicAmount ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
-    const totalDE = recordId ? (!basicAmount ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0) : 0
+    const totalEN = recordId ? (basicAmount ? await ChangeEntitlementsAmount(entitlements, basicAmount) : 0) : 0
+    const totalDE = recordId ? (basicAmount ? await ChangeDeductionsAmount(deductions, basicAmount, totalEN) : 0) : 0
     const finalAmount = basicAmount ? totalEN - totalDE + basicAmount : 0
-
     setSalaryInfo(prev => ({
       ...prev,
       basicAmount: basicAmount || 0
@@ -182,9 +181,9 @@ export default function SalaryTab({
 
           const updatedSalary = {
             ...lastSalary,
-            eAmount: 0,
-            dAmount: 0,
-            finalAmount: lastSalary.basicAmount,
+            eAmount: '0.00',
+            dAmount: '0.00',
+            finalAmount: parseFloat(lastSalary.basicAmount).toFixed(2),
             effectiveDate: new Date(),
             recordId: null
           }
@@ -355,11 +354,11 @@ export default function SalaryTab({
               values={formik.values}
               maxAccess={maxAccess}
               onChange={(_, newValue) => {
-                formik.setFieldValue('paymentMethod', newValue?.key || null)
                 if (newValue?.key != 2) {
                   formik.setFieldValue('bankId', '')
                   formik.setFieldValue('accountNumber', '')
                 }
+                formik.setFieldValue('paymentMethod', newValue?.key || null)
               }}
               required
               error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
