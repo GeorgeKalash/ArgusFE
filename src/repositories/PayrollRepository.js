@@ -5,7 +5,11 @@ export const PayrollRepository = {
     qry: service + 'qryHE'
   },
   BankTransferFilters: {
-    qry: service + 'qrySB'
+    qry: service + 'qrySB',
+    page: service + 'pageSB',
+    get: service + 'getSB',
+    set: service + 'setSB',
+    del: service + 'delSB'
   },
   Paycode: {
     qry: service + 'qryPC',
@@ -31,12 +35,6 @@ export const PayrollRepository = {
   },
   Arguments: {
     page: service + 'pageAR'
-  },
-  CnssBranches: {
-    page: service + 'pageSB',
-    get: service + 'getSB',
-    set: service + 'setSB',
-    del: service + 'delSB'
   },
   SalaryBatch: {
     page: service + 'pageBAT',

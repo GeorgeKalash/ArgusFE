@@ -18,7 +18,7 @@ export default function CnssBranchesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: PayrollRepository.CnssBranches.page
+    endpointId: PayrollRepository.BankTransferFilters.page
   })
 
   const { formik } = useForm({
@@ -33,7 +33,7 @@ export default function CnssBranchesForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: PayrollRepository.CnssBranches.set,
+        extension: PayrollRepository.BankTransferFilters.set,
         record: JSON.stringify(obj)
       })
 
@@ -48,7 +48,7 @@ export default function CnssBranchesForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: PayrollRepository.CnssBranches.get,
+          extension: PayrollRepository.BankTransferFilters.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res.record)
