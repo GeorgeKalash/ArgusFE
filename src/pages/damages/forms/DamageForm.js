@@ -24,7 +24,6 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import Table from 'src/components/Shared/Table'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { RepairAndServiceRepository } from 'src/repositories/RepairAndServiceRepository'
 
 export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -133,10 +132,9 @@ export default function DamageForm({ recordId, jobId }) {
     }).then(jobRes => {
       formik.setValues({
         recordId: res?.header.recordId || null,
-        ...formik.values.header,
         header: {
           ...res?.header,
-          date: formatDateFromApi(jobRes?.record?.date),
+          date: formatDateFromApi(res?.header.date),
           sku: jobRes?.record?.sku,
           itemName: jobRes?.record?.itemName,
           designName: jobRes?.record?.designName,
@@ -148,8 +146,7 @@ export default function DamageForm({ recordId, jobId }) {
           workCenterId: jobRes?.record?.workCenterId,
           maxPcs: jobRes?.record?.pcs
         },
-        items:
-          res?.items || []
+        items: res?.items || []
       })
     })
   }
@@ -289,7 +286,7 @@ export default function DamageForm({ recordId, jobId }) {
                   { key: 'itemName', value: 'Item Name' },
                   { key: 'description', value: 'Description' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setValues({
                     header: {
                       ...formik.values.header,
@@ -319,6 +316,7 @@ export default function DamageForm({ recordId, jobId }) {
                 value={formik.values?.header?.pcs}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('header.pcs', 0)}
+                required
                 maxAccess={maxAccess}
                 error={formik?.touched?.header?.pcs && Boolean(formik?.errors?.header?.pcs)}
               />
@@ -484,7 +482,7 @@ export default function DamageForm({ recordId, jobId }) {
                 displayFieldWidth={2}
                 required
                 values={formik.values.header}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.laborId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}

@@ -262,8 +262,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
     return pcs + pcsValue
   }, 0)
 
-  const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + designQty, 0) ?? 0
-  const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + designPcs, 0) ?? 0
+  const totalExpQty = formik.values.items?.reduce((acc, { designQty = 0 }) => acc + (Number(designQty) || 0), 0) ?? 0
+  const totalExpPcs = formik.values.items?.reduce((acc, { designPcs = 0 }) => acc + (Number(designPcs) || 0), 0) ?? 0
 
   return (
     <FormShell

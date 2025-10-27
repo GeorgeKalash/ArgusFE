@@ -478,7 +478,7 @@ export default function WCConsumpForm({ recordId, window }) {
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.description },
       datasetId: ResourceIds.WorkCenterConsumptions,
       disabled: !editMode
     },

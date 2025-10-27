@@ -50,6 +50,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function RetailTransactionsForm({
   labels,
@@ -57,10 +58,12 @@ export default function RetailTransactionsForm({
   access,
   recordId,
   functionId,
+  lockRecord,
   getGLResource,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
@@ -425,11 +428,35 @@ export default function RetailTransactionsForm({
     const res = await postRequest({
       extension: PointofSaleRepository.RetailInvoice.unpost,
       record: JSON.stringify(formik.values.header)
-    })
+    }).then(res => {
+      toast.success(platformLabels.Posted)
+      lockRecord({
+        recordId: res.recordId,
+        reference: formik.values.header.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId,
+            reference: formik.values.header.reference
+          })
+          refetchForm(res.recordId)
+        },
+        isAlreadyLocked: name => {
+          window.close()
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            },
+            title: platformLabels.Dialog
+          })
+        }
+      })
 
-    toast.success(platformLabels.Posted)
-    invalidate()
-    refetchForm(res?.recordId)
+      invalidate()
+    })
   }
 
   const actions = [
@@ -455,7 +482,7 @@ export default function RetailTransactionsForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
@@ -530,6 +557,20 @@ export default function RetailTransactionsForm({
       ...(addressObj?.record || {}),
       countryId: addressObj?.countryId || countryId?.value
     })
+
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: retailTrxHeader.recordId,
+        reference: retailTrxHeader.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId: retailTrxHeader.recordId,
+            reference: retailTrxHeader.reference
+          })
+        }
+      })
   }
 
   async function getRetailTransactionPack(transactionId) {

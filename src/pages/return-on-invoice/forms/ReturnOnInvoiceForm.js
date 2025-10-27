@@ -795,6 +795,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       datasetId: ResourceIds.GLReturnOnInvoice,
       disabled: !editMode
     },

@@ -57,5 +57,8 @@ export const LoanManagementRepository = {
     snapshot: service + 'snapshotRE',
     close: service + 'closeRE',
     reopen: service + 'reopenRE'
+  },
+  Leaves: {
+    qry: service + 'qryELB'
   }
 }
