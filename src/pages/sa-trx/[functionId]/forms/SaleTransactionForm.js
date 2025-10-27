@@ -111,6 +111,23 @@ export default function SaleTransactionForm({
 
   const { schema, requiredFields } = createConditionalSchema(conditions, allowNoLines)
 
+  async function validateSalesPerson(spId) {
+    if (!spId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.SalesPerson.get,
+      parameters: `_recordId=${spId}`
+    })
+
+    const salesperson = res?.record
+
+    if (!salesperson || salesperson.isInactive) {
+      return null
+    }
+
+    return spId
+  }
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
@@ -1270,6 +1287,8 @@ export default function SaleTransactionForm({
     const res = await getClientInfo(clientId)
 
     const record = res?.record || {}
+
+    const validSpId = await validateSalesPerson(record.spId)
     const accountId = record.accountId
     const currencyId = record.currencyId ?? formik.values.header.currencyId ?? null
     if (!currencyId) {
@@ -1291,7 +1310,7 @@ export default function SaleTransactionForm({
         maxDiscount: clientObject?.maxDiscount,
         taxId: clientObject?.taxId,
         currencyId: currencyId,
-        spId: record.spId,
+        spId: validSpId,
         ptId: record.ptId ?? defaultsDataState.ptId,
         plId: record.plId ?? defaultsDataState.plId,
         szId: record.szId,
@@ -1716,7 +1735,8 @@ export default function SaleTransactionForm({
     const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
+    const validSpId = await validateSalesPerson(dtd?.record?.spId || userDefaultsDataState?.spId)
+    formik.setFieldValue('header.spId', validSpId)
     formik.setFieldValue('header.siteId', currentSiteId)
     formik.setFieldValue('header.siteRef', siteRef || '')
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
@@ -1825,7 +1845,8 @@ export default function SaleTransactionForm({
   const setDefaultFields = async () => {
     if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
     formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
+    const validSpId = await validateSalesPerson(userDefaultsDataState?.spId)
+    formik.setFieldValue('header.spId', validSpId)
     const currentSiteId = userDefaultsDataState?.siteId || null
     const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.siteId', currentSiteId)

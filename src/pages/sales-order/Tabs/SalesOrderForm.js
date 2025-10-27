@@ -79,6 +79,23 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     enabled: !recordId
   })
 
+  async function validateSalesPerson(spId) {
+    if (!spId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.SalesPerson.get,
+      parameters: `_recordId=${spId}`
+    })
+
+    const salesperson = res?.record
+
+    if (!salesperson || salesperson.isInactive) {
+      return null
+    }
+
+    return spId
+  }
+
   const initialValues = {
     recordId: recordId,
     dtId: null,
@@ -861,7 +878,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const res = await getClient(clientId)
     formik.setFieldValue('currencyId', res?.record?.currencyId)
-    formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
+    const validSpId = await validateSalesPerson(res?.record?.spId || formik.values.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
@@ -1227,7 +1246,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
+
+    const validSpId = await validateSalesPerson(res?.record?.spId || defaults.userDefaultsList.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
   }
   useEffect(() => {
@@ -1283,8 +1305,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
         const plant = defaultValues.userDefaultsList.plantId
         const salesPerson = defaultValues.userDefaultsList.spId
+        const validSpId = await validateSalesPerson(parseInt(salesPerson))
         formik.setFieldValue('siteId', parseInt(siteId))
-        formik.setFieldValue('spId', parseInt(salesPerson))
+        formik.setFieldValue('spId', validSpId)
         formik.setFieldValue('plantId', parseInt(plant))
       }
     })()
