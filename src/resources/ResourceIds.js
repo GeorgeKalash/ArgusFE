@@ -126,6 +126,7 @@ export const ResourceIds = {
   RateType: 32100,
   MultiCurrencyMapping: 32102,
   ClientRelation: 36202,
+  PrintLabels: 41229,
   MC_Default: 32104,
   MultiCurrencyMapping: 32102,
   Description_Template: 31110,
