@@ -66,7 +66,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
             if (isOverheadFilled) {
               const numericValue = Number(value)
 
-              if (!value || isNaN(numericValue) || numericValue <= 0) {
+              if (!value || isNaN(numericValue)) {
                 return false
               }
             }
