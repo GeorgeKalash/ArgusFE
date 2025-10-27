@@ -847,7 +847,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik?.values?.header?.description },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
