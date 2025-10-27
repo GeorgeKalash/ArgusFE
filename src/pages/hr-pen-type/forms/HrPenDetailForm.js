@@ -22,7 +22,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const conditions = {
-    amount: row => row?.amount,
+    amount: row => row?.amount != null,
     actionName: row => row?.actionName,
     deductionType: row => row?.deductionType,
     expressionId: row => row?.expressionId
@@ -33,6 +33,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
     maxAccess,
     conditionSchema: ['items'],
     validationSchema: yup.object({
+      damage: yup.number().required(),
       items: yup.array().of(schema)
     }),
     initialValues: {
@@ -64,20 +65,24 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
   useEffect(() => {
     if (recordId) {
       ;(async function () {
-        const res = await getRequest({
-          extension: PayrollRepository.PenaltyDetail.qry,
-          parameters: `_ptId=${recordId}&_damage=${formik.values.damage}`
-        })
+        if (formik.values.damage) {
+          const res = await getRequest({
+            extension: PayrollRepository.PenaltyDetail.qry,
+            parameters: `_ptId=${recordId}&_damage=${formik.values.damage}`
+          })
 
-        formik.setFieldValue(
-          'items',
-          res.list?.length > 0
-            ? res?.list?.map((item, index) => ({
-                ...item,
-                id: index + 1
-              }))
-            : formik.initialValues.items
-        )
+          formik.setFieldValue(
+            'items',
+            res.list?.length > 0
+              ? res?.list?.map((item, index) => ({
+                  ...item,
+                  id: index + 1
+                }))
+              : formik.initialValues.items
+          )
+        } else {
+          formik.setFieldValue('items', formik.initialValues.items)
+        }
       })()
     }
   }, [formik.values.damage])
@@ -118,7 +123,8 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
       label: labels.deductionAmount,
       name: 'amount',
       props: {
-        allowNegative: false
+        allowNegative: false,
+        maxLength: 10
       }
     },
     {
@@ -155,6 +161,7 @@ const HrPenDetailForm = ({ store, maxAccess, labels }) => {
                 values={formik.values}
                 valueField='key'
                 displayField='value'
+                required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('damage', newValue?.key || null)
