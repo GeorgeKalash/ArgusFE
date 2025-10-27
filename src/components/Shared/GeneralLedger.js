@@ -384,8 +384,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 updatedRows = [...formik2.values.glTransactions, ...mappedNewRows]
               }
 
-              formik2.setFieldValue('glTransactions', updatedRows)
               formik2.setFieldValue('editStatus', 2)
+              formik2.setFieldValue('glTransactions', updatedRows)
             }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
