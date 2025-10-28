@@ -23,12 +23,19 @@ import { LoanManagementRepository } from 'src/repositories/LoanManagementReposit
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
+import useResourceParams from 'src/hooks/useResourceParams'
 
-export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
+export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const editMode = !!recordId
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.LeaveRequestODOM,
+    editMode
+  })
+
   useSetWindow({ title: platformLabels.LeaveRequestODOM, window })
 
   const invalidate = useInvalidate({
@@ -98,7 +105,7 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
       )}`
     })
 
-    formik.setFieldValue('leaveBalance', res2.list?.[0].summary.balance)
+    formik.setFieldValue('leaveBalance', res2.list?.[0]?.summary?.balance)
   }
 
   const isClosed = formik.values.wip == 2
@@ -107,22 +114,23 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
     {
       field: 'dayId',
       headerName: labels.date,
-      flex: 1
+      flex: 3
     },
     {
       field: 'ldtName',
       headerName: labels.leaveDayType,
-      flex: 1
+      flex: 2
     },
     {
       field: 'hours',
       headerName: labels.hours,
-      flex: 1
+      flex: 1,
+      type: { field: 'number', decimal: 2 }
     }
   ]
 
   const refetchData = async recordId => {
-    await onPreview()
+    if (!recordId) return
 
     const res = await getRequest({
       extension: LoanManagementRepository.LeaveRequest.get2,
@@ -153,11 +161,9 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
       record: JSON.stringify(rest)
     })
 
-    if (res?.recordId) {
-      toast.success(platformLabels.Closed)
-      invalidate()
-      refetchData(res.recordId)
-    }
+    toast.success(platformLabels.Closed)
+    invalidate()
+    refetchData(res.recordId)
   }
 
   const onReopen = async () => {
@@ -168,11 +174,9 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
       record: JSON.stringify(rest)
     })
 
-    if (res?.recordId) {
-      toast.success(platformLabels.Reopened)
-      invalidate()
-      refetchData(res.recordId)
-    }
+    toast.success(platformLabels.Reopened)
+    invalidate()
+    refetchData(res.recordId)
   }
 
   async function onValidationRequired() {
@@ -225,9 +229,10 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
   }
 
   useEffect(() => {
-    if (recordId) {
+    ;(async function () {
+      await onPreview()
       refetchData(recordId)
-    }
+    })()
   }, [])
 
   const actions = [
@@ -252,10 +257,13 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
     {
       key: 'Preview',
       condition: true,
-      onClick: onPreview,
-      disabled: false
+      onClick: onPreview
     }
   ]
+
+  useEffect(() => {
+    formik.setFieldValue('leaveDays', formik.values.items.length)
+  }, [formik.values.items])
 
   return (
     <FormShell
@@ -306,7 +314,6 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
                 displayField='fullName'
                 name='employeeRef'
                 label={labels.employee}
-                secondDisplayField={true}
                 required
                 secondValue={formik.values.employeeName}
                 onChange={(_, newValue) => {
@@ -457,5 +464,5 @@ export const LeaveForm = ({ labels, recordId, maxAccess, window }) => {
   )
 }
 
-LeaveForm.width = 850
-LeaveForm.height = 600
+LeaveForm.width = 1000
+LeaveForm.height = 650

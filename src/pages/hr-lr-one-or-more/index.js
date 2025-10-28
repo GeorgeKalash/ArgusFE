@@ -55,7 +55,7 @@ const LeaveRequestOneDayOrMore = () => {
     query: { data },
     filterBy,
     refetch,
-    labels: labels,
+    labels,
     access,
     paginationParameters,
     invalidate
@@ -151,8 +151,6 @@ const LeaveRequestOneDayOrMore = () => {
     stack({
       Component: LeaveForm,
       props: {
-        labels,
-        maxAccess: access,
         recordId
       }
     })
