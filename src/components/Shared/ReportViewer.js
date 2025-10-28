@@ -139,7 +139,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           leftSection={
-            <Grid item xs={3}>
+            <Grid item xs={2.5}>
               <Grid container spacing={2}>
                 <Grid item xs={10}>
                   <ResourceComboBox
