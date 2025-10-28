@@ -244,7 +244,10 @@ export default function ProductionOrderForm({ recordId, window }) {
           designRef: result?.designRef || '',
           lineId: result?.lineId || null,
           lineRef: result?.lineRef || '',
-          itemWeight: result1?.stdWeight || null
+          itemWeight: result1?.stdWeight || null,
+          routingId: result1?.routingId || null,
+          routingRef: result1?.routingRef || '',
+          routingName: result1?.routingName || ''
         })
       }
     },
