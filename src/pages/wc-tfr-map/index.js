@@ -31,7 +31,7 @@ export default function WorkCenterTransferMap() {
       return {
         id: item.recordId,
         rowLabels: item.name,
-        colLabels: item.name
+        colLabels: item.reference
       }
     })
     setData(mapping || [])
@@ -39,8 +39,7 @@ export default function WorkCenterTransferMap() {
 
   async function getIntersections() {
     const res = await getRequest({
-      extension: ManufacturingRepository.WorkCenterTransferMap.qry,
-      parameters: ``
+      extension: ManufacturingRepository.WorkCenterTransferMap.qry
     })
 
     const mapping = res?.list?.map(item => {

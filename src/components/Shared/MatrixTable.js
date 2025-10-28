@@ -60,11 +60,32 @@ const MatrixGrid = ({
         width: 250,
         minWidth: 150,
         maxWidth: 450,
-        cellStyle: {
-          fontWeight: 'bold',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+        cellRenderer: params => {
+          const value = params.value || ''
+          const displayValue = value.length > 30 ? value.slice(0, 30) + '...' : value
+
+          return (
+            <div
+              title={value}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                direction: 'rtl',
+                whiteSpace: 'nowrap',
+                textAlign: 'center',
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+                padding: '0 8px',
+                boxSizing: 'border-box'
+              }}
+            >
+              {displayValue}
+            </div>
+          )
         }
       }
     ]
