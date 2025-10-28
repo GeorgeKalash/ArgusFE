@@ -98,6 +98,10 @@ export default function TRXForm({ labels, access, setStore, store }) {
     fetchDataAndSetPlant()
   }, [])
 
+  useEffect(() => {
+    formik.setFieldValue('baseAmount', store?.result?.baseAmount || 0)
+  }, [store?.result?.baseAmount])
+
   async function fetchData(recordId) {
     await getRequest({
       extension: CostAllocationRepository.PuCostAllocations.get,
@@ -298,7 +302,7 @@ export default function TRXForm({ labels, access, setStore, store }) {
               <CustomNumberField
                 name='baseAmount'
                 label={labels.amount}
-                value={store.result?.baseAmount}
+                value={formik.values?.baseAmount}
                 maxAccess={maxAccess}
                 readOnly
                 decimalScale={2}

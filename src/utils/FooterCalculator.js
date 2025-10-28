@@ -122,7 +122,7 @@ const recalcFooter = (_array, _footerSummary) => {
 }
 
 const getSubtotal = _array => {
-  return _array.reduce((sum, item) => sum + item.extendedPrice, 0)
+  return _array.reduce((sum, item) => sum + (Number(item.extendedPrice) || 0), 0)
 }
 
 const getFooterTotals = (_array, _footerSummary) => {

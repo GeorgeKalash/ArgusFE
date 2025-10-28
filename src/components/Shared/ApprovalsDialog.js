@@ -3,7 +3,7 @@ import ConfirmationDialog from '../ConfirmationDialog'
 import { useContext } from 'react'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const ApprovalsDialog = ({ window, responseValue, onConfirm, fullScreen }) => {
+const ApprovalsDialog = ({ window, w, responseValue, onConfirm, fullScreen }) => {
   const { platformLabels } = useContext(ControlContext)
   useSetWindow({ title: platformLabels.Confirmation, window })
 
@@ -13,6 +13,7 @@ const ApprovalsDialog = ({ window, responseValue, onConfirm, fullScreen }) => {
       okButtonAction={() => {
         onConfirm()
         window.close()
+        w.close()
       }}
       fullScreen={fullScreen}
       cancelButtonAction={() => {
