@@ -97,7 +97,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
   })
 
   const totAmount = formik?.values?.items?.reduce((amountSum, row) => {
-    const amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = Math.round(parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0)
 
     return amountSum + amountValue
   }, 0)
