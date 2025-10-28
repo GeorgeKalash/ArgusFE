@@ -490,7 +490,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
