@@ -65,26 +65,38 @@ const MatrixGrid = ({
           const displayValue = value.length > 30 ? value.slice(0, 30) + '...' : value
 
           return (
-            <div
-              title={value}
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                direction: 'rtl',
-                whiteSpace: 'nowrap',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: '100%',
-                height: '100%',
-                padding: '0 8px',
-                boxSizing: 'border-box'
-              }}
-            >
-              {displayValue}
-            </div>
+            <>
+              <style>
+                {`
+                  .my-matrix-grid .ag-horizontal-left-spacer,
+                  .my-matrix-grid .ag-horizontal-right-spacer {
+                    width: 0px !important;
+                    min-width: 0px !important;
+                    overflow-x: hidden !important;
+                  }
+                `}
+              </style>
+              <div
+                title={value}
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  direction: 'rtl',
+                  whiteSpace: 'nowrap',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                  padding: '0 8px',
+                  boxSizing: 'border-box'
+                }}
+              >
+                {displayValue}
+              </div>
+            </>
           )
         }
       }
@@ -229,7 +241,7 @@ const MatrixGrid = ({
   }
 
   return (
-    <div style={{ height: '100%', width: '100%' }} className='ag-theme-alpine'>
+    <div style={{ height: '100%', width: '100%' }} className='ag-theme-alpine my-matrix-grid'>
       <AgGridReact
         ref={gridRef}
         rowData={initialRowData}
