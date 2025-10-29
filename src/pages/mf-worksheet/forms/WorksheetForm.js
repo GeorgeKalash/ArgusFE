@@ -397,9 +397,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.Labor.qry}
-                        parameters={`_startAt=0&_pageSize=200&_params=`}
-                        filter={item => item.workCenterId === formik.values.workCenterId}
+                        endpointId={formik.values.workCenterId && ManufacturingRepository.Labor.qry2}
+                        parameters={`_startAt=0&_pageSize=200&_workCenterId=${formik.values.workCenterId}`}
                         name='laborId'
                         label={labels.labor}
                         required
