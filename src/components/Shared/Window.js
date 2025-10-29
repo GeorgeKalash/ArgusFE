@@ -248,7 +248,8 @@ const Window = React.memo(
                     ))}
                   </Tabs>
                 )}
-                {!showOverlay && isLoading && <LoadingOverlay />}
+                {!showOverlay && isLoading && LoadingOverlay()}
+
                 {!controlled ? (
                   <>
                     <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
