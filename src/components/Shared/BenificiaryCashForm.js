@@ -46,7 +46,7 @@ const BenificiaryCashForm = ({
   submitMainForm = true,
   recordId,
   forceDisable,
-  forceEditMode = null,
+  forceEdit = null,
   window
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -167,7 +167,7 @@ const BenificiaryCashForm = ({
     }
   })
 
-  const editMode = forceEditMode == null ? !!formik.values.recordId : forceEditMode
+  const editMode = forceEdit == null ? !!formik.values.recordId : forceEdit
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash

@@ -579,7 +579,7 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           submitted={submitted}
                           setSubmitted={setSubmitted}
                           setValidSubmit={setValidSubmit}
-                          forceEditMode={editMode}
+                          forceEdit={editMode}
                           client={{
                             clientId: formik.values.clientId,
                             clientName: formik.values.clientName,
@@ -606,7 +606,7 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                       {dispersalMode === DISPERSAL_MODE_CASH && (
                         <BenificiaryCashForm
                           viewBtns={false}
-                          forceEditMode={editMode}
+                          forceEdit={editMode}
                           resetForm={resetForm}
                           setResetForm={setResetForm}
                           onChange={changedBeneficiaryData}

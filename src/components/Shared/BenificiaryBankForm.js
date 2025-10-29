@@ -47,7 +47,7 @@ export default function BenificiaryBankForm({
   submitMainForm = true,
   forceDisable,
   recordId,
-  forceEditMode = null,
+  forceEdit = null,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -191,7 +191,7 @@ export default function BenificiaryBankForm({
     }
   })
 
-  const editMode = forceEditMode == null ? !!formik.values.recordId : forceEditMode
+  const editMode = forceEdit == null ? !!formik.values.recordId : forceEdit
 
   useEffect(() => {
     ;(async function () {
