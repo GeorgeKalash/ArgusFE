@@ -167,7 +167,8 @@ const Window = React.memo(
                 ref={paperRef}
                 tabIndex={-1}
                 sx={{
-                  transition: 'width 0.3s, height 0.3s, background-color 0.3s',
+                  transition:
+                    'max-height 0.35s ease, width 0.35s ease, background-color 0.35s ease, opacity 0.25s ease',
                   height: !minimized
                     ? controlled
                       ? expanded
@@ -177,6 +178,7 @@ const Window = React.memo(
                       ? containerHeight
                       : height
                     : '40px',
+                  opacity: minimized ? 0.85 : 1,
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
                   flexDirection: controlled ? 'column' : 'unset',
