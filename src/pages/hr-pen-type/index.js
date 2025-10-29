@@ -9,43 +9,75 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
-import { ControlContext } from 'src/providers/ControlContext'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
-import CnssBranchesForm from './form/CnssBranchesForm'
+import HrPenTypeWindow from './Window/HrPenTypeWindow'
+import { ControlContext } from 'src/providers/ControlContext'
 
-const CnssBranches = () => {
+const HrPenType = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: PayrollRepository.BankTransferFilters.page,
+      extension: PayrollRepository.PenaltyType.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
     })
 
-    return { ...response, _startAt: _startAt }
+    return {
+      ...response,
+
+      _startAt: _startAt
+    }
   }
 
   const {
     query: { data },
     labels,
-    refetch,
-    invalidate,
     paginationParameters,
+    invalidate,
+    refetch,
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.BankTransferFilters.page,
-    datasetId: ResourceIds.CnssBranches
+    endpointId: PayrollRepository.PenaltyType.page,
+    datasetId: ResourceIds.PenaltyType
   })
 
   const columns = [
     {
       field: 'name',
       headerName: labels.name,
+      flex: 1
+    },
+    {
+      field: 'reasonString',
+      headerName: labels.reason,
+      flex: 1
+    },
+    {
+      field: 'timeBaseString',
+      headerName: labels.timeBase,
+      flex: 1
+    },
+    {
+      field: 'from',
+      headerName: labels.from,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'to',
+      headerName: labels.to,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'timeCodeName',
+      headerName: labels.timeVariationType,
       flex: 1
     }
   ]
@@ -60,24 +92,25 @@ const CnssBranches = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: PayrollRepository.BankTransferFilters.del,
+      extension: PayrollRepository.PenaltyType.del,
       record: JSON.stringify(obj)
     })
-    invalidate()
     toast.success(platformLabels.Deleted)
+
+    invalidate()
   }
 
   function openForm(recordId) {
     stack({
-      Component: CnssBranchesForm,
+      Component: HrPenTypeWindow,
       props: {
         labels,
         recordId,
-        maxAccess: access
+        access
       },
-      width: 600,
-      height: 250,
-      title: labels.title
+      width: 800,
+      height: 420,
+      title: labels.penaltyType
     })
   }
 
@@ -95,14 +128,14 @@ const CnssBranches = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          paginationType='api'
-          maxAccess={access}
           refetch={refetch}
           paginationParameters={paginationParameters}
+          paginationType='api'
+          maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
 
-export default CnssBranches
+export default HrPenType

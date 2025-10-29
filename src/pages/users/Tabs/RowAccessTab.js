@@ -112,6 +112,13 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
         parameters: '_params=&_startAt=0&_pageSize=1000'
       })
 
+    const costCenterGroupRequestPromise =
+      classId == ResourceIds.CostCenterGroup &&
+      getRequest({
+        extension: GeneralLedgerRepository.CostCenterGroup.qry,
+        parameters: '_params=&_startAt=0&_pageSize=1000'
+      })
+
     const rowAccessUserPromise = getRequest({
       extension: AccessControlRepository.RowAccessUserView.qry,
       parameters: `_resourceId=${classId}&_userId=${storeRecordId}`
@@ -125,67 +132,87 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
       posRequestPromise,
       salesPersonRequestPromise,
       rowAccessUserPromise,
-      costCenterRequestPromise
-    ]).then(([cashAccountRequest, plantRequest, posRequest, salesPersonRequest, rowAccessUser, costCenterRequest]) => {
-      if (classId == ResourceIds.Plants || classId === 'undefined') {
-        rar = plantRequest.list?.map(item => {
-          return {
-            recordId: item.recordId,
-            name: item.name,
-            reference: item.reference,
-            hasAccess: false
-          }
-        })
-      } else if (classId == ResourceIds.CashAccounts) {
-        rar = cashAccountRequest.list?.map(item => {
-          return {
-            recordId: item.recordId,
-            name: item.name,
-            reference: item.reference,
-            hasAccess: false
-          }
-        })
-      } else if (classId == ResourceIds.SalesPerson) {
-        rar = salesPersonRequest.list?.map(item => {
-          return {
-            recordId: item.recordId,
-            name: item.name,
-            reference: item.spRef,
-            hasAccess: false
-          }
-        })
-      } else if (classId == ResourceIds.PointOfSale) {
-        rar = posRequest.list?.map(item => {
-          return {
-            recordId: item.recordId,
-            name: item.name,
-            reference: item.reference,
-            hasAccess: false
-          }
-        })
-      } else if (classId == ResourceIds.CostCenter) {
-        rar = costCenterRequest.list?.map(item => {
-          return {
-            recordId: item.recordId,
-            name: item.name,
-            reference: item.reference,
-            hasAccess: false
-          }
-        })
-      }
-      if (classId && rar) {
-        for (let i = 0; i < rar.length; i++) {
-          rowAccessUser.list.forEach(storedItem => {
-            if (storedItem.recordId.toString() == rar[i].recordId) {
-              rar[i].hasAccess = true
-              rar[i].checked = true
+      costCenterRequestPromise,
+      costCenterGroupRequestPromise
+    ]).then(
+      ([
+        cashAccountRequest,
+        plantRequest,
+        posRequest,
+        salesPersonRequest,
+        rowAccessUser,
+        costCenterRequest,
+        costCenterGroupRequest
+      ]) => {
+        if (classId == ResourceIds.Plants || classId === 'undefined') {
+          rar = plantRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.CashAccounts) {
+          rar = cashAccountRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.SalesPerson) {
+          rar = salesPersonRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.spRef,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.PointOfSale) {
+          rar = posRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.CostCenter) {
+          rar = costCenterRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
+            }
+          })
+        } else if (classId == ResourceIds.CostCenterGroup) {
+          rar = costCenterGroupRequest.list?.map(item => {
+            return {
+              recordId: item.recordId,
+              name: item.name,
+              reference: item.reference,
+              hasAccess: false
             }
           })
         }
+        if (classId && rar) {
+          for (let i = 0; i < rar.length; i++) {
+            rowAccessUser.list.forEach(storedItem => {
+              if (storedItem.recordId.toString() == rar[i].recordId) {
+                rar[i].hasAccess = true
+                rar[i].checked = true
+              }
+            })
+          }
 
-        setData({ list: rar })
+          setData({ list: rar })
+        }
       }
-    })
+    )
   }
 
   const handleSearchChange = event => {

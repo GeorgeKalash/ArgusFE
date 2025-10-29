@@ -58,6 +58,7 @@ export default function ProductionOrderForm({ recordId, window }) {
   const conditions = {
     sku: row => row?.sku,
     qty: row => row?.qty != null,
+    jobCount: row => row?.jobCount != null,
     itemName: row => row?.itemName
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
@@ -71,6 +72,7 @@ export default function ProductionOrderForm({ recordId, window }) {
       dtId: null,
       reference: '',
       plantId,
+      lineId: null,
       notes: '',
       date: new Date(),
       status: 1,
@@ -83,6 +85,7 @@ export default function ProductionOrderForm({ recordId, window }) {
           qty: null,
           pcs: null,
           designId: null,
+          jobCount: 1,
           notes: '',
           seqNo: '',
           lineId: null,
@@ -247,6 +250,15 @@ export default function ProductionOrderForm({ recordId, window }) {
     },
     {
       component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      width: 200,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
       label: labels.design,
       name: 'designRef',
       width: 200,
@@ -255,13 +267,10 @@ export default function ProductionOrderForm({ recordId, window }) {
       }
     },
     {
-      component: 'textfield',
-      label: labels.itemName,
-      name: 'itemName',
-      width: 200,
-      props: {
-        readOnly: true
-      }
+      component: 'numberfield',
+      label: labels.jobCount,
+      name: 'jobCount',
+      width: 100
     },
     {
       component: 'resourcecombobox',
@@ -597,7 +606,7 @@ export default function ProductionOrderForm({ recordId, window }) {
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
                     maxLength='30'
-                    readOnly={isPosted || isClosed}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -641,6 +650,26 @@ export default function ProductionOrderForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    name='lineId'
+                    label={labels.prodLine}
+                    readOnly={isPosted || isClosed}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('lineId', newValue?.recordId)
+                    }}
+                    error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
                     label={labels.description}
@@ -664,6 +693,7 @@ export default function ProductionOrderForm({ recordId, window }) {
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
+            initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
             allowAddNewLine={!isPosted && !isClosed}
             allowDelete={!isPosted && !isClosed}
