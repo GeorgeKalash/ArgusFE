@@ -70,8 +70,6 @@ const MatrixGrid = ({
                 {`
                   .my-matrix-grid .ag-horizontal-left-spacer,
                   .my-matrix-grid .ag-horizontal-right-spacer {
-                    width: 0px !important;
-                    min-width: 0px !important;
                     overflow-x: hidden !important;
                   }
                 `}
