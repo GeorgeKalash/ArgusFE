@@ -246,18 +246,14 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
         }))
       formik.setFieldValue('dtId', dtId || null)
       formik.setFieldValue('siteName', res2?.record?.siteName || '')
-      formik.setFieldValue('workCenterRef', res?.record?.workCenterRef || '')
-      formik.setFieldValue('workCenterName', res?.record?.workCenterName || '')
-
       formik.setFieldValue('siteId', res2?.record?.siteId || null)
       formik.setFieldValue('workCenterId', res?.record?.workCenterId || null)
     } else {
       formik.setFieldValue('dtId', null)
       formik.setFieldValue('siteId', null)
       formik.setFieldValue('siteName', '')
+      formik.setFieldValue('laborId', null)
       formik.setFieldValue('workCenterId', null)
-      formik.setFieldValue('workCenterRef', '')
-      formik.setFieldValue('workCenterName', '')
     }
   }
 
