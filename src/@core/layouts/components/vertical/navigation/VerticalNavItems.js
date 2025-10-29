@@ -115,9 +115,15 @@ const VerticalNavItems = props => {
                   display: navCollapsed ? 'none' : 'flex'
                 }}
               >
-                <div className='text'>
-                  {' '}
-                  <span>{node.title}</span>
+                <div
+                  className='text'
+                  style={{
+                    textOverflow: 'ellipsis',
+                    maxWidth: '180px'
+                  }}
+                  title={node.title}
+                >
+                  {node.title.length > 25 ? node.title.slice(0, 22) + '...' : node.title}
                 </div>
                 {isFolder && (
                   <div
