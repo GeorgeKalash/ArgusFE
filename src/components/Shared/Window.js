@@ -241,39 +241,37 @@ const Window = React.memo(
                     )}
                   </Box>
                 </DialogTitle>
-                <>
-                  {tabs && (
-                    <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
-                      {tabs.map((tab, i) => (
-                        <Tab key={i} label={tab.label} disabled={tab?.disabled} />
-                      ))}
-                    </Tabs>
-                  )}
-                  {!showOverlay && isLoading && <LoadingOverlay />}
-                  {!controlled ? (
-                    <>
-                      <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
-                      {windowToolbarVisible && (
-                        <WindowToolbar
-                          onSave={onSave}
-                          onClear={onClear}
-                          onInfo={onInfo}
-                          onApply={onApply}
-                          disabledSubmit={disabledSubmit}
-                          disabledInfo={disabledInfo}
-                          disabledApply={disabledApply}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    React.Children.map(children, child => {
-                      return React.cloneElement(child, {
-                        expanded: expanded,
-                        height: expanded ? containerHeightPanel : heightPanel
-                      })
+                {tabs && (
+                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                    {tabs.map((tab, i) => (
+                      <Tab key={i} label={tab.label} disabled={tab?.disabled} />
+                    ))}
+                  </Tabs>
+                )}
+                {!showOverlay && isLoading && <LoadingOverlay />}
+                {!controlled ? (
+                  <>
+                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
+                    {windowToolbarVisible && (
+                      <WindowToolbar
+                        onSave={onSave}
+                        onClear={onClear}
+                        onInfo={onInfo}
+                        onApply={onApply}
+                        disabledSubmit={disabledSubmit}
+                        disabledInfo={disabledInfo}
+                        disabledApply={disabledApply}
+                      />
+                    )}
+                  </>
+                ) : (
+                  React.Children.map(children, child => {
+                    return React.cloneElement(child, {
+                      expanded: expanded,
+                      height: expanded ? containerHeightPanel : heightPanel
                     })
-                  )}
-                </>
+                  })
+                )}
               </Paper>
             </Box>
           </Draggable>
