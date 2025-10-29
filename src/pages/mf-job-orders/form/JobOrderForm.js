@@ -446,9 +446,9 @@ export default function JobOrderForm({
   async function fillDesignInfo(values) {
     if (imageSource == 1) updateParent(values.recordId, imageSource)
     else if (imageSource == 2) updateParent(values.itemId, imageSource)
-    formik.setFieldValue('designId', values?.recordId)
-    formik.setFieldValue('designRef', values?.reference)
-    formik.setFieldValue('designName', values?.name)
+    formik.setFieldValue('designId', values?.recordId || null)
+    formik.setFieldValue('designRef', values?.reference || '')
+    formik.setFieldValue('designName', values?.name || '')
     formik.setFieldValue('stdWeight', values?.stdWeight)
     formik.setFieldValue(
       'expectedQty',
@@ -501,9 +501,9 @@ export default function JobOrderForm({
   async function updateWC(routingId, isRouting) {
     if (!routingId) {
       if (!isRouting) {
-        formik.setFieldValue('workCenterId', null)
         formik.setFieldValue('wcRef', null)
         formik.setFieldValue('wcName', null)
+        formik.setFieldValue('workCenterId', null)
       }
 
       return
@@ -514,9 +514,9 @@ export default function JobOrderForm({
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
-    formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
-    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
+    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef || '')
+    formik.setFieldValue('wcName', res?.list[0]?.workCenterName || '')
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId || null)
   }
   function updateParent(recordId, imgSource) {
     setParentImage({
@@ -764,7 +764,7 @@ export default function JobOrderForm({
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
                         readOnly={isCancelled || isPosted}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await fillDesignInfo(newValue)
                           await updateWC(newValue?.routingId, false)
                         }}
@@ -879,9 +879,9 @@ export default function JobOrderForm({
                         readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
                         onChange={(event, newValue) => {
-                          formik.setFieldValue('workCenterId', newValue?.recordId)
-                          formik.setFieldValue('wcRef', newValue?.reference)
-                          formik.setFieldValue('wcName', newValue?.name)
+                          formik.setFieldValue('wcRef', newValue?.reference || '')
+                          formik.setFieldValue('wcName', newValue?.name || '')
+                          formik.setFieldValue('workCenterId', newValue?.recordId || null)
                         }}
                       />
                     </Grid>

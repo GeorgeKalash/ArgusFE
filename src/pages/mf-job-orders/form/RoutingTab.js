@@ -73,7 +73,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'numberfield',
       label: labels.seqNo,
       name: 'seqNo',
-      width: 65,
+      flex: 1,
       props: {
         unClearable: true
       },
@@ -85,7 +85,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.seqName,
       name: 'name',
-      flex: 1,
+      flex: 2,
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
       }
@@ -94,7 +94,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'resourcelookup',
       label: labels.wcRef,
       name: 'workCenterRef',
-      width: 100,
+      flex: 2,
       props: {
         endpointId: ManufacturingRepository.WorkCenter.snapshot,
         displayField: 'reference',
@@ -138,7 +138,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.wcName,
       name: 'workCenterName',
-      width: 310,
+      flex: 2.7,
       props: {
         readOnly: true
       }
@@ -147,7 +147,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'resourcecombobox',
       label: labels.operation,
       name: 'operationName',
-      width: 100,
+      flex: 2,
       props: {
         store: operationStore?.current,
         displayField: 'reference',
@@ -175,7 +175,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       component: 'textfield',
       label: labels.status,
       name: 'statusName',
-      width: 100,
+      flex: 2,
       props: {
         readOnly: true
       }
@@ -183,7 +183,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.qtyIn,
-      width: 65,
+      flex: 1,
       name: 'qtyIn',
       props: {
         readOnly: true
@@ -192,7 +192,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.pcsIn,
-      width: 65,
+      flex: 1,
       name: 'pcsIn',
       props: {
         readOnly: true
@@ -201,7 +201,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.qty,
-      width: 65,
+      flex: 1,
       name: 'qty',
       props: {
         readOnly: true
@@ -210,7 +210,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     {
       component: 'numberfield',
       label: labels.pcs,
-      width: 65,
+      flex: 1,
       name: 'pcs',
       props: {
         readOnly: true
