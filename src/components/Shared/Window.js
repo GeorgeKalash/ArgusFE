@@ -107,9 +107,9 @@ const Window = React.memo(
           id='parent'
           sx={{
             bottom: 0,
-            position: 'absolute',
-            width: spacing ? containerWidth : '100%',
-            height: spacing ? containerHeight : '100%',
+            position: 'fixed',
+            width: containerWidth,
+            height: containerHeight,
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
             display: 'flex',
             justifyContent: 'center',
