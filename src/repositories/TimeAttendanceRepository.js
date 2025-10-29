@@ -9,7 +9,7 @@ export const TimeAttendanceRepository = {
     set: service + 'setOTP',
     get: service + 'getOTP',
     del: service + 'delOTP',
-    qry: service + 'qryOTP',
+    qry: service + 'qryOTP'
   },
   PendingPunches: {
     page: service + 'pagePP',
@@ -27,10 +27,15 @@ export const TimeAttendanceRepository = {
     get: service + 'getLR',
     del: service + 'delLR'
   },
-  ResetTV: {
+  TimeVariation: {
     reset: service + 'resetTV',
     qry: service + 'qryTV',
-    qry2: service + 'qryTV2'
+    qry2: service + 'qryTV2',
+    snapshot: service + 'snapshotTV',
+    page: service + 'pageTV',
+    get: service + 'getTV',
+    set: service + 'setTV',
+    del: service + 'delTV'
   },
   ShitLeave: {
     page: service + 'pageLQ',

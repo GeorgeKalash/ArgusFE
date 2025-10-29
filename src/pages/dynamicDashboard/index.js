@@ -157,7 +157,7 @@ const DashboardLayout = () => {
         getRequest({ extension: DashboardRepository.dashboard }),
         getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
         getRequest({
-          extension: TimeAttendanceRepository.ResetTV.qry2,
+          extension: TimeAttendanceRepository.TimeVariation.qry2,
           parameters: `_dayId=${formatDateForGetApI(new Date())}`
         }),
         getRequest({
