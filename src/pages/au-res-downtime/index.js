@@ -50,6 +50,11 @@ const ResourceDowntime = () => {
       flex: 1
     },
     {
+      field: 'typeName',
+      headerName: labels.type,
+      flex: 1
+    },
+    {
       field: 'moduleName',
       headerName: labels.module,
       flex: 1
