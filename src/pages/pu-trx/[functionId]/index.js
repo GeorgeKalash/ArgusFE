@@ -15,6 +15,7 @@ import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import PurchaseTransactionForm from './PurchaseTransactionForm'
 import { Router } from 'src/lib/useRouter'
+import toast from 'react-hot-toast'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -32,6 +33,15 @@ const PuTrx = () => {
         return ResourceIds.PurchaseReturn
       default:
         return null
+    }
+  }
+
+  const getEndpoint = {
+    [SystemFunction.PurchaseInvoice]: {
+      del: PurchaseRepository.PurchaseInvoiceHeader.del
+    },
+    [SystemFunction.PurchaseReturn]: {
+      del: PurchaseRepository.PurchaseReturnHeader.del
     }
   }
 
@@ -211,7 +221,7 @@ const PuTrx = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: PurchaseRepository.PurchaseInvoiceHeader.del,
+      extension: getEndpoint[functionId]?.['del'],
       record: JSON.stringify(obj)
     })
     invalidate()

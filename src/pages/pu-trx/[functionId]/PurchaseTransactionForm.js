@@ -62,6 +62,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import Installments from 'src/components/Shared/Installments'
+import { PUSerialsForm } from 'src/components/Shared/PUSerialsForm'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -204,6 +205,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
+  const getEndpoint = {
+    [SystemFunction.PurchaseInvoice]: {
+      set: PurchaseRepository.PurchaseInvoiceHeader.set2,
+      post: PurchaseRepository.PurchaseInvoiceHeader.post,
+      unpost: PurchaseRepository.PurchaseInvoiceHeader.unpost
+    },
+    [SystemFunction.PurchaseReturn]: {
+      set: PurchaseRepository.PurchaseReturnHeader.set2,
+      post: PurchaseRepository.PurchaseReturnHeader.post,
+      unpost: PurchaseRepository.PurchaseReturnHeader.unpost
+    }
+  }
+
   const onClick = () => {
     stack({
       Component: ItemPromotion,
@@ -307,7 +321,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
 
       const puTrxRes = await postRequest({
-        extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
+        extension: getEndpoint[functionId]?.['set'],
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -489,7 +503,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -717,7 +731,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const onPost = async () => {
     await postRequest({
-      extension: PurchaseRepository.PurchaseInvoiceHeader.post,
+      extension: getEndpoint[functionId]?.['post'],
       record: JSON.stringify(formik.values.header)
     })
 
@@ -729,7 +743,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: PurchaseRepository.PurchaseInvoiceHeader.unpost,
+      extension: getEndpoint[functionId]?.['unpost'],
       record: JSON.stringify(formik.values.header)
     })
 
@@ -1527,6 +1541,30 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
+  if (functionId == SystemFunction.PurchaseInvoice) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: PUSerialsForm,
+            props: {
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
+              updateRow
+            }
+          })
+        }
+      }
+    })
+  }
+
   async function getMultiCurrencyFormData(currencyId, date) {
     if (currencyId && date) {
       const res = await getRequest({
@@ -1752,9 +1790,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
                 }
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                  formik.setFieldValue('header.siteRef', newValue?.reference || null)
+                  formik.setFieldValue('header.siteName', newValue?.name || null)
+                  formik.setFieldValue('header.siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
               />
@@ -1882,6 +1920,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}
           />
         </Grow>

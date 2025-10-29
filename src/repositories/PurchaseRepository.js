@@ -77,6 +77,10 @@ export const PurchaseRepository = {
     snapshot: service + 'snapshotINV'
   },
   PurchaseReturnHeader: {
+    set2: service + 'set2IVR',
+    post: service + 'postIVR',
+    unpost: service + 'unpostIVR',
+    del: service + 'delIVR',
     qry: service + 'qryIVR',
     snapshot: service + 'snapshotIVR'
   },

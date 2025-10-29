@@ -5,10 +5,11 @@ export const PayrollRepository = {
     qry: service + 'qryHE'
   },
   BankTransferFilters: {
-    qry: service + 'qrySB'
-  },
-  Penalty: {
-    qry: service + 'qryPT'
+    qry: service + 'qrySB',
+    page: service + 'pageSB',
+    get: service + 'getSB',
+    set: service + 'setSB',
+    del: service + 'delSB'
   },
   Paycode: {
     qry: service + 'qryPC',
@@ -35,12 +36,6 @@ export const PayrollRepository = {
   Arguments: {
     page: service + 'pageAR'
   },
-  CnssBranches: {
-    page: service + 'pageSB',
-    get: service + 'getSB',
-    set: service + 'setSB',
-    del: service + 'delSB'
-  },
   SalaryBatch: {
     page: service + 'pageBAT',
     get: service + 'getBAT',
@@ -49,6 +44,7 @@ export const PayrollRepository = {
   },
   TimeCodes: {
     page: service + 'pageTC',
+    qry: service + 'qryTC',
     get: service + 'getTC',
     set: service + 'setTC',
     del: service + 'delTC'
@@ -68,5 +64,16 @@ export const PayrollRepository = {
   IndemnityResignation: {
     qry: service + 'qryIR',
     set2: service + 'set2IR'
+  },
+  PenaltyType: {
+    page: service + 'pagePT',
+    qry: service + 'qryPT',
+    get: service + 'getPT',
+    set: service + 'setPT',
+    del: service + 'delPT'
+  },
+  PenaltyDetail: {
+    qry: service + 'qryPD',
+    set2: service + 'set2PD'
   }
 }
