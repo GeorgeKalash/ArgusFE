@@ -53,7 +53,6 @@ const Window = React.memo(
     disabledInfo,
     onApply,
     disabledApply,
-    spacing,
     isLoading = true,
     ...props
   }) => {
