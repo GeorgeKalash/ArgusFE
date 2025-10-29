@@ -64,7 +64,6 @@ const Window = React.memo(
     const [minimized, setMinimized] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
-    const actionRef = useRef()
 
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
@@ -85,6 +84,12 @@ const Window = React.memo(
         transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
       }
     }, [expanded])
+
+    useEffect(() => {
+      if (paperRef.current) {
+        paperRef.current.focus()
+      }
+    }, [])
 
     useEffect(() => {
       if (!loading) {
@@ -121,31 +126,8 @@ const Window = React.memo(
             zIndex: 2
           }}
           onKeyDown={e => {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && closable) {
               onClose()
-            } else {
-              const target = e.target
-              const role = target.getAttribute('role') || ''
-              const isSearchField = target.getAttribute('data-search') === 'true'
-
-              if (actionRef.current?.submit) {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-                  e.preventDefault()
-                  actionRef.current?.submit()
-                }
-                if (e.key === 'Enter') {
-                  if (isSearchField) {
-                    return
-                  }
-                  const isDropDownOpen = target.getAttribute('aria-expanded') === 'true'
-                  const isEqual = (role === 'combobox' && isDropDownOpen) || role === 'gridcell'
-
-                  if (!isEqual) {
-                    e.preventDefault()
-                    actionRef.current?.submit()
-                  }
-                }
-              }
             }
           }}
         >
@@ -182,6 +164,7 @@ const Window = React.memo(
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
                   flexDirection: controlled ? 'column' : 'unset',
+                  '&:focus': { outline: 'none', boxShadow: 'none' },
                   backgroundColor: minimized ? 'rgba(255, 255, 255, 0.4)' : 'background.paper',
                   backdropFilter: minimized ? 'blur(4px)' : 'none',
                   boxShadow: minimized ? 'none' : 6,
@@ -266,7 +249,6 @@ const Window = React.memo(
                       ))}
                     </Tabs>
                   )}
-
                   {!showOverlay && isLoading && <LoadingOverlay />}
                   {!controlled ? (
                     <>
@@ -287,8 +269,7 @@ const Window = React.memo(
                     React.Children.map(children, child => {
                       return React.cloneElement(child, {
                         expanded: expanded,
-                        height: expanded ? containerHeightPanel : heightPanel,
-                        ref: actionRef
+                        height: expanded ? containerHeightPanel : heightPanel
                       })
                     })
                   )}

@@ -1,4 +1,3 @@
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -12,6 +11,7 @@ import { useContext } from 'react'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { useResourceQuery } from 'src/hooks/resource'
+import Form from './Form'
 
 export default function ExpensesCostCenters({ row, window, updateRow, recordId, readOnly }) {
   const { platformLabels } = useContext(ControlContext)
@@ -114,14 +114,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
   const canSubmit = balance > 0 || balance < 0 || readOnly
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CostCenter}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-      disabledSubmit={canSubmit}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={canSubmit}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={4}>
@@ -173,7 +166,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

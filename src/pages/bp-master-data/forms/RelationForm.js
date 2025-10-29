@@ -32,7 +32,6 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       toBPRef: null,
       fromBPId: bpId
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       toBPId: yup.string().required(),
@@ -81,7 +80,7 @@ const RelationForm = ({ bpId, recordId, labels, maxAccess, getRelationGridData, 
       resourceId={ResourceIds.BPMasterData}
       form={formik}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={editMode}
     >
       <VertLayout>

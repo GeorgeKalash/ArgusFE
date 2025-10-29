@@ -8,10 +8,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
+import Form from 'src/components/Shared/Form'
 
 const PUFinancialIntegrators = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,10 +23,10 @@ const PUFinancialIntegrators = () => {
     })
     formik.setValues({
       ...formik.values,
-      items: res.list.map(({ ...rest }, index) => ({
+      items: res.list.map(({ sameNumber, ...rest }, index) => ({
+        ...rest,
         id: index + 1,
-        sameNumber: false,
-        ...rest
+        sameNumber: sameNumber || false
       }))
     })
   }
@@ -96,24 +95,23 @@ const PUFinancialIntegrators = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => {
-            formik.setFieldValue('items', value)
-          }}
-          name='financialIntegrator'
-          value={formik.values?.items}
-          error={formik.errors?.items}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => {
+              formik.setFieldValue('items', value)
+            }}
+            name='financialIntegrator'
+            value={formik.values?.items}
+            error={formik.errors?.items}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

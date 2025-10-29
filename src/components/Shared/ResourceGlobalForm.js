@@ -1,7 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -13,6 +11,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from 'src/hooks/useSetWindow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 export default function ResourceGlobalForm({ labels, maxAccess, row, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -38,7 +37,6 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, window, res
         unpost: false
       }
     },
-    enableReinitialize: true,
     validateOnChange: true,
 
     onSubmit: async obj => {
@@ -80,13 +78,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, window, res
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SecurityGroup}
-      form={formik}
-      maxAccess={maxAccess}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -193,7 +185,7 @@ export default function ResourceGlobalForm({ labels, maxAccess, row, window, res
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

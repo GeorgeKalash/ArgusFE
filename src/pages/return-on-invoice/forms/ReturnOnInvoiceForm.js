@@ -134,6 +134,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         metalId: 0,
         metalPurity: 0,
         taxId: 0,
+        totalWeight: 0,
         balanceQty: 0,
         pieces: 0,
         itemId: null,
@@ -524,6 +525,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     },
     {
       component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.volume,
       name: 'volume',
       props: {
@@ -786,6 +795,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       datasetId: ResourceIds.GLReturnOnInvoice,
       disabled: !editMode
     },
@@ -837,6 +850,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
                 serials: serials?.filter(s => s.seqNo == item.seqNo),
+                totalWeight: (parseFloat(item.weight || 0) * parseFloat(item.qty || 0)).toFixed(2),
                 isEditMode: true
               }
             })
@@ -1013,7 +1027,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
     let data = iconClicked ? { changes: commonData } : commonData
-    update(data)
+    update({
+      ...data,
+      totalWeight: parseFloat(newRow?.weight).toFixed(2) * parseFloat(newRow?.returnNowQty).toFixed(2)
+    })
   }
 
   const parsedItemsArray = formik.values.items
@@ -1217,7 +1234,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   async function onValidationRequired() {

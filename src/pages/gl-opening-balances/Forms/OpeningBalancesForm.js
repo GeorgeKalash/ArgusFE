@@ -36,12 +36,11 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
       accountId: null,
       currencyId: null,
       sign: '',
-      costCenterId: null,
+      costCenterId: 0,
       amount: null,
       baseAmount: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.number().required(),
@@ -68,7 +67,8 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
       } else toast.success(platformLabels.Edited)
       formik.setValues({
         ...obj,
-        recordId: String(obj.fiscalYear * 10) + String(obj.accountId) + String(obj.currencyId) + String(obj.costCenterId)
+        recordId:
+          String(obj.fiscalYear * 10) + String(obj.accountId) + String(obj.currencyId) + String(obj.costCenterId)
       })
 
       invalidate()
@@ -79,7 +79,14 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
 
   useEffect(() => {
     ;(async function () {
-      if (record && record.currencyId && record.fiscalYear && record.accountId && record.costCenterId !== null && recordId) {
+      if (
+        record &&
+        record.currencyId &&
+        record.fiscalYear &&
+        record.accountId &&
+        record.costCenterId !== null &&
+        recordId
+      ) {
         const res = await getRequest({
           extension: GeneralLedgerRepository.OpeningBalances.get,
           parameters: `_fiscalYear=${record.fiscalYear}&_accountId=${record.accountId}&_currencyId=${record.currencyId}&_costCenterId=${record.costCenterId}`
@@ -88,7 +95,10 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
         formik.setValues({
           ...res.record,
           recordId:
-            String(record.fiscalYear * 10) + String(record.accountId) + String(record.currencyId) + String(record.costCenterId)
+            String(record.fiscalYear * 10) +
+            String(record.accountId) +
+            String(record.currencyId) +
+            String(record.costCenterId)
         })
       }
     })()
@@ -111,7 +121,7 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 required
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear ||null)
+                  formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)
                 }}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
@@ -183,10 +193,8 @@ export default function OpeningBalancesForm({ labels, maxAccess, record, recordI
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('costCenterId', newValue?.recordId)
-                  formik.setFieldValue('costCenterRef', newValue?.reference)
-                  formik.setFieldValue('costCenterName', newValue?.name)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('costCenterId', newValue?.recordId || 0)
                 }}
                 error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
                 maxAccess={maxAccess}

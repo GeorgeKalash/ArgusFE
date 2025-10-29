@@ -4,12 +4,11 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import FileUpload from '../Inputs/FileUpload'
-import FormShell from './FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -18,7 +17,7 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   useSetWindow({ title: platformLabels.Attachment, window })
 
   const invalidate = useInvalidate({
-    endpointId: SystemRepository.Attachment.qry
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`,
   })
 
   const { formik } = useForm({
@@ -26,7 +25,6 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
       resourceId,
       seqNo
     },
-    enableReinitialize: false,
     validateOnChange: false,
     onSubmit: async obj => {
       if (fileUploadRef.current) {
@@ -39,19 +37,13 @@ const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SystemAttachments}
-      form={formik}
-      isSavedClear={false}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit}>
       <VertLayout>
         <Grow>
           <FileUpload ref={fileUploadRef} resourceId={resourceId} seqNo={seqNo} recordId={recordId} />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

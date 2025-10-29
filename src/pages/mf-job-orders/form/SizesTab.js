@@ -8,12 +8,12 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function SizesTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -22,7 +22,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
@@ -190,14 +189,11 @@ export default function SizesTab({ labels, maxAccess, store }) {
   }, [recordId])
 
   return (
-    <FormShell
+    <Form
       resourceId={ResourceIds.MFJobOrders}
-      form={formik}
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -230,6 +226,6 @@ export default function SizesTab({ labels, maxAccess, store }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

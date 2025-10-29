@@ -1,17 +1,16 @@
 import { Grid } from '@mui/material'
 import { useContext } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function ReleaseCodeForm({ labels, maxAccess, recordId, window }) {
   const { postRequest } = useContext(RequestsContext)
@@ -26,7 +25,6 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
       codeId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       codeId: yup.string().required()
@@ -43,14 +41,7 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
   })
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SecurityGroup}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={!!recordId}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!recordId}>
       <VertLayout>
         <Grow>
           <Grid item xs={12}>
@@ -71,6 +62,6 @@ export default function ReleaseCodeForm({ labels, maxAccess, recordId, window })
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -203,7 +203,6 @@ export default function PurchaseOrderForm({ recordId, window }) {
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     conditionSchema: ['items'],
     initialValues: initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -857,6 +856,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
 
+    const unitPrice = !vendorPrice ? 0 : vendorPrice.priceList
     const baseLaborPrice = !vendorPrice ? 0 : vendorPrice.baseLaborPrice
     const TotPricePerG = baseLaborPrice
 
@@ -907,7 +907,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       basePrice: 0,
       baseLaborPrice: baseLaborPrice,
       TotPricePerG: TotPricePerG,
-      unitPrice: 0,
+      unitPrice,
       priceType: itemInfo?.priceType || 1,
       qty: 0,
       msId: itemInfo?.msId,
@@ -924,10 +924,10 @@ export default function PurchaseOrderForm({ recordId, window }) {
     }
   }
 
-  async function getDataRow(itemId) {
+  async function getDataRow(itemId, hideVendorUnitPrice) {
     const phycialProperty = await getItemPhysProp(itemId)
     const itemInfo = await getItem(itemId)
-    const vendorPrice = await getVendorPrice(itemId)
+    const vendorPrice = !hideVendorUnitPrice ? await getVendorPrice(itemId) : ''
 
     return await itemObject(phycialProperty, itemInfo, vendorPrice)
   }
@@ -1230,7 +1230,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
     const itemInfoArray = await Promise.all(
       response.list.map(async item => {
-        const itemInfo = await getDataRow(item.itemId)
+        const itemInfo = await getDataRow(item.itemId, true)
 
         const keysToExclude = [
           'muId',
@@ -1371,8 +1371,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     form={formik}
                     secondDisplayField={false}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('requestId', newValue.recordId || null)
-                      formik.setFieldValue('requestRef', newValue.reference || '')
+                      formik.setFieldValue('requestId', newValue?.recordId || null)
+                      formik.setFieldValue('requestRef', newValue?.reference || '')
                     }}
                     errorCheck={'requestId'}
                     maxAccess={maxAccess}

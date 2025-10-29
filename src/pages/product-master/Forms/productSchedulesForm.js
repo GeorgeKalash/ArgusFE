@@ -1,17 +1,16 @@
 import { useFormik } from 'formik'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,7 +20,6 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   const ref = useRef()
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       schedules: yup
@@ -274,14 +272,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.ProductMaster}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -322,7 +313,7 @@ const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) 
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

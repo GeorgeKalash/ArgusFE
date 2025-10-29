@@ -118,7 +118,6 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
       attemptNo: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -356,6 +355,7 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
       actions={actions}
       editMode={editMode}
       functionId={SystemFunction.OutwardsReturn}
+      previewReport={editMode}
       disabledSubmit={isOpenOutwards ? false : isPosted || isClosed}
     >
       <VertLayout>

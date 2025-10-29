@@ -1,8 +1,6 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -11,17 +9,16 @@ import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import Form from 'src/components/Shared/Form'
 
 const ScrapForm = ({ store, maxAccess, labels }) => {
   const { recordId, metalColorId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-
   const editMode = !!recordId
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     validationSchema: yup.object({
@@ -128,14 +125,7 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.MetalSettings}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -144,10 +134,11 @@ const ScrapForm = ({ store, maxAccess, labels }) => {
             error={formik.errors.scrap}
             columns={columns}
             name={'scrap'}
+            maxAccess={maxAccess}
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

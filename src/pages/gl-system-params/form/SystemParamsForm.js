@@ -8,21 +8,19 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { ControlContext } from 'src/providers/ControlContext'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import * as yup from 'yup'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import Form from 'src/components/Shared/Form'
 
 const SystemParamsForm = ({ _labels, access }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       GLDOEGainAccountId: yup.string().required(),
@@ -148,14 +146,7 @@ const SystemParamsForm = ({ _labels, access }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SystemParams}
-      form={formik}
-      maxAccess={access}
-      infoVisible={false}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -385,7 +376,7 @@ const SystemParamsForm = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

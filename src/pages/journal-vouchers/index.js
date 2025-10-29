@@ -74,7 +74,7 @@ const JournalVoucher = () => {
       type: 'date'
     },
     {
-      field: 'description',
+      field: 'notes',
       headerName: _labels.description,
       flex: 1
     },

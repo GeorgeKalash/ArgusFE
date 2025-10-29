@@ -25,7 +25,7 @@ const IvItems = () => {
 
     const response = await getRequest({
       extension: InventoryRepository.Items.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=recordId desc&_params=${params}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -41,7 +41,7 @@ const IvItems = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: InventoryRepository.Items.snapshot,
+    endpointId: InventoryRepository.Items.qry,
     datasetId: ResourceIds.Items,
     filter: {
       filterFn: fetchWithFilter

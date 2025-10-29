@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import React, { useContext, useEffect, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -12,10 +11,10 @@ import { useForm } from 'src/hooks/form'
 import ImageUpload from 'src/components/Inputs/ImageUpload'
 import { getStorageData } from 'src/storage/storage'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Form from 'src/components/Shared/Form'
 
 const CompanyInfo = () => {
   const imageUploadRef = useRef()
-
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { labels: labels, access: maxAccess } = useResourceParams({
@@ -47,7 +46,6 @@ const CompanyInfo = () => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       plantId: '',
@@ -77,14 +75,7 @@ const CompanyInfo = () => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CompanyInfo}
-      form={formik}
-      infoVisible={false}
-      isCleared={false}
-      isSavedClear={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grid container spacing={4}>
           <Grid item xs={12}>
@@ -186,7 +177,7 @@ const CompanyInfo = () => {
           </Grid>
         </Grid>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

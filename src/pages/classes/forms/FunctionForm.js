@@ -21,7 +21,6 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
   })
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues,
     validationSchema: yup.object({

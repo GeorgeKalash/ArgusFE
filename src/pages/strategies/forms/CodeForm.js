@@ -4,28 +4,16 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { useEffect } from 'react'
-
 import * as yup from 'yup'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const CodeForm = ({
-  labels,
-  editMode,
-  maxAccess,
-
-  recordId,
-  store,
-
-  window
-}) => {
+const CodeForm = ({ labels, editMode, maxAccess, recordId, store, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
@@ -37,60 +25,42 @@ const CodeForm = ({
   const { formik } = useForm({
     maxAccess,
     initialValues: { codeId: '', groupId: store.groupId, strategyId: stgId },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       codeId: yup.string().required()
     }),
 
     onSubmit: async values => {
-      try {
-        await postGroups(values)
-        window.close()
-      } catch (error) {
-        toast.error('An error occurred')
-      }
+      await postGroups(values)
+      window.close()
     }
   })
 
   const postGroups = async obj => {
-    const isNewRecord = !obj?.codeId
-
-    try {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.StrategyCode.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (isNewRecord) {
-        toast.success('Record Added Successfully')
-      } else {
-        toast.success('Record Edited Successfully')
-      }
-      invalidate()
-    } catch {}
+    await postRequest({
+      extension: DocumentReleaseRepository.StrategyCode.set,
+      record: JSON.stringify(obj)
+    })
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    invalidate()
   }
   useEffect(() => {
     recordId && getGroupId(recordId)
   }, [recordId])
 
   const getGroupId = codeId => {
-    const defaultParams = `_codeId=${codeId}&_groupId=${store.groupId}`
-    var parameters = defaultParams
     getRequest({
       extension: DocumentReleaseRepository.GroupCode.qry,
       parameters: `_groupId=${store.groupId}`
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        formik.setValues(res.record)
-      })
-      .catch(error => {})
   }
 
   return (
     <FormShell
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       resourceId={ResourceIds.Strategies}
       maxAccess={maxAccess}
       editMode={editMode}

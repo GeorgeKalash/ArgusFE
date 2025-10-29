@@ -28,8 +28,10 @@ import GenerateInvoiceForm from './GenerateInvoiceForm'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useInvalidate } from 'src/hooks/resource'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
+export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -39,10 +41,15 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
   const [measurements, setMeasurements] = useState([])
   const { stack: stackError } = useError()
 
-  
   const invalidate = useInvalidate({
     endpointId: PurchaseRepository.Shipment.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.Shipments
+  })
+
+  useSetWindow({ title: labels.shipment, window })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Shipment,
@@ -112,7 +119,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -233,7 +239,7 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
       recordId: shipHeader.record.recordId,
       dtId: shipHeader.record.dtId,
       header: {
-        ...shipHeader.record,
+        ...shipHeader.record
       },
       items: itemsList
     })
@@ -854,3 +860,6 @@ export default function ShipmentsForm({ labels, maxAccess: access, recordId }) {
     </FormShell>
   )
 }
+
+ShipmentsForm.width = 1300
+ShipmentsForm.height = 700

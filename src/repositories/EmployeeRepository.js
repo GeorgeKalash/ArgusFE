@@ -3,7 +3,9 @@ const service = 'EP.asmx/'
 export const EmployeeRepository = {
   Employee: {
     snapshot: service + 'snapshotEM',
-    get1: service + 'getEM1'
+    get1: service + 'getEM1',
+    set: service + 'setEM',
+    del: service + 'delEM'
   },
   CertificateFilters: {
     qry: service + 'qryCL',
@@ -58,13 +60,15 @@ export const EmployeeRepository = {
     get: service + 'getNP',
     set: service + 'setNP',
     del: service + 'delNP',
+    qry: service + 'qryNP',
     page: service + 'pageNP'
   },
   CustomProperties: {
     get: service + 'getUP',
     set: service + 'setUP',
     del: service + 'delUP',
-    page: service + 'pageUP'
+    page: service + 'pageUP',
+    qry: service + 'qryUP'
   },
   ResignationRequest: {
     get: service + 'getRR',
@@ -88,7 +92,8 @@ export const EmployeeRepository = {
     reopen: service + 'reopenJI',
     get: service + 'getJI',
     set: service + 'setJI',
-    del: service + 'delJI'
+    del: service + 'delJI',
+    qry: service + 'qryJI'
   },
   QuickView: {
     get: service + 'getQV'
@@ -107,12 +112,42 @@ export const EmployeeRepository = {
     del: service + 'delED',
     get: service + 'getED',
     set: service + 'setED',
-    snapshot: service + 'snapshotED',
+    snapshot: service + 'snapshotED'
   },
   FullName: {
     sync: service + 'syncFullName'
   },
   EmployeeChart: {
-    qry: service + 'qryES'
+    qry: service + 'qryES',
+    qry2: service + 'qryES2',
+    page: service + 'pageES1'
+  },
+  TerminationEmployee: {
+    get: service + 'getTE'
+  },
+  EmployementHistory: {
+    qry: service + 'qryEH',
+    del: service + 'delEH',
+    get: service + 'getEH',
+    set: service + 'setEH'
+  },
+  Hiring: {
+    get: service + 'getRE',
+    set: service + 'setRE'
+  },
+  Skills: {
+    qry: service + 'qryCE',
+    del: service + 'delCE',
+    get: service + 'getCE',
+    set: service + 'setCE'
+  },
+  UserDefined: {
+    qry: service + 'qryUV',
+    set2: service + 'set2UV'
+  },
+  Leaves: {
+    set: service + 'setLS',
+    del: service + 'delLS',
   }
 }
+

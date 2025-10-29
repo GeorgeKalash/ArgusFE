@@ -1,8 +1,6 @@
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
@@ -10,6 +8,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import Form from 'src/components/Shared/Form'
 
 const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -19,7 +18,6 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       rows: []
@@ -72,12 +70,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
     })
 
     await Promise.all(postBody)
-
-    if (!recordId) {
-      toast.success(platformLabels.Added)
-    } else {
-      toast.success(platformLabels.Edited)
-    }
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
   }
 
   async function getIdNumber(recordId) {
@@ -112,14 +105,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
   }, [store.category, recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.BPMasterData}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -133,7 +119,7 @@ const IDNumberForm = ({ store, maxAccess, labels }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

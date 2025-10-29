@@ -8,7 +8,8 @@ export const TimeAttendanceRepository = {
     page: service + 'pageOTP',
     set: service + 'setOTP',
     get: service + 'getOTP',
-    del: service + 'delOTP'
+    del: service + 'delOTP',
+    qry: service + 'qryOTP',
   },
   PendingPunches: {
     page: service + 'pagePP',
@@ -27,7 +28,9 @@ export const TimeAttendanceRepository = {
     del: service + 'delLR'
   },
   ResetTV: {
-    reset: service + 'resetTV'
+    reset: service + 'resetTV',
+    qry: service + 'qryTV',
+    qry2: service + 'qryTV2'
   },
   ShitLeave: {
     page: service + 'pageLQ',
@@ -42,5 +45,20 @@ export const TimeAttendanceRepository = {
   },
   DSLReason: {
     qry: service + 'qryLR'
+  },
+  Calendar: {
+    qry: service + 'qryCA'
+  },
+  DayTypes: {
+    page: service + 'pageDT',
+    set: service + 'setDT',
+    get: service + 'getDT',
+    del: service + 'delDT'
+  },
+  AttendanceDay: {
+    qry: service + 'qryAD'
+  },
+  Schedule: {
+    qry: service + 'qrySC'
   }
 }

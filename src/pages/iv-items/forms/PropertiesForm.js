@@ -1,8 +1,5 @@
 import { useState, useContext, useEffect } from 'react'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
-
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -10,10 +7,10 @@ import { useForm } from 'src/hooks/form.js'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import toast from 'react-hot-toast'
+import Form from 'src/components/Shared/Form'
 
 const PropertiesForm = ({ store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -100,7 +97,6 @@ const PropertiesForm = ({ store, maxAccess }) => {
   const { formik } = useForm({
     initialValues: {},
 
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: async () => {
       const submissionData = dimensions.map(dimension => {
@@ -153,7 +149,7 @@ const PropertiesForm = ({ store, maxAccess }) => {
   })
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -203,7 +199,7 @@ const PropertiesForm = ({ store, maxAccess }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -2,7 +2,6 @@ import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -12,16 +11,15 @@ import { useForm } from 'src/hooks/form.js'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
 const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { recordId } = store
-
   const { platformLabels } = useContext(ControlContext)
 
   const conditions = {
@@ -30,7 +28,8 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
     ptName: row => row?.ptName,
     value: row => row?.value || row?.value === 0,
     vtName: row => row?.vtName,
-    minPrice: row => (row.value > 0 || row?.plId  > 0 || row?.ptName  > 0 || row?.currencyId  > 0) && row?.minPrice <= row?.value
+    minPrice: row =>
+      (row.value > 0 || row?.plId > 0 || row?.ptName > 0 || row?.currencyId > 0) && row?.minPrice <= row?.value
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -246,7 +245,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
   ]
 
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Items} maxAccess={maxAccess} infoVisible={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -313,7 +312,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

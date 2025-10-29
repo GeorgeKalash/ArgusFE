@@ -203,14 +203,14 @@ export default function SaleTransactionForm({
           applyVat: false,
           taxId: null,
           taxDetails: null,
-          notes: ''
+          notes: '',
+          totalWeight: 0
         }
       ],
       serials: [],
       lots: [],
       taxes: []
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
@@ -450,6 +450,8 @@ export default function SaleTransactionForm({
       mdValue: 0,
       taxId: rowTax,
       minPrice,
+      siteId: formik.values?.header?.siteId || null,
+      siteRef: formik.values?.header?.siteRef || null,
       taxDetails: rowTaxDetails,
       taxDetailsButton: true
     })
@@ -553,7 +555,7 @@ export default function SaleTransactionForm({
         if (!newRow.itemId) return
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        getFilteredMU(newRow?.itemId)
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
         await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
@@ -623,16 +625,42 @@ export default function SaleTransactionForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          await getItemConvertPrice(newRow.itemId, newRow?.muId)
-          const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-          const qtyInBase = newRow?.qty * filteredItems?.muQty
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
 
-          update({
-            qtyInBase,
-            muQty: newRow?.muQty
-          })
+          return
         }
+
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+        const qtyInBase = newRow?.qty * filteredItems?.muQty
+
+        const unitPrice =
+          ItemConvertPrice?.priceType === 3
+            ? (newRow?.weight || 0) *
+              ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
+                (ItemConvertPrice?.baseLaborPrice || 0))
+            : ItemConvertPrice?.unitPrice || 0
+
+        const data = getItemPriceRow(
+          {
+            ...newRow,
+            qtyInBase,
+            muQty: newRow?.muQty,
+            unitPrice,
+            minPrice: ItemConvertPrice?.minPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1,
+            basePrice:
+              newRow?.isMetal === false
+                ? ItemConvertPrice?.basePrice || 0
+                : newRow?.metalPurity > 0
+                ? basePriceValue
+                : 0
+          },
+          DIRTYFIELD_QTY
+        )
+        update(data)
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredMeasurements?.current }
@@ -644,11 +672,14 @@ export default function SaleTransactionForm({
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
-        update(data)
+        update({
+          ...data,
+          totalWeight: (data.weight || 0) * (newRow.qty || 0)
+        })
       }
     },
     {
@@ -666,6 +697,14 @@ export default function SaleTransactionForm({
       name: 'weight',
       props: {
         decimalScale: 2,
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
         readOnly: true
       }
     },
@@ -758,7 +797,7 @@ export default function SaleTransactionForm({
     },
     {
       component: 'button',
-      name: 'taxDetailsButton',
+      name: 'taxDetails',
       props: {
         onCondition: row => {
           if (row.itemId && row.taxId) {
@@ -1019,7 +1058,7 @@ export default function SaleTransactionForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.description },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
@@ -1098,6 +1137,7 @@ export default function SaleTransactionForm({
           upo: item.upo,
           vatAmount: item.vatAmount,
           extendedPrice: item.extendedPrice,
+          totalWeight: (item.weight || 0) * (item.qty || 0),
           serials: saTrxPack?.serials
             ?.filter(row => row.seqNo == item.seqNo)
             .map((serialDetail, index) => {
@@ -1428,12 +1468,10 @@ export default function SaleTransactionForm({
     return iconClicked ? { changes: commonData } : commonData
   }
 
-  async function getFilteredMU(itemId) {
+  async function getFilteredMU(itemId, msId) {
     if (!itemId) return
 
-    const currentItemId = formik.values.items?.find(item => parseInt(item.itemId) === itemId)?.msId
-
-    const arrayMU = measurements?.filter(item => item.msId === currentItemId) || []
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
     filteredMeasurements.current = arrayMU
   }
 
@@ -1475,14 +1513,14 @@ export default function SaleTransactionForm({
 
   function checkDiscount(typeChange, tdPct, tdAmount, currentDiscount) {
     const _discountObj = getDiscValues({
-      tdAmount: parseFloat(currentDiscount),
+      tdAmount: parseFloat(currentDiscount) || 0,
       tdPlain: typeChange == 1,
       tdPct: typeChange == 2,
       tdType: typeChange,
       subtotal: subtotal,
       currentDiscount: currentDiscount,
-      hiddenTdPct: tdPct,
-      hiddenTdAmount: parseFloat(tdAmount),
+      hiddenTdPct: tdPct || 0,
+      hiddenTdAmount: parseFloat(tdAmount) || 0,
       typeChange: typeChange
     })
     formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
@@ -1652,6 +1690,18 @@ export default function SaleTransactionForm({
     const { value } = event.target
     formik.setFieldValue('search', value)
   }
+
+  async function getSiteInfo(siteId) {
+    if (!siteId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Site.get,
+      parameters: `_recordId=${siteId}`
+    })
+
+    return res?.record?.reference
+  }
+
   async function onChangeDtId(recordId) {
     const dtd = await getDTD(recordId)
     if (dtd?.record != null) {
@@ -1662,13 +1712,19 @@ export default function SaleTransactionForm({
       formik.setFieldValue('header.KGmetalPrice', 0)
       setmetalPriceVisibility(false)
     }
+    const currentSiteId = dtd?.record?.siteId || userDefaultsDataState?.siteId || null
+    const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', dtd?.record?.siteId || userDefaultsDataState?.siteId || null)
+    formik.setFieldValue('header.siteId', currentSiteId)
+    formik.setFieldValue('header.siteRef', siteRef || '')
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
-    if (dtd?.record?.commitItems == false) formik.setFieldValue('header.siteId', null)
+    if (dtd?.record?.commitItems == false) {
+      formik.setFieldValue('header.siteId', null)
+      formik.setFieldValue('header.siteRef', '')
+    }
   }
 
   useEffect(() => {
@@ -1692,7 +1748,7 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     if (reCal) {
-      let currentTdAmount = (parseFloat(formik.values.header.tdPct) * parseFloat(subtotal)) / 100
+      let currentTdAmount = (parseFloat(formik.values?.header?.tdPct || 0) * parseFloat(subtotal)) / 100
       recalcGridVat(
         formik.values.header.tdType,
         formik.values.header.tdPct,
@@ -1766,11 +1822,14 @@ export default function SaleTransactionForm({
     return myObject
   }
 
-  const setDefaultFields = () => {
+  const setDefaultFields = async () => {
     if (!editMode) formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
     formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
     formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
-    formik.setFieldValue('header.siteId', userDefaultsDataState?.siteId || null)
+    const currentSiteId = userDefaultsDataState?.siteId || null
+    const siteRef = await getSiteInfo(currentSiteId)
+    formik.setFieldValue('header.siteId', currentSiteId)
+    formik.setFieldValue('header.siteRef', siteRef || '')
   }
 
   async function previewBtnClicked() {
@@ -1810,7 +1869,7 @@ export default function SaleTransactionForm({
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='header.dtId'
-                readOnly={editMode}
+                readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
@@ -1956,7 +2015,11 @@ export default function SaleTransactionForm({
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                readOnly={isPosted || (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)}
+                readOnly={
+                  isPosted ||
+                  formik.values.items?.some(item => item.sku) ||
+                  (formik?.values?.header?.dtId && !formik?.values?.header?.commitItems)
+                }
                 required={
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
@@ -2156,14 +2219,19 @@ export default function SaleTransactionForm({
             error={formik.errors.items}
             initialValues={formik?.initialValues?.items[0]}
             onSelectionChange={(row, update, field) => {
-              if (field == 'muRef') getFilteredMU(row?.itemId)
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             name='items'
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}
             allowAddNewLine={!formik.values.search}
-            disabled={isPosted || !formik.values.header.clientId || !formik.values.header.currencyId}
+            disabled={
+              isPosted ||
+              !formik.values?.header?.currencyId ||
+              !formik.values?.header?.clientId ||
+              (!(formik.values?.header?.dtId && !formik.values?.header?.commitItems) && !formik.values?.header?.siteId)
+            }
           />
         </Grow>
         <Fixed>

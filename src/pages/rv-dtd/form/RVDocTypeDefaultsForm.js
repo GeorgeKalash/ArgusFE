@@ -29,7 +29,6 @@ export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {
   const { formik } = useForm({
     initialValues: { cashAccountId: '', plantId: '', dtId: '', recordId: recordId || null },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       dtId: yup.string().required(),

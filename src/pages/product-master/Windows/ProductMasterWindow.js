@@ -38,8 +38,8 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <ProductMasterForm
           store={store}
           setStore={setStore}
@@ -49,7 +49,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <ProductCountriesForm
           store={store}
           setStore={setStore}
@@ -60,7 +60,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <ProductCurrenciesForm
           store={store}
           setStore={setStore}
@@ -71,7 +71,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab}>
+      <CustomTabPanel height={height} index={3} value={activeTab} maxAccess={maxAccess}>
         <ProductDispersalList
           store={store}
           setStore={setStore}
@@ -82,7 +82,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={4} value={activeTab}>
+      <CustomTabPanel height={height} index={4} value={activeTab} maxAccess={maxAccess}>
         <ProductSchedulesForm
           store={store}
           setStore={setStore}
@@ -93,7 +93,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={5} value={activeTab}>
+      <CustomTabPanel height={height} index={5} value={activeTab} maxAccess={maxAccess}>
         <ProductLegForm
           store={store}
           setStore={setStore}
@@ -106,7 +106,7 @@ const ProductMasterWindow = ({ labels, recordId, maxAccess, height, expanded }) 
         />
       </CustomTabPanel>
 
-      <CustomTabPanel height={height} index={6} value={activeTab}>
+      <CustomTabPanel height={height} index={6} value={activeTab} maxAccess={maxAccess}>
         <ProductAgentForm store={store} labels={labels} maxAccess={maxAccess} expanded={expanded} height={height} />
       </CustomTabPanel>
     </>

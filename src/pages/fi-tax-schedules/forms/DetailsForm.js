@@ -16,7 +16,6 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
     initialValues: {
@@ -104,8 +103,9 @@ const DetailsForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       form={formik}
       resourceId={ResourceIds.TaxCodes}
       maxAccess={maxAccess}
-      infoVisible={false}
+      isInfo={false}
       editMode={editMode}
+      isParentWindow={false}
     >
       <VertLayout>
         <Grow>

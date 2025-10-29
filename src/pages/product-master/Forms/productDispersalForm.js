@@ -29,8 +29,6 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
       isDefault: false,
       isInactive: false
     },
-    enableReinitialize: true,
-    validateOnChange: true,
     validationSchema: yup.object({
       productId: yup.string().required(),
       reference: yup.string().required(),
@@ -45,21 +43,14 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
   })
 
   const post = async obj => {
-    const recordId = obj.recordId
-    const productId = obj.productId ? obj.productId : pId
     await postRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.set,
       record: JSON.stringify(obj)
+    }).then(res => {
+      toast.success(!obj.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited))
+      window.close()
+      getGridData(pId)
     })
-      .then(res => {
-        if (!recordId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
-
-        getGridData(pId)
-        window.close()
-      })
-      .catch(error => {})
   }
 
   const getDispersalById = id => {
@@ -69,13 +60,9 @@ const ProductDispersalForm = ({ pId, labels, recordId, getGridData, maxAccess, w
     getRequest({
       extension: RemittanceSettingsRepository.ProductDispersal.get,
       parameters: parameters
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        formik.setValues(res.record)
-      })
-      .catch(error => {
-        setErrorMessage(error)
-      })
   }
   useEffect(() => {
     recordId && getDispersalById(recordId)

@@ -4,11 +4,8 @@ import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
-
 import { useEffect } from 'react'
-
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
-
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useForm } from 'src/hooks/form'
@@ -28,14 +25,13 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   const { recordId: stgId } = store
 
   const validationSchema = yup.object({
-    codeId: yup.number().required(' '),
-    prerequisiteId: yup.number().required(' ')
+    codeId: yup.number().required(),
+    prerequisiteId: yup.number().required()
   })
 
   const { formik } = useForm({
     maxAccess,
     initialValues: { codeId: '', prerequisiteId: '', StrategyId: stgId },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
     onSubmit: values => {
@@ -44,23 +40,13 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
   })
 
   const postPreReq = async obj => {
-    const isNewRecord = !obj?.codeId
+    await postRequest({
+      extension: DocumentReleaseRepository.StrategyPrereq.set,
+      record: JSON.stringify(obj)
+    })
 
-    try {
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.StrategyPrereq.set,
-        record: JSON.stringify(obj)
-      })
-
-      if (isNewRecord) {
-        toast.success('Record Added Successfully')
-      } else {
-        toast.success('Record Edited Successfully')
-      }
-      invalidate()
-    } catch (error) {
-      toast.error('An error occurred')
-    }
+    toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+    invalidate()
   }
   useEffect(() => {
     recordId && getCodeId(recordId)
@@ -74,17 +60,15 @@ const PreReqsForm = ({ labels, editMode, maxAccess, recordId, store }) => {
     getRequest({
       extension: DocumentReleaseRepository.StrategyCode.get,
       parameters: `_groupId=${recordId}`
+    }).then(res => {
+      formik.setValues(res.record)
     })
-      .then(res => {
-        formik.setValues(res.record)
-      })
-      .catch(error => {})
   }
 
   return (
     <FormShell
       form={formik}
-      infoVisible={false}
+      isInfo={false}
       resourceId={ResourceIds.Strategies}
       maxAccess={maxAccess}
       editMode={editMode}

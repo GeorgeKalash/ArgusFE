@@ -1,6 +1,5 @@
 import { useEffect, useState, useContext } from 'react'
 import toast from 'react-hot-toast'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -15,6 +14,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { CommonContext } from 'src/providers/CommonContext'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, window, resourceId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -36,7 +36,6 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       gridRows: [],
@@ -193,14 +192,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SecurityGroup}
-      form={formik}
-      editMode={true}
-      maxAccess={maxAccess}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} editMode={true} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={4}>
@@ -259,7 +251,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
