@@ -763,7 +763,7 @@ export default function JobOrderForm({
                         errorCheck={'designId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={isCancelled || isPosted}
                         onChange={async (event, newValue) => {
                           await fillDesignInfo(newValue)
                           await updateWC(newValue?.routingId, false)
@@ -829,7 +829,7 @@ export default function JobOrderForm({
                         valueField='recordId'
                         displayField='name'
                         maxAccess={maxAccess}
-                        readOnly={isCancelled || isReleased}
+                        readOnly={isCancelled || isPosted}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                         }}
@@ -957,7 +957,7 @@ export default function JobOrderForm({
                   seqNo={0}
                   customWidth={300}
                   customHeight={180}
-                  disabled={isCancelled || isReleased || isPosted}
+                  disabled={isCancelled || isPosted}
                   isAbsolutePath={true}
                   parentImage={parentImage}
                 />
