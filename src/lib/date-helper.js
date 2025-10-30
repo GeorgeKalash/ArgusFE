@@ -73,7 +73,7 @@ function formatDateTimeForGetAPI(dateString) {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
 }
 
-export function formatDateTimeForYYYYMMDD(dateString) {
+function formatDateTimeForYYYYMMDD(dateString) {
   return dayjs(dateString).format('YYYY/MM/DD HH:mm')
 }
 
@@ -188,5 +188,6 @@ export {
   formatDateTimeDefault,
   formatDateToISO,
   formatDateTimeForGetAPI,
-  formatDayId
+  formatDayId,
+  formatDateTimeForYYYYMMDD
 }

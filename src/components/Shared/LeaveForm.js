@@ -17,31 +17,13 @@ import CustomDatePicker from '../Inputs/CustomDatePicker'
 import { ResourceLookup } from './ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import FormShell from './FormShell'
-import { formatDateFromApi, formatDateTimeForGetAPI, formatDateTimeForYYYYMMDD, formatDayId } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateTimeForYYYYMMDD, formatDayId } from 'src/lib/date-helper'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
-
-dayjs.extend(customParseFormat)
-
-export function formatDate(value) {
-  const sanitized = String(value)
-    .trim()
-    .replace(/[\u200e\u200f]/g, '')
-  const isDayMonthYear = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sanitized)
-
-  const parsed = isDayMonthYear
-    ? dayjs(sanitized, ['D/M/YY', 'DD/MM/YY', 'D/M/YYYY', 'DD/MM/YYYY'], true)
-    : dayjs(sanitized)
-
-  if (!parsed.isValid()) return null
-
-  return parsed.startOf('day').format('MM/DD/YYYY hh:mm:ss A')
-}
 
 export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -145,31 +127,16 @@ export const LeaveForm = ({ recordId, window }) => {
     if (!lsIdValue) {
       return
     }
-    let native
-    if (typeof asOfDate === 'string' && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(asOfDate)) {
-      native = formatDate(asOfDate)
-    } else {
-      native = formatDateTimeForYYYYMMDD(asOfDate)
-    }
 
     const res2 = await getRequest({
       extension: LoanManagementRepository.Leaves.qry,
       parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
-        asOfDate ? native : formatDateTimeForGetAPI(new Date())
+        asOfDate ? formatDateTimeForYYYYMMDD(asOfDate) : formatDateTimeForYYYYMMDD(new Date())
       }`
     })
 
     const balance = res2?.list?.[0]?.summary?.balance ?? 0
     formik.setFieldValue('leaveBalance', balance)
-  }
-
-  const onEmployeeChange = async (employeeId, asOfDate = new Date()) => {
-    if (!employeeId) return
-
-    await getRequest({
-      extension: EmployeeRepository.QuickView.get,
-      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateTimeForGetAPI(asOfDate)}`
-    })
   }
 
   const isClosed = formik.values.wip == 2
@@ -287,7 +254,6 @@ export const LeaveForm = ({ recordId, window }) => {
       if (scheduled > 0) {
         const ratio = hours / scheduled
 
-        console.log(ratio)
         if (!isNaN(ratio)) {
           totalDays += ratio
         }
@@ -400,11 +366,10 @@ export const LeaveForm = ({ recordId, window }) => {
                 label={labels.date}
                 value={formik.values?.date}
                 readOnly={isClosed}
-                onBlur={async e => {
-                  const selectedDate = e.target.value
-                  await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, selectedDate)
+                onChange={async (e, newValue) => {
+                  formik.setFieldValue('date', newValue)
+                  await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, newValue)
                 }}
-                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
@@ -423,8 +388,8 @@ export const LeaveForm = ({ recordId, window }) => {
                 label={labels.employee}
                 required
                 secondValue={formik.values.employeeName}
-                onChange={(_, newValue) => {
-                  onEmployeeChange(newValue?.recordId)
+                onChange={async (_, newValue) => {
+                  await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
