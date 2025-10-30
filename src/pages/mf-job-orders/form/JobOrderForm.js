@@ -112,7 +112,7 @@ export default function JobOrderForm({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
-      workCenterId: yup.string().required()
+      workCenterId: yup.number().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -399,6 +399,7 @@ export default function JobOrderForm({
           })
         }
       })
+    setRefetchRouting(true)
 
     return res?.record.reference
   }
@@ -878,7 +879,7 @@ export default function JobOrderForm({
                         maxAccess={maxAccess}
                         readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('wcRef', newValue?.reference || '')
                           formik.setFieldValue('wcName', newValue?.name || '')
                           formik.setFieldValue('workCenterId', newValue?.recordId || null)

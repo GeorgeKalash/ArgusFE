@@ -12,7 +12,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Form from 'src/components/Shared/Form'
-import CustomButton from 'src/components/Inputs/CustomButton'
 
 export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -257,14 +256,13 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     setWorkCenters(res?.list)
   }
 
-  async function refetchForm() {
-    await fetchGridData()
-    await fetchAllWorkCenters()
-    setRefetchRouting(false)
-  }
-
   useEffect(() => {
-    if (recordId) refetchForm()
+    ;(async function () {
+      if (!refetchRouting || !recordId) return
+      await fetchGridData()
+      await fetchAllWorkCenters()
+      setRefetchRouting(false)
+    })()
   }, [recordId, refetchRouting])
 
   return (
@@ -279,9 +277,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <CustomTextField value={formik.values.jobReference} label={labels.reference} readOnly />
-            </Grid>
-            <Grid item xs={2}>
-              <CustomButton onClick={refetchForm} color='#D3D3D3' image='exchange-refresh-icon.png' />
             </Grid>
           </Grid>
         </Fixed>
