@@ -40,9 +40,33 @@ const Container = styled.div`
   flex-direction: column;
 `
 
+const TOP_ROW_H = '400px'
+const FOUR_APPLETS_ROW_H = '340px'
+const APPLETS_ROW_H = '540px'
+
 const TopRow = styled.div`
   display: grid;
   margin-bottom: 10px;
+  grid-template-columns: 1fr;
+  height: ${TOP_ROW_H};
+  min-height: ${TOP_ROW_H};
+  max-height: ${TOP_ROW_H};
+`
+
+const FourAppletsRow = styled.div`
+  grid-template-columns: 1fr;
+  display: grid;
+  height: ${FOUR_APPLETS_ROW_H};
+  min-height: ${FOUR_APPLETS_ROW_H};
+  max-height: ${FOUR_APPLETS_ROW_H};
+`
+
+const AppletsRow = styled.div`
+  grid-template-columns: 1fr;
+  display: grid;
+  height: ${APPLETS_ROW_H};
+  min-height: ${APPLETS_ROW_H};
+  max-height: ${APPLETS_ROW_H};
 `
 
 const SummaryCard = styled.div`
@@ -91,7 +115,7 @@ const ChartCard = styled.div`
   background: rgb(255, 255, 255);
   border-radius: 10px;
   display: flex;
-  padding: 10px;
+  padding: 8px;
   flex-direction: column;
 `
 
@@ -211,6 +235,18 @@ const DashboardLayout = () => {
   return (
     <Frame>
       <Container>
+        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.authorization}</Title>
+              </SummaryCard>
+              <Box sx={{ display: 'flex', flex: '1' }}>
+                <ApprovalsTable pageSize={10} />
+              </Box>
+            </ChartCard>
+          </TopRow>
+        )}
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <TopRow>
             <ChartCard>
@@ -292,56 +328,64 @@ const DashboardLayout = () => {
         )}
         <MiddleRow>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.myYearlyUnitsSoldList}</Title>
-              </SummaryCard>
-              <MixedColorsBarChartDark
-                id='myYearlyUnitsSoldChart'
-                labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
-                data={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
-                label={labels.qty}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.myYearlyUnitsSoldList}</Title>
+                </SummaryCard>
+                <MixedColorsBarChartDark
+                  id='myYearlyUnitsSoldChart'
+                  labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
+                  data={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
+                  label={labels.qty}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.myYearlyGrowthInUnitsSoldList}</Title>
-              </SummaryCard>
-              <MixedColorsBarChartDark
-                id='myYearlyGrowthUnitsSoldChart'
-                labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
-                data={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
-                label={labels.qty}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.myYearlyGrowthInUnitsSoldList}</Title>
+                </SummaryCard>
+                <MixedColorsBarChartDark
+                  id='myYearlyGrowthUnitsSoldChart'
+                  labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
+                  data={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
+                  label={labels.qty}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.myYearlyClientsAcquiredList}</Title>
-              </SummaryCard>
-              <MixedColorsBarChartDark
-                id='myYearlyClientsAcquiredList'
-                labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
-                data={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
-                label={labels.qty}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.myYearlyClientsAcquiredList}</Title>
+                </SummaryCard>
+                <MixedColorsBarChartDark
+                  id='myYearlyClientsAcquiredList'
+                  labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
+                  data={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
+                  label={labels.qty}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.myYearlyGrowthInClientsAc}</Title>
-              </SummaryCard>
-              <MixedColorsBarChartDark
-                id='myYearlyGrowthInClientsAcquiredList'
-                labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
-                data={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
-                label={labels.qty}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.myYearlyGrowthInClientsAc}</Title>
+                </SummaryCard>
+                <MixedColorsBarChartDark
+                  id='myYearlyGrowthInClientsAcquiredList'
+                  labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
+                  data={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
+                  label={labels.qty}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
         </MiddleRow>
         {containsApplet(ResourceIds.TodayPlantSales) && (
@@ -491,134 +535,144 @@ const DashboardLayout = () => {
               )}
             </SummaryGrid>
           )}
-
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.avWeeklySales}</Title>
-                <strong>
-                  {(
-                    (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
-                    (data?.dashboard?.weeklySales?.length || 1)
-                  ).toLocaleString()}
-                </strong>
-              </SummaryCard>
-              <CompositeBarChartDark
-                id='weeklySalesChart'
-                labels={data?.dashboard?.weeklySales?.map(ws => ws.weekName) || []}
-                data={data?.dashboard?.weeklySales?.map(ws => ws.sales) || []}
-                label={labels.weeklySales}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.avWeeklySales}</Title>
+                  <strong>
+                    {(
+                      (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                      (data?.dashboard?.weeklySales?.length || 1)
+                    ).toLocaleString()}
+                  </strong>
+                </SummaryCard>
+                <CompositeBarChartDark
+                  id='weeklySalesChart'
+                  labels={data?.dashboard?.weeklySales?.map(ws => ws.weekName) || []}
+                  data={data?.dashboard?.weeklySales?.map(ws => ws.sales) || []}
+                  label={labels.weeklySales}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.avMonthlySales}</Title>
-                <strong>
-                  {(
-                    (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
-                    (data?.dashboard?.monthlySales?.length || 1)
-                  ).toLocaleString()}
-                </strong>
-              </SummaryCard>
-              <CompositeBarChartDark
-                id='monthlySalesChart'
-                labels={data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
-                data={data?.dashboard?.monthlySales?.map(ms => ms.sales) || []}
-                label={labels.monthlySales}
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.avMonthlySales}</Title>
+                  <strong>
+                    {(
+                      (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
+                      (data?.dashboard?.monthlySales?.length || 1)
+                    ).toLocaleString()}
+                  </strong>
+                </SummaryCard>
+                <CompositeBarChartDark
+                  id='monthlySalesChart'
+                  labels={data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
+                  data={data?.dashboard?.monthlySales?.map(ms => ms.sales) || []}
+                  label={labels.monthlySales}
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.accRevenues}</Title>
-              </SummaryCard>
-              <CompositeBarChartDark
-                id='accumulatedRevenuesChart'
-                labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
-                data={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
-                label={labels.accRevenues}
-                color='#ff6c02'
-                hoverColor='#fec106'
-              />
-            </ChartCard>
+            <FourAppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.accRevenues}</Title>
+                </SummaryCard>
+                <CompositeBarChartDark
+                  id='accumulatedRevenuesChart'
+                  labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
+                  data={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
+                  label={labels.accRevenues}
+                  color='#ff6c02'
+                  hoverColor='#fec106'
+                />
+              </ChartCard>
+            </FourAppletsRow>
           )}
           {containsApplet(ResourceIds.Receivables) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.receivables}</Title>
-              </SummaryCard>
-              <HorizontalBarChartDark
-                id='Receivables'
-                labels={Object.keys(data?.dashboard?.receivables || {})}
-                data={Object.values(data?.dashboard?.receivables || {}).map(value =>
-                  typeof value === 'number' ? Math.ceil(value) : 0
-                )}
-                label={labels.receivables}
-                color='#6e87b6'
-                hoverColor='#818181'
-              />
-            </ChartCard>
+            <AppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.receivables}</Title>
+                </SummaryCard>
+                <HorizontalBarChartDark
+                  id='Receivables'
+                  labels={Object.keys(data?.dashboard?.receivables || {})}
+                  data={Object.values(data?.dashboard?.receivables || {}).map(value =>
+                    typeof value === 'number' ? Math.ceil(value) : 0
+                  )}
+                  label={labels.receivables}
+                  color='#6e87b6'
+                  hoverColor='#818181'
+                />
+              </ChartCard>
+            </AppletsRow>
           )}
           {containsApplet(ResourceIds.TopCustomers) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.topCostumers}</Title>
-              </SummaryCard>
-              <HorizontalBarChartDark
-                id='TopCustomers'
-                labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
-                data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
-                label={labels.revenue}
-                color='#d5b552'
-                hoverColor='#818181'
-              />
-            </ChartCard>
+            <AppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.topCostumers}</Title>
+                </SummaryCard>
+                <HorizontalBarChartDark
+                  id='TopCustomers'
+                  labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
+                  data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
+                  label={labels.revenue}
+                  color='#d5b552'
+                  hoverColor='#818181'
+                />
+              </ChartCard>
+            </AppletsRow>
           )}
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.averageRevenuePerItem}</Title>
-              </SummaryCard>
-              <LineChart
-                id='AverageRevenuePerItem'
-                labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
-                data={data?.dashboard?.avgUnitSales?.map(c => c.avgPrice) || []}
-                label={labels.averageRevenue}
-              />
-            </ChartCard>
+            <AppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.averageRevenuePerItem}</Title>
+                </SummaryCard>
+                <LineChart
+                  id='AverageRevenuePerItem'
+                  labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
+                  data={data?.dashboard?.avgUnitSales?.map(c => c.avgPrice) || []}
+                  label={labels.averageRevenue}
+                />
+              </ChartCard>
+            </AppletsRow>
           )}
-
           {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
-            <ChartCard>
-              <SummaryCard>
-                <Title>{labels.todaysTimeVariationsDetails}</Title>
-              </SummaryCard>
-
-              <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-              {(data?.hr?.tabs || []).map((tab, idx) => (
-                <CustomTabPanel key={idx} index={idx} value={activeTab}>
-                  <Box sx={{ display: 'flex', height: '350px' }}>
-                    <Table
-                      name='TVtable'
-                      columns={[
-                        { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
-                        { field: 'branchName', headerName: labels.branchName, flex: 3 },
-                        { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
-                        { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
-                      ]}
-                      gridData={data?.hr?.groupedData?.[tab.timeCode] || { list: [] }}
-                      rowId={['recordId']}
-                      pagination={false}
-                      maxAccess={access}
-                    />
-                  </Box>
-                </CustomTabPanel>
-              ))}
-            </ChartCard>
+            <AppletsRow>
+              <ChartCard>
+                <SummaryCard>
+                  <Title>{labels.todaysTimeVariationsDetails}</Title>
+                </SummaryCard>
+                <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
+                {(data?.hr?.tabs || []).map((tab, idx) => (
+                  <CustomTabPanel key={idx} index={idx} value={activeTab}>
+                    <Box sx={{ display: 'flex', height: '350px' }}>
+                      <Table
+                        name='TVtable'
+                        columns={[
+                          { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
+                          { field: 'branchName', headerName: labels.branchName, flex: 3 },
+                          { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
+                          { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
+                        ]}
+                        gridData={data?.hr?.groupedData?.[tab.timeCode] || { list: [] }}
+                        rowId={['recordId']}
+                        pagination={false}
+                        maxAccess={access}
+                      />
+                    </Box>
+                  </CustomTabPanel>
+                ))}
+              </ChartCard>
+            </AppletsRow>
           )}
         </MiddleRow>
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
@@ -627,7 +681,7 @@ const DashboardLayout = () => {
               <SummaryCard>
                 <Title>{labels.authorization}</Title>
               </SummaryCard>
-              <Box sx={{ display: 'flex', height: '350px' }}>
+              <Box sx={{ display: 'flex', flex: '1' }}>
                 <ApprovalsTable pageSize={10} />
               </Box>
             </ChartCard>
