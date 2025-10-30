@@ -389,10 +389,10 @@ export const LeaveForm = ({ recordId, window }) => {
                 required
                 secondValue={formik.values.employeeName}
                 onChange={async (_, newValue) => {
-                  await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
+                  await getLeaveBalance(recordId, newValue?.recordId, formik?.values?.ltId, formik.values.date)
                 }}
                 error={formik.touched.employeeId && Boolean(formik.errors.employeeId)}
               />
