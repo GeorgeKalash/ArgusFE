@@ -52,21 +52,41 @@ const CustomNumberField = ({
     }
   }
 
-  const parseInputValue = val => {
+  function isDotFollowedByOnlyZeros(val) {
+    if (typeof val !== 'string') return false
+
+    return /^0?\.0+$/.test(val)
+  }
+
+  const parseInputValue = (val, blur) => {
     val = val.replace(/,/g, '')
-    if (val.endsWith('.') && !/\.\d+$/.test(val)) {
+    if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
-    const num = val != '' ? Number(val) : null
+
+    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) return val.toString()
+
+    if (val?.endsWith('.') && !blur) {
+      return val
+    }
+    if (isDotFollowedByOnlyZeros(val) && !blur) {
+      return val.startsWith('.') ? ('0' + val).toString() : val.toString()
+    }
+
+    if (val == '.' && blur) {
+      return null
+    }
+
+    const num = val != '' ? val : null
 
     return isNaN(num) ? null : num
   }
 
-  const handleNumberChangeValue = e => {
+  const handleNumberChangeValue = (e, blur) => {
     const value = formatNumber(e)
     if (value) e.target.value = value
 
-    onChange(e, parseInputValue(value))
+    onChange(e, parseInputValue(value, blur))
   }
 
   const handleNumberMouseLeave = e => {
@@ -130,7 +150,7 @@ const CustomNumberField = ({
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
-          handleNumberChangeValue(e)
+          handleNumberChangeValue(e, true)
         }
       }}
       InputProps={{

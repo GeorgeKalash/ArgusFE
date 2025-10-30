@@ -13,6 +13,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import Form from 'src/components/Shared/Form'
 
 const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,7 +24,6 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
 
     validationSchema: yup.object({
@@ -194,13 +194,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.SettingsResources}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -237,7 +231,7 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

@@ -41,8 +41,7 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.StockCount,
-    access,
-    hasDT: false
+    access
   })
 
   const { formik } = useForm({
@@ -63,7 +62,6 @@ export default function CycleCountsForm({ labels, maxAccess: access, setStore, s
       disableItemDuplicate: false
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       genVar: yup.string().required(),

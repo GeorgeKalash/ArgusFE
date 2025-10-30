@@ -134,6 +134,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         metalId: 0,
         metalPurity: 0,
         taxId: 0,
+        totalWeight: 0,
         balanceQty: 0,
         pieces: 0,
         itemId: null,
@@ -524,6 +525,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     },
     {
       component: 'numberfield',
+      label: labels.totalWeight,
+      name: 'totalWeight',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.volume,
       name: 'volume',
       props: {
@@ -786,6 +795,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       datasetId: ResourceIds.GLReturnOnInvoice,
       disabled: !editMode
     },
@@ -837,6 +850,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
                 serials: serials?.filter(s => s.seqNo == item.seqNo),
+                totalWeight: (parseFloat(item.weight || 0) * parseFloat(item.qty || 0)).toFixed(2),
                 isEditMode: true
               }
             })
@@ -855,6 +869,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       commitItems: dtInfo?.commitItems,
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
+      maxDiscount: clientDiscount.tdPct || 0,
       items: modifiedList
     })
   }
@@ -986,8 +1001,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: itemPriceRow?.qty,
+      weight: itemPriceRow?.weight,
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
@@ -1010,7 +1027,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
     }
     let data = iconClicked ? { changes: commonData } : commonData
-    update(data)
+    update({
+      ...data,
+      totalWeight: parseFloat(newRow?.weight).toFixed(2) * parseFloat(newRow?.returnNowQty).toFixed(2)
+    })
   }
 
   const parsedItemsArray = formik.values.items
@@ -1069,8 +1089,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
       const vatCalcRow = getVatCalc({
+        priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
         qty: item?.qty,
+        weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
@@ -1212,7 +1234,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   async function onValidationRequired() {
@@ -1231,6 +1253,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         formik.setTouched(touchedFields, true)
       }
     }
+  }
+
+  async function updateValues(fields) {
+    Object.entries(fields).forEach(([key, val]) => {
+      formik.setFieldValue(key, val)
+    })
   }
 
   useEffect(() => {
@@ -1460,12 +1488,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       stack({
                         Component: ChangeClient,
                         props: {
-                          form: formik
+                          formValues: formik.values,
+                          onSubmit: fields => updateValues(fields)
                         }
                       })
                     }}
                     image='popup.png'
-                    disabled={isPosted || !formik.values.clientId}
+                    disabled={!(editMode && !isPosted && formik.values.clientId)}
                     tooltipText={platformLabels.editClient}
                   />
                 </Grid>

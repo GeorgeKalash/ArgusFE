@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -41,7 +41,6 @@ const CashCountForm = ({ recordId, window }) => {
 
   const getDefaultDT = async () => {
     const userData = getStorageData('userData')
-
     const _userId = userData.userId
     const parameters = `_userId=${_userId}&_functionId=${SystemFunction.CashCountTransaction}`
 
@@ -83,7 +82,8 @@ const CashCountForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashCountTransaction
+    datasetId: ResourceIds.CashCountTransaction,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.cashCount, window })
@@ -127,7 +127,6 @@ const CashCountForm = ({ recordId, window }) => {
         }
       ]
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       cashAccountRef: yup.string().required(),

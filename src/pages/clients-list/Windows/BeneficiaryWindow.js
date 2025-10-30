@@ -1,6 +1,5 @@
 import Table from 'src/components/Shared/Table'
-import { useContext, useState } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
+import { useContext } from 'react'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -17,16 +16,13 @@ import historyIcon from '/public/images/TableIcons/history.png'
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()
 
-  const [initialValues, setInitialData] = useState({
-    recordId: clientId
-  })
-
   const formik = useFormik({
-    initialValues,
-    enableReinitialize: true,
+    initialValues: {
+      recordId: clientId
+    },
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: values => {}
+    onSubmit: () => {}
   })
   const { getRequest } = useContext(RequestsContext)
 
@@ -155,27 +151,17 @@ const BeneficiaryWindow = ({ clientId }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Beneficiary}
-      height={480}
-      form={formik}
+    <Table
+      width={500}
+      height={400}
+      columns={columns}
+      gridData={data}
+      rowId={['beneficiaryId']}
+      isLoading={false}
+      pagination={false}
       maxAccess={access}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
-      <Table
-        width={500}
-        height={400}
-        columns={columns}
-        gridData={data}
-        rowId={['beneficiaryId']}
-        isLoading={false}
-        pagination={false}
-        maxAccess={access}
-        onEdit={editBeneficiary}
-      />
-    </FormShell>
+      onEdit={editBeneficiary}
+    />
   )
 }
 

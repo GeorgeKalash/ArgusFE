@@ -40,7 +40,6 @@ import { getFooterTotals, getSubtotal } from 'src/utils/FooterCalculator'
 import { useError } from 'src/error'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -49,6 +48,9 @@ import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepositor
 import { RateDivision } from 'src/resources/RateDivision'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
+import AddressForm from 'src/components/Shared/AddressForm'
+import CustomButton from 'src/components/Inputs/CustomButton'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function RetailTransactionsForm({
   labels,
@@ -56,10 +58,12 @@ export default function RetailTransactionsForm({
   access,
   recordId,
   functionId,
+  lockRecord,
   getGLResource,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
@@ -84,7 +88,7 @@ export default function RetailTransactionsForm({
     [SystemFunction.RetailPurchaseReturn]: ResourceIds.RetailPurchaseReturn
   }
 
-  const { documentType, maxAccess } = useDocumentType({
+  const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
     access: access,
     enabled: !recordId,
@@ -109,6 +113,7 @@ export default function RetailTransactionsForm({
       spId: parseInt(posUser?.spId),
       addressId: null,
       oDocId: null,
+      oDocRef: '',
       subtotal: 0,
       vatAmount: 0,
       amount: 0,
@@ -195,12 +200,10 @@ export default function RetailTransactionsForm({
     maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
     initialValues,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
-        dtId: yup.string().required(),
         name: yup.string().test('Name-Required', 'Name is required when street1 or street2 has a value', function () {
           const { street1, street2, name, phone, cityId } = this.parent
 
@@ -425,11 +428,35 @@ export default function RetailTransactionsForm({
     const res = await postRequest({
       extension: PointofSaleRepository.RetailInvoice.unpost,
       record: JSON.stringify(formik.values.header)
-    })
+    }).then(res => {
+      toast.success(platformLabels.Posted)
+      lockRecord({
+        recordId: res.recordId,
+        reference: formik.values.header.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId,
+            reference: formik.values.header.reference
+          })
+          refetchForm(res.recordId)
+        },
+        isAlreadyLocked: name => {
+          window.close()
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            },
+            title: platformLabels.Dialog
+          })
+        }
+      })
 
-    toast.success(platformLabels.Posted)
-    invalidate()
-    refetchForm(res?.recordId)
+      invalidate()
+    })
   }
 
   const actions = [
@@ -455,7 +482,7 @@ export default function RetailTransactionsForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
@@ -492,6 +519,8 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
       })
@@ -528,6 +557,20 @@ export default function RetailTransactionsForm({
       ...(addressObj?.record || {}),
       countryId: addressObj?.countryId || countryId?.value
     })
+
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: retailTrxHeader.recordId,
+        reference: retailTrxHeader.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId: retailTrxHeader.recordId,
+            reference: retailTrxHeader.reference
+          })
+        }
+      })
   }
 
   async function getRetailTransactionPack(transactionId) {
@@ -574,8 +617,10 @@ export default function RetailTransactionsForm({
     if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
+      priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
       qty: parseFloat(itemPriceRow?.qty),
+      weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
@@ -594,6 +639,7 @@ export default function RetailTransactionsForm({
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
+      totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -680,8 +726,7 @@ export default function RetailTransactionsForm({
         ...(!formik.values.disableSKULookup && {
           endpointId: PointofSaleRepository.PUItems.snapshot,
           parameters: {
-            _siteId:
-              totalQty > 0 || SystemFunction.RetailInvoice === functionId ? 0 : formik.values?.header?.siteId || 0
+            _siteId: totalQty < 0 || SystemFunction.RetailInvoice != functionId ? 0 : formik.values?.header?.siteId || 0
           },
           displayField: 'sku',
           valueField: 'sku',
@@ -908,7 +953,7 @@ export default function RetailTransactionsForm({
         if (cashAmount == 0) update({ amount: (Number(amount) || 0).toFixed(2) })
         getFilteredCC(newRow?.cashAccountId)
         if (newRow?.type == 1) {
-          update({ bankFees: calculateBankFees(newRow?.ccId) || 0 })
+          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
         }
       }
     },
@@ -932,8 +977,8 @@ export default function RetailTransactionsForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow?.recordId) {
-          update({ bankFees: calculateBankFees(newRow?.recordId) || 0 })
+        if (newRow?.ccId) {
+          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
         }
       },
       propsReducer({ row, props }) {
@@ -991,16 +1036,13 @@ export default function RetailTransactionsForm({
 
   function openAddressForm() {
     stack({
-      Component: AddressFormShell,
+      Component: AddressForm,
       props: {
         address: address,
         setAddress: setAddress,
         isCleared: false,
-        isSavedClear: false
-      },
-      width: 850,
-      height: 620,
-      title: labels.address
+        datasetId: ResourceIds.ADDRetailInvoice
+      }
     })
   }
 
@@ -1046,6 +1088,7 @@ export default function RetailTransactionsForm({
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
     const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1058,13 +1101,23 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('header.siteName', posInfo?.siteName)
     formik.setFieldValue('header.posRef', posInfo?.reference)
     formik.setFieldValue('header.plId', posInfo?.plId)
-    formik.setFieldValue('header.dtId', formik.values.header.dtId || posInfo?.dtId)
+    formik.setFieldValue('header.dtId', formik.values.header.dtId || posDtId ? posInfo?.dtId : null)
     formik.setFieldValue('header.countryId', countryId?.value)
     setAddress(prevAddress => ({
       ...prevAddress,
       countryId: countryId?.value
     }))
   }
+
+  async function isPosDtMatchesdgId(posDtId) {
+    const res = await getRequest({
+      extension: PointofSaleRepository.RetailInvoice.level,
+      parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
+    })
+
+    return res?.record?.documentTypes?.some(x => x.recordId == posDtId) || false
+  }
+
   async function fillCashObjects() {
     const cashAccounts = await getAllCashBanks()
     const creditCards = await fillCreditCardStore()
@@ -1128,6 +1181,83 @@ export default function RetailTransactionsForm({
 
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
   }
+
+  async function importInvoiceItems() {
+    const retailTrxItems = await getRetailTransactionPack(formik.values?.header?.oDocId)
+
+    const modifiedItemsList = await Promise.all(
+      retailTrxItems?.items?.map(async (item, index) => {
+        const taxDetails = await getTaxDetails(item?.taxId)
+
+        const getItems = getItemPriceRow(
+          {
+            ...item,
+            id: index + 1,
+            qty: parseFloat(item.qty).toFixed(2),
+            unitPrice: parseFloat(item.unitPrice).toFixed(2),
+            extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+            taxDetails
+          },
+          DIRTYFIELD_BASE_PRICE
+        )
+
+        return getItems
+      })
+    )
+    formik.setFieldValue('items', modifiedItemsList)
+    setReCal(true)
+  }
+  function calculatePrice(item = {}, taxDetails = null, dirtyField) {
+    const unitPrice = item?.unitPrice ?? 0
+    const priceWithVAT = item?.priceWithVAT ?? 0
+
+    if (!taxDetails) {
+      const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
+
+      return price.toFixed(2)
+    }
+
+    const { amount = 0, taxBase } = taxDetails
+
+    switch (dirtyField) {
+      case DIRTYFIELD_BASE_PRICE:
+        return (unitPrice * (1 + amount / 100)).toFixed(2)
+
+      case DIRTYFIELD_UNIT_PRICE:
+        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
+
+        if (taxBase == 2) return priceWithVAT.toFixed(2)
+
+        return (priceWithVAT - unitPrice).toFixed(2)
+
+      default:
+        return
+    }
+  }
+
+  function getTotPricePerG(header, item, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: item?.priceType,
+      basePrice: parseFloat(item?.basePrice || 0),
+      volume: parseFloat(item?.volume) || 0,
+      weight: parseFloat(item?.weight),
+      unitPrice: parseFloat(item?.unitPrice || 0),
+      upo: 0,
+      qty: parseFloat(item?.qty) || 0,
+      extendedPrice: parseFloat(item?.extendedPrice),
+      mdAmount: header?.mdAmount || 0,
+      mdType: item?.mdType || 1,
+      baseLaborPrice: item?.baseLaborPrice || 0,
+      totalWeightPerG: item?.TotPricePerG,
+      mdValue: parseFloat(item?.mdValue),
+      tdPct: 0,
+      dirtyField
+    })
+
+    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
+  }
+
   useEffect(() => {
     formik.setFieldValue('header.name', address?.name || '')
     formik.setFieldValue('header.street1', address?.street1 || '')
@@ -1200,7 +1330,8 @@ export default function RetailTransactionsForm({
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      formik.setFieldValue('header.dtId', newValue?.recordId)
+                      await changeDT(newValue)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
@@ -1271,6 +1402,45 @@ export default function RetailTransactionsForm({
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
                 </Grid>
+                {SystemFunction.RetailReturn == functionId && (
+                  <>
+                    <Grid item xs={9}>
+                      <ResourceLookup
+                        endpointId={PointofSaleRepository.RetailInvoice.snapshot}
+                        parameters={{
+                          _posId: parseInt(posUser?.posId),
+                          _functionId: SystemFunction.RetailInvoice
+                        }}
+                        valueField='reference'
+                        displayField='reference'
+                        name='header.oDocRef'
+                        label={labels.invoices}
+                        readOnly={isPosted || formik.values.items?.some(item => !!item.itemId)}
+                        form={formik}
+                        displayFieldWidth={1.5}
+                        formObject={formik.values.header}
+                        secondDisplayField={false}
+                        onChange={(event, newValue) => {
+                          formik.setFieldValue('header.isVatable', newValue?.isVatable || false)
+                          formik.setFieldValue('header.oDocRef', newValue?.reference || '')
+                          formik.setFieldValue('header.oDocId', newValue?.recordId || null)
+                        }}
+                        errorCheck={'oDocId'}
+                        maxAccess={maxAccess}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <CustomButton
+                        onClick={() => importInvoiceItems()}
+                        tooltipText={platformLabels.import}
+                        image={'import.png'}
+                        disabled={
+                          !formik.values.header.oDocId || formik.values.items?.some(item => !!item.itemId) || isPosted
+                        }
+                      />
+                    </Grid>
+                  </>
+                )}
               </Grid>
             </Grid>
 

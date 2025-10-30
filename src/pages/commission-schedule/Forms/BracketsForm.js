@@ -1,166 +1,124 @@
-import { Box } from '@mui/material'
-import { useFormik } from 'formik'
-import * as yup from 'yup'
-import { useEffect, useState, useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
-
-import InlineEditGrid from 'src/components/Shared/InlineEditGrid'
-
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import * as yup from 'yup'
+import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from 'src/repositories/SaleRepository'
+import { useInvalidate } from 'src/hooks/resource'
+import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
-const BracketsTab = ({ labels, maxAccess, recordId, setErrorMessage, setSelectedRecordIds }) => {
+const BracketsForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
-  const [isLoading, setIsLoading] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
+  const { recordId } = store
 
   const invalidate = useInvalidate({
-    endpointId: SaleRepository.CommissionScheduleBracket.qry
+    endpointId: SaleRepository.CommissionScheduleBracket.page
   })
 
-  const formik = useFormik({
-    enableReinitialize: true,
-    validateOnChange: true,
+  const conditions = {
+    minAmount: row => row?.minAmount != null && row.minAmount <= row.maxAmount,
+    maxAmount: row => row?.maxAmount != null && row.minAmount <= row.maxAmount,
+    pct: row => row?.pct != null && row.pct >= 0 && row.pct <= 100
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues: { rows: [] },
+    conditionSchema: ['rows'],
     validationSchema: yup.object({
-      rows: yup.array().of(
-        yup.object({
-          minAmount: yup.string().required('Minimum amount is required'),
-          maxAmount: yup.string().required('Maximum amount is required')
-        })
-      )
+      rows: yup.array().of(schema)
     }),
-    initialValues: {
-      recordId: recordId,
-      rows: [
-        {
-          commissionScheduleId: recordId || '',
-          seqNo: '',
-          minAmount: '',
-          maxAmount: '',
-          pct: ''
-        }
-      ]
-    },
-    onSubmit: async obj => {
-      const updatedRows = formik.values.rows.map((adjDetail, index) => {
-        const seqNo = index + 1 // Adding 1 to make it 1-based index
+    onSubmit: async values => {
+      const filteredRows = values.rows.filter(row => Object.values(requiredFields)?.some(fn => fn(row)))
 
-        return {
-          ...adjDetail,
-          commissionScheduleId: recordId,
-          seqNo: seqNo
-        }
-      })
+      const updatedRows = filteredRows.map((row, index) => ({
+        ...row,
+        commissionScheduleId: recordId,
+        seqNo: index + 1
+      }))
 
-      const resultObject = {
+      const payload = {
         commissionScheduleId: recordId,
         items: updatedRows
       }
 
-      console.log('updated rows ', resultObject)
-
-      const response = await postRequest({
+      await postRequest({
         extension: SaleRepository.CommissionSchedule.set2,
-        record: JSON.stringify(resultObject)
+        record: JSON.stringify(payload)
       })
 
-      if (!recordId) {
-        toast.success('Record Added Successfully')
-        setInitialData({
-          ...obj, // Spread the existing properties
-          recordId: response.recordId // Update only the recordId field
-        })
-      } else toast.success('Record Edited Successfully')
-
+      toast.success(platformLabels.Updated)
       invalidate()
     }
   })
 
+  const getGridData = async () => {
+    const res = await getRequest({
+      extension: SaleRepository.CommissionScheduleBracket.qry,
+      parameters: `_commissionScheduleId=${recordId}`
+    })
+    if (res.list.length > 0) {
+      const newRows = res.list.map((obj, index) => ({
+        id: index + 1,
+        ...obj
+      }))
+      formik.setValues({ rows: newRows })
+    }
+  }
+
+  useEffect(() => {
+    if (recordId) getGridData()
+  }, [recordId])
+
   const columns = [
     {
-      field: 'numberfield',
-      header: labels[4],
+      component: 'numberfield',
+      label: labels.min,
       name: 'minAmount',
-      mandatory: true
+      props: { allowNegative: false }
     },
     {
-      field: 'numberfield',
-      header: labels[5],
+      component: 'numberfield',
+      label: labels.max,
       name: 'maxAmount',
-      mandatory: true
+      props: { allowNegative: false }
     },
     {
-      field: 'numberfield',
-      header: labels[6],
+      component: 'numberfield',
+      label: labels.pct,
       name: 'pct',
-      mandatory: true
+      props: {
+        allowNegative: false,
+        maxLength: 5,
+        decimalScale: 2
+      }
     }
   ]
 
-  useEffect(() => {
-    ;(async function () {
-      try {
-        if (recordId) {
-          setIsLoading(true)
-
-          const res = await getRequest({
-            extension: SaleRepository.CommissionScheduleBracket.qry,
-            parameters: `_commissionScheduleId=${recordId}`
-          })
-
-          if (res.list.length > 0) {
-            formik.setValues({ recordId: recordId, rows: res.list })
-          } else {
-            formik.setValues({
-              recordId: recordId,
-              rows: [
-                {
-                  commissionScheduleId: recordId || '',
-                  seqNo: '',
-                  minAmount: '',
-                  maxAmount: '',
-                  pct: ''
-                }
-              ]
-            })
-          }
-        }
-      } catch (error) {
-        setErrorMessage(error)
-      }
-      setIsLoading(false)
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
-    <FormShell resourceId={ResourceIds.CommissionSchedule} form={formik} editMode={true} maxAccess={maxAccess}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
       <VertLayout>
         <Grow>
-          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', marginTop: -5 }}>
-            <InlineEditGrid
-              gridValidation={formik}
-              maxAccess={maxAccess}
-              columns={columns}
-              defaultRow={{
-                commissionScheduleId: recordId || '',
-                seqNo: '',
-                minAmount: '',
-                maxAmount: '',
-                pct: ''
-              }}
-              width={500}
-            />
-          </Box>
+          <DataGrid
+            name='rows'
+            maxAccess={maxAccess}
+            value={formik.values.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            onChange={value => formik.setFieldValue('rows', value)}
+          />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 
-export default BracketsTab
+export default BracketsForm

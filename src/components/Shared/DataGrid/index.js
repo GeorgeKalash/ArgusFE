@@ -10,6 +10,8 @@ import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import { AuthContext } from 'src/providers/AuthContext'
 
 export function DataGrid({
   name, // maxAccess
@@ -33,6 +35,8 @@ export function DataGrid({
 }) {
   const gridApiRef = useRef(null)
 
+  const { user } = useContext(AuthContext)
+
   let lastCellStopped = useRef()
 
   const isDup = useRef(null)
@@ -46,6 +50,14 @@ export function DataGrid({
   const skip = allowDelete ? 1 : 0
 
   const gridContainerRef = useRef(null)
+
+  const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
+
+  const isAccessDenied = maxAccess?.editMode
+    ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
+    : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
+
+  const _disabled = isAccessDenied || disabled
 
   function checkDuplicates(field, data) {
     return value.find(
@@ -202,6 +214,68 @@ export function DataGrid({
     })
   }
 
+  const BUTTON_SELECTOR = [
+    'button:not([disabled])',
+    '[role="button"]:not(.Mui-disabled)',
+    '.MuiButtonBase-root:not(.Mui-disabled)',
+    '.MuiIconButton-root:not(.Mui-disabled)',
+    '.MuiButton-root:not(.Mui-disabled)',
+    '.MuiFab-root:not(.Mui-disabled)',
+    '.MuiListItemButton-root:not(.Mui-disabled)'
+  ].join(',')
+
+  useEffect(() => {
+    const isInsideAgGridUX = (el, e) => {
+      if (!el) return false
+      const root = gridContainerRef.current
+      const path = e?.composedPath?.()
+
+      const withinContainer = !!(root && (root.contains(el) || path?.includes(root)))
+
+      const agStructure = !!(
+        el.closest('.ag-root') ||
+        el.closest('.ag-cell') ||
+        el.closest('.ag-header') ||
+        el.closest('.ag-header-row') ||
+        el.closest('.ag-popup') ||
+        el.closest('.ag-overlay') ||
+        el.closest('.ag-tooltip')
+      )
+
+      return withinContainer || agStructure
+    }
+
+    const commitIfEditing = () => {
+      const api = gridApiRef.current
+      if (!api) return
+      const editing = api.getEditingCells?.() || []
+      if (editing.length) {
+        api.stopEditing()
+        api.flushAsyncTransactions?.()
+      }
+    }
+
+    const onPointerDownCapture = e => {
+      const target = e.target
+      if (!target) return
+
+      const pressedButton = target.closest(BUTTON_SELECTOR)
+
+      if (gridApiRef.current?.getEditingCells()?.length == 0) return
+      if (!pressedButton || pressedButton.closest('.MuiPaper-root')) return
+      if (isInsideAgGridUX(pressedButton, e)) return
+      if (gridApiRef.current?.getEditingCells()?.length > 0) {
+        commitIfEditing()
+      }
+    }
+
+    window.addEventListener('pointerdown', onPointerDownCapture, true)
+
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDownCapture, true)
+    }
+  }, [])
+
   useEffect(() => {
     if (!value?.length && allowAddNewLine && ready) {
       addNewRow()
@@ -257,7 +331,7 @@ export function DataGrid({
     }
   }
 
-  const allColumns = columns.filter(
+  const allColumns = columns?.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
@@ -272,8 +346,10 @@ export function DataGrid({
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.hidden) && 
-      (typeof allColumns?.[i]?.props?.onCondition !== 'function' || !allColumns?.[i]?.props?.onCondition(data)?.disabled)
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
+        !allColumns?.[i]?.props?.onCondition(data)?.hidden) &&
+      (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
+        !allColumns?.[i]?.props?.onCondition(data)?.disabled)
     )
   }
 
@@ -356,7 +432,7 @@ export function DataGrid({
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
-      if (allowAddNewLine && !error) {
+      if (allowAddNewLine && !error && !_disabled) {
         event.stopPropagation()
         addNewRow()
       }
@@ -480,7 +556,7 @@ export function DataGrid({
 
       setData(changes, params)
 
-      if (column.colDef.updateOn !== 'blur') {
+      if (column.colDef.updateOn !== 'blur' && value !== '.') {
         commit(changes)
         process(params, oldRow, setData)
       }
@@ -581,7 +657,7 @@ export function DataGrid({
       field: column.name,
       headerName: column.label || column.name,
       headerTooltip: column.label,
-      editable: !disabled,
+      editable: !_disabled,
       flex: column.flex || (!column.width && 1),
       sortable: false,
       cellRenderer: CustomCellRenderer,
@@ -604,7 +680,7 @@ export function DataGrid({
                 sx={{
                   width: '20%',
                   height: '20%',
-                  marginLeft: '0px !important'
+                  marginLeft: '50px !important'
                 }}
                 disabled={column.checkAll?.disabled}
               />
@@ -620,7 +696,7 @@ export function DataGrid({
         return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
     })),
-    allowDelete
+    allowDelete && !isAccessDenied
       ? {
           field: 'actions',
           headerName: '',
@@ -645,10 +721,11 @@ export function DataGrid({
 
     const { colDef, rowIndex, api } = params
 
-    api.startEditingCell({
-      rowIndex: rowIndex,
-      colKey: colDef.field
-    })
+    if (colDef.component !== 'button')
+      api.startEditingCell({
+        rowIndex: rowIndex,
+        colKey: colDef.field
+      })
 
     if (params?.data.id !== rowSelectionModel) {
       const selectedRow = params?.data
@@ -666,11 +743,13 @@ export function DataGrid({
 
   useEffect(() => {
     function handleBlur(event) {
+      const pressedButton = event.target.closest(BUTTON_SELECTOR)
+
       if (
         (gridContainerRef.current &&
           !gridContainerRef.current.contains(event.target) &&
+          !pressedButton?.closest('.MuiPaper-root') &&
           gridApiRef.current?.getEditingCells()?.length > 0 &&
-          !event.target.classList.contains('MuiBox-root') &&
           !event.target.classList.contains('MuiAutocomplete-option')) ||
         event.target.closest('.ag-header-row')
       ) {
@@ -747,15 +826,17 @@ export function DataGrid({
   }
 
   const onCellEditingStopped = params => {
-    const disableRefocus = true
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
+    const disableRefocus = colDef?.component === 'numberfield'
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
-    if (newValue == currentValue) return
+    if (newValue == currentValue && newValue !== '.') return
 
     if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
       newValue = newValue.slice(0, -1).replace(/,/g, '')
+      newValue = newValue != '' ? Number(newValue) : null
+      newValue = isNaN(newValue) ? null : newValue
 
       const changes = {
         [colDef?.field]: newValue || undefined
@@ -836,6 +917,7 @@ export function DataGrid({
               tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
               enableBrowserTooltips={true}
+              enableRtl={user?.languageId === 2}
             />
           )}
         </Box>

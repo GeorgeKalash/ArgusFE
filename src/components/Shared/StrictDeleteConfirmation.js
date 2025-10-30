@@ -1,9 +1,11 @@
 import React, { useContext, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
-import WindowToolbar from './WindowToolbar'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
+import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from './Layouts/Grow'
 
 const StrictDeleteConfirmation = ({ window, action }) => {
   const [confirmationText, setConfirmationText] = useState('')
@@ -35,28 +37,38 @@ const StrictDeleteConfirmation = ({ window, action }) => {
   ]
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
-          {platformLabels.areYouSure}
-          <br />
-          {platformLabels.youAreAbout}
-        </p>
-        <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeDelete}</p>
-      </Grid>
-      <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
-        <CustomTextField
-          name='deleteConfirmation'
-          value={confirmationText}
-          onChange={handleChange}
-          onClear={handleClear}
-          placeholder={platformLabels.placeHolder}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <WindowToolbar actions={actions} smallBox={true} />
-      </Grid>
-    </Grid>
+    <Form
+      actions={actions}
+      isSaved={false}
+      onSave={handleSubmit}
+      disabledSubmit={confirmationText.toLowerCase() !== 'delete'}
+      isParentWindow={false}
+    >
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
+                {platformLabels.areYouSure}
+                <br />
+                {platformLabels.youAreAbout}
+              </p>
+              <p style={{ paddingLeft: '2rem' }}>{platformLabels.typeDelete}</p>
+            </Grid>
+            <Grid item xs={12} marginLeft={'1rem'} marginRight={'1rem'}>
+              <CustomTextField
+                name='deleteConfirmation'
+                value={confirmationText}
+                onChange={handleChange}
+                onClear={handleClear}
+                placeholder={platformLabels.placeHolder}
+                autoFocus={true}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

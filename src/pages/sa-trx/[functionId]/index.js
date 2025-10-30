@@ -18,12 +18,14 @@ import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
 import NormalDialog from 'src/components/Shared/NormalDialog'
 import { Router } from 'src/lib/useRouter'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { functionId } = Router()
 
@@ -179,8 +181,7 @@ const SaTrx = () => {
         : stackError({
             message: labels.noSelectedCurrency
           })
-    },
-    hasDT: false
+    }
   })
 
   const edit = obj => {
@@ -238,6 +239,11 @@ const SaTrx = () => {
         reference: reference,
         resourceId: getResourceId(parseInt(functionId)),
         onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId(parseInt(functionId)),
+            recordId,
+            reference
+          })
           openStack(recordId)
         },
         isAlreadyLocked: name => {

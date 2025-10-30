@@ -7,12 +7,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Table from 'src/components/Shared/Table'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import { formatDate, formatDateDefault } from 'src/lib/date-helper'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { useError } from 'src/error'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
+import Form from './Form'
 
 const formatDateForImport = dateString => {
   const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
@@ -28,9 +29,9 @@ const convertValue = (value, dataType, isAPI = false) => {
   }
   switch (dataType) {
     case 2:
-      return parseInt(value, 10) || 0
+      return parseInt(value, 10)
     case 3:
-      return parseFloat(value) || 0
+      return parseFloat(value)
     case 5:
       return isAPI ? formatDateForImport(value) : formatDateDefault(formatDate(value))
     default:
@@ -129,9 +130,10 @@ const getImportData = (gridData, columns, stackError) => {
   return convertedData
 }
 
-const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) => {
+const ImportForm = ({ onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const [importConfig, setImportConfig] = useState(null)
   const [parsedFileContent, setParsedFileContent] = useState({ count: 0, list: [] })
   const [file, setFile] = useState(null)
@@ -202,7 +204,7 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
     onSuccess?.(res)
 
     toast.success(platformLabels.Imported)
-    window.close()
+    if (window) window.close()
   }
 
   const actions = [
@@ -215,76 +217,81 @@ const ImportForm = ({ onSuccess, resourceId, access, platformLabels, window }) =
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar
-          leftSection={
-            <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <CustomTextField
-                name='name'
-                label={platformLabels?.SelectCSV}
-                value={file?.name}
-                readOnly
-                disabled={!!file?.name}
-              />
-              <Button
-                sx={{ ml: 6, minWidth: '90px !important' }}
-                variant='contained'
-                size='small'
-                disabled={!!file?.name}
-                onClick={() => imageInputRef.current.click()}
-              >
-                {platformLabels?.Browse}...
-              </Button>
-              <input
-                type='file'
-                accept='.csv'
-                ref={imageInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
-              <Button
-                onClick={clearFile}
-                sx={{
-                  backgroundColor: '#f44336',
-                  '&:hover': { backgroundColor: '#f44336', opacity: 0.8 },
-                  ml: 2
-                }}
-                variant='contained'
-              >
-                <img src='/images/buttonsIcons/clear.png' alt={platformLabels?.Clear} />
-              </Button>
-            </Grid>
-          }
-        />
-      </Fixed>
+    <Form
+      onSave={handleSubmit}
+      disabledSubmit={!file?.name}
+      isSaved={false}
+      actions={actions}
+      maxAccess={access}
+      fullSize
+    >
+      <VertLayout>
+        <Fixed>
+          <GridToolbar
+            leftSection={
+              <Grid item sx={{ display: 'flex', mr: 2 }}>
+                <CustomTextField
+                  name='name'
+                  label={platformLabels?.SelectCSV}
+                  value={file?.name}
+                  readOnly
+                  disabled={!!file?.name}
+                />
+                <Button
+                  sx={{ ml: 6, minWidth: '90px !important' }}
+                  variant='contained'
+                  size='small'
+                  disabled={!!file?.name}
+                  onClick={() => imageInputRef.current.click()}
+                >
+                  {platformLabels?.Browse}...
+                </Button>
+                <input
+                  type='file'
+                  accept='.csv'
+                  ref={imageInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+                <Button
+                  onClick={clearFile}
+                  sx={{
+                    backgroundColor: '#f44336',
+                    '&:hover': { backgroundColor: '#f44336', opacity: 0.8 },
+                    ml: 2
+                  }}
+                  variant='contained'
+                >
+                  <img src='/images/buttonsIcons/clear.png' alt={platformLabels?.Clear} />
+                </Button>
+              </Grid>
+            }
+          />
+        </Fixed>
 
-      <Grow>
-        <Table
-          name='table'
-          columns={[
-            {
-              field: 'recordId',
-              headerName: '',
-              width: 130
-            },
-            ...columns
-          ]}
-          gridData={parsedFileContent}
-          rowId={['recordId']}
-          isLoading={false}
-          pageSize={50}
-          paginationType='api'
-          pagination={false}
-          maxAccess={access}
-          textTransform
-        />
-      </Grow>
-
-      <Fixed>
-        <WindowToolbar smallBox actions={actions} />
-      </Fixed>
-    </VertLayout>
+        <Grow>
+          <Table
+            name='import'
+            columns={[
+              {
+                field: 'recordId',
+                headerName: '',
+                width: 130
+              },
+              ...columns
+            ]}
+            gridData={parsedFileContent}
+            rowId={['recordId']}
+            isLoading={false}
+            pageSize={50}
+            paginationType='api'
+            pagination={false}
+            maxAccess={access}
+            textTransform
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

@@ -38,7 +38,8 @@ const OutwardsModificationForm = ({ recordId, window }) => {
   const [validSubmit, setValidSubmit] = useState(false)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsModification
+    datasetId: ResourceIds.OutwardsModification,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.outwardsModification, window })
@@ -91,7 +92,6 @@ const OutwardsModificationForm = ({ recordId, window }) => {
       modificationType: '',
       beneficiaryData: {}
     },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       owRef: yup.string().required(),

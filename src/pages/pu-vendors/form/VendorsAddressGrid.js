@@ -1,69 +1,84 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import AddressGridTab from 'src/components/Shared/AddressGridTab'
 import { useWindow } from 'src/windows'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
-import VendorsAddressForm from './VendorsAddressForm'
 import { ControlContext } from 'src/providers/ControlContext'
+import AddressForm from 'src/components/Shared/AddressForm'
+import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
-const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) => {
+const VendorsAddressGrid = ({ store, labels, editMode, ...props }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const [addressGridData, setAddressGridData] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const getAddressGridData = vendorId => {
-    setAddressGridData([])
+  const fetchGridData = async (options = {}) => {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-    const defaultParams = `_vendorId=${vendorId}`
-    var parameters = defaultParams
-
-    getRequest({
-      extension: PurchaseRepository.Address.qry,
-      parameters: parameters
+    const response = await getRequest({
+      extension: PurchaseRepository.Address.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_vendorId=${recordId}`
     })
-      .then(res => {
-        res.list = res.list.map(row => (row = row.address)) //sol
-        setAddressGridData(res)
-      })
-      .catch(error => {})
+
+    return { ...response, _startAt }
   }
 
-  const delAddress = obj => {
+  const {
+    query: { data, refetch },
+    paginationParameters
+  } = useResourceQuery({
+    enabled: !!recordId,
+    queryFn: fetchGridData,
+    endpointId: PurchaseRepository.Address.page,
+    datasetId: ResourceIds.Address
+  })
+
+  const delAddress = async obj => {
     const vendorId = recordId
     obj.vendorId = vendorId
     obj.addressId = obj.recordId
-    postRequest({
+    await postRequest({
       extension: PurchaseRepository.Address.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
-        toast.success(platformLabels.Deleted)
-        getAddressGridData(vendorId)
-      })
-      .catch(error => {})
+
+    toast.success(platformLabels.Deleted)
+    refetch()
   }
 
   function addAddress() {
     openForm('')
   }
 
-  function openForm(id) {
+  function openForm(recordId) {
     stack({
-      Component: VendorsAddressForm,
+      Component: AddressForm,
       props: {
-        _labels: labels,
-        maxAccess,
-        editMode,
-        recordId: id,
-        vendorId: recordId,
-        getAddressGridData: getAddressGridData
-      },
-      width: 600,
-      height: 500,
-      title: labels.address
+        recordId,
+        isCleared: false,
+        datasetId: ResourceIds.ADDPuVendors,
+        onSubmit: async (obj, window) => {
+          if (obj) {
+            const data = {
+              vendorId: store.recordId,
+              address: obj,
+              addressId: obj.recordId
+            }
+
+            await postRequest({
+              extension: PurchaseRepository.Address.set,
+              record: JSON.stringify(data)
+            })
+
+            toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
+            refetch()
+            window.close()
+          }
+        }
+      }
     })
   }
 
@@ -71,32 +86,17 @@ const VendorsAddressGrid = ({ store, maxAccess, labels, editMode, ...props }) =>
     openForm(obj.recordId)
   }
 
-  useEffect(() => {
-    recordId && getAddressGridData(recordId)
-  }, [recordId])
-
-  const columns = [
-    {
-      field: 'city',
-      headerName: labels.city,
-      flex: 1
-    },
-    {
-      field: 'street1',
-      headerName: labels.street1,
-      flex: 1
-    }
-  ]
+  const addressGridData = { ...data, list: (data?.list || []).map(row => row.address) }
 
   return (
     <AddressGridTab
       addressGridData={addressGridData}
+      paginationParameters={paginationParameters}
       addAddress={addAddress}
       delAddress={delAddress}
       editAddress={editAddress}
-      labels={labels}
-      columns={columns}
-      maxAccess={maxAccess}
+      datasetId={ResourceIds.ADDPuVendors}
+      refetch={refetch}
       {...props}
     />
   )

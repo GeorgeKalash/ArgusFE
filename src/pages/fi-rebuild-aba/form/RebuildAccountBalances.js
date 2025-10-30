@@ -20,24 +20,20 @@ export default function RebuildAccountBalances({ _labels, access }) {
 
   const { formik } = useForm({
     initialValues: { fiscalYear: '', groupId: 0, recordId: 'N/A', accountId: 0 },
-    enableReinitialize: true,
     maxAccess: access,
     validateOnChange: true,
-
     validationSchema: yup.object({
-      fiscalYear: yup.string().required(' ')
+      fiscalYear: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const { recordId, ...rest } = obj
+      const { recordId, ...rest } = obj
 
-        await postRequest({
-          extension: FinancialRepository.AccountCreditBalance.rebuild,
-          record: JSON.stringify(rest)
-        })
+      await postRequest({
+        extension: FinancialRepository.AccountCreditBalance.rebuild,
+        record: JSON.stringify(rest)
+      })
 
-        toast.success(platformLabels.rebuild)
-      } catch (error) {}
+      toast.success(platformLabels.rebuild)
     }
   })
 

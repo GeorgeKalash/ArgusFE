@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -9,21 +8,45 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { DataGrid } from 'src/components/Shared/DataGrid'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { DataSets } from 'src/resources/DataSets'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import Table from 'src/components/Shared/Table'
+import { useResourceQuery } from 'src/hooks/resource'
+import { useWindow } from 'src/windows'
+import ResourceGlobalForm from 'src/components/Shared/ResourceGlobalForm'
+import Form from 'src/components/Shared/Form'
 
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  const {
+    query: { data: sgData },
+    paginationParameters,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: AccessControlRepository.SecurityGroup.qry,
+    datasetId: ResourceIds.SettingsResources
+  })
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 20 } = options
+
+    const response = await getRequest({
+      extension: AccessControlRepository.SecurityGroup.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
-
     initialValues: {
       resourceId: row.resourceId,
+      moduleId: row.moduleId,
       resourceName: row.resourceName,
       items: [
         {
@@ -65,84 +88,40 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
 
   const columns = [
     {
-      component: 'textfield',
-      label: labels.name,
-      name: 'sgName',
-      props: {
-        readOnly: true
-      }
+      headerName: labels.name,
+      field: 'name',
+      flex: 1
     },
     {
-      component: 'textfield',
-      label: labels.description,
-      name: 'sgDescription',
-      props: {
-        readOnly: true
-      }
-    },
-    {
-      component: 'resourcecombobox',
-      name: 'accessLevel',
-      label: labels.accessLevel,
-      props: {
-        datasetId: DataSets.ACCESS_LEVEL,
-        valueField: 'key',
-        displayField: 'value',
-        mapping: [
-          { from: 'key', to: 'accessLevel' },
-          { from: 'value', to: 'accessLevelName' }
-        ]
-      }
+      headerName: labels.description,
+      field: 'description',
+      flex: 2
     }
   ]
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const res1 = await getRequest({
-        extension: AccessControlRepository.SecurityGroup.qry,
-        parameters: '_startAt=0&_pageSize=1000'
-      })
+  const edit = obj => {
+    openForm(obj)
+  }
 
-      const res2 = await getRequest({
-        extension: AccessControlRepository.ModuleClass.qry0,
-        parameters: `_resourceId=${row.resourceId}`
-      })
-
-      const list1 = res1.list || []
-      const list2 = res2.list || []
-
-      const combinedList = list1.map((item1, index) => {
-        const match = list2.find(item2 => item2.sgId === item1.recordId)
-
-        return {
-          id: index + 1,
-          accessLevelName: match ? match.accessLevelName : '',
-          accessLevel: match ? match.accessLevel : null,
-          resourceId: row.resourceId,
-          sgId: item1.recordId,
-          moduleId: row.moduleId,
-          sgName: item1.name,
-          sgDescription: item1.description
-        }
-      })
-
-      formik.setValues({
-        ...formik.values,
-        items: combinedList
-      })
-    }
-
-    fetchData()
-  }, [])
+  function openForm(row) {
+    stack({
+      Component: ResourceGlobalForm,
+      props: {
+        labels,
+        maxAccess,
+        row: {
+          resourceId: formik.values?.resourceId,
+          resourceName: formik.values?.resourceName,
+          sgId: row?.recordId,
+          moduleId: formik.values?.moduleId
+        },
+        resourceId: ResourceIds.SecurityGroup
+      }
+    })
+  }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.SettingsResources}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -168,19 +147,21 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
           </Grid>
         </Fixed>
         <Grow>
-          <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values.items}
-            error={formik.errors.items}
-            allowDelete={false}
-            allowAddNewLine={false}
-            columns={columns}
-            maxAccess={maxAccess}
+          <Table
             name='items'
+            columns={columns}
+            gridData={sgData}
+            onEdit={edit}
+            rowId={['recordId']}
+            maxAccess={maxAccess}
+            refetch={refetch}
+            pageSize={20}
+            paginationType='api'
+            paginationParameters={paginationParameters}
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

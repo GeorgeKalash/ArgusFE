@@ -1,25 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Box, Button } from '@mui/material'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
-
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
+import Form from 'src/components/Shared/Form'
 
-const IndicatorForm = ({
-  labels,
-
-  expanded,
-  editMode,
-  height,
-  maxAccess,
-  store
-}) => {
+const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
   const [valueGridData, setValueGridData] = useState([])
   const { postRequest } = useContext(RequestsContext)
 
@@ -30,7 +19,6 @@ const IndicatorForm = ({
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       indicatorData: [
@@ -112,19 +100,15 @@ const IndicatorForm = ({
   }, [recordId, applyTrigger])
 
   const applyStrategy = async () => {
-    try {
-      const { groupName, ...valuesWithoutGroupName } = store
+    const { groupName, ...valuesWithoutGroupName } = store
 
-      const res = await postRequest({
-        extension: DocumentReleaseRepository.ApplySTG.apply,
-        record: JSON.stringify(valuesWithoutGroupName)
-      })
-      toast.success('Strategy Applied Successfully')
+    const res = await postRequest({
+      extension: DocumentReleaseRepository.ApplySTG.apply,
+      record: JSON.stringify(valuesWithoutGroupName)
+    })
+    toast.success('Strategy Applied Successfully')
 
-      setApplyTrigger(prev => prev + 1)
-    } catch (error) {
-      toast.error('An error occurred during apply')
-    }
+    setApplyTrigger(prev => prev + 1)
   }
 
   const columns = [
@@ -177,26 +161,24 @@ const IndicatorForm = ({
   ]
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Strategies}
+    <Form
+      onSave={formik.handleSubmit}
       maxAccess={maxAccess}
-      infoVisible={false}
       editMode={editMode}
       actions={actions}
+      isParentWindow={false}
     >
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', scroll: 'none', overflow: 'hidden' }}>
+      <Grow>
         <DataGrid
           onChange={value => formik.setFieldValue('indicatorData', value)}
           value={formik.values.indicatorData}
           error={formik.errors.indicatorData}
           columns={columns}
-          height={`${expanded ? `calc(100vh - 280px)` : `${height - 100}px`}`}
           allowDelete={false}
           allowAddNewLine={false}
         />
-      </Box>
-    </FormShell>
+      </Grow>
+    </Form>
   )
 }
 

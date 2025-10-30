@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect, useRef } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 
@@ -23,16 +23,23 @@ export const ResourceLookup = ({
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
   const [success, setSuccess] = useState(false)
+  const lookupRequestId = useRef(0)
 
   const onLookup = async searchQry => {
     setSuccess(false)
     setStore([])
     setRenderOption(false)
+
+    const currentRequestId = ++lookupRequestId.current
+
     if (!endpointId) {
-      setSuccess(true)
-      const res = await rest?.onLookup(searchQry)
-      setStore(res)
-      setRenderOption(true)
+      if (rest.onLookup) {
+        setSuccess(true)
+        const res = await rest?.onLookup(searchQry)
+        if (currentRequestId !== lookupRequestId.current) return
+        setStore(res)
+        setRenderOption(true)
+      }
     } else {
       if (searchQry?.length >= minChars) {
         setIsLoading(true)
@@ -42,7 +49,7 @@ export const ResourceLookup = ({
           disableLoading: true
         })
           .then(res => {
-            res.list !== undefined && setSuccess(true)
+            if (currentRequestId !== lookupRequestId.current) return
             if (filter) {
               res.list = res?.list?.filter(item => {
                 return Object.entries(filter).every(([key, value]) => {
@@ -58,8 +65,10 @@ export const ResourceLookup = ({
             setRenderOption(true)
           })
           .finally(() => {
-            setIsLoading(false)
-            setRenderOption(true)
+            if (currentRequestId === lookupRequestId.current) {
+              setIsLoading(false)
+              setRenderOption(true)
+            }
           })
       }
     }
@@ -106,8 +115,8 @@ export const ResourceLookup = ({
     setStore([])
   }, [_firstValue])
 
-  const onKeyUp = e => {
-    if (e.key === 'Enter') {
+  const onKeyUp = (e, HighlightedOption) => {
+    if (e.key === 'Enter' && !HighlightedOption) {
       selectFirstOption()
     }
   }

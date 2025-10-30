@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -24,20 +23,22 @@ const CAadjustment = () => {
 
   const { functionId } = Router()
 
-    async function fetchGridData(options = {}) {
-      const { _startAt = 0, _pageSize = 50, params } = options
-  
-      const response = await getRequest({
-        extension: CashBankRepository.CAadjustment.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_sortBy=reference&_functionId=${functionId}`
-      })
-  
-      return { ...response, _startAt: _startAt }
-    }
-  
-    async function fetchWithFilter({ filters, pagination }) {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: CashBankRepository.CAadjustment.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }&_sortBy=date desc&_functionId=${functionId}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const {
     query: { data },
@@ -144,7 +145,7 @@ const CAadjustment = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'CAADJ'} filterBy={filterBy} hasSearch={false}/>
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'CAADJ'} filterBy={filterBy} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table

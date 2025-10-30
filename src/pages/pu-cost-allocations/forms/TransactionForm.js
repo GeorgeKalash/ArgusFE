@@ -18,8 +18,8 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function TransactionForm({ labels, maxAccess, recordId, seqNo, caId, onSubmit }) {
+  const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
@@ -30,16 +30,15 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     initialValues: {
       recordId: null,
       costTypeId: null,
-      caId: caId,
+      caId,
       currencyId: null,
       accountId: null,
       functionId: null,
       baseAmount: 0.0,
       reference: '',
-      seqNo: seqNo || null,
+      seqNo: null,
       amount: 0.0
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       baseAmount: yup.number().required(),
@@ -53,21 +52,16 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
       })
     }),
     onSubmit: async obj => {
-      await postRequest({
-        extension: CostAllocationRepository.TrxCostType.set,
-        record: JSON.stringify(obj)
-      }).then(res => {
-        if (!obj.recordId) {
-          toast.success(platformLabels.Added)
-          formik.setFieldValue('recordId', res.recordId)
-        } else {
-          toast.success(platformLabels.Edited)
-        }
-        invalidate()
-      })
+      const res = await onSubmit(obj)
+
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      formik.setFieldValue('recordId', res.recordId)
+
+      invalidate()
     }
   })
-  const editMode = !!formik.values.recordId
+
+  const editMode = !!formik.values?.recordId
 
   useEffect(() => {
     ;(async function () {

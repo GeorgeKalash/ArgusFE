@@ -17,13 +17,13 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { formatDateFromApi } from 'src/lib/date-helper'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ReportPuGeneratorRepository } from 'src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
+import Form from 'src/components/Shared/Form'
 
 const OpenPurchaseOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -33,10 +33,6 @@ const OpenPurchaseOrder = () => {
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.OpenPOs
-  })
-
-  const { labels: _labels, access: maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.Shipments
   })
 
   const defaultVat = defaultsData?.list?.find(({ key }) => key === 'POSHPVarPct')
@@ -88,22 +84,12 @@ const OpenPurchaseOrder = () => {
           isChecked: false,
           receiveNow: 0
         }))
-
         formik.setFieldValue('items', items)
-
         stack({
           Component: ShipmentsForm,
           props: {
-            labels: _labels,
-            recordId: res.recordId,
-            maxAccess,
-            plantId,
-            siteId,
-            dtId
-          },
-          width: 1300,
-          height: 700,
-          title: _labels.shipment
+            recordId: res.recordId
+          }
         })
 
         toast.success(platformLabels.Generated)
@@ -256,230 +242,230 @@ const OpenPurchaseOrder = () => {
     }
   ]
 
-  const handleSubmit = e => {
-    setTimeout(() => {
-      formik.handleSubmit()
-    }, 5)
-  }
-
   const actions = [
     {
       key: 'SHP',
       condition: true,
-      onClick: handleSubmit,
+      onClick: () => formik.handleSubmit(),
       disabled: !vendorId || !siteId
     }
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container spacing={2} padding={2}>
-          <Grid item xs={4}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.DocumentType.qry}
-                  parameters={`_dgId=${SystemFunction.Shipment}&_startAt=${0}&_pageSize=${1000}`}
-                  name='dtId'
-                  label={labels.documentType}
-                  valueField='recordId'
-                  displayField='name'
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('dtId', newValue?.recordId || null)
-                  }}
-                  error={formik.touched.dtId && Boolean(formik.errors.dtId)}
-                  maxAccess={access}
-                />
+    <Form
+      actions={actions}
+      onSave={formik.handleSubmit}
+      disabledSubmit={!vendorId || !siteId}
+      isSaved={false}
+      maxAccess={access}
+      fullSize
+    >
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2} p={2}>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.DocumentType.qry}
+                    parameters={`_dgId=${SystemFunction.Shipment}&_startAt=${0}&_pageSize=${1000}`}
+                    name='dtId'
+                    label={labels.documentType}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_pagesize=30&_startAt=0&_name='
+                    name='categoryId'
+                    label={labels.category}
+                    valueField='recordId'
+                    displayField={'name'}
+                    displayFieldWidth={1}
+                    values={formik?.values}
+                    maxAccess={access}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('categoryId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Group.qry}
+                    parameters='_startAt=0&_pageSize=1000'
+                    name='groupId'
+                    label={labels.group}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('groupId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+                    maxAccess={access}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Category.qry}
-                  parameters='_pagesize=30&_startAt=0&_name='
-                  name='categoryId'
-                  label={labels.category}
-                  valueField='recordId'
-                  displayField={'name'}
-                  displayFieldWidth={1}
-                  values={formik?.values}
-                  maxAccess={access}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('categoryId', newValue?.recordId || 0)
-                  }}
-                  error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
-                />
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={PurchaseRepository.Vendor.snapshot}
+                    filter={item => !item.isInactive}
+                    valueField='reference'
+                    displayField='name'
+                    name='vendorId'
+                    label={labels.vendor}
+                    form={formik}
+                    displayFieldWidth={2}
+                    valueShow='vendorRef'
+                    secondValueShow='vendorName'
+                    maxAccess={access}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' },
+                      { key: 'flName', value: 'Foreign Language' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('vendorName', newValue?.name || '')
+                      formik.setFieldValue('vendorRef', newValue?.reference || '')
+                      formik.setFieldValue('vendorId', newValue?.recordId || 0)
+                    }}
+                    errorCheck={'vendorId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='siteId'
+                    label={labels.site}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={access}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('siteId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.sitId && Boolean(formik.errors.sitId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.Plant.qry}
+                    name='plantId'
+                    label={labels.plant}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('plantId', newValue?.recordId || 0)
+                    }}
+                    error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                    maxAccess={access}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Group.qry}
-                  parameters='_startAt=0&_pageSize=1000'
-                  name='groupId'
-                  label={labels.group}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('groupId', newValue?.recordId || 0)
-                  }}
-                  error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-                  maxAccess={access}
-                />
+            </Grid>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name='itemId'
+                    label={labels.sku}
+                    valueField='sku'
+                    displayField='name'
+                    valueShow='itemRef'
+                    secondValueShow='itemName'
+                    form={formik}
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId || 0)
+                      formik.setFieldValue('itemName', newValue?.name || '')
+                      formik.setFieldValue('itemRef', newValue?.sku || '')
+                      formik.setFieldValue('sku', newValue?.sku || '')
+                    }}
+                    displayFieldWidth={2}
+                    maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  <ResourceLookup
+                    endpointId={PurchaseRepository.UnpostedOrderPack.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='poId'
+                    label={labels.ref}
+                    form={formik}
+                    secondDisplayField={false}
+                    displayFieldWidth={2}
+                    valueShow='poRef'
+                    maxAccess={access}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('poName', newValue?.name || '')
+                      formik.setFieldValue('poRef', newValue?.reference || '')
+                      formik.setFieldValue('poId', newValue?.recordId || 0)
+                    }}
+                    errorCheck={'poId'}
+                  />
+                </Grid>
+                <Grid item xs={2}>
+                  <CustomButton
+                    variant='contained'
+                    image={'preview.png'}
+                    label={platformLabels.Preview}
+                    onClick={() => getData()}
+                    color='#231f20'
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={4}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={PurchaseRepository.Vendor.snapshot}
-                  filter={item => !item.isInactive}
-                  valueField='reference'
-                  displayField='name'
-                  name='vendorId'
-                  label={labels.vendor}
-                  form={formik}
-                  displayFieldWidth={2}
-                  valueShow='vendorRef'
-                  secondValueShow='vendorName'
-                  maxAccess={maxAccess}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' },
-                    { key: 'flName', value: 'Foreign Language' }
-                  ]}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('vendorName', newValue?.name || '')
-                    formik.setFieldValue('vendorRef', newValue?.reference || '')
-                    formik.setFieldValue('vendorId', newValue?.recordId || 0)
-                  }}
-                  errorCheck={'vendorId'}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={InventoryRepository.Site.qry}
-                  name='siteId'
-                  label={labels.site}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  maxAccess={access}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  required
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('siteId', newValue?.recordId || 0)
-                  }}
-                  error={formik.touched.sitId && Boolean(formik.errors.sitId)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.Plant.qry}
-                  name='plantId'
-                  label={labels.plant}
-                  valueField='recordId'
-                  displayField={['reference', 'name']}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('plantId', newValue?.recordId || 0)
-                  }}
-                  error={formik.touched.plantId && Boolean(formik.errors.plantId)}
-                  maxAccess={access}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={4}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <ResourceLookup
-                  endpointId={InventoryRepository.Item.snapshot}
-                  name='itemId'
-                  label={labels.sku}
-                  valueField='sku'
-                  displayField='name'
-                  valueShow='itemRef'
-                  secondValueShow='itemName'
-                  form={formik}
-                  columnsInDropDown={[
-                    { key: 'sku', value: 'SKU' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('itemId', newValue?.recordId || 0)
-                    formik.setFieldValue('itemName', newValue?.name || '')
-                    formik.setFieldValue('itemRef', newValue?.sku || '')
-                    formik.setFieldValue('sku', newValue?.sku || '')
-                  }}
-                  displayFieldWidth={2}
-                  maxAccess={access}
-                />
-              </Grid>
-              <Grid item xs={10}>
-                <ResourceLookup
-                  endpointId={PurchaseRepository.UnpostedOrderPack.snapshot}
-                  valueField='reference'
-                  displayField='name'
-                  name='poId'
-                  label={labels.ref}
-                  form={formik}
-                  secondDisplayField={false}
-                  displayFieldWidth={2}
-                  valueShow='poRef'
-                  maxAccess={maxAccess}
-                  columnsInDropDown={[
-                    { key: 'reference', value: 'Reference' },
-                    { key: 'name', value: 'Name' }
-                  ]}
-                  onChange={async (event, newValue) => {
-                    formik.setFieldValue('poName', newValue?.name || '')
-                    formik.setFieldValue('poRef', newValue?.reference || '')
-                    formik.setFieldValue('poId', newValue?.recordId || 0)
-                  }}
-                  errorCheck={'poId'}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <CustomButton
-                  variant='contained'
-                  image={'preview.png'}
-                  label={platformLabels.Preview}
-                  onClick={() => getData()}
-                  color='#231f20'
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Fixed>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-          name='items'
-          allowDelete={false}
-          allowAddNewLine={false}
-          maxAccess={access}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar smallBox={true} actions={actions} />
-      </Fixed>
-    </VertLayout>
+        </Fixed>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

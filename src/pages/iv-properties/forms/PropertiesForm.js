@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -12,6 +10,7 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, fetchData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -24,22 +23,18 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
       name: ''
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       id: yup.string().required()
     }),
     onSubmit: async obj => {
-      const id = obj.id
-
-      const response = await postRequest({
+      await postRequest({
         extension: InventoryRepository.Dimension.set,
         record: JSON.stringify(obj)
       })
 
       toast.success(platformLabels.Updated)
-
       fetchData()
       window.close()
     }
@@ -59,13 +54,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
   }, [id])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.IVDimension}
-      form={formik}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -97,6 +86,6 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

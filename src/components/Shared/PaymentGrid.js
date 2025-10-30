@@ -11,14 +11,15 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const editMode = !!rest.data.recordId
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds?.POSPayment
+    datasetId: ResourceIds?.POSPayment,
+    editMode
   })
   const { stack } = useWindow()
 
   const initialValuePayment = [
     {
       id: 1,
-      seqNo: 0,
+      seqNo: 1,
       cashAccountId: null,
       cashAccount: '',
       posStatus: 1,
@@ -72,8 +73,8 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       )
       .required('Cash array is required')
 
-    rest.setFormik({ ...initialValuePayment, paymentValidation })
-  }, [rest.name])
+    !value && rest.setFormik({ ...initialValuePayment, paymentValidation })
+  }, [rest.name, value])
 
   const calculate = values => {
     const totalPaidAmount = values.reduce((sum, current) => sum + parseFloat(current.paidAmount || 0), 0)
@@ -95,8 +96,18 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   }
 
   const onCondition = row => {
-    return {
-      disabled: !editMode || row.type != 3
+    if (row.type == 3) {
+      return {
+        imgSrc: '/images/buttonsIcons/open-external.png',
+        hidden: false,
+        disabled: !editMode || row.type != 3
+      }
+    } else {
+      return {
+        imgSrc: '',
+        hidden: true,
+        disabled: !editMode || row.type != 3
+      }
     }
   }
 
@@ -228,11 +239,10 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       component: 'button',
       name: 'pos',
       props: {
-        imgSrc: '/images/buttonsIcons/open-external.png',
         onCondition
       },
       label: labels.pos,
-      onClick: (e, row, update, updateRow) => {
+      onClick: (e, row) => {
         stack({
           Component: POSForm,
           props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
@@ -256,6 +266,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       }}
       value={value}
       initialValues={initialValuePayment[0]}
+      allowDelete={!rest.disabled}
     />
   )
 }

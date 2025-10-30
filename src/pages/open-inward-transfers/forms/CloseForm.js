@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import FieldSet from 'src/components/Shared/FieldSet'
-import FormShell from 'src/components/Shared/FormShell'
+import Form from 'src/components/Shared/Form'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
@@ -17,7 +17,6 @@ import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import * as yup from 'yup'
 
 export default function CloseForm({ form, labels, access, window }) {
@@ -46,7 +45,6 @@ export default function CloseForm({ form, labels, access, window }) {
       receiver_accountNo: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       corId: yup.string().required(),
@@ -143,13 +141,7 @@ export default function CloseForm({ form, labels, access, window }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.InwardTransfer}
-      form={formik}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <FieldSet title={labels.header} sx={{ flex: 0 }}>
@@ -282,6 +274,6 @@ export default function CloseForm({ form, labels, access, window }) {
           </FieldSet>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

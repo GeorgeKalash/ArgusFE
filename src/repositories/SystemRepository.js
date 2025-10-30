@@ -1,5 +1,3 @@
-import MetalColor from 'src/pages/iv-metal-color'
-
 const service = 'SY.asmx/'
 
 export const SystemRepository = {
@@ -29,10 +27,10 @@ export const SystemRepository = {
     del: service + 'delDT'
   },
   DocumentTypeMap: {
-    qry: service + 'qryDTM',
     get: service + 'getDTM',
     set: service + 'setDTM',
-    del: service + 'delDTM'
+    del: service + 'delDTM',
+    page: service +'pageDTM'
   },
   RelationType: {
     qry: service + 'qryRT',
@@ -256,13 +254,35 @@ export const SystemRepository = {
   Attachment: {
     qry: service + 'qryAT',
     set: service + 'setAT',
+    set2: service + 'setAT2',
     get: service + 'getAT',
+    get2: service + 'getAT2',
     del: service + 'delAT'
   },
   Folders: {
     page: service + 'pageFO',
+    qry: service + 'qryFO',
     get: service + 'getFO',
     set: service + 'setFO',
     del: service + 'delFO'
+  },
+  ResourcePerformance: {
+    page: service + 'pageTLP'
+  },
+  DocumentReverseReasons: {
+    page: service + 'pageRER',
+    get: service + 'getRER',
+    set: service + 'setRER',
+    del: service + 'delRER'
+  },
+  SystemAlerts: {
+    qry: service + 'qryAA',
+    arr: service + 'arrAA'
+  },
+  RightToWork: {
+    page: service + 'qryRW',
+    get: service + 'getRW',
+    set: service + 'setRW',
+    del: service + 'delRW'
   }
 }

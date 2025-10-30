@@ -5,11 +5,10 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import USDocTypeForm from './USDocTypeForm'
-import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
@@ -20,7 +19,6 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId: storeRecordId || null,
@@ -102,45 +100,35 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      maxAccess={maxAccess}
-      editMode={!!storeRecordId}
-      isSaved={false}
-      isCleared={false}
-      infoVisible={false}
-      form={formik}
-    >
-      <VertLayout>
-        <Fixed>
-          <Grid container>
-            <Grid item xs={4}>
-              <CustomTextField
-                name='search'
-                value={formik.values.search}
-                label={labels.search}
-                onClear={() => {
-                  formik.setFieldValue('search', '')
-                }}
-                onChange={handleSearchChange}
-              />
-            </Grid>
+    <VertLayout>
+      <Fixed>
+        <Grid container p={4}>
+          <Grid item xs={4}>
+            <CustomTextField
+              name='search'
+              value={formik.values.search}
+              label={labels.search}
+              onClear={() => {
+                formik.setFieldValue('search', '')
+              }}
+              onChange={handleSearchChange}
+            />
           </Grid>
-        </Fixed>
-        <Grow>
-          <Table
-            name='docType'
-            columns={columns}
-            gridData={filteredData}
-            rowId={['userId', 'functionId']}
-            onEdit={edit}
-            isLoading={false}
-            maxAccess={maxAccess}
-            pagination={false}
-          />
-        </Grow>
-      </VertLayout>
-    </FormShell>
+        </Grid>
+      </Fixed>
+      <Grow>
+        <Table
+          name='docType'
+          columns={columns}
+          gridData={filteredData}
+          rowId={['userId', 'functionId']}
+          onEdit={edit}
+          isLoading={false}
+          maxAccess={maxAccess}
+          pagination={false}
+        />
+      </Grow>
+    </VertLayout>
   )
 }
 

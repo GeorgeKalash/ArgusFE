@@ -43,7 +43,8 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.ThreeDDesign
+    datasetId: ResourceIds.ThreeDDesign,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.ThreeDDesign, window })
@@ -80,7 +81,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       collectionId: null
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       source: yup.number().required(),

@@ -1,7 +1,6 @@
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -9,9 +8,9 @@ import toast from 'react-hot-toast'
 import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import Form from 'src/components/Shared/Form'
 
 const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -29,7 +28,6 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   const [fullGroups, setFullGroups] = useState(initialGroups)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',
@@ -121,13 +119,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Users}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={!!storeRecordId}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
       <VertLayout>
         <Fixed>
           <Grid container>
@@ -170,7 +162,7 @@ const SecurityGrpTab = ({ labels, maxAccess, storeRecordId }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

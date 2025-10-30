@@ -40,7 +40,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   })
 
   const initialValues = {
-    recordId: null,
+    recordId: recordId || null,
     currencyId: parseInt(getDefaultsData()?.currencyId),
     currencyRef: '',
     currencyName: '',
@@ -85,7 +85,6 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
     initialValues,
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
@@ -102,7 +101,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
           message: labels.errorMessage
         })
 
-        return
+        throw { silent: true }
       }
 
       const res = await postRequest({
@@ -309,6 +308,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
               label={labels.date}
               value={formik?.values?.date}
               required
+              autoFocus={!editMode}
               onChange={async (e, newValue) => {
                 formik.setFieldValue('date', newValue)
                 await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)

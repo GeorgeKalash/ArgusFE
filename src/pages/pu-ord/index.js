@@ -41,8 +41,7 @@ const PuTrx = () => {
     functionId: SystemFunction.PurchaseOrder,
     action: async () => {
       openForm()
-    },
-    hasDT: true
+    }
   })
 
   const columns = [
@@ -141,13 +140,8 @@ const PuTrx = () => {
     stack({
       Component: PurchaseOrderForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 1330,
-      height: 720,
-      title: labels.purchaseOrder
+        recordId
+      }
     })
   }
 

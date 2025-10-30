@@ -99,8 +99,13 @@ const RPBGridToolbar = ({
             paramsDict: formatDataDictForApi(rpbParams),
             search: search
           })
-      },
-      disabled: !reportName
+      }
+    },
+    {
+      key: 'Print',
+      condition: !!rest?.Print,
+      onClick: () => rest?.Print(rpbParams),
+      disabled: rest?.disablePrint
     }
   ].filter(item => !item?.hidden)
 

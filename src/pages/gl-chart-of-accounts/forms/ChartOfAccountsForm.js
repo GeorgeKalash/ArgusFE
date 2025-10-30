@@ -1,5 +1,5 @@
-import { Grid, FormControlLabel, Checkbox, Box, TextField } from '@mui/material'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { Grid } from '@mui/material'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -15,11 +15,12 @@ import SegmentedInput from 'src/components/Shared/SegmentedInput'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import { ControlContext } from 'src/providers/ControlContext'
 
-export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onChange }) {
-  const [editMode, setEditMode] = useState(!!recordId)
-
+export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.ChartOfAccounts.page
@@ -27,57 +28,60 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId,
       accountRef: '',
       name: '',
       description: '',
-      groupId: '',
+      groupId: null,
       disableManualEntry: false,
-      sign: '',
-      activeStatus: ''
+      isConfidential: false,
+      sign: null,
+      activeStatus: null,
+      sgId: null
     },
-    maxAccess: maxAccess,
-    enableReinitialize: true,
+    maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      activeStatus: yup.string().required(),
+      activeStatus: yup.number().required(),
       description: yup.string().required(),
+      sgId: yup
+        .number()
+        .nullable()
+        .test('sgId-required-if-confidential', 'sgId is required when confidential', function (value) {
+          const { isConfidential } = this.parent
+
+          return !(isConfidential && !value)
+        }),
       accountRef: yup
         .string()
         .required()
-        .matches(/^(?=.*\d)[\d_-]+$/)
+        .matches(/^[A-Za-z0-9-]+$/)
     }),
-    onSubmit: async (values, { setSubmitting }) => {
-      setSubmitting(true)
+    onSubmit: async values => {
+      const response = await postRequest({
+        extension: GeneralLedgerRepository.ChartOfAccounts.set,
+        record: JSON.stringify(values)
+      })
 
-      try {
-        const response = await postRequest({
-          extension: GeneralLedgerRepository.ChartOfAccounts.set,
-          record: JSON.stringify(values)
-        })
-
-        toast.success(`Record ${values.recordId ? 'Edited' : 'Added'} Successfully`)
-
-        setEditMode(true)
-        invalidate()
-      } catch (error) {
-      } finally {
-        setSubmitting(false)
-      }
+      const actionMessage = values.recordId ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      formik.setFieldValue('recordId', response.recordId)
+      invalidate()
     }
   })
 
+  const editMode = !!formik.values.recordId
+
   useEffect(() => {
-    if (recordId) {
-      getRequest({
-        extension: GeneralLedgerRepository.ChartOfAccounts.get,
-        parameters: `_recordId=${recordId}`
-      }).then(res => {
-        formik.setValues(res.record)
-      })
-    }
-  }, [recordId])
+    if (!recordId) return
+    getRequest({
+      extension: GeneralLedgerRepository.ChartOfAccounts.get,
+      parameters: `_recordId=${recordId}`
+    }).then(res => {
+      formik.setValues(res.record)
+    })
+  }, [])
 
   return (
     <FormShell resourceId={ResourceIds.ChartOfAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
@@ -89,14 +93,12 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 endpointId={GeneralLedgerRepository.GLAccountGroups.qry}
                 name='groupId'
                 label={labels.group}
-                columnsInDropDown={[{ key: 'name', value: 'Name' }]}
                 values={formik.values}
                 valueField='recordId'
-                displayField={['name']}
+                displayField='name'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('groupId', newValue?.recordId)
-                }}
+                onChange={(event, newValue) => formik && formik.setFieldValue('groupId', newValue?.recordId || null)}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -111,6 +113,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 }}
                 label={labels.accountRef}
                 required
+                maxAccess={maxAccess}
                 error={formik.touched.accountRef && Boolean(formik.errors.accountRef)}
               />
             </Grid>
@@ -149,12 +152,9 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 values={formik.values}
                 valueField='key'
                 displayField='value'
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('activeStatus', newValue?.key)
-                  } else {
-                    formik.setFieldValue('activeStatus', newValue?.key)
-                  }
+                  formik.setFieldValue('activeStatus', newValue?.key || null)
                 }}
                 error={formik.touched.activeStatus && Boolean(formik.errors.activeStatus)}
               />
@@ -167,12 +167,9 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 values={formik.values}
                 valueField='key'
                 displayField='value'
+                maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('sign', newValue?.key)
-                  } else {
-                    formik.setFieldValue('sign', newValue?.key)
-                  }
+                  formik.setFieldValue('sign', newValue?.key || null)
                 }}
                 error={formik.touched.sign && Boolean(formik.errors.sign)}
               />
@@ -184,6 +181,36 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId, onCha
                 onChange={event => formik.setFieldValue('disableManualEntry', event.target.checked)}
                 label={labels.disableManualEntry}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomCheckBox
+                name='isConfidential'
+                value={formik.values?.isConfidential}
+                onChange={event => {
+                  formik.setFieldValue('isConfidential', event.target.checked)
+                  formik.setFieldValue('sgId', null)
+                }}
+                label={labels.isConfidential}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={AccessControlRepository.SecurityGroup.qry}
+                parameters={`_startAt=0&_pageSize=1000&filter=`}
+                name='sgId'
+                label={labels.securityGrp}
+                values={formik.values}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('sgId', newValue?.recordId || null)
+                }}
+                required={formik.values.isConfidential}
+                readOnly={!formik.values.isConfidential}
+                error={formik.touched.sgId && Boolean(formik.errors.sgId)}
               />
             </Grid>
           </Grid>

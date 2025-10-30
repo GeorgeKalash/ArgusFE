@@ -56,7 +56,8 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   const [sysDefault, setDefault] = useState({ countryRef: '', currencyRef: '' })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.OutwardsOrder
+    datasetId: ResourceIds.OutwardsOrder,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.OutwardsOrder, window })
@@ -77,11 +78,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
     firstName: '',
     middleName: '',
     lastName: '',
-    familyName: '',
     fl_firstName: '',
     fl_middleName: '',
     fl_lastName: '',
-    fl_familyName: '',
     expiryDate: null,
     professionId: '',
     recordId: recordId,
@@ -372,7 +371,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
     }
   }
 
-  const vatAmount = (header?.commission * header.vatRate) / 100 || 0
+  const vatAmount = (header?.commission * vatPctValue) / 100 || 0
 
   const amount = parseFloat(parseFloat(header.lcAmount) + (header.commission + vatAmount - header.tdAmount))
 
@@ -443,7 +442,8 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
         ...headerView,
         valueDate: formatDateFromApi(headerView.valueDate),
         defaultValueDate: formatDateFromApi(headerView.defaultValueDate),
-        date: formatDateFromApi(headerView.date)
+        date: formatDateFromApi(headerView.date),
+        exRate: parseFloat(headerView.exRate).toFixed(5)
       },
       ICRequest:
         headerView.interfaceId == 1 && dataRequest?.requestLog
@@ -533,8 +533,6 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
           firstName,
           middleName,
           lastName,
-          familyName,
-          fl_familyName,
           fl_firstName,
           fl_lastName,
           fl_middleName,
@@ -552,11 +550,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
         firstName,
         middleName,
         lastName,
-        familyName,
         fl_firstName,
         fl_middleName,
         fl_lastName,
-        fl_familyName,
         professionId,
         hiddenTrxCount: trxCountPerYear,
         hiddenTrxAmount: trxAmountPerYear,
@@ -1120,7 +1116,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                     <CustomSwitch
                       readOnly={header.lcAmount || header.fcAmount || editMode}
                       label={labels.includeTransferFees}
-                      name='header,includingFees'
+                      name='header.includingFees'
                       checked={header.includingFees}
                       onChange={e => {
                         formik.setFieldValue('header.includingFees', e.target.checked)
@@ -1258,7 +1254,11 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                       name='header.exRate2'
                       decimalScale={5}
                       label={labels.exRateDivide}
-                      value={header?.exRate ? 1 / header.exRate : ''}
+                      value={
+                        formik?.values?.header?.exRate && formik?.values?.header.exRate != 0
+                          ? 1 / formik?.values?.header.exRate
+                          : '0.00000'
+                      }
                       readOnly
                       maxAccess={maxAccess}
                       maxLength={10}
@@ -1384,7 +1384,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           errorCheck={'header.clientId'}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='firstName'
                           label={labels.firstName}
@@ -1393,7 +1393,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='middleName'
                           label={labels.middleName}
@@ -1402,7 +1402,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
+                      <Grid item xs={4}>
                         <CustomTextField
                           name='lastName'
                           label={labels.lastName}
@@ -1411,18 +1411,9 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                           maxAccess={maxAccess}
                         />
                       </Grid>
-                      <Grid item xs={3}>
-                        <CustomTextField
-                          name='familyName'
-                          label={labels.familyName}
-                          value={formik.values?.familyName}
-                          readOnly
-                          maxAccess={maxAccess}
-                        />
-                      </Grid>
                       <Grid item xs={12}>
                         <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
                               label={labels.flFirstName}
@@ -1432,7 +1423,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_middleName'
                               label={labels.flMiddleName}
@@ -1442,24 +1433,13 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               maxAccess={maxAccess}
                             />
                           </Grid>
-                          <Grid item xs={3}>
+                          <Grid item xs={4}>
                             <CustomTextField
                               name='fl_lastName'
                               label={labels.flLastName}
                               value={formik.values?.fl_lastName}
                               readOnly
                               dir='rtl'
-                              maxAccess={maxAccess}
-                            />
-                          </Grid>
-                          <Grid item xs={3}>
-                            <CustomTextField
-                              name='fl_familyName'
-                              label={labels.flFamilyName}
-                              value={formik.values?.fl_familyName}
-                              readOnly
-                              dir='rtl'
-                              error={formik.touched.fl_familyName && Boolean(formik.errors.fl_familyName)}
                               maxAccess={maxAccess}
                             />
                           </Grid>
@@ -1501,7 +1481,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
                               name='header.cellPhone'
                               phone={true}
                               label={labels.cellPhone}
-                              value={formik.values?.cellPhone}
+                              value={formik.values?.header.cellPhone}
                               readOnly
                               maxLength='15'
                               autoComplete='off'

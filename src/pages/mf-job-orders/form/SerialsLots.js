@@ -2,48 +2,31 @@ import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { useForm } from 'src/hooks/form'
-import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import FormShell from 'src/components/Shared/FormShell'
-import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
-export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
+  const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
   const editMode = !!recordId
 
+  useSetWindow({ title: platformLabels.serials, window })
+
   const { formik } = useForm({
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       jobId: recordId,
       serials: []
-    },
-    validationSchema: yup.object({
-      serials: yup.array().of(
-        yup.object({
-          weight: yup.string().required()
-        })
-      )
-    }),
-    onSubmit: async obj => {
-      const modifiedSerials = obj.serials.map((serials, index) => ({
-        ...serials,
-        seqNo: index + 1,
-        jobId: recordId
-      }))
-      await postRequest({
-        extension: ManufacturingRepository.MFSerial.set2,
-        record: JSON.stringify({ jobId: recordId, data: modifiedSerials })
-      })
-      toast.success(platformLabels.Edited)
     }
   })
 
@@ -65,14 +48,17 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
     {
       component: 'numberfield',
       label: labels.weight,
-      name: 'weight'
+      name: 'weight',
+      props: {
+        readOnly: true
+      }
     }
   ]
 
   async function fetchGridData() {
     const res = await getRequest({
-      extension: ManufacturingRepository.MFSerial.qry,
-      parameters: `_jobId=${recordId}`
+      extension: api,
+      parameters
     })
 
     const updateSerialsList =
@@ -91,39 +77,12 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
     formik.setFieldValue('serials', updateSerialsList)
   }
 
-  const actions = [
-    {
-      key: 'GenerateSerialsLots',
-      condition: true,
-      onClick: generateSRL,
-      disabled: formik?.values?.serials[0]?.srlNo
-    }
-  ]
-
-  async function generateSRL() {
-    await postRequest({
-      extension: ManufacturingRepository.MFSerial.generate,
-      record: JSON.stringify({ jobId: recordId, itemId: itemId })
-    })
-    toast.success(platformLabels.Generated)
-    await fetchGridData()
-  }
-
   useEffect(() => {
     if (recordId) fetchGridData()
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.MFJobOrders}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-      isSavedClear={false}
-      actions={actions}
-    >
+    <Form resourceId={ResourceIds.MFJobOrders} onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -132,6 +91,7 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
             error={formik.errors?.serials}
             initialValues={formik?.initialValues?.serials?.[0]}
             allowAddNewLine={false}
+            allowDelete={false}
             columns={columns}
             name='serials'
             maxAccess={maxAccess}
@@ -145,6 +105,9 @@ export default function SerialsLots({ labels, maxAccess, recordId, itemId }) {
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
+
+SerialsLots.width = 500
+SerialsLots.height = 600

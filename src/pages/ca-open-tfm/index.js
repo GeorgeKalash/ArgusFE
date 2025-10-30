@@ -5,7 +5,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
-import { Grid } from '@mui/material'
+import { Grid, Box, IconButton } from '@mui/material'
 import * as yup from 'yup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
@@ -19,6 +19,8 @@ import { useWindow } from 'src/windows'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import OpenMultiForm from './forms/OpenMultiForm'
 import { getStorageData } from 'src/storage/storage'
+import Icon from 'src/@core/components/icon'
+import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
 
 const OpenMultiCurrencyCashTransfer = () => {
   const [data, setData] = useState([])
@@ -36,14 +38,12 @@ const OpenMultiCurrencyCashTransfer = () => {
       return
     }
 
-    try {
-      const response = await getRequest({
-        extension: CashBankRepository.OpenMultiCurrencyCashTransfer.open,
-        parameters: `_plantId=${formik.values.plantId}`
-      })
+    const response = await getRequest({
+      extension: CashBankRepository.OpenMultiCurrencyCashTransfer.open,
+      parameters: `_plantId=${formik.values.plantId}`
+    })
 
-      setData(response || [])
-    } catch (error) {}
+    setData(response || [])
   }
 
   const {
@@ -62,7 +62,6 @@ const OpenMultiCurrencyCashTransfer = () => {
       plantId: ''
     },
     access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required()
@@ -127,6 +126,29 @@ const OpenMultiCurrencyCashTransfer = () => {
       field: 'wipName',
       headerName: _labels.wip,
       flex: 1
+    },
+    {
+      field: '',
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton
+            size='small'
+            onClick={() => {
+              stack({
+                Component: CashTransferTab,
+                props: {
+                  recordId: row?.data?.recordId,
+                  refetch: () => {
+                    refetch()
+                  }
+                }
+              })
+            }}
+          >
+            <Icon icon='mdi:application-edit-outline' fontSize={18} />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -146,7 +168,6 @@ const OpenMultiCurrencyCashTransfer = () => {
   }
 
   const edit = obj => {
-    console.log(formik.values.plantId, 'plantId')
     openForm(obj?.recordId, formik.values.plantId)
   }
 

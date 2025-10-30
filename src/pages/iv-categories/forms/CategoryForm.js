@@ -21,6 +21,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { MasterSource } from 'src/resources/MasterSource'
 
 const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -54,7 +55,6 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
       allowNegativeQty: false,
       isInactive: false
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       metalId: yup
@@ -151,8 +151,24 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.ItemCategory,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell form={formik} resourceId={ResourceIds.Category} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      resourceId={ResourceIds.Category}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grid container gap={2}>
           <Grid item xs={7}>

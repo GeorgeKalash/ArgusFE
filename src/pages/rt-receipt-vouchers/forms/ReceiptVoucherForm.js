@@ -38,7 +38,8 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
   const [selectedReport, setSelectedReport] = useState(null)
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.RemittanceReceiptVoucher
+    datasetId: ResourceIds.RemittanceReceiptVoucher,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.receiptVoucher, window })
@@ -57,7 +58,6 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
   const { formik } = useForm({
     maxAccess: maxAccess,
     documentType: { key: 'header.dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       recordId,
@@ -94,19 +94,16 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
         posStatus: 1,
         cashAccountId: cashAccountId
       }))
-
       const data = { header: formik.values.header, cash: cash }
 
       const totalCashAmount = formik.values.cash
         .reduce((sum, current) => sum + parseFloat(current.amount || 0), 0)
         .toFixed(2)
-
       if (totalCashAmount !== formik.values.header.amount.toFixed(2)) {
         toast.error('The total amount does not match the sum of amounts in the grid.')
 
         return
       }
-
       await postRequest({
         extension: RemittanceOutwardsRepository.ReceiptVouchers.set2,
         record: JSON.stringify(data)
@@ -119,7 +116,6 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
           toast.success(platformLabels.Edited)
         }
       })
-
       if (!form) {
         invalidate()
       }
@@ -137,7 +133,8 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
       Component: OTPPhoneVerification,
       props: {
         values: result || formik.values.header,
-        recordId: recordId,
+        recordId,
+        deviceId: (result?.cellPhone || formik?.values?.header?.cellPhone)?.replace(/^\+/, '') || null,
         functionId: SystemFunction.RemittanceReceiptVoucher,
         onSuccess: () => {
           onClose(recordId)
@@ -289,6 +286,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
                   }
                 })
               }
+              recordId={Id}
               resourceId={ResourceIds.OutwardsTransfer}
               setSelectedReport={setSelectedReport}
             />
@@ -324,7 +322,7 @@ const ReceiptVoucherForm = ({ recordId, cashAccountId, form = null, window }) =>
       onClick: () => {
         viewOTP(null)
       },
-      disabled: !editMode
+      disabled: !editMode || formik?.values?.header?.status == 3
     },
     {
       key: 'GL',

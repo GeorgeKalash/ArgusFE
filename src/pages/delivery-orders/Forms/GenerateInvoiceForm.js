@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -20,8 +19,10 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
+import { useInvalidate } from 'src/hooks/resource'
 
-export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form }) {
+export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, refetchForm, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -30,6 +31,10 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     functionId: SystemFunction.SalesInvoice,
     access,
     enabled: !recordId
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: DeliveryRepository.DeliveriesOrders.qry
   })
 
   const getDataResult = () => {
@@ -73,7 +78,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
       deliveryOrderId: form?.values?.recordId
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required()
@@ -83,6 +87,10 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
         extension: DeliveryRepository.Invoice.generate,
         record: JSON.stringify(obj)
       })
+
+      await refetchForm(recordId)
+      invalidate()
+      window.close()
 
       !res.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
     }
@@ -109,16 +117,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.DeliveriesOrders}
-      form={formik}
-      maxAccess={maxAccess}
-      functionId={SystemFunction.DeliveryTrip}
-      actions={actions}
-      isSaved={false}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} actions={actions} isSaved={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -198,6 +197,6 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

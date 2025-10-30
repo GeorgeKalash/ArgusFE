@@ -26,11 +26,20 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import ImportForm from 'src/components/Shared/ImportForm'
+import { createConditionalSchema } from 'src/lib/validation'
+import WorkFlow from 'src/components/Shared/WorkFlow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import useSetWindow from 'src/hooks/useSetWindow'
 
-export default function ProductionOrderForm({ labels, access, recordId, window }) {
+export default function ProductionOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.ProductionOrder
+  })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ProductionOrder,
@@ -38,20 +47,32 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     enabled: !recordId
   })
 
+  useSetWindow({ title: labels.ProductionOrder, window })
+
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.ProductionOrder.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    qty: row => row?.qty != null,
+    jobCount: row => row?.jobCount != null,
+    itemName: row => row?.itemName
+  }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'rows')
+
   const { formik } = useForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
+    conditionSchema: ['rows'],
     initialValues: {
       recordId,
       dtId: null,
       reference: '',
       plantId,
+      lineId: null,
       notes: '',
       date: new Date(),
       status: 1,
@@ -64,24 +85,18 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           qty: null,
           pcs: null,
           designId: null,
+          jobCount: 1,
           notes: '',
-          seqNo: ''
+          seqNo: '',
+          lineId: null,
+          lineRef: ''
         }
       ]
     },
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      rows: yup
-        .array()
-        .of(
-          yup.object().shape({
-            sku: yup.string().required(),
-            qty: yup.number().required(),
-            itemName: yup.string().required()
-          })
-        )
-        .required()
+      rows: yup.array().of(schema)
     }),
     onSubmit: async obj => {
       const { rows, date, ...rest } = obj
@@ -91,14 +106,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         date: formatDateToApi(date)
       }
 
-      const updatedRows = formik.values.rows.map((prodDetails, index) => {
-        return {
-          ...prodDetails,
-          poId: recordId ?? 0,
-          deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
-          seqNo: index + 1
-        }
-      })
+      const updatedRows = rows
+        ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((prodDetails, index) => {
+          return {
+            ...prodDetails,
+            poId: recordId ?? 0,
+            deliveryDate: prodDetails.deliveryDate ? formatDateToApi(prodDetails.deliveryDate) : null,
+            seqNo: index + 1
+          }
+        })
 
       const resultObject = {
         header,
@@ -119,6 +136,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
 
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.status === 3
+  const isClosed = formik.values.wip === 2
 
   const totalQty = formik.values?.rows
     ?.reduce((qtySum, row) => {
@@ -183,34 +201,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
   const columns = [
     {
       component: 'resourcelookup',
-      label: labels.design,
-      name: 'designId',
-      width: 150,
-      props: {
-        valueField: 'recordId',
-        displayField: 'reference',
-        readOnly: isPosted,
-        displayFieldWidth: 2,
-        endpointId: ManufacturingRepository.Design.snapshot,
-        mapping: [
-          { from: 'recordId', to: 'designId' },
-          { from: 'reference', to: 'designRef' },
-          { from: 'name', to: 'designName' },
-          { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'itemName', to: 'itemName' },
-          { from: 'routingId', to: 'routingId' },
-          { from: 'routingName', to: 'routingName' },
-          { from: 'routingRef', to: 'routingRef' }
-        ],
-        columnsInDropDown: [
-          { key: 'reference', value: 'Reference' },
-          { key: 'name', value: 'Name' }
-        ]
-      }
-    },
-    {
-      component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
       width: 100,
@@ -228,6 +218,37 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        let result
+        let result1
+
+        if (newRow?.itemId) {
+          const res = await getRequest({
+            extension: InventoryRepository.ItemProduction.get,
+            parameters: `_recordId=${newRow.itemId}`
+          })
+          result = res?.record
+
+          if (result?.designId) {
+            const res1 = await getRequest({
+              extension: ManufacturingRepository.Design.get,
+              parameters: `_recordId=${res.record?.designId}`
+            })
+            result1 = res1?.record
+          }
+        }
+
+        update({
+          designId: result?.designId || null,
+          designRef: result?.designRef || '',
+          lineId: result?.lineId || null,
+          lineRef: result?.lineRef || '',
+          itemWeight: result1?.stdWeight || null,
+          routingId: result1?.routingId || null,
+          routingRef: result1?.routingRef || '',
+          routingName: result1?.routingName || ''
+        })
       }
     },
     {
@@ -238,6 +259,42 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.design,
+      name: 'designRef',
+      width: 200,
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.jobCount,
+      name: 'jobCount',
+      width: 100
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.prodLine,
+      name: 'lineId',
+      props: {
+        endpointId: ManufacturingRepository.ProductionLine.qry,
+        valueField: 'recordId',
+        displayField: 'reference',
+        displayFieldWidth: 2,
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        mapping: [
+          { from: 'reference', to: 'lineRef' },
+          { from: 'recordId', to: 'lineId' },
+          { from: 'name', to: 'lineName' }
+        ]
+      },
+      width: 150
     },
     {
       component: 'date',
@@ -273,12 +330,11 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       width: 100,
       props: {
         maxLength: 12,
-        decimalScale: 3
+        decimalScale: 3,
+        readOnly: true
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
-        }
+        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -291,9 +347,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
         decimalScale: 0
       },
       async onChange({ row: { update, newRow } }) {
-        if (newRow) {
-          update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
-        }
+        update({ qty: newRow?.itemWeight * newRow?.pcs || 0 })
       }
     },
     {
@@ -379,14 +433,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       parameters: `_recordId=${recordId}`
     })
 
-    const modifiedList = res?.record?.items?.map((item, index) => ({
-      ...item,
-      deliveryDate: formatDateFromApi(item.deliveryDate),
-      id: index + 1
-    })) || formik.initialValues.items
+    const modifiedList = res?.record?.items?.length
+      ? res?.record?.items?.map((item, index) => ({
+          ...item,
+          deliveryDate: formatDateFromApi(item.deliveryDate),
+          id: index + 1
+        }))
+      : formik.initialValues.rows
 
     formik.setValues({
-      ...res.record.header,
+      ...res?.record?.header,
       date: formatDateFromApi(res?.record?.header?.date),
       rows: modifiedList
     })
@@ -398,6 +454,40 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     if (recordId) refetchForm(recordId)
   }, [])
 
+  async function onImportClick() {
+    stack({
+      Component: ImportForm,
+      props: {
+        resourceId: ResourceIds.ImportProductionOrder,
+        access: maxAccess,
+        onSuccess: async () => {
+          if (recordId) refetchForm(recordId)
+        }
+      }
+    })
+  }
+
+  const onClose = async () => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionOrder.close,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(platformLabels.Closed)
+    refetchForm(formik.values.recordId)
+    invalidate()
+  }
+
+  const onWorkFlowClick = async () => {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.ProductionOrder,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -406,10 +496,16 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: !editMode
     },
     {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode
+      disabled: !editMode || !isClosed
     },
     {
       key: 'Locked',
@@ -418,22 +514,66 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
       disabled: true
     },
     {
+      key: 'Close',
+      condition: true,
+      onClick: onClose,
+      disabled: isClosed || !editMode
+    },
+    {
       key: 'generate',
       condition: true,
       onClick: onGenerateAssembly,
       disabled: !editMode
+    },
+    {
+      key: 'GenerateJob',
+      condition: true,
+      onClick: generateJob,
+      disabled: !isPosted
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImportClick,
+      disabled: !editMode || isPosted || isClosed
+    },
+    {
+      key: 'Refresh',
+      condition: true,
+      onClick: sync,
+      disabled: isPosted
     }
   ]
+
+  async function generateJob() {
+    const { rows, rsName, statusName, wipName, batchId, date, plantRef, plantName, isVerified, ...rest } = formik.values
+    await postRequest({
+      extension: ManufacturingRepository.JobOrder.gen,
+      record: JSON.stringify({ ...rest, date: formatDateToApi(date) })
+    })
+
+    toast.success(platformLabels.Generated)
+  }
+
+  async function sync() {
+    await postRequest({
+      extension: ManufacturingRepository.RefreshPoItem.refresh,
+      record: JSON.stringify(formik.values)
+    })
+    toast.success(platformLabels.Refresh)
+    refetchForm(formik.values.recordId)
+  }
 
   return (
     <FormShell
       resourceId={ResourceIds.ProductionOrder}
+      functionId={SystemFunction.ProductionOrder}
       form={formik}
       maxAccess={maxAccess}
       actions={actions}
       editMode={editMode}
       previewReport={editMode}
-      disabledSubmit={isPosted}
+      disabledSubmit={isPosted || isClosed}
     >
       <VertLayout>
         <Fixed>
@@ -469,7 +609,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     value={formik?.values?.reference}
                     maxAccess={!editMode && maxAccess}
                     maxLength='30'
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('reference', '')}
                     error={formik.touched.reference && Boolean(formik.errors.reference)}
@@ -479,7 +619,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     value={formik?.values?.date}
                     onChange={formik.setFieldValue}
                     required
@@ -497,7 +637,7 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                     endpointId={SystemRepository.Plant.qry}
                     name='plantId'
                     label={labels.plant}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
@@ -513,12 +653,32 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionLine.qry}
+                    name='lineId'
+                    label={labels.prodLine}
+                    readOnly={isPosted || isClosed}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('lineId', newValue?.recordId)
+                    }}
+                    error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomTextArea
                     name='notes'
                     label={labels.description}
                     value={formik?.values?.notes}
                     rows={2.5}
-                    readOnly={isPosted}
+                    readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('notes', '')}
@@ -536,10 +696,11 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
             error={formik.errors.rows}
             name='rows'
             maxAccess={maxAccess}
+            initialValues={formik?.initialValues?.rows?.[0]}
             columns={columns}
-            allowAddNewLine={!isPosted}
-            allowDelete={!isPosted}
-            disabled={isPosted}
+            allowAddNewLine={!isPosted && !isClosed}
+            allowDelete={!isPosted && !isClosed}
+            disabled={isPosted || isClosed}
           />
         </Grow>
         <Fixed>
@@ -559,3 +720,6 @@ export default function ProductionOrderForm({ labels, access, recordId, window }
     </FormShell>
   )
 }
+
+ProductionOrderForm.width = 1200
+ProductionOrderForm.height = 680

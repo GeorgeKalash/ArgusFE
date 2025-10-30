@@ -45,6 +45,8 @@ const Table = ({
   selectionMode = 'row',
   rowDragManaged = false,
   onRowDragEnd = false,
+  collabsable = true,
+  domLayout = 'normal',
   ...props
 }) => {
   const pageSize = props?.pageSize || 10000
@@ -55,8 +57,8 @@ const Table = ({
   const [startAt, setStartAt] = useState(0)
   const { languageId } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const maxAccess = props?.maxAccess && props?.maxAccess.record.accessFlags
-  const columnsAccess = props?.maxAccess && props?.maxAccess.record.controls
+  const maxAccess = props?.maxAccess && props?.maxAccess?.record?.accessFlags
+  const columnsAccess = props?.maxAccess && props?.maxAccess?.record?.controls
   const { stack } = useWindow()
   const [checked, setChecked] = useState(false)
   const [focus, setFocus] = useState(false)
@@ -94,7 +96,10 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: { textAlign: 'right' },
+          cellStyle: params => ({
+            fontWeight: params.data?.isBold ? 'bold' : 'normal',
+            textAlign: languageId === 2 ? 'left' : 'right'
+          }),
           sortable: !disableSorting
         }
       }
@@ -125,10 +130,36 @@ const Table = ({
           }
         }
       }
+      if (col.type === 'colorCombo') {
+        return {
+          ...col,
+          cellRenderer: ({ data }) => {
+            const color = data?.[col.field]
+
+            return color ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: '4px',
+                    backgroundColor: color,
+                    border: '1px solid #ccc'
+                  }}
+                />
+                <span>{color}</span>
+              </div>
+            ) : null
+          }
+        }
+      }
 
       return {
         ...col,
-        sortable: !disableSorting
+        sortable: !disableSorting,
+        cellStyle: params => ({
+          fontWeight: params.data?.isBold ? 'bold' : 'normal'
+        })
       }
     })
 
@@ -500,6 +531,13 @@ const Table = ({
         checked={params.value}
         disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
+          e.preventDefault()
+          const rowIndex = params.node.rowIndex
+          const colId = params.column?.getColId?.() || params.colDef.field
+          params.api.setFocusedCell(rowIndex, colId)
+          params.api.ensureIndexVisible(rowIndex)
+          if (!params.node.isSelected()) params.node.setSelected(true)
+
           const checked = e.target.checked
           if (rowSelection !== 'single') {
             params.node.setDataValue(params.colDef.field, checked)
@@ -620,6 +658,59 @@ const Table = ({
       ? (containerWidth - totalFixedColumnWidth) / filteredColumns?.length
       : 0
 
+  const IndentedCellRenderer = props => {
+    const { data, value } = props
+    const indent = data.level * 20
+    const isParent = data.level === 0
+
+    const arrow = data.hasChildren ? (data.isExpanded ? '▼' : '▶') : ''
+
+    if (!collabsable) {
+      return <div style={{ paddingLeft: indent }}>{value}</div>
+    }
+
+    return (
+      <div
+        style={{ paddingLeft: indent, cursor: isParent && data.hasChildren ? 'pointer' : 'default' }}
+        onClick={() => handleRowClick(data)}
+      >
+        {arrow} {value}
+      </div>
+    )
+  }
+
+  const handleRowClick = params => {
+    props.fullRowData.current = props?.fullRowData.current.map(row => {
+      if (row?.[props?.field] === params?.[props?.field] && row.hasChildren) {
+        return { ...row, isExpanded: !row.isExpanded }
+      }
+
+      return row
+    })
+
+    const updatedVisibleRows = []
+
+    function addWithChildren(parentRow) {
+      updatedVisibleRows.push(parentRow)
+      if (parentRow.isExpanded) {
+        const children = props?.fullRowData.current.filter(child => child.parent === parentRow?.[props?.field])
+        children.forEach(child => addWithChildren(child))
+      }
+    }
+
+    props?.fullRowData.current.filter(row => row.level === 0).forEach(root => addWithChildren(root))
+
+    props?.setRowData(updatedVisibleRows)
+  }
+
+  const imageRenderer =
+    column =>
+    ({ data }) => {
+      const imageUrl = data?.[column.field]
+
+      return <img src={imageUrl ?? '/images/emptyPhoto.jpg'} alt='' width={70} />
+    }
+
   const columnDefs = [
     ...(showCheckboxColumn
       ? [
@@ -634,7 +725,20 @@ const Table = ({
               showSelectAll && (
                 <Checkbox
                   checked={checked}
-                  onChange={e => selectAll(params, e)}
+                  onChange={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    const colId = params.column.getColId()
+                    params.api.ensureColumnVisible(colId)
+
+                    const root = params.api.getGui && params.api.getGui()
+                    const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+                    const cell = headerRoot && headerRoot.querySelector('.ag-header-cell[col-id="' + colId + '"]')
+                    const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+                    focusable && focusable.focus && focusable.focus()
+                    selectAll(params, e)
+                  }}
                   sx={{
                     width: '100%',
                     height: '100%'
@@ -650,7 +754,14 @@ const Table = ({
       width: column.width + (column?.type !== 'checkbox' ? additionalWidth : 0),
       flex: column.flex,
       sort: column.sort || '',
-      cellRenderer: column.cellRenderer ? column.cellRenderer : FieldWrapper
+      cellRenderer:
+        column.type === 'image'
+          ? imageRenderer(column)
+          : column.isTree
+          ? IndentedCellRenderer
+          : column.cellRenderer
+          ? column.cellRenderer
+          : FieldWrapper
     }))
   ]
 
@@ -674,7 +785,7 @@ const Table = ({
 
           return (
             <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-              {props?.onEdit && (
+              {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
                   onClick={e => {
@@ -700,21 +811,26 @@ const Table = ({
                   <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
                 </IconButton>
               )}
-              {globalStatus && !isStatus3 && !isStatusCanceled && deleteBtnVisible && !isWIP && (
-                <IconButton
-                  size='small'
-                  onClick={e => {
-                    if (props?.deleteConfirmationType == 'strict') {
-                      openDeleteConfirmation(data)
-                    } else {
-                      openDelete(data)
-                    }
-                  }}
-                  color='error'
-                >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
-                </IconButton>
-              )}
+              {globalStatus &&
+                !isStatus3 &&
+                !isStatusCanceled &&
+                deleteBtnVisible &&
+                !isWIP &&
+                (!props?.actionCondition || props?.actionCondition(data, 'delete')) && (
+                  <IconButton
+                    size='small'
+                    onClick={e => {
+                      if (props?.deleteConfirmationType == 'strict') {
+                        openDeleteConfirmation(data)
+                      } else {
+                        openDelete(data)
+                      }
+                    }}
+                    color='error'
+                  >
+                    <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                  </IconButton>
+                )}
             </Box>
           )
         }
@@ -813,6 +929,8 @@ const Table = ({
     }
   }
 
+  const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+
   return (
     <VertLayout>
       <Grow>
@@ -857,6 +975,7 @@ const Table = ({
             enableClipboard={true}
             enableRangeSelection={true}
             columnDefs={finalColumns}
+            domLayout={domLayout}
             {...(hasRowId && {
               getRowId: params => params?.data?.id
             })}
@@ -865,7 +984,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            rowHeight={35}
+            rowHeight={hasImageColumn ? 70 : 35}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
@@ -873,6 +992,7 @@ const Table = ({
             onColumnMoved={onColumnMoved}
             onColumnResized={onColumnResized}
             onSortChanged={onSortChanged}
+            enableRtl={languageId === 2}
           />
         </Box>
       </Grow>

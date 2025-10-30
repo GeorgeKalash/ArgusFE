@@ -6,11 +6,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useState } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ProductAgentForm = ({
   store,
@@ -43,7 +42,6 @@ const ProductAgentForm = ({
   ]
 
   const formik = useFormik({
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       agents: yup
@@ -109,14 +107,7 @@ const ProductAgentForm = ({
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.ProductMaster}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form fonSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <ResourceComboBox
@@ -144,7 +135,7 @@ const ProductAgentForm = ({
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

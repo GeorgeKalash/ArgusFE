@@ -40,6 +40,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
   const { formik } = useForm({
     initialValues: {
       recordId: recordId,
+      barcodeId: null,
       itemId: recordId || store?.recordId,
       sku: store?._reference,
       defaultQty: '',
@@ -77,6 +78,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
       if (!values.recordId) {
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', formik.values.barcode)
+        formik.setFieldValue('barcodeId', res.recordId)
       } else toast.success(platformLabels.Edited)
       invalidate()
     }
@@ -108,6 +110,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
           ...res.record,
           scaleDescription: res.record.scaleDescription,
           posDescription: res.record.posDescription,
+          barcodeId: res?.record.recordId,
           recordId: res?.record.barcode
         })
       }
@@ -151,6 +154,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
                     }}
                     maxAccess={access}
                     required
+                    displayFieldWidth={2}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -195,7 +199,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
                 ref={imageUploadRef}
                 resourceId={ResourceIds.Barcodes}
                 seqNo={0}
-                recordId={formik.values.recordId}
+                recordId={formik.values.barcodeId}
               />
             </Grid>
             <Grid item xs={12}>

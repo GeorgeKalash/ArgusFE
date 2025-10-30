@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+import * as yup from 'yup'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -15,13 +16,11 @@ import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import FormShell from 'src/components/Shared/FormShell'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { useError } from 'src/error'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 
 const PostWorkCenterJob = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const { stack: stackError } = useError()
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.PostWorkCenterJob
@@ -30,10 +29,50 @@ const PostWorkCenterJob = () => {
   const { formik } = useForm({
     initialValues: {
       jobId: null,
+      toWorkCenterId: null,
+      workCenterId: null,
+      seqNo: 1,
       data: { list: [] }
     },
     maxAccess,
-    validateOnChange: true
+    validationSchema: yup.object({
+      workCenterId: yup.number().required(),
+      toWorkCenterId: yup
+        .number()
+        .nullable()
+        .when('routingId', {
+          is: val => !!val,
+          then: () => yup.number().required(),
+          otherwise: () => yup.number().nullable()
+        })
+    }),
+    onSubmit: async () => {
+      if (!isLocked) {
+        await postRequest({
+          extension: ManufacturingRepository.JobWorkCenter.close,
+          record: JSON.stringify({
+            jobId: formik.values.jobId,
+            seqNo: formik.values.seqNo,
+            workCenterId: formik.values.workCenterId,
+            qty: formik.values.qty,
+            pcs: formik.values.pcs,
+          })
+        })
+        toast.success(platformLabels.Posted)
+        formik.resetForm()
+      } else {
+        await postRequest({
+          extension: ManufacturingRepository.JobWorkCenter.reopen,
+          record: JSON.stringify({
+            jobId: formik.values.jobId,
+            seqNo: formik.values.seqNo,
+            workCenterId: formik.values.workCenterId
+          })
+        })
+        toast.success(platformLabels.Unposted)
+        formik.resetForm()
+      }
+    }
   })
 
   const columns = [
@@ -54,6 +93,12 @@ const PostWorkCenterJob = () => {
       type: 'number'
     },
     {
+      field: 'loss',
+      headerName: labels.loss,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'wipPcs',
       headerName: labels.pcs,
       flex: 1,
@@ -64,43 +109,18 @@ const PostWorkCenterJob = () => {
   const isLocked = formik.values.status === 1
   const hasDraftItems = formik?.values?.data?.list?.length > 0
 
-  async function onPost() {
-    await postRequest({
-      extension: ManufacturingRepository.JobWorkCenter.close,
-      record: JSON.stringify({
-        jobId: formik.values.jobId,
-        seqNo: formik.values.seqNo,
-        workCenterId: formik.values.workCenterId
-      })
-    })
-    toast.success(platformLabels.Posted)
-    formik.resetForm()
-  }
-
-  async function onUnlock() {
-    await postRequest({
-      extension: ManufacturingRepository.JobWorkCenter.reopen,
-      record: JSON.stringify({
-        jobId: formik.values.jobId,
-        seqNo: formik.values.seqNo,
-        workCenterId: formik.values.workCenterId
-      })
-    })
-    toast.success(platformLabels.Unposted)
-    formik.resetForm()
-  }
-
   const actions = [
     {
       key: 'Unlocked',
       condition: !isLocked,
-      onClick: onPost,
+      onClick: formik.handleSubmit,
       disabled: hasDraftItems || !formik.values.jobId
     },
     {
       key: 'Locked',
       condition: isLocked,
-      onClick: onUnlock,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: formik.handleSubmit,
       disabled: false
     }
   ]
@@ -160,14 +180,26 @@ const PostWorkCenterJob = () => {
             extension: ManufacturingRepository.JobRouting.get,
             parameters: `_jobOrderId=${newValue?.recordId}&_seqNo=${parseInt(jobRes?.record?.routingSeqNo) + 1}`
           })
-
+          formik.setFieldValue('toWorkCenterId', res?.record?.workCenterId || null)
           formik.setFieldValue('toWorkCenterName', res?.record?.workCenterName || '')
           formik.setFieldValue('toWorkCenterRef', res?.record?.workCenterRef || '')
         } else {
-          stackError({
-            message: platformLabels.MandatoryRoutingSeqNo
+          formik.setValues({
+            ...formik.values,
+            ...jobRes?.record,
+            workCenterId: null,
+            workCenterName: '',
+            workCenterRef: '',
+            toWorkCenterId: null,
+            pcs: jobRes?.record?.pcs || 0,
+            pcsIn: jobRes?.record?.expectedPcs || 0,
+            qty: jobRes?.record?.qty || 0,
+            qtyIn: jobRes?.record?.expectedQty || 0,
+            jobId: jobRes?.record?.recordId || null,
+            jobRef: jobRes?.record?.reference || '',
+            documentTypeID: jobRes?.record?.dtName || null,
+            seqNo: 1
           })
-          formik.resetForm()
         }
       })
     } else {
@@ -204,8 +236,9 @@ const PostWorkCenterJob = () => {
                   { key: 'itemName', value: 'Item Name' }
                 ]}
                 onChange={async (_, newValue) => {
-                  formik.setFieldValue('jobId', newValue?.recordId || null)
                   formik.setFieldValue('jobRef', newValue?.reference || '')
+                  formik.setFieldValue('routingId', newValue?.routingId || null)
+                  formik.setFieldValue('jobId', newValue?.recordId || null)
                   fillForm(newValue)
                 }}
                 errorCheck={'jobId'}
@@ -234,37 +267,73 @@ const PostWorkCenterJob = () => {
               <CustomTextField name='routingName' label={labels.name} value={formik.values.routingName} readOnly />
             </Grid>
             <Grid item xs={6}></Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='workCenterRef'
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={
+                  formik?.values?.jobId
+                    ? formik?.values?.routingId
+                      ? ManufacturingRepository.JobRouting.qry
+                      : ManufacturingRepository.JobWorkCenter.qry
+                    : null
+                }
+                parameters={
+                  formik.values.jobId
+                    ? `_jobId=${formik.values.jobId}${
+                        formik.values.routingId ? '&_workCenterId=0&_status=0&_params=' : ''
+                      }`
+                    : ''
+                }
+                name='workCenterId'
                 label={labels.fromWorkCenter}
-                value={formik.values.workCenterRef}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='workCenterName'
-                label={labels.name}
-                value={formik.values.workCenterName}
-                readOnly
+                readOnly={!!formik?.values?.routingId || !formik.values.jobId}
+                valueField='workCenterId'
+                displayField={['workCenterRef', 'workCenterName']}
+                values={formik.values}
+                columnsInDropDown={[
+                  { key: 'workCenterRef', value: 'Reference' },
+                  { key: 'workCenterName', value: 'Name' }
+                ]}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('workCenterId', newValue?.workCenterId || null)
+                }}
+                required
+                maxAccess={maxAccess}
+                error={formik.touched.workCenterId && formik.errors.workCenterId}
               />
             </Grid>
             <Grid item xs={6}></Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='toWorkCenterRef'
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={
+                  formik?.values?.jobId
+                    ? formik?.values?.routingId
+                      ? ManufacturingRepository.JobRouting.qry
+                      : ManufacturingRepository.JobWorkCenter.qry
+                    : null
+                }
+                parameters={
+                  formik.values.jobId
+                    ? `_jobId=${formik.values.jobId}${
+                        formik.values.routingId ? '&_workCenterId=0&_status=0&_params=' : ''
+                      }`
+                    : ''
+                }
+                name='toWorkCenterId'
                 label={labels.toWorkCenter}
-                value={formik.values.toWorkCenterRef}
                 readOnly
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <CustomTextField
-                name='toWorkCenterName'
-                label={labels.name}
-                value={formik.values.toWorkCenterName}
-                readOnly
+                valueField='workCenterId'
+                displayField={['workCenterRef', 'workCenterName']}
+                values={formik.values}
+                columnsInDropDown={[
+                  { key: 'workCenterRef', value: 'Reference' },
+                  { key: 'workCenterName', value: 'Name' }
+                ]}
+                onChange={async (event, newValue) => {
+                  formik.setFieldValue('toWorkCenterId', newValue?.workCenterId || null)
+                }}
+                required={formik.values.routingId}
+                maxAccess={maxAccess}
+                error={formik.touched.toWorkCenterId && formik.errors.toWorkCenterId}
               />
             </Grid>
             <Grid item xs={6}></Grid>

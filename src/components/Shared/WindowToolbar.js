@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -31,6 +31,8 @@ const WindowToolbar = ({
   form,
   previewBtnClicked,
   maxAccess,
+  onPrint,
+  reportSize,
   actions = []
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -80,7 +82,12 @@ const WindowToolbar = ({
 
     const combinedStore = firstStore ? [...firstStore2, ...secondStore] : [...secondStore]
 
-    setReportStore(combinedStore)
+    setReportStore(
+      (combinedStore || []).map((item, index) => ({
+        ...item,
+        uniqueId: index + 1
+      }))
+    )
   }
 
   const functionMapping = {
@@ -109,6 +116,17 @@ const WindowToolbar = ({
   return (
     <Box sx={{ padding: '8px !important' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        {!!onPrint ? (
+          <Grid item xs={3} sx={{ display: 'flex', mr: 2 }}>
+            <CustomButton
+              onClick={onPrint}
+              image={'print.png'}
+              disabled={!editMode}
+            />
+          </Grid>
+        ) : (
+          <></>
+        )}
         {previewReport ? (
           <ReportGenerator
             previewReport={previewReport}
@@ -118,6 +136,7 @@ const WindowToolbar = ({
             reportStore={reportStore}
             getReportLayout={getReportLayout}
             recordId={recordId}
+            reportSize={reportSize}
             previewBtnClicked={previewBtnClicked}
           />
         ) : (

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 import { Grid } from '@mui/material'
@@ -12,14 +12,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import TransactionForm from './TransactionForm'
 import { useWindow } from 'src/windows'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 
-const TransactionTab = ({ store, labels, access }) => {
+const TransactionTab = ({ store, labels, access, setStore }) => {
   const { platformLabels } = useContext(ControlContext)
   const { recordId, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const latestListRef = useRef([])
 
   const {
     query: { data },
@@ -79,7 +80,62 @@ const TransactionTab = ({ store, labels, access }) => {
       record: JSON.stringify(obj)
     })
     invalidate()
+    saveTRX(data.list.filter(x => x.seqNo !== obj.seqNo))
+
     toast.success(platformLabels.Deleted)
+  }
+
+  const invalidateOuterGrid = useInvalidate({
+    endpointId: CostAllocationRepository.PuCostAllocations.page
+  })
+
+  async function saveTRX(data) {
+    const baseAmount = data?.reduce((curSum, item) => {
+      return curSum + parseFloat(item.baseAmount) || 0
+    }, 0)
+
+    await postRequest({
+      extension: CostAllocationRepository.PuCostAllocations.set,
+      record: JSON.stringify({ ...store?.result, baseAmount })
+    })
+
+    setStore(prevStore => ({
+      ...prevStore,
+      result: { ...prevStore?.result, baseAmount }
+    }))
+    invalidateOuterGrid()
+
+    return true
+  }
+
+  useEffect(() => {
+    latestListRef.current = data?.list ?? []
+  }, [data])
+
+  async function onSubmit(obj) {
+    const list = latestListRef.current || []
+
+    const i = list.findIndex(x => x.seqNo === obj.seqNo)
+    let newData
+
+    if (i > -1) {
+      const next = list.slice()
+      next[i] = obj
+      newData = next
+    } else {
+      newData = [...list, obj]
+    }
+
+    obj.seqNo = obj.seqNo ?? list?.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1
+
+    const res = await postRequest({
+      extension: CostAllocationRepository.TrxCostType.set,
+      record: JSON.stringify(obj)
+    })
+
+    saveTRX(newData)
+
+    return res
   }
 
   function openForm(obj) {
@@ -89,7 +145,8 @@ const TransactionTab = ({ store, labels, access }) => {
         labels,
         recordId: obj?.caId,
         caId: recordId,
-        seqNo: obj?.seqNo ?? maxSeqNo,
+        seqNo: obj?.seqNo,
+        onSubmit,
         maxAccess: access
       },
       width: 600,
@@ -107,7 +164,6 @@ const TransactionTab = ({ store, labels, access }) => {
   }
 
   const baseAmounts = data ? data.list.reduce((acc, item) => acc + item.baseAmount, 0) : 0
-  const maxSeqNo = data ? data.list.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   return (
     <VertLayout>

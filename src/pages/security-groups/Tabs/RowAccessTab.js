@@ -2,7 +2,6 @@ import Table from 'src/components/Shared/Table'
 import { Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -14,6 +13,7 @@ import toast from 'react-hot-toast'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 export default function RowAccessTab({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -35,28 +35,31 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
 
   const { formik } = useForm({
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: {
       search: '',
       classId: ResourceIds.DocumentTypes
     },
     onSubmit: async () => {
-      for (const item of data?.list) {
-        item.hasAccess = item.checked
+      const updatedRows = data.list
+        .filter(obj => obj.checked)
+        .map(row => ({
+          recordId: row.recordId,
+          sgId: recordId,
+          resourceId: parseInt(formik.values.classId)
+        }))
 
-        if (item.checked) {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.set,
-            record: JSON.stringify(item)
-          })
-        } else {
-          await postRequest({
-            extension: AccessControlRepository.DataAccessItem.del,
-            record: JSON.stringify(item)
-          })
-        }
+      const resultObject = {
+        sgId: recordId,
+        resourceId: parseInt(formik.values.classId),
+        items: updatedRows
       }
+
+      await postRequest({
+        extension: AccessControlRepository.DataAccessItem.set2,
+        record: JSON.stringify(resultObject)
+      })
+
       toast.success(platformLabels.Updated)
     }
   })
@@ -103,14 +106,7 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
   }, [recordId])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Users}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-      editMode={!!recordId}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!recordId}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -156,6 +152,6 @@ export default function RowAccessTab({ labels, maxAccess, recordId }) {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

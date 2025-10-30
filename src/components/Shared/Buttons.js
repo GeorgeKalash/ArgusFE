@@ -11,9 +11,16 @@ export const getButtons = platformLabels => [
     main: true
   },
   {
+    key: 'Rebuild',
+    color: '#231F20',
+    label: platformLabels.RebuildButton,
+    image: 'rebuild.png',
+    main: false
+  },
+  {
     key: 'Info',
     label: platformLabels.Info,
-    condition: 'isInfo && infoVisible',
+    condition: 'isInfo',
     onClick: 'onInfo',
     color: '#4355a5',
     disabled: '!editMode',
@@ -199,13 +206,6 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
-    key: 'Print',
-    label: platformLabels.Print,
-    color: '#231f20',
-    image: 'print.png',
-    main: false
-  },
-  {
     key: 'Invoice',
     label: platformLabels.Invoice,
     color: '#231f20',
@@ -298,14 +298,14 @@ export const getButtons = platformLabels => [
   },
   {
     key: 'Shipment',
-    label: platformLabels.Shipment,
+    label: platformLabels.Transportation,
     color: '#843c54',
     image: 'shipment.png',
     main: false
   },
   {
     key: 'Transportation',
-    label: platformLabels.Transportation,
+    label: platformLabels.Shipment,
     color: '#064b38',
     image: 'transportation.png',
     main: false
@@ -322,13 +322,6 @@ export const getButtons = platformLabels => [
     label: platformLabels.Apply,
     color: '#4eb558',
     image: 'apply.png',
-    main: false
-  },
-  {
-    key: 'Rebuild',
-    color: '#231F20',
-    label: platformLabels.RebuildButton,
-    image: 'rebuild.png',
     main: false
   },
   {
@@ -355,7 +348,8 @@ export const getButtons = platformLabels => [
   {
     key: 'Refresh',
     label: platformLabels.Refresh,
-    color: '#231F20',
+    image: 'exchange-refresh-icon.png',
+    color: '#D3D3D3',
     main: false
   },
   {
@@ -380,10 +374,38 @@ export const getButtons = platformLabels => [
     main: false
   },
   {
+    key: 'generateQTN',
+    label: platformLabels.Quotation,
+    color: 'black',
+    image: 'generate.png',
+    main: false
+  },
+  {
+    key: 'generatePO',
+    label: platformLabels.PurchaseOrder,
+    color: 'black',
+    image: 'order.png',
+    main: false
+  },
+  {
+    key: 'generateProdOrder',
+    label: platformLabels.GenerateProductionOder,
+    color: 'black',
+    image: 'order.png',
+    main: false
+  },
+  {
     key: 'Audit',
     label: platformLabels.Audit,
     color: '#231f20',
     image: 'info.png',
+    main: false
+  },
+  {
+    key: 'Print',
+    label: platformLabels.Print,
+    color: '#231f20',
+    image: 'print.png',
     main: false
   },
   {
@@ -599,6 +621,33 @@ export const getButtons = platformLabels => [
     label: platformLabels.Reset,
     image: 'undo-arrow-icon.png',
     color: '#231f20',
+    main: false
+  },
+  {
+    key: 'PV',
+    label: platformLabels.PV,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Installments',
+    label: platformLabels.Installments,
+    color: '#49732F',
+    image: 'invoice-installements.png',
+    main: false
+  },
+  {
+    key: 'Sync',
+    label: platformLabels.Sync,
+    color: '#231F20',
+    image: 'sync.png',
+    main: false
+  },
+  {
+    key: 'History',
+    label: platformLabels.History,
+    color: '#231f20',
+    image: 'history.png',
     main: false
   }
 ]

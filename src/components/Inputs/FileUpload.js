@@ -1,10 +1,12 @@
-import { Box, Typography, IconButton, Button } from '@mui/material'
+import { Box, Typography, IconButton, Button, Grid } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useForm } from 'src/hooks/form'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { ControlContext } from 'src/providers/ControlContext'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { useInvalidate } from 'src/hooks/resource'
 
 const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
@@ -13,8 +15,11 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const [files, setFiles] = useState([])
   const [initialValues, setInitialData] = useState({})
 
+  const invalidate = useInvalidate({
+    endpointId: `${SystemRepository.Attachment.qry}::r=${resourceId}::rec=${recordId ?? 0}`
+  })
+
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues
   })
@@ -61,7 +66,8 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
           folderName: null,
           date: day + '/' + month + '/' + year,
           url: null,
-          file: selectedFile
+          file: selectedFile,
+          folderId: null
         }
 
         const fileSizeInKB = Math.round(selectedFile.size / 1024)
@@ -98,35 +104,48 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
     }))
   }
 
-  const submit = () => {
-    if (formik.values?.files?.length) {
-      const filesToUpload = formik.values.files.map(file => ({
-        ...file,
-        recordId: ref.current.value || recordId
-      }))
-
-      return filesToUpload
-        .reduce((promise, file) => {
-          return promise.then(async () => {
-            await postRequest({
-              extension: SystemRepository.Attachment.set,
-              record: JSON.stringify(file),
-              file: file.file
-            })
-          })
-        }, Promise.resolve())
-        .then(res => {
-          return res
-        })
-    } else if (!files.length && initialValues?.url && !formik.values?.url) {
+  const submit = async () => {
+    if (!files.length && initialValues?.url && !formik.values?.url) {
       return postRequest({
         extension: SystemRepository.Attachment.del,
         record: JSON.stringify(initialValues),
         file: initialValues?.url
-      }).then(res => {
-        return res
       })
     }
+
+    if (!files.length) return
+
+    const recId = ref?.current?.value ?? recordId
+
+    const folderResult = await getRequest({
+      extension: SystemRepository.Folders.qry,
+      parameters: `_params=&_filter=`
+    })
+    const defaultFolderId = folderResult?.list.length > 0 ? folderResult?.list[0].recordId : null
+
+    return files
+      .reduce((promise, file) => {
+        return promise.then(async () => {
+          await postRequest({
+            extension: SystemRepository.Attachment.set,
+            record: JSON.stringify({
+              resourceId: file.resourceId,
+              recordId: recId,
+              seqNo: file.seqNo,
+              fileName: file.fileName,
+              date: file.date,
+              url: file.url,
+              folderId: file.folderId ?? defaultFolderId
+            }),
+            file: file.file
+          })
+        })
+      }, Promise.resolve())
+      .then(res => {
+        invalidate()
+
+        return res
+      })
   }
 
   useImperativeHandle(ref, () => ({
@@ -162,19 +181,50 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
               <Box
                 key={index}
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
                   border: 'black solid 1px',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  p: 1,
+                  mb: 1
                 }}
               >
-                <Box sx={{ display: 'flex', gap: 1, mx: 3 }}>
-                  <Typography variant='body2'>{file.fileName}</Typography>
-                  <Typography variant='body2'>({Math.round(file.file.size / 1024)} KB)</Typography>
-                </Box>
-                <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
-                  <DeleteIcon />
-                </IconButton>
+                <Grid container alignItems='center' spacing={1} padding={1}>
+                  <Grid item xs={8}>
+                    <Typography variant='body2' component='span'>
+                      {file.fileName}
+                    </Typography>
+                    <Typography variant='body2' component='span' sx={{ ml: 1 }}>
+                      ({Math.round(file.file.size / 1024)} KB)
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Folders.qry}
+                      name={`files[${index}].folderId`}
+                      label={platformLabels.folder}
+                      valueField='recordId'
+                      displayField='name'
+                      values={formik.values}
+                      value={file.folderId ?? 1}
+                      onChange={(_, newValue) => {
+                        const newFolderId = newValue?.recordId || 1
+                        setFiles(prev => {
+                          const copy = [...prev]
+                          copy[index] = { ...copy[index], folderId: newFolderId }
+
+                          return copy
+                        })
+                        formik.setFieldValue(`files[${index}].folderId`, newFolderId)
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={1}>
+                    <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
               </Box>
             ))}
           </Box>

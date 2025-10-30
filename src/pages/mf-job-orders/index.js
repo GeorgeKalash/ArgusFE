@@ -15,11 +15,13 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import JobOrderWindow from './window/JobOrderWindow'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const JobOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -139,8 +141,7 @@ const JobOrder = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.JobOrder,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -151,19 +152,21 @@ const JobOrder = () => {
     openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openStack(recordId) {
+  async function openStack(recordId, reference) {
     stack({
       Component: JobOrderWindow,
       props: {
         labels,
         access,
         recordId,
+        jobReference: reference,
         lockRecord,
         invalidate
       },
       width: 1150,
-      height: 700,
-      title: labels.jobOrder
+      height: 720,
+      title: labels.jobOrder,
+      nextToTitle: reference
     })
   }
 
@@ -177,30 +180,35 @@ const JobOrder = () => {
   }
 
   async function openForm(recordId, reference, status) {
-      if (recordId && status !== 3) {
-        await lockRecord({
-          recordId: recordId,
-          reference: reference,
-          resourceId: ResourceIds.MFJobOrders,
-          onSuccess: () => {
-            openStack(recordId)
-          },
-          isAlreadyLocked: name => {
-            stack({
-              Component: NormalDialog,
-              props: {
-                DialogText: `${platformLabels.RecordLocked} ${name}`,
-                width: 600,
-                height: 200,
-                title: platformLabels.Dialog
-              }
-            })
-          }
-        })
-      } else {
-        openStack(recordId)
-      }
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: ResourceIds.MFJobOrders,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.MFJobOrders,
+            recordId,
+            reference
+          })
+          openStack(recordId, reference)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId, reference)
     }
+  }
 
   return (
     <VertLayout>

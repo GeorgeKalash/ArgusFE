@@ -1,7 +1,5 @@
 import { useContext, useState } from 'react'
 import { Grid } from '@mui/material'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -17,6 +15,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { SystemRepository } from 'src/repositories/SystemRepository'
+import Form from 'src/components/Shared/Form'
 
 const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -42,7 +41,6 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
       priceWithVat: '',
       minPrice: ''
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyId: yup.string().required(),
@@ -107,14 +105,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      infoVisible={false}
-      resourceId={ResourceIds.PriceList}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -258,7 +249,7 @@ const SalesForm = ({ labels, maxAccess, store, cId, plId, record, muId }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

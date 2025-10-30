@@ -14,6 +14,7 @@ import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 
 export default function ProductionLineForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,10 +29,9 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       recordId: null,
       reference: '',
       name: '',
-      headWCId: null
+      ccId: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
@@ -44,7 +44,6 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
       })
       formik.setFieldValue('recordId', res.recordId)
       toast.success(!recordId ? platformLabels.Added : platformLabels.Edited)
-
       invalidate()
     }
   })
@@ -97,22 +96,22 @@ export default function ProductionLineForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={ManufacturingRepository.WorkCenter.qry}
-                name='headWCId'
-                label={labels.headWorkCenter}
-                valueField='recordId'
-                displayField={['reference', 'name']}
+                endpointId={GeneralLedgerRepository.CostCenter.qry}
+                parameters={`_params=&_startAt=0&_pageSize=1000`}
+                name='ccId'
+                label={labels.costCenter}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
-                readOnly={editMode}
+                valueField='recordId'
+                displayField={['reference', 'name']}
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('headWCId', newValue?.recordId)
-                }}
-                error={formik.touched.headWCId && Boolean(formik.errors.headWCId)}
                 maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('ccId', newValue?.recordId)
+                }}
+                error={formik.touched.ccId && Boolean(formik.errors.ccId)}
               />
             </Grid>
           </Grid>

@@ -3,11 +3,9 @@ import { useContext, useEffect, useState } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import FormShell from 'src/components/Shared/FormShell'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -16,6 +14,7 @@ import { useWindow } from 'src/windows'
 import PopupDialog from 'src/components/Shared/PopupDialog'
 import * as yup from 'yup'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 export default function POSForm({ labels, data, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
@@ -75,6 +74,7 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
       }
       setSubmitting(true)
       const res = await axios.post(`${process.env.NEXT_PUBLIC_POS_URL}/api/Ingenico/start_PUR`, formik.values)
+
       if (res.data) {
         setSubmitting(false)
 
@@ -136,14 +136,7 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.POSPayment}
-      form={formik}
-      isCleared={false}
-      isInfo={false}
-      isSaved={false}
-      actions={actions}
-    >
+    <Form isSaved={false} onSave={() => onReceived()} actions={actions} disabledSubmit={data?.viewPosButtons}>
       <Grow>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -253,6 +246,6 @@ export default function POSForm({ labels, data, maxAccess, amount }) {
           </Grid>
         </Grid>
       </Grow>
-    </FormShell>
+    </Form>
   )
 }

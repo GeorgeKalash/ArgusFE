@@ -32,7 +32,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
   const systemFunction = SystemFunction.Sketch
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.Sketch
+    datasetId: ResourceIds.Sketch,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels?.Sketch, window })
@@ -67,7 +68,6 @@ export default function SketchForm({ recordId, invalidate, window }) {
       wip: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),

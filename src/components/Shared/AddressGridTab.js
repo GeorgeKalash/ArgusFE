@@ -1,22 +1,23 @@
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
+import useResourceParams from 'src/hooks/useResourceParams'
+import { ResourceIds } from 'src/resources/ResourceIds'
 
 const AddressGridTab = ({
   addressGridData,
-  getAddressGridData,
   addAddress,
   delAddress,
   editAddress,
-  maxAccess,
-  columns
+  paginationParameters,
+  refetch,
+  datasetId
 }) => {
-  const { labels: labels, access } = useResourceParams({
-    datasetId: ResourceIds.Address
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.Address,
+    DatasetIdAccess: datasetId,
   })
 
   const tableColumns = [
@@ -60,19 +61,22 @@ const AddressGridTab = ({
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={addAddress} maxAccess={access} />
+        <GridToolbar onAdd={addAddress} maxAccess={maxAccess} />
       </Fixed>
       <Grow>
         <Table
-          columns={columns || tableColumns}
+          name='address'
+          columns={tableColumns}
           gridData={addressGridData}
           rowId={['recordId']}
-          api={getAddressGridData}
           onEdit={editAddress}
           onDelete={delAddress}
           isLoading={false}
-          maxAccess={access}
-          pagination={false}
+          maxAccess={maxAccess}
+          pageSize={50}
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>

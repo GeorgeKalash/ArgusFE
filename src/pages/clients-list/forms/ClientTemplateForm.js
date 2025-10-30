@@ -22,7 +22,6 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { RTCLRepository } from 'src/repositories/RTCLRepository'
 import { useWindow } from 'src/windows'
 import Confirmation from 'src/components/Shared/Confirmation'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
 import { CTCLRepository } from 'src/repositories/CTCLRepository'
 import BeneficiaryWindow from '../Windows/BeneficiaryWindow'
 import { useInvalidate } from 'src/hooks/resource'
@@ -42,6 +41,8 @@ import CustomPhoneNumber from 'src/components/Inputs/CustomPhoneNumber'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import AddressForm from 'src/components/Shared/AddressForm'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -64,11 +65,13 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
 
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
+  const [formikSettings, setFormik] = useState({})
 
   const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
   const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.ClientMaster
+    datasetId: ResourceIds.ClientMaster,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.pageTitle, window })
@@ -88,27 +91,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     idtId: '',
     idtName: '',
     cityName: '',
-
-    //address
-    countryId: '',
-    cityId: '',
-    city: '',
-    stateId: '',
-    cityDistrictId: '',
-    cityDistrict: '',
-    email1: '',
-    email2: '',
-    name: '',
-    phone: '',
-    phone2: '',
-    phone3: '',
-    postalCode: '',
-    street1: '',
-    street2: '',
-    subNo: '',
-    unitNo: '',
-    bldgNo: '',
-    poBox: '',
 
     //clientIndividual
     birthDate: null,
@@ -208,18 +190,6 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     }
   }
 
-  async function getCountry() {
-    var parameters = `_filter=&_key=countryId`
-
-    const res = await getRequest({
-      extension: SystemRepository.Defaults.get,
-      parameters: parameters
-    })
-    const countryId = res.record.value
-
-    countryId && formik.setFieldValue('idCountry', parseInt(countryId))
-  }
-
   useEffect(() => {
     if (recordId) {
       getClient(recordId, true)
@@ -239,7 +209,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       formik.setValues({
         //clientIDView
         functionId: SystemFunction.KYC,
-        masterRecordId: obj.clientMaster?.recordId,
+        masterRecordId: obj?.clientMaster?.recordId,
         reference: obj.clientMaster?.reference,
         clientId: obj.clientIDView?.clientId,
         expiryDate: formatDateFromApi(obj.clientMaster?.expiryDate),
@@ -413,6 +383,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       props: {
         recordId: formik.values.recordId,
         values: formik.values,
+        deviceId: formik.values.cellPhone,
         functionId: formik.values.functionId,
         setEditMode: setEditMode,
         getData: getClient
@@ -421,36 +392,19 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: formikSettings.maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validateOnBlur: true,
-    validate: values => {
-      const errors = {}
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (values.isRelativeDiplomat && !values.relativeDiplomatInfo) {
-        errors.relativeDiplomatInfo = 'Relative Diplomat Info is required'
-      }
-
-      if (values.email1 && !emailRegex.test(values.email1)) {
-        errors.email1 = 'Invalid email format'
-      }
-
-      if (values.email2 && !emailRegex.test(values.email2)) {
-        errors.email2 = 'Invalid email format'
-      }
-
-      return errors
-    },
     validationSchema: yup.object({
+      ...formikSettings.validate,
       reference: referenceRequired && yup.string().required(),
       isResident: yup.string().required(),
       birthDate: yup.date().required(),
       idtId: yup.string().required(),
       idNo: yup.string().required(),
       expiryDate: yup.date().required(),
+      issueDate: yup.date().required(),
       countryId: yup.string().required(),
       cityId: yup.string().required(),
       idCountry: yup.string().required(),
@@ -485,8 +439,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         }),
       smsLanguage: yup.string().required(),
       incomeSourceId: yup.string().required(),
-      gender: yup.string().required(),
-      street1: yup.string().required()
+      gender: yup.string().required()
     }),
     onSubmit: async values => {
       shouldValidateOnSubmit ? handleConfirmFetchMobileOwner() : await postRtDefault(values)
@@ -618,28 +571,31 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       poBox: obj.poBox
     }
 
-    const obj6 = {
-      recordId: address.recordId,
-      name: address.name,
-      countryId: address.countryId,
-      stateId: address.stateId,
-      cityId: address.cityId,
-      cityName: address.cityName,
-      street1: address.street1,
-      street2: address.street2,
-      email1: address.email1,
-      email2: address.email2,
-      phone: address.phone,
-      phone2: address.phone2,
-      phone3: address.phone3,
-      addressId: address.addressId,
-      postalCode: address.postalCode,
-      cityDistrictId: address.cityDistrictId,
-      bldgNo: address.bldgNo,
-      poBox: address.poBox,
-      unitNo: address.unitNo,
-      subNo: address.subNo
-    }
+    const obj6 =
+      address.length > 0
+        ? {
+            recordId: address.recordId,
+            name: address.name,
+            countryId: address.countryId,
+            stateId: address.stateId,
+            cityId: address.cityId,
+            cityName: address.cityName,
+            street1: address.street1,
+            street2: address.street2,
+            email1: address.email1,
+            email2: address.email2,
+            phone: address.phone,
+            phone2: address.phone2,
+            phone3: address.phone3,
+            addressId: address.addressId,
+            postalCode: address.postalCode,
+            cityDistrictId: address.cityDistrictId,
+            bldgNo: address.bldgNo,
+            poBox: address.poBox,
+            unitNo: address.unitNo,
+            subNo: address.subNo
+          }
+        : null
 
     if (allowEdit) {
       obj1.status = -1
@@ -651,7 +607,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         clientRemittance: obj4,
         clientMaster: obj1, //CTCL
         address: obj5,
-        workAddress: obj6 ? obj6 : null
+        workAddress: obj6
       }
 
       await postRequest({
@@ -675,7 +631,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
         ClientIndividual: obj3, //CTCLI
         clientRemittance: obj4,
         address: obj5,
-        workAddress: obj6.name && obj6.countryId && obj6.cityId && obj6.phone && obj6.street1 ? obj6 : null
+        workAddress: obj6?.name && obj6?.countryId && obj6?.cityId && obj6?.phone && obj6?.street1 ? obj6 : null
       }
 
       postRequest({
@@ -686,6 +642,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
           if (imageUrl && obj?.idScanMode == 1) saveImage({ clientId: res.recordId, numberID: obj.idNo })
 
           toast.success(platformLabels.Submit)
+          invalidate()
           setOtpShow(true)
           getClient(res.recordId)
           setEditMode(true)
@@ -695,12 +652,25 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }
 
   useEffect(() => {
-    if (formik.values.idtId) {
-      const res = idTypes.list?.filter(item => item.recordId === formik.values.idtId)?.[0]
-      if (res && res['type'] && (res['type'] === 1 || res['type'] === 2)) {
-        getCountry()
+    ;(async function () {
+      if (formik?.values?.idtId) {
+        const res = idTypes.list?.find(item => item.recordId === formik.values.idtId)
+
+        if (!res || !res.type || (res.type !== 1 && res.type !== 2)) {
+          formik.setFieldValue('idCountry', null)
+          formik.setFieldValue('nationalityId', null)
+
+          return
+        }
+
+        const country = parseInt(defaultsData?.list?.find(obj => obj.key === 'countryId')?.value)
+        formik.setFieldValue('idCountry', country)
+        formik.setFieldValue('nationalityId', res.type == 1 ? country : null)
+      } else {
+        formik.setFieldValue('idCountry', null)
+        formik.setFieldValue('nationalityId', null)
       }
-    }
+    })()
   }, [formik.values.idtId])
 
   useEffect(() => {
@@ -866,7 +836,8 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   }, [formik?.values?.nationalityId])
 
   const handleFetchMobileOwner = async window => {
-    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${formik.values.cellPhone}`
+    const cleanMobile = formik.values.cellPhone.replace(/^\+/, '')
+    const parameters = `_idNo=${formik.values.idNo}&_mobileNumber=${cleanMobile}`
 
     getRequest({
       extension: CurrencyTradingSettingsRepository.Mobile.get,
@@ -897,10 +868,11 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
     !formik.values.govCellVerified &&
     !systemChecks?.some(item => item.checkId === SystemChecks.CT_DISABLE_MOBILE_VERIFICATION)
 
-  function onAddressSubmit(values) {
+  function onAddressSubmit(values, window) {
     setAddress({
       ...values
     })
+    window.close()
   }
 
   return (
@@ -999,17 +971,16 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
+                            if (e?.relatedTarget?.id === 'idNo') return
+                            formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)
                             !editMode && checkIdNumber(e.target.value)
                           }}
                           readOnly={editMode}
                           maxLength='15'
-                          onFocus={e => {
-                            setShowAsPassword(false)
-                          }}
-                          onClear={() => {
-                            formik.setFieldValue('idNo', '')
-                          }}
+                          onFocus={() => setShowAsPassword(false)}
+                          ClearId='idNo'
+                          onClear={() => formik.setFieldValue('idNo', null)}
                           error={formik.touched.idNo && Boolean(formik.errors.idNo)}
                           maxAccess={maxAccess}
                         />
@@ -1082,7 +1053,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.expiryDate}
                           value={formik.values?.expiryDate}
                           readOnly={editMode && !allowEdit && true}
-                          required={true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('expiryDate', '')}
                           disabledDate={!editMode && '<'}
@@ -1096,6 +1067,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.issueDate}
                           value={formik.values?.issueDate}
                           readOnly={editMode && !allowEdit && true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('issueDate', '')}
                           disabledDate={!editMode && '>'}
@@ -1257,7 +1229,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} sx={{ flexDirection: 'row-reverse' }}>
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1317,7 +1289,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               maxAccess={maxAccess}
                             />
                           </Grid> */}
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <ResourceComboBox
@@ -1389,7 +1361,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                             { key: 'name', value: 'Name' },
                             { key: 'flName', value: 'Foreign Language Name' }
                           ]}
-                          displayFieldWidth={1.5}
+                          displayFieldWidth={3}
                           values={formik.values}
                           required
                           onChange={(event, newValue) => {
@@ -1729,8 +1701,10 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                       labels={labels}
                       defaultReadOnly={{ countryId: true }}
                       addressValidation={formik}
-                      readOnly={editMode && !allowEdit && true}
+                      readOnly={editMode && !allowEdit}
                       access={maxAccess}
+                      datasetId={ResourceIds.ADDNationalClientMaster}
+                      setFormik={setFormik}
                     />
                   </FieldSet>
                 </Grid>
@@ -1738,25 +1712,23 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                   <Grid container spacing={2}>
                     <Grid item xs={5}>
                       <CustomButton
-                        onClick={() =>
+                        onClick={() => {
                           stack({
-                            Component: AddressFormShell,
+                            Component: AddressForm,
                             props: {
-                              readOnly: editMode && !allowEdit,
-                              allowPost: true,
-                              optional: true,
-                              labels: labels,
+                              editMode: editMode,
+                              address: address,
                               setAddress: setAddress,
                               onSubmit: onAddressSubmit,
-                              address: address,
-                              maxAccess: maxAccess,
-                              isCleared: false
+                              readOnly: editMode && !allowEdit,
+                              datasetId: ResourceIds.ADDWorkClientMaster,
+                              optional: true,
+                              changeClear: true,
+                              allowPost: false
                             },
-                            width: 800,
-                            height: 350,
                             title: labels.workAddress
                           })
-                        }
+                        }}
                         label={labels.workAddress}
                         color='primary'
                       />

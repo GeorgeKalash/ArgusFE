@@ -1,13 +1,11 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { DataSets } from 'src/resources/DataSets'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
@@ -27,13 +25,12 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
   const { formik } = useForm({
     initialValues: { recordId: null, name: '', reference: '', flName: '', sitId: '' },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
-      name: yup.string().required(' '),
-      reference: yup.string().required(' '),
-      sitId: yup.string().required(' '),
-      flName: yup.string().required(' ')
+      name: yup.string().required(),
+      reference: yup.string().required(),
+      sitId: yup.string().required(),
+      flName: yup.string().required()
     }),
     onSubmit: async obj => {
       const recordId = obj.recordId
@@ -62,19 +59,17 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (recordId) {
-          const res = await getRequest({
-            extension: RemittanceSettingsRepository.SourceOfIncome.get,
-            parameters: `_recordId=${recordId}`
-          })
-          setStore({
-            recordId: res.record.recordId,
-            name: res.record.name
-          })
-          formik.setValues(res.record)
-        }
-      } catch (exception) {}
+      if (recordId) {
+        const res = await getRequest({
+          extension: RemittanceSettingsRepository.SourceOfIncome.get,
+          parameters: `_recordId=${recordId}`
+        })
+        setStore({
+          recordId: res.record.recordId,
+          name: res.record.name
+        })
+        formik.setValues(res.record)
+      }
     })()
   }, [])
 
@@ -138,7 +133,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
               formik.setFieldValue('sitRef', newValue ? newValue.reference : '')
               formik.setFieldValue('sitName', newValue ? newValue.name : '')
             }}
-            error={formik.touched.incomeType && Boolean(formik.errors.incomeType)}
+            error={formik.touched.sitId && Boolean(formik.errors.sitId)}
           />
         </Grid>
       </Grid>

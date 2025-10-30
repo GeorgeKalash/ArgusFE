@@ -33,7 +33,6 @@ const LoginPage = () => {
   const { stack } = useWindow()
 
   const validation = useFormik({
-    enableReinitialize: true,
     initialValues: {
       username: '',
       password: '',
@@ -47,8 +46,10 @@ const LoginPage = () => {
     onSubmit: values => {
       auth.login({ ...values }, error => {
         const { loggedUser } = error
-
-        if (error?.getUS2?.umcpnl) {
+        if (error?.signIn3?.forcePasswordReset) {
+          const onClose = async () => {}
+          openForm(error.username, loggedUser, onClose)
+        } else if (error?.getUS2?.umcpnl) {
           const onClose = async () => {
             await updateUmcpnl(loggedUser, error?.getUS2)
           }

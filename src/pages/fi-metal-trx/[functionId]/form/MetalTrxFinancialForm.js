@@ -101,7 +101,6 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       ]
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.string().required(),
@@ -134,13 +133,13 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     }
   })
 
-  const getPayload = (obj) => {
+  const getPayload = obj => {
     const { items: originalItems, ...header } = obj
 
     const updatedHeader = {
       ...header,
-      qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
-      pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
+      qty: originalItems?.reduce((sum, item) => sum + (Number(item.qty) || 0), 0) || 0,
+      pcs: originalItems?.reduce((sum, item) => sum + (Number(item.pcs) || 0), 0) || 0
     }
 
     const items = originalItems?.map(item => ({
@@ -211,7 +210,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     const { items, ...restValues } = formik.values
 
     const res = await postRequest({
-      extension: FinancialRepository.MetalTrx.unpost,
+      extension:
+        functionId === SystemFunction.MetalReceiptVoucher
+          ? FinancialRepository.MetalReceiptVoucher.unpost
+          : FinancialRepository.MetalPaymentVoucher.unpost,
       record: JSON.stringify({
         ...restValues,
         qty: totalQty,
@@ -494,6 +496,10 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       condition: true,
       onClick: 'onClickGL',
       datasetId: getGLResourceId(functionId),
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       onReset,
       disabled: !editMode
     },

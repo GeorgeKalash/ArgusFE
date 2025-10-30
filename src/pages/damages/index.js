@@ -88,8 +88,7 @@ const Damages = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.Damage,
-    action: openForm,
-    hasDT: false
+    action: openForm
   })
 
   const add = async () => {
@@ -128,7 +127,7 @@ const Damages = () => {
       </Fixed>
       <Grow>
         <Table
-          name='damageTable'
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

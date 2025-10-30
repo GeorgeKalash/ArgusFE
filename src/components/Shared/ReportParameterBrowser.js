@@ -44,6 +44,8 @@ const formatDateFrom = value => {
 }
 
 const convertDateToCompactFormat = input => {
+  if (!input) return
+
   let date
 
   if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
@@ -62,6 +64,8 @@ const convertDateToCompactFormat = input => {
 }
 
 const convertCompactFormatToDate = compactDate => {
+  if (!compactDate) return
+
   const year = parseInt(compactDate.slice(0, 4), 10)
   const month = parseInt(compactDate.slice(4, 6), 10) - 1
   const day = parseInt(compactDate.slice(6, 8), 10)
@@ -154,13 +158,24 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           name={`parameters[${field.id}]`}
           label={field.caption}
           valueField={apiDetails.valueField}
-          displayField={apiDetails.displayField}
+          displayField={
+            Array.isArray(apiDetails?.displayField)
+              ? apiDetails.displayField.flatMap((header, idx) =>
+                  idx < apiDetails.displayField.length - 1 ? [header, apiDetails?.separator ?? ' '] : [header]
+                )
+              : [apiDetails?.displayField]
+          }
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
           values={formik.values?.parameters?.[field.id]?.value}
           onChange={(event, newValue) => {
+            const separator = apiDetails?.separator ?? ' '
+
             const textValue = Array.isArray(apiDetails?.displayField)
-              ? apiDetails?.displayField?.map(header => newValue?.[header]?.toString())?.join(' ')
+              ? apiDetails.displayField
+                  .map(header => newValue?.[header]?.toString())
+                  .filter(Boolean)
+                  .join(separator)
               : newValue?.[apiDetails?.displayField]
 
             formik.setFieldValue(
@@ -252,7 +267,39 @@ const GetDate = ({ field, formik, rpbParams }) => {
 
 const GetDateTimePicker = ({ field, formik, rpbParams }) => {
   useEffect(() => {
-    if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
+    const currentValue = formik.values?.parameters?.[field.id]?.value
+
+    if (currentValue !== undefined && currentValue !== null) return
+
+    if (field.defaultValue) {
+      let defVal
+      switch (field.defaultValue) {
+        case 'today':
+          defVal = new Date()
+          break
+        case 'yesterday':
+          defVal = new Date()
+          defVal.setDate(defVal.getDate() - 1)
+          break
+        case 'boy':
+          defVal = new Date(new Date().getFullYear(), 0, 1)
+          break
+        default:
+          defVal = null
+      }
+
+      if (defVal) {
+        formik.setFieldValue(`parameters[${field.id}]`, {
+          fieldId: field.id,
+          fieldKey: field.key,
+          defaultValue: field.defaultValue,
+          value: defVal,
+          controlType: field?.controlType,
+          caption: field.caption,
+          display: formatDateTimeDefault(defVal)
+        })
+      }
+    } else if (field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
@@ -270,7 +317,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
       <CustomDateTimePicker
         name={`parameters[${field.id}]`}
         label={field.caption}
-        value={formik.values?.parameters?.[field.id]?.value}
+        value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
         onChange={(name, newValue) => {
@@ -392,7 +439,6 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
 
       return errors.parameters.length > 0 ? errors : {}
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: values => {
       setRpbParams([])
@@ -469,7 +515,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   }, [reportName])
 
   return (
-    <FormShell form={formik} infoVisible={false} isSavedClear={false}>
+    <FormShell form={formik} isInfo={false} isSavedClear={false}>
       <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
         {items?.map(item => {
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {

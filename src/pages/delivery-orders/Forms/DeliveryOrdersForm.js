@@ -1,4 +1,4 @@
-import { Grid, Checkbox, FormControlLabel } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
@@ -74,6 +74,9 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       deliveredNowQty: null,
       deliveredQty: null,
       mwFunctionId: null,
+      muId: null,
+      muRef: '',
+      muName: '',
       mwId: null,
       mwRef: '',
       mwSeqNo: null
@@ -117,7 +120,6 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       orders: ordersInitialValues
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.number().required(),
@@ -302,7 +304,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           form: formik,
           labels,
           maxAccess,
-          recordId
+          recordId,
+          refetchForm
         },
         width: 500,
         height: 550,
@@ -341,7 +344,7 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
       key: 'generateIV',
       condition: true,
       onClick: openGenerateInvoiceForm,
-      disabled: !isPosted && !isCancelled
+      disabled: (!isPosted && !isCancelled) || !!formik.values.invoiceId
     }
   ]
 
@@ -361,6 +364,9 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           { from: 'itemName', to: 'itemName' },
           { from: 'seqNo', to: 'mwSeqNo' },
           { from: 'qty', to: 'qty' },
+          { from: 'muName', to: 'muName' },
+          { from: 'muRef', to: 'muRef' },
+          { from: 'muId', to: 'muId' },
           { from: 'functionId', to: 'mwFunctionId' },
           { from: 'reference', to: 'mwRef' },
           { from: 'itemId', to: 'itemId' },
@@ -415,6 +421,12 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
           }
         }
       }
+    },
+    {
+      component: 'textfield',
+      label: labels.mu,
+      name: 'muName',
+      props: { readOnly: true }
     },
     {
       component: 'resourcecombobox',

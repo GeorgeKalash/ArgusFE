@@ -81,11 +81,11 @@ const Window = React.memo(
       }
     }, [expanded])
 
-    // useEffect(() => {
-    //   if (paperRef.current) {
-    //     paperRef.current.focus()
-    //   }
-    // }, [])
+    useEffect(() => {
+      if (paperRef.current) {
+        paperRef.current.focus()
+      }
+    }, [])
 
     useEffect(() => {
       if (!loading) {
@@ -116,6 +116,11 @@ const Window = React.memo(
             alignItems: 'center',
             zIndex: 2
           }}
+          onKeyDown={e => {
+            if (e.key === 'Escape' && closable) {
+              onClose()
+            }
+          }}
         >
           <Draggable
             handle='#draggable-dialog-title'
@@ -133,7 +138,8 @@ const Window = React.memo(
                   height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset'
+                  flexDirection: controlled ? 'column' : 'unset',
+                  '&:focus': { outline: 'none', boxShadow: 'none' }
                 }}
               >
                 <DialogTitle

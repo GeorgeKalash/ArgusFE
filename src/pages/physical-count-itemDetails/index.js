@@ -449,7 +449,6 @@ const PhysicalCountItemDe = () => {
       props: {
         resourceId: ResourceIds.PhysicalCountItemDetailsImport,
         access,
-        platformLabels,
         onSuccess: async res => {
           if (formik.values?.controllerId) fetchGridData(formik.values?.controllerId)
         }
@@ -520,10 +519,11 @@ const PhysicalCountItemDe = () => {
       maxAccess={access}
       resourceId={ResourceIds.IVPhysicalCountItemDetails}
       previewReport={editMode}
+      fullSize
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} p={2}>
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SCRepository.StockCount.qry}

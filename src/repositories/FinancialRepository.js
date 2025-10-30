@@ -178,21 +178,22 @@ export const FinancialRepository = {
   PaymentVoucherCostCenters: {
     qry: service + 'qryPVC'
   },
-  Apply2: {
-    qry: service + 'qryAPL2'
-  },
-  Apply3: {
-    qry: service + 'qryAPL3'
+  Apply: {
+    qry: service + 'qryAPL',
+    qry2: service + 'qryAPL2',
+    qry3: service + 'qryAPL3'
   },
   AgingLeg: {
     qry: service + 'qryAGL'
   },
   MetalReceiptVoucher: {
     set2: service + 'set2MRV',
-    qry: service + 'qryMTI'
+    qry: service + 'qryMTI',
+    unpost: service + 'unpostMRV'
   },
   MetalPaymentVoucher: {
-    set2: service + 'set2MPV'
+    set2: service + 'set2MPV',
+    unpost: service + 'unpostMPV'
   },
   MetalTrx: {
     get: service + 'getMTX',
@@ -206,7 +207,8 @@ export const FinancialRepository = {
   },
   AgingDoc: {
     snapshot: service + 'snapshotAGD',
-    rebuild: service + 'rebuildAGD'
+    rebuild: service + 'rebuildAGD',
+    qry: service + 'qryAGD'
   },
   BalanceTransferMultiAccounts: {
     page: service + 'pageTMA',
@@ -262,12 +264,18 @@ export const FinancialRepository = {
     snapshot2: service + 'snapshot2PO',
     cancel: service + 'cancelPO',
     close: service + 'closePO',
-    reopen: service + 'reopenPO'
+    reopen: service + 'reopenPO',
+    open: service + 'openPO',
+    generate: service + 'generatePO2PV'
   },
   PaymentOrdersExpenses: {
     qry2: service + 'qry2POX'
   },
   PaymentOrdersCostCenters: {
     qry: service + 'qryPOC'
+  },
+  ApplyManual: {
+    set2: service + 'set2APLM',
+    qry: service + 'qryAPLM'
   }
 }

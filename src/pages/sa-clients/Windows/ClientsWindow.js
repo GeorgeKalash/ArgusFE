@@ -3,7 +3,7 @@ import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import ClientsForm from '../forms/ClientsForm'
 import SalesForm from '../forms/SalesForm'
-import AddressTab from '../forms/AddressTab'
+import ClientsAddressTab from '../forms/ClientsAddressTab'
 import PriceTab from '../forms/PriceTable'
 
 const ClientsWindow = ({ height, recordId, labels, maxAccess }) => {
@@ -23,17 +23,17 @@ const ClientsWindow = ({ height, recordId, labels, maxAccess }) => {
 
   return (
     <>
-      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-      <CustomTabPanel height={height} index={0} value={activeTab}>
+      <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={0} value={activeTab} maxAccess={maxAccess}>
         <ClientsForm store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab}>
+      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab}>
-        <AddressTab store={store} setStore={setStore} labels={labels} maxAccess={maxAccess} />
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
+        <ClientsAddressTab store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={3} value={activeTab}>
+      <CustomTabPanel height={height} index={3} value={activeTab} maxAccess={maxAccess}>
         <PriceTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>

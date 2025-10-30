@@ -126,8 +126,7 @@ const BalanceTrfBetweenAcc = () => {
 
   const { proxyAction } = useDocumentTypeProxy({
     functionId: SystemFunction.BalanceTransfer,
-    action: openForm,
-    hasDT: true
+    action: openForm
   })
 
   const del = async obj => {

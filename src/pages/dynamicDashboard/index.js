@@ -18,6 +18,12 @@ import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { Box } from '@mui/material'
+import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import { DataSets } from 'src/resources/DataSets'
+import { formatDateForGetApI } from 'src/lib/date-helper'
+import ApprovalsTable from 'src/components/Shared/ApprovalsTable'
 
 const Frame = styled.div`
   display: flex;
@@ -126,8 +132,10 @@ const DashboardLayout = () => {
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState(0)
   const userData = getStorageData('userData')
   const _userId = userData.userId
+  const _languageId = userData.languageId
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -138,32 +146,57 @@ const DashboardLayout = () => {
   })
 
   useEffect(() => {
-    getRequest({
-      extension: SystemRepository.DynamicDashboard.qry,
-      parameters: `_userId=${_userId}`
-    })
-      .then(result => {
-        setApplets(result.list)
+    const fetchData = async () => {
+      const appletsRes = await getRequest({
+        extension: SystemRepository.DynamicDashboard.qry,
+        parameters: `_userId=${_userId}`
+      })
+      setApplets(appletsRes.list)
 
-        return getRequest({
-          extension: DashboardRepository.dashboard
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        getRequest({ extension: DashboardRepository.dashboard }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+        getRequest({
+          extension: TimeAttendanceRepository.ResetTV.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`
+        }),
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
         })
+      ])
+
+      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+
+      const filteredTabs = resTimeCode.list
+        .filter(t => availableTimeCodes.has(Number(t.key)))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
+
+      const groupedData = filteredTabs.reduce((acc, tab) => {
+        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+
+        return acc
+      }, {})
+
+      setData({
+        dashboard: resDashboard?.record,
+        sp: resSP?.record,
+        hr: {
+          timeVariationDetails: resTV.list || [],
+          tabs: filteredTabs,
+          groupedData: groupedData
+        }
       })
-      .then(res => {
-        return getRequest({
-          extension: DashboardRepository.SalesPersonDashboard.spDB,
-          parameters: ``
-        }).then(resSP => {
-          return getRequest({
-            extension: DocumentReleaseRepository.DocumentsOnHold.qry3,
-            parameters: ``
-          }).then(resDR => {
-            setData({ dashboard: { ...res?.record }, sp: { ...resSP?.record }, authorization: { ...resDR } })
-            debouncedCloseLoading()
-          })
-        })
-      })
-  }, [])
+
+      debouncedCloseLoading()
+    }
+
+    fetchData()
+  }, [_userId, _languageId])
 
   if (loading) {
     return <LoadingOverlay />
@@ -178,6 +211,18 @@ const DashboardLayout = () => {
   return (
     <Frame>
       <Container>
+        {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+          <TopRow>
+            <ChartCard>
+              <SummaryCard>
+                <Title>{labels.authorization}</Title>
+              </SummaryCard>
+              <Box sx={{ display: 'flex', height: '350px' }}>
+                <ApprovalsTable pageSize={10} />
+              </Box>
+            </ChartCard>
+          </TopRow>
+        )}
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <TopRow>
             <ChartCard>
@@ -458,6 +503,7 @@ const DashboardLayout = () => {
               )}
             </SummaryGrid>
           )}
+
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
             <ChartCard>
               <SummaryCard>
@@ -556,37 +602,34 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
+
+          {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
             <ChartCard>
               <SummaryCard>
-                <Title>{labels.authorization}</Title>
+                <Title>{labels.todaysTimeVariationsDetails}</Title>
               </SummaryCard>
-              <Box style={{ height: '350px', display: 'flex' }}>
-                <Table
-                  name='table'
-                  columns={[
-                    {
-                      field: 'reference',
-                      headerName: labels.reference,
-                      flex: 1
-                    },
-                    {
-                      field: 'functionName',
-                      headerName: labels.functionName,
-                      flex: 1
-                    },
-                    {
-                      field: 'thirdParty',
-                      headerName: labels.thirdParty,
-                      flex: 1
-                    }
-                  ]}
-                  gridData={data?.authorization}
-                  rowId={['recordId']}
-                  pagination={false}
-                  maxAccess={access}
-                />
-              </Box>
+
+              <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+              {(data?.hr?.tabs || []).map((tab, idx) => (
+                <CustomTabPanel key={idx} index={idx} value={activeTab}>
+                  <Box sx={{ display: 'flex', height: '350px' }}>
+                    <Table
+                      name='TVtable'
+                      columns={[
+                        { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
+                        { field: 'branchName', headerName: labels.branchName, flex: 3 },
+                        { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
+                        { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
+                      ]}
+                      gridData={data?.hr?.groupedData?.[tab.timeCode] || { list: [] }}
+                      rowId={['recordId']}
+                      pagination={false}
+                      maxAccess={access}
+                    />
+                  </Box>
+                </CustomTabPanel>
+              ))}
             </ChartCard>
           )}
         </MiddleRow>

@@ -10,7 +10,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import Table from 'src/components/Shared/Table'
 
-export default function OperationsTab({ labels, store, maxAccess }) {
+export default function OperationsTab({ store, labels, access }) {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
   const resourceId = ResourceIds.Worksheet
@@ -21,6 +21,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Worksheet.summary,
     datasetId: resourceId,
+    params: { disabledReqParams: true, maxAccess: access },
     enabled: Boolean(recordId)
   })
 
@@ -42,10 +43,11 @@ export default function OperationsTab({ labels, store, maxAccess }) {
         <Table
           name='operationTable'
           gridData={data}
-          maxAccess={maxAccess}
+          maxAccess={access}
           columns={[
             { field: 'operationRef', headerName: labels.operationRef, flex: 1 },
-            { field: 'operationName', headerName: labels.operationName, flex: 1 },
+            { field: 'operationName', headerName: labels.operationName, flex: 2 },
+            { field: 'categoryName', headerName: labels.category, flex: 2 },
             { field: 'issued_qty', headerName: labels.issued, type: 'number', flex: 1 },
             { field: 'returned_qty', headerName: labels.returned, type: 'number', flex: 1 },
             { field: 'lost_qty', headerName: labels.loss, type: 'number', flex: 1 },
@@ -56,7 +58,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
         />
       </Grow>
       <Fixed>
-        <Grid container spacing={1}>
+        <Grid container spacing={1} sx={{ pt: 2 }}>
           <Grid item xs={6.8}></Grid>
           <Grid item xs={5}>
             <Grid container spacing={4}>
@@ -72,7 +74,7 @@ export default function OperationsTab({ labels, store, maxAccess }) {
               <Grid item xs={3}>
                 <CustomNumberField name='totalConsumed' label={labels.totalConsumed} value={otalConsumed} readOnly />
               </Grid>
-              <Grid item xs={.2}></Grid>
+              <Grid item xs={0.2}></Grid>
             </Grid>
           </Grid>
         </Grid>

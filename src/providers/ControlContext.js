@@ -116,7 +116,7 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    !apiPlatformLabels && getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
+    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
@@ -157,9 +157,9 @@ const ControlProvider = ({ children }) => {
       })
   }
 
-  const getLabels = (resourceId, callback) => {
+  const getLabels = (resourceId, callback, cacheOnlyMode) => {
     const cache = commonResourceIds.includes(resourceId)
-    if (cache && labels?.[resourceId]) {
+    if ((cache && labels?.[resourceId]) || cacheOnlyMode) {
       callback(labels?.[resourceId])
     } else {
       var parameters = '_dataset=' + resourceId
@@ -177,10 +177,10 @@ const ControlProvider = ({ children }) => {
     }
   }
 
-  const getAccess = (resourceId, callback) => {
+  const getAccess = (resourceId, callback, cacheOnlyMode) => {
     const cache = commonResourceIds.includes(resourceId)
 
-    if (cache && access?.[resourceId]) {
+    if ((cache && access?.[resourceId]) || cacheOnlyMode) {
       callback(access?.[resourceId])
     } else {
       var parameters = '_resourceId=' + resourceId

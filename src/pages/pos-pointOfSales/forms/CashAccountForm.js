@@ -1,7 +1,6 @@
 import { useFormik } from 'formik'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
+
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import * as yup from 'yup'
@@ -11,6 +10,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
+import Form from 'src/components/Shared/Form'
 
 const CashAccountForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store
@@ -18,7 +18,6 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
   const { platformLabels } = useContext(ControlContext)
 
   const formik = useFormik({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       pOSUser: yup
@@ -129,13 +128,7 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
   }, [recordId])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.PointOfSale}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -147,7 +140,7 @@ const CashAccountForm = ({ store, labels, maxAccess }) => {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

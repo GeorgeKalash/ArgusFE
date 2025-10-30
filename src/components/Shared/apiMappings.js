@@ -28,6 +28,7 @@ import { PointofSaleRepository } from 'src/repositories/PointofSaleRepository'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
 import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
+import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
 
 export const COMBOBOX = 1
 
@@ -245,6 +246,17 @@ export const apiMappings = {
   [ResourceIds.FlAccountGroups]: {
     type: COMBOBOX,
     endpoint: FinancialRepository.Group.qry,
+    parameters: '_filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
     parameters: '_filter=',
     valueField: 'recordId',
     displayField: ['reference', 'name'],
@@ -862,7 +874,7 @@ export const apiMappings = {
       { key: 'name', value: 'Name' }
     ]
   },
-  [ResourceIds.CertificateFilter]: {
+  [ResourceIds.CertificateLevels]: {
     type: COMBOBOX,
     endpoint: EmployeeRepository.CertificateFilters.qry,
     valueField: 'recordId',
@@ -977,6 +989,13 @@ export const apiMappings = {
   [ResourceIds.Metals]: {
     type: COMBOBOX,
     endpoint: InventoryRepository.Metals.qry,
+    parameters: `_params=&_startAt=0&_pageSize=1000`,
+    valueField: 'recordId',
+    displayField: 'reference'
+  },
+  [ResourceIds.MetalColor]: {
+    type: COMBOBOX,
+    endpoint: InventoryRepository.MetalColor.qry,
     parameters: `_params=&_startAt=0&_pageSize=1000`,
     valueField: 'recordId',
     displayField: 'reference'
@@ -1127,5 +1146,73 @@ export const apiMappings = {
     firstField: 'reference',
     secondDisplayField: false,
     valueOnSelection: 'recordId'
+  },
+  [ResourceIds.FeeSchedule]: {
+    type: COMBOBOX,
+    endpoint: RemittanceOutwardsRepository.FeeSchedule.qry,
+    parameters: '_startAt=0&_pageSize=50&filter=',
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.RiskLevel]: {
+    type: COMBOBOX,
+    endpoint: CurrencyTradingSettingsRepository.RiskLevel.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.ProfessionGroups]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.ProfessionGroups.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.SalaryRange]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.SalaryRange.qry,
+    valueField: 'recordId',
+    displayField: ['min', 'max'],
+    separator: '->',
+    columnsInDropDown: [
+      { key: 'min', value: 'MIN' },
+      { key: 'max', value: 'MAX' }
+    ]
+  },
+  [ResourceIds.SourceOfIncomeType]: {
+    type: COMBOBOX,
+    endpoint: RemittanceSettingsRepository.SourceOfIncomeType.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.PurposeExchangeGroup]: {
+    type: COMBOBOX,
+    endpoint: CurrencyTradingSettingsRepository.PurposeExchangeGroup.qry,
+    valueField: 'recordId',
+    displayField: 'name'
+  },
+  [ResourceIds.RateType]: {
+    type: COMBOBOX,
+    endpoint: MultiCurrencyRepository.RateType.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

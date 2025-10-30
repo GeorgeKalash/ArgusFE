@@ -21,7 +21,7 @@ const CustomTextField = ({
   editMode = false,
   maxLength = '1000',
   position,
-  dir = 'ltr',
+  dir = '',
   hidden = false,
   phone = false,
   search = false,
@@ -82,6 +82,12 @@ const CustomTextField = ({
     }
   }
 
+  useEffect(() => {
+    if (autoFocus && inputRef.current && value == '' && !focus) {
+      inputRef.current.focus()
+    }
+  }, [autoFocus, inputRef.current, value])
+
   return _hidden ? (
     <></>
   ) : (
@@ -103,15 +109,16 @@ const CustomTextField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
-        dir: dir,
+        ...(dir ? { dir } : {}),
         inputMode: numberField && 'numeric',
         pattern: numberField && '[0-9]*',
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none' // Apply text transform if forceUpperCase is true
+          textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
-        tabIndex: _readOnly ? -1 : 0
+        tabIndex: _readOnly ? -1 : 0,
+        'data-search': search ? 'true' : 'false'
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
@@ -127,6 +134,7 @@ const CustomTextField = ({
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton
                 tabIndex={-1}
+                id={props.ClearId}
                 edge='end'
                 onClick={e => {
                   onClear(e)

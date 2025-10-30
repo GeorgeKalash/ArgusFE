@@ -11,6 +11,10 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
+import { Grid } from '@mui/material'
+import CustomTextField from 'src/components/Inputs/CustomTextField'
+import { getFormattedNumber } from 'src/lib/numberField-helper'
 
 const Components = ({ store, maxAccess, labels }) => {
   const { recordId } = store
@@ -116,13 +120,16 @@ const Components = ({ store, maxAccess, labels }) => {
     })()
   }, [])
 
+  const totalQty = formik.values.items.reduce((qty, row) => qty + (Number(row.qty) || 0), 0)
+  const totalPcs = formik.values.items.reduce((pcs, row) => pcs + (Number(row.pcs) || 0), 0)
+
   const columns = [
     {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'itemId',
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
+        endpointId: InventoryRepository.Item.snapshot4,
         displayField: 'sku',
         valueField: 'recordId',
         columnsInDropDown: [
@@ -182,6 +189,28 @@ const Components = ({ store, maxAccess, labels }) => {
             columns={columns}
           />
         </Grow>
+        <Fixed>
+          <Grid container direction='row' wrap='nowrap' sx={{ pt: 5, justifyContent: 'flex-end' }}>
+            <Grid item xs={3} sx={{ pl: 3 }}>
+              <CustomTextField
+                name='totalQty'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalQty)}
+                label={labels.totalQty}
+                readOnly={true}
+              />
+            </Grid>
+            <Grid item xs={3} sx={{ pl: 3 }}>
+              <CustomTextField
+                name='totalPcs'
+                maxAccess={maxAccess}
+                value={getFormattedNumber(totalPcs.toFixed(2))}
+                label={labels.totalPcs}
+                readOnly={true}
+              />
+            </Grid>
+          </Grid>
+        </Fixed>
       </VertLayout>
     </FormShell>
   )

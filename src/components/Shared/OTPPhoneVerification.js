@@ -9,7 +9,17 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose, getData, onSuccess, window }) => {
+const OTPPhoneVerification = ({
+  values,
+  recordId,
+  clientId,
+  functionId,
+  deviceId,
+  onClose,
+  getData,
+  onSuccess,
+  window
+}) => {
   const { postRequest } = useContext(RequestsContext)
   const { defaultsData, platformLabels } = useContext(ControlContext)
 
@@ -44,7 +54,7 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
       clientId: values.clientId || clientId,
       secret: '',
       functionId: functionId,
-      deviceId: values.cellPhone,
+      deviceId,
       otp: null
     }
     postRequest({
@@ -60,7 +70,7 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
         recordId: recordId || null,
         secret: '',
         functionId: functionId,
-        deviceId: values.cellPhone,
+        deviceId,
         otp: value
       }
       postRequest({
@@ -153,7 +163,8 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
   return (
     <div width={500} height={300} onClose={onClose}>
       <Grid className={styles.phoneVerificationContainer}>
-        <h2>{labels.OTPVerification}</h2>
+        <h3>{labels.sentOTP}</h3>
+        <h3>{values.cellPhone}</h3>
         <Grid className={styles.otpInputContainer}>
           {otp.map((digit, index) => (
             <input
@@ -183,7 +194,7 @@ const OTPPhoneVerification = ({ values, recordId, clientId, functionId, onClose,
         </button>
         <button
           className={styles.verifyButton}
-          onClick={handleVerifyOtp}
+          onClick={() => handleVerifyOtp()}
           disabled={timer === 0 || disabled < 5 ? true : false}
         >
           {labels.verifyOTP}

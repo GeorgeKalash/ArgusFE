@@ -38,7 +38,8 @@ export default function ThreeDPrintForm({ recordId, window }) {
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.Printing
+    datasetId: ResourceIds.Printing,
+    editMode: !!recordId
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -83,13 +84,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
       wip: 1
     },
     maxAccess,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable()
+      setPcs: yup.number().nullable(),
+      collectionName: yup.string().required()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -538,6 +539,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
                     readOnly
+                    required
                     error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
                   />
                 </Grid>

@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useForm } from 'src/hooks/form'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -12,27 +10,37 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { useInvalidate } from 'src/hooks/resource'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { useInvalidate } from 'src/hooks/resource'
+import Form from 'src/components/Shared/Form'
 
-export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomId, msId, window }) {
+export default function ComponentForm({
+  labels,
+  maxAccess,
+  recordId,
+  seqNo,
+  bomId,
+  msId,
+  components,
+  calculateCostPct,
+  window
+}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Component.qry
-  })
+  const invalidate = useInvalidate({ endpointId: ManufacturingRepository.Component.qry })
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId: null,
+      recordId: recordId || null,
       costTypeId: null,
       bomId,
       itemId: null,
       qty: null,
       muId: null,
+      muQty: null,
       msId,
       currentCost: 0,
       seqNo,
@@ -44,13 +52,25 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
       qty: yup.number().required().moreThan(0)
     }),
     onSubmit: obj => {
-      const data = {
+      const newComponent = {
         ...obj,
-        baseQty: obj.qty
+        baseQty: obj?.baseQty || (obj?.muId ? obj.qty * obj.muQty : obj.qty)
       }
+
+      const existingIndex = components.findIndex(c => c.seqNo === newComponent.seqNo)
+
+      let updatedComponents
+      if (existingIndex !== -1) {
+        updatedComponents = components.map((c, i) => (i === existingIndex ? newComponent : c))
+      } else {
+        updatedComponents = [...components, newComponent]
+      }
+
+      updatedComponents = calculateCostPct(updatedComponents)
+
       postRequest({
-        extension: ManufacturingRepository.Component.set,
-        record: JSON.stringify(data)
+        extension: ManufacturingRepository.Component.set2,
+        record: JSON.stringify({ components: updatedComponents, bomId })
       }).then(res => {
         toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
         formik.setFieldValue('recordId', res.recordId)
@@ -60,6 +80,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
       })
     }
   })
+
   const editMode = !!formik.values.recordId
 
   useEffect(() => {
@@ -92,21 +113,15 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.BillOfMaterials}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={InventoryRepository.RMSKU.snapshot}
+                endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
+                autoFocus={!editMode}
                 label={labels?.sku}
                 valueField='recordId'
                 displayField='sku'
@@ -146,6 +161,7 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
                 values={formik.values}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('muId', newValue?.recordId || null)
+                  formik.setFieldValue('muQty', newValue?.qty || null)
                 }}
                 maxAccess={maxAccess}
               />
@@ -209,6 +225,6 @@ export default function ComponentForm({ labels, maxAccess, recordId, seqNo, bomI
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

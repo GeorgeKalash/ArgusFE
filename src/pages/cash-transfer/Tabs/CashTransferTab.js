@@ -33,7 +33,7 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 
-const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => {
+const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, window }) => {
   const [editMode, setEditMode] = useState(!!recordId)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
@@ -46,7 +46,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   })
 
   const { labels, access } = useResourceParams({
-    datasetId: ResourceIds.CashTransfer
+    datasetId: ResourceIds.CashTransfer,
+    editMode: !!recordId
   })
 
   useSetWindow({ title: labels.cashTransfer, window })
@@ -88,13 +89,13 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.CashTransfer,
     access: access,
-    enabled: !recordId
+    enabled: !recordId,
+    hasDT: false
   })
 
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       fromCashAccountId: yup.string().required(),
@@ -223,6 +224,10 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
     if (res.recordId) {
       toast.success('Record Closed Successfully')
       invalidate()
+      if (refetch) {
+        refetch()
+        window.close()
+      }
       setIsClosed(false)
       setIsPosted(true)
     }
@@ -526,8 +531,8 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, window }) => 
                   if (newRow.currencyId) {
                     const result = await getCurrencyApi(newRow?.currencyId)
                     update({
-                      exRate: result.record.exRate,
-                      rateCalcMethod: result.record.rateCalcMethod
+                      exRate: result.record?.exRate,
+                      rateCalcMethod: result.record?.rateCalcMethod
                     })
                   }
                 }
