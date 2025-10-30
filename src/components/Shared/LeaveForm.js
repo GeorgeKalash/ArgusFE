@@ -16,14 +16,32 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
 import { ResourceLookup } from './ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
-import Table from './Table'
 import FormShell from './FormShell'
-import { formatDateFromApi, formatDateTimeForGetAPI, formatDayId } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateTimeForGetAPI, formatDateTimeForYYYYMMDD, formatDayId } from 'src/lib/date-helper'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { DataGrid } from './DataGrid'
+
+dayjs.extend(customParseFormat)
+
+export function formatDate(value) {
+  const sanitized = String(value)
+    .trim()
+    .replace(/[\u200e\u200f]/g, '')
+  const isDayMonthYear = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(sanitized)
+
+  const parsed = isDayMonthYear
+    ? dayjs(sanitized, ['D/M/YY', 'DD/MM/YY', 'D/M/YYYY', 'DD/MM/YYYY'], true)
+    : dayjs(sanitized)
+
+  if (!parsed.isValid()) return null
+
+  return parsed.startOf('day').format('MM/DD/YYYY hh:mm:ss A')
+}
 
 export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -70,7 +88,23 @@ export const LeaveForm = ({ recordId, window }) => {
       ltId: yup.number().required(),
       startDate: yup.date().required(),
       endDate: yup.date().required(),
-      destination: yup.string().required()
+      destination: yup.string().required(),
+      items: yup.array().of(
+        yup.object({
+          dayId: yup.string().nullable(),
+          hours: yup
+            .number()
+            .nullable()
+            .typeError()
+            .min(0)
+            .test('hours-not-greater-than-scheduled', 'Hours cannot be greater than scheduled hours', function (value) {
+              const { scheduledHours } = this.parent
+              if (value == null || scheduledHours == null) return true
+
+              return value <= scheduledHours
+            })
+        })
+      )
     }),
     onSubmit: async values => {
       const { items, ...rest } = values
@@ -97,35 +131,73 @@ export const LeaveForm = ({ recordId, window }) => {
     }
   })
 
-  const getLeaveBalance = async (recordId, employeeId, lsId) => {
-    const res2 = await getRequest({
-      extension: LoanManagementRepository.Leaves.qry,
-      parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsId}&_asOfDate=${formatDateTimeForGetAPI(
-        new Date()
-      )}`
+  const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
+    if (!employeeId || !ltId) {
+      return
+    }
+
+    const res = await getRequest({
+      extension: EmployeeRepository.Leaves.get,
+      parameters: `_ltId=${ltId}&_employeeId=${employeeId}`
     })
 
-    formik.setFieldValue('leaveBalance', res2.list?.[0]?.summary?.balance)
+    const lsIdValue = res?.record?.lsId
+    if (!lsIdValue) {
+      return
+    }
+    let native
+    if (typeof asOfDate === 'string' && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(asOfDate)) {
+      native = formatDate(asOfDate)
+    } else {
+      native = formatDateTimeForYYYYMMDD(asOfDate)
+    }
+
+    const res2 = await getRequest({
+      extension: LoanManagementRepository.Leaves.qry,
+      parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
+        asOfDate ? native : formatDateTimeForGetAPI(new Date())
+      }`
+    })
+
+    const balance = res2?.list?.[0]?.summary?.balance ?? 0
+    formik.setFieldValue('leaveBalance', balance)
+  }
+
+  const onEmployeeChange = async (employeeId, asOfDate = new Date()) => {
+    if (!employeeId) return
+
+    await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateTimeForGetAPI(asOfDate)}`
+    })
   }
 
   const isClosed = formik.values.wip == 2
 
   const columns = [
     {
-      field: 'dayId',
-      headerName: labels.date,
-      flex: 3
+      component: 'textfield',
+      label: labels.date,
+      name: 'dayId',
+      props: { readOnly: true },
+      width: 200
     },
     {
-      field: 'ldtName',
-      headerName: labels.leaveDayType,
-      flex: 2
+      component: 'textfield',
+      label: labels.leaveDayType,
+      name: 'ldtName',
+      props: { readOnly: true },
+      width: 70
     },
     {
-      field: 'hours',
-      headerName: labels.hours,
-      flex: 1,
-      type: { field: 'number', decimal: 2 }
+      component: 'numberfield',
+      label: labels.hours,
+      name: 'hours',
+      width: 70,
+      props: {
+        maxLength: 12,
+        decimalScale: 2
+      }
     }
   ]
 
@@ -150,7 +222,12 @@ export const LeaveForm = ({ recordId, window }) => {
           })) || []
       })
 
-    getLeaveBalance(recordId, res.record.leave.employeeId, res.record.leave.ltId)
+    getLeaveBalance(
+      recordId,
+      res.record.leave.employeeId,
+      res.record.leave.ltId,
+      formatDateFromApi(res?.record?.leave?.date)
+    )
   }
 
   const onClose = async () => {
@@ -197,6 +274,29 @@ export const LeaveForm = ({ recordId, window }) => {
     }
   }
 
+  const calculateLeaveTotals = items => {
+    let totalHours = 0
+    let totalDays = 0
+
+    items.forEach(row => {
+      const hours = parseFloat(row.hours) || 0
+      const scheduled = parseFloat(row.scheduledHours) || 0
+
+      totalHours += hours
+
+      if (scheduled > 0) {
+        const ratio = hours / scheduled
+
+        console.log(ratio)
+        if (!isNaN(ratio)) {
+          totalDays += ratio
+        }
+      }
+    })
+
+    return { totalHours, totalDays }
+  }
+
   const onPreview = async () => {
     const fromDayId = format(new Date(formik.values.startDate), 'yyyyMMdd')
     const toDayId = format(new Date(formik.values.endDate), 'yyyyMMdd')
@@ -222,9 +322,10 @@ export const LeaveForm = ({ recordId, window }) => {
         }))
       )
 
-      const totalHours = res.list.reduce((sum, day) => sum + (day.hours || 0), 0)
+      const { totalHours, totalDays } = calculateLeaveTotals(res.list)
 
       formik.setFieldValue('hours', totalHours)
+      formik.setFieldValue('leaveDays', totalDays)
     }
   }
 
@@ -234,6 +335,12 @@ export const LeaveForm = ({ recordId, window }) => {
       refetchData(recordId)
     })()
   }, [])
+
+  useEffect(() => {
+    const { totalHours, totalDays } = calculateLeaveTotals(formik.values.items)
+    formik.setFieldValue('hours', totalHours)
+    formik.setFieldValue('leaveDays', totalDays)
+  }, [formik.values.items])
 
   const actions = [
     {
@@ -260,10 +367,6 @@ export const LeaveForm = ({ recordId, window }) => {
       onClick: onPreview
     }
   ]
-
-  useEffect(() => {
-    formik.setFieldValue('leaveDays', formik.values.items.length)
-  }, [formik.values.items])
 
   return (
     <FormShell
@@ -297,6 +400,10 @@ export const LeaveForm = ({ recordId, window }) => {
                 label={labels.date}
                 value={formik.values?.date}
                 readOnly={isClosed}
+                onBlur={async e => {
+                  const selectedDate = e.target.value
+                  await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, selectedDate)
+                }}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -317,6 +424,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 required
                 secondValue={formik.values.employeeName}
                 onChange={(_, newValue) => {
+                  onEmployeeChange(newValue?.recordId)
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -381,10 +489,11 @@ export const LeaveForm = ({ recordId, window }) => {
                 maxAccess={maxAccess}
                 readOnly={isClosed}
                 required
-                onChange={(_, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('hours', 0)
                   formik.setFieldValue('leaveBalance', 0)
                   formik.setFieldValue('leaveDays', 0)
+                  await getLeaveBalance(recordId, formik?.values?.employeeId, newValue?.recordId, formik.values.date)
                   formik.setFieldValue('ltId', newValue?.recordId || null)
                 }}
                 error={formik.touched.ltId && Boolean(formik.errors.ltId)}
@@ -423,12 +532,14 @@ export const LeaveForm = ({ recordId, window }) => {
                 overflow: 'hidden'
               }}
             >
-              <Table
-                name='leaveDaysTable'
+              <DataGrid
+                name='items'
+                onChange={value => formik.setFieldValue('items', value)}
+                value={formik.values.items}
+                error={formik.errors.items}
                 columns={columns}
-                gridData={{ list: formik.values.items }}
-                rowId={['dayId']}
-                pagination={false}
+                allowDelete={false}
+                allowAddNewLine={false}
                 maxAccess={maxAccess}
               />
             </Grid>
@@ -452,6 +563,7 @@ export const LeaveForm = ({ recordId, window }) => {
                 value={formik.values.leaveDays}
                 readOnly
                 maxAccess={maxAccess}
+                decimalScale={3}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('leaveDays', null)}
                 error={formik.touched.leaveDays && Boolean(formik.errors.leaveDays)}

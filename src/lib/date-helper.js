@@ -73,6 +73,10 @@ function formatDateTimeForGetAPI(dateString) {
   return dayjs(dateString).format('YYYY-MM-DD HH:mm')
 }
 
+export function formatDateTimeForYYYYMMDD(dateString) {
+  return dayjs(dateString).format('YYYY/MM/DD HH:mm')
+}
+
 function formatDateDefault(date) {
   //used for report params
   return formatDateandTime(date)
@@ -162,7 +166,7 @@ export function formatDateMDY(date) {
 }
 
 // from yyyymmdd to Day, Month dd, yyyy
-const formatDayId = (dayId) => {
+const formatDayId = dayId => {
   if (!dayId || dayId.length !== 8) return dayId
   const year = dayId.slice(0, 4)
   const month = dayId.slice(4, 6)
