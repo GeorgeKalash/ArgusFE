@@ -78,9 +78,9 @@ const VerticalNavItems = props => {
   }
 
   const truncateTitle = (title, level) => {
-    const maxLength = Math.max(10, 43 - level * 6)
+    const maxLength = Math.max(10, 31 - level)
 
-    return title.length > maxLength ? `${title.slice(0, maxLength)}...` : title
+    return title.length > maxLength ? `${title.slice(0, maxLength - 3)}...` : title
   }
 
   const renderNode = (node, level = 0) => {
