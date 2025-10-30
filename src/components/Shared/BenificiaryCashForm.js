@@ -221,7 +221,7 @@ const BenificiaryCashForm = ({
           recordId,
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
-          dispersalType: dispersalType,
+          dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
           isInactive: RTBEN?.record?.isInactive,

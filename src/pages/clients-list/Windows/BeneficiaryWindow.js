@@ -117,7 +117,7 @@ const BeneficiaryWindow = ({ clientId }) => {
         Component: BenificiaryCashForm,
         props: {
           client: { clientId: clientId },
-          dispersalType: dispersalType,
+          dispersalType,
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId,
@@ -132,7 +132,7 @@ const BeneficiaryWindow = ({ clientId }) => {
         Component: BenificiaryBankForm,
         props: {
           client: { clientId: clientId },
-          dispersalType: dispersalType,
+          dispersalType,
           beneficiary: { beneficiaryId: beneficiaryId, beneficiarySeqNo: obj.seqNo },
           corId: 0,
           countryId: nationalityId,

@@ -213,6 +213,7 @@ export default function BenificiaryBankForm({
           name: RTBEN?.record?.name,
 
           recordId,
+          dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
           isInactive: RTBEN?.record?.isInactive,
