@@ -147,20 +147,20 @@ export const LeaveForm = ({ recordId, window }) => {
       label: labels.date,
       name: 'dayId',
       props: { readOnly: true },
-      width: 200
+      flex: 2
     },
     {
       component: 'textfield',
       label: labels.leaveDayType,
       name: 'ldtName',
       props: { readOnly: true },
-      width: 70
+      flex:1.5
     },
     {
       component: 'numberfield',
       label: labels.hours,
       name: 'hours',
-      width: 70,
+      flex:1,
       props: {
         maxLength: 12,
         decimalScale: 2
