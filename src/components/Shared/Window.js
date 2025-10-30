@@ -73,9 +73,9 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-    const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-    const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
-    const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
+    const containerWidth = window.innerWidth - (navCollapsed ? 10 : 310)
+    const containerHeight = window.innerHeight - 40
+    const containerHeightPanel = window.innerHeight - 180
     const heightPanel = height - 120
 
     useEffect(() => {
@@ -92,6 +92,19 @@ const Window = React.memo(
     }, [])
 
     useEffect(() => {
+      const body = document.body
+      if (expanded || minimized) {
+        body.style.overflow = 'hidden'
+      } else {
+        body.style.overflow = ''
+      }
+
+      return () => {
+        body.style.overflow = ''
+      }
+    }, [expanded, minimized])
+
+    useEffect(() => {
       if (!loading) {
         const timer = setTimeout(() => {
           setShowOverlay(true)
@@ -103,7 +116,7 @@ const Window = React.memo(
 
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
-    }, [expanded])
+    }, [])
 
     const handleMinimizeToggle = useCallback(() => {
       if (expanded) setExpanded(false)
@@ -115,8 +128,12 @@ const Window = React.memo(
         <Box
           id='parent'
           sx={{
+            top: 0,
+            left: 0,
+            right: 0,
             bottom: 0,
             position: 'absolute',
+            overflow: 'hidden',
             width: spacing ? containerWidth : '100%',
             height: spacing ? containerHeight : '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
@@ -184,15 +201,13 @@ const Window = React.memo(
                     backgroundColor: '#231F20',
                     borderTopLeftRadius: '5px',
                     borderTopRightRadius: '5px',
-                    borderBottomLeftRadius: '0px',
-                    borderBottomRightRadius: '0px',
                     height: '40px',
                     zIndex: 10
                   }}
                 >
                   <Box>
                     <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: 'white !important' }}>
-                      {nextToTitle ? Title + ' ' + nextToTitle : Title}
+                      {nextToTitle ? `${Title} ${nextToTitle}` : Title}
                     </Typography>
                   </Box>
                   <Box>
@@ -221,7 +236,6 @@ const Window = React.memo(
                         tabIndex={-1}
                         edge='end'
                         onClick={handleExpandToggle}
-                        data-is-expanded={expanded}
                         aria-label='expand'
                         sx={{ color: 'white !important' }}
                       >
@@ -242,7 +256,7 @@ const Window = React.memo(
                   </Box>
                 </DialogTitle>
                 {tabs && (
-                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                  <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                     {tabs.map((tab, i) => (
                       <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                     ))}
@@ -266,12 +280,12 @@ const Window = React.memo(
                     )}
                   </>
                 ) : (
-                  React.Children.map(children, child => {
-                    return React.cloneElement(child, {
+                  React.Children.map(children, child =>
+                    React.cloneElement(child, {
                       expanded: expanded,
                       height: expanded ? containerHeightPanel : heightPanel
                     })
-                  })
+                  )
                 )}
               </Paper>
             </Box>
