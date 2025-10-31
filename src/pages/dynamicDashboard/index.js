@@ -16,7 +16,6 @@ import useResourceParams from 'src/hooks/useResourceParams'
 import { debounce } from 'lodash'
 import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
 import Table from 'src/components/Shared/Table'
-import { DocumentReleaseRepository } from 'src/repositories/DocumentReleaseRepository'
 import { Box } from '@mui/material'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
@@ -223,7 +222,7 @@ const DashboardLayout = () => {
   }, [_userId, _languageId])
 
   if (loading) {
-    return <LoadingOverlay />
+    return <LoadingOverlay fullSize={true} />
   }
 
   const containsApplet = appletId => {
@@ -552,6 +551,7 @@ const DashboardLayout = () => {
                   labels={data?.dashboard?.weeklySales?.map(ws => ws.weekName) || []}
                   data={data?.dashboard?.weeklySales?.map(ws => ws.sales) || []}
                   label={labels.weeklySales}
+                  height={250}
                 />
               </ChartCard>
             </FourAppletsRow>
@@ -573,6 +573,7 @@ const DashboardLayout = () => {
                   labels={data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
                   data={data?.dashboard?.monthlySales?.map(ms => ms.sales) || []}
                   label={labels.monthlySales}
+                  height={250}
                 />
               </ChartCard>
             </FourAppletsRow>
@@ -590,6 +591,7 @@ const DashboardLayout = () => {
                   label={labels.accRevenues}
                   color='#ff6c02'
                   hoverColor='#fec106'
+                  height={250}
                 />
               </ChartCard>
             </FourAppletsRow>
