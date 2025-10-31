@@ -788,7 +788,6 @@ export default function JobOrderForm({
                         label={labels.description}
                         value={formik.values.description}
                         rows={2.5}
-                        maxLength='100'
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isPosted}
                         onChange={formik.handleChange}
