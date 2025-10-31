@@ -30,6 +30,7 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
     },
     maxAccess: maxAccess,
     validationSchema: yup.object({
+      periodId: yup.number().required(),
       name: yup.string().required()
     }),
     onSubmit: async obj => {
