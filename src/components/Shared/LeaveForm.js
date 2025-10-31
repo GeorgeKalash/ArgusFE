@@ -17,7 +17,7 @@ import CustomDatePicker from '../Inputs/CustomDatePicker'
 import { ResourceLookup } from './ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import FormShell from './FormShell'
-import { formatDateFromApi, formatDateTimeForYYYYMMDD, formatDayId } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateTimeForGetAPI, formatDayId } from 'src/lib/date-helper'
 import { LoanManagementRepository } from 'src/repositories/LoanManagementRepository'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import CustomNumberField from '../Inputs/CustomNumberField'
@@ -115,6 +115,8 @@ export const LeaveForm = ({ recordId, window }) => {
 
   const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
     if (!employeeId || !ltId) {
+      formik.setFieldValue('leaveBalance', 0)
+
       return
     }
 
@@ -125,18 +127,19 @@ export const LeaveForm = ({ recordId, window }) => {
 
     const lsIdValue = res?.record?.lsId
     if (!lsIdValue) {
+      formik.setFieldValue('leaveBalance', 0)
+
       return
     }
 
     const res2 = await getRequest({
       extension: LoanManagementRepository.Leaves.qry,
       parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
-        asOfDate ? formatDateTimeForYYYYMMDD(asOfDate) : formatDateTimeForYYYYMMDD(new Date())
+        asOfDate ? formatDateTimeForGetAPI(asOfDate) : formatDateTimeForGetAPI(new Date())
       }`
     })
 
-    const balance = res2?.list?.[0]?.summary?.balance ?? 0
-    formik.setFieldValue('leaveBalance', balance)
+    formik.setFieldValue('leaveBalance', res2?.list?.[0]?.summary?.balance ?? 0)
   }
 
   const isClosed = formik.values.wip == 2
@@ -154,13 +157,13 @@ export const LeaveForm = ({ recordId, window }) => {
       label: labels.leaveDayType,
       name: 'ldtName',
       props: { readOnly: true },
-      flex:1.5
+      flex: 1.5
     },
     {
       component: 'numberfield',
       label: labels.hours,
       name: 'hours',
-      flex:1,
+      flex: 1,
       props: {
         maxLength: 12,
         decimalScale: 2
@@ -175,24 +178,24 @@ export const LeaveForm = ({ recordId, window }) => {
       extension: LoanManagementRepository.LeaveRequest.get2,
       parameters: `_recordId=${recordId}`
     })
-    if (res.record)
-      formik.setValues({
-        ...res.record.leave,
-        date: res.record.leave.date ? formatDateFromApi(res.record.leave.date) : null,
-        startDate: res.record.leave.startDate ? formatDateFromApi(res.record.leave.startDate) : null,
-        endDate: res.record.leave.endDate ? formatDateFromApi(res.record.leave.endDate) : null,
-        items:
-          res.record.leaveDays.map((day, index) => ({
-            ...day,
-            dayId: formatDayId(day.dayId),
-            id: index
-          })) || []
-      })
+
+    formik.setValues({
+      ...res.record.leave,
+      date: res.record.leave.date ? formatDateFromApi(res.record.leave.date) : null,
+      startDate: res.record.leave.startDate ? formatDateFromApi(res.record.leave.startDate) : null,
+      endDate: res.record.leave.endDate ? formatDateFromApi(res.record.leave.endDate) : null,
+      items:
+        res.record.leaveDays.map((day, index) => ({
+          ...day,
+          dayId: formatDayId(day.dayId),
+          id: index
+        })) || []
+    })
 
     getLeaveBalance(
       recordId,
-      res.record.leave.employeeId,
-      res.record.leave.ltId,
+      res?.record?.leave?.employeeId,
+      res?.record?.leave?.ltId,
       formatDateFromApi(res?.record?.leave?.date)
     )
   }
@@ -292,12 +295,14 @@ export const LeaveForm = ({ recordId, window }) => {
 
       formik.setFieldValue('hours', totalHours)
       formik.setFieldValue('leaveDays', totalDays)
+    } else {
+      formik.setFieldValue('items', [])
     }
   }
 
   useEffect(() => {
     ;(async function () {
-      await onPreview()
+      if (editMode) await onPreview()
       refetchData(recordId)
     })()
   }, [])
