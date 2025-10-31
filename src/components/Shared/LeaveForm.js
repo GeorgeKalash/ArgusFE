@@ -24,11 +24,13 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
+import { useError } from 'src/error'
 
 export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const { stack: stackError } = useError()
   const editMode = !!recordId
 
   const { labels, access: maxAccess } = useResourceParams({
@@ -267,12 +269,23 @@ export const LeaveForm = ({ recordId, window }) => {
   }
 
   const onPreview = async () => {
-    const fromDayId = format(new Date(formik.values.startDate), 'yyyyMMdd')
-    const toDayId = format(new Date(formik.values.endDate), 'yyyyMMdd')
+    const { startDate, endDate, employeeId, ltId } = formik.values
 
-    if (!formik.values.employeeId || !formik.values.ltId || !fromDayId || !toDayId) {
-      onValidationRequired()
+    const fromDayId = format(new Date(startDate), 'yyyyMMdd')
+    const toDayId = format(new Date(endDate), 'yyyyMMdd')
 
+    if (!employeeId || !ltId || !fromDayId || !toDayId) {
+      await onValidationRequired()
+
+      return
+    }
+
+    const diffInYears = dayjs(endDate).diff(dayjs(startDate), 'year', true)
+    if (diffInYears > 1) {
+      stackError({
+        message: labels.cannotExceedOneYear
+      })
+      
       return
     }
 
