@@ -5,7 +5,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useWindow } from 'src/windows'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import USDocTypeForm from './USDocTypeForm'
@@ -84,15 +84,21 @@ const DocTypeTab = ({ labels, maxAccess, storeRecordId }) => {
 
   const value = formik.values.search
 
-  const filteredData = data && {
-    ...data,
-    list: data.list.filter(
-      item =>
-        (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
-        (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase())) ||
-        (item.functionId !== null && String(item.functionId).includes(value))
-    )
-  }
+  const filteredData = useMemo(() => {
+    const list = data?.list || []
+
+    if (!value) return data
+
+    return {
+      ...data,
+      list: list.filter(
+        item =>
+          (item.sfName && item.sfName.toLowerCase().includes(value.toLowerCase())) ||
+          (item.dtName && item.dtName.toLowerCase().includes(value.toLowerCase())) ||
+          (item.functionId !== null && String(item.functionId).includes(value))
+      )
+    }
+  }, [data?.list, value])
 
   const handleSearchChange = event => {
     const { value } = event.target
