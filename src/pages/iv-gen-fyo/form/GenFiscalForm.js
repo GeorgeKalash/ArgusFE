@@ -12,7 +12,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DataSets } from 'src/resources/DataSets'
 
 export default function GenFiscalForm({ _labels, maxAccess }) {
   const { postRequest } = useContext(RequestsContext)
@@ -22,13 +21,12 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
     initialValues: {
       recordId: 'N/A',
       fiscalYear: '',
-      openingStatus: ''
+      periodId: null
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       fiscalYear: yup.string().required(),
-      openingStatus: yup.string().required()
+      periodId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -61,34 +59,22 @@ export default function GenFiscalForm({ _labels, maxAccess }) {
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('fiscalYear', newValue.fiscalYear)
-                  } else {
-                    formik.setFieldValue('fiscalYear', '')
-                  }
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('fiscalYear', newValue?.fiscalYear || null)}
                 error={formik.touched.fiscalYear && Boolean(formik.errors.fiscalYear)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.FY_PERIOD_STATUS}
-                name='openingStatus'
-                required
-                label={_labels.openingStatus}
-                valueField='key'
-                displayField='value'
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='periodId'
+                label={_labels.fiscalPeriod}
+                valueField='periodId'
+                displayField='name'
                 values={formik.values}
+                required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    formik.setFieldValue('openingStatus', newValue.key)
-                  } else {
-                    formik.setFieldValue('openingStatus', '')
-                  }
-                }}
-                error={formik.touched.openingStatus && Boolean(formik.errors.openingStatus)}
+                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
+                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
           </Grid>
