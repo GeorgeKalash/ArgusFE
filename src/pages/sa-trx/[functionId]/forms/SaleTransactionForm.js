@@ -2284,7 +2284,7 @@ export default function SaleTransactionForm({
                     label={labels.description}
                     value={formik.values.header.description}
                     rows={3}
-                    editMode={editMode}
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('header.description', e.target.value)}
                     onClear={() => formik.setFieldValue('header.description', '')}
