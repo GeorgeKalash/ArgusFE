@@ -16,83 +16,95 @@ const VerticalNavItems = props => {
 
   const { handleBookmark, setLastOpenedPage, setReloadOpenedPage, openTabs, setCurrentTabIndex, currentTabIndex } =
     useContext(MenuContext)
+
   const { platformLabels } = useContext(ControlContext)
+
   const { verticalNavItems, settings, openFolders, setOpenFolders, navCollapsed, isArabic } = props
 
   const [selectedNode, setSelectedNode] = useState(false)
+  const theme = createTheme(themeOptions(settings, 'light'))
 
-  let theme = createTheme(themeOptions(settings, 'light'))
-
-  const closeDialog = () => {
-    setSelectedNode(false)
-  }
+  const closeDialog = () => setSelectedNode(false)
 
   const handleRightClick = (e, node, imgName) => {
     e.preventDefault()
-    setSelectedNode([node, imgName ? true : false])
+    setSelectedNode([node, Boolean(imgName)])
   }
 
   const toggleFolder = folderId => {
-    if (openFolders.includes(folderId)) {
-      setOpenFolders(openFolders.filter(id => id !== folderId))
+    setOpenFolders(prev => (prev.includes(folderId) ? prev.filter(id => id !== folderId) : [...prev, folderId]))
+  }
+
+  const handleNodeClick = node => {
+    if (node.children) {
+      toggleFolder(node.id)
+
+      return
+    }
+
+    const normalizedPath = node.path.replace(/\/$/, '') + '/'
+    const existingTabIndex = openTabs.findIndex(tab => tab.route === normalizedPath)
+    const isCurrentTab = openTabs[currentTabIndex]?.route === normalizedPath
+
+    if (isCurrentTab) {
+      setReloadOpenedPage([])
+      setReloadOpenedPage(node)
+    } else if (existingTabIndex !== -1) {
+      setCurrentTabIndex(existingTabIndex)
+      window.history.replaceState(null, '', openTabs[existingTabIndex].route)
     } else {
-      setOpenFolders([...openFolders, folderId])
-    }
-  }
-
-  const findNode = (nodes, targetRouter) => {
-    for (const node of nodes) {
-      if (node.children) {
-        const result = findNode(node.children, targetRouter)
-        if (result) {
-          return result
-        }
-      } else if (node.path && node.path === targetRouter) {
-        return node.path
-      }
+      router.push(node.path)
     }
 
-    return null
+    setLastOpenedPage(node)
   }
 
-  const renderNode = node => {
+  const getNodeIcon = (node, isOpen, isRoot) => {
+    if (!node.iconName) return null
+
+    return isRoot
+      ? `/images/folderIcons/${isOpen ? node.iconName + 'Active' : node.iconName}.png`
+      : `/images/folderIcons/${node.iconName}.png`
+  }
+
+  const renderArrowIcon = (isOpen, isArabic) => {
+    if (isOpen) return <ExpandMoreIcon style={{ fontSize: 20 }} />
+
+    return isArabic ? (
+      <ArrowBackIosIcon style={{ fontSize: 13, height: '100%', paddingBottom: '5px' }} />
+    ) : (
+      <ChevronRightIcon style={{ fontSize: 20 }} />
+    )
+  }
+
+  const truncateTitle = (title, level) => {
+    const maxLength = Math.max(10, 31 - level)
+
+    return title.length > maxLength ? `${title.slice(0, maxLength - 3)}...` : title
+  }
+
+  const renderNode = (node, level = 0) => {
     const isOpen = openFolders.includes(node.id)
     const isRoot = node.parentId === 0
-    const isFolder = node.children
-
-    const imgName = node.iconName
-      ? isRoot
-        ? `/images/folderIcons/${isOpen ? node.iconName + 'Active' : node.iconName}.png`
-        : `/images/folderIcons/${node.iconName}.png`
-      : null
+    const isFolder = Boolean(node.children)
+    const imgName = getNodeIcon(node, isOpen, isRoot)
+    const truncatedTitle = truncateTitle(node.title, level)
 
     return (
-      <div key={node.id} style={{ paddingBottom: isRoot && 5 }}>
+      <div key={node.id} style={{ paddingBottom: isRoot ? 5 : undefined }}>
         <div
           className={`node ${isFolder ? 'folder' : 'file'} ${isOpen ? 'open' : ''}`}
           style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
-          onClick={() => {
-            if (node.children) {
-              toggleFolder(node.id)
-            } else {
-              if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
-                setReloadOpenedPage([])
-                setReloadOpenedPage(node)
-              } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
-                const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
-                setCurrentTabIndex(index)
-                window.history.replaceState(null, '', openTabs[index].route)
-              } else {
-                router.push(node.path)
-              }
-
-              setLastOpenedPage(node)
-            }
-          }}
+          onClick={() => handleNodeClick(node)}
           onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
         >
           <div
-            style={{ display: 'flex', alignItems: 'center', overflowX: navCollapsed ? '' : 'hidden', height: '25px' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              overflowX: navCollapsed ? '' : 'hidden',
+              height: 25
+            }}
           >
             {imgName ? (
               <div
@@ -100,48 +112,33 @@ const VerticalNavItems = props => {
                   display: 'flex',
                   alignItems: navCollapsed ? 'center !important' : 'left',
                   justifyContent: navCollapsed ? 'center' : 'left',
-                  paddingLeft: '8px'
+                  paddingLeft: 8
                 }}
               >
                 <Image src={imgName} alt={node.title} width={22} height={22} />
               </div>
             ) : (
-              <div style={{ width: '30px', height: '22px' }}>{/* placeHolder */}</div>
+              <div style={{ width: 30, height: 22 }} />
             )}
-            <>
-              <div
-                style={{
-                  margin: '2px 0px 0px 5px',
-                  display: navCollapsed ? 'none' : 'flex'
-                }}
-              >
-                <div className='text'>
-                  {' '}
-                  <span>{node.title}</span>
+
+            {!navCollapsed && (
+              <div style={{ margin: '2px 0 0 5px', display: 'flex' }}>
+                <div className='text' title={truncatedTitle == node.title ? null : node.title}>
+                  {truncatedTitle}
                 </div>
                 {isFolder && (
-                  <div
-                    className='arrow'
-                    style={{
-                      right: isArabic ? '260px' : '8px'
-                    }}
-                  >
-                    {isOpen ? (
-                      <ExpandMoreIcon style={{ fontSize: 20 }} />
-                    ) : isArabic ? (
-                      <ArrowBackIosIcon style={{ fontSize: 13, height: '100%', paddingBottom: '5px' }} />
-                    ) : (
-                      <ChevronRightIcon style={{ fontSize: 20 }} />
-                    )}
+                  <div className='arrow' style={{ right: isArabic ? '260px' : '8px' }}>
+                    {renderArrowIcon(isOpen, isArabic)}
                   </div>
                 )}
               </div>
-            </>
+            )}
           </div>
         </div>
+
         {isOpen && isFolder && (
           <div className='children' style={{ paddingLeft: navCollapsed ? '0px' : '12px' }}>
-            {node.children.map(child => renderNode(child))}
+            {node.children.map(child => renderNode(child, level + 1))}
           </div>
         )}
       </div>
@@ -149,22 +146,21 @@ const VerticalNavItems = props => {
   }
 
   return (
-    <>
-      <ThemeProvider theme={theme}>
-        <div className='sidebar' style={{ paddingRight: navCollapsed ? '8px' : '' }}>
-          {verticalNavItems.map(node => renderNode(node))}
-        </div>
-        {selectedNode && (
-          <ConfirmationDialog
-            openCondition={selectedNode ? true : false}
-            closeCondition={() => setSelectedNode(false)}
-            DialogText={selectedNode[1] ? platformLabels.RemoveFav : platformLabels.AddFav}
-            okButtonAction={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)}
-            cancelButtonAction={() => setSelectedNode(false)}
-          />
-        )}
-      </ThemeProvider>
-    </>
+    <ThemeProvider theme={theme}>
+      <div className='sidebar' style={{ paddingRight: navCollapsed ? 8 : '' }}>
+        {verticalNavItems.map(node => renderNode(node, 0))}
+      </div>
+
+      {selectedNode && (
+        <ConfirmationDialog
+          openCondition={Boolean(selectedNode)}
+          closeCondition={closeDialog}
+          DialogText={selectedNode[1] ? platformLabels.RemoveFav : platformLabels.AddFav}
+          okButtonAction={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)}
+          cancelButtonAction={closeDialog}
+        />
+      )}
+    </ThemeProvider>
   )
 }
 
