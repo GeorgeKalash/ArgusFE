@@ -1,151 +1,279 @@
-import { useContext } from 'react'
-import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useContext, useEffect, useRef } from 'react'
+import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 import { useWindow } from 'src/windows'
-import NodeWindow from '../windows/NodeWindow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import toast from 'react-hot-toast'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataGrid } from 'src/components/Shared/DataGrid'
+import Form from 'src/components/Shared/Form'
+import { DataSets } from 'src/resources/DataSets'
+import { useForm } from 'src/hooks/form'
+import FlagsForm from './FlagsForm'
+import NodesTitleForm from './NodesTitleForm'
 
-const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialData }) => {
+  const { postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
 
-  const {
-    query: { data },
-    invalidate
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: FinancialStatementRepository.Node.qry,
-    enabled: Boolean(mainRecordId),
-    datasetId: ResourceIds.FinancialStatements
-  })
+  const updateNodeFlags = (seqNo, newFlagsValue) => {
+    formik.setFieldValue(
+      'items',
+      formik.values.items.map(item => (item.seqNo === seqNo ? { ...item, flags: newFlagsValue } : item))
+    )
+  }
 
-  async function fetchGridData() {
-    await fetchData()
+  const parents = useRef([])
 
-    return getRequest({
-      extension: FinancialStatementRepository.Node.qry,
-      parameters: `_fsId=${mainRecordId}`
-    })
+  const onOk = newTitles => {
+    const existingTitles = formik.values.titles ?? []
+    const mergedTitles = [...existingTitles]
+
+    const seqNo = node.current?.nodeId
+    const filteredExisting = mergedTitles.filter(t => t.seqNo !== seqNo)
+
+    const newValues = newTitles.filter(t => !!t.languageId)
+
+    formik.setFieldValue('titles', [...filteredExisting, ...newValues])
   }
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      component: 'textfield',
+      label: labels.reference,
+      name: 'reference',
+      props: {
+        maxLength: 10
+      },
       flex: 1
     },
     {
-      field: 'parentRef',
-      headerName: labels.parent,
+      component: 'resourcecombobox',
+      label: labels.parent,
+      name: 'parentSeqNo',
+      props: {
+        store: parents?.current,
+        valueField: 'seqNo',
+        displayField: 'reference',
+        mapping: [
+          { from: 'seqNo', to: 'parentSeqNo' },
+          { from: 'reference', to: 'parentRef' }
+        ],
+        displayFieldWidth: 2
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: parents?.current }
+      },
       flex: 1
     },
     {
-      field: 'description',
-      headerName: labels.description,
+      component: 'resourcecombobox',
+      label: labels.format,
+      name: 'numberFormat',
+      props: {
+        datasetId: DataSets.GLFS_NB_FORMAT,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'numberFormat' },
+          { from: 'value', to: 'numberFormatName' }
+        ],
+        displayFieldWidth: 2
+      },
+      flex: 2
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.amount,
+      name: 'amountSource',
+      props: {
+        datasetId: DataSets.GLFS_SIGN,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'amountSource' },
+          { from: 'value', to: 'amountSourceName' }
+        ],
+        displayFieldWidth: 2
+      },
+      flex: 2
+    },
+    {
+      component: 'numberfield',
+      label: labels.order,
+      name: 'displayOrder',
+      props: {
+        allowNegative: false,
+        maxLength: 4
+      },
       flex: 1
     },
     {
-      field: 'displayOrder',
-      headerName: labels.order,
-      flex: 1,
-      type: 'number'
+      component: 'textfield',
+      label: labels.description,
+      name: 'description',
+      props: {
+        maxLength: 40
+      }
     },
     {
-      field: 'numberFormatName',
-      headerName: labels.format,
-      flex: 1
+      component: 'button',
+      name: 'flag',
+      flex: 0.75,
+      label: labels.flag,
+      onClick: (e, row) => {
+        stack({
+          Component: FlagsForm,
+          props: {
+            nodeForm: row,
+            labels,
+            maxAccess,
+            updateNodeFlags
+          },
+          width: 700,
+          title: labels.flags
+        })
+      }
     },
     {
-      field: 'flags',
-      headerName: labels.flags,
-      flex: 1,
-      type: 'number'
+      component: 'button',
+      name: 'nodeTitle',
+      flex: 0.75,
+      label: labels.title,
+      onClick: () => {
+        stack({
+          Component: NodesTitleForm,
+          props: {
+            node,
+            labels,
+            maxAccess,
+            mainRecordId,
+            initialData: formik.values.titles,
+            onOk
+          },
+          width: 700,
+          title: labels.nodesTitle
+        })
+      }
     }
   ]
 
-  const add = () => {
-    node.current.nodeId = null
- 
-    openForm()
-  }
+  const { formik } = useForm({
+    initialValues: {
+      fsId: mainRecordId,
+      items: [
+        {
+          id: 1,
+          fsId: mainRecordId || 0,
+          reference: '',
+          parentSeqNo: null,
+          numberFormat: null,
+          displayOrder: null,
+          description: '',
+          flag: true,
+          seqNo: 1,
+          flags: 0
+        }
+      ],
+      titles: initialData?.titles ?? []
+    },
+    validationSchema: yup.object({
+      items: yup.array().of(
+        yup.object({
+          reference: yup.string().required(),
+          displayOrder: yup.number().required(),
+          numberFormat: yup.number().required(),
+          amountSource: yup.number().required()
+        })
+      )
+    }),
+    onSubmit: async values => {
+      const itemsWithSeq =
+        values.items?.map((row, index) => ({
+          ...row,
+          seqNo: index + 1,
+          fsId: mainRecordId
+        })) ?? []
 
-  const edit = obj => {
-    node.current.nodeId = obj?.recordId
+      const validSeqNos = itemsWithSeq.map(i => i.seqNo)
 
+      const filteredTitles =
+        values.titles
+          ?.filter(t => validSeqNos.includes(t.seqNo) && !!t.languageId && t.title?.trim())
+          ?.map(t => ({
+            ...t,
+            fsId: mainRecordId
+          })) ?? []
 
-    node.current.viewNodeId = obj?.recordId
-    node.current.viewNodeRef = obj?.reference
-    node.current.viewNodedesc = obj?.description
+      const data = { fsId: mainRecordId, items: itemsWithSeq, titles: filteredTitles }
 
-    openForm()
-  }
+      const res = await postRequest({
+        extension: FinancialStatementRepository.Node.set2,
+        record: JSON.stringify(data)
+      })
 
-  const del = async obj => {
-    await postRequest({
-      extension: FinancialStatementRepository.Node.del,
-      record: JSON.stringify(obj)
-    })
-    node.current.nodeId = null
-
-  
-    if (node.current.viewNodeId === obj?.recordId) {
-      node.current.viewNodeId = null
-      node.current.viewNodeRef = ''
-      node.current.viewNodedesc = ''
+      node.current.nodeId = res.recordId
+      toast.success(platformLabels.Edited)
+      fetchData()
     }
+  })
 
-    invalidate()
-    toast.success(platformLabels.Deleted)
-  }
+  useEffect(() => {
+    if (!mainRecordId) return
 
-  function openForm() {
-    stack({
-      Component: NodeWindow,
-      props: {
-        labels,
-        maxAccess,
-        mainRecordId,
-        node,
-        fetchData
-      },
-      height: 520,
-      width: 500,
-      title: labels.node
-    })
-  }
+    if (initialData?.nodes?.length) {
+      if (!formik.values.items[0].reference) {
+        parents.current = initialData.nodes
+
+        formik.setValues({
+          ...formik.values,
+          fsId: mainRecordId,
+          items: initialData.nodes.map((node, i) => {
+            const nodeTitles =
+              initialData.titles
+                ?.filter(t => t.seqNo === node.seqNo)
+                ?.map(t => ({
+                  languageId: t.languageId,
+                  title: t.title
+                })) ?? []
+
+            return {
+              id: i + 1,
+              titles: nodeTitles,
+              ...node
+            }
+          }),
+          titles: initialData.titles ?? []
+        })
+      }
+    }
+  }, [mainRecordId, initialData?.nodes?.length])
 
   return (
-    <VertLayout>
-      <Fixed>
-        <GridToolbar onAdd={add} maxAccess={maxAccess} labels={labels} />
-      </Fixed>
-      <Grow>
-        <Table
-          name='nodeTable'
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          maxAccess={maxAccess}
-          pagination={false}
-          onSelectionChange={row => { 
-            node.current.viewNodeId = row?.recordId || null
-            node.current.viewNodeRef = row?.reference || ''
-            node.current.viewNodedesc = row?.description || ''
-          }}
-        />
-      </Grow>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='items'
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            maxAccess={maxAccess}
+            initialValues={formik.initialValues.items?.[0]}
+            onSelectionChange={row => {
+              node.current.nodeId = row?.id || null
+              node.current.viewNodeId = row?.id || null
+              node.current.viewNodeRef = row?.reference || ''
+              node.current.viewNodedesc = row?.description || ''
+            }}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 
