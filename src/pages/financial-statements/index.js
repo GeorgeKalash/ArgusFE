@@ -87,7 +87,7 @@ const FinancialStatements = () => {
         maxAccess: access,
         recordId
       },
-      width: 800,
+      width: 1000,
       height: 630,
       title: labels.financialStatement
     })
