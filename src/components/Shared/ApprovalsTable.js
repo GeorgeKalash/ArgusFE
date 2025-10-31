@@ -31,6 +31,7 @@ import ThreeDDesignForm from '../../pages/pm-3d-design/forms/ThreeDDesignForm'
 import SalesOrderForm from '../../pages/sales-order/Tabs/SalesOrderForm'
 import PurchaseRquisitionForm from '../../pages/purchase-requisition/form/PurchaseRquisitionForm'
 import LoanWindow from '../../pages/hr-loans/Window/LoanWindow'
+import PurchaseOrderForm from 'src/pages/pu-ord/forms/PurchaseOrderForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -218,6 +219,17 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
           </IconButton>
         </Box>
       )
+    },
+    {
+      field: 'purchaseOrder',
+      flex: 1,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => openPurchase(row.data)}>
+            <Icon icon='mdi:application-edit-outline' fontSize={18} />
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -231,6 +243,15 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         recordId: obj.recordId,
         functionId: obj.functionId,
         seqNo: obj.seqNo
+      }
+    })
+  }
+
+  const openPurchase = obj => {
+    stack({
+      Component: PurchaseOrderForm,
+      props: {
+        recordId: obj.recordId
       }
     })
   }
