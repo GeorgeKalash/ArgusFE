@@ -7,12 +7,11 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import * as yup from 'yup'
+import Form from 'src/components/Shared/Form'
 
 const IrDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -34,7 +33,6 @@ const IrDefaultForm = ({ _labels, access }) => {
   }
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     initialValues: { ir_amcShortTerm: null, ir_amcLongTerm: null, ir_tfr_DocTypeId: null, recordId: 'N/A' },
     validationSchema: yup.object().shape({
@@ -69,15 +67,7 @@ const IrDefaultForm = ({ _labels, access }) => {
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SystemDefaults}
-      form={formik}
-      maxAccess={access}
-      editMode={true}
-      isSavedClear={false}
-      isCleared={false}
-      infoVisible={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={access} editMode={true}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -124,7 +114,7 @@ const IrDefaultForm = ({ _labels, access }) => {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

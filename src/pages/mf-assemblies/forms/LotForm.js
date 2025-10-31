@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -14,6 +12,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import Form from 'src/components/Shared/Form'
 
 export default function LotForm({ labels, maxAccess, form }) {
   const { platformLabels } = useContext(ControlContext)
@@ -39,7 +38,6 @@ export default function LotForm({ labels, maxAccess, form }) {
       udn2: null
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema,
     onSubmit: async obj => {
@@ -113,15 +111,7 @@ export default function LotForm({ labels, maxAccess, form }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.LegalStatus}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={3}>
@@ -229,6 +219,6 @@ export default function LotForm({ labels, maxAccess, form }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

@@ -381,7 +381,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     ref={imageUploadRef}
                     resourceId={ResourceIds.Design}
                     seqNo={0}
-                    recordId={recordId}
+                    recordId={formik?.values?.recordId}
                     width={300}
                     height={'auto'}
                   />

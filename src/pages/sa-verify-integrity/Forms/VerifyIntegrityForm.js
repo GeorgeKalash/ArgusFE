@@ -1,16 +1,15 @@
 import { Grid } from '@mui/material'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useWindow } from 'src/windows'
 import SuccessDialog from 'src/components/Shared/SuccessDialog'
+import Form from 'src/components/Shared/Form'
 
 export default function VerifyIntegrityForm({ _labels, maxAccess }) {
   const { platformLabels } = useContext(ControlContext)
@@ -25,7 +24,6 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
       verifyIVC: false
     },
     maxAccess,
-    enableReinitialize: false,
     onSubmit: async () => {
       const res = await getRequest({
         extension: SaleRepository.VerifyIntegrity.check,
@@ -61,16 +59,7 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.SAVerifyTransIntegrity}
-      actions={actions}
-      isSaved={false}
-      isInfo={false}
-      isSavedClear={false}
-      isCleared={false}
-      form={formik}
-      maxAccess={maxAccess}
-    >
+    <Form actions={actions} isSaved={false} onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -104,6 +93,6 @@ export default function VerifyIntegrityForm({ _labels, maxAccess }) {
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

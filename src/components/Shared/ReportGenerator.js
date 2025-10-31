@@ -18,7 +18,8 @@ const ReportGenerator = ({
   recordId,
   form,
   resourceId,
-  previewBtnClicked
+  previewBtnClicked,
+  reportSize = 3
 }) => {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -104,10 +105,10 @@ const ReportGenerator = ({
   }
 
   return (
-    <Grid item xs={3} sx={{ display: 'flex', mr: 2 }}>
+    <Grid item xs={reportSize} sx={{ display: 'flex', mr: 2 }}>
       <CustomComboBox
         label={platformLabels.SelectReport}
-        valueField='caption'
+        valueField='uniqueId'
         displayField='layoutName'
         store={reportStore}
         value={report.selectedReport}

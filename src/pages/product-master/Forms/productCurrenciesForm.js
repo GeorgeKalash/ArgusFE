@@ -1,7 +1,6 @@
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
-import FormShell from 'src/components/Shared/FormShell'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'
 import * as yup from 'yup'
@@ -9,9 +8,9 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
+import Form from 'src/components/Shared/Form'
 
 const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess }) => {
   const { recordId: pId, countries } = store
@@ -48,7 +47,6 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
         }
       ]
     },
-    enableReinitialize: false,
     validateOnChange: true,
     onSubmit: async values => {
       await post(values.currencies)
@@ -185,14 +183,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
   }
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.ProductMaster}
-      maxAccess={maxAccess}
-      infoVisible={false}
-      editMode={editMode}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode} isParentWindow={false}>
       <VertLayout>
         <Grow>
           <DataGrid
@@ -204,7 +195,7 @@ const ProductCurrenciesForm = ({ store, setStore, labels, editMode, maxAccess })
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
 

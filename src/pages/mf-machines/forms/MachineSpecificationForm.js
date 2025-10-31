@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
@@ -13,6 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import Form from 'src/components/Shared/Form'
 
 export default function MachineSpecificationForm({ labels, maxAccess, store }) {
   const { recordId } = store
@@ -30,7 +29,6 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
       lifeTimeHours: 0,
       productionYear: null
     },
-    enableReinitialize: false,
     validateOnChange: false,
     validationSchema: yup.object({
       serialNo: yup.string().required(),
@@ -75,14 +73,7 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
   }, [])
 
   return (
-    <FormShell
-      resourceId={ResourceIds.Machines}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      infoVisible={false}
-      isCleared={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
@@ -158,6 +149,6 @@ export default function MachineSpecificationForm({ labels, maxAccess, store }) {
           />
         </Grid>
       </Grid>
-    </FormShell>
+    </Form>
   )
 }

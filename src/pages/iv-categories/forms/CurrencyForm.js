@@ -19,7 +19,6 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   const [numRows, setNumRows] = useState(0)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       data: yup
@@ -149,13 +148,7 @@ const CurrencyForm = ({ store, labels, maxAccess }) => {
   }, [formik.values.data])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.Category}
-      isCleared={false}
-      infoVisible={false}
-      maxAccess={maxAccess}
-    >
+    <FormShell form={formik} resourceId={ResourceIds.Category} isCleared={false} isInfo={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <DataGrid

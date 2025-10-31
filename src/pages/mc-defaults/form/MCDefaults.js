@@ -1,10 +1,8 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -12,6 +10,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import Form from 'src/components/Shared/Form'
 
 const MCDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -24,7 +24,8 @@ const MCDefault = ({ _labels, access }) => {
     'mc_defaultRTFI',
     'mc_defaultRTTAX',
     'baseMetalCuId',
-    'baseSalesMetalId'
+    'baseSalesMetalId',
+    'mf_damageOperationId'
   ]
 
   const { formik } = useForm({
@@ -43,7 +44,7 @@ const MCDefault = ({ _labels, access }) => {
 
   useEffect(() => {
     const updated = {}
-    defaultsData.list.forEach(obj => {
+    defaultsData.list?.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         updated[obj.key] = obj.value ? parseFloat(obj.value) : null
         formik.setFieldValue(obj.key, updated[obj.key])
@@ -66,15 +67,33 @@ const MCDefault = ({ _labels, access }) => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <Grid container spacing={4} sx={{ p: 2 }}>
-          {rateTypeFields.map(({ name, label }) => (
-            <Grid item xs={12} key={name}>
+    <Form onSave={formik.handleSubmit} maxAccess={access}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={4}>
+            {rateTypeFields.map(({ name, label }) => (
+              <Grid item xs={12} key={name}>
+                <ResourceComboBox
+                  endpointId={MultiCurrencyRepository.RateType.qry}
+                  name={name}
+                  label={label}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'Reference' },
+                    { key: 'name', value: 'Name' }
+                  ]}
+                  values={formik.values}
+                  onChange={(_, newValue) => formik.setFieldValue(name, newValue?.recordId || null)}
+                  error={formik.touched[name] && Boolean(formik.errors[name])}
+                />
+              </Grid>
+            ))}
+            <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={MultiCurrencyRepository.RateType.qry}
-                name={name}
-                label={label}
+                endpointId={SystemRepository.Currency.qry}
+                name='baseMetalCuId'
+                label={_labels.baseMetalCuId}
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 columnsInDropDown={[
@@ -82,47 +101,45 @@ const MCDefault = ({ _labels, access }) => {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(_, newValue) => formik.setFieldValue(name, newValue?.recordId || null)}
-                error={formik.touched[name] && Boolean(formik.errors[name])}
+                onChange={(_, newValue) => formik.setFieldValue('baseMetalCuId', newValue?.recordId || null)}
+                error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
+                readOnly={isReadOnly('baseMetalCuId')}
               />
             </Grid>
-          ))}
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={SystemRepository.Currency.qry}
-              name='baseMetalCuId'
-              label={_labels.baseMetalCuId}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              onChange={(_, newValue) => formik.setFieldValue('baseMetalCuId', newValue?.recordId || null)}
-              error={formik.touched.baseMetalCuId && Boolean(formik.errors.baseMetalCuId)}
-              readOnly={isReadOnly('baseMetalCuId')}
-            />
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='baseSalesMetalId'
+                label={_labels.baseSalesMetalId}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('baseSalesMetalId', newValue?.recordId || null)}
+                error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
+                readOnly={isReadOnly('baseSalesMetalId')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Operation.qry}
+                parameters='_workCenterId=0'
+                name='mf_damageOperationId'
+                label={_labels.operation}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('mf_damageOperationId', newValue?.recordId || null)}
+                error={formik.touched.mf_damageOperationId && Boolean(formik.errors.mf_damageOperationId)}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <ResourceComboBox
-              endpointId={InventoryRepository.Metals.qry}
-              name='baseSalesMetalId'
-              label={_labels.baseSalesMetalId}
-              valueField='recordId'
-              displayField='reference'
-              values={formik.values}
-              onChange={(_, newValue) => formik.setFieldValue('baseSalesMetalId', newValue?.recordId || null)}
-              error={formik.touched.baseSalesMetalId && Boolean(formik.errors.baseSalesMetalId)}
-              readOnly={isReadOnly('baseSalesMetalId')}
-            />
-          </Grid>
-        </Grid>
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved />
-      </Fixed>
-    </VertLayout>
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

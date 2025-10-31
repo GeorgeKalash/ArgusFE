@@ -14,7 +14,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
+import Form from 'src/components/Shared/Form'
 
 const CorrespondentDispersal = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -25,15 +25,13 @@ const CorrespondentDispersal = () => {
     items: []
   }
 
-  const { labels: labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.CorrespondentDispersal
   })
 
   const { formik } = useForm({
     initialValues,
-    maxAccess,
-    enableReinitialize: true,
-    validateOnChange: true,
+    maxAccess: access,
     validationSchema: yup.object({
       corId: yup.string().required()
     }),
@@ -93,47 +91,46 @@ const CorrespondentDispersal = () => {
   ]
 
   return (
-    <VertLayout>
-      <Fixed>
-        <Grid container spacing={2}>
-          <Grid item xs={4} sx={{ m: 3 }}>
-            <ResourceComboBox
-              endpointId={RemittanceSettingsRepository.Correspondent.qry2}
-              name='corId'
-              label={labels.correspondent}
-              valueField='recordId'
-              displayField={['reference', 'name']}
-              columnsInDropDown={[
-                { key: 'reference', value: 'Reference' },
-                { key: 'name', value: 'Name' }
-              ]}
-              values={formik.values}
-              required
-              onChange={(event, newValue) => {
-                getData(newValue?.recordId)
-                formik.setFieldValue('corId', newValue?.recordId || null)
-              }}
-            />
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Fixed>
+          <Grid container spacing={2} p={2}>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={RemittanceSettingsRepository.Correspondent.qry2}
+                name='corId'
+                label={labels.correspondent}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                values={formik.values}
+                required
+                onChange={(event, newValue) => {
+                  getData(newValue?.recordId)
+                  formik.setFieldValue('corId', newValue?.recordId || null)
+                }}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Fixed>
+        </Fixed>
 
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik?.values?.items}
-          error={formik.errors.items}
-          name='items'
-          allowAddNewLine={false}
-          maxAccess={maxAccess}
-          allowDelete={false}
-          columns={columns}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={() => formik.handleSubmit()} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik?.values?.items}
+            error={formik.errors.items}
+            name='items'
+            allowAddNewLine={false}
+            maxAccess={access}
+            allowDelete={false}
+            columns={columns}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

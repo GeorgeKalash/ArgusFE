@@ -86,7 +86,6 @@ const SiteDashboard = () => {
     initialValues: {
       siteId: null
     },
-    enableReinitialize: true,
     validateOnChange: true,
     onSubmit: () => {
       paginationActivities({ _startAt: 0, _pageSize: 50 })
@@ -136,8 +135,8 @@ const SiteDashboard = () => {
         />
       </Fixed>
       <Grow>
-        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-        <CustomTabPanel index={0} value={activeTab}>
+        <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={access} />
+        <CustomTabPanel index={0} value={activeTab} maxAccess={access}>
           <AvailabilitiesTab
             labels={labels}
             maxAccess={access}
@@ -147,7 +146,7 @@ const SiteDashboard = () => {
             access={accessAvailabilities}
           />
         </CustomTabPanel>
-        <CustomTabPanel index={1} value={activeTab}>
+        <CustomTabPanel index={1} value={activeTab} maxAccess={access}>
           <ActivitiesTab
             maxAccess={access}
             labels={labels}

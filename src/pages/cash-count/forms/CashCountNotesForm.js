@@ -1,8 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { useForm } from 'src/hooks/form'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -12,6 +10,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { CashCountRepository } from 'src/repositories/CashCountRepository'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import Form from 'src/components/Shared/Form'
 
 export default function CashCountNotesForm({
   labels,
@@ -31,14 +30,13 @@ export default function CashCountNotesForm({
       total: 0,
       currencyNotes: [{ id: 1, seqNo: '', cashCountId: 0, note: '', qty: '', subTotal: '' }]
     },
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       currencyNotes: yup
         .array()
         .of(
           yup.object().shape({
-            note: yup.string().required(' ')
+            note: yup.string().required()
           })
         )
         .required('Operations array is required')
@@ -57,7 +55,7 @@ export default function CashCountNotesForm({
         }))
 
       const counted = obj.currencyNotes.reduce((acc, { subTotal }) => {
-        return acc + (subTotal || 0)
+        return acc + (Number(subTotal) || 0)
       }, 0)
 
       forceNoteCount
@@ -79,55 +77,53 @@ export default function CashCountNotesForm({
   }, [recordId])
 
   const getGridData = async () => {
-    try {
-      const parameters = `_currencyId=` + row.currencyId
+    const parameters = `_currencyId=` + row.currencyId
 
-      const { list } = await getRequest({
-        extension: CashCountRepository.CcCashNotes.qry,
-        parameters: parameters
-      })
+    const { list } = await getRequest({
+      extension: CashCountRepository.CcCashNotes.qry,
+      parameters: parameters
+    })
 
-      const currencyNotes = row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
-        id: index + 1,
-        qty,
-        note,
-        subTotal: qty * note,
-        ...rest
-      }))
+    const currencyNotes = row.currencyNotes?.map(({ id, qty, note, ...rest }, index) => ({
+      id: index + 1,
+      qty,
+      note,
+      subTotal: qty * note,
+      ...rest
+    }))
 
-      const notes = list?.map(({ ...rest }, index) => ({
-        id: index + 1,
-        ...rest
-      }))
+    const notes = list?.map(({ ...rest }, index) => ({
+      id: index + 1,
+      ...rest
+    }))
 
-      const finalList = notes.map(x => {
-        const n = {
-          id: x.id,
-          note: x.note,
-          seqNo: null,
-          qty: '',
-          subTotal: 0
-        }
+    const finalList = notes.map(x => {
+      const n = {
+        id: x.id,
+        note: x.note,
+        seqNo: null,
+        qty: '',
+        subTotal: 0
+      }
 
-        const currencyNote = currencyNotes?.find(y => n.note === y.note)
+      const currencyNote = currencyNotes?.find(y => n.note === y.note)
 
-        if (currencyNote) {
-          n.qty = currencyNote.qty
-          n.qty1 = currencyNote.qty1 || ''
-          n.qty100 = currencyNote.qty100 || ''
-          n.qty1000 = currencyNote.qty1000 || ''
-          n.seqNo = currencyNote.seqNo
-          n.subTotal = currencyNote.subTotal
-        }
+      if (currencyNote) {
+        n.qty = currencyNote.qty
+        n.qty1 = currencyNote.qty1 || ''
+        n.qty100 = currencyNote.qty100 || ''
+        n.qty1000 = currencyNote.qty1000 || ''
+        n.seqNo = currencyNote.seqNo
+        n.subTotal = currencyNote.subTotal
+      }
 
-        return n
-      })
-      formik.setFieldValue('currencyNotes', finalList)
-    } catch (error) {}
+      return n
+    })
+    formik.setFieldValue('currencyNotes', finalList)
   }
 
   const total = formik.values?.currencyNotes?.reduce((acc, { subTotal }) => {
-    return acc + (subTotal || 0)
+    return acc + (Number(subTotal) || 0)
   }, 0)
 
   function sumQty({ update, newRow }) {
@@ -144,13 +140,7 @@ export default function CashCountNotesForm({
   }
 
   return (
-    <FormShell
-      resourceId={ResourceIds.CashCountTransaction}
-      form={formik}
-      maxAccess={maxAccess}
-      isCleared={false}
-      isInfo={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container xs={6}>
@@ -247,6 +237,6 @@ export default function CashCountNotesForm({
           </Grid>
         </Fixed>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

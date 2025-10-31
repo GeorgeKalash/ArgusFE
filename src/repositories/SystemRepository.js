@@ -27,10 +27,10 @@ export const SystemRepository = {
     del: service + 'delDT'
   },
   DocumentTypeMap: {
-    qry: service + 'qryDTM',
     get: service + 'getDTM',
     set: service + 'setDTM',
-    del: service + 'delDTM'
+    del: service + 'delDTM',
+    page: service + 'pageDTM'
   },
   RelationType: {
     qry: service + 'qryRT',
@@ -220,6 +220,9 @@ export const SystemRepository = {
   Period: {
     qry: service + 'qryFPE'
   },
+  FiscalPeriod: {
+    qry: service + 'qryFPT'
+  },
   FiscalPeriodPack: {
     set2: service + 'set2FPE'
   },
@@ -261,6 +264,7 @@ export const SystemRepository = {
   },
   Folders: {
     page: service + 'pageFO',
+    qry: service + 'qryFO',
     get: service + 'getFO',
     set: service + 'setFO',
     del: service + 'delFO'
@@ -277,5 +281,11 @@ export const SystemRepository = {
   SystemAlerts: {
     qry: service + 'qryAA',
     arr: service + 'arrAA'
+  },
+  RightToWork: {
+    page: service + 'qryRW',
+    get: service + 'getRW',
+    set: service + 'setRW',
+    del: service + 'delRW'
   }
 }

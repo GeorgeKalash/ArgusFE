@@ -10,13 +10,14 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const { formik } = useForm({
-    enableReinitialize: true,
     validateOnChange: true,
     maxAccess,
 
@@ -25,8 +26,8 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         .array()
         .of(
           yup.object().shape({
-            amount: yup.string().required(' '),
-            date: yup.string().required(' ')
+            amount: yup.string().required(),
+            date: yup.string().required()
           })
         )
         .required(' ')
@@ -39,7 +40,6 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
           taxCodeId: recordId || null,
           date: '',
           amount: '',
-
           seqNo: ''
         }
       ]
@@ -61,44 +61,36 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
       taxCodeId: recordId,
       items: items
     }
-
     await postRequest({
       extension: FinancialRepository.TaxHistoryPack.set2,
       record: JSON.stringify(data)
     })
-      .then(res => {
-        toast.success('Record Edited Successfully')
-        setStore(prevStore => ({
-          ...prevStore,
-          TaxHistoryView: items
-        }))
-      })
-      .catch(error => {})
+    toast.success(platformLabels.Edited)
+    setStore(prevStore => ({
+      ...prevStore,
+      TaxHistoryView: items
+    }))
   }
   useEffect(() => {
-    const defaultParams = `_taxCodeId=${recordId}`
-    var parameters = defaultParams
     if (recordId) {
       getRequest({
         extension: FinancialRepository.TaxHistoryPack.qry,
         parameters: `_taxCodeId=${recordId}`
+      }).then(res => {
+        if (res?.list?.length > 0) {
+          const items = res.list.map((item, index) => ({
+            ...item,
+            id: index + 1,
+            date: formatDateFromApi(item.date),
+            amount: item.amount
+          }))
+          formik.setValues({ TaxHistoryView: items })
+          setStore(prevStore => ({
+            ...prevStore,
+            TaxHistoryView: items
+          }))
+        }
       })
-        .then(res => {
-          if (res?.list?.length > 0) {
-            const items = res.list.map((item, index) => ({
-              ...item,
-              id: index + 1,
-              date: formatDateFromApi(item.date),
-              amount: item.amount
-            }))
-            formik.setValues({ TaxHistoryView: items })
-            setStore(prevStore => ({
-              ...prevStore,
-              TaxHistoryView: items
-            }))
-          }
-        })
-        .catch(error => {})
     }
   }, [])
 
@@ -108,7 +100,7 @@ const HistoryForm = ({ store, setStore, maxAccess, labels, editMode }) => {
         form={formik}
         resourceId={ResourceIds.TaxCodes}
         maxAccess={maxAccess}
-        infoVisible={false}
+        isInfo={false}
         editMode={editMode}
       >
         <VertLayout>

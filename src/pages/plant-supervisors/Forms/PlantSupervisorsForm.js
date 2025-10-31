@@ -1,10 +1,8 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -13,6 +11,7 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
+import Form from 'src/components/Shared/Form'
 
 export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -25,7 +24,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
       rows: []
     },
     maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       plantId: yup.string().required(),
@@ -55,9 +53,9 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
 
   const fetchSupervisors = async () => {
     if (!formik.values.plantId) {
-      formik.setFieldValue('rows', []); 
+      formik.setFieldValue('rows', [])
 
-      return;
+      return
     }
 
     if (formik.values.plantId) {
@@ -120,13 +118,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
   ]
 
   return (
-    <FormShell
-      resourceId={ResourceIds.PlantSupervisors}
-      isInfo={false}
-      form={formik}
-      maxAccess={maxAccess}
-      editMode={false}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -163,6 +155,6 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

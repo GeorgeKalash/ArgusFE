@@ -123,7 +123,8 @@ const Correspondent = () => {
       Component: CorrespondentWindow,
       props: {
         labels: _labels,
-        recordId: recordId ? recordId : null
+        recordId: recordId ? recordId : null,
+        maxAccess: access
       },
       width: 900,
       height: 660,

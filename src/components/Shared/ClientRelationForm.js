@@ -58,7 +58,6 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       parentId: yup.string().required(),
@@ -116,7 +115,7 @@ export const ClientRelationForm = ({ seqNo, clientId, formValidation, window }) 
   const editMode = !!formik.values.seqNo
 
   return (
-    <FormShell form={formik} infoVisible={false} isSaved={!editMode} isCleared={!editMode}>
+    <FormShell form={formik} isInfo={false} isSaved={!editMode} isCleared={!editMode}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2} xs={12}>

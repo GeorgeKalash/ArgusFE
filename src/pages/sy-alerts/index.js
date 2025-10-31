@@ -9,9 +9,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { ControlContext } from 'src/providers/ControlContext'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import * as yup from 'yup'
+import Form from 'src/components/Shared/Form'
 
 const SyAlerts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -32,14 +31,14 @@ const SyAlerts = () => {
     })
   }
 
-  const { labels, maxAccess } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     endpointId: SystemRepository.SystemAlerts.qry,
     queryFn: getGridData,
     datasetId: ResourceIds.SystemAlerts
   })
 
   const { formik } = useForm({
-    maxAccess,
+    maxAccess: access,
     validateOnChange: true,
     initialValues: {
       rows: [
@@ -101,25 +100,24 @@ const SyAlerts = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          name='rows'
-          onChange={value => {
-            formik.setFieldValue('rows', value)
-          }}
-          value={formik.values?.rows}
-          error={formik.errors?.rows}
-          columns={columns}
-          allowDelete={false}
-          allowAddNewLine={false}
-          maxAccess={maxAccess}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.submitForm} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            name='rows'
+            onChange={value => {
+              formik.setFieldValue('rows', value)
+            }}
+            value={formik.values?.rows}
+            error={formik.errors?.rows}
+            columns={columns}
+            allowDelete={false}
+            allowAddNewLine={false}
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

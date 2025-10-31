@@ -6,12 +6,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useForm } from 'src/hooks/form'
 import { useResourceQuery } from 'src/hooks/resource'
-import WindowToolbar from './WindowToolbar'
 import { VertLayout } from './Layouts/VertLayout'
-import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import useSetWindow from 'src/hooks/useSetWindow'
+import Form from './Form'
 
 const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -26,7 +25,6 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: false,
     validateOnChange: true,
     initialValues: {
       Integrations: [
@@ -144,21 +142,20 @@ const GlobalIntegrationGrid = ({ masterSource, masterId, window }) => {
   }
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('Integrations', value)}
-          value={formik.values.Integrations}
-          error={formik.errors.Integrations}
-          columns={column}
-          allowDelete={false}
-          allowAddNewLine={false}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access} isParentWindow={false}>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('Integrations', value)}
+            value={formik.values.Integrations}
+            error={formik.errors.Integrations}
+            columns={column}
+            allowDelete={false}
+            allowAddNewLine={false}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 GlobalIntegrationGrid.width = 800

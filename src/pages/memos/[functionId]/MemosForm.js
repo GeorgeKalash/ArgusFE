@@ -1,5 +1,5 @@
 import { Button, Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -39,9 +39,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
-  const [defaultsDataState, setDefaultsDataState] = useState(null)
 
-  const [initialVatPct, setInitialVatPct] = useState('')
+  const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value) || null
+  const vatPct = parseInt(defaultsData?.list?.find(({ key }) => key === 'vatPct')?.value) || null
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -58,14 +58,14 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
       reference: '',
       date: new Date(),
       plantId,
-      currencyId: '',
+      currencyId,
       currencyName: '',
       status: '',
       accountId: '',
       amount: '',
       baseAmount: '',
       functionId: functionId,
-      vatPct: '',
+      vatPct: 0,
       exRate: 1,
       rateCalcMethod: 1,
       subtotal: '',
@@ -77,7 +77,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
-    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       amount: yup.number().required(),
@@ -121,12 +120,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   })
   const editMode = !!formik.values.recordId || !!recordId
 
-  async function getDefaultVAT() {
-    const defaultVAT = defaultsData?.list?.find(({ key }) => key === 'vatPct')
-
-    return parseInt(defaultVAT?.value)
-  }
-
   function setBaseAmount(amount) {
     const updatedRateRow = getRate({
       amount: amount ?? 0,
@@ -139,19 +132,13 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
   }
 
   useEffect(() => {
-    ;(async function () {
-      const vatPctValue = await getDefaultVAT()
-      setInitialVatPct(vatPctValue)
-    })()
-  }, [])
-  useEffect(() => {
     let calculatedAmount = parseFloat(formik.values.subtotal)
 
     if (formik.values.isSubjectToVAT) {
-      formik.setFieldValue('vatPct', initialVatPct)
-      const vatAmount = (calculatedAmount * parseFloat(initialVatPct)) / 100
+      const currentVat = (formik?.values?.recordId ? formik?.values?.vatPct : vatPct) || 0
+      const vatAmount = (calculatedAmount * parseFloat(currentVat)) / 100
       formik.setFieldValue('vatAmount', vatAmount)
-
+      formik.setFieldValue('vatPct', currentVat)
       calculatedAmount += vatAmount
     } else {
       formik.setFieldValue('vatPct', '')
@@ -160,24 +147,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
 
     formik.setFieldValue('amount', calculatedAmount)
     setBaseAmount(calculatedAmount)
-  }, [formik.values.isSubjectToVAT, initialVatPct, formik.values.subtotal])
-
-  async function getDefaultsData() {
-    const myObject = {}
-
-    const filteredList = defaultsData?.list?.filter(obj => {
-      return obj.key === 'currencyId'
-    })
-
-    filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
-    setDefaultsDataState(myObject)
-
-    return myObject
-  }
-
-  useEffect(() => {
-    if (!editMode) formik.setFieldValue('currencyId', parseInt(defaultsDataState?.currencyId))
-  }, [defaultsDataState])
+  }, [formik.values.isSubjectToVAT, formik.values.subtotal])
 
   useEffect(() => {
     ;(async function () {
@@ -193,9 +163,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           date: formatDateFromApi(res.record.date)
         })
       }
-      await getDefaultsData()
     })()
   }, [])
+
   useEffect(() => {
     formik.setFieldValue('templateId', '')
   }, [formik.values.notes])
@@ -569,9 +539,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                         variant='contained'
                         size='small'
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={
-                          !formik.values.currencyId || formik.values.currencyId === defaultsDataState?.currencyId
-                        }
+                        disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                       >
                         <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
                       </Button>
@@ -614,12 +582,26 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='vatAmount'
-                    readOnly
+                    readOnly={!formik.values.isSubjectToVAT || isPosted || isCancelled}
+                    required={formik.values.isSubjectToVAT}
                     label={labels.vatAmount}
                     value={formik.values.vatAmount}
                     maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('vatAmount', '')}
+                    onChange={async e => {
+                      const vatPct =
+                        formik.values.subtotal != 0
+                          ? (parseFloat(e.target.value) * 100) / parseFloat(formik.values.subtotal)
+                          : 0
+                      formik.setFieldValue('vatPct', parseFloat(vatPct).toFixed(2) || 0)
+                      formik.setFieldValue('vatAmount', e.target.value)
+                      const calcAmount = Number(e.target.value || 0) + Number(formik.values.subtotal)
+                      formik.setFieldValue('amount', calcAmount)
+                      setBaseAmount(calcAmount)
+                    }}
+                    onClear={() => {
+                      formik.setFieldValue('vatAmount', 0)
+                      formik.setFieldValue('amount', Number(formik.values.subtotal || 0))
+                    }}
                     error={formik.touched.vatAmount && Boolean(formik.errors.vatAmount)}
                   />
                 </Grid>

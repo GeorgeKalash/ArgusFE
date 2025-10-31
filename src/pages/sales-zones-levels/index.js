@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import WindowToolbar from 'src/components/Shared/WindowToolbar'
 import * as yup from 'yup'
 import { useContext } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
@@ -9,11 +8,11 @@ import toast from 'react-hot-toast'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import { useError } from 'src/error'
+import Form from 'src/components/Shared/Form'
 
 const SalesZonesLevels = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -49,7 +48,6 @@ const SalesZonesLevels = () => {
 
   const { formik } = useForm({
     maxAccess: access,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       items: yup.array().of(
@@ -81,28 +79,24 @@ const SalesZonesLevels = () => {
       ]
     },
     onSubmit: async values => {
-      try {
-        const levelIds = values.items.map(item => item.levelId)
+      const levelIds = values.items.map(item => item.levelId)
 
-        const uniqueLevelIds = new Set()
-        for (const id of levelIds) {
-          if (uniqueLevelIds.has(id)) {
-            stackError({ message: `Duplicate Level ID found: ${id}` })
+      const uniqueLevelIds = new Set()
+      for (const id of levelIds) {
+        if (uniqueLevelIds.has(id)) {
+          stackError({ message: `Duplicate Level ID found: ${id}` })
 
-            return
-          }
-          uniqueLevelIds.add(id)
+          return
         }
-
-        const data = { items: values.items }
-        await postRequest({
-          extension: SaleRepository.SaleZoneLevel.set2,
-          record: JSON.stringify(data)
-        })
-        toast.success(platformLabels.Saved)
-      } catch (error) {
-        stackError({ message: `Save failed: ${error.message}` })
+        uniqueLevelIds.add(id)
       }
+
+      const data = { items: values.items }
+      await postRequest({
+        extension: SaleRepository.SaleZoneLevel.set2,
+        record: JSON.stringify(data)
+      })
+      toast.success(platformLabels.Saved)
     }
   })
 
@@ -120,19 +114,20 @@ const SalesZonesLevels = () => {
   ]
 
   return (
-    <VertLayout>
-      <Grow>
-        <DataGrid
-          onChange={value => formik.setFieldValue('items', value)}
-          value={formik.values.items}
-          error={formik.errors.items}
-          columns={columns}
-        />
-      </Grow>
-      <Fixed>
-        <WindowToolbar onSave={formik.handleSubmit} isSaved={true} smallBox={true} />
-      </Fixed>
-    </VertLayout>
+    <Form onSave={formik.handleSubmit} maxAccess={access} fullSize>
+      <VertLayout>
+        <Grow>
+          <DataGrid
+            onChange={value => formik.setFieldValue('items', value)}
+            value={formik.values.items}
+            error={formik.errors.items}
+            columns={columns}
+            name='items'
+            maxAccess={access}
+          />
+        </Grow>
+      </VertLayout>
+    </Form>
   )
 }
 

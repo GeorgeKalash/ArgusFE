@@ -31,7 +31,6 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
       spId: null
     },
     maxAccess: maxAccess,
-    enableReinitialize: true,
     validateOnChange: true,
     validationSchema: yup.object({
       userId: yup.string().required(),
@@ -106,7 +105,7 @@ export default function PosUsersForm({ labels, maxAccess, recordId, record, wind
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SaleRepository.PosUsers.qry}
+                endpointId={SaleRepository.SalesPerson.qry}
                 name='spId'
                 label={labels.spName}
                 valueField='recordId'

@@ -1,7 +1,6 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
 import { useContext } from 'react'
-import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -14,6 +13,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useWindow } from 'src/windows'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
+import Form from 'src/components/Shared/Form'
 
 export default function BatchPostForm({ access }) {
   const { postRequest } = useContext(RequestsContext)
@@ -36,7 +36,6 @@ export default function BatchPostForm({ access }) {
       endDate: today,
       status: parseInt(status)
     },
-    enableReinitialize: false,
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
@@ -77,7 +76,7 @@ export default function BatchPostForm({ access }) {
   ]
 
   return (
-    <FormShell form={formik} actions={actions} isSaved={false} editMode={true} isInfo={false} isCleared={false}>
+    <Form onSave={formik.handleSubmit} actions={actions} isSaved={false} editMode={true} maxAccess={access}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -90,6 +89,7 @@ export default function BatchPostForm({ access }) {
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('startDate', '')}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -101,6 +101,7 @@ export default function BatchPostForm({ access }) {
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', '')}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -123,6 +124,7 @@ export default function BatchPostForm({ access }) {
                   }
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
+                maxAccess={access}
               />
             </Grid>
             <Grid item xs={12}>
@@ -146,11 +148,12 @@ export default function BatchPostForm({ access }) {
                   formik.setFieldValue('batchName', newValue?.name || '')
                 }}
                 error={formik.touched.batchId && Boolean(formik.errors.batchId)}
+                maxAccess={access}
               />
             </Grid>
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }

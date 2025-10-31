@@ -8,7 +8,6 @@ import { Grid } from '@mui/material'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
 import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -24,6 +23,7 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { useError } from 'src/error'
 import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
 import { createConditionalSchema } from 'src/lib/validation'
+import Form from 'src/components/Shared/Form'
 
 export default function IRGenerateTransfer() {
   const { stack } = useWindow()
@@ -73,7 +73,8 @@ export default function IRGenerateTransfer() {
             requestId: itemDetails.requestId,
             requestSeqNo: itemDetails.seqNo,
             itemId: itemDetails.itemId,
-            qty: itemDetails.transferNow
+            qty: itemDetails.transferNow,
+            muId: itemDetails?.muId || null
           }
         })
 
@@ -300,15 +301,7 @@ export default function IRGenerateTransfer() {
   }, [formik.values.toSiteId, formik.values.fromSiteId])
 
   return (
-    <FormShell
-      form={formik}
-      isInfo={false}
-      isCleared={false}
-      isSaved={false}
-      actions={actions}
-      maxAccess={access}
-      resourceId={ResourceIds.GenerateTransfers}
-    >
+    <Form onSave={formik.handleSubmit} isSaved={false} actions={actions} maxAccess={access}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -436,6 +429,6 @@ export default function IRGenerateTransfer() {
           />
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
