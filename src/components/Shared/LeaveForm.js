@@ -297,6 +297,8 @@ export const LeaveForm = ({ recordId, window }) => {
       formik.setFieldValue('leaveDays', totalDays)
     } else {
       formik.setFieldValue('items', [])
+      formik.setFieldValue('hours', null)
+      formik.setFieldValue('leaveDays', null)
     }
   }
 
