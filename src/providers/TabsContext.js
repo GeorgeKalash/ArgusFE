@@ -184,9 +184,6 @@ const TabsProvider = ({ children }) => {
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-
-      // if closing last tab
-
       if (newValue === index - 1 || router.asPath === window?.history?.state?.as) {
         setCurrentTabIndex(newValue)
       }
@@ -208,14 +205,6 @@ const TabsProvider = ({ children }) => {
     }
   }
 
-  const refreshHomeTab = () => {
-    const homeTabIndex = openTabs.findIndex(tab => tab.route === '/default/')
-    if (homeTabIndex !== -1) {
-      setOpenTabs(prev => prev.map((tab, index) => (index === homeTabIndex ? { ...tab, id: uuidv4() } : tab)))
-      setReloadOpenedPage([])
-    }
-  }
-
   useEffect(() => {
     if (reloadOpenedPage) {
       setOpenTabs(openTabs => openTabs.map(tab => (tab.route === router.asPath ? { ...tab, id: uuidv4() } : tab)))
@@ -225,14 +214,7 @@ const TabsProvider = ({ children }) => {
 
   useEffect(() => {
     if (initialLoadDone) {
-      const isTabOpen = openTabs.some((activeTab, index) => {
-        if (activeTab.route === router.asPath || !window?.history?.state?.as) {
-          return true
-        }
-
-        return false
-      })
-
+      const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
       if (!isTabOpen) {
         const newValueState = openTabs.length
 
@@ -287,10 +269,7 @@ const TabsProvider = ({ children }) => {
             : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
           resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
-
-        const index = newTabs.findIndex(tab => tab.route === router.asPath)
-
-        setCurrentTabIndex(index)
+        setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
       }
 
       setOpenTabs(newTabs)
@@ -370,35 +349,37 @@ const TabsProvider = ({ children }) => {
                   label={
                     <Box display='flex' alignItems='center'>
                       <span>{activeTab.label}</span>
-                      {activeTab.route === '/default/' && currentTabIndex === i && (
+                      <Box display='flex' alignItems='center' ml={0.5}>
                         <IconButton
                           size='small'
                           onClick={e => {
                             e.stopPropagation()
-                            refreshHomeTab()
+                            setOpenTabs(tabs =>
+                              tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
+                            )
+                            setReloadOpenedPage([])
                           }}
-                          sx={{ ml: 1, p: 0.5 }}
+                          sx={{ p: 0.5 }}
                         >
                           <RefreshIcon fontSize='small' />
                         </IconButton>
-                      )}
+                        {activeTab.route !== '/default/' && (
+                          <IconButton
+                            size='small'
+                            onClick={event => {
+                              event.stopPropagation()
+                              closeTab(activeTab.route)
+                            }}
+                            sx={{ p: 0.5 }}
+                          >
+                            <CloseIcon fontSize='small' />
+                          </IconButton>
+                        )}
+                      </Box>
                     </Box>
                   }
                   onContextMenu={event => OpenItems(event, i)}
-                  icon={
-                    activeTab.route === '/default/' ? null : (
-                      <IconButton
-                        size='small'
-                        onClick={event => {
-                          event.stopPropagation()
-                          if (activeTab) unlockIfLocked(activeTab)
-                          closeTab(activeTab.route)
-                        }}
-                      >
-                        <CloseIcon fontSize='small' />
-                      </IconButton>
-                    )
-                  }
+                  icon={null}
                   iconPosition='end'
                   sx={{
                     minHeight: '35px !important',
@@ -406,9 +387,7 @@ const TabsProvider = ({ children }) => {
                     borderTopRightRadius: 5,
                     py: '0px !important',
                     mb: '0px !important',
-                    borderBottom: '0px !important',
                     mr: '2px !important',
-                    fontWeight: '1.5rem',
                     pr: '0px !important',
                     pl: '10px !important',
                     display: activeTab.route === '/default/' && dashboardId === null ? 'none' : 'flex'
