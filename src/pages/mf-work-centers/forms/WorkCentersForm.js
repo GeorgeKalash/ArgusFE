@@ -39,7 +39,6 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
       isSerialCreator: false,
       isInactive: false
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
@@ -116,9 +115,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('supervisorId', newValue?.recordId)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('supervisorId', newValue?.recordId)}
                 error={formik.touched.supervisorId && Boolean(formik.errors.supervisorId)}
               />
             </Grid>
@@ -135,9 +132,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId || null)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId || null)}
                 required
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
@@ -155,9 +150,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue?.recordId || null)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('plantId', newValue?.recordId || null)}
                 required
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -175,11 +168,8 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 values={formik.values}
-                readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('costCenterId', newValue?.recordId)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('costCenterId', newValue?.recordId || null)}
                 error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
               />
             </Grid>
@@ -196,9 +186,7 @@ export default function WorkCentersForm({ labels, maxAccess, recordId }) {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('lineId', newValue?.recordId)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('lineId', newValue?.recordId || null)}
                 error={formik.touched.lineId && Boolean(formik.errors.lineId)}
               />
             </Grid>
