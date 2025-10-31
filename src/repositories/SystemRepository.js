@@ -220,9 +220,6 @@ export const SystemRepository = {
   Period: {
     qry: service + 'qryFPE'
   },
-  FiscalPeriod: {
-    qry: service + 'qryFPT'
-  },
   FiscalPeriodPack: {
     set2: service + 'set2FPE'
   },
@@ -287,5 +284,12 @@ export const SystemRepository = {
     get: service + 'getRW',
     set: service + 'setRW',
     del: service + 'delRW'
+  },
+  FiscalPeriod: {
+    page: service + 'pageFPT',
+    get: service + 'getFPT',
+    set: service + 'setFPT',
+    del: service + 'delFPT',
+    qry: service + 'qryFPT'
   }
 }

@@ -35,7 +35,8 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       startDate: null,
       endDate: null,
       periods: '',
-      status: ''
+      status: '',
+      currentPeriodId: null
     },
     maxAccess,
     validateOnChange: true,
@@ -134,7 +135,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('startDate', '')}
+                onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               />
             </Grid>
@@ -146,7 +147,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
                 onChange={formik.setFieldValue}
                 required
                 maxAccess={maxAccess}
-                onClear={() => formik.setFieldValue('endDate', '')}
+                onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
             </Grid>
@@ -160,9 +161,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
                     valueField='key'
                     displayField='value'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('periods', newValue ? newValue.key : '')
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('periods', newValue ? newValue.key : null)}
                     maxAccess={maxAccess}
                     readOnly={editMode}
                     error={formik.touched.periods && Boolean(formik.errors.periods)}
@@ -182,12 +181,22 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
                 valueField='key'
                 displayField='value'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('status', newValue ? newValue.key : '')
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('status', newValue ? newValue.key : null)}
                 maxAccess={maxAccess}
                 error={formik.touched.status && Boolean(formik.errors.status)}
                 required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='currentPeriodId'
+                label={labels.fiscalPeriod}
+                valueField='currentPeriodId'
+                displayField='name'
+                values={formik.values}
+                readOnly
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
