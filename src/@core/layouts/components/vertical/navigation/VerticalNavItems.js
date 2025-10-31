@@ -123,7 +123,7 @@ const VerticalNavItems = props => {
 
             {!navCollapsed && (
               <div style={{ margin: '2px 0 0 5px', display: 'flex' }}>
-                <div className='text' title={node.title}>
+                <div className='text' title={truncatedTitle == node.title ? null : node.title}>
                   {truncatedTitle}
                 </div>
                 {isFolder && (
