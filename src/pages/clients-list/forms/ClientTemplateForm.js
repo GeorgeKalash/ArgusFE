@@ -42,6 +42,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
 import AddressForm from 'src/components/Shared/AddressForm'
+import FixedGrid from 'src/components/Shared/FixedGrid'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
@@ -403,6 +404,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
       idtId: yup.string().required(),
       idNo: yup.string().required(),
       expiryDate: yup.date().required(),
+      issueDate: yup.date().required(),
       countryId: yup.string().required(),
       cityId: yup.string().required(),
       idCountry: yup.string().required(),
@@ -1051,7 +1053,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.expiryDate}
                           value={formik.values?.expiryDate}
                           readOnly={editMode && !allowEdit && true}
-                          required={true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('expiryDate', '')}
                           disabledDate={!editMode && '<'}
@@ -1065,6 +1067,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           label={labels.issueDate}
                           value={formik.values?.issueDate}
                           readOnly={editMode && !allowEdit && true}
+                          required
                           onChange={formik.setFieldValue}
                           onClear={() => formik.setFieldValue('issueDate', '')}
                           disabledDate={!editMode && '>'}
@@ -1226,7 +1229,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         </Grid>
                       </Grid>
                       <Grid item xs={12}>
-                        <Grid container spacing={2} wrap='nowrap' sx={{ direction: 'ltr' }}>
+                        <FixedGrid container spacing={2}>
                           <Grid item xs={4}>
                             <CustomTextField
                               name='fl_firstName'
@@ -1286,7 +1289,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               maxAccess={maxAccess}
                             />
                           </Grid> */}
-                        </Grid>
+                        </FixedGrid>
                       </Grid>
                       <Grid item xs={4}>
                         <ResourceComboBox
