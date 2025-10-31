@@ -115,7 +115,7 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={9}>
                   <ResourceComboBox

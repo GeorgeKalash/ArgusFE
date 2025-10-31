@@ -103,7 +103,7 @@ const SiteDashboard = () => {
           maxAccess={access}
           inputSearch={false}
           leftSection={
-            <Grid item sx={{ display: 'flex', mr: 2, width: 400 }}>
+            <Grid item sx={{ display: 'flex' }} xs={3}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'

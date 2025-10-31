@@ -85,7 +85,7 @@ const GridToolbar = ({
   return (
     <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
       <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
-        <Grid item xs={previewReport ? 6 : 9}>
+        <Grid item xs={previewReport ? 6 : rightSection ? 9 : 12}>
           <Grid container spacing={zoomSpacing}>
             {onAdd && addBtnVisible && (
               <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -149,9 +149,11 @@ const GridToolbar = ({
             reportStore={reportStore}
           />
         )}
-        <Grid item xs={3}>
-          {rightSection}
-        </Grid>
+        {rightSection && (
+          <Grid item xs={3}>
+            {rightSection}
+          </Grid>
+        )}
       </Grid>
       {bottomSection}
     </DialogActions>

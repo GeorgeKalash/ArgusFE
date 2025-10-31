@@ -173,7 +173,7 @@ const GateKeeper = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item sx={{ display: 'flex', width: '300px' }}>
+            <Grid item xs={2.5}>
               <ResourceComboBox
                 datasetId={DataSets.LEAN_STATUS}
                 name='status'

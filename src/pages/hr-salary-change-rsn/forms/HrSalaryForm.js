@@ -18,7 +18,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
-    endpointId: EmployeeRepository.SalaryChangeReasonFilters.page
+    endpointId: EmployeeRepository.SalaryChangeReason.page
   })
 
   const { formik } = useForm({
@@ -33,7 +33,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
     }),
     onSubmit: async obj => {
       const response = await postRequest({
-        extension: EmployeeRepository.SalaryChangeReasonFilters.set,
+        extension: EmployeeRepository.SalaryChangeReason.set,
         record: JSON.stringify(obj)
       })
 
@@ -50,7 +50,7 @@ export default function HrSalaryForm({ labels, maxAccess, recordId }) {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: EmployeeRepository.SalaryChangeReasonFilters.get,
+          extension: EmployeeRepository.SalaryChangeReason.get,
           parameters: `_recordId=${recordId}`
         })
         formik.setValues(res?.record)

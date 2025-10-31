@@ -22,7 +22,7 @@ const HrSalary = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: EmployeeRepository.SalaryChangeReasonFilters.page,
+      extension: EmployeeRepository.SalaryChangeReason.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
 
@@ -38,7 +38,7 @@ const HrSalary = () => {
     access
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: EmployeeRepository.SalaryChangeReasonFilters.page,
+    endpointId: EmployeeRepository.SalaryChangeReason.page,
     datasetId: ResourceIds.SalaryChangeReasonFilter
   })
 
@@ -74,7 +74,7 @@ const HrSalary = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: EmployeeRepository.SalaryChangeReasonFilters.del,
+      extension: EmployeeRepository.SalaryChangeReason.del,
       record: JSON.stringify(obj)
     })
     toast.success(platformLabels.Deleted)
