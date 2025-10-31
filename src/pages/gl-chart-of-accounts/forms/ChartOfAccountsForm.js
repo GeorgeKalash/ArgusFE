@@ -103,7 +103,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <SegmentedInput
-                readOnly={editMode}
                 name='accountRef'
                 setFieldValue={formik.setFieldValue}
                 value={formik.values.accountRef}
