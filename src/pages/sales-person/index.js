@@ -92,7 +92,7 @@ const SalesPerson = () => {
         maxAccess: access
       },
       width: 600,
-      height: 500,
+      height: 550,
       title: labels.SalesPerson
     })
   }
