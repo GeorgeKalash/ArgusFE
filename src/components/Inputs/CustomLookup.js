@@ -1,9 +1,8 @@
-import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
+import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper, CircularProgress } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
-import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
 
@@ -27,6 +26,7 @@ const CustomLookup = ({
   onChange,
   onKeyDown,
   error,
+  success,
   firstFieldWidth = secondDisplayField ? 6 : 12,
   displayFieldWidth = 1,
   helperText,
@@ -50,7 +50,6 @@ const CustomLookup = ({
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
-
   const valueHighlightedOption = useRef(null)
 
   const selectFirstValue = useRef(null)
@@ -86,18 +85,20 @@ const CustomLookup = ({
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
+          PopperComponent={success ? PopperComponent : () => null}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           name={name}
           key={firstValue || null}
           value={firstValue}
-          {...(!firstValue && { inputValue: inputValue })}
+          {...(!firstValue && { inputValue })}
           size={size}
           options={store}
           filterOptions={options => {
-            if (displayField) {
-              return options.filter(option => option)
-            }
+            if (error) return []
+            if (displayField) return options.filter(option => option)
+
+            return options
           }}
           getOptionLabel={option => {
             if (typeof valueField == 'object') {
@@ -120,7 +121,6 @@ const CustomLookup = ({
           onHighlightChange={(event, newValue) => {
             valueHighlightedOption.current = newValue
           }}
-          PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
@@ -248,7 +248,6 @@ const CustomLookup = ({
               required={_required}
               onKeyUp={e => {
                 onKeyUp(e, valueHighlightedOption?.current)
-
                 if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{
