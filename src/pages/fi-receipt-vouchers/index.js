@@ -51,7 +51,7 @@ export default function CurrencyTrading() {
     }
   })
 
-  async function fetchWithFilter({ filters, pagination }) {
+  async function fetchWithFilters({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
         extension: FinancialRepository.ReceiptVouchers.snapshot,
@@ -87,7 +87,7 @@ export default function CurrencyTrading() {
   }
 
   const del = async obj => {
-    await postRequest({
+    await postRequestt({
       extension: FinancialRepository.ReceiptVouchers.del,
       record: JSON.stringify(obj)
     })

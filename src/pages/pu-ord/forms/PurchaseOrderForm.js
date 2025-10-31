@@ -1310,7 +1310,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                       if (newValue?.recordId) {
                         formik.setFieldTouched('header.dtId', false)
                       }
-                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
+                      formikkkkkkkkkkkkkk.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
