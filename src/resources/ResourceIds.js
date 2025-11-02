@@ -19,6 +19,7 @@ export const ResourceIds = {
 
   // inventory
   InventoryBelowMinimum: 60200,
+  FiscaYear: 41104,
 
   // HR
   TodaysAttendance: 60300,
