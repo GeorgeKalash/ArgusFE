@@ -649,5 +649,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'history.png',
     main: false
+  },
+  {
+    key: 'Serials',
+    label: platformLabels.Serials,
+    color: '#af1515ff',
+    image: 'history.png',
+    main: false
   }
 ]

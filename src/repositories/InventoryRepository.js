@@ -357,5 +357,9 @@ export const InventoryRepository = {
   },
   FiscaYear: {
     qry: service + 'qryFPE'
+  },
+  QtyOpeningSerials: {
+    qry: service + 'qryOQS',
+    set2: service + 'set2OQS'
   }
 }

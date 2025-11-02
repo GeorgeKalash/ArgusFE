@@ -16,10 +16,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useWindow } from 'src/windows'
+import { SerialsForm } from './SerialsForm'
 
 const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.InventoryOpeningQtys.qry
@@ -42,7 +45,6 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       pieces: '',
       periodId: null
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       year: yup.string().required(),
       siteId: yup.string().required(),
@@ -98,8 +100,35 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
     })()
   }, [])
 
+  const OpenSerialsForm = async () => {
+    stack({
+      Component: SerialsForm,
+      props: {
+        parentForm: formik.values
+      },
+      width: 700,
+      height: 600,
+      title: labels.Serials
+    })
+  }
+
+  const actions = [
+    {
+      key: 'Serials',
+      condition: true,
+      onClick: OpenSerialsForm,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell form={formik} resourceId={ResourceIds.InventoryOpeningQtys} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      actions={actions}
+      resourceId={ResourceIds.InventoryOpeningQtys}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -115,9 +144,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 required
                 refresh={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('year', newValue?.fiscalYear)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear)}
                 error={formik.touched.year && Boolean(formik.errors.year)}
               />
             </Grid>
