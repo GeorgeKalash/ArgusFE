@@ -14,7 +14,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 
 const IvFy = () => {
   const { getRequest } = useContext(RequestsContext)
-  const [fiscalYear, setFiscalYear] = useState({ fiscalYear: 2026 })
+  const [fiscalYear, setFiscalYear] = useState({ fiscalYear: 2025 })
 
   async function fetchGridData() {
     const response = await getRequest({
