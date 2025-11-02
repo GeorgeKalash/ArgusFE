@@ -35,8 +35,7 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
       startDate: null,
       endDate: null,
       periods: '',
-      status: '',
-      currentPeriodId: null
+      status: ''
     },
     maxAccess,
     validateOnChange: true,
@@ -185,18 +184,6 @@ export default function FiscalYearForm({ labels, maxAccess, setStore, store, win
                 maxAccess={maxAccess}
                 error={formik.touched.status && Boolean(formik.errors.status)}
                 required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalPeriod.qry}
-                name='currentPeriodId'
-                label={labels.fiscalPeriod}
-                valueField='currentPeriodId'
-                displayField='name'
-                values={formik.values}
-                readOnly
-                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
