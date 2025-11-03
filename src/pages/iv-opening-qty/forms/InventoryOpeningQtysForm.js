@@ -64,7 +64,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
         record: JSON.stringify(obj)
       })
 
-      if (!year && !siteId && !itemId) {
+      if (!year && !siteId && !itemId && !periodId) {
         toast.success(platformLabels.Added)
       } else toast.success(platformLabels.Edited)
 

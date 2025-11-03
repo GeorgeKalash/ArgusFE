@@ -141,7 +141,7 @@ export const OpeningSerialsForm = ({ parentForm, window }) => {
     return acc + (Number(curr.weight) || 0)
   }, 0)
 
-  const balanceWeight = parentForm.qty - totalWeight
+  const balanceWeight = parentForm?.qty - totalWeight
 
   return (
     <Form onSave={formik.handleSubmit} editMode={true}>
@@ -173,7 +173,7 @@ export const OpeningSerialsForm = ({ parentForm, window }) => {
                   <CustomNumberField
                     name='qty'
                     maxAccess={maxAccess}
-                    value={parentForm.qty.toFixed(2)}
+                    value={Number(parentForm?.qty).toFixed(2)}
                     label={labels.qty}
                     readOnly={true}
                   />
