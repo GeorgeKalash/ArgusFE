@@ -454,15 +454,17 @@ export default function JobOrderForm({
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = await getRouting(values?.routingId)
-    if (routing?.record?.isInactive) {
-      formik.setFieldValue('routingId', null)
-      formik.setFieldValue('routingRef', null)
-      formik.setFieldValue('routingName', null)
-    } else {
-      formik.setFieldValue('routingId', values?.routingId || null)
-      formik.setFieldValue('routingRef', values?.routingRef)
-      formik.setFieldValue('routingName', values?.routingName)
+    if (!isReleased) {
+      const routing = await getRouting(values?.routingId)
+      if (routing?.record?.isInactive) {
+        formik.setFieldValue('routingId', null)
+        formik.setFieldValue('routingRef', null)
+        formik.setFieldValue('routingName', null)
+      } else {
+        formik.setFieldValue('routingId', values?.routingId || null)
+        formik.setFieldValue('routingRef', values?.routingRef)
+        formik.setFieldValue('routingName', values?.routingName)
+      }
     }
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
@@ -766,7 +768,7 @@ export default function JobOrderForm({
                         readOnly={isCancelled || isPosted}
                         onChange={async (_, newValue) => {
                           await fillDesignInfo(newValue)
-                          await updateWC(newValue?.routingId, false)
+                          await updateWC(isReleased ? formik.values?.routingId : newValue?.routingId, false)
                         }}
                       />
                     </Grid>
@@ -854,7 +856,7 @@ export default function JobOrderForm({
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
                         ]}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await updateWC(newValue?.recordId, true)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
