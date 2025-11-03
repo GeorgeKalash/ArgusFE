@@ -157,7 +157,7 @@ export const OpeningSerialsForm = ({ parentForm, window }) => {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
+          <Grid container>
             <Grid item xs={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

@@ -89,11 +89,11 @@ const IvFy = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           pagination={false}
           rowId={['recordId']}
-          isLoading={false}
           refetch={refetch}
           maxAccess={access}
         />
