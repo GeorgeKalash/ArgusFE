@@ -70,7 +70,8 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
                 label={labels.periodId}
                 value={formik.values.periodId}
                 required
-                maxLength={8}
+                maxLength={5}
+                decimalScale={0}
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
