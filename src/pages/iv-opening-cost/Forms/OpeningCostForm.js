@@ -142,7 +142,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 }}
                 maxAccess={maxAccess}
                 required
-                error={formik.touched.itemId && Boolean(formik.errors.itemId)}
+                errorCheck={'itemId'}
               />
             </Grid>
             <Grid item xs={12}>
