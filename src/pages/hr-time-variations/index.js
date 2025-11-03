@@ -10,8 +10,8 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
-import TimeVariatrionForm from './Windows/TimeVariatrionForm'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
+import TimeVariatrionForm from './forms/TimeVariatrionForm'
 
 export default function TimeVariation() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -52,7 +52,22 @@ export default function TimeVariation() {
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_sortBy=recordId&_params=${params || ''}`
     })
 
-    return { ...response, _startAt: _startAt }
+    response.list = (response?.list || []).map(record => ({
+      ...record,
+      duration: time(record?.duration)
+    }))
+
+    return { ...response, _startAt }
+  }
+
+  function time(minutes) {
+    if (minutes == 0) return '00:00'
+
+    const absMinutes = Math.abs(minutes)
+    const hours = String(Math.floor(absMinutes / 60)).padStart(2, '0')
+    const mins = String(absMinutes % 60).padStart(2, '0')
+
+    return (minutes < 0 ? '-' : '') + `${hours}:${mins}`
   }
 
   const columns = [
@@ -73,7 +88,7 @@ export default function TimeVariation() {
       flex: 1
     },
     {
-      field: 'timeCodeString',
+      field: 'timeName',
       headerName: labels.timeCode,
       flex: 1
     },
