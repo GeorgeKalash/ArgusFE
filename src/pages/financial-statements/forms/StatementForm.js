@@ -18,7 +18,7 @@ import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 
 export default function StatementForm({ initialData, labels, maxAccess, setRecId, mainRecordId }) {
-  const { postRequest } = useContext(RequestsContext)
+  const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
 
@@ -107,11 +107,54 @@ export default function StatementForm({ initialData, labels, maxAccess, setRecId
     }
   }
 
+  const onImport = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.style.display = 'none'
+
+    input.onchange = async e => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      const text = await file.text()
+      const json = JSON.parse(text)
+
+      const pack = json.record
+
+      if (!pack?.fs) {
+        return
+      }
+
+      const res = await postRequest({
+        extension: FinancialStatementRepository.FinancialStatement.set2,
+        record: JSON.stringify(pack)
+      })
+
+      if (res?.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+        setRecId(res.recordId)
+      }
+
+      invalidate()
+    }
+
+    document.body.appendChild(input)
+    input.click()
+    document.body.removeChild(input)
+  }
+
   const actions = [
     {
       key: 'Export',
       condition: true,
       onClick: onExport,
+      disabled: !editMode
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImport,
       disabled: !editMode
     }
   ]
