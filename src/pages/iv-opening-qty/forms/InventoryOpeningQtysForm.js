@@ -100,7 +100,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
     })()
   }, [])
 
-  const OpenSerialsForm = async () => {
+  const OpenSerialsForm = () => {
     stack({
       Component: OpeningSerialsForm,
       props: {
