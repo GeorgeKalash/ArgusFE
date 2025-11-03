@@ -597,6 +597,7 @@ export const ResourceIds = {
   FinancialStatementsReport: 30405,
   BatchWorksheet: 42345,
   ProcessNotifications: 76102,
+  LeaveRequestODOM: 73201,
   PenaltyType: 75106,
 
   // GL
