@@ -27,13 +27,15 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
     maxAccess,
     initialValues: {
       recordId: null,
+      reference: '',
       name: '',
       color: ''
     },
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
-      color: yup.string().required()
+      color: yup.string().required(),
+      reference: yup.string().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -67,6 +69,19 @@ export default function DayTypesForm({ labels, maxAccess, recordId, window }) {
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'
