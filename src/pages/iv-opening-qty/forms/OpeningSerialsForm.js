@@ -2,7 +2,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { Grid } from '@mui/material'
+import { Box, Grid } from '@mui/material'
 import { useForm } from 'src/hooks/form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import * as yup from 'yup'
@@ -145,53 +145,55 @@ export const OpeningSerialsForm = ({ parentForm, window }) => {
 
   return (
     <Form onSave={formik.handleSubmit} editMode={true}>
-      <VertLayout>
-        <Grow>
-          <DataGrid
-            name='data'
-            maxAccess={maxAccess}
-            value={formik.values.data}
-            error={formik.errors?.data}
-            columns={columns}
-            onChange={value => formik.setFieldValue('data', value)}
-          />
-        </Grow>
-        <Fixed>
-          <Grid container>
-            <Grid item xs={6}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='totalWeight'
-                    maxAccess={maxAccess}
-                    value={totalWeight.toFixed(2)}
-                    label={labels.totalWeight}
-                    readOnly={true}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='qty'
-                    maxAccess={maxAccess}
-                    value={Number(parentForm?.qty).toFixed(2)}
-                    label={labels.qty}
-                    readOnly={true}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='balanceWeight'
-                    maxAccess={maxAccess}
-                    value={balanceWeight.toFixed(2)}
-                    label={labels.balanceWeight}
-                    readOnly={true}
-                  />
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <VertLayout>
+          <Grow>
+            <DataGrid
+              name='data'
+              maxAccess={maxAccess}
+              value={formik.values.data}
+              error={formik.errors?.data}
+              columns={columns}
+              onChange={value => formik.setFieldValue('data', value)}
+            />
+          </Grow>
+          <Fixed>
+            <Grid container>
+              <Grid item xs={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='totalWeight'
+                      maxAccess={maxAccess}
+                      value={totalWeight.toFixed(2)}
+                      label={labels.totalWeight}
+                      readOnly={true}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='qty'
+                      maxAccess={maxAccess}
+                      value={Number(parentForm?.qty).toFixed(2)}
+                      label={labels.qty}
+                      readOnly={true}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='balanceWeight'
+                      maxAccess={maxAccess}
+                      value={balanceWeight.toFixed(2)}
+                      label={labels.balanceWeight}
+                      readOnly={true}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Fixed>
-      </VertLayout>
+          </Fixed>
+        </VertLayout>
+      </Box>
     </Form>
   )
 }
