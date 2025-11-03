@@ -528,6 +528,15 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           dispersalType={formik.values.dispersalType}
                           countryId={formik.values.countryId}
                           corId={formik.values.corId}
+                          recordId={
+                            formik.values?.clientId &&
+                            formik.values?.oldBeneficiaryId &&
+                            formik.values?.oldBeneficiarySeqNo
+                              ? (formik.values.clientId * 100).toString() +
+                                (formik.values.oldBeneficiaryId * 10).toString() +
+                                formik.values.oldBeneficiarySeqNo
+                              : null
+                          }
                           viewBtns={false}
                         />
                       )}
@@ -545,6 +554,15 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           dispersalType={formik.values.dispersalType}
                           countryId={formik.values.countryId}
                           corId={formik.values.corId}
+                          recordId={
+                            formik.values?.clientId &&
+                            formik.values?.oldBeneficiaryId &&
+                            formik.values?.oldBeneficiarySeqNo
+                              ? (formik.values.clientId * 100).toString() +
+                                (formik.values.oldBeneficiaryId * 10).toString() +
+                                formik.values.oldBeneficiarySeqNo
+                              : null
+                          }
                           viewBtns={false}
                         />
                       )}
@@ -561,7 +579,7 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           submitted={submitted}
                           setSubmitted={setSubmitted}
                           setValidSubmit={setValidSubmit}
-                          editable={!editMode}
+                          forceEdit={editMode}
                           client={{
                             clientId: formik.values.clientId,
                             clientName: formik.values.clientName,
@@ -573,13 +591,22 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           }}
                           dispersalType={formik.values.dispersalType}
                           corId={formik.values.corId}
+                          recordId={
+                            formik.values?.clientId &&
+                            formik.values?.newBeneficiaryId &&
+                            formik.values?.newBeneficiarySeqNo
+                              ? (formik.values.clientId * 100).toString() +
+                                (formik.values.newBeneficiaryId * 10).toString() +
+                                formik.values.newBeneficiarySeqNo
+                              : null
+                          }
                           submitMainForm={false}
                         />
                       )}
                       {dispersalMode === DISPERSAL_MODE_CASH && (
                         <BenificiaryCashForm
                           viewBtns={false}
-                          editable={!editMode}
+                          forceEdit={editMode}
                           resetForm={resetForm}
                           setResetForm={setResetForm}
                           onChange={changedBeneficiaryData}
@@ -598,6 +625,15 @@ const OutwardsModificationForm = ({ recordId, window }) => {
                           dispersalType={formik.values.dispersalType}
                           countryId={formik.values.countryId}
                           corId={formik.values.corId}
+                          recordId={
+                            formik.values?.clientId &&
+                            formik.values?.newBeneficiaryId &&
+                            formik.values?.newBeneficiarySeqNo
+                              ? (formik.values.clientId * 100).toString() +
+                                (formik.values.newBeneficiaryId * 10).toString() +
+                                formik.values.newBeneficiarySeqNo
+                              : null
+                          }
                           submitMainForm={false}
                         />
                       )}
