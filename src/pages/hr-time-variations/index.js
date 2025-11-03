@@ -52,17 +52,29 @@ export default function TimeVariation() {
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_sortBy=recordId&_params=${params || ''}`
     })
 
-    response.list = (response?.list || []).map(record => ({
-      ...record,
-      duration: time(record?.duration)
-    }))
+    response.list = (response?.list || []).map(record => {
+      const dayId = record?.dayId
+      let formattedDay = ''
+
+      if (dayId && dayId.length === 8) {
+        const year = dayId.slice(0, 4)
+        const month = dayId.slice(4, 6)
+        const day = dayId.slice(6, 8)
+        formattedDay = `${day}/${month}/${year}`
+      }
+
+      return {
+        ...record,
+        clockDuration: time(record?.duration),
+        dayId: formattedDay
+      }
+    })
 
     return { ...response, _startAt }
   }
 
   function time(minutes) {
     if (minutes == 0) return '00:00'
-
     const absMinutes = Math.abs(minutes)
     const hours = String(Math.floor(absMinutes / 60)).padStart(2, '0')
     const mins = String(absMinutes % 60).padStart(2, '0')
@@ -77,10 +89,9 @@ export default function TimeVariation() {
       flex: 1
     },
     {
-      field: 'dayIdString',
+      field: 'dayId',
       headerName: labels.date,
-      flex: 1,
-      type: 'date'
+      flex: 1
     },
     {
       field: 'employeeName',
@@ -93,7 +104,7 @@ export default function TimeVariation() {
       flex: 1
     },
     {
-      field: 'clockDurationString',
+      field: 'clockDuration',
       headerName: labels.clockDuration,
       flex: 1
     },
@@ -104,7 +115,7 @@ export default function TimeVariation() {
       type: 'number'
     },
     {
-      field: 'damageLevelString',
+      field: 'damageLevelName',
       headerName: labels.damageLevel,
       flex: 1
     },
