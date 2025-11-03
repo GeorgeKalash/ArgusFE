@@ -826,14 +826,15 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.ProductionLine.qry}
+                        endpointId={formik?.values?.itemId && ManufacturingRepository.ProductionLine.qry3}
+                        parameters={`_itemId=${formik?.values?.itemId}`}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
                         valueField='recordId'
                         displayField='name'
                         maxAccess={maxAccess}
-                        readOnly={isCancelled || isPosted}
+                        readOnly={!formik?.values?.itemId || isCancelled || isPosted}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                         }}
