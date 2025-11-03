@@ -17,7 +17,13 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
 
   const tabs = [
     { label: labels.jobOrder },
-    { label: labels.routing, disabled: !store.recordId },
+    {
+      label: labels.routing,
+      disabled: !store.recordId,
+      onRefetch: () => {
+        setRefetchRouting(true)
+      }
+    },
     { label: labels.worksheet, disabled: !store.recordId },
     { label: labels.overhead, disabled: !store.recordId },
     { label: labels.materials, disabled: !store.recordId },

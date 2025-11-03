@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CostAllocationRepository } from 'src/repositories/CostAllocationRepository'
 import { Grid } from '@mui/material'
@@ -20,6 +20,7 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
   const { recordId, isClosed } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const latestListRef = useRef([])
 
   const {
     query: { data },
@@ -107,8 +108,13 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
     return true
   }
 
+  useEffect(() => {
+    latestListRef.current = data?.list ?? []
+  }, [data])
+
   async function onSubmit(obj) {
-    const list = data?.list || []
+    const list = latestListRef.current || []
+
     const i = list.findIndex(x => x.seqNo === obj.seqNo)
     let newData
 
@@ -120,7 +126,16 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
       newData = [...list, obj]
     }
 
+    obj.seqNo = obj.seqNo ?? list?.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1
+
+    const res = await postRequest({
+      extension: CostAllocationRepository.TrxCostType.set,
+      record: JSON.stringify(obj)
+    })
+
     saveTRX(newData)
+
+    return res
   }
 
   function openForm(obj) {
@@ -130,7 +145,7 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
         labels,
         recordId: obj?.caId,
         caId: recordId,
-        seqNo: obj?.seqNo ?? maxSeqNo,
+        seqNo: obj?.seqNo,
         onSubmit,
         maxAccess: access
       },
@@ -149,7 +164,6 @@ const TransactionTab = ({ store, labels, access, setStore }) => {
   }
 
   const baseAmounts = data ? data.list.reduce((acc, item) => acc + item.baseAmount, 0) : 0
-  const maxSeqNo = data ? data.list.reduce((acc, item) => Math.max(acc, item.seqNo), 0) + 1 : 0
 
   return (
     <VertLayout>

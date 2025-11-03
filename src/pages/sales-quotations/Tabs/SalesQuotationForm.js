@@ -70,6 +70,23 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     enabled: !recordId
   })
 
+  async function validateSalesPerson(spId) {
+    if (!spId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.SalesPerson.get,
+      parameters: `_recordId=${spId}`
+    })
+
+    const salesperson = res?.record
+
+    if (!salesperson || salesperson.isInactive) {
+      return null
+    }
+
+    return spId
+  }
+
   const initialValues = {
     recordId,
     dtId: null,
@@ -743,7 +760,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
     formik.setFieldValue('plId', res?.record?.plId || formik.values?.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
     formik.setFieldValue('currencyId', res?.record?.currencyId)
-    formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
+    const validSpId = await validateSalesPerson(res?.record?.spId || formik.values.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('shipToAddressId', res?.record?.shipAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     formik.setFieldValue('shipAddress', shipAdd || '')
@@ -1132,7 +1151,8 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
+    const validSpId = await validateSalesPerson(res?.record?.spId || defaults.userDefaultsList.spId)
+    formik.setFieldValue('spId', validSpId)
     formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
   }
   useEffect(() => {
@@ -1187,7 +1207,9 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         const plant = defaultValues.userDefaultsList.plantId
         const salesPerson = defaultValues.userDefaultsList.spId
         formik.setFieldValue('siteId', parseInt(siteId))
-        formik.setFieldValue('spId', parseInt(salesPerson))
+        const validSpId = await validateSalesPerson(salesPerson)
+        formik.setFieldValue('spId', validSpId)
+
         formik.setFieldValue('plantId', parseInt(plant))
         formik.setFieldValue('plId', parseInt(defaultValues?.systemDefaultsList?.plId))
       }
@@ -1336,6 +1358,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     endpointId={SaleRepository.SalesPerson.qry}
                     name='spId'
                     label={labels.salesPerson}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     columnsInDropDown={[
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }

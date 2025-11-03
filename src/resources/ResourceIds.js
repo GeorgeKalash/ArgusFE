@@ -96,6 +96,7 @@ export const ResourceIds = {
   ExchangeTables: 32101,
   NumberRange: 20103,
   FiscalYears: 20109,
+  FiscalPeriod: 20138,
   BpRelationType: 21107,
   IdCategories: 21106,
   Groups: 21101,
