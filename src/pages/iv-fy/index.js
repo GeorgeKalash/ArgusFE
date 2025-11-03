@@ -92,7 +92,7 @@ const IvFy = () => {
           name='table'
           columns={columns}
           gridData={data}
-          pagination={false}
+          paginationType={'client'}
           rowId={['recordId']}
           refetch={refetch}
           maxAccess={access}
