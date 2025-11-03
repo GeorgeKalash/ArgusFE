@@ -9,7 +9,7 @@ export const TimeAttendanceRepository = {
     set: service + 'setOTP',
     get: service + 'getOTP',
     del: service + 'delOTP',
-    qry: service + 'qryOTP',
+    qry: service + 'qryOTP'
   },
   PendingPunches: {
     page: service + 'pagePP',
@@ -51,6 +51,7 @@ export const TimeAttendanceRepository = {
   },
   DayTypes: {
     page: service + 'pageDT',
+    qry: service + 'qryDT',
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'

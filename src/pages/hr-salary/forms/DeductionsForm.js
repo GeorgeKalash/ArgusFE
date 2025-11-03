@@ -54,7 +54,7 @@ export default function DeductionsForm({
         .number()
         .min(0)
         .max(100)
-        .test('pct-required', 'Percentage is required', function (value) {
+        .test(function (value) {
           const { isPct } = this.parent
 
           return isPct ? !!value : true

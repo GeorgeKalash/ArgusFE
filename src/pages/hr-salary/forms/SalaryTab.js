@@ -74,7 +74,7 @@ export default function SalaryTab({
       bankId: yup
         .number()
         .nullable()
-        .test('bank-required', 'Bank is required', function (value) {
+        .test(function (value) {
           const { paymentMethod } = this.parent
 
           return paymentMethod == 2 ? !!value : true
@@ -82,7 +82,7 @@ export default function SalaryTab({
       accountNumber: yup
         .number()
         .nullable()
-        .test('account-required', 'Account number is required', function (value) {
+        .test(function (value) {
           const { paymentMethod } = this.parent
 
           return paymentMethod == 2 ? !!value : true

@@ -15,6 +15,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { DataSets } from 'src/resources/DataSets'
 import { calculateFixed } from 'src/utils/Payroll'
 import Form from 'src/components/Shared/Form'
+import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 
 export default function EntitlementForm({
   labels,
@@ -45,17 +46,26 @@ export default function EntitlementForm({
       pct: 0,
       comments: '',
       isTaxable: false,
-      edCalcType: null
+      edCalcType: null,
+      dayTypeId: null
     },
     validationSchema: yup.object({
       edId: yup.number().required(),
       fixedAmount: yup.number().min(0).required(),
       edCalcType: yup.number().required(),
+      dayTypeId: yup
+        .number()
+        .nullable()
+        .test(function (value) {
+          const { edCalcType } = this.parent
+
+          return edCalcType == 2 ? !!value : true
+        }),
       pct: yup
         .number()
         .min(0)
         .max(100)
-        .test('pct-required', 'Percentage is required', function (value) {
+        .test(function (value) {
           const { isPct } = this.parent
 
           return isPct ? !!value : true
@@ -202,8 +212,26 @@ export default function EntitlementForm({
               values={formik.values}
               maxAccess={maxAccess}
               required
-              onChange={(_, newValue) => formik.setFieldValue('edCalcType', newValue?.key || null)}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('dayTypeId', null)
+                formik.setFieldValue('edCalcType', newValue?.key || null)
+              }}
               error={formik.touched.edCalcType && Boolean(formik.errors.edCalcType)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ResourceComboBox
+              endpointId={TimeAttendanceRepository.DayTypes.qry}
+              name='dayTypeId'
+              label={labels.dayType}
+              valueField='recordId'
+              displayField='name'
+              values={formik.values}
+              maxAccess={maxAccess}
+              readOnly={formik.values?.edCalcType != 2}
+              required={formik.values?.edCalcType == 2}
+              onChange={(_, newValue) => formik.setFieldValue('dayTypeId', newValue?.recordId || null)}
+              error={formik.touched.dayTypeId && Boolean(formik.errors.dayTypeId)}
             />
           </Grid>
         </Grid>
