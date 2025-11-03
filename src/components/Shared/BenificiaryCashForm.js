@@ -1,4 +1,4 @@
-import { Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useEffect, useState, useContext, useRef } from 'react'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -46,6 +46,7 @@ const BenificiaryCashForm = ({
   submitMainForm = true,
   recordId,
   forceDisable,
+  forceEdit = null,
   window
 }) => {
   const [maxAccess, setMaxAccess] = useState({ record: [] })
@@ -56,7 +57,7 @@ const BenificiaryCashForm = ({
   const hiddenIsBlocked = useRef(false)
   const { platformLabels } = useContext(ControlContext)
 
-  useSetWindow({ title: platformLabels.Cash, window })
+  useSetWindow({ title: platformLabels.cash, window })
 
   const initialValues = {
     //RTBEN
@@ -100,7 +101,6 @@ const BenificiaryCashForm = ({
   const { formik } = useForm({
     maxAccess,
     initialValues,
-    validateOnChange: true,
     validationSchema: yup.object({
       clientId: yup.string().required(),
       countryId: yup.string().required(),
@@ -167,7 +167,7 @@ const BenificiaryCashForm = ({
     }
   })
 
-  const editMode = !!formik.values.recordId
+  const editMode = forceEdit == null ? !!formik.values.recordId : forceEdit
 
   const { labels: _labels } = useResourceQuery({
     datasetId: ResourceIds.BeneficiaryCash
@@ -202,7 +202,7 @@ const BenificiaryCashForm = ({
 
   useEffect(() => {
     ;(async function () {
-      if (recordId) {
+      if (recordId && client?.clientId && beneficiary?.beneficiaryId && beneficiary?.beneficiarySeqNo) {
         const RTBEC = await getRequest({
           extension: RemittanceOutwardsRepository.BeneficiaryCash.get,
           parameters: `_clientId=${client?.clientId}&_beneficiaryId=${beneficiary?.beneficiaryId}&_seqNo=${beneficiary?.beneficiarySeqNo}`
@@ -218,11 +218,10 @@ const BenificiaryCashForm = ({
         const obj = {
           //RTBEN
           clientId: client?.clientId,
-          recordId: (client?.clientId * 10).toString() + beneficiary?.beneficiaryId,
-
+          recordId,
           beneficiaryId: beneficiary?.beneficiaryId,
           name: RTBEN?.record?.name,
-          dispersalType: dispersalType,
+          dispersalType,
           nationalityId: RTBEN?.record?.nationalityId,
           isBlocked: RTBEN?.record?.isBlocked,
           isInactive: RTBEN?.record?.isInactive,
@@ -257,7 +256,7 @@ const BenificiaryCashForm = ({
         formik.setValues(obj)
       }
     })()
-  }, [])
+  }, [recordId])
 
   useEffect(() => {
     if (resetForm) {
