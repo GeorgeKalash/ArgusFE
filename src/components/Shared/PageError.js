@@ -2,7 +2,7 @@ import React from 'react'
 import Window from './Window'
 import { Box, Button, DialogActions, DialogContent } from '@mui/material'
 
-const PageError = ({ onClose, message, height = '' }) => {
+const PageError = ({ onClose, message, height = '', fullScreen }) => {
   const errorMessage =
     typeof message === 'string'
       ? message
@@ -14,10 +14,13 @@ const PageError = ({ onClose, message, height = '' }) => {
       ? message.response.data.error
       : message?.response?.data
 
+  console.log(fullScreen)
+
   return (
     <Window
       Title='Error'
       width={450}
+      fullScreen
       height={height}
       onClose={onClose}
       expandable={false}

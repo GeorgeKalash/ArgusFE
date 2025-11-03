@@ -24,7 +24,8 @@ const MenuProvider = ({ children }) => {
     var parameters = '_filter='
     getRequest({
       extension: SystemRepository.mainMenu,
-      parameters: parameters
+      parameters: parameters,
+      fullScreen: true
     }).then(async res => {
       const builtMenu = buildMenu(res?.record?.folders, res?.record?.commandLines)
       const builtGear = buildGear(res?.record?.commandLines)
