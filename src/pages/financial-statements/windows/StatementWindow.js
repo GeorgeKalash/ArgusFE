@@ -23,9 +23,9 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
       parameters: `_recordId=${mainRecordId}`
     })
 
-    if (res?.record) {
-      setLoadedData(res.record)
-    }
+    setLoadedData(res?.record)
+
+    return res?.record
   }
 
   useEffect(() => {

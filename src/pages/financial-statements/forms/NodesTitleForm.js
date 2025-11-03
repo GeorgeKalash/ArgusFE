@@ -45,7 +45,8 @@ const NodesTitleForm = ({ labels, maxAccess, node, mainRecordId, onOk, window, i
 
     const seqNo = node?.current?.nodeId
 
-    const existingTitles = (initialData ?? []).filter(t => Number(t.seqNo) === Number(seqNo))
+    const currentNode = (initialData ?? []).find(n => Number(n.seqNo) === Number(seqNo))
+    const existingTitles = currentNode?.titles ?? []
 
     const listView =
       titlesXMLList?.list

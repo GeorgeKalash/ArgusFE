@@ -151,7 +151,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
             labels,
             maxAccess,
             mainRecordId,
-            initialData: formik.values.titles,
+            initialData: formik.values.items,
             onOk
           },
           width: 700,
@@ -217,9 +217,33 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
 
       node.current.nodeId = res.recordId
       toast.success(platformLabels.Edited)
-      fetchData()
+      const newData = await fetchData()
+      getData(newData)
     }
   })
+
+  const getData = data => {
+    formik.setValues({
+      ...formik.values,
+      fsId: mainRecordId,
+      items: data.nodes.map((node, i) => {
+        const nodeTitles =
+          data.titles
+            ?.filter(t => t.seqNo === node.seqNo)
+            ?.map(t => ({
+              languageId: t.languageId,
+              title: t.title
+            })) ?? []
+
+        return {
+          id: i + 1,
+          titles: nodeTitles,
+          ...node
+        }
+      }),
+      titles: data.titles ?? []
+    })
+  }
 
   useEffect(() => {
     if (!mainRecordId) return
@@ -227,30 +251,10 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     if (initialData?.nodes?.length) {
       if (!formik.values.items[0].reference) {
         parents.current = initialData.nodes
-
-        formik.setValues({
-          ...formik.values,
-          fsId: mainRecordId,
-          items: initialData.nodes.map((node, i) => {
-            const nodeTitles =
-              initialData.titles
-                ?.filter(t => t.seqNo === node.seqNo)
-                ?.map(t => ({
-                  languageId: t.languageId,
-                  title: t.title
-                })) ?? []
-
-            return {
-              id: i + 1,
-              titles: nodeTitles,
-              ...node
-            }
-          }),
-          titles: initialData.titles ?? []
-        })
+        getData(initialData)
       }
     }
-  }, [mainRecordId, initialData?.nodes?.length])
+  }, [initialData?.nodes?.length])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
@@ -258,7 +262,10 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         <Grow>
           <DataGrid
             name='items'
-            onChange={value => formik.setFieldValue('items', value)}
+            onChange={value => {
+              parents.current = value.filter(v => v.reference)
+              formik.setFieldValue('items', value)
+            }}
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
