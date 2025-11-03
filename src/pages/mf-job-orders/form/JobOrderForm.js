@@ -80,7 +80,6 @@ export default function JobOrderForm({
     stdWeight: 0,
     netSerialsWeight: 0,
     producedWgt: 0,
-    itemWeight: 0,
     expectedQty: 0,
     expectedPcs: 0,
     RMCost: 0,
@@ -419,7 +418,7 @@ export default function JobOrderForm({
       formik.setFieldValue('itemName', null)
       formik.setFieldValue('sku', null)
       formik.setFieldValue('itemsPL', null)
-      formik.setFieldValue('itemWeight', null)
+      formik.setFieldValue('stdWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
 
@@ -438,7 +437,13 @@ export default function JobOrderForm({
     formik.setFieldValue('itemId', values?.recordId)
     formik.setFieldValue('itemName', values?.name)
     formik.setFieldValue('sku', values?.sku)
-    formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
+    formik.setFieldValue('stdWeight', ItemPhysProp?.record?.weight)
+    formik.setFieldValue(
+      'expectedQty',
+      !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
+        ? 0
+        : formik.values.expectedPcs * ItemPhysProp?.record?.weight
+    )
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
     formik.setFieldValue('itemCategoryId', values?.categoryId)
@@ -797,9 +802,9 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={6}>
                       <CustomNumberField
-                        name='itemWeight'
+                        name='stdWeight'
                         label={labels.itemWeight}
-                        value={formik.values.itemWeight}
+                        value={formik.values.stdWeight}
                         readOnly
                       />
                     </Grid>
@@ -1019,6 +1024,9 @@ export default function JobOrderForm({
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={ProductModelingRepository.Rubber.snapshot}
+                  parameters={{
+                    _lineId: formik.values.lineId || 0
+                  }}
                   valueField='reference'
                   displayField='reference'
                   secondDisplayField={false}

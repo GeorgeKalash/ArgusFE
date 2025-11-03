@@ -344,6 +344,9 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={ProductModelingRepository.Rubber.snapshot}
+                    parameters={{
+                      _lineId: formik.values.productionLineId || 0
+                    }}
                     valueField='reference'
                     displayField='reference'
                     secondDisplayField={false}
