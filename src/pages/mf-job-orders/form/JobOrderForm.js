@@ -421,6 +421,10 @@ export default function JobOrderForm({
       formik.setFieldValue('stdWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
+      formik.setFieldValue('lineId', null)
+      formik.setFieldValue('routingId', null)
+      formik.setFieldValue('routingRef', null)
+      formik.setFieldValue('routingName', null)
 
       return
     }
@@ -446,6 +450,9 @@ export default function JobOrderForm({
     )
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
+    formik.setFieldValue('routingId', null)
+    formik.setFieldValue('routingRef', null)
+    formik.setFieldValue('routingName', null)
     formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
@@ -837,6 +844,14 @@ export default function JobOrderForm({
                         readOnly={!formik?.values?.itemId || isCancelled || isPosted}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
+                          formik.setFieldValue('routingId', null)
+                          formik.setFieldValue('routingRef', '')
+                          formik.setFieldValue('routingName', '')
+                        }}
+                        onClear={() => {
+                          formik.setFieldValue('routingId', null)
+                          formik.setFieldValue('routingRef', '')
+                          formik.setFieldValue('routingName', '')
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
@@ -844,6 +859,9 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceLookup
                         endpointId={ManufacturingRepository.Routing.snapshot2}
+                        parameters={{
+                          _lineId: formik.values.lineId || 0
+                        }}
                         valueField='reference'
                         displayField='name'
                         name='routingId'
@@ -855,7 +873,7 @@ export default function JobOrderForm({
                         errorCheck={'routingId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={!formik.values.lineId || isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
@@ -1025,9 +1043,6 @@ export default function JobOrderForm({
               <Grid item xs={12}>
                 <ResourceLookup
                   endpointId={ProductModelingRepository.Rubber.snapshot}
-                  parameters={{
-                    _lineId: formik.values.lineId || 0
-                  }}
                   valueField='reference'
                   displayField='reference'
                   secondDisplayField={false}
