@@ -16,7 +16,7 @@ import Form from 'src/components/Shared/Form'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
-const SerialsForm = ({ parentForm, window }) => {
+export default function OpeningSerialsForm({ parentForm, window }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
@@ -195,5 +195,3 @@ const SerialsForm = ({ parentForm, window }) => {
     </Form>
   )
 }
-
-export default SerialsForm

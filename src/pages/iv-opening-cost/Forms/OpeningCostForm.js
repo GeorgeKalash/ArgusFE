@@ -106,6 +106,21 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
               />
             </Grid>
             <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='periodId'
+                label={labels.fiscalPeriod}
+                valueField='periodId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
+                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
@@ -150,21 +165,6 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 decimalScale={3}
                 onClear={() => formik.setFieldValue('avgCost', 0)}
                 error={formik.touched.avgCost && Boolean(formik.errors.avgCost)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalPeriod.qry}
-                name='periodId'
-                label={labels.fiscalPeriod}
-                valueField='periodId'
-                displayField='name'
-                values={formik.values}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
-                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
           </Grid>

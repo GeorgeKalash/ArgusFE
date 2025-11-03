@@ -17,7 +17,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useWindow } from 'src/windows'
-import { SerialsForm } from './SerialsForm'
+import { OpeningSerialsForm } from './OpeningSerialsForm'
 
 const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -102,7 +102,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
 
   const OpenSerialsForm = async () => {
     stack({
-      Component: SerialsForm,
+      Component: OpeningSerialsForm,
       props: {
         parentForm: formik.values
       },
@@ -146,6 +146,21 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear)}
                 error={formik.touched.year && Boolean(formik.errors.year)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='periodId'
+                label={labels.fiscalPeriod}
+                valueField='periodId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
+                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -237,21 +252,6 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 error={formik.touched.avgWeight && Boolean(formik.errors.avgWeight)}
                 maxLength={8}
                 allowNegative={false}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalPeriod.qry}
-                name='periodId'
-                label={labels.fiscalPeriod}
-                valueField='periodId'
-                displayField='name'
-                values={formik.values}
-                required
-                readOnly={editMode}
-                maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
-                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
           </Grid>
