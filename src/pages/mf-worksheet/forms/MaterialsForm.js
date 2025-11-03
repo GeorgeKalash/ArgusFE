@@ -100,7 +100,8 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
       items: yup.array().of(
         yup.object({
           sku: yup.string().required(),
-          itemName: yup.string().required()
+          itemName: yup.string().required(),
+          qty: yup.number().required()
         })
       )
     }),
@@ -515,7 +516,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
                 component: 'numberfield',
                 label: labels.pieces,
                 name: 'pcs',
-                props: { maxLength: 4, decimalScale: 0 }
+                props: { decimalScale: 0 }
               }
             ]}
             disabled={isPosted}

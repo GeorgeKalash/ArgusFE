@@ -148,6 +148,7 @@ export const EmployeeRepository = {
   Leaves: {
     set: service + 'setLS',
     del: service + 'delLS',
+    get: service + 'getLS'
   }
 }
 

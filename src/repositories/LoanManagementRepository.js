@@ -47,7 +47,9 @@ export const LoanManagementRepository = {
     del: service + 'delLR',
     snapshot: service + 'snapshotLR',
     close: service + 'closeLR',
-    reopen: service + 'reopenLR'
+    reopen: service + 'reopenLR',
+    set2: service + 'set2LR',
+    get2: service + 'get2LR'
   },
   LeaveReturn: {
     page: service + 'pageRE',
@@ -57,6 +59,9 @@ export const LoanManagementRepository = {
     snapshot: service + 'snapshotRE',
     close: service + 'closeRE',
     reopen: service + 'reopenRE'
+  },
+  PreviewDays: {
+    preview: service + 'previewLD'
   },
   Leaves: {
     qry: service + 'qryELB'
