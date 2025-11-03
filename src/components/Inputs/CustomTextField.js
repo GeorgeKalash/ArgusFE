@@ -8,7 +8,6 @@ import { checkAccess } from 'src/lib/maxAccess'
 const CustomTextField = ({
   type = 'text', //any valid HTML5 input type
   variant = 'outlined', //outlined, standard, filled
-  displayType,
   value,
   onClear,
   onSearch,
@@ -17,7 +16,7 @@ const CustomTextField = ({
   autoFocus = false,
   readOnly = false,
   clearable = false,
-  autoComplete = 'new-password',
+  autoComplete = 'off',
   numberField = false,
   editMode = false,
   maxLength = '1000',
@@ -107,7 +106,7 @@ const CustomTextField = ({
         setIsFocused(false), setFocus(false)
       }}
       inputProps={{
-        autoComplete,
+        autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
         ...(dir ? { dir } : {}),
@@ -116,8 +115,7 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none',
-          WebkitTextSecurity: displayType == 'password' ? 'disc' : 'none'
+          textTransform: forceUpperCase ? 'uppercase' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
         'data-search': search ? 'true' : 'false'

@@ -126,6 +126,7 @@ export const ResourceIds = {
   RateType: 32100,
   MultiCurrencyMapping: 32102,
   ClientRelation: 36202,
+  PrintLabels: 41229,
   MC_Default: 32104,
   MultiCurrencyMapping: 32102,
   Description_Template: 31110,
@@ -593,6 +594,7 @@ export const ResourceIds = {
   Files: 71209,
   FinancialStatementsReport: 30405,
   BatchWorksheet: 42345,
+  ProcessNotifications:76102,
 
   // GL
   GLSalesInvoice: 51604,
@@ -668,5 +670,5 @@ export const ResourceIds = {
   ADDCorrespondentAgentBranch: 36608,
   ADDNationalClientMaster: 35601,
   ADDWorkClientMaster: 35602,
-  ADDClientCorporate: 35603
+  ADDClientCorporate: 35603,
 }

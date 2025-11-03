@@ -155,6 +155,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
         window.setTitle(res.record.sku ? `${labels.items} ${res.record.sku}` : labels.items)
       }
 
+      await refetchForm(response.recordId)
+
       invalidate()
     }
   })

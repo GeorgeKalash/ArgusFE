@@ -1,43 +1,22 @@
 import { useContext, useEffect } from 'react'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
-import toast from 'react-hot-toast'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { DataSets } from 'src/resources/DataSets'
-import { ControlContext } from 'src/providers/ControlContext'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useForm } from 'src/hooks/form'
 import Form from 'src/components/Shared/Form'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import { Grow } from 'src/components/Shared/Layouts/Grow'
 
-const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+const NodesTitleForm = ({ labels, maxAccess, node, mainRecordId, onOk, window, initialData = [] }) => {
+  const { getRequest } = useContext(RequestsContext)
   const { user } = useContext(AuthContext)
 
   const { formik } = useForm({
     maxAccess,
     initialValues: {
       titles: []
-    },
-    onSubmit: async values => {
-      await postRequest({
-        extension: FinancialStatementRepository.Title.set2,
-        record: JSON.stringify({
-          fsNodeId: node?.current?.nodeId,
-          titles: values?.titles
-            ?.filter(line => line.title)
-            .map(item => ({
-              ...item,
-              fsNodeId: node?.current?.nodeId
-            }))
-        })
-      })
-
-      toast.success(platformLabels.Edited)
-      fetchData()
     }
   })
 
@@ -59,35 +38,63 @@ const NodesTitleForm = ({ labels, maxAccess, node, fetchData }) => {
   async function getTitles() {
     if (!node?.current?.nodeId) return
 
-    const [res, titlesXMLList] = await Promise.all([
-      getRequest({
-        extension: FinancialStatementRepository.Title.qry,
-        parameters: `_fsNodeId=${node?.current?.nodeId}`
-      }),
-      getRequest({
-        extension: SystemRepository.KeyValueStore,
-        parameters: `_dataset=${DataSets.LANGUAGE}&_language=${user.languageId}`
-      })
-    ])
+    const titlesXMLList = await getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: `_dataset=${DataSets.LANGUAGE}&_language=${user.languageId}`
+    })
+
+    const seqNo = node?.current?.nodeId
+
+    const currentNode = (initialData ?? []).find(n => Number(n.seqNo) === Number(seqNo))
+    const existingTitles = currentNode?.titles ?? []
 
     const listView =
-      titlesXMLList?.list?.map((node, index) => ({
-        id: index + 1,
-        languageId: parseInt(node.key, 10),
-        title: res?.list?.find(item => item.languageId.toString() === node.key)?.title,
-        fsNodeId: parseInt(node?.current?.nodeId, 10),
-        languageName: node.value
-      })) ?? []
+      titlesXMLList?.list
+        ?.map((lang, index) => {
+          const match = existingTitles.find(t => t.languageId?.toString() === lang.key)
+
+          return {
+            id: index + 1,
+            languageId: parseInt(lang.key, 10),
+            languageName: lang.value,
+            title: match?.title ?? '',
+            fsId: mainRecordId,
+            seqNo
+          }
+        })
+        .filter(Boolean) ?? []
 
     formik.setFieldValue('titles', listView)
   }
 
   useEffect(() => {
     getTitles()
-  }, [node?.current?.nodeId])
+  }, [node?.current?.nodeId, initialData.length])
+
+  const ok = () => {
+    const seqNo = node?.current?.nodeId
+
+    const validTitles = (formik.values.titles ?? []).map(t => ({
+      ...t,
+      seqNo,
+      fsId: mainRecordId
+    }))
+
+    if (onOk) onOk(validTitles)
+    window.close()
+  }
+
+  const actions = [
+    {
+      key: 'Ok',
+      condition: true,
+      onClick: ok,
+      disabled: false
+    }
+  ]
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} isParentWindow={false}>
+    <Form onSave={ok} maxAccess={maxAccess} isParentWindow={false} actions={actions} isSaved={false}>
       <VertLayout>
         <Grow>
           <DataGrid

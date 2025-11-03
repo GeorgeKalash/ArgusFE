@@ -62,6 +62,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import Installments from 'src/components/Shared/Installments'
+import { PUSerialsForm } from 'src/components/Shared/PUSerialsForm'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -529,7 +530,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeight',
       props: {
         readOnly: true,
-        decimalScale: 3,
+        decimalScale: 3
       }
     },
     {
@@ -846,7 +847,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik?.values?.header?.description },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
@@ -901,6 +902,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const modifiedList = await Promise.all(
       puTrxItems?.map(async (item, index) => {
+        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
         const taxDetailsResponse = []
 
         const updatedpuTrxTaxes =
@@ -930,7 +932,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 id: index
               }
             }),
-          taxDetails: updatedpuTrxTaxes.filter(tax => tax.seqNo === item.seqNo)
+          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
         }
       })
     )
@@ -1176,7 +1178,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       formik.setFieldValue('header.currentDiscount', currentPctAmount)
     } else {
       currentTdAmount =
-        formik.values.header.currentDiscount < 0 || formik.values.header.subtotal < formik.values.header.currentDiscount
+        formik.values.header.currentDiscount < 0 || subtotal < formik.values.header.currentDiscount
           ? 0
           : formik.values.header.currentDiscount
       currentPctAmount = (parseFloat(currentTdAmount) / parseFloat(formik.values.header.subtotal)) * 100
@@ -1299,14 +1301,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       hiddenTdAmount: parseFloat(tdAmount),
       typeChange: typeChange
     })
-    formik.setFieldValue(
-      'header.tdAmount',
-      formik.values?.header?.currentDiscount
-        ? formik.values?.header?.currentDiscount
-        : _discountObj?.hiddenTdAmount
-        ? _discountObj?.hiddenTdAmount?.toFixed(2)
-        : 0
-    )
+    formik.setFieldValue('header.tdAmount', _discountObj?.hiddenTdAmount ? _discountObj?.hiddenTdAmount?.toFixed(2) : 0)
+
     formik.setFieldValue('header.tdType', _discountObj?.tdType)
     formik.setFieldValue('header.currentDiscount', _discountObj?.currentDiscount || 0)
     formik.setFieldValue('header.tdPct', _discountObj?.hiddenTdPct)
@@ -1524,6 +1520,30 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               siteId: formik?.values?.header.siteId,
               maxAccess,
               checkForSiteId: row.qty >= 0 ? false : true,
+              updateRow
+            }
+          })
+        }
+      }
+    })
+  }
+
+  if (functionId == SystemFunction.PurchaseInvoice) {
+    columns.push({
+      component: 'button',
+      name: 'serials',
+      label: platformLabels.serials,
+      props: {
+        onCondition
+      },
+      onClick: (e, row, update, updateRow) => {
+        if (row?.trackBy === 1) {
+          stack({
+            Component: PUSerialsForm,
+            props: {
+              row,
+              disabled: isPosted,
+              siteId: formik?.values?.header.siteId,
               updateRow
             }
           })
@@ -1757,9 +1777,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
                 }
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
-                  formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
-                  formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
+                  formik.setFieldValue('header.siteRef', newValue?.reference || null)
+                  formik.setFieldValue('header.siteName', newValue?.name || null)
+                  formik.setFieldValue('header.siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
               />
@@ -1887,6 +1907,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
             name='items'
             columns={columns}
             maxAccess={maxAccess}
+            allowDelete={!isPosted}
             disabled={isPosted || !formik.values.header.vendorId || !formik.values.header.vendorId}
           />
         </Grow>
@@ -1944,7 +1965,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                   name='header.tdAmount'
                   maxAccess={maxAccess}
                   label={labels.discount}
-                  value={formik.values.header.tdAmount}
+                  value={formik.values.header.currentDiscount}
                   displayCycleButton={true}
                   cycleButtonLabel={cycleButtonState.text}
                   decimalScale={2}
@@ -1958,7 +1979,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       if (discount < 0 || discount > 100) discount = 0
                       formik.setFieldValue('header.tdPct', discount)
                     } else {
-                      if (discount < 0 || formik.values.header.subtotal < discount) {
+                      if (discount < 0 || subtotal < discount) {
                         discount = 0
                       }
                       formik.setFieldValue('header.tdAmount', discount)
@@ -1966,6 +1987,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     formik.setFieldValue('header.currentDiscount', discount)
                   }}
                   onBlur={async e => {
+                    setReCal(true)
                     let discountAmount = Number(e.target.value.replace(/,/g, ''))
                     let tdPct = Number(e.target.value.replace(/,/g, ''))
                     let tdAmount = Number(e.target.value.replace(/,/g, ''))
@@ -1977,7 +1999,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                       tdAmount = (parseFloat(discountAmount) * parseFloat(subtotal)) / 100
                       formik.setFieldValue('header.tdAmount', tdAmount)
                     }
-                    setReCal(true)
+
                     await recalcGridVat(formik.values.header.tdType, tdPct, tdAmount, discountAmount)
                   }}
                   onClear={() => {

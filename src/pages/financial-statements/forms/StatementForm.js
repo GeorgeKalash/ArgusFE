@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,9 +15,10 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { useError } from 'src/error'
+import { useForm } from 'src/hooks/form'
 
-export default function StatementForm({ labels, maxAccess, setRecId, mainRecordId }) {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+export default function StatementForm({ initialData, labels, maxAccess, setRecId, mainRecordId }) {
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
 
@@ -28,7 +28,7 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
     endpointId: FinancialStatementRepository.FinancialStatement.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: {
       recordId: null,
       name: '',
@@ -79,17 +79,10 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (mainRecordId) {
-        const res = await getRequest({
-          extension: FinancialStatementRepository.FinancialStatement.get,
-          parameters: `_recordId=${mainRecordId}`
-        })
-
-        formik.setValues(res.record)
-      }
-    })()
-  }, [])
+    if (initialData && Object.keys(initialData).length > 0) {
+      formik.setValues(initialData)
+    }
+  }, [initialData])
 
   const onExport = async () => {
     const res = await getRequest({

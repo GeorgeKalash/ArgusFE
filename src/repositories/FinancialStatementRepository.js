@@ -7,13 +7,14 @@ export const FinancialStatementRepository = {
     get: service + 'getFS',
     set: service + 'setFS',
     del: service + 'delFS',
-    get2: service + 'get2FS'
+    get2: service + 'get2FS',
   },
   Node: {
     qry: service + 'qryFSN',
     get: service + 'getFSN',
     set: service + 'setFSN',
-    del: service + 'delFSN'
+    del: service + 'delFSN',
+    set2: service + 'set2FSN'
   },
   Ledger: {
     qry: service + 'qryFSL',
