@@ -91,8 +91,46 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
     })()
   }, [])
 
+  const onExport = async () => {
+    const res = await getRequest({
+      extension: FinancialStatementRepository.FinancialStatement.get2,
+      parameters: `_recordId=${mainRecordId}`
+    })
+
+    if (res.record) {
+      const jsonString = JSON.stringify(res, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `financial_statement_${mainRecordId}.json`
+
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const actions = [
+    {
+      key: 'Export',
+      condition: true,
+      onClick: onExport,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.FinancialStatements}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
