@@ -229,6 +229,12 @@ export default function JobOrderForm({
     }
   ]
   async function onStart() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.start,
       record: JSON.stringify({
@@ -243,6 +249,12 @@ export default function JobOrderForm({
     setRefetchRouting(true)
   }
   async function onStop() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.stop,
       record: JSON.stringify({
@@ -532,6 +544,23 @@ export default function JobOrderForm({
           ? ResourceIds.MFJobOrders
           : null
     })
+  }
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
   }
 
   useEffect(() => {
