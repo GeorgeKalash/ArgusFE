@@ -13,7 +13,7 @@ import { useWindow } from 'src/windows'
 import toast from 'react-hot-toast'
 import PeriodTitlesForm from './Forms/PeriodTitlesForm'
 
-const FaFiscalPeriodTitle = () => {
+const FiscalPeriodTitle = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -93,6 +93,7 @@ const FaFiscalPeriodTitle = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['periodId']}
@@ -109,4 +110,4 @@ const FaFiscalPeriodTitle = () => {
   )
 }
 
-export default FaFiscalPeriodTitle
+export default FiscalPeriodTitle

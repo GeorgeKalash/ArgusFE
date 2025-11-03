@@ -28,7 +28,7 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
       periodId: null,
       name: ''
     },
-    maxAccess: maxAccess,
+    maxAccess,
     validationSchema: yup.object({
       periodId: yup.number().required(),
       name: yup.string().required()
@@ -38,7 +38,7 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
         extension: SystemRepository.FiscalPeriod.set,
         record: JSON.stringify(obj)
       })
-      if (!obj.recordId) formik.setFieldValue('recordId', response.periodId)
+      formik.setFieldValue('recordId', obj.periodId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
@@ -70,6 +70,7 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
                 label={labels.periodId}
                 value={formik.values.periodId}
                 required
+                maxLength={8}
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
