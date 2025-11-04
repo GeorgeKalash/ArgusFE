@@ -534,7 +534,7 @@ const DashboardLayout = () => {
           {containsApplet(ResourceIds.Receivables) && (
             <ChartCard>
               <SummaryCard>
-                <Title>{labels.receivables} w</Title>
+                <Title>{labels.receivables}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
                 labels={Object.keys(data?.dashboard?.receivables || {})}
@@ -562,7 +562,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {containsApplet(ResourceIds.AverageRevenuePerItem) && (
+          {/* {containsApplet(ResourceIds.AverageRevenuePerItem) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.averageRevenuePerItem}</Title>
@@ -603,7 +603,7 @@ const DashboardLayout = () => {
                 </CustomTabPanel>
               ))}
             </ChartCard>
-          )}
+          )} */}
         </MiddleRow>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (

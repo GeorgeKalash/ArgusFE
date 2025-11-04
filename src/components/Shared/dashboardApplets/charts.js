@@ -113,31 +113,11 @@ export const MixedBarChart = memo(function MixedBarChart({
   hasLegend = false,
   height = 320
 }) {
-  const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-
-    const ensureReady = () => {
-      if (el.clientWidth > 0) setReady(true)
-    }
-    ensureReady()
-
-    const ro = new ResizeObserver(() => {
-      if (el.clientWidth > 0) {
-        setReady(true)
-
-        chartRef.current?.resize()
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!ready || !canvasRef.current) return
+    if (!canvasRef.current) return
 
     const ctx = canvasRef.current.getContext('2d')
 
@@ -220,17 +200,17 @@ export const MixedBarChart = memo(function MixedBarChart({
       },
       plugins: [ChartDataLabels]
     })
-  }, [ready])
+  }, [label1, label2, labels, data1, data2])
 
   return (
     <div
-      ref={wrapRef}
       style={{
+        position: 'relative',
         width: '100%',
         height
       }}
     >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
     </div>
   )
 })
@@ -238,29 +218,10 @@ export const MixedBarChart = memo(function MixedBarChart({
 export const HorizontalBarChartDark = memo(function HorizontalBarChartDark({ labels, data, label, color, hoverColor }) {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
-  const roRef = useRef(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!ready || chartRef.current || !chartInstanceRef.current) return
+    if (chartInstanceRef.current) return
 
-    const el = wrapRef.current
-    if (!el) return
-
-    const ensureReady = () => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) setReady(true)
-    }
-    ensureReady()
-
-    roRef.current = new ResizeObserver(() => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) {
-        setReady(true)
-      }
-      chartRef?.current?.resize()
-    })
-  }, [])
-
-  useEffect(() => {
     const ctx = chartRef.current.getContext('2d')
 
     chartInstanceRef.current = new Chart(ctx, {
@@ -279,7 +240,7 @@ export const HorizontalBarChartDark = memo(function HorizontalBarChartDark({ lab
       },
       options: {
         indexAxis: 'y',
-        responsive: false,
+        responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
@@ -338,17 +299,28 @@ export const HorizontalBarChartDark = memo(function HorizontalBarChartDark({ lab
       },
       plugins: [ChartDataLabels]
     })
-
-    return () => {
-      chartInstanceRef.current.destroy()
-    }
-  }, [ready])
+  }, [labels, data, label])
 
   const baseHeight = 200
   const barHeight = 25
   const dynamicHeight = baseHeight + labels.length * barHeight
 
-  return <canvas ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: dynamicHeight
+      }}
+    >
+      <canvas
+        ref={chartRef}
+        height={dynamicHeight}
+        width={window.innerWidth / 2.5}
+        style={{ position: 'absolute' }}
+      ></canvas>
+    </div>
+  )
 })
 
 export const CompositeBarChartDark = memo(function CompositeBarChartDark({
@@ -359,34 +331,11 @@ export const CompositeBarChartDark = memo(function CompositeBarChartDark({
   hoverColor,
   height = 300
 }) {
-  const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
-  const roRef = useRef(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-
-    const ensureReady = () => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) setReady(true)
-    }
-    ensureReady()
-
-    roRef.current = new ResizeObserver(() => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) {
-        setReady(true)
-      }
-      chartRef?.current?.resize()
-    })
-    roRef.current.observe(el)
-
-    return () => roRef.current?.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!ready || chartRef.current || !canvasRef.current) return
+    if (chartRef.current || !canvasRef.current) return
 
     const ctx = canvasRef.current.getContext('2d')
 
@@ -442,48 +391,27 @@ export const CompositeBarChartDark = memo(function CompositeBarChartDark({
       },
       plugins: [ChartDataLabels]
     })
-  }, [ready])
+  }, [data, labels, label])
 
   return (
     <div
-      ref={wrapRef}
       style={{
+        position: 'relative',
         width: '100%',
-        height,
-        minWidth: 0
+        height
       }}
     >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'block' }} />
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
     </div>
   )
 })
 
 export const MixedColorsBarChartDark = memo(function MixedColorsBarChartDark({ labels, data, label, height = 300 }) {
-  const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
-  const roRef = useRef(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-
-    const ensureReady = () => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) setReady(true)
-    }
-    ensureReady()
-
-    roRef.current = new ResizeObserver(() => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) {
-        setReady(true)
-      }
-      chartRef?.current?.resize()
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!ready || chartRef.current || !canvasRef.current) return
+    if (chartRef.current || !canvasRef.current) return
     const colors = generateColors(data?.length || 0)
 
     const ctx = canvasRef.current.getContext('2d')
@@ -563,17 +491,17 @@ export const MixedColorsBarChartDark = memo(function MixedColorsBarChartDark({ l
       },
       plugins: [ChartDataLabels]
     })
-  }, [ready])
+  }, [data, labels, label])
 
   return (
     <div
-      ref={wrapRef}
       style={{
+        position: 'relative',
         width: '100%',
         height
       }}
     >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }}></canvas>
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }}></canvas>
     </div>
   )
 })
@@ -608,35 +536,11 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
 }
 
 export const LineChart = memo(function LineChart({ labels, data, label, height = 450 }) {
-  const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
-  const roRef = useRef(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-
-    const ensureReady = () => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) setReady(true)
-    }
-    ensureReady()
-
-    roRef.current = new ResizeObserver(() => {
-      if (el.clientWidth > 0 && el.clientHeight > 0) {
-        setReady(true)
-      }
-
-      chartRef.current?.resize()
-    })
-    roRef.current.observe(el)
-
-    return () => roRef.current?.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!ready || chartRef.current || !canvasRef.current) return
+    if (chartRef.current || !canvasRef.current) return
 
     const ctx = canvasRef.current.getContext('2d')
     chartRef.current = new Chart(ctx, {
@@ -695,12 +599,12 @@ export const LineChart = memo(function LineChart({ labels, data, label, height =
         }
       }
     })
-  }, [ready])
+  }, [labels, data])
 
   return (
     <div
-      ref={wrapRef}
       style={{
+        position: 'relative',
         width: '100%',
         height
       }}
@@ -708,6 +612,7 @@ export const LineChart = memo(function LineChart({ labels, data, label, height =
       <canvas
         ref={canvasRef}
         style={{
+          position: 'absolute',
           width: '100%',
           height: '100%'
         }}
