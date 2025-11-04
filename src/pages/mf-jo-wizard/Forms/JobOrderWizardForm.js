@@ -50,6 +50,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         recordId: null,
         jobId: null,
         bomId: null,
+        workCenterId: null,
+        operationId: null,
+        laborId: null,
         avgWeight: 0,
         expectedPcs: 0,
         expectedQty: 0,
@@ -79,7 +82,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         itemId: yup.number().required(),
         sfItemId: yup.number().required(),
         expectedQty: yup.number().required(),
-        jobId: yup.number().required()
+        jobId: yup.number().required(),
+        operationId: yup.number().required(),
+        laborId: yup.number().required()
       }),
       rows: yup
         .array()
@@ -232,20 +237,24 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     }
   }
   async function getItemPhysical(itemId) {
-    const res = await getRequest({
-      extension: InventoryRepository.Physical.get,
-      parameters: `_itemId=${itemId}`
-    })
+    if (itemId) {
+      const res = await getRequest({
+        extension: InventoryRepository.Physical.get,
+        parameters: `_itemId=${itemId}`
+      })
 
-    return res?.record
+      return res?.record
+    }
   }
   async function getItemProduction(itemId) {
-    const res = await getRequest({
-      extension: InventoryRepository.ItemProduction.get,
-      parameters: `_recordId=${itemId}`
-    })
+    if (itemId) {
+      const res = await getRequest({
+        extension: InventoryRepository.ItemProduction.get,
+        parameters: `_recordId=${itemId}`
+      })
 
-    return res?.record
+      return res?.record
+    }
   }
 
   const totalReturned = formik.values?.rows?.reduce((returned, row) => {
@@ -371,15 +380,22 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
                   formik.setFieldValue('header.pcs', newValue?.pcs || 0)
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
-                  const physical = await getItemPhysical(newValue.itemId)
+                  formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
+                  formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
+                  const physical = await getItemPhysical(newValue?.itemId)
                   formik.setFieldValue('header.weight', physical?.weight || 0)
-                  const production = await getItemProduction(newValue.itemId)
+                  const production = await getItemProduction(newValue?.itemId)
                   formik.setFieldValue('header.bomId', production?.bomId || 0)
+                }}
+                onClear={async (_, newValue) => {
+                  formik.setFieldValue('header.workCenterName', '')
+                  formik.setFieldValue('header.workCenterId', null)
+                  formik.setFieldValue('header.operationId', null)
+                  formik.setFieldValue('header.laborId', null)
                 }}
                 error={formik?.touched?.header?.jobId && Boolean(formik?.errors?.header?.jobId)}
               />
             </Grid>
-
             <Grid item xs={8}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
@@ -392,6 +408,60 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 formObject={formik.values.header}
                 readOnly
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomTextField
+                name='header.workCenterName'
+                label={labels.workCenter}
+                value={formik?.values?.header?.workCenterName}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={formik.values.header.workCenterId && ManufacturingRepository.Operation.qry}
+                parameters={`_workCenterId=${formik.values.header.workCenterId}`}
+                name='header.operationId'
+                label={labels.operation}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'reference', width: 1 },
+                  { key: 'name', value: 'name', width: 2 }
+                ]}
+                displayFieldWidth={1.5}
+                required
+                readOnly={!formik?.values?.header?.workCenterId || editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.operationId', newValue?.recordId || null)
+                }}
+                error={formik?.touched?.header?.operationId && Boolean(formik?.errors?.header?.operationId)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={formik.values.header.workCenterId && ManufacturingRepository.Labor.qry2}
+                parameters={`_workCenterId=${formik.values.header.workCenterId}`}
+                name='header.laborId'
+                label={labels.labor}
+                values={formik.values.header}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'reference', width: 1 },
+                  { key: 'name', value: 'name', width: 2 }
+                ]}
+                displayFieldWidth={1.5}
+                required
+                readOnly={!formik?.values?.header?.workCenterId || editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.laborId', newValue?.recordId || null)
+                }}
+                error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}
               />
             </Grid>
             <Grid item xs={4}>
