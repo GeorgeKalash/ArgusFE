@@ -23,7 +23,7 @@ import ConfirmationOnSubmit from 'src/pages/currency-trading/forms/ConfirmationO
 import FormShell from 'src/components/Shared/FormShell'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { CTTRXrepository } from 'src/repositories/CTTRXRepository'
-import FormGrid from 'src/components/form/layout/FormGrid'
+import FormGrid from 'src/components/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { RemittanceSettingsRepository } from 'src/repositories/RemittanceRepository'

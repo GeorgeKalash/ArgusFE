@@ -16,7 +16,6 @@ import themeConfig from 'src/configs/themeConfig'
 import AppBar from './components/vertical/appBar'
 import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/vertical/navigation'
-import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
 
 const VerticalLayoutWrapper = styled('div')({
@@ -37,7 +36,7 @@ const ContentWrapper = styled('main')(({ theme }) => ({
   width: '100%',
   height: 'calc(100 * var(--vh))',
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column'
 }))
 
 const VerticalLayout = props => {
@@ -62,7 +61,6 @@ const VerticalLayout = props => {
       <VerticalLayoutWrapper className='layout-wrapper'>
         {/* Navigation Menu */}
         {navHidden && !(navHidden && settings.lastLayout === 'horizontal') ? null : (
-
           <Navigation
             navWidth={navWidth}
             navVisible={navVisible}
@@ -81,10 +79,7 @@ const VerticalLayout = props => {
             {...props}
           />
         )}
-        <MainContentWrapper
-          className='layout-content-wrapper'
-          sx={{ ...(contentHeightFixed)}}
-        >
+        <MainContentWrapper className='layout-content-wrapper' sx={{ ...contentHeightFixed }}>
           {/* AppBar Component */}
           <AppBar
             toggleNavVisibility={toggleNavVisibility}
