@@ -29,9 +29,7 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
   }
 
   useEffect(() => {
-    ;(async function () {
-      await fetchFullFinancialStatement()
-    })()
+    fetchFullFinancialStatement()
   }, [mainRecordId])
 
   const tabs = [

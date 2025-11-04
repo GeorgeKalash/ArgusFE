@@ -9,8 +9,8 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { createConditionalSchema } from 'src/lib/validation'
 import Form from 'src/components/Shared/Form'
+import { useError } from 'src/error'
 
 const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchData }) => {
   const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc } = node?.current || {}
@@ -18,8 +18,7 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const lastValidNodeId = useRef(nodeId || null)
-
-  const { schema, requiredFields } = createConditionalSchema({}, true, maxAccess, 'ledgers')
+  const { stack: stackError } = useError()
 
   const makeInitialValues = seqNo => ({
     nodeRef,
@@ -40,22 +39,28 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
 
   const formik = useFormik({
     initialValues: makeInitialValues(nodeId),
-    conditionSchema: ['ledgers'],
     validationSchema: yup.object({
-      nodeRef: yup.string().required(),
-      ledgers: yup.array().of(schema)
+      nodeRef: yup.string().required()
     }),
     onSubmit: async obj => {
+      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4)
+
+      if (hasInvalidLedger) {
+        stackError({
+          message: labels.mandatorySeg
+        })
+
+        return
+      }
+
       const data = {
         fsId: mainRecordId,
         seqNo: nodeId,
-        ledgers: obj?.ledgers
-          ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-          ?.map((ledger, index) => ({
-            ...ledger,
-            seqNo: nodeId,
-            ledgerSeqNo: index + 1
-          }))
+        ledgers: obj?.ledgers?.map((ledger, index) => ({
+          ...ledger,
+          seqNo: nodeId,
+          ledgerSeqNo: index + 1
+        }))
       }
 
       await postRequest({
@@ -147,7 +152,6 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
     }
 
     if (nodeId) {
-
       lastValidNodeId.current = nodeId
 
       formik.resetForm({ values: makeInitialValues(nodeId) })
