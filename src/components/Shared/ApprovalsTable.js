@@ -155,6 +155,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.PurchaseRequisition:
         relevantComponent = PurchaseRquisitionForm
+        break
+      case SystemFunction.PurchaseOrder:
+        relevantComponent = PurchaseOrderForm
       default:
         // Handle default case if needed
         break
@@ -219,17 +222,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
           </IconButton>
         </Box>
       )
-    },
-    {
-      field: 'purchaseOrder',
-      flex: 1,
-      cellRenderer: row => (
-        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-          <IconButton size='small' onClick={() => openPurchase(row.data)}>
-            <Icon icon='mdi:application-edit-outline' fontSize={18} />
-          </IconButton>
-        </Box>
-      )
     }
   ]
 
@@ -243,15 +235,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         recordId: obj.recordId,
         functionId: obj.functionId,
         seqNo: obj.seqNo
-      }
-    })
-  }
-
-  const openPurchase = obj => {
-    stack({
-      Component: PurchaseOrderForm,
-      props: {
-        recordId: obj.recordId
       }
     })
   }
