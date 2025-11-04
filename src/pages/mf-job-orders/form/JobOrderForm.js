@@ -758,7 +758,10 @@ export default function JobOrderForm({
                             formik.values.stdWeight ? formik.values.stdWeight * e.target.value : 0
                           )
                         }}
-                        onClear={() => formik.setFieldValue('expectedPcs', 0)}
+                        onClear={() => {
+                          formik.setFieldValue('expectedPcs', 0)
+                          formik.setFieldValue('expectedQty', 0)
+                        }}
                         error={formik.touched.expectedPcs && Boolean(formik.errors.expectedPcs)}
                       />
                     </Grid>
@@ -873,7 +876,7 @@ export default function JobOrderForm({
                         errorCheck={'routingId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={!formik.values.lineId || isCancelled || isReleased || isPosted}
+                        readOnly={!formik?.values?.lineId || isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
