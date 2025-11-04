@@ -34,7 +34,7 @@ export default function PeriodTitlesForm({ labels, maxAccess, recordId }) {
       name: yup.string().required()
     }),
     onSubmit: async obj => {
-      const response = await postRequest({
+      await postRequest({
         extension: SystemRepository.FiscalPeriod.set,
         record: JSON.stringify(obj)
       })
