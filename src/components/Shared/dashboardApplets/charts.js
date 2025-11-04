@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
@@ -103,7 +103,7 @@ const getChartOptions = (label, type) => {
   }
 }
 
-export const MixedBarChart = memo(function MixedBarChart({
+export const MixedBarChart = ({
   labels,
   data1,
   data2,
@@ -112,7 +112,7 @@ export const MixedBarChart = memo(function MixedBarChart({
   rotation = 0,
   hasLegend = false,
   height = 320
-}) {
+}) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -213,9 +213,9 @@ export const MixedBarChart = memo(function MixedBarChart({
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
     </div>
   )
-})
+}
 
-export const HorizontalBarChartDark = memo(function HorizontalBarChartDark({ labels, data, label, color, hoverColor }) {
+export const HorizontalBarChartDark = ({ labels, data, label, color, hoverColor }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -321,16 +321,9 @@ export const HorizontalBarChartDark = memo(function HorizontalBarChartDark({ lab
       ></canvas>
     </div>
   )
-})
+}
 
-export const CompositeBarChartDark = memo(function CompositeBarChartDark({
-  labels,
-  data,
-  label,
-  color,
-  hoverColor,
-  height = 300
-}) {
+export const CompositeBarChartDark = ({ labels, data, label, color, hoverColor, height = 300 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -404,9 +397,9 @@ export const CompositeBarChartDark = memo(function CompositeBarChartDark({
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
     </div>
   )
-})
+}
 
-export const MixedColorsBarChartDark = memo(function MixedColorsBarChartDark({ labels, data, label, height = 300 }) {
+export const MixedColorsBarChartDark = ({ labels, data, label, height = 300 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -504,7 +497,7 @@ export const MixedColorsBarChartDark = memo(function MixedColorsBarChartDark({ l
       <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }}></canvas>
     </div>
   )
-})
+}
 
 export const CompositeBarChart = ({ id, labels, data, label }) => {
   useEffect(() => {
@@ -535,7 +528,7 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
-export const LineChart = memo(function LineChart({ labels, data, label, height = 450 }) {
+export const LineChart = ({ labels, data, label, height = 450 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -599,7 +592,7 @@ export const LineChart = memo(function LineChart({ labels, data, label, height =
         }
       }
     })
-  }, [labels, data])
+  }, [labels, data, label])
 
   return (
     <div
@@ -619,7 +612,7 @@ export const LineChart = memo(function LineChart({ labels, data, label, height =
       />
     </div>
   )
-})
+}
 
 export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
   useEffect(() => {

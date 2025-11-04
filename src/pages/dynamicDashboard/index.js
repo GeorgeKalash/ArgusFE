@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -128,7 +128,7 @@ const Value = styled.div`
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
-  const [_data, setData] = useState(null)
+  const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
@@ -196,8 +196,6 @@ const DashboardLayout = () => {
 
     fetchData()
   }, [_userId, _languageId])
-
-  const data = useMemo(() => _data ?? [], [_data])
 
   if (loading) {
     return <LoadingOverlay />
@@ -553,7 +551,6 @@ const DashboardLayout = () => {
                 <Title>{labels.topCostumers}</Title>
               </SummaryCard>
               <HorizontalBarChartDark
-                id='TopCustomers'
                 labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
                 data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
                 label={labels.revenue}
