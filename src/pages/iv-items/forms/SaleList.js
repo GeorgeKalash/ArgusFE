@@ -60,6 +60,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
       const submissionData = {
         ...formikInitial,
         recordId,
+        pgId: obj?.pgId || null,
         defSaleMUId: formik.values.defSaleMUId,
         returnPolicyId: formik.values.returnPolicyId
       }
@@ -73,6 +74,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
         extension: SaleRepository.Sales.set2,
         record: JSON.stringify({
           itemId: recordId,
+          pgId: obj?.pgId || null,
           items: obj.items
             .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
             .map(item => ({
