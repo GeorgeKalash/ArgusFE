@@ -20,6 +20,7 @@ export const ManufacturingRepository = {
     page: service + 'pageLIN',
     qry: service + 'qryLIN',
     qry2: service + 'qry2LIN',
+    qry3: service + 'qry3LIN',
     set: service + 'setLIN',
     get: service + 'getLIN',
     del: service + 'delLIN'

@@ -30,7 +30,7 @@ export const SystemRepository = {
     get: service + 'getDTM',
     set: service + 'setDTM',
     del: service + 'delDTM',
-    page: service +'pageDTM'
+    page: service + 'pageDTM'
   },
   RelationType: {
     qry: service + 'qryRT',
@@ -284,5 +284,12 @@ export const SystemRepository = {
     get: service + 'getRW',
     set: service + 'setRW',
     del: service + 'delRW'
+  },
+  FiscalPeriod: {
+    page: service + 'pageFPT',
+    get: service + 'getFPT',
+    set: service + 'setFPT',
+    del: service + 'delFPT',
+    qry: service + 'qryFPT'
   }
 }

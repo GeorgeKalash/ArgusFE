@@ -11,6 +11,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import Form from 'src/components/Shared/Form'
+import * as yup from 'yup'
 
 export default function Samples({ labels, maxAccess, recordId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -25,10 +26,24 @@ export default function Samples({ labels, maxAccess, recordId }) {
         {
           id: 1,
           jobId: recordId,
+          seqNo: 1,
           itemWeight: 0
         }
       ]
     },
+    validationSchema: yup.object({
+      data: yup.array().of(
+        yup.object({
+          itemWeight: yup.string().test('check-value', 'itemWeight must be at least 0.01', function (value) {
+            if (!value || value <= 0) {
+              return false
+            }
+
+            return true
+          })
+        })
+      )
+    }),
     onSubmit: async obj => {
       const modifiedData = obj.data
         .filter(data => data.itemWeight)
@@ -46,19 +61,40 @@ export default function Samples({ labels, maxAccess, recordId }) {
     }
   })
 
-  const totWeight = formik.values.data.reduce((weightSum, row) => {
+  const handleSeqNoGridChange = newRows => {
+    const isAddOrDelete = newRows.length !== formik.values.data.length
+
+    const rowsToSet = isAddOrDelete ? newRows.map((row, i) => ({ ...row, seqNo: i + 1 })) : newRows
+
+    formik.setFieldValue('data', rowsToSet)
+  }
+
+  const validRows = formik.values.data.filter(row => row.itemWeight > 0)
+
+  const totWeight = validRows.reduce((weightSum, row) => {
     const weightValue = parseFloat(row?.itemWeight?.toString().replace(/,/g, '')) || 0
 
     return weightSum + weightValue
   }, 0)
 
-  const avgWeight = formik.values.data.length > 0 ? totWeight / formik.values.data.length : 0
+  const avgWeight = validRows.length > 0 ? totWeight / validRows.length : 0
+
+  const totalCount = validRows.length
 
   const columns = [
     {
       component: 'numberfield',
+      label: labels.seqNo,
+      name: 'seqNo',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'numberfield',
       label: labels.itemWgt,
-      name: 'itemWeight'
+      name: 'itemWeight',
+      flex: 2
     }
   ]
 
@@ -79,7 +115,7 @@ export default function Samples({ labels, maxAccess, recordId }) {
               }
             })
           )
-        : [{ id: 1, itemWeight: 0 }]
+        : [{ id: 1, itemWeight: 0, seqNo: 1 }]
     formik.setValues({
       jobId: recordId,
       data: updateDataList
@@ -95,9 +131,9 @@ export default function Samples({ labels, maxAccess, recordId }) {
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('data', value)}
             value={formik.values?.data}
             error={formik.errors?.data}
+            onChange={value => handleSeqNoGridChange(value)}
             initialValues={formik?.initialValues?.data?.[0]}
             columns={columns}
             name='data'
@@ -105,9 +141,15 @@ export default function Samples({ labels, maxAccess, recordId }) {
           />
         </Grow>
         <Fixed>
-          <Grid container>
-            <Grid item xs={4} sx={{ pt: 2 }}>
+          <Grid container sx={{ pt: 2 }}>
+            <Grid item xs={4}>
               <CustomNumberField name='avgWeight' label={labels.average} value={avgWeight} readOnly />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField name='totalCount' label={labels.totalCount} value={totalCount} readOnly />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField name='totWeight' label={labels.totWeight} value={totWeight} readOnly />
             </Grid>
           </Grid>
         </Fixed>

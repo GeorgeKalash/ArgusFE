@@ -161,6 +161,17 @@ export function formatDateMDY(date) {
   return `${month}/${day}/${year}`
 }
 
+// from yyyymmdd to Day, Month dd, yyyy
+const formatDayId = dayId => {
+  if (!dayId || dayId.length !== 8) return dayId
+  const year = dayId.slice(0, 4)
+  const month = dayId.slice(4, 6)
+  const day = dayId.slice(6, 8)
+  const date = new Date(`${year}-${month}-${day}`)
+
+  return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+}
+
 export {
   formatDateFromApi,
   formatDateToApi,
@@ -172,5 +183,6 @@ export {
   formatDate,
   formatDateTimeDefault,
   formatDateToISO,
-  formatDateTimeForGetAPI
+  formatDateTimeForGetAPI,
+  formatDayId
 }

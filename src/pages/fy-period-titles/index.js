@@ -1,19 +1,19 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
-import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { useWindow } from 'src/windows'
-import { useResourceQuery } from 'src/hooks/resource'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
+import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Table from 'src/components/Shared/Table'
+import { useResourceQuery } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
-import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
-import DayTypesForm from './Forms/DayTypesForm'
+import { RequestsContext } from 'src/providers/RequestsContext'
+import { SystemRepository } from 'src/repositories/SystemRepository'
+import { ResourceIds } from 'src/resources/ResourceIds'
+import { useWindow } from 'src/windows'
+import toast from 'react-hot-toast'
+import PeriodTitlesForm from './Forms/PeriodTitlesForm'
 
-const DayTypes = () => {
+const FiscalPeriodTitle = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +22,8 @@ const DayTypes = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.DayTypes.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      extension: SystemRepository.FiscalPeriod.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,38 +32,26 @@ const DayTypes = () => {
   const {
     query: { data },
     labels,
+    access,
     invalidate,
-    paginationParameters,
     refetch,
-    access
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: TimeAttendanceRepository.DayTypes.page,
-    datasetId: ResourceIds.DayTypes
+    endpointId: SystemRepository.FiscalPeriod.page,
+    datasetId: ResourceIds.FiscalPeriod
   })
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'periodId',
+      headerName: labels.periodId,
       flex: 1
     },
     {
       field: 'name',
       headerName: labels.name,
       flex: 1
-    },
-    {
-      field: 'color',
-      headerName: labels.color,
-      flex: 1,
-      type: 'colorCombo'
-    },
-    {
-      field: 'isWorkingDay',
-      headerName: labels.isWorkingDay,
-      flex: 1,
-      type: 'checkbox'
     }
   ]
 
@@ -71,9 +59,13 @@ const DayTypes = () => {
     openForm()
   }
 
+  const edit = obj => {
+    openForm(obj?.periodId)
+  }
+
   const del = async obj => {
     await postRequest({
-      extension: TimeAttendanceRepository.DayTypes.del,
+      extension: SystemRepository.FiscalPeriod.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -82,39 +74,35 @@ const DayTypes = () => {
 
   function openForm(recordId) {
     stack({
-      Component: DayTypesForm,
+      Component: PeriodTitlesForm,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
       width: 600,
-      height: 300,
-      title: labels.dayType
+      height: 350,
+      title: labels?.FiscalPeriodTitle
     })
-  }
-
-  const edit = obj => {
-    openForm(obj?.recordId)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar maxAccess={access} onAdd={add} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['periodId']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          refetch={refetch}
-          paginationParameters={paginationParameters}
           paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -122,4 +110,4 @@ const DayTypes = () => {
   )
 }
 
-export default DayTypes
+export default FiscalPeriodTitle
