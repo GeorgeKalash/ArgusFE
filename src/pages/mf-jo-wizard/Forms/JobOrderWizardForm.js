@@ -49,6 +49,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         reference: '',
         recordId: null,
         jobId: null,
+        bomId: null,
         avgWeight: 0,
         expectedPcs: 0,
         expectedQty: 0,
@@ -103,8 +104,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
           return {
             ...details,
             jozId: obj.recordId ?? 0,
-            issued: parseInt(details.issued),
-            returned: parseInt(details.returned),
             seqNo: index + 1
           }
         })
@@ -173,6 +172,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       component: 'numberfield',
       name: 'issued',
       label: labels.issued,
+      props: { maxLength: 9, decimalScale: 3 },
       async onChange({ row: { update, newRow } }) {
         update({
           consumed: newRow.issued - newRow.returned
@@ -190,14 +190,14 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       },
       props: {
         maxLength: 9,
-        decimalScale: 2
+        decimalScale: 3
       }
     },
     {
       component: 'numberfield',
       name: 'consumed',
       label: labels.consumed,
-      props: { readOnly: true, maxLength: 9, decimalScale: 2 }
+      props: { readOnly: true, maxLength: 9, decimalScale: 3 }
     }
   ]
 
@@ -216,7 +216,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     if (res?.record?.header) {
       const modifiedList = res?.record?.items?.map((item, index) => ({
         ...item,
-        consumed: item.issued - item.returned,
         id: index + 1
       }))
 
@@ -231,6 +230,22 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
 
       return res?.record
     }
+  }
+  async function getItemPhysical(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record
+  }
+  async function getItemProduction(itemId) {
+    const res = await getRequest({
+      extension: InventoryRepository.ItemProduction.get,
+      parameters: `_recordId=${itemId}`
+    })
+
+    return res?.record
   }
 
   const totalReturned = formik.values?.rows?.reduce((returned, row) => {
@@ -348,7 +363,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 required
                 readOnly={editMode}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('header.jobId', newValue?.recordId || null)
                   formik.setFieldValue('header.sku', newValue?.sku || null)
                   formik.setFieldValue('header.itemName', newValue?.itemName || '')
@@ -356,6 +371,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
                   formik.setFieldValue('header.pcs', newValue?.pcs || 0)
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
+                  const physical = await getItemPhysical(newValue.itemId)
+                  formik.setFieldValue('header.weight', physical?.weight || 0)
+                  const production = await getItemProduction(newValue.itemId)
+                  formik.setFieldValue('header.bomId', production?.bomId || 0)
                 }}
                 error={formik?.touched?.header?.jobId && Boolean(formik?.errors?.header?.jobId)}
               />
@@ -406,26 +425,27 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 readOnly
               />
             </Grid>
-            <Grid item xs={8}>
-              <ResourceLookup
-                endpointId={InventoryRepository.SFSKU.snapshot}
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={formik.values.header.bomId && ManufacturingRepository.Component.qry}
+                parameters={`_bomId=${formik.values.header.bomId}`}
                 name='header.sfItemId'
                 label={labels.semiFinishedItem}
-                valueField='sku'
-                displayField='name'
-                readOnly={isPosted}
-                valueShow='sfItemSku'
+                values={formik.values.header}
+                valueField='itemId'
+                displayField={['sku', 'itemName']}
+                columnsInDropDown={[
+                  { key: 'sku', value: 'sku', width: 1 },
+                  { key: 'itemName', value: 'Item Name', width: 2 }
+                ]}
+                displayFieldWidth={1.5}
                 required
-                secondValueShow='sfItemName'
-                formObject={formik.values.header}
-                displayFieldWidth={2}
+                readOnly={!formik?.values?.header?.bomId || editMode}
+                maxAccess={maxAccess}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('header.sfItemId', newValue?.recordId || null)
-                  formik.setFieldValue('header.sfItemSku', newValue?.sku || '')
-                  formik.setFieldValue('header.sfItemName', newValue?.name || '')
+                  formik.setFieldValue('header.sfItemId', newValue?.itemId || null)
                 }}
                 error={formik?.touched?.header?.sfItemId && Boolean(formik?.errors?.header?.sfItemId)}
-                maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={4}>
@@ -433,6 +453,15 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.producedWeight'
                 label={labels.producedWeight}
                 value={producedWeight}
+                maxAccess={maxAccess}
+                readOnly
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.weight'
+                label={labels.weight}
+                value={formik?.values?.header?.weight}
                 maxAccess={maxAccess}
                 readOnly
               />
