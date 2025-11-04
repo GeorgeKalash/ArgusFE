@@ -562,7 +562,7 @@ const DashboardLayout = () => {
               />
             </ChartCard>
           )}
-          {/* {containsApplet(ResourceIds.AverageRevenuePerItem) && (
+          {containsApplet(ResourceIds.AverageRevenuePerItem) && (
             <ChartCard>
               <SummaryCard>
                 <Title>{labels.averageRevenuePerItem}</Title>
@@ -603,7 +603,7 @@ const DashboardLayout = () => {
                 </CustomTabPanel>
               ))}
             </ChartCard>
-          )} */}
+          )}
         </MiddleRow>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
