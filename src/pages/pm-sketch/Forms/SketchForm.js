@@ -59,6 +59,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
       itemGroupId: null,
       productionClassId: null,
       productionStandardId: null,
+      designGroupId: null,
+      designFamilyId: null,
       metalId: null,
       collectionId: null,
       source: null,
@@ -292,6 +294,36 @@ export default function SketchForm({ recordId, invalidate, window }) {
                       formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
                     error={formik.touched.designerId && Boolean(formik.errors.designerId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignFamily.qry}
+                    name='designFamilyId'
+                    label={labels.familyGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                    error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignGroup.qry}
+                    name='designGroupId'
+                    label={labels.designGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('designGroupId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
