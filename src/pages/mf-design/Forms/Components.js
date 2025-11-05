@@ -129,7 +129,7 @@ const Components = ({ store, maxAccess, labels }) => {
       label: labels.sku,
       name: 'itemId',
       props: {
-        endpointId: InventoryRepository.Item.snapshot4,
+        endpointId: InventoryRepository.RMSKU.snapshot,
         displayField: 'sku',
         valueField: 'recordId',
         columnsInDropDown: [
