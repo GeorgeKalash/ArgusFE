@@ -23,6 +23,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -61,7 +62,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         sfItemId: null,
         itemId: null,
         date: new Date(),
-        status: 1
+        status: 1,
+        notes: ''
       },
       rows: [
         {
@@ -553,38 +555,65 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         </Grow>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3}>
-              <CustomNumberField
-                name='header.totalUsedSemiFinished'
-                label={labels.totalUsedSemiFinished}
-                value={totalUsedSemiFinished}
-                maxAccess={maxAccess}
-                readOnly
-              />
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='header.notes'
+                    label={labels.notes}
+                    value={formik.values.header?.notes}
+                    rows={2.5}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={6}></Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='header.totalIssued' label={labels.totalIssued} value={totalIssued} readOnly />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.totalUsedSemiFinished'
+                    label={labels.totalUsedSemiFinished}
+                    value={totalUsedSemiFinished}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={9}></Grid>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='header.totalReturned'
-                label={labels.totalReturned}
-                value={totalReturned}
-                maxAccess={maxAccess}
-                readOnly
-              />
-            </Grid>
-            <Grid item xs={9}></Grid>
-            <Grid item xs={3}>
-              <CustomNumberField
-                name='header.totalConsumed'
-                label={labels.totalConsumed}
-                value={totalConsumed}
-                maxAccess={maxAccess}
-                readOnly
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.totalIssued'
+                    label={labels.totalIssued}
+                    value={totalIssued}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.totalReturned'
+                    label={labels.totalReturned}
+                    value={totalReturned}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    name='header.totalConsumed'
+                    label={labels.totalConsumed}
+                    value={totalConsumed}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
