@@ -69,6 +69,8 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         recordId: null,
         reference: '',
         workCenterId: null,
+        operationId: null,
+        laborId: null,
         date: new Date(),
         dtId: null,
         status: 1,
@@ -81,7 +83,9 @@ export default function MainForm({ labels, access, store, setStore, window }) {
     validationSchema: yup.object({
       header: yup.object({
         date: yup.date().required(),
-        workCenterId: yup.number().required()
+        workCenterId: yup.number().required(),
+        operationId: yup.number().required(),
+        laborId: yup.number().required()
       }),
       batchWorksheetJobs: yup.array().of(schema),
       batchWSRM: yup.array().of(materialsSchema)
@@ -381,7 +385,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
                   maxAccess={!editMode && maxAccess}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <CustomTextField
                   name='header.reference'
                   label={labels.reference}
@@ -393,7 +397,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
                   error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <CustomDatePicker
                   name='header.date'
                   label={labels.date}
@@ -420,12 +424,60 @@ export default function MainForm({ labels, access, store, setStore, window }) {
                     { key: 'name', value: 'Name' }
                   ]}
                   values={formik.values.header}
-                  onChange={(event, newValue) => {
+                  onChange={newValue => {
                     formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
+                    formik.setFieldValue('header.operationId', null)
+                    formik.setFieldValue('header.laborId', null)
                   }}
                   error={formik.touched.header?.workCenterId && formik.errors.header?.workCenterId}
                   maxAccess={maxAccess}
                   displayFieldWidth={1.5}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={formik.values.header.workCenterId && ManufacturingRepository.Operation.qry}
+                  parameters={`_workCenterId=${formik.values.header.workCenterId}`}
+                  name='header.operationId'
+                  label={labels.operation}
+                  values={formik.values.header}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'reference', width: 1 },
+                    { key: 'name', value: 'name', width: 2 }
+                  ]}
+                  displayFieldWidth={1.5}
+                  required
+                  readOnly={!formik?.values?.header?.workCenterId}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue('header.operationId', newValue?.recordId || null)
+                  }}
+                  error={formik?.touched?.header?.operationId && Boolean(formik?.errors?.header?.operationId)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ResourceComboBox
+                  endpointId={formik.values.header.workCenterId && ManufacturingRepository.Labor.qry2}
+                  parameters={`_workCenterId=${formik.values.header.workCenterId}`}
+                  name='header.laborId'
+                  label={labels.labor}
+                  values={formik.values.header}
+                  valueField='recordId'
+                  displayField={['reference', 'name']}
+                  columnsInDropDown={[
+                    { key: 'reference', value: 'reference', width: 1 },
+                    { key: 'name', value: 'name', width: 2 }
+                  ]}
+                  displayFieldWidth={1.5}
+                  required
+                  readOnly={!formik?.values?.header?.workCenterId}
+                  maxAccess={maxAccess}
+                  onChange={(_, newValue) => {
+                    formik.setFieldValue('header.laborId', newValue?.recordId || null)
+                  }}
+                  error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}
                 />
               </Grid>
             </Grid>
