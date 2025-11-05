@@ -36,14 +36,14 @@ const NodesTitleForm = ({ labels, maxAccess, node, mainRecordId, onOk, window, i
   ]
 
   async function getTitles() {
-    if (!node?.current?.nodeId) return
+    if (!node?.current?.viewNodeId) return
 
     const titlesXMLList = await getRequest({
       extension: SystemRepository.KeyValueStore,
       parameters: `_dataset=${DataSets.LANGUAGE}&_language=${user.languageId}`
     })
 
-    const seqNo = node?.current?.nodeId
+    const seqNo = node?.current?.viewNodeId
 
     const currentNode = (initialData ?? []).find(n => Number(n.seqNo) === Number(seqNo))
     const existingTitles = currentNode?.titles ?? []
@@ -69,14 +69,12 @@ const NodesTitleForm = ({ labels, maxAccess, node, mainRecordId, onOk, window, i
 
   useEffect(() => {
     getTitles()
-  }, [node?.current?.nodeId, initialData.length])
+  }, [node?.current?.viewNodeId, initialData.length])
 
   const ok = () => {
-    const seqNo = node?.current?.nodeId
-
     const validTitles = (formik.values.titles ?? []).map(t => ({
       ...t,
-      seqNo,
+      seqNo: node?.current?.viewNodeId,
       fsId: mainRecordId
     }))
 

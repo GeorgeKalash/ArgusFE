@@ -88,8 +88,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         record: JSON.stringify(data)
       })
 
-      const seqNo = node.current?.nodeId
-      const selectedNode = itemsWithSeq.find(i => Number(i.seqNo) === Number(seqNo))
+      const selectedNode = itemsWithSeq.find(i => Number(i.seqNo) === Number(node.current?.viewNodeId))
 
       if (selectedNode) {
         node.current.viewNodeRef = selectedNode.reference || ''
@@ -98,23 +97,21 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
 
       toast.success(platformLabels.Edited)
       const newData = await fetchData()
-      getData(newData)
+      setData(newData)
     }
   })
 
   const onOk = newTitles => {
     const existingTitles = formik.values.titles ?? []
-    const mergedTitles = [...existingTitles]
 
-    const seqNo = node.current?.nodeId
-    const filteredExisting = mergedTitles.filter(t => t.seqNo !== seqNo)
+    const filteredExisting = [...existingTitles].filter(t => t.seqNo !== node.current?.viewNodeId)
     const newValues = newTitles.filter(t => !!t.languageId)
 
     const updatedTitles = [...filteredExisting, ...newValues]
     formik.setFieldValue('titles', updatedTitles)
 
     const updatedItems = formik.values.items.map(item =>
-      item.seqNo == seqNo
+      item.seqNo == node.current?.viewNodeId
         ? {
             ...item,
             titles: newValues
@@ -249,7 +246,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     }
   ]
 
-  const getData = data => {
+  const setData = data => {
     formik.setValues({
       ...formik.values,
       fsId: mainRecordId,
@@ -275,14 +272,12 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
   useEffect(() => {
     if (!mainRecordId) return
 
-    if (initialData?.nodes?.length) {
-      if (!formik.values.items[0].reference) {
-        parents.current = initialData.nodes.map((n, i) => ({
-          ...n,
-          id: n.seqNo ?? i + 1
-        }))
-        getData(initialData)
-      }
+    if (initialData?.nodes?.length && !formik.values.items[0].reference) {
+      parents.current = initialData.nodes.map((n, i) => ({
+        ...n,
+        id: n.seqNo ?? i + 1
+      }))
+      setData(initialData)
     }
   }, [initialData?.nodes?.length])
 
@@ -302,7 +297,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
               const normalized = value.map((v, i) => ({
                 ...v,
                 id: v.id ?? i + 1,
-                seqNo: v.id ?? i + 1 
+                seqNo: v.id ?? i + 1
               }))
 
               parents.current = normalized
@@ -314,7 +309,6 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
             maxAccess={maxAccess}
             initialValues={formik.initialValues.items?.[0]}
             onSelectionChange={row => {
-              node.current.nodeId = row?.id || null
               node.current.viewNodeId = row?.id || null
               node.current.viewNodeRef = row?.reference || ''
               node.current.viewNodedesc = row?.description || ''

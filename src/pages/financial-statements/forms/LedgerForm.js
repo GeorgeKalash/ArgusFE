@@ -134,7 +134,6 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
 
   useEffect(() => {
     if (!mainRecordId) return
-
     if (initialData?.length && nodeId) {
       const nodeLedgers = initialData.filter(l => Number(l.seqNo) === Number(nodeId))
 
@@ -142,7 +141,6 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
         id: i + 1,
         ...l
       }))
-
       formik.setValues({
         nodeRef,
         ledgers: normalized.length ? normalized : makeInitialValues(nodeId).ledgers
@@ -151,13 +149,8 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
       return
     }
 
-    if (nodeId) {
-      lastValidNodeId.current = nodeId
-
-      formik.resetForm({ values: makeInitialValues(nodeId) })
-    } else {
-      formik.resetForm({ values: makeInitialValues(null) })
-    }
+    if (nodeId) lastValidNodeId.current = nodeId
+    formik.resetForm({ values: makeInitialValues(nodeId || null) })
   }, [nodeId, mainRecordId, initialData])
 
   return (
