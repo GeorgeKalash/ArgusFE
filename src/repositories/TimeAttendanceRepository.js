@@ -16,7 +16,8 @@ export const TimeAttendanceRepository = {
   },
   PendingPunches: {
     page: service + 'pagePP',
-    del: service + 'delPP'
+    del: service + 'delPP',
+    qry: service + 'qryPP'
   },
   BiometricDevices: {
     page: service + 'pageBM',
@@ -57,9 +58,6 @@ export const TimeAttendanceRepository = {
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'
-  },
-  ProcessedPunches: {
-    qry: service + 'qryPP'
   },
   AttendanceDay: {
     qry: service + 'qryAD'

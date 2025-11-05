@@ -12,33 +12,33 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
 
-const ProcessedPunches = () => {
-  const { postRequest } = useContext(RequestsContext)
+const HrProcessedPunches = () => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: TimeAttendanceRepository.PendingPunches.qry,
+    datasetId: ResourceIds.ProcessedPunches
+  })
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: TimeAttendanceRepository.ProcessedPunches.qry,
+      extension: TimeAttendanceRepository.PendingPunches.qry,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|9`
     })
 
     return { ...response, _startAt: _startAt }
   }
-
-  const {
-    query: { data },
-    labels: labels,
-    paginationParameters,
-    refetch,
-    access
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: TimeAttendanceRepository.ProcessedPunches.qry,
-    datasetId: ResourceIds.ProcessedPunches
-  })
 
   const columns = [
     {
@@ -55,7 +55,7 @@ const ProcessedPunches = () => {
       field: 'clockStamp',
       headerName: labels.date,
       flex: 1,
-      type: 'date'
+      type: 'dateTime'
     },
     {
       field: 'udid',
@@ -84,6 +84,7 @@ const ProcessedPunches = () => {
       }
     }
   ]
+
   function confirmation(dialogText) {
     stack({
       Component: ConfirmationDialog,
@@ -91,9 +92,7 @@ const ProcessedPunches = () => {
         DialogText: dialogText,
         fullScreen: false,
         close: true,
-        okButtonAction: window => {
-          window.close()
-        }
+        okButtonAction: refetch
       },
       width: 400,
       height: 150
@@ -103,7 +102,7 @@ const ProcessedPunches = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar actions={actions} />
+        <GridToolbar actions={actions} maxAccess={access} onAdd={false} />
       </Fixed>
       <Grow>
         <Table
@@ -122,4 +121,4 @@ const ProcessedPunches = () => {
   )
 }
 
-export default ProcessedPunches
+export default HrProcessedPunches
