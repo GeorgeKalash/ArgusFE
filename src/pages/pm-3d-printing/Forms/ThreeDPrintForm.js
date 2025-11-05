@@ -91,8 +91,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable(),
-      collectionName: yup.string().required()
+      setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -582,7 +581,6 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
                     readOnly
-                    required
                     error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
                   />
                 </Grid>
