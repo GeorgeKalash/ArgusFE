@@ -228,6 +228,12 @@ export default function JobOrderForm({
     }
   ]
   async function onStart() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.start,
       record: JSON.stringify({
@@ -242,6 +248,12 @@ export default function JobOrderForm({
     setRefetchRouting(true)
   }
   async function onStop() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.stop,
       record: JSON.stringify({
@@ -466,15 +478,17 @@ export default function JobOrderForm({
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = await getRouting(values?.routingId)
-    if (routing?.record?.isInactive) {
-      formik.setFieldValue('routingId', null)
-      formik.setFieldValue('routingRef', null)
-      formik.setFieldValue('routingName', null)
-    } else {
-      formik.setFieldValue('routingId', values?.routingId || null)
-      formik.setFieldValue('routingRef', values?.routingRef)
-      formik.setFieldValue('routingName', values?.routingName)
+    if (!isReleased) {
+      const routing = await getRouting(values?.routingId)
+      if (routing?.record?.isInactive) {
+        formik.setFieldValue('routingId', null)
+        formik.setFieldValue('routingRef', null)
+        formik.setFieldValue('routingName', null)
+      } else {
+        formik.setFieldValue('routingId', values?.routingId || null)
+        formik.setFieldValue('routingRef', values?.routingRef)
+        formik.setFieldValue('routingName', values?.routingName)
+      }
     }
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
@@ -542,6 +556,23 @@ export default function JobOrderForm({
           ? ResourceIds.MFJobOrders
           : null
     })
+  }
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
   }
 
   useEffect(() => {
@@ -781,7 +812,7 @@ export default function JobOrderForm({
                         readOnly={isCancelled || isPosted}
                         onChange={async (_, newValue) => {
                           await fillDesignInfo(newValue)
-                          await updateWC(newValue?.routingId, false)
+                          await updateWC(isReleased ? formik.values?.routingId : newValue?.routingId, false)
                         }}
                       />
                     </Grid>
@@ -881,7 +912,7 @@ export default function JobOrderForm({
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
                         ]}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await updateWC(newValue?.recordId, true)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
