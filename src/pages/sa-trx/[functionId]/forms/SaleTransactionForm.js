@@ -1466,7 +1466,7 @@ export default function SaleTransactionForm({
       mdAmount,
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice || 0),
       totalWeightPerG: newRow?.totPricePerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
