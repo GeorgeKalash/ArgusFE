@@ -194,6 +194,7 @@ export default function SaleTransactionForm({
           siteId: null,
           muId: null,
           qty: 0,
+          defaultQty: null,
           volume: 0,
           weight: 0,
           isMetal: false,
@@ -207,7 +208,7 @@ export default function SaleTransactionForm({
           mdType: MDTYPE_PCT,
           basePrice: 0,
           baseLaborPrice: 0,
-          TotPricePerG: 0,
+          totPricePerG: 0,
           mdValue: 0,
           unitPrice: 0,
           unitCost: 0,
@@ -371,7 +372,8 @@ export default function SaleTransactionForm({
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
-  async function barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo) {
+  async function barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo) {
+    let result = {}
     const weight = itemPhysProp?.weight || 0
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
@@ -382,9 +384,8 @@ export default function SaleTransactionForm({
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-    const TotPricePerG = basePriceValue + baseLaborPrice
-
-    const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * TotPricePerG : ItemConvertPrice?.unitPrice || 0
+    const totPricePerG = basePriceValue + baseLaborPrice
+    const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totPricePerG : ItemConvertPrice?.unitPrice || 0
 
     const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
     let rowTax = null
@@ -426,12 +427,13 @@ export default function SaleTransactionForm({
     }
 
     if (setItemInfo) {
-      update({
+      result = {
+        ...result,
         sku: ItemConvertPrice?.sku,
         barcode: ItemConvertPrice?.barcode,
         itemName: ItemConvertPrice?.itemName,
         itemId: ItemConvertPrice?.itemId
-      })
+      }
     }
     let categoryName
     if (itemInfo.categoryId) {
@@ -441,7 +443,14 @@ export default function SaleTransactionForm({
       })
       categoryName = category?.record?.name
     }
-    update({
+
+    formik.setFieldValue(
+      'header.mdAmount',
+      formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
+    )
+
+    result = {
+      ...result,
       isMetal,
       metalId,
       metalPurity,
@@ -450,11 +459,10 @@ export default function SaleTransactionForm({
       weight,
       basePrice: isMetal === false ? ItemConvertPrice?.basePrice || 0 : metalPurity > 0 ? basePriceValue : 0,
       baseLaborPrice,
-      TotPricePerG,
+      totPricePerG,
       unitPrice,
       upo: ItemConvertPrice?.upo || 0,
       priceType: ItemConvertPrice?.priceType || 1,
-      qty: 0,
       msId: itemInfo?.msId,
       categoryId: itemInfo.categoryId,
       categoryName,
@@ -471,12 +479,18 @@ export default function SaleTransactionForm({
       siteRef: formik.values?.header?.siteRef || null,
       taxDetails: rowTaxDetails,
       taxDetailsButton: true
-    })
+    }
 
-    formik.setFieldValue(
-      'header.mdAmount',
-      formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
-    )
+    let data = getItemPriceRow({ ...result, id: newRow?.id, qty: newRow?.defaultQty || 1 }, DIRTYFIELD_QTY)
+
+    const dirtyField = isValidPrice(result.basePrice)
+      ? DIRTYFIELD_BASE_PRICE
+      : isValidPrice(result.unitPrice)
+      ? DIRTYFIELD_UNIT_PRICE
+      : null
+    if (dirtyField) data = getItemPriceRow(data, dirtyField)
+
+    update({ ...data, priceWithVAT: calculatePrice(data, rowTaxDetails?.[0], DIRTYFIELD_BASE_PRICE) })
   }
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
@@ -524,6 +538,10 @@ export default function SaleTransactionForm({
     return mdType === MDTYPE_PCT ? '%' : '123'
   }
 
+  function isValidPrice(value) {
+    return value != null && value != '' && !isNaN(value) && value != 0
+  }
+
   const columns = [
     {
       component: 'textfield',
@@ -537,7 +555,7 @@ export default function SaleTransactionForm({
         if (ItemConvertPrice) {
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
-          await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, true)
+          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true)
         } else {
           update({
             barcode: null
@@ -575,7 +593,7 @@ export default function SaleTransactionForm({
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+        await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, false)
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -759,7 +777,7 @@ export default function SaleTransactionForm({
     {
       component: 'numberfield',
       label: labels.totalPPG,
-      name: 'totalWeightPerG',
+      name: 'totPricePerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
@@ -1163,6 +1181,8 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          totPricePerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
       })
@@ -1436,18 +1456,18 @@ export default function SaleTransactionForm({
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: newRow?.basePrice || 0,
+      basePrice: parseFloat(newRow?.basePrice || 0),
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
-      unitPrice: newRow?.unitPrice || 0,
+      unitPrice: parseFloat(newRow?.unitPrice) || 0,
       upo: parseFloat(newRow?.upo) || 0,
-      qty: newRow?.qty,
-      extendedPrice: newRow?.extendedPrice,
-      mdAmount: mdAmount,
+      qty: parseFloat(newRow?.qty || 0),
+      extendedPrice: parseFloat(newRow?.extendedPrice),
+      mdAmount,
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
       baseLaborPrice: newRow?.baseLaborPrice || 0,
-      totalWeightPerG: newRow?.totalWeightPerG || 0,
+      totalWeightPerG: newRow?.totPricePerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -1480,11 +1500,62 @@ export default function SaleTransactionForm({
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
+      totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
-      vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0
+      vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
+      priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
     }
 
     return iconClicked ? { changes: commonData } : commonData
+  }
+
+  function calculatePrice(item = {}, taxDetails = null, dirtyField) {
+    const unitPrice = item?.unitPrice ?? 0
+    const priceWithVAT = item?.priceWithVAT ?? 0
+
+    if (!taxDetails) {
+      const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
+
+      return price.toFixed(2)
+    }
+
+    const { amount = 0, taxBase } = taxDetails
+
+    switch (dirtyField) {
+      case DIRTYFIELD_BASE_PRICE:
+        return (unitPrice * (1 + amount / 100)).toFixed(2)
+
+      case DIRTYFIELD_UNIT_PRICE:
+        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
+
+        if (taxBase == 2) return priceWithVAT.toFixed(2)
+
+        return (priceWithVAT - unitPrice).toFixed(2)
+
+      default:
+        return
+    }
+  }
+  function getTotPricePerG(header, item, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: item?.priceType,
+      basePrice: parseFloat(item?.basePrice || 0),
+      volume: parseFloat(item?.volume) || 0,
+      weight: parseFloat(item?.weight),
+      unitPrice: parseFloat(item?.unitPrice || 0),
+      upo: 0,
+      qty: parseFloat(item?.qty) || 0,
+      extendedPrice: parseFloat(item?.extendedPrice),
+      mdAmount: header?.mdAmount || 0,
+      mdType: item?.mdType || 1,
+      baseLaborPrice: item?.baseLaborPrice || 0,
+      totalWeightPerG: item?.TotPricePerG,
+      mdValue: parseFloat(item?.mdValue),
+      tdPct: 0,
+      dirtyField
+    })
+
+    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
   }
 
   async function getFilteredMU(itemId, msId) {
