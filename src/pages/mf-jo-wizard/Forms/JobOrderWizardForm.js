@@ -63,7 +63,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         itemId: null,
         date: new Date(),
         status: 1,
-        notes: ''
+        notes: '',
+        producedWeight: 0
       },
       rows: [
         {
@@ -87,8 +88,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         jobId: yup.number().required(),
         operationId: yup.number().required(),
         laborId: yup.number().required(),
-        avgWeight: yup.number().required().min(0.01),
-        producedWeight: yup.number().required().min(0.01)
+        avgWeight: yup.number().min(0.01).nullable(),
+        producedWeight: yup.number().min(0.01).nullable()
       }),
       rows: yup
         .array()
@@ -129,6 +130,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     }
   })
 
+  console.log(formik)
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
@@ -501,6 +503,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 value={formik?.values?.header.avgWeight}
                 maxAccess={maxAccess}
                 readOnly
+                error={formik?.touched?.header?.avgWeight && Boolean(formik?.errors?.header?.avgWeight)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -534,6 +537,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 value={producedWeight}
                 maxAccess={maxAccess}
                 readOnly
+                error={formik?.touched?.header?.producedWeight && Boolean(formik?.errors?.header?.producedWeight)}
               />
             </Grid>
             <Grid item xs={4}>
