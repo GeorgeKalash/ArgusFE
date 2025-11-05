@@ -39,7 +39,7 @@ const convertValue = (value, dataType, isAPI = false) => {
   }
 }
 
-const parseCSV = (text, columns) => {
+const parseCSV = (text, columns, staticColumns = []) => {
   const lines = text.split('\n').filter(line => line.trim())
   if (!lines.length) return { count: 0, list: [] }
 
@@ -56,22 +56,31 @@ const parseCSV = (text, columns) => {
   const rows = lines.slice(1).map((line, i) => {
     const values = line.split(',').map(val => val.trim())
 
-    return orderedColumns.reduce(
-      (row, col, index) => {
+    let row = orderedColumns.reduce(
+      (acc, col, index) => {
         const header = headers[index]
         if (col) {
-          row[col.field] = convertValue(values[index], col.dataType)
+          acc[col.field] = convertValue(values[index], col.dataType)
         } else {
-          row[header] = values[index]
+          acc[header] = values[index]
         }
 
-        return {
-          ...row,
-          minPrice: row.minPrice ? parseFloat(row.minPrice) : 0
-        }
+        return acc
       },
       { recordId: i + 1 }
     )
+
+    staticColumns.forEach(col => {
+      if (headers.includes(col.field)) {
+        row[col.field] = col.value
+      } else {
+        row[col.field] = col.value
+      }
+    })
+
+    if (row.minPrice) row.minPrice = parseFloat(row.minPrice) || 0
+
+    return row
   })
 
   return { count: rows.length, list: rows }
@@ -130,7 +139,7 @@ const getImportData = (gridData, columns, stackError) => {
   return convertedData
 }
 
-const ImportForm = ({ onSuccess, resourceId, access, window }) => {
+const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window }) => {
   const { stack: stackError } = useError()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -166,7 +175,21 @@ const ImportForm = ({ onSuccess, resourceId, access, window }) => {
       ...rest
     })) || []
 
-  const columns = modifiedFields || []
+  const csvFieldNames = modifiedFields.map(f => f.field)
+
+  const columns = [
+    ...staticColumns
+      .filter(col => !csvFieldNames.includes(col.field))
+      .map(col => ({
+        field: col.field,
+        headerName: col.field,
+        width: 130,
+        dataType: 1,
+        readOnly: true
+      })),
+    ...modifiedFields
+  ]
+
   const objectName = importConfig.record.objectName
   const endPoint = importConfig.record.endPoint
 
@@ -176,7 +199,7 @@ const ImportForm = ({ onSuccess, resourceId, access, window }) => {
     if (file) {
       const reader = new FileReader()
       reader.onload = e => {
-        const data = parseCSV(e.target.result, columns)
+        const data = parseCSV(e.target.result, columns, staticColumns)
         setParsedFileContent(data)
       }
       reader.readAsText(file)
