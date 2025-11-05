@@ -293,6 +293,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     if (recordId) refetchForm(recordId)
   }, [])
 
+  useEffect(() => {
+    formik.setFieldValue('header.totalSFQty', parseFloat(totalUsedSemiFinished).toFixed(2))
+  }, [totalUsedSemiFinished])
+
   return (
     <FormShell
       resourceId={ResourceIds.JobOrderWizard}
