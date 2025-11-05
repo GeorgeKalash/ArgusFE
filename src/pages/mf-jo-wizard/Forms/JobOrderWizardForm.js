@@ -576,7 +576,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    name='header.totalUsedSemiFinished'
+                    name='header.totalSFQty'
                     label={labels.totalUsedSemiFinished}
                     value={totalUsedSemiFinished}
                     maxAccess={maxAccess}
