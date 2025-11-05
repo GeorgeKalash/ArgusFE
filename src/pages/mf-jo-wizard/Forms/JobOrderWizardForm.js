@@ -86,7 +86,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         expectedQty: yup.number().required(),
         jobId: yup.number().required(),
         operationId: yup.number().required(),
-        laborId: yup.number().required()
+        laborId: yup.number().required(),
+        avgWeight: yup.number().required().min(0.01),
+        producedWeight: yup.number().required().min(0.01)
       }),
       rows: yup
         .array()
@@ -384,7 +386,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.itemName', newValue?.itemName || '')
                   formik.setFieldValue('header.itemId', newValue?.itemId || null)
                   formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
-                  formik.setFieldValue('header.pcs', newValue?.pcs || 0)
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
                   formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
                   formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
@@ -495,6 +496,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             <Grid item xs={4}>
               <CustomNumberField
                 name='header.avgWeight'
+                allowNegative={false}
                 label={labels.avgWeight}
                 value={formik?.values?.header.avgWeight}
                 maxAccess={maxAccess}
@@ -528,6 +530,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               <CustomNumberField
                 name='header.producedWeight'
                 label={labels.producedWeight}
+                allowNegative={false}
                 value={producedWeight}
                 maxAccess={maxAccess}
                 readOnly
