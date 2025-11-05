@@ -246,7 +246,7 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
       isSaved={false}
       actions={actions}
       maxAccess={access}
-      fullSize
+      isParentWindow={false}
     >
       <VertLayout>
         <Fixed>
