@@ -568,29 +568,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     error={formik.touched.castingType && Boolean(formik.errors.castingType)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='statusName'
-                    label={labels.statusName}
-                    value={formik.values.statusName}
-                    maxAccess={maxAccess}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='notes'
-                    label={labels.notes}
-                    value={formik.values.notes}
-                    maxLength='100'
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    readOnly={isClosed}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
-                  />
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
@@ -670,6 +647,29 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     readOnly={isClosed}
                     onClear={() => formik.setFieldValue('fileReference ', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='statusName'
+                    label={labels.statusName}
+                    value={formik.values.statusName}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    maxLength='100'
+                    rows={2}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    readOnly={isClosed}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
                 </Grid>
               </Grid>
