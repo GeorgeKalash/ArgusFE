@@ -528,6 +528,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         })
       },
       disabled: !formik.values.accountId
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
     }
   ]
 

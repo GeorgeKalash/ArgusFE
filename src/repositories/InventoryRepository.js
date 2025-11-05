@@ -12,7 +12,7 @@ export const InventoryRepository = {
     snapshot4: service + 'snapshotIT4',
     get: service + 'getIT',
     quickView: service + 'quickViewIT',
-    clone: service + 'cloneIT',
+    clone: service + 'cloneIT'
   },
   Group: {
     qry: service + 'qryGRP',
@@ -302,7 +302,7 @@ export const InventoryRepository = {
   Management: {
     get: service + 'getMAN',
     set2: service + 'set2MAN',
-    del: service + 'delMAN',
+    del: service + 'delMAN'
   },
   SManagement: {
     qry: service + 'qrySMA'
@@ -354,5 +354,12 @@ export const InventoryRepository = {
   },
   LabelString: {
     md: service + 'mdLBL'
+  },
+  FiscaYear: {
+    qry: service + 'qryFPE'
+  },
+  QtyOpeningSerials: {
+    qry: service + 'qryOQS',
+    set2: service + 'set2OQS'
   }
 }

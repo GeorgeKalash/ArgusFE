@@ -63,7 +63,7 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
               label={tab.label}
               disabled={tab?.disabled}
               icon={
-                tab?.onRefetch ? (
+                tab?.id == activeTab && tab?.onRefetch ? (
                   <IconButton
                     size='small'
                     onClick={() => {
