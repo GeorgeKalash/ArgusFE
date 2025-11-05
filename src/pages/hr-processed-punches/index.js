@@ -8,9 +8,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ProcessedPunches = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -69,12 +75,30 @@ const ProcessedPunches = () => {
       condition: true,
       disabled: false,
       onClick: async () => {
-        await getRequest({
-          extension: TimeAttendanceRepository.ProcessedShiftPunches.retry
+        await postRequest({
+          extension: TimeAttendanceRepository.ProcessedShiftPunches.retry,
+          parameters: ''
+        }).then(() => {
+          confirmation(platformLabels.ServiceStarted)
         })
       }
     }
   ]
+  function confirmation(dialogText) {
+    stack({
+      Component: ConfirmationDialog,
+      props: {
+        DialogText: dialogText,
+        fullScreen: false,
+        close: true,
+        okButtonAction: window => {
+          window.close()
+        }
+      },
+      width: 400,
+      height: 150
+    })
+  }
 
   return (
     <VertLayout>
