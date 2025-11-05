@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
@@ -399,7 +399,7 @@ export const CompositeBarChartDark = ({ labels, data, label, color, hoverColor, 
   )
 }
 
-export const MixedColorsBarChartDark = ({ labels, data, label, height = 300 }) => {
+export const MixedColorsBarChartDark = ({ labels = [], data = [], label, height = 300 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -499,11 +499,14 @@ export const MixedColorsBarChartDark = ({ labels, data, label, height = 300 }) =
   )
 }
 
-export const CompositeBarChart = ({ id, labels, data, label }) => {
-  useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+export const CompositeBarChart = ({ labels = [], data = [], label = '' }) => {
+  const canvasRef = useRef(null)
+  const chartRef = useRef(null)
 
-    const chart = new Chart(ctx, {
+  useEffect(() => {
+    const ctx = canvasRef.current.getContext('2d')
+
+    chartRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -516,16 +519,27 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
             borderWidth: 1
           }
         ]
-      },
-      options: getChartOptions(label, 'bar')
+      }
     })
 
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, data, label])
+    return () => chartRef.current?.destroy()
+  }, [])
 
-  return <canvas id={id}></canvas>
+  useEffect(() => {
+    if (!chartRef.current) return
+    const chart = chartRef.current
+
+    chart.data.labels = [...labels]
+    chart.data.datasets[0].label = label
+    chart.data.datasets[0].data = [...data]
+    chart.update()
+  }, [labels, data, label])
+
+  return (
+    <div style={{ width: '100%', height: '100%' }}>
+      <canvas ref={canvasRef} />
+    </div>
+  )
 }
 
 export const LineChart = ({ labels, data, label, height = 450 }) => {
@@ -614,43 +628,45 @@ export const LineChart = ({ labels, data, label, height = 450 }) => {
   )
 }
 
-export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+export const LineChartDark = ({ labels = [], datasets = [], datasetLabels }) => {
+  const canvasRef = useRef(null)
+  const chartRef = useRef(null)
+
+  const datasetConfig = useMemo(
+    () =>
+      datasets
+        .map((data, index) => {
+          if (!data?.length) return null
+          const color = getColorForIndex(index)
+
+          return {
+            label: datasetLabels?.[index] ?? '',
+            data,
+            fill: false,
+            borderColor: color,
+            backgroundColor: color,
+            borderWidth: 2,
+            pointRadius: 5,
+            tension: 0.2
+          }
+        })
+        .filter(Boolean),
+    [datasets, datasetLabels]
+  )
+
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const ctx = canvasRef.current.getContext('2d')
 
-    const datasetConfig = datasets
-      .map((data, index) => {
-        if (data.length === 0) return null
-
-        const color = getColorForIndex(index)
-        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : ``
-
-        return {
-          label,
-          data,
-          fill: false,
-          borderColor: color,
-          backgroundColor: color,
-          borderWidth: 2,
-          pointRadius: 5,
-          tension: 0.2
-        }
-      })
-      .filter(Boolean)
-
-    const chart = new Chart(ctx, {
+    chartRef.current = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels,
-        datasets: datasetConfig
-      },
+      data: { labels, datasets: datasetConfig },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: datasetConfig.length > 0,
-            position: 'left'
+          legend: { display: datasetConfig.length > 0, position: 'left' },
+          datalabels: {
+            display: false
           },
           tooltip: {
             enabled: true,
@@ -669,12 +685,17 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
       }
     })
 
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, datasets, datasetLabels])
+    return () => chartRef.current?.destroy()
+  }, [datasetConfig, labels])
 
-  return <canvas id={id}></canvas>
+  useEffect(() => {
+    if (!chartRef.current) return
+    chartRef.current.data.labels = [...labels]
+    chartRef.current.data.datasets = datasetConfig
+    chartRef.current.update()
+  }, [labels, datasetConfig])
+
+  return <canvas ref={canvasRef} />
 }
 
 const getColorForIndex = index => {
@@ -793,7 +814,7 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
   return <canvas id={id}></canvas>
 }
 
-export const CompBarChart = ({ labels = [], datasets = [] }) => {
+export const CompBarChart = ({ labels = [], datasets = [], height = 350 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -895,7 +916,7 @@ export const CompBarChart = ({ labels = [], datasets = [] }) => {
   }, [labels, datasets])
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 350 }}>
+    <div style={{ position: 'relative', width: '100%', height }}>
       <canvas ref={canvasRef} />
     </div>
   )
