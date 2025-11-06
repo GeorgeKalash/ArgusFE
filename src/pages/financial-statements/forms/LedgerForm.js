@@ -39,6 +39,7 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
   })
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: makeInitialValues(nodeId),
     validationSchema: yup.object({
       nodeRef: yup.string().required()

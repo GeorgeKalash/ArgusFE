@@ -39,6 +39,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
 
   const { formik } = useForm({
     conditionSchema: ['items'],
+    enableReinitialize: true,
     maxAccess,
     initialValues: {
       fsId: mainRecordId,
