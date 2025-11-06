@@ -269,7 +269,6 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     })
   }
 
-
   useEffect(() => {
     if (!mainRecordId) return
 
@@ -278,9 +277,9 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         ...n,
         id: n.seqNo ?? i + 1
       }))
-    }
 
-    setData(initialData)
+      setData(initialData)
+    }
   }, [initialData?.nodes])
 
   return (
