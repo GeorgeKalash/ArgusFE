@@ -386,7 +386,7 @@ export default function RetailTransactionsForm({
     return currentAmount
   }
 
-  function calculateBankFees(ccId) {
+  function calculateBankFees(ccId, amount = 0) {
     if (!ccId || !amount) return
     const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
     if (arrayCC.length === 0) return
@@ -940,8 +940,7 @@ export default function RetailTransactionsForm({
         mapping: [
           { from: 'cashAccountId', to: 'cashAccountId' },
           { from: 'cashAccountRef', to: 'cashAccountRef' },
-          { from: 'type', to: 'type' },
-          { from: 'ccId', to: 'ccId' }
+          { from: 'type', to: 'type' }
         ],
         columnsInDropDown: [
           { key: 'cashAccountRef', value: 'Reference' },
@@ -952,8 +951,11 @@ export default function RetailTransactionsForm({
       async onChange({ row: { update, newRow } }) {
         if (cashAmount == 0) update({ amount: (Number(amount) || 0).toFixed(2) })
         getFilteredCC(newRow?.cashAccountId)
+
         if (newRow?.type == 1) {
-          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
+          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
+        } else {
+          update({ ccId: null, ccRef: '', bankFees: null })
         }
       }
     },
@@ -978,7 +980,7 @@ export default function RetailTransactionsForm({
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.ccId) {
-          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
+          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
         }
       },
       propsReducer({ row, props }) {

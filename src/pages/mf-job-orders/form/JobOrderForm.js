@@ -80,7 +80,6 @@ export default function JobOrderForm({
     stdWeight: 0,
     netSerialsWeight: 0,
     producedWgt: 0,
-    itemWeight: 0,
     expectedQty: 0,
     expectedPcs: 0,
     RMCost: 0,
@@ -107,12 +106,11 @@ export default function JobOrderForm({
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues,
-    validateOnChange: false,
     validationSchema: yup.object({
       date: yup.string().required(),
       expectedQty: yup.number().required(),
       expectedPcs: yup.number().moreThan(0).required(),
-      workCenterId: yup.string().required()
+      workCenterId: yup.number().required()
     }),
     onSubmit: async values => {
       const obj = { ...values }
@@ -230,6 +228,12 @@ export default function JobOrderForm({
     }
   ]
   async function onStart() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.start,
       record: JSON.stringify({
@@ -244,6 +248,12 @@ export default function JobOrderForm({
     setRefetchRouting(true)
   }
   async function onStop() {
+    if (Object.keys(formik?.errors)?.length > 0) {
+      onValidationRequired()
+
+      return
+    }
+
     const res = await postRequest({
       extension: ManufacturingRepository.MFJobOrder.stop,
       record: JSON.stringify({
@@ -399,6 +409,7 @@ export default function JobOrderForm({
           })
         }
       })
+    setRefetchRouting(true)
 
     return res?.record.reference
   }
@@ -419,9 +430,13 @@ export default function JobOrderForm({
       formik.setFieldValue('itemName', null)
       formik.setFieldValue('sku', null)
       formik.setFieldValue('itemsPL', null)
-      formik.setFieldValue('itemWeight', null)
+      formik.setFieldValue('stdWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
+      formik.setFieldValue('lineId', null)
+      formik.setFieldValue('routingId', null)
+      formik.setFieldValue('routingRef', null)
+      formik.setFieldValue('routingName', null)
 
       return
     }
@@ -438,31 +453,42 @@ export default function JobOrderForm({
     formik.setFieldValue('itemId', values?.recordId)
     formik.setFieldValue('itemName', values?.name)
     formik.setFieldValue('sku', values?.sku)
-    formik.setFieldValue('itemWeight', ItemPhysProp?.record?.weight)
+    formik.setFieldValue('stdWeight', ItemPhysProp?.record?.weight)
+    formik.setFieldValue(
+      'expectedQty',
+      !ItemPhysProp?.record?.weight || !formik.values.expectedPcs
+        ? 0
+        : formik.values.expectedPcs * ItemPhysProp?.record?.weight
+    )
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
+    formik.setFieldValue('routingId', null)
+    formik.setFieldValue('routingRef', null)
+    formik.setFieldValue('routingName', null)
     formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
     if (imageSource == 1) updateParent(values.recordId, imageSource)
     else if (imageSource == 2) updateParent(values.itemId, imageSource)
-    formik.setFieldValue('designId', values?.recordId)
-    formik.setFieldValue('designRef', values?.reference)
-    formik.setFieldValue('designName', values?.name)
+    formik.setFieldValue('designId', values?.recordId || null)
+    formik.setFieldValue('designRef', values?.reference || '')
+    formik.setFieldValue('designName', values?.name || '')
     formik.setFieldValue('stdWeight', values?.stdWeight)
     formik.setFieldValue(
       'expectedQty',
       !values?.stdWeight || !formik.values.expectedPcs ? 0 : formik.values.expectedPcs * values?.stdWeight
     )
-    const routing = await getRouting(values?.routingId)
-    if (routing?.record?.isInactive) {
-      formik.setFieldValue('routingId', null)
-      formik.setFieldValue('routingRef', null)
-      formik.setFieldValue('routingName', null)
-    } else {
-      formik.setFieldValue('routingId', values?.routingId || null)
-      formik.setFieldValue('routingRef', values?.routingRef)
-      formik.setFieldValue('routingName', values?.routingName)
+    if (!isReleased) {
+      const routing = await getRouting(values?.routingId)
+      if (routing?.record?.isInactive) {
+        formik.setFieldValue('routingId', null)
+        formik.setFieldValue('routingRef', null)
+        formik.setFieldValue('routingName', null)
+      } else {
+        formik.setFieldValue('routingId', values?.routingId || null)
+        formik.setFieldValue('routingRef', values?.routingRef)
+        formik.setFieldValue('routingName', values?.routingName)
+      }
     }
     formik.setFieldValue('lineId', values?.lineId)
     formik.setFieldValue('designPL', values?.lineId)
@@ -501,9 +527,9 @@ export default function JobOrderForm({
   async function updateWC(routingId, isRouting) {
     if (!routingId) {
       if (!isRouting) {
-        formik.setFieldValue('workCenterId', null)
         formik.setFieldValue('wcRef', null)
         formik.setFieldValue('wcName', null)
+        formik.setFieldValue('workCenterId', null)
       }
 
       return
@@ -514,9 +540,9 @@ export default function JobOrderForm({
       parameters: `_routingId=${routingId}`
     })
 
-    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef)
-    formik.setFieldValue('wcName', res?.list[0]?.workCenterName)
-    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId)
+    formik.setFieldValue('wcRef', res?.list[0]?.workCenterRef || '')
+    formik.setFieldValue('wcName', res?.list[0]?.workCenterName || '')
+    formik.setFieldValue('workCenterId', res?.list[0]?.workCenterId || null)
   }
   function updateParent(recordId, imgSource) {
     setParentImage({
@@ -530,6 +556,23 @@ export default function JobOrderForm({
           ? ResourceIds.MFJobOrders
           : null
     })
+  }
+  async function onValidationRequired() {
+    if (Object.keys(await formik.validateForm()).length) {
+      const errors = await formik.validateForm()
+
+      const touchedFields = Object.keys(errors).reduce((acc, key) => {
+        if (!formik.touched[key]) {
+          acc[key] = true
+        }
+
+        return acc
+      }, {})
+
+      if (Object.keys(touchedFields).length) {
+        formik.setTouched(touchedFields, true)
+      }
+    }
   }
 
   useEffect(() => {
@@ -746,7 +789,10 @@ export default function JobOrderForm({
                             formik.values.stdWeight ? formik.values.stdWeight * e.target.value : 0
                           )
                         }}
-                        onClear={() => formik.setFieldValue('expectedPcs', 0)}
+                        onClear={() => {
+                          formik.setFieldValue('expectedPcs', 0)
+                          formik.setFieldValue('expectedQty', 0)
+                        }}
                         error={formik.touched.expectedPcs && Boolean(formik.errors.expectedPcs)}
                       />
                     </Grid>
@@ -763,10 +809,10 @@ export default function JobOrderForm({
                         errorCheck={'designId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={isCancelled || isReleased || isPosted}
-                        onChange={async (event, newValue) => {
+                        readOnly={isCancelled || isPosted}
+                        onChange={async (_, newValue) => {
                           await fillDesignInfo(newValue)
-                          await updateWC(newValue?.routingId, false)
+                          await updateWC(isReleased ? formik.values?.routingId : newValue?.routingId, false)
                         }}
                       />
                     </Grid>
@@ -788,7 +834,6 @@ export default function JobOrderForm({
                         label={labels.description}
                         value={formik.values.description}
                         rows={2.5}
-                        maxLength='100'
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isPosted}
                         onChange={formik.handleChange}
@@ -798,9 +843,9 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={6}>
                       <CustomNumberField
-                        name='itemWeight'
+                        name='stdWeight'
                         label={labels.itemWeight}
-                        value={formik.values.itemWeight}
+                        value={formik.values.stdWeight}
                         readOnly
                       />
                     </Grid>
@@ -822,16 +867,25 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.ProductionLine.qry}
+                        endpointId={formik?.values?.itemId && ManufacturingRepository.ProductionLine.qry3}
+                        parameters={`_itemId=${formik?.values?.itemId}`}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
                         valueField='recordId'
                         displayField='name'
                         maxAccess={maxAccess}
-                        readOnly={isCancelled || isReleased}
+                        readOnly={!formik?.values?.itemId || isCancelled || isPosted}
                         onChange={(event, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
+                          formik.setFieldValue('routingId', null)
+                          formik.setFieldValue('routingRef', '')
+                          formik.setFieldValue('routingName', '')
+                        }}
+                        onClear={() => {
+                          formik.setFieldValue('routingId', null)
+                          formik.setFieldValue('routingRef', '')
+                          formik.setFieldValue('routingName', '')
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
@@ -839,6 +893,9 @@ export default function JobOrderForm({
                     <Grid item xs={12}>
                       <ResourceLookup
                         endpointId={ManufacturingRepository.Routing.snapshot2}
+                        parameters={{
+                          _lineId: formik.values.lineId || 0
+                        }}
                         valueField='reference'
                         displayField='name'
                         name='routingId'
@@ -850,12 +907,12 @@ export default function JobOrderForm({
                         errorCheck={'routingId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={isCancelled || isReleased || isPosted}
+                        readOnly={!formik?.values?.lineId || isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }
                         ]}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await updateWC(newValue?.recordId, true)
                           formik.setFieldValue('routingRef', newValue?.reference || null)
                           formik.setFieldValue('routingName', newValue?.name || null)
@@ -878,10 +935,10 @@ export default function JobOrderForm({
                         maxAccess={maxAccess}
                         readOnly={formik?.values?.routingId || formik?.values?.designId}
                         displayFieldWidth={2}
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue('workCenterId', newValue?.recordId)
-                          formik.setFieldValue('wcRef', newValue?.reference)
-                          formik.setFieldValue('wcName', newValue?.name)
+                        onChange={(_, newValue) => {
+                          formik.setFieldValue('wcRef', newValue?.reference || '')
+                          formik.setFieldValue('wcName', newValue?.name || '')
+                          formik.setFieldValue('workCenterId', newValue?.recordId || null)
                         }}
                       />
                     </Grid>
@@ -957,7 +1014,7 @@ export default function JobOrderForm({
                   seqNo={0}
                   customWidth={300}
                   customHeight={180}
-                  disabled={isCancelled || isReleased || isPosted}
+                  disabled={isCancelled || isPosted}
                   isAbsolutePath={true}
                   parentImage={parentImage}
                 />

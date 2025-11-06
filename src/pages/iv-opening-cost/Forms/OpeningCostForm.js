@@ -31,6 +31,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
       itemId: null,
       itemName: '',
       year: null,
+      periodId: null,
       avgCost: 0
     },
     maxAccess,
@@ -38,6 +39,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
     validationSchema: yup.object({
       year: yup.number().required(),
       itemId: yup.string().required(),
+      periodId: yup.number().required(),
       avgCost: yup.number().min(0).max(999999999).required()
     }),
     onSubmit: async obj => {
@@ -51,7 +53,7 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
 
         formik.setValues({
           ...obj,
-          recordId: String(obj.year) + String(obj.itemId)
+          recordId: String(obj.year) + String(obj.itemId) + String(obj.periodId)
         })
       } else toast.success(platformLabels.Edited)
 
@@ -63,15 +65,15 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
 
   useEffect(() => {
     ;(async function () {
-      if (record?.itemId && record?.year && recordId) {
+      if (record?.itemId && record?.year && record?.periodId && recordId) {
         const res = await getRequest({
           extension: InventoryRepository.OpeningCost.get,
-          parameters: `_itemId=${record?.itemId}&_fiscalYear=${record?.year}`
+          parameters: `_itemId=${record?.itemId}&_fiscalYear=${record?.year}&_periodId=${record?.periodId}`
         })
 
         formik.setValues({
           ...res.record,
-          recordId: String(res.record.year) + String(res.record.itemId)
+          recordId: String(res.record.year) + String(res.record.itemId) + String(res.record.periodId)
         })
       }
     })()
@@ -99,10 +101,23 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                 values={formik.values}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('year', newValue?.fiscalYear || null)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear || null)}
                 error={formik.touched.year && Boolean(formik.errors.year)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='periodId'
+                label={labels.fiscalPeriod}
+                valueField='periodId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
+                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -120,13 +135,14 @@ export default function OpeningCostForm({ labels, maxAccess, record, recordId })
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || '')
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')
                 }}
                 maxAccess={maxAccess}
                 required
+                errorCheck={'itemId'}
               />
             </Grid>
             <Grid item xs={12}>

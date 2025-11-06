@@ -138,8 +138,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
 
     const updatedHeader = {
       ...header,
-      qty: originalItems?.reduce((sum, item) => sum + item.qty, 0) || 0,
-      pcs: originalItems?.reduce((sum, item) => sum + item.pcs, 0) || 0
+      qty: originalItems?.reduce((sum, item) => sum + (Number(item.qty) || 0), 0) || 0,
+      pcs: originalItems?.reduce((sum, item) => sum + (Number(item.pcs) || 0), 0) || 0
     }
 
     const items = originalItems?.map(item => ({
@@ -528,6 +528,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         })
       },
       disabled: !formik.values.accountId
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
     }
   ]
 

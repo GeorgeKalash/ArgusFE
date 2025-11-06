@@ -1214,5 +1214,15 @@ export const apiMappings = {
       { key: 'reference', value: 'Reference' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.FiscalPeriod]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.FiscalPeriod.qry,
+    valueField: 'periodId',
+    displayField: ['periodId', 'name'],
+    columnsInDropDown: [
+      { key: 'periodId', value: 'PeriodId' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

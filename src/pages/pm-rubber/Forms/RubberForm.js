@@ -55,6 +55,11 @@ export default function RubberForm({ labels, access, recordId }) {
       modelId: null,
       modelRef: '',
       threeDPId: null,
+      designGroupId: null,
+      designFamilyId: null,
+      productionClassId: null,
+      itemGroupId: null,
+      productionStandardId: null,
       laborId: null,
       startDate: null,
       endDate: null,
@@ -188,6 +193,13 @@ export default function RubberForm({ labels, access, recordId }) {
     }
   }, [])
 
+  const getDesign = async recordId => {
+    return await getRequest({
+      extension: ProductModelingRepository.ThreeDDesign.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Rubber}
@@ -308,10 +320,14 @@ export default function RubberForm({ labels, access, recordId }) {
                       extension: ProductModelingRepository.Printing.get,
                       parameters: `_recordId=${newValue?.threeDPId}`
                     })
-
+                    const res2 = await getDesign(response.record?.threeDDId)
+                    formik.setFieldValue('productionStandardId', res2?.record?.productionStandardId || null)
+                    formik.setFieldValue('itemGroupId', res2?.record?.itemGroupId || null)
+                    formik.setFieldValue('productionClassId', res2?.record?.productionClassId || null)
                     const jobId = response?.record?.jobId
                     formik.setFieldValue('jobId', jobId || null)
-
+                    formik.setFieldValue('designFamilyId', response?.record?.designFamilyId || null)
+                    formik.setFieldValue('designGroupId', response?.record?.designGroupId || null)
                     if (jobId) {
                       const result = await getRequest({
                         extension: ManufacturingRepository.MFJobOrder.get,
@@ -341,7 +357,84 @@ export default function RubberForm({ labels, access, recordId }) {
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />
             </Grid>
-
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.DesignFamily.qry}
+                name='designFamilyId'
+                label={labels.familyGroup}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.DesignGroup.qry}
+                name='designGroupId'
+                label={labels.designGroup}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('designGroupId', newValue?.recordId || null)}
+                error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionClass.qry}
+                values={formik.values}
+                name='productionClassId'
+                label={labels.productionClass}
+                valueField='recordId'
+                displayField='name'
+                maxAccess={maxAccess}
+                readOnly
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('productionClassId', newValue?.recordId || null)
+                }}
+                error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionStandard.qry}
+                values={formik.values}
+                name='productionStandardId'
+                label={labels.productionStandard}
+                valueField='recordId'
+                displayField='reference'
+                maxAccess={maxAccess}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('productionStandardId', newValue?.recordId || '')}
+                error={formik.touched.productionStandardId && Boolean(formik.errors.productionStandardId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Group.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                values={formik.values}
+                name='itemGroupId'
+                label={labels.itemGroup}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                displayFieldWidth={1}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
+                error={formik.touched.itemGroupId && formik.errors.itemGroupId}
+              />
+            </Grid>
             <Grid item xs={12}>
               <Grid item xs={12}>
                 <ResourceComboBox

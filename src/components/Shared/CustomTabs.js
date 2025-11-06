@@ -1,5 +1,6 @@
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, IconButton, Tab, Tabs } from '@mui/material'
 import React, { useEffect } from 'react'
+import RefreshIcon from '@mui/icons-material/Refresh'
 
 export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 'tab' }) => {
   const indexes =
@@ -55,12 +56,26 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
             }
           }}
         >
-          {_tabs?.map((tab, i) => (
+          {_tabs?.map(tab => (
             <Tab
               key={tab.id}
               value={tab.id}
               label={tab.label}
               disabled={tab?.disabled}
+              icon={
+                tab?.id == activeTab && tab?.onRefetch ? (
+                  <IconButton
+                    size='small'
+                    onClick={() => {
+                      tab?.onRefetch()
+                    }}
+                    sx={{ ml: 1, p: 0.5 }}
+                  >
+                    <RefreshIcon fontSize='small' />
+                  </IconButton>
+                ) : null
+              }
+              iconPosition='end'
               sx={{
                 minHeight: '35px !important',
                 borderTopLeftRadius: 5,

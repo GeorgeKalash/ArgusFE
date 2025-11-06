@@ -43,69 +43,23 @@ const VerticalNavGroup = props => {
     navigationBorderWidth
   } = props
 
-  // ** Hooks & Vars
   const router = useRouter()
   const currentURL = router.asPath
   const { direction, navCollapsed, verticalNavToggleType } = settings
 
-  // ** Accordion menu group open toggle
-  // const toggleActiveGroup = (item, parent) => {
-  //   let openGroup = groupActive
-
-  //   // ** If Group is already open and clicked, close the group
-  //   if (openGroup.includes(item.id)) {
-  //     openGroup.splice(openGroup.indexOf(item.id), 1)
-
-  //     // If clicked Group has open group children, Also remove those children to close those groups
-  //     if (item.children) {
-  //       removeChildren(item.children, openGroup, currentActiveGroup)
-  //     }
-  //   } else if (parent) {
-  //     // ** If Group clicked is the child of an open group, first remove all the open groups under that parent
-  //     if (parent.children) {
-  //       removeChildren(parent.children, openGroup, currentActiveGroup)
-  //     }
-
-  //     // ** After removing all the open groups under that parent, add the clicked group to open group array
-  //     if (!openGroup.includes(item.id)) {
-  //       openGroup.push(item.id)
-  //     }
-  //   } else {
-  //     // ** If clicked on another group that is not active or open, create openGroup array from scratch
-  //     // ** Empty Open Group array
-  //     openGroup = []
-
-  //     // ** push Current Active Group To Open Group array
-  //     if (currentActiveGroup.every(elem => groupActive.includes(elem))) {
-  //       openGroup.push(...currentActiveGroup)
-  //     }
-
-  //     // ** Push current clicked group item to Open Group array
-  //     if (!openGroup.includes(item.id)) {
-  //       openGroup.push(item.id)
-  //     }
-  //   }
-  //   setGroupActive([...openGroup])
-  // }
-
   const toggleActiveGroup = item => {
-    let openGroups = groupActive.slice() // Create a copy of the active groups array
-
-    // Check if the item's ID is already in the active groups
+    let openGroups = groupActive.slice()
     const index = openGroups.indexOf(item.id)
 
     if (index !== -1) {
-      // If it's in the active groups, remove it to close the group
       openGroups.splice(index, 1)
     } else {
-      // If it's not in the active groups, add it to open the group
       openGroups.push(item.id)
     }
 
     setGroupActive([...openGroups])
   }
 
-  // ** Menu Group Click
   const handleGroupClick = () => {
     const openGroup = groupActive
     if (verticalNavToggleType === 'collapse') {
@@ -129,12 +83,11 @@ const VerticalNavGroup = props => {
     setGroupActive([...groupActive])
     setCurrentActiveGroup([...groupActive])
 
-    // Empty Active Group When Menu is collapsed and not hovered, to fix issue route change
     if (navCollapsed) {
       setGroupActive([])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.asPath])
+
   useEffect(() => {
     if (navCollapsed) {
       setGroupActive([])
@@ -142,14 +95,14 @@ const VerticalNavGroup = props => {
     if (navCollapsed || (groupActive.length === 0 && !navCollapsed)) {
       setGroupActive([...currentActiveGroup])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navCollapsed])
+
   useEffect(() => {
     if (groupActive.length === 0 && !navCollapsed) {
       setGroupActive([])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
   const icon = parent && !item.icon ? themeConfig.navSubItemIcon : item.icon
   const menuGroupCollapsedStyles = navCollapsed ? { opacity: 0 } : { opacity: 1 }
 

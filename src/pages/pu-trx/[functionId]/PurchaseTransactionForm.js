@@ -205,6 +205,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
   }
 
+  const getEndpoint = {
+    [SystemFunction.PurchaseInvoice]: {
+      set: PurchaseRepository.PurchaseInvoiceHeader.set2,
+      post: PurchaseRepository.PurchaseInvoiceHeader.post,
+      unpost: PurchaseRepository.PurchaseInvoiceHeader.unpost
+    },
+    [SystemFunction.PurchaseReturn]: {
+      set: PurchaseRepository.PurchaseReturnHeader.set2,
+      post: PurchaseRepository.PurchaseReturnHeader.post,
+      unpost: PurchaseRepository.PurchaseReturnHeader.unpost
+    }
+  }
+
   const onClick = () => {
     stack({
       Component: ItemPromotion,
@@ -308,7 +321,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
 
       const puTrxRes = await postRequest({
-        extension: PurchaseRepository.PurchaseInvoiceHeader.set2,
+        extension: getEndpoint[functionId]?.['set'],
         record: JSON.stringify(payload)
       })
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
@@ -490,7 +503,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 3
+        decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -718,7 +731,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const onPost = async () => {
     await postRequest({
-      extension: PurchaseRepository.PurchaseInvoiceHeader.post,
+      extension: getEndpoint[functionId]?.['post'],
       record: JSON.stringify(formik.values.header)
     })
 
@@ -730,7 +743,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: PurchaseRepository.PurchaseInvoiceHeader.unpost,
+      extension: getEndpoint[functionId]?.['unpost'],
       record: JSON.stringify(formik.values.header)
     })
 

@@ -35,6 +35,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
       name: '',
       timeFrom: '',
       timeTo: '',
+      type: null,
       moduleId: null,
       resourceId: null,
       sgId: null,
@@ -45,6 +46,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
     validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
+      type: yup.number().required(),
       timeFrom: yup
         .mixed()
         .required()
@@ -186,6 +188,20 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 error={formik.touched.timeTo && Boolean(formik.errors.timeTo)}
                 min={dayjs(formik.values.timeFrom, 'HH:mm')}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.RESOURCE_DOWNTIME_TYPE}
+                label={labels.type}
+                defaultIndex={0}
+                required
+                name='type'
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => formik.setFieldValue('type', newValue?.key || null)}
               />
             </Grid>
             <Grid item xs={12}>
