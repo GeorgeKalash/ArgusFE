@@ -11,6 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Form from 'src/components/Shared/Form'
 import { useError } from 'src/error'
+import { useForm } from 'src/hooks/form'
 
 const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchData }) => {
   const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc } = node?.current || {}
@@ -38,11 +39,12 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
     ]
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: makeInitialValues(nodeId),
     validationSchema: yup.object({
       nodeRef: yup.string().required()
     }),
+    maxAccess,
     onSubmit: async obj => {
       const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4)
 
