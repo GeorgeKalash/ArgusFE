@@ -85,7 +85,7 @@ export default function ProductionOrderForm({ recordId, window }) {
           qty: null,
           pcs: null,
           designId: null,
-          jobCount: 1,
+          jobCount: null,
           notes: '',
           seqNo: '',
           lineId: null,
@@ -247,7 +247,8 @@ export default function ProductionOrderForm({ recordId, window }) {
           itemWeight: result1?.stdWeight || null,
           routingId: result1?.routingId || null,
           routingRef: result1?.routingRef || '',
-          routingName: result1?.routingName || ''
+          routingName: result1?.routingName || '',
+          jobCount: 1
         })
       }
     },
