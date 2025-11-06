@@ -103,8 +103,8 @@ export default function ModellingForm({ labels, access, setStore, store }) {
     })
     setStore(prevStore => ({
       ...prevStore,
-      recordId: res.record.recordId,
-      isClosed: res.record.wip === 2
+      recordId: res?.record?.recordId,
+      isClosed: res?.record?.wip === 2
     }))
   }
   async function onClose() {
