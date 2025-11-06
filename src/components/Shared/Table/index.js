@@ -27,6 +27,7 @@ import { Fixed } from '../Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
+import styles from './Table.module.css'
 
 const Table = ({
   name,
@@ -124,7 +125,7 @@ const Table = ({
               <Checkbox
                 checked={data?.[col.field]}
                 onChange={col.editable ? handleCheckboxChange : null}
-                style={col.editable ? {} : { pointerEvents: 'none' }}
+                className={col.editable ? '' : styles.pointerNone}
               />
             )
           }
@@ -137,16 +138,8 @@ const Table = ({
             const color = data?.[col.field]
 
             return color ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <div
-                  style={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: '4px',
-                    backgroundColor: color,
-                    border: '1px solid #ccc'
-                  }}
-                />
+              <div className={styles.colorComboWrapper}>
+                <div className={styles.colorSwatch} style={{ backgroundColor: color }} />
                 <span>{color}</span>
               </div>
             ) : null
@@ -252,14 +245,7 @@ const Table = ({
         return (
           <TextField
             size={'small'}
-            sx={{
-              px: 2,
-              p: 1,
-              width: '80px',
-              '& .MuiInputBase-root': {
-                height: '30px'
-              }
-            }}
+            className={styles.pageTextField}
             autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
@@ -296,16 +282,8 @@ const Table = ({
         }
 
         return (
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box
-              sx={{
-                width: '100%',
-                backgroundColor: '#fff',
-                borderTop: '1px solid #ccc',
-                fontSize: '0.9rem',
-                bottom: 0
-              }}
-            >
+          <Box className={styles.paginationWrapper}>
+            <Box className={styles.paginationBar}>
               <IconButton
                 onClick={goToFirstPage}
                 disabled={page === 1}
@@ -413,16 +391,8 @@ const Table = ({
           }
 
           return (
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Box
-                sx={{
-                  width: '100%',
-                  backgroundColor: '#fff',
-                  borderTop: '1px solid #ccc',
-                  fontSize: '0.9rem',
-                  bottom: 0
-                }}
-              >
+            <Box className={styles.paginationWrapper}>
+              <Box className={styles.paginationBar}>
                 <IconButton
                   onClick={goToFirstPage}
                   disabled={page === 1}
@@ -524,10 +494,7 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
-        sx={{
-          width: '100%',
-          height: '100%'
-        }}
+        className={styles.fullSizeCheckbox}
         checked={params.value}
         disabled={props?.disable && props?.disable(params?.data)}
         onChange={e => {
@@ -602,42 +569,12 @@ const Table = ({
     return (
       <Box>
         {tooltipOpen && (
-          <Box
-            sx={{
-              zIndex: 1000,
-              position: 'fixed',
-              top: '-40px',
-              backgroundColor: 'black',
-              color: 'white',
-              paddingY: '1px',
-              paddingX: '3px',
-              borderRadius: '5px'
-            }}
-          >
-            Copied!
-          </Box>
+          <Box className={styles.copiedTooltip}>Copied!</Box>
         )}
         <Box
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
-          sx={{
-            userSelect: 'text',
-            cursor: 'pointer',
-            height: '50%',
-            width: '100%',
-            '&::selection': {
-              backgroundColor: 'none !important',
-              color: 'inherit'
-            },
-            '&:focus': {
-              outline: 'none'
-            },
-            ...(!params.colDef?.wrapText && {
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            })
-          }}
+          className={styles.fieldWrapper}
         >
           {params.value}
         </Box>
@@ -739,10 +676,7 @@ const Table = ({
                     focusable && focusable.focus && focusable.focus()
                     selectAll(params, e)
                   }}
-                  sx={{
-                    width: '100%',
-                    height: '100%'
-                  }}
+                  className={styles.fullSizeCheckbox}
                 />
               ),
             suppressMenu: true
@@ -784,7 +718,7 @@ const Table = ({
           const isWIP = data.wip === 2
 
           return (
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+            <Box className={styles.actionsBox}>
               {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
@@ -938,33 +872,13 @@ const Table = ({
           ref={gridRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className='ag-theme-alpine'
-          style={{
-            flex: !props.maxHeight && !props.height && 1,
-            width: '1000px !important',
-            height: props?.maxHeight ? height : props?.height || 'auto',
-            maxHeight: props?.maxHeight || 'auto',
-            position: 'relative'
-          }}
-          sx={{
-            '.ag-header': {
-              height: '40px !important',
-              minHeight: '40px !important'
-            },
-            '.ag-header-cell': {
-              height: '40px !important',
-              minHeight: '40px !important'
-            },
-            '.ag-cell': {
-              borderRight: '1px solid #d0d0d0 !important'
-            },
-            '.ag-cell .MuiBox-root': {
-              padding: '0px !important'
-            }
-          }}
-        >
+          className={[
+            'ag-theme-alpine',
+            styles.agGridContainer,
+            !props.maxHeight && !props.height ? styles.agGridFlex : ''
+          ].join(' ')}        >
           {hoveredTable && !pagination && (
-            <Box position='absolute' top={0} right={0} zIndex={9999} boxShadow={3} borderRadius={1} bgcolor='white'>
+            <Box className={styles.hoverReset}>
               <IconButton size='small' onClick={onReset}>
                 <CachedIcon fontSize='small' />
               </IconButton>
