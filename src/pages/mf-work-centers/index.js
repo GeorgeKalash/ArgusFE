@@ -149,7 +149,13 @@ const WorkCenter = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'MFWCT'} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          filterBy={filterBy}
+          reportName={'MFWCT'}
+          previewReport={ResourceIds.WorkCenters}
+        />
       </Fixed>
       <Grow>
         <Table
