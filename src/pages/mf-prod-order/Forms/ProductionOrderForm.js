@@ -460,6 +460,9 @@ export default function ProductionOrderForm({ recordId, window }) {
       props: {
         resourceId: ResourceIds.ImportProductionOrder,
         access: maxAccess,
+        staticColumns: [
+          { field: 'poRef', value: formik.values.reference },
+        ],
         onSuccess: async () => {
           if (recordId) refetchForm(recordId)
         }
