@@ -130,7 +130,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     }
   })
 
-  console.log(formik)
   const editMode = !!formik.values.recordId
   const isPosted = formik.values.header.status === 3
 
@@ -234,7 +233,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         recordId: res.record.header.recordId,
         header: {
           ...res.record.header,
-          date: formatDateFromApi(res?.record?.header?.date)
+          date: formatDateFromApi(res?.record?.header?.date),
+          producedWeight: res.record.header.pcs * res.record.header.avgWeight
         },
         rows: modifiedList
       })
@@ -290,8 +290,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     return consumed + consumedValue
   }, 0)
 
-  const producedWeight = formik.values.header.pcs * formik.values.header.avgWeight
-  const totalUsedSemiFinished = producedWeight - totalConsumed
+  const totalUsedSemiFinished = formik.values.header.producedWeight - totalConsumed
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -395,6 +394,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.weight', physical?.weight || 0)
                   const production = await getItemProduction(newValue?.itemId)
                   formik.setFieldValue('header.bomId', production?.bomId || 0)
+                  formik.setFieldValue('header.producedWeight', newValue?.avgWeight * formik.values.header.pcs)
                 }}
                 onClear={async (_, newValue) => {
                   formik.setFieldValue('header.workCenterName', '')
@@ -487,7 +487,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.pcs'
                 label={labels.producedPcs}
                 value={formik.values.header.pcs}
-                onChange={formik.handleChange}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.producedWeight', newValue * formik.values.header.avgWeight)
+                  formik.setFieldValue('header.pcs', newValue || null)
+                }}
                 onClear={() => formik.setFieldValue('header.pcs', '')}
                 readOnly={isPosted}
                 maxLength={9}
@@ -534,7 +537,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.producedWeight'
                 label={labels.producedWeight}
                 allowNegative={false}
-                value={producedWeight}
+                value={formik.values.header.producedWeight}
                 maxAccess={maxAccess}
                 readOnly
                 error={formik?.touched?.header?.producedWeight && Boolean(formik?.errors?.header?.producedWeight)}
