@@ -32,6 +32,11 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
     fetchFullFinancialStatement()
   }, [mainRecordId])
 
+  const handleImportData = data => {
+    setLoadedData(data)
+    setRecId(data?.fs?.recordId)
+  }
+
   const tabs = [
     { label: labels.financialStatement },
     { label: labels.node, disabled: !mainRecordId },
@@ -49,6 +54,7 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
           setRecId={setRecId}
           mainRecordId={mainRecordId}
           initialData={loadedData?.fs ?? {}}
+          onImportData={handleImportData}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
@@ -71,7 +77,7 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
           labels={labels}
           node={node}
           mainRecordId={mainRecordId}
-          initialData={loadedData?.ledgers ?? []}
+          initialData={loadedData}
           fetchData={fetchFullFinancialStatement}
         />
       </CustomTabPanel>

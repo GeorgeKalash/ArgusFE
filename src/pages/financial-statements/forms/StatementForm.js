@@ -17,7 +17,7 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 
-export default function StatementForm({ initialData, labels, maxAccess, setRecId, mainRecordId }) {
+export default function StatementForm({ initialData, labels, maxAccess, setRecId, mainRecordId, onImportData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -119,16 +119,39 @@ export default function StatementForm({ initialData, labels, maxAccess, setRecId
 
       const text = await file.text()
       const json = JSON.parse(text)
-
       const pack = json.record
 
-      if (!pack?.fs) {
+      if (!pack?.fs) return
+
+      const clonedPack = structuredClone(pack) 
+
+      const newFsId = mainRecordId || formik.values.recordId
+
+      if (!newFsId) {
         return
+      }
+
+      clonedPack.fs.recordId = newFsId
+
+      if (Array.isArray(clonedPack.nodes)) {
+        clonedPack.nodes = clonedPack.nodes.map(n => ({ ...n, fsId: newFsId }))
+      }
+
+      if (Array.isArray(clonedPack.titles)) {
+        clonedPack.titles = clonedPack.titles.map(t => ({ ...t, fsId: newFsId }))
+      }
+
+      if (Array.isArray(clonedPack.ledgers)) {
+        clonedPack.ledgers = clonedPack.ledgers.map(l => ({ ...l, fsId: newFsId }))
+      }
+
+      if (onImportData) {
+        onImportData(clonedPack)
       }
 
       const res = await postRequest({
         extension: FinancialStatementRepository.FinancialStatement.set2,
-        record: JSON.stringify(pack)
+        record: JSON.stringify(clonedPack)
       })
 
       if (res?.recordId) {

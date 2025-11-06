@@ -15,6 +15,7 @@ import { useError } from 'src/error'
 const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchData }) => {
   const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc } = node?.current || {}
 
+  const ledgers = initialData?.ledgers
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const lastValidNodeId = useRef(nodeId || null)
@@ -134,8 +135,10 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
 
   useEffect(() => {
     if (!mainRecordId) return
-    if (initialData?.length && nodeId) {
-      const nodeLedgers = initialData.filter(l => Number(l.seqNo) === Number(nodeId))
+    if (ledgers?.length && nodeId) {
+      const nodeLedgers = ledgers.filter(
+        l => Number(l.seqNo) === Number(nodeId) || Number(l.ledgerSeqNo) === Number(nodeId)
+      )
 
       const normalized = nodeLedgers.map((l, i) => ({
         id: i + 1,
@@ -151,7 +154,7 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
 
     if (nodeId) lastValidNodeId.current = nodeId
     formik.resetForm({ values: makeInitialValues(nodeId || null) })
-  }, [nodeId, mainRecordId, initialData])
+  }, [nodeId, mainRecordId, ledgers])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>

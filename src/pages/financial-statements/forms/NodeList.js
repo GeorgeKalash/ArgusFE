@@ -269,17 +269,19 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     })
   }
 
+
   useEffect(() => {
     if (!mainRecordId) return
 
-    if (initialData?.nodes?.length && !formik.values.items[0].reference) {
+    if (initialData?.nodes?.length && !formik?.values?.items[0]?.reference) {
       parents.current = initialData.nodes.map((n, i) => ({
         ...n,
         id: n.seqNo ?? i + 1
       }))
-      setData(initialData)
     }
-  }, [initialData?.nodes?.length])
+
+    setData(initialData)
+  }, [initialData?.nodes])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
