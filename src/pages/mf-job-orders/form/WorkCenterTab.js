@@ -28,7 +28,7 @@ const WorkCenterTab = ({ labels, maxAccess, store }) => {
     enabled: !!recordId,
     endpointId: ManufacturingRepository.JobWorkCenter.qry,
     datasetId: ResourceIds.MFJobOrders,
-    params: { disabledReqParams: true, maxAccess },
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const columns = [

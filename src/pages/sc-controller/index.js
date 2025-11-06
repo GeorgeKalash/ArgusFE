@@ -52,7 +52,7 @@ const StockCountController = () => {
       field: 'plantName',
       headerName: _labels.plant,
       flex: 1
-    },
+    }
   ]
 
   const add = () => {

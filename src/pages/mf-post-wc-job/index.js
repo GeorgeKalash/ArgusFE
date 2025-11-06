@@ -55,7 +55,7 @@ const PostWorkCenterJob = () => {
             seqNo: formik.values.seqNo,
             workCenterId: formik.values.workCenterId,
             qty: formik.values.qty,
-            pcs: formik.values.pcs,
+            pcs: formik.values.pcs
           })
         })
         toast.success(platformLabels.Posted)

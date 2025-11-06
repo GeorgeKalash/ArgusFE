@@ -87,9 +87,7 @@ const CcCashNotes = () => {
       props: {
         labels: labels,
         record: record,
-        recordId: record
-          ? String(record.currencyId * 10) + record.note
-          : null,
+        recordId: record ? String(record.currencyId * 10) + record.note : null,
         maxAccess: access
       },
       width: 600,

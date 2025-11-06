@@ -25,7 +25,7 @@ const ResourcePerformance = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
   const now = new Date()
-  const fromDT = new Date(now.getTime() - 5 * 60 * 1000) 
+  const fromDT = new Date(now.getTime() - 5 * 60 * 1000)
   const toDT = now
 
   const { formik } = useForm({
@@ -44,20 +44,20 @@ const ResourcePerformance = () => {
     })
   })
   useEffect(() => {
-  const interval = setInterval(() => {
-    const now = new Date()
-    const fromDT = new Date(now.getTime() - 5 * 60 * 1000)
-    const toDT = now
+    const interval = setInterval(() => {
+      const now = new Date()
+      const fromDT = new Date(now.getTime() - 5 * 60 * 1000)
+      const toDT = now
 
-    formik.setValues(prev => ({
-      ...prev,
-      fromDT,
-      toDT
-    }))
-  }, 60 * 1000)
+      formik.setValues(prev => ({
+        ...prev,
+        fromDT,
+        toDT
+      }))
+    }, 60 * 1000)
 
-  return () => clearInterval(interval)
-}, [])
+    return () => clearInterval(interval)
+  }, [])
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options

@@ -90,7 +90,7 @@ const PMTasksTab = ({ labels, maxAccess, store }) => {
     openForm(obj)
   }
 
-  const openForm = (obj) => {
+  const openForm = obj => {
     stack({
       Component: EquipmentTaskForm,
       props: {

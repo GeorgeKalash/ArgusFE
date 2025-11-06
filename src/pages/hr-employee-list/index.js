@@ -41,7 +41,7 @@ const EmployeeList = () => {
         extension: EmployeeRepository.EmployeeChart.qry2,
         parameters: `_filter=${filters.qry}&_branchId=0`
       })
-      
+
       if (res && res?.list) {
         res.list = res?.list.map(item => ({
           ...item,

@@ -28,7 +28,7 @@ const FinalSettlement = () => {
 
     response.list = response?.list?.map(item => ({
       ...item,
-      employeeName: item?.employee?.parent.fullName || '',
+      employeeName: item?.employee?.parent.fullName || ''
     }))
 
     return { ...response, _startAt: _startAt }

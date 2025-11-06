@@ -104,13 +104,7 @@ const FOMoulds = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          labels={labels}
-          maxAccess={access}
-          filterBy={filterBy}
-          onAdd={add}
-          reportName={'FOMOU'}
-        />
+        <RPBGridToolbar labels={labels} maxAccess={access} filterBy={filterBy} onAdd={add} reportName={'FOMOU'} />
       </Fixed>
       <Grow>
         <Table

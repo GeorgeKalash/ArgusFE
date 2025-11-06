@@ -21,11 +21,9 @@ const Users = () => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
 
-
     const response = await getRequest({
       extension: SystemRepository.Users.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-
     })
 
     return { ...response, _startAt: _startAt }
@@ -73,7 +71,7 @@ const Users = () => {
       title: labels.users
     })
   }
-  
+
   const columns = [
     {
       field: 'fullName',
@@ -131,7 +129,7 @@ const Users = () => {
       </Fixed>
       <Grow>
         <Table
-          name="table"
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -141,7 +139,7 @@ const Users = () => {
           maxAccess={access}
           paginationParameters={paginationParameters}
           paginationType='api'
-          refetch={refetch}        
+          refetch={refetch}
         />
       </Grow>
     </VertLayout>

@@ -1,40 +1,22 @@
-// ** Next Imports
 import Head from 'next/head'
 import { Router } from 'next/router'
-
-// ** Store Imports
 import { store } from 'src/store'
 import { Provider } from 'react-redux'
-
-// ** Loader Import
 import NProgress from 'nprogress'
-
-// ** Emotion Imports
 import { CacheProvider } from '@emotion/react'
-
-// ** Config Imports
 import 'src/configs/i18n'
 import { defaultACLObj } from 'src/configs/acl'
 import themeConfig from 'src/configs/themeConfig'
-
-// ** Third Party Import
 import { Toaster } from 'react-hot-toast'
-
-// ** Component Imports
 import UserLayout from 'src/layouts/UserLayout'
 import AclGuard from 'src/@core/components/auth/AclGuard'
 import ThemeComponent from 'src/@core/theme/ThemeComponent'
 import AuthGuard from 'src/@core/components/auth/AuthGuard'
 import GuestGuard from 'src/@core/components/auth/GuestGuard'
-
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import 'ag-grid-community'
-
-// ** Spinner Import
 import Spinner from 'src/@core/components/spinner'
-
-// ** Contexts
 import { AuthContext, AuthProvider } from 'src/providers/AuthContext'
 import { RequestsProvider } from 'src/providers/RequestsContext'
 import { ControlProvider } from 'src/providers/ControlContext'
@@ -43,30 +25,18 @@ import { MenuProvider } from 'src/providers/MenuContext'
 import { TabsProvider } from 'src/providers/TabsContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
 import { PrimeReactProvider } from 'primereact/api'
-
-// ** Styled Components
 import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
-
-// ** Utils Imports
 import { createEmotionCache } from 'src/@core/utils/create-emotion-cache'
-
-// ** Prismjs Styles
 import 'prismjs'
 import 'prismjs/themes/prism-tomorrow.css'
 import 'prismjs/components/prism-jsx'
 import 'prismjs/components/prism-tsx'
-
-// ** React Perfect Scrollbar Style
 import 'react-perfect-scrollbar/dist/css/styles.css'
 import 'src/iconify-bundle/icons-bundle-react'
-
-// ** PrimeReact Styles
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/saga-blue/theme.css'
 import 'styles/globals.css'
 import 'styles/formgrid.css'
-
-// ** Global css styles
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from 'src/windows'
 import { ErrorProvider } from 'src/error'
@@ -76,7 +46,6 @@ import { LockedScreensProvider } from 'src/providers/LockedScreensContext'
 
 const clientSideEmotionCache = createEmotionCache()
 
-// ** Pace Loader
 if (themeConfig.routingLoader) {
   Router.events.on('routeChangeStart', () => {
     NProgress.start()
@@ -109,11 +78,9 @@ const queryClient = new QueryClient({
   }
 })
 
-// ** Configure JSS & ClassName
 const App = props => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
-  // Variables
   const contentHeightFixed = Component.contentHeightFixed ?? false
 
   const getLayout =

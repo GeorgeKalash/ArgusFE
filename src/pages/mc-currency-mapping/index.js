@@ -86,9 +86,7 @@ const MultiCurrencyMapping = () => {
         labels: _labels,
         record,
         maxAccess: access,
-        recordId: record
-          ? String(record.currencyId * 1000 + record.rateTypeId)
-          : null
+        recordId: record ? String(record.currencyId * 1000 + record.rateTypeId) : null
       },
       width: 600,
       height: 300,

@@ -46,7 +46,6 @@ const Designs = () => {
     }
   })
 
-
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
@@ -57,7 +56,7 @@ const Designs = () => {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
     }
   }
-  
+
   const columns = [
     {
       field: 'reference',

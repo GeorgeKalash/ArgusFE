@@ -77,7 +77,7 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       Component: WorksheetWindow,
       props: {
         recordId,
-        joInvalidate: invalidate,
+        joInvalidate: invalidate
       }
     })
   }

@@ -25,7 +25,7 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
         parameters: `_msId=${msId}`
       })
 
-      setMeasurementUnitGridData(response) 
+      setMeasurementUnitGridData(response)
     } catch (error) {}
   }
 
@@ -55,7 +55,7 @@ const MeasurementUnit = ({ store, maxAccess, labels }) => {
     openForm(obj?.recordId)
   }
 
-  const openForm = id => { 
+  const openForm = id => {
     stack({
       Component: MeasurementUnitForm,
       props: {

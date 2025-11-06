@@ -65,37 +65,37 @@ const LeavesTab = ({ labels, maxAccess, store }) => {
       field: 'earned',
       headerName: labels.earned,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'used',
       headerName: labels.used,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'lost',
       headerName: labels.lost,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'adjustments',
       headerName: labels.adjustment,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'payments',
       headerName: labels.payment,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     },
     {
       field: 'balance',
       headerName: labels.balance,
       flex: 1,
-      type: { field: 'number', decimal: 2 },
+      type: { field: 'number', decimal: 2 }
     }
   ]
 

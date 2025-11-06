@@ -78,9 +78,7 @@ const WorkCenters = () => {
       Component: WorkCentersForm,
       props: {
         labels: _labels,
-        recordId: record
-          ? record.workCenterId
-          : null,
+        recordId: record ? record.workCenterId : null,
         record,
         maxAccess: access
       },

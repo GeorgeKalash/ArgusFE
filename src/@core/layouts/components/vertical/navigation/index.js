@@ -6,15 +6,11 @@ import TextField from '@mui/material/TextField'
 import SearchIcon from '@mui/icons-material/Search'
 import SettingsIcon from '@mui/icons-material/Settings'
 import GradeIcon from '@mui/icons-material/Grade'
-import { createTheme, responsiveFontSizes, styled, ThemeProvider } from '@mui/material/styles'
-import PerfectScrollbar from 'react-perfect-scrollbar'
+import { createTheme, responsiveFontSizes, ThemeProvider, useTheme } from '@mui/material/styles'
 import themeConfig from 'src/configs/themeConfig'
-import Drawer from './Drawer'
-import VerticalNavItems from './VerticalNavItems'
-import VerticalNavHeader from './VerticalNavHeader'
+import MuiSwipeableDrawer from '@mui/material/SwipeableDrawer'
 import Dropdown from './Dropdown'
 import themeOptions from 'src/@core/theme/ThemeOptions'
-import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import { useRouter } from 'next/router'
 import { MenuContext } from 'src/providers/MenuContext'
 import { useAuth } from 'src/hooks/useAuth'
@@ -24,187 +20,120 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import { ControlContext } from 'src/providers/ControlContext'
 import { Remove } from '@mui/icons-material'
 import { Tooltip } from '@mui/material'
+import Link from 'next/link'
+import UserDropdown from '../../shared-components/UserDropdown'
+import Image from 'next/image'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
+import ConfirmationDialog from 'src/components/ConfirmationDialog'
+import styles from './Navigation.module.css'
 
-function ArrowBackIcon() {
-  return (
-    <KeyboardArrowRightIcon
-      sx={{
-        transform: 'rotate(180Deg)'
-      }}
-    />
-  )
-}
-
-const StyledBoxForShadow = styled(Box)(({ theme }) => ({
-  top: 60,
-  left: -8,
-  zIndex: 2,
-  opacity: 0,
-  position: 'absolute',
-  pointerEvents: 'none',
-  width: 'calc(100% + 15px)',
-  height: theme.mixins.toolbar.minHeight,
-  transition: 'opacity .15s ease-in-out',
-  background: `linear-gradient(${theme.palette.background.default} ${
-    theme.direction === 'rtl' ? '95%' : '5%'
-  },${hexToRGBA(theme.palette.background.default, 0.85)} 30%,${hexToRGBA(
-    theme.palette.background.default,
-    0.5
-  )} 65%,${hexToRGBA(theme.palette.background.default, 0.3)} 75%,transparent)`,
-  '&.scrolled': {
-    opacity: 1
-  }
-}))
+const SwipeableDrawer = MuiSwipeableDrawer
 
 const Navigation = props => {
   const {
+    hidden,
+    settings,
+    beforeNavMenuContent,
+    navMenuBranding,
+    collapsedNavWidth,
+    navigationBorderWidth,
     saveSettings,
     toggleNavVisibility,
     menuLockedIcon: userMenuLockedIcon,
-    menuUnlockedIcon: userMenuUnlockedIcon
+    menuUnlockedIcon: userMenuUnlockedIcon,
+    navWidth,
+    navVisible,
+    navMenuProps,
+    setNavVisible
   } = props
 
-  const router = useRouter()
-  const { hidden, settings, afterNavMenuContent, beforeNavMenuContent, navMenuContent: userNavMenuContent } = props
-
-  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex } =
+  const { setLastOpenedPage, openTabs, setReloadOpenedPage, currentTabIndex, setCurrentTabIndex, handleBookmark } =
     useContext(MenuContext)
   const { platformLabels } = useContext(ControlContext)
-  const [currentActiveGroup, setCurrentActiveGroup] = useState([])
   const [filteredMenu, setFilteredMenu] = useState([])
   const [openFolders, setOpenFolders] = useState([])
+  const [selectedNode, setSelectedNode] = useState(false)
   const menu = props.verticalNavItems
   const gear = useContext(MenuContext)
   const [isArabic, setIsArabic] = useState(false)
   const auth = useAuth()
   const shadowRef = useRef(null)
   const { navCollapsed } = settings
-  const { afterVerticalNavMenuContentPosition, beforeVerticalNavMenuContentPosition } = themeConfig
-  const MenuLockedIcon = () => userMenuLockedIcon || <ArrowBackIcon />
+  const { beforeVerticalNavMenuContentPosition } = themeConfig
+  const MenuLockedIcon = () => userMenuLockedIcon || <KeyboardArrowRightIcon sx={{ transform: 'rotate(180deg)' }} />
   const MenuUnlockedIcon = () => userMenuUnlockedIcon || <KeyboardArrowRightIcon />
+  const theme = useTheme()
+  const router = useRouter()
 
-  const navMenuContentProps = {
-    ...props,
-    currentActiveGroup,
-    setCurrentActiveGroup
+  const MobileDrawerProps = {
+    open: navVisible,
+    onOpen: () => setNavVisible(true),
+    onClose: () => setNavVisible(false),
+    ModalProps: { keepMounted: true }
   }
 
-  // ** Create new theme for the navigation menu when mode is `semi-dark`
+  const DesktopDrawerProps = { open: true, onOpen: () => null, onClose: () => null }
+
+  let userNavMenuStyle = {}
+  let userNavMenuPaperStyle = {}
+
+  if (navMenuProps?.sx) userNavMenuStyle = navMenuProps.sx
+  if (navMenuProps?.PaperProps?.sx) userNavMenuPaperStyle = navMenuProps.PaperProps.sx
+
+  const userNavMenuProps = { ...navMenuProps }
+  delete userNavMenuProps.sx
+  delete userNavMenuProps.PaperProps
+
+  const menuHeaderPaddingLeft = () => {
+    if (navCollapsed) {
+      return navMenuBranding ? 0 : (collapsedNavWidth - navigationBorderWidth - 30) / 8
+    } else return 6
+  }
+
   let darkTheme = createTheme(themeOptions(settings, 'dark'))
-
-  // ** Set responsive font sizes to true
-  if (themeConfig.responsiveFontSizes) {
-    darkTheme = responsiveFontSizes(darkTheme)
-  }
-
-  // ** Fixes Navigation InfiniteScroll
-  const handleInfiniteScroll = ref => {
-    if (ref) {
-      // @ts-ignore
-      ref._getBoundingClientRect = ref.getBoundingClientRect
-      ref.getBoundingClientRect = () => {
-        // @ts-ignore
-        const original = ref._getBoundingClientRect()
-
-        return { ...original, height: Math.floor(original.height) }
-      }
-    }
-  }
+  if (themeConfig.responsiveFontSizes) darkTheme = responsiveFontSizes(darkTheme)
 
   useEffect(() => {
     if (auth?.user?.languageId === 2) setIsArabic(true)
     else setIsArabic(false)
   }, [])
 
-  // ** Scroll Menu
   const scrollMenu = container => {
     if (beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) {
       container = hidden ? container.target : container
       if (shadowRef && container.scrollTop > 0) {
-        // @ts-ignore
-        if (!shadowRef.current.classList.contains('scrolled')) {
-          // @ts-ignore
-          shadowRef.current.classList.add('scrolled')
-        }
-      } else {
-        // @ts-ignore
-        shadowRef.current.classList.remove('scrolled')
-      }
+        if (!shadowRef.current?.classList.contains('scrolled')) shadowRef.current?.classList.add('scrolled')
+      } else shadowRef.current?.classList.remove('scrolled')
     }
   }
 
-  // ** filterMenu
   const handleSearch = e => {
     const term = e.target.value
-
     if (term === '') {
       setFilteredMenu(menu)
       setOpenFolders([])
     } else {
-      const [filteredChildren, updatedActiveGroups] = filterMenu(menu, term)
+      const [filteredChildren] = filterMenu(menu, term)
       setFilteredMenu(filteredChildren)
     }
   }
-
-  // const filterMenu = (items, term, newActiveGroups = []) => {
-
-  //   const filtered = items.map((item) => {
-  //     if (item.children) {
-  //       // Recursively filter children
-  //       const [filteredChildren, updatedActiveGroups] = filterMenu(item.children, term, newActiveGroups);
-
-  //       // Keep the folder if any of its children match the search term
-  //       if (filteredChildren.length > 0) {
-  //         if (!newActiveGroups.includes(item.id)) {
-  //           newActiveGroups.push(item.id);
-  //         }
-
-  //         return {
-  //           ...item,
-  //           children: filteredChildren,
-  //         };
-  //       }
-  //     }
-
-  //     // Check if the item's title includes the search term
-  //     if (item.title.toLowerCase().includes(term.toLowerCase())) {
-  //       if (item.children && item.children.length > 0 && !newActiveGroups.includes(item.id)) {
-  //         newActiveGroups.push(item.id);
-  //       }
-
-  //       return item;
-  //     }
-
-  //     return null;
-  //   });
-
-  //   // Remove null values and return filtered items
-  //   const filteredItems = filtered.filter((item) => item !== null);
-
-  //   return [filteredItems, newActiveGroups];
-  // };
 
   const filterMenu = (items, term) => {
     const filteredItems = items.map(item => {
       if (item.children) {
         const [filteredChildren, hasMatchingChild] = filterMenu(item.children, term)
         if (filteredChildren.length > 0 || hasMatchingChild) {
-          setOpenFolders(prevState => {
-            return [...prevState, item.id]
-          })
+          setOpenFolders(prev => [...prev, item.id])
 
-          return {
-            ...item,
-            children: filteredChildren,
-            isOpen: true // Open folders with matching children
-          }
+          return { ...item, children: filteredChildren, isOpen: true }
         }
       }
       const isMatch = item.title.toLowerCase().includes(term.toLowerCase())
 
       return isMatch ? { ...item, isOpen: true } : null
     })
-
     const filteredItemsWithoutNull = filteredItems.filter(item => item !== null)
     const hasMatchingItem = filteredItemsWithoutNull.some(item => item.isOpen)
 
@@ -212,18 +141,12 @@ const Navigation = props => {
   }
 
   const filterFav = menu => {
-    const iconName = 'FavIcon'
     const favorites = []
 
     const traverse = items => {
       items?.forEach(item => {
-        if (item?.children && item?.children?.length > 0) {
-          traverse(item?.children)
-        } else {
-          if (item?.iconName === iconName) {
-            favorites?.push(item)
-          }
-        }
+        if (item?.children?.length > 0) traverse(item.children)
+        else if (item?.iconName === 'FavIcon') favorites.push(item)
       })
     }
     traverse(menu)
@@ -235,38 +158,153 @@ const Navigation = props => {
     setFilteredMenu(props.verticalNavItems)
   }, [props.verticalNavItems])
 
-  const ScrollWrapper = hidden ? Box : PerfectScrollbar
+  const onCollapse = () => setOpenFolders([])
+  const closeDialog = () => setSelectedNode(false)
 
-  const go = node => {
-    if (openTabs[currentTabIndex]?.route === node.path.replace(/\/$/, '') + '/') {
+  const handleRightClick = (e, node, imgName) => {
+    e.preventDefault()
+    setSelectedNode([node, Boolean(imgName)])
+  }
+
+  const toggleFolder = folderId => {
+    setOpenFolders(prev => (prev.includes(folderId) ? prev.filter(id => id !== folderId) : [...prev, folderId]))
+  }
+
+  const handleNodeClick = node => {
+    if (node.children) {
+      toggleFolder(node.id)
+
+      return
+    }
+    const normalizedPath = node.path.replace(/\/$/, '') + '/'
+    const existingTabIndex = openTabs.findIndex(tab => tab.route === normalizedPath)
+    const isCurrentTab = openTabs[currentTabIndex]?.route === normalizedPath
+    if (isCurrentTab) {
       setReloadOpenedPage([])
       setReloadOpenedPage(node)
-    } else if (openTabs.find(tab => tab.route === node.path.replace(/\/$/, '') + '/')) {
-      const index = openTabs.findIndex(tab => tab.route === node.path.replace(/\/$/, '') + '/')
-      setCurrentTabIndex(index)
-      window.history.replaceState(null, '', openTabs[index].route)
-    } else {
-      router.push(node.path)
-    }
-
+    } else if (existingTabIndex !== -1) {
+      setCurrentTabIndex(existingTabIndex)
+      window.history.replaceState(null, '', openTabs[existingTabIndex].route)
+    } else router.push(node.path)
     setLastOpenedPage(node)
   }
 
-  const onCollapse = () => {
-    setOpenFolders([])
+  const getNodeIcon = (node, isOpen, isRoot) => {
+    if (!node.iconName) return null
+
+    return isRoot
+      ? `/images/folderIcons/${isOpen ? node.iconName + 'Active' : node.iconName}.png`
+      : `/images/folderIcons/${node.iconName}.png`
+  }
+
+  const renderArrowIcon = (isOpen, isArabic) => {
+    if (isOpen) return <ExpandMoreIcon style={{ fontSize: 20 }} />
+
+    return isArabic ? (
+      <ArrowBackIosIcon style={{ fontSize: 13, height: '100%', paddingBottom: '5px' }} />
+    ) : (
+      <ChevronRightIcon style={{ fontSize: 20 }} />
+    )
+  }
+
+  const truncateTitle = (title, level) => {
+    const maxLength = Math.max(10, 31 - level)
+
+    return title.length > maxLength ? `${title.slice(0, maxLength - 3)}...` : title
+  }
+
+  const renderNode = (node, level = 0) => {
+    const isOpen = openFolders.includes(node.id)
+    const isRoot = node.parentId === 0
+    const isFolder = Boolean(node.children)
+    const imgName = getNodeIcon(node, isOpen, isRoot)
+    const truncatedTitle = truncateTitle(node.title, level)
+
+    return (
+      <div key={node.id} style={{ paddingBottom: isRoot ? 5 : undefined }}>
+        <div
+          className={`${styles.node} ${isFolder ? styles.folder : styles.file} ${isOpen ? styles.open : ''}`}
+          style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
+          onClick={() => handleNodeClick(node)}
+          onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
+        >
+          <div className={styles['node-content']}>
+            {imgName ? (
+              <div className={styles['node-icon']}>
+                <Image src={imgName} alt={node.title} width={22} height={22} />
+              </div>
+            ) : (
+              <div style={{ width: 30, height: 22 }} />
+            )}
+
+            {!navCollapsed && (
+              <div className={styles['node-text']}>
+                <div className='text' title={truncatedTitle == node.title ? null : node.title}>
+                  {truncatedTitle}
+                </div>
+                {isFolder && (
+                  <div className={styles.arrow} style={{ right: isArabic ? '260px' : '8px' }}>
+                    {renderArrowIcon(isOpen, isArabic)}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {isOpen && isFolder && (
+          <div className={styles.children} style={{ paddingLeft: navCollapsed ? '0px' : '12px' }}>
+            {node.children.map(child => renderNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Drawer {...props}>
-        <VerticalNavHeader isArabic={isArabic} {...props} />
-        {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'fixed'
-          ? beforeNavMenuContent(navMenuContentProps)
-          : null}
-        {(beforeVerticalNavMenuContentPosition === 'static' || !beforeNavMenuContent) && (
-          <StyledBoxForShadow ref={shadowRef} />
-        )}
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pb: '10px', pt: 2 }}>
+      <SwipeableDrawer
+        className={styles['layout-vertical-nav']}
+        variant={hidden ? 'temporary' : 'permanent'}
+        {...(hidden ? { ...MobileDrawerProps } : { ...DesktopDrawerProps })}
+        PaperProps={{
+          sx: {
+            backgroundColor: 'background.default',
+            width: navCollapsed ? collapsedNavWidth : navWidth,
+            ...(!hidden && navCollapsed ? { boxShadow: 9 } : {}),
+            borderRight: navigationBorderWidth === 0 ? 0 : `${navigationBorderWidth}px solid ${theme.palette.divider}`,
+            ...userNavMenuPaperStyle
+          },
+          ...navMenuProps?.PaperProps
+        }}
+        sx={{ width: navCollapsed ? collapsedNavWidth : navWidth, ...userNavMenuStyle }}
+        {...userNavMenuProps}
+      >
+        <Box
+          className={styles['menu-header-wrapper']}
+          sx={{
+            pl: menuHeaderPaddingLeft(),
+            backgroundColor: '#231f20',
+            flexDirection: navCollapsed ? 'column' : 'row'
+          }}
+        >
+          <Box className={styles['menu-header-box']}>
+            {navMenuBranding ? (
+              navMenuBranding(props)
+            ) : (
+              <Link href='/' className={styles['link-styled']}>
+                <img
+                  src={!navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/WhiteA.png'}
+                  alt='Argus'
+                  style={{ maxHeight: '25px' }}
+                />
+              </Link>
+            )}
+            {!navCollapsed && <UserDropdown settings={settings} />}
+          </Box>
+        </Box>
+
+        <Box className={styles['menu-search-box']}>
           <TextField
             placeholder={platformLabels.Filter}
             variant='outlined'
@@ -276,14 +314,9 @@ const Navigation = props => {
             autoComplete='off'
             InputProps={{
               sx: {
-                display: 'flex',
-                alignItems: navCollapsed ? 'center !important' : 'left',
-                justifyContent: navCollapsed ? 'center !important' : 'left',
                 border: 'transparent',
                 background: '#231f20',
-                fieldset: {
-                  borderColor: 'transparent !important'
-                },
+                fieldset: { borderColor: 'transparent !important' },
                 height: '30px',
                 borderRadius: '5px',
                 pr: 1
@@ -291,85 +324,33 @@ const Navigation = props => {
               endAdornment: <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
             }}
           />
-          <TextField sx={{ display: 'none' }} />
-          <Tooltip
-            sx={{
-              backgroundColor: '#231f20',
-              borderRadius: '4px',
-              height: '30px',
-              padding: '3px',
-              marginLeft: '10px'
-            }}
-            title={platformLabels.collapse}
-          >
+          <Tooltip title={platformLabels.collapse}>
             <Remove onClick={onCollapse} width={28} />
           </Tooltip>
-
           <Dropdown
             Image={<SettingsIcon />}
             TooltipTitle={platformLabels.Gear}
-            onClickAction={GearItem => go(GearItem)}
+            onClickAction={GearItem => handleNodeClick(GearItem)}
             map={gear.gear}
             navCollapsed={navCollapsed}
           />
-          {filterFav(menu) && filterFav(menu).length > 0 && (
+          {filterFav(menu)?.length > 0 && (
             <Dropdown
               Image={<GradeIcon style={{ color: 'yellow' }} />}
               TooltipTitle={platformLabels.Favorite}
-              onClickAction={favorite => go(favorite)}
+              onClickAction={favorite => handleNodeClick(favorite)}
               map={filterFav(menu)}
               navCollapsed={navCollapsed}
             />
           )}
         </Box>
-        <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-          <ScrollWrapper
-            {...(hidden
-              ? {
-                  onScroll: container => scrollMenu(container),
-                  sx: { height: '100%', overflowY: 'auto', overflowX: 'hidden' }
-                }
-              : {
-                  options: { wheelPropagation: false },
-                  onScrollY: container => scrollMenu(container),
-                  containerRef: ref => handleInfiniteScroll(ref)
-                })}
-          >
-            {beforeNavMenuContent && beforeVerticalNavMenuContentPosition === 'static'
-              ? beforeNavMenuContent(navMenuContentProps)
-              : null}
-            {userNavMenuContent ? (
-              userNavMenuContent(navMenuContentProps)
-            ) : (
-              <List
-                className='nav-items'
-                sx={{
-                  pt: 0,
-                  transition: 'padding .25s ease',
-                  '& > :first-child': { mt: '0' }
-                }}
-              >
-                <VerticalNavItems
-                  navCollapsed={navCollapsed}
-                  currentActiveGroup={currentActiveGroup}
-                  setCurrentActiveGroup={setCurrentActiveGroup}
-                  openFolders={openFolders}
-                  setOpenFolders={setOpenFolders}
-                  {...props}
-                  verticalNavItems={filteredMenu}
-                  isArabic={isArabic}
-                />
-              </List>
-            )}
-            {afterNavMenuContent && afterVerticalNavMenuContentPosition === 'static'
-              ? afterNavMenuContent(navMenuContentProps)
-              : null}
-          </ScrollWrapper>
+        <Box className={styles['menu-scroll-wrapper']} onScroll={scrollMenu}>
+          <List className='nav-items'>
+            <div className={styles.sidebar}>{filteredMenu.map(node => renderNode(node, 0))}</div>
+          </List>
         </Box>
-        {afterNavMenuContent && afterVerticalNavMenuContentPosition === 'fixed'
-          ? afterNavMenuContent(navMenuContentProps)
-          : null}
-      </Drawer>
+      </SwipeableDrawer>
+
       {hidden ? (
         <IconButton
           disableRipple
@@ -383,17 +364,7 @@ const Navigation = props => {
           disableRipple
           disableFocusRipple
           onClick={() => saveSettings({ ...settings, navCollapsed: !navCollapsed })}
-          sx={{
-            p: 0,
-            color: 'white',
-            backgroundColor: '#231f20 !important',
-            borderRadius: '0 !important',
-            width: '10px !important',
-            '& svg': {
-              fontSize: '1.2rem',
-              transition: 'opacity .25s ease-in-out'
-            }
-          }}
+          className={styles['collapse-button']}
         >
           {navCollapsed
             ? isArabic
@@ -403,6 +374,15 @@ const Navigation = props => {
             ? MenuUnlockedIcon()
             : MenuLockedIcon()}
         </IconButton>
+      )}
+      {selectedNode && (
+        <ConfirmationDialog
+          openCondition={Boolean(selectedNode)}
+          closeCondition={closeDialog}
+          DialogText={selectedNode[1] ? platformLabels.RemoveFav : platformLabels.AddFav}
+          okButtonAction={() => handleBookmark(selectedNode[0], selectedNode[1], closeDialog)}
+          cancelButtonAction={closeDialog}
+        />
       )}
     </ThemeProvider>
   )

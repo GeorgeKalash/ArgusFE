@@ -178,7 +178,6 @@ const DocumentAging = () => {
     }
   ]
 
-
   const columnsAgingTree = [
     {
       field: 'reference',

@@ -1,23 +1,14 @@
-// ** MUI Imports
 import Fab from '@mui/material/Fab'
 import AppBar from '@mui/material/AppBar'
 import { styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import MuiToolbar from '@mui/material/Toolbar'
-
-// ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Theme Config Import
 import themeConfig from 'src/configs/themeConfig'
-
-// ** Components
 import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/horizontal/navigation'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
 import AppBarContent from './components/horizontal/app-bar-content'
-
-// ** Util Import
 import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 
 const HorizontalLayoutWrapper = styled('div')({
@@ -59,19 +50,8 @@ const ContentWrapper = styled('main')(({ theme }) => ({
 }))
 
 const HorizontalLayout = props => {
-  // ** Props
-  const {
-    hidden,
-    children,
-    settings,
-    scrollToTop,
-    footerProps,
-    saveSettings,
-    contentHeightFixed,
-    horizontalLayoutProps
-  } = props
+  const { hidden, children, settings, scrollToTop, saveSettings, contentHeightFixed, horizontalLayoutProps } = props
 
-  // ** Vars
   const { skin, appBar, navHidden, appBarBlur, contentWidth } = settings
   const appBarProps = horizontalLayoutProps?.appBar?.componentProps
   const userNavMenuContent = horizontalLayoutProps?.navMenu?.content
@@ -85,7 +65,6 @@ const HorizontalLayout = props => {
   return (
     <HorizontalLayoutWrapper className='layout-wrapper'>
       <MainContentWrapper className='layout-content-wrapper' sx={{ ...(contentHeightFixed && { maxHeight: '100vh' }) }}>
-        {/* Navbar (or AppBar) and Navigation Menu Wrapper */}
         <AppBar
           color='default'
           elevation={skin === 'bordered' ? 0 : 3}
@@ -109,7 +88,6 @@ const HorizontalLayout = props => {
           }}
           {...userAppBarProps}
         >
-          {/* Navbar / AppBar */}
           <Box
             className='layout-navbar'
             sx={{
@@ -135,8 +113,6 @@ const HorizontalLayout = props => {
               />
             </Toolbar>
           </Box>
-
-          {/* Navigation Menu */}
           {navHidden ? null : (
             <Box className='layout-horizontal-nav' sx={{ width: '100%', ...horizontalLayoutProps?.navMenu?.sx }}>
               <Toolbar
@@ -154,8 +130,6 @@ const HorizontalLayout = props => {
             </Box>
           )}
         </AppBar>
-
-        {/* Content */}
         <ContentWrapper
           className='layout-page-content'
           sx={{
@@ -169,11 +143,7 @@ const HorizontalLayout = props => {
         >
           {children}
         </ContentWrapper>
-
-        {/* Customizer */}
         {themeConfig.disableCustomizer || hidden ? null : <Customizer />}
-
-        {/* Scroll to top button */}
         {scrollToTop ? (
           scrollToTop(props)
         ) : (
