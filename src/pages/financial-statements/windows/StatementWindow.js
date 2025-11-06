@@ -50,6 +50,7 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
       <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <StatementForm
           labels={labels}
+          node={node}
           maxAccess={maxAccess}
           setRecId={setRecId}
           mainRecordId={mainRecordId}

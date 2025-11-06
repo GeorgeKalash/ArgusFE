@@ -39,7 +39,6 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
 
   const { formik } = useForm({
     conditionSchema: ['items'],
-    enableReinitialize: true,
     maxAccess,
     initialValues: {
       fsId: mainRecordId,
@@ -111,14 +110,17 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     const updatedTitles = [...filteredExisting, ...newValues]
     formik.setFieldValue('titles', updatedTitles)
 
-    formik.setFieldValue('items', formik.values.items.map(item =>
-      item.seqNo == node.current?.viewNodeId
-        ? {
-            ...item,
-            titles: newValues
-          }
-        : item
-    ))
+    formik.setFieldValue(
+      'items',
+      formik.values.items.map(item =>
+        item.seqNo == node.current?.viewNodeId
+          ? {
+              ...item,
+              titles: newValues
+            }
+          : item
+      )
+    )
   }
 
   const columns = [
@@ -249,21 +251,24 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     formik.setValues({
       ...formik.values,
       fsId: mainRecordId,
-      items: data.nodes.map((node, i) => {
-        const nodeTitles =
-          data.titles
-            ?.filter(t => t.seqNo === node.seqNo)
-            ?.map(t => ({
-              languageId: t.languageId,
-              title: t.title
-            })) ?? []
+      items:
+        data.nodes.length > 0
+          ? data.nodes.map((node, i) => {
+              const nodeTitles =
+                data.titles
+                  ?.filter(t => t.seqNo === node.seqNo)
+                  ?.map(t => ({
+                    languageId: t.languageId,
+                    title: t.title
+                  })) ?? []
 
-        return {
-          id: i + 1,
-          titles: nodeTitles,
-          ...node
-        }
-      }),
+              return {
+                id: i + 1,
+                titles: nodeTitles,
+                ...node
+              }
+            })
+          : formik.initialValues.items,
       titles: data.titles ?? []
     })
   }
@@ -276,9 +281,9 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         ...n,
         id: n.seqNo ?? i + 1
       }))
-
-      setData(initialData)
     }
+
+    setData(initialData)
   }, [initialData?.nodes])
 
   return (

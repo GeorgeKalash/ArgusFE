@@ -17,7 +17,7 @@ import { AccessControlRepository } from 'src/repositories/AccessControlRepositor
 import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 
-export default function StatementForm({ initialData, labels, maxAccess, setRecId, mainRecordId, onImportData }) {
+export default function StatementForm({ node, initialData, labels, maxAccess, setRecId, mainRecordId, onImportData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -124,7 +124,7 @@ export default function StatementForm({ initialData, labels, maxAccess, setRecId
 
       if (!pack?.fs) return
 
-      const clonedPack = structuredClone(pack) 
+      const clonedPack = structuredClone(pack)
 
       const newFsId = mainRecordId || formik.values.recordId
 
@@ -149,6 +149,10 @@ export default function StatementForm({ initialData, labels, maxAccess, setRecId
       if (onImportData) {
         onImportData(clonedPack)
       }
+
+      node.current.viewNodeId = null
+      node.current.viewNodeRef = ''
+      node.current.viewNodedesc = ''
 
       const res = await postRequest({
         extension: FinancialStatementRepository.FinancialStatement.set2,
