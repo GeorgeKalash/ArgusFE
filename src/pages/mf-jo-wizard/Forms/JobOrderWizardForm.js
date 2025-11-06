@@ -63,7 +63,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         itemId: null,
         date: new Date(),
         status: 1,
-        notes: ''
+        notes: '',
+        producedWeight: 0
       },
       rows: [
         {
@@ -86,7 +87,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         expectedQty: yup.number().required(),
         jobId: yup.number().required(),
         operationId: yup.number().required(),
-        laborId: yup.number().required()
+        laborId: yup.number().required(),
+        avgWeight: yup.number().min(0.01).nullable(),
+        producedWeight: yup.number().min(0.01).nullable()
       }),
       rows: yup
         .array()
@@ -230,7 +233,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         recordId: res.record.header.recordId,
         header: {
           ...res.record.header,
-          date: formatDateFromApi(res?.record?.header?.date)
+          date: formatDateFromApi(res?.record?.header?.date),
+          producedWeight: res.record.header.pcs * res.record.header.avgWeight
         },
         rows: modifiedList
       })
@@ -286,8 +290,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     return consumed + consumedValue
   }, 0)
 
-  const producedWeight = formik.values.header.pcs * formik.values.header.avgWeight
-  const totalUsedSemiFinished = producedWeight - totalConsumed
+  const totalUsedSemiFinished = formik.values.header.producedWeight - totalConsumed
 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
@@ -384,7 +387,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.itemName', newValue?.itemName || '')
                   formik.setFieldValue('header.itemId', newValue?.itemId || null)
                   formik.setFieldValue('header.expectedPcs', newValue?.expectedPcs || 0)
-                  formik.setFieldValue('header.pcs', newValue?.pcs || 0)
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
                   formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
                   formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
@@ -392,6 +394,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.weight', physical?.weight || 0)
                   const production = await getItemProduction(newValue?.itemId)
                   formik.setFieldValue('header.bomId', production?.bomId || 0)
+                  formik.setFieldValue('header.producedWeight', newValue?.avgWeight * formik.values.header.pcs)
                 }}
                 onClear={async (_, newValue) => {
                   formik.setFieldValue('header.workCenterName', '')
@@ -484,7 +487,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 name='header.pcs'
                 label={labels.producedPcs}
                 value={formik.values.header.pcs}
-                onChange={formik.handleChange}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('header.producedWeight', newValue * formik.values.header.avgWeight)
+                  formik.setFieldValue('header.pcs', newValue || null)
+                }}
                 onClear={() => formik.setFieldValue('header.pcs', '')}
                 readOnly={isPosted}
                 maxLength={9}
@@ -495,10 +501,12 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
             <Grid item xs={4}>
               <CustomNumberField
                 name='header.avgWeight'
+                allowNegative={false}
                 label={labels.avgWeight}
                 value={formik?.values?.header.avgWeight}
                 maxAccess={maxAccess}
                 readOnly
+                error={formik?.touched?.header?.avgWeight && Boolean(formik?.errors?.header?.avgWeight)}
               />
             </Grid>
             <Grid item xs={4}>
@@ -528,9 +536,11 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
               <CustomNumberField
                 name='header.producedWeight'
                 label={labels.producedWeight}
-                value={producedWeight}
+                allowNegative={false}
+                value={formik.values.header.producedWeight}
                 maxAccess={maxAccess}
                 readOnly
+                error={formik?.touched?.header?.producedWeight && Boolean(formik?.errors?.header?.producedWeight)}
               />
             </Grid>
             <Grid item xs={4}>
