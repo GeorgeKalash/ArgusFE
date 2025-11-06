@@ -29,6 +29,7 @@ export default function StatementForm({ initialData, labels, maxAccess, setRecId
   })
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
       name: '',

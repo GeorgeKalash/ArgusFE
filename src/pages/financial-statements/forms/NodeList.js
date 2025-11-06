@@ -110,16 +110,14 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
     const updatedTitles = [...filteredExisting, ...newValues]
     formik.setFieldValue('titles', updatedTitles)
 
-    const updatedItems = formik.values.items.map(item =>
+    formik.setFieldValue('items', formik.values.items.map(item =>
       item.seqNo == node.current?.viewNodeId
         ? {
             ...item,
             titles: newValues
           }
         : item
-    )
-
-    formik.setFieldValue('items', updatedItems)
+    ))
   }
 
   const columns = [
