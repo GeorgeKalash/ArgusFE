@@ -73,9 +73,8 @@ const HrProcessedPunches = () => {
     {
       key: 'Reset',
       condition: true,
-      disabled: false,
-      onClick: async () => {
-        await postRequest({
+      onClick: () => {
+        postRequest({
           extension: TimeAttendanceRepository.ProcessedShiftPunches.retry,
           parameters: ''
         }).then(() => {
@@ -95,7 +94,10 @@ const HrProcessedPunches = () => {
         okButtonAction: refetch
       },
       width: 400,
-      height: 150
+      height: 150,
+      expandable: false,
+      refresh: false,
+      draggable: false
     })
   }
 
@@ -109,7 +111,6 @@ const HrProcessedPunches = () => {
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}
