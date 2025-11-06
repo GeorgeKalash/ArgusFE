@@ -15,7 +15,7 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { DataSets } from 'src/resources/DataSets'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToISO } from 'src/lib/date-helper'
 import { useInvalidate } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ChangeDeductionsAmount, ChangeEntitlementsAmount } from 'src/utils/Payroll'
@@ -93,7 +93,7 @@ export default function SalaryTab({
         await postRequest({
           extension: EmployeeRepository.SalaryDetails.set2,
           record: JSON.stringify({
-            salary: { ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) },
+            salary: { ...obj, effectiveDate: formatDateToISO(new Date(obj.effectiveDate)) },
             salaryDetails: data
           })
         })
@@ -104,7 +104,7 @@ export default function SalaryTab({
       } else {
         const res = await postRequest({
           extension: EmployeeRepository.EmployeeSalary.set,
-          record: JSON.stringify({ ...obj, effectiveDate: formatDateToApi(obj.effectiveDate) })
+          record: JSON.stringify({ ...obj, effectiveDate: formatDateToISO(new Date(obj.effectiveDate)) })
         })
         toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
         invalidate()
