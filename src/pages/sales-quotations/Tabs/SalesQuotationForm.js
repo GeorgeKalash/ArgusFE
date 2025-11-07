@@ -348,7 +348,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: rowTaxDetails || null,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
@@ -999,7 +999,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct: tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })

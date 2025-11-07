@@ -175,7 +175,8 @@ export default function PuQtnForm({ recordId, window }) {
             ...itemDetails,
             seqNo: index + 1,
             deliveryDate: itemDetails?.deliveryDate ? formatDateToApi(itemDetails.deliveryDate) : null,
-            lastPurchaseDate: itemDetails?.lastPurchaseDate ? formatDateToApi(itemDetails.lastPurchaseDate) : null
+            lastPurchaseDate: itemDetails?.lastPurchaseDate ? formatDateToApi(itemDetails.lastPurchaseDate) : null,
+            applyVat: obj.isVattable || false
           }
         })
 
@@ -289,9 +290,8 @@ export default function PuQtnForm({ recordId, window }) {
           muId: filteredMU?.[0]?.recordId,
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
-          baseQty: filteredItems?.[0]?.qty * newRow?.qty,
-          applyVat: formik.values.isVattable || false
+          taxDetails: rowTaxDetails || null,
+          baseQty: filteredItems?.[0]?.qty * newRow?.qty
         })
       }
     },
@@ -797,7 +797,7 @@ export default function PuQtnForm({ recordId, window }) {
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
