@@ -147,6 +147,11 @@ export default function ProductionOrderForm({ recordId, window }) {
     .toFixed(2)
 
   async function onPost() {
+    const errors = await formik.validateForm()
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
     await postRequest({
       extension: ManufacturingRepository.ProductionOrder.post,
       record: JSON.stringify({
@@ -472,6 +477,11 @@ export default function ProductionOrderForm({ recordId, window }) {
   }
 
   const onClose = async () => {
+    const errors = await formik.validateForm()
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
     await postRequest({
       extension: ManufacturingRepository.ProductionOrder.close,
       record: JSON.stringify(formik.values)
