@@ -595,7 +595,7 @@ export default function SaleTransactionForm({
 
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, defaultMu?.recordId || 0)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, defaultMu?.recordId)
         await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, false, defaultMu)
       },
       propsReducer({ row, props }) {
@@ -663,12 +663,6 @@ export default function SaleTransactionForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.muId) {
-          update({ baseQty: 0 })
-
-          return
-        }
-
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty
