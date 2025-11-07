@@ -344,14 +344,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
-        const ItemConvertPrice = await getItemConvertPrice(
-          newRow.itemId,
-          update,
-          itemInfo?.defSaleMUId ? defaultMu?.recordId || filteredMeasurements?.[0]?.recordId : 0
-        )
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -392,13 +387,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           mdAmount: formik.values.initialTdPct ? formik.values.initialTdPct : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
-          muId: defaultMu?.recordId || filteredMeasurements?.[0]?.recordId,
-          muQty: filteredMeasurements?.[0]?.qty,
+          muRef: defaultMu?.reference || '',
+          muId: defaultMu?.recordId || null,
+          muQty: 0,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: rowTaxDetails || null,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId)
@@ -1102,7 +1097,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
