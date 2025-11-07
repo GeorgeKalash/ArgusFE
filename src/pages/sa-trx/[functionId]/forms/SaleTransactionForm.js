@@ -164,7 +164,7 @@ export default function SaleTransactionForm({
         billAddressId: null,
         billAddress: '',
         maxDiscount: '',
-        currentDiscount: '',
+        currentDiscount: 0,
         exRate: 1,
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
