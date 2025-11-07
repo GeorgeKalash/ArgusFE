@@ -88,8 +88,9 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         jobId: yup.number().required(),
         operationId: yup.number().required(),
         laborId: yup.number().required(),
+        pcs: yup.number().min(0.01).nullable(),
         avgWeight: yup.number().min(0.01).nullable(),
-        producedWeight: yup.number().min(0.01).nullable()
+        producedWeight: yup.number().min(0.01).required()
       }),
       rows: yup
         .array()
@@ -390,6 +391,8 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                   formik.setFieldValue('header.avgWeight', newValue?.avgWeight || 0)
                   formik.setFieldValue('header.workCenterName', newValue?.wcName || '')
                   formik.setFieldValue('header.workCenterId', newValue?.workCenterId || null)
+                  formik.setFieldValue('header.operationId', null)
+                  formik.setFieldValue('header.laborId', null)
                   const physical = await getItemPhysical(newValue?.itemId)
                   formik.setFieldValue('header.weight', physical?.weight || 0)
                   const production = await getItemProduction(newValue?.itemId)
@@ -489,9 +492,12 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 value={formik.values.header.pcs}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('header.producedWeight', newValue * formik.values.header.avgWeight)
-                  formik.setFieldValue('header.pcs', newValue || null)
+                  formik.setFieldValue('header.pcs', newValue || 0)
                 }}
-                onClear={() => formik.setFieldValue('header.pcs', '')}
+                onClear={() => {
+                  formik.setFieldValue('header.pcs', 0)
+                  formik.setFieldValue('header.producedWeight', 0)
+                }}
                 readOnly={isPosted}
                 maxLength={9}
                 required
