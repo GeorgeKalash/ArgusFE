@@ -128,7 +128,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       plId: null,
       ptId: null,
       maxDiscount: '',
-      currentDiscount: '',
+      currentDiscount: 0,
       exRate: 1,
       rateCalcMethod: 1,
       tdType: cycleButtonState.value,
@@ -1036,7 +1036,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
         tdPct: object?.tradeDiscount,
-        currentDiscount: object?.tradeDiscount,
+        currentDiscount: object?.tradeDiscount || 0,
         tdType: currenctTdType,
         taxId: object?.taxId,
         paymentMethod: object?.paymentMethod
@@ -1856,7 +1856,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 errorCheck={'header.vendorId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                readOnly={isPosted || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
