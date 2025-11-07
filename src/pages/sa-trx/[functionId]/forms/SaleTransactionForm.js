@@ -164,7 +164,7 @@ export default function SaleTransactionForm({
         billAddressId: null,
         billAddress: '',
         maxDiscount: '',
-        currentDiscount: '',
+        currentDiscount: 0,
         exRate: 1,
         rateCalcMethod: 1,
         tdType: DIRTYFIELD_TDPCT,
@@ -663,6 +663,10 @@ export default function SaleTransactionForm({
         ]
       },
       async onChange({ row: { update, newRow } }) {
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
+        }
+
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
         const qtyInBase = newRow?.qty * filteredItems?.muQty

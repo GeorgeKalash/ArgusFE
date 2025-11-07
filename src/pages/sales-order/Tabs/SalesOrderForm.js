@@ -346,7 +346,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const itemInfo = await getItem(newRow.itemId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId)
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -444,9 +444,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         ]
       },
       async onChange({ row: { update, newRow } }) {
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
+        }
+
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty
-        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, '', newRow?.muId || 0)
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, '', newRow?.muId)
 
         const data = getItemPriceRow(
           {
@@ -911,7 +915,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId, update, muId = 0) {
+  async function getItemConvertPrice(itemId, update, muId) {
     if (!formik.values.currencyId) {
       update({
         itemId: null,

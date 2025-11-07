@@ -797,7 +797,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
     if (currenctTdType == DIRTYFIELD_TDPCT) setCycleButtonState({ text: '%', value: 2 })
     formik.setValues({
       ...formik.values,
-      currentDiscount: object?.tradeDiscount,
+      currentDiscount: object?.tradeDiscount || 0,
       header: {
         ...formik.values.header,
         vendorId: object?.recordId,
