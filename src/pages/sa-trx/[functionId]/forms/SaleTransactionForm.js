@@ -554,7 +554,8 @@ export default function SaleTransactionForm({
         if (ItemConvertPrice) {
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
-          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true)
+          const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+          await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
         } else {
           update({
             barcode: null
