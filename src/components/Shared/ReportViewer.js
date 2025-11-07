@@ -76,13 +76,15 @@ const ReportViewer = ({ resourceId }) => {
     }).then(res => {
       setReportStore(prevReportStore => [
         ...prevReportStore,
-        ...res.list.map(item => ({
-          api_url: item.wsName,
-          reportClass: item.reportName,
-          parameters: item.parameters,
-          layoutName: item.caption,
-          assembly: item.assembly
-        }))
+        ...res.list
+          ?.filter(item => !item.isInactive)
+          ?.map(item => ({
+            api_url: item.wsName,
+            reportClass: item.reportName,
+            parameters: item.parameters,
+            layoutName: item.caption,
+            assembly: item.assembly
+          }))
       ])
     })
   }

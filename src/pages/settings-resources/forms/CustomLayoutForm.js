@@ -183,7 +183,6 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
       parameters: `_resourceId=${row.resourceId}`
     }).then(res => {
       const modifiedList = res.list
-        ?.filter(item => !item.isInactive)
         ?.map((itemPartsItem, index) => ({
           ...itemPartsItem,
           id: index + 1
