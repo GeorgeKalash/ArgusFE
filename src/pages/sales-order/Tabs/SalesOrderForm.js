@@ -446,8 +446,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.muId) {
           update({ baseQty: 0 })
-
-          return
         }
 
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
@@ -457,7 +455,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const data = getItemPriceRow(
           {
             ...newRow,
-            baseQty: newRow?.qty * muQty,
+            baseQty: newRow?.qty * muQty || 0,
             basePrice: ItemConvertPrice?.basePrice || 0,
             unitPrice: ItemConvertPrice?.unitPrice || 0,
             upo: ItemConvertPrice?.upo || 0,
