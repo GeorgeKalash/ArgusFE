@@ -16,7 +16,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 const Sites = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext) 
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options

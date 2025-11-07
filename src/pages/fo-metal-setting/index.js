@@ -39,7 +39,7 @@ const MetalSettings = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FoundryRepository.MetalSettings.page,
-    datasetId: ResourceIds.MetalSettings
+    datasetId: ResourceIds.MetalSettings,
   })
 
   const columns = [

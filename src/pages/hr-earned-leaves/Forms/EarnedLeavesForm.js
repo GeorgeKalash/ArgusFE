@@ -106,9 +106,9 @@ export default function EarnedLeavesForm({ labels, access, recordId }) {
   }
 
   useEffect(() => {
-    if (recordId) {
-      getData(recordId)
-    }
+      if (recordId) {
+        getData(recordId)
+      }
   }, [])
 
   const onPost = async () => {

@@ -37,7 +37,7 @@ const Measurement = () => {
     access,
     invalidate,
     refetch,
-    paginationParameters
+    paginationParameters,
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Measurement.page,

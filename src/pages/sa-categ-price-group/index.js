@@ -71,7 +71,7 @@ const CategoryPriceGroup = () => {
       field: 'unitPrice',
       headerName: labels.unitPrice,
       flex: 1,
-      type: 'number'
+      type: 'number',
     }
   ]
 
@@ -89,7 +89,9 @@ const CategoryPriceGroup = () => {
       props: {
         labels,
         record,
-        recordId: record ? String(record.pgId * 10) + String(record.categoryId) : null,
+        recordId: record
+          ? String(record.pgId * 10) + String(record.categoryId)
+          : null,
         maxAccess: access
       },
       width: 500,
@@ -110,14 +112,7 @@ const CategoryPriceGroup = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          hasSearch={false}
-          maxAccess={access}
-          reportName={'SAPGC'}
-          filterBy={filterBy}
-          previewReport={ResourceIds.CategoryPriceGroup}
-        />
+        <RPBGridToolbar onAdd={add} hasSearch={false} maxAccess={access} reportName={'SAPGC'} filterBy={filterBy} previewReport={ResourceIds.CategoryPriceGroup}/>
       </Fixed>
       <Grow>
         <Table

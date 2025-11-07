@@ -126,8 +126,8 @@ const PaymentOrdersExpenses = () => {
     stack({
       Component: PaymentOrdersExpensesForm,
       props: {
-        recordId
-      }
+        recordId,
+      },
     })
   }
 

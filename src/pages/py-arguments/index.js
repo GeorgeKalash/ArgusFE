@@ -23,6 +23,7 @@ const PayrollArguments = () => {
     return { ...response, _startAt: _startAt }
   }
 
+
   const {
     query: { data },
     labels,
@@ -42,6 +43,7 @@ const PayrollArguments = () => {
       flex: 1
     }
   ]
+
 
   return (
     <VertLayout>

@@ -52,7 +52,7 @@ const SerialProfiles = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
-    }
+    },
   ]
 
   function openForm(recordId) {

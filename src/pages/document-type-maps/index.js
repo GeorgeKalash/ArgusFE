@@ -1,3 +1,4 @@
+
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
@@ -112,14 +113,7 @@ const DocumentTypeMaps = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          hasSearch={false}
-          labels={_labels}
-          onAdd={add}
-          maxAccess={access}
-          reportName={'SYDTM'}
-          filterBy={filterBy}
-        />
+        <RPBGridToolbar  hasSearch={false} labels={_labels} onAdd={add}  maxAccess={access}  reportName={'SYDTM'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
