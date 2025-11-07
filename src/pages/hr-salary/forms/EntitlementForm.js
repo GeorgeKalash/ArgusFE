@@ -156,6 +156,7 @@ export default function EntitlementForm({
               value={formik.values.pct}
               readOnly={!formik.values.isPct}
               required={formik.values.isPct}
+              allowNegative={false}
               onBlur={e => {
                 let pctValue = Number(e.target.value)
                 const amount = calculateFixed(pctValue, 1, salaryInfo.header.basicAmount, salaryInfo.header.eAmount)
@@ -174,6 +175,7 @@ export default function EntitlementForm({
               value={formik.values.fixedAmount}
               onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
               required
+              allowNegative={false}
               maxAccess={maxAccess}
               readOnly={formik.values.isPct}
               onClear={() => formik.setFieldValue('fixedAmount', null)}

@@ -168,6 +168,7 @@ export default function DeductionsForm({
                 formik.setFieldValue('fixedAmount', parseFloat(amount || 0).toFixed(2))
                 formik.setFieldValue('pct', pctValue)
               }}
+              allowNegative={false}
               maxAccess={maxAccess}
               onClear={() => formik.setFieldValue('pct', 0)}
               error={formik.touched.pct && Boolean(formik.errors.pct)}
@@ -180,6 +181,7 @@ export default function DeductionsForm({
               value={formik.values.fixedAmount}
               onBlur={e => formik.setFieldValue('fixedAmount', parseFloat(e?.target?.value || 0).toFixed(2))}
               required
+              allowNegative={false}
               maxAccess={maxAccess}
               readOnly={formik.values.isPct}
               onClear={() => formik.setFieldValue('fixedAmount', null)}
