@@ -371,7 +371,7 @@ export default function SaleTransactionForm({
   const isPosted = formik.values.header.status === 3
   const editMode = !!formik.values.header.recordId
 
-  async function barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo) {
+  async function barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, setItemInfo, defaultMu) {
     const weight = itemPhysProp?.weight || 0
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
@@ -420,7 +420,6 @@ export default function SaleTransactionForm({
       rowTaxDetails = details
     }
 
-    const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
       ShowMinPriceValueErrorMessage(minPrice, unitPrice)
     }
@@ -458,8 +457,8 @@ export default function SaleTransactionForm({
       msId: itemInfo?.msId,
       categoryId: itemInfo.categoryId,
       categoryName,
-      muRef: filteredMeasurements?.[0]?.reference,
-      muId: filteredMeasurements?.[0]?.recordId,
+      muRef: defaultMu?.reference || '',
+      muId: defaultMu?.recordId || null,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
       mdValue: 0,
       mdType: MDTYPE_PCT,
@@ -573,9 +572,11 @@ export default function SaleTransactionForm({
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
         getFilteredMU(newRow?.itemId, newRow?.msId)
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
-        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, filteredMeasurements?.[0]?.recordId)
-        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false)
+
+        const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, defaultMu?.recordId || 0)
+        await barcodeSkuSelection(update, ItemConvertPrice, itemPhysProp, itemInfo, false, defaultMu)
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -658,6 +659,10 @@ export default function SaleTransactionForm({
               ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
                 (ItemConvertPrice?.baseLaborPrice || 0))
             : ItemConvertPrice?.unitPrice || 0
+
+        const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
+        const basePrice = ((formik?.values?.header?.KGmetalPrice || 0) * (newRow?.metalPurity || 0)) / 1000
+        const basePriceValue = postMetalToFinancials === false ? basePrice : 0
 
         const data = getItemPriceRow(
           {

@@ -341,11 +341,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
           return
         }
-        update({ itemId: newRow?.recordId })
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
         const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
@@ -390,7 +388,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           qty: 0,
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
-          muId: defaultMu?.recordId || 0,
+          muId: defaultMu?.recordId || null,
           muQty: 0,
           extendedPrice: 0,
           mdValue: 0,
