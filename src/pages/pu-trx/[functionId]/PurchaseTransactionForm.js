@@ -1856,7 +1856,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 errorCheck={'header.vendorId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                readOnly={isPosted || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
