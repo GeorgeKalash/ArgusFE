@@ -1217,7 +1217,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: newRow?.basePrice || 0,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
@@ -1227,7 +1227,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
