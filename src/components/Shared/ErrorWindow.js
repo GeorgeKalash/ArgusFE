@@ -17,7 +17,7 @@ const ErrorWindow = ({ open, onClose, message }) => {
       : message?.response?.data
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} TransitionProps={{ timeout: 0 }} keepMounted={false}>
       <DialogTitle>Error</DialogTitle>
       <DialogContent>
         <DialogContentText>{errorMessage}</DialogContentText>
