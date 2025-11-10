@@ -22,7 +22,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import FormShell from 'src/components/Shared/FormShell'
 import { useAuth } from 'src/hooks/useAuth'
 
-export const SSLeaveRequestForm = ({ recordId, labels, maxAccess }) => {
+export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
 
   const { user } = useAuth()
