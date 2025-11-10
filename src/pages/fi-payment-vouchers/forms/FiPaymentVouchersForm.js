@@ -150,10 +150,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
       formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
       formik.setFieldValue('cashAccountName', cashAccountResult.name)
 
-      return paymentMethod
+      return cashAccountResult.paymentMethod
+    } else {
+      return null
     }
-
-    return null
   }
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
