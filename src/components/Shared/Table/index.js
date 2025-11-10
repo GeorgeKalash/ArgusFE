@@ -898,7 +898,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            rowHeight={hasImageColumn ? 70 : 35}
+            getRowHeight={(params) => (hasImageColumn ? 70 : undefined)}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}

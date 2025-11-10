@@ -1,113 +1,254 @@
-
 .agGridContainer {
-    position: relative;
-    width: 100%;        
-    height: auto;
-    max-height: none;
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-height: none;}
+
+.agGridFlex {
+  flex: 1 1 auto;
+}
+
+.hoverReset {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  box-shadow: var(--shadow-3, 0 1px 2px rgba(0,0,0,0.15));
+  border-radius: 4px;
+  background: #fff;
+}
+
+.paginationWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.paginationBar {
+  flex: 1 1 auto;
+  min-width: 0;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  font-size: 0.9rem;
+  padding: 1px 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 34px;
+}
+
+.pageTextField {
+  padding: 4px 8px;
+  width: 80px;
+}
+
+.pageTextField :global(.MuiInputBase-root) {
+  height: 30px;
+}
+
+.actionsBox {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionsBox :global(.MuiIconButton-root) {
+  padding: 4px;
+}
+
+.actionsBox :global(img) {
+  max-width: 18px;
+  max-height: 18px;
+}
+
+.fullSizeCheckbox {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.pointerNone {
+  pointer-events: none;
+}
+
+.fieldWrapper {
+  user-select: text;
+  cursor: pointer;
+  height: 50%;
+  width: 100%;
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldWrapper::selection {
+  background: none !important;
+  color: inherit;
+}
+
+.copiedTooltip {
+  z-index: 1000;
+  position: fixed;
+  top: -40px;
+  background-color: #000;
+  color: #fff;
+  padding: 1px 3px;
+  border-radius: 5px;
+}
+
+.colorComboWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.agGridContainer :global(.ag-header) {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+.agGridContainer :global(.ag-header-cell) {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+.agGridContainer :global(.ag-cell) {
+  border-right: 1px solid #d0d0d0 !important;
+}
+
+.agGridContainer :global(.ag-cell .MuiBox-root) {
+  padding: 0 !important;
+}
+.agGridContainer :global(.ag-row) {
+  height: 35px !important;
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {  
+  .agGridContainer {
+    --ag-font-size: 11px;
   }
-  .agGridFlex {
-    flex: 1 1 auto;
-  }
-  .hoverReset {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 9999;
-    box-shadow: var(--shadow-3, 0 1px 2px rgba(0,0,0,0.15));
-    border-radius: 4px;
-    background: #fff;
-  }
-  
-  .paginationWrapper {
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;            
-    gap: 8px; 
-  }
-  .paginationBar {
-    flex: 1 1 auto;               
-    min-width: 0;                   
-    background-color: #fff;
-    border-top: 1px solid #ccc;
-    font-size: 0.9rem;
-    padding: 4px 8px;               
-    display: flex;                  
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .pageTextField {
-    padding: 4px 8px;
-    width: 80px;
-  }
-  .pageTextField :global(.MuiInputBase-root) {
-    height: 30px;
-  }
-  
-  .actionsBox {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .fullSizeCheckbox {
-    width: 100% !important;
-    height: 100% !important;
-  }
-  
-  .pointerNone {
-    pointer-events: none;
-  }
-  
-  .fieldWrapper {
-    user-select: text;
-    cursor: pointer;
-    height: 50%;
-    width: 100%;
-    outline: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .fieldWrapper::selection {
-    background: none !important;
-    color: inherit;
-  }
-  
-  .copiedTooltip {
-    z-index: 1000;
-    position: fixed;
-    top: -40px;
-    background-color: #000;
-    color: #fff;
-    padding: 1px 3px;
-    border-radius: 5px;
-  }
-  
-  .colorComboWrapper {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .colorSwatch {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  .agGridContainer :global(.ag-header) {
-    height: 40px !important;
-    min-height: 40px !important;
-  }
+
+  .agGridContainer :global(.ag-header),
   .agGridContainer :global(.ag-header-cell) {
-    height: 40px !important;
-    min-height: 40px !important;
+    height: 32px !important;
+    min-height: 32px !important;
   }
+
+  .agGridContainer :global(.ag-row) {
+    height: 26px !important;
+  }
+
   .agGridContainer :global(.ag-cell) {
-    border-right: 1px solid #d0d0d0 !important;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    line-height: 1.1;
   }
-  .agGridContainer :global(.ag-cell .MuiBox-root) {
-    padding: 0 !important;
+
+  .paginationBar {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    gap: 4px;
+    min-height: 30px;
   }
-  
+
+  .pageTextField {
+    width: 60px;
+    padding: 2px 6px;
+  }
+
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 26px;
+    font-size: 0.8rem;
+  }
+
+  .fieldWrapper {
+    font-size: 0.8rem;
+  }
+
+  .colorSwatch {
+    width: 14px;
+    height: 14px;
+  }
+
+  .actionsBox :global(.MuiIconButton-root) {
+    padding: 3px;
+  }
+
+  .actionsBox :global(img) {
+    max-width: 16px;
+    max-height: 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .agGridContainer {
+    --ag-font-size: 10px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 24px !important;
+  }
+
+  .agGridContainer :global(.ag-cell) {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    line-height: 1.1;
+  }
+
+  .paginationWrapper {
+    gap: 1px;
+  }
+
+  .paginationBar {
+    font-size: 0.75rem;
+    padding: 1px 2px;
+    min-height: 26px;         
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    padding: 1px;              
+  }
+
+  .pageTextField {
+    width: 55px;
+    padding: 1px 4px;
+  }
+
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 24px;
+    font-size: 0.75rem;
+  }
+
+  .fieldWrapper {
+    font-size: 0.75rem;
+  }
+
+  .actionsBox {
+    gap: 2px;
+  }
+
+  .actionsBox :global(.MuiIconButton-root) {
+    padding: 2px;
+  }
+
+  .actionsBox :global(img) {
+    max-width: 14px;
+    max-height: 14px;
+  }
+}
