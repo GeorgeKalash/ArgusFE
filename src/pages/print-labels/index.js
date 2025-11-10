@@ -149,7 +149,7 @@ const PrintLabels = () => {
         <Fixed>
           <GridToolbar
             leftSection={
-              <Grid item xs={5}>
+              <Grid item xs={4}>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <ResourceComboBox
