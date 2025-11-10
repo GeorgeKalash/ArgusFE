@@ -141,19 +141,23 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   })
 
   const getCashAccountAndPayment = async cashAccountId => {
-    if (cashAccountId) {
-      const { record: cashAccountResult } = await getRequest({
-        extension: CashBankRepository.CbBankAccounts.get,
-        parameters: `_recordId=${cashAccountId}`
-      })
-      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
-      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+    if (!cashAccountId) {
+      formik.setFieldValue('cashAccountId', null)
+      formik.setFieldValue('cashAccountRef', '')
+      formik.setFieldValue('cashAccountName', '')
 
-      return cashAccountResult.paymentMethod
-    } else {
       return null
     }
+
+    const { record: cashAccountResult } = await getRequest({
+      extension: CashBankRepository.CbBankAccounts.get,
+      parameters: `_recordId=${cashAccountId}`
+    })
+    formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
+    formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
+    formik.setFieldValue('cashAccountName', cashAccountResult.name)
+
+    return paymentMethod || null
   }
 
   async function getMultiCurrencyFormData(currencyId, date, rateType, amount) {
