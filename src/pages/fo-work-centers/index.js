@@ -76,7 +76,7 @@ const WorkCenters = () => {
   function openForm(record) {
     stack({
       Component: WorkCentersForm,
-       props: {
+      props: {
         labels: _labels,
         recordId: record
           ? record.workCenterId

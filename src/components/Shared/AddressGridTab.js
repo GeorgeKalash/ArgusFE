@@ -17,7 +17,7 @@ const AddressGridTab = ({
 }) => {
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.Address,
-    DatasetIdAccess: datasetId
+    DatasetIdAccess: datasetId,
   })
 
   const tableColumns = [

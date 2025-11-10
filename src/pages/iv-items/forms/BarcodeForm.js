@@ -96,7 +96,7 @@ const BarcodeForm = ({ store, labels }) => {
     })
   }
 
-
+  
   async function fetchWithSearch({ options = {}, qry }) {
     const { _startAt = 0, _size = 50 } = options
 

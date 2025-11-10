@@ -96,7 +96,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
     })
     node.current.nodeId = null
 
-
+  
     if (node.current.viewNodeId === obj?.recordId) {
       node.current.viewNodeId = null
       node.current.viewNodeRef = ''
