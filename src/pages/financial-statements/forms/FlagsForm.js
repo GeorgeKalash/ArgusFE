@@ -6,7 +6,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Form from 'src/components/Shared/Form'
 
-export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
+export default function FlagsForm({ nodeForm, labels, maxAccess, window, updateNodeFlags }) {
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [data, setData] = useState([])
 
@@ -62,7 +62,8 @@ export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
   const handleSubmit = () => {
     const checkedFlags = data?.map(item => item.isChecked ?? false)
     const decimalFlagValue = gridToDecimal(checkedFlags)
-    nodeForm.setFieldValue('flags', decimalFlagValue)
+    updateNodeFlags(nodeForm?.seqNo, decimalFlagValue)
+
     window.close()
   }
 
@@ -77,7 +78,7 @@ export default function FlagsForm({ nodeForm, labels, maxAccess, window }) {
   useEffect(() => {
     ;(async function () {
       const flags = await getAllFlags()
-      const listBool = convertDecimalToArrayBool(nodeForm.values.flags, flags.length)
+      const listBool = convertDecimalToArrayBool(nodeForm?.flags, flags.length)
 
       const listFlags = flags.map((item, index) => ({
         isChecked: listBool[index] || false,

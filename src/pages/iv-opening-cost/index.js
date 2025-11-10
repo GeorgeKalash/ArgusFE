@@ -67,6 +67,11 @@ const OpeningCost = () => {
       flex: 1
     },
     {
+      field: 'periodId',
+      headerName: _labels.periodId,
+      flex: 1
+    },
+    {
       field: 'avgCost',
       headerName: _labels.cost,
       flex: 1,

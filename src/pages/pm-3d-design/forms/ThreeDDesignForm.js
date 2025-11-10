@@ -72,6 +72,8 @@ const ThreeDDesignForm = ({ recordId, window }) => {
       notes: '',
       date: new Date(),
       startDate: null,
+      designGroupId: null,
+      designFamilyId: null,
       endDate: null,
       fileReference: '',
       itemGroupId: null,
@@ -300,7 +302,9 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                             productionStandardName: '',
                             collectionId: null,
                             metalPurity: null,
-                            metalId: null
+                            metalId: null,
+                            designGroupId: null,
+                            designFamilyId: null
                           })
                         }
                       }
@@ -396,10 +400,40 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                         productionStandardName: newValue?.productionStandardName || '',
                         collectionId: newValue?.collectionId || null,
                         metalPurity: newValue?.metalPurity || null,
+                        designFamilyId: newValue?.designFamilyId || null,
+                        designGroupId: newValue?.designGroupId || null,
                         metalId: newValue?.metalId || null
                       })
                     }}
                     errorCheck={'sketchId'}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignFamily.qry}
+                    name='designFamilyId'
+                    label={labels.familyGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly
+                    onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                    error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignGroup.qry}
+                    name='designGroupId'
+                    label={labels.designGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly
+                    onChange={(_, newValue) => formik.setFieldValue('designGroupId', newValue?.recordId || null)}
+                    error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
@@ -534,29 +568,6 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     error={formik.touched.castingType && Boolean(formik.errors.castingType)}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='statusName'
-                    label={labels.statusName}
-                    value={formik.values.statusName}
-                    maxAccess={maxAccess}
-                    readOnly
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextArea
-                    name='notes'
-                    label={labels.notes}
-                    value={formik.values.notes}
-                    maxLength='100'
-                    rows={2}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    readOnly={isClosed}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
-                  />
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
@@ -636,6 +647,29 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                     readOnly={isClosed}
                     onClear={() => formik.setFieldValue('fileReference ', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='statusName'
+                    label={labels.statusName}
+                    value={formik.values.statusName}
+                    maxAccess={maxAccess}
+                    readOnly
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    maxLength='100'
+                    rows={2}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    readOnly={isClosed}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
                   />
                 </Grid>
               </Grid>

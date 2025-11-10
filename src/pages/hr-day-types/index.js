@@ -25,7 +25,6 @@ const DayTypes = () => {
       extension: TimeAttendanceRepository.DayTypes.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
     })
-    
 
     return { ...response, _startAt: _startAt }
   }
@@ -44,6 +43,11 @@ const DayTypes = () => {
   })
 
   const columns = [
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
     {
       field: 'name',
       headerName: labels.name,

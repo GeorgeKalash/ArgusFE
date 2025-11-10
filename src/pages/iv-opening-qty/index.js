@@ -81,6 +81,11 @@ const InventoryOpeningQtys = () => {
       flex: 1
     },
     {
+      field: 'periodId',
+      headerName: _labels.periodId,
+      flex: 1
+    },
+    {
       field: 'pieces',
       headerName: _labels.pieces,
       flex: 1
@@ -111,14 +116,12 @@ const InventoryOpeningQtys = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: InventoryRepository.InventoryOpeningQtys.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (error) {}
+    await postRequest({
+      extension: InventoryRepository.InventoryOpeningQtys.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   return (

@@ -85,7 +85,7 @@ export default function ProductionOrderForm({ recordId, window }) {
           qty: null,
           pcs: null,
           designId: null,
-          jobCount: 1,
+          jobCount: null,
           notes: '',
           seqNo: '',
           lineId: null,
@@ -147,6 +147,11 @@ export default function ProductionOrderForm({ recordId, window }) {
     .toFixed(2)
 
   async function onPost() {
+    const errors = await formik.validateForm()
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
     await postRequest({
       extension: ManufacturingRepository.ProductionOrder.post,
       record: JSON.stringify({
@@ -247,7 +252,8 @@ export default function ProductionOrderForm({ recordId, window }) {
           itemWeight: result1?.stdWeight || null,
           routingId: result1?.routingId || null,
           routingRef: result1?.routingRef || '',
-          routingName: result1?.routingName || ''
+          routingName: result1?.routingName || '',
+          jobCount: 1
         })
       }
     },
@@ -460,6 +466,9 @@ export default function ProductionOrderForm({ recordId, window }) {
       props: {
         resourceId: ResourceIds.ImportProductionOrder,
         access: maxAccess,
+        staticColumns: [
+          { field: 'poRef', value: formik.values.reference },
+        ],
         onSuccess: async () => {
           if (recordId) refetchForm(recordId)
         }
@@ -468,6 +477,11 @@ export default function ProductionOrderForm({ recordId, window }) {
   }
 
   const onClose = async () => {
+    const errors = await formik.validateForm()
+    if (Object.keys(errors).length > 0) {
+      return
+    }
+
     await postRequest({
       extension: ManufacturingRepository.ProductionOrder.close,
       record: JSON.stringify(formik.values)

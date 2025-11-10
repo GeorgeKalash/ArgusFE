@@ -1,6 +1,6 @@
 import { Box, Button, Grid, IconButton } from '@mui/material'
 import Icon from 'src/@core/components/icon'
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -129,14 +129,22 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
     })
   }
 
-  const filteredData = data && {
-    ...data,
-    list: data.list.filter(
-      item =>
-        (item.resourceId && item.resourceId.toString().includes(formik.values.search)) ||
-        (item.resourceName && item.resourceName.toLowerCase().includes(formik.values.search.toLowerCase()))
-    )
-  }
+  const search = formik.values.search
+
+  const filteredData = useMemo(() => {
+    const list = data?.list || []
+
+    if (!search) return data
+
+    return {
+      ...data,
+      list: list.filter(
+        item =>
+          (item.resourceId && item.resourceId.toString()?.includes(search)) ||
+          (item.resourceName && item.resourceName.toLowerCase().includes(search.toLowerCase()))
+      )
+    }
+  }, [data?.list, search])
 
   const handleSearchChange = event => {
     const { value } = event.target
