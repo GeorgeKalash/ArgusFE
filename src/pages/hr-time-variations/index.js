@@ -36,12 +36,7 @@ export default function TimeVariation() {
   })
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry)
-      return await getRequest({
-        extension: TimeAttendanceRepository.TimeVariation.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   async function fetchGridData(options = {}) {
@@ -165,7 +160,7 @@ export default function TimeVariation() {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'TATV'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'TATV'} filterBy={filterBy} hasSearch={false} />
       </Fixed>
       <Grow>
         <Table
