@@ -1,9 +1,10 @@
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
 import * as yup from 'yup'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {
+  const validateTimerRef = useRef()
   function explode(str) {
     const parts = str.split('.')
 
@@ -48,6 +49,7 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
 
   const formik = useFormik({
     ...formikProps,
+    validateOnChange: false,
     validate(values) {
       let maxAccessErrors = {}
 
@@ -125,6 +127,17 @@ export function useForm({ documentType = {}, conditionSchema = [], maxAccess, va
   useEffect(() => {
     if (key && value && formik.values[key] !== value) formik.setFieldValue(key, value)
   }, [value])
+
+  useEffect(() => {
+    if (formik.submitCount === 0) return
+
+    clearTimeout(validateTimerRef.current)
+    validateTimerRef.current = setTimeout(() => {
+      formik.validateForm()
+    }, 300)
+
+    return () => clearTimeout(validateTimerRef.current)
+  }, [formik.values])
 
   useEffect(() => {
     if (reference?.isEmpty) {
