@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 import { useAuth } from 'src/hooks/useAuth'
+import styles from './Navigation.module.css'
 
 const UserDropdown = props => {
   const { settings } = props
@@ -22,9 +23,7 @@ const UserDropdown = props => {
   }
 
   const handleDropdownClose = url => {
-    if (url) {
-      router.push(url)
-    }
+    if (url) router.push(url)
     setAnchorEl(null)
   }
 
@@ -38,7 +37,7 @@ const UserDropdown = props => {
       <Badge
         overlap='circular'
         onClick={handleDropdownOpen}
-        sx={{ ml: 2, cursor: 'pointer' }}
+        className={styles.userDropdownIcon}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -46,25 +45,28 @@ const UserDropdown = props => {
       >
         <Icon icon='mdi-account-circle' color='white' fontSize='1.8rem' />
       </Badge>
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => handleDropdownClose()}
-        sx={{ '& .MuiMenu-paper': { backgroundColor: '#f4f5fa', mt: 4 } }}
+        classes={{ paper: styles.userMenu }}
         anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
       >
         <Box sx={{ pt: 2, pb: 3, px: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4 }}>{auth?.user?.username}</Typography>
+              <Typography className={styles.userName}>{auth?.user?.username}</Typography>
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ backgroundColor: '#383838' }} />
-        <MenuItem onClick={handleLogout} sx={{ py: 2, '& svg': { mr: 2, fontSize: '1.375rem', color: '#383838' } }}>
+
+        <Divider className={styles.userMenuDivider} />
+
+        <MenuItem onClick={handleLogout} className={styles.logoutMenuItem}>
           <Icon icon='mdi:logout-variant' />
-          <Typography sx={{ color: '#383838', pl: 1 }}>Logout</Typography>
+          <Typography className={styles.logoutText}>Logout</Typography>
         </MenuItem>
       </Menu>
     </Fragment>
