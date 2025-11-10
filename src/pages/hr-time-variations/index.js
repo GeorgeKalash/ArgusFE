@@ -111,7 +111,7 @@ export default function TimeVariation() {
     },
     {
       field: 'damageLevelName',
-      headerName: labels.damageLevel,
+      headerName: labels.damage,
       flex: 1
     },
     {
