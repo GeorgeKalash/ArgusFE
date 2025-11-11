@@ -10,7 +10,7 @@ function AppFallback({ error }) {
     emitError(error)
   }, [error])
 
-  return <>{!!err && <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />}</>
+  return <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
 }
 
 export default function RootBoundary({ children, resetKey }) {

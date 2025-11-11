@@ -17,5 +17,5 @@ export default function GlobalErrorHandlers() {
     }
   }, [])
 
-  return <>{!!err && <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />}</>
+  return <ErrorWindow open={!!err} message={{ message: err }} onClose={() => setErr(null)} />
 }
