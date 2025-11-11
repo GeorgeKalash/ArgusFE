@@ -97,12 +97,15 @@ const CustomTextField = ({
         setIsFocused(true)
         setFocus(true)
       }}
-        onBlur={e => {
-          if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
-            return
-          }
-        }}
-        inputProps = {{
+      onBlur={e => {
+        if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
+          return
+        }
+
+        setIsFocused(false)
+        setFocus(false)
+      }}
+      inputProps={{
         autoComplete: 'off',
         readOnly: _readOnly,
         maxLength: maxLength,
@@ -161,8 +164,6 @@ const CustomTextField = ({
         '& .MuiInputBase-input': {
           fontSize: '0.90rem'
         }
-        setIsFocused(false)
-        setFocus(false)
       }}
       style={{ width: fullWidth ? '100%' : 'auto' }}
     >
