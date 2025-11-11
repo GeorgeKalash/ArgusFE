@@ -1,0 +1,121 @@
+ .root {
+  flex: 1;
+}
+
+.agContainer {
+  height: 100%;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.agContainer :global(.ag-header),
+.agContainer :global(.ag-header-cell) {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+.agContainer :global(.ag-header-row) {
+  background: var(--ag-header-bg);
+  height: 35px !important;
+  min-height: 35px !important;
+}
+
+.agContainer :global(.ag-cell) {
+  border-right: 1px solid #d0d0d0 !important;
+  font-size: 0.8rem !important;
+}
+.agContainer.ag-theme-alpine {
+  --ag-row-height: 35px;     
+  --ag-header-height: 40px;   
+  --ag-font-size: 0.9rem;
+}
+
+.agContainer :global(.ag-cell .MuiBox-root) {
+  padding: 0 !important;
+}
+
+.cellBox,
+.cellEditorBox {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  display: flex;
+}
+
+.cellEditorBox {
+  align-items: center;
+}
+
+.cellBoxCentered,
+.cellEditorBoxCentered {
+  justify-content: center;
+}
+
+.actionCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.deleteIcon {
+  font-size: 1.3rem !important;
+}
+
+.headerCheckboxContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.headerCheckbox {
+  width: 20%;
+  height: 20%;
+  margin-left: 50px !important;
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .agContainer {
+    --ag-font-size: 11px;
+  }
+
+
+  .agContainer :global(.ag-header),
+  .agContainer :global(.ag-header-cell),
+  .agContainer :global(.ag-header-row) {
+    height: 32px !important;
+    min-height: 32px !important;
+  }
+
+  .agContainer :global(.ag-row) {
+    height: 26px !important;
+  }
+
+  .agContainer :global(.ag-cell) {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    line-height: 1.1;
+    font-size: 0.75rem !important;
+  }
+
+  .cellBox,
+  .cellEditorBox {
+    font-size: 0.8rem;
+  }
+
+  .deleteIcon {
+    font-size: 1.1rem !important;
+  }
+
+  .headerCheckbox {
+    width: 16px;
+    height: 16px;
+    margin-left: 32px !important;
+    
+  }
+  .agContainer.ag-theme-alpine {
+    --ag-row-height: 26px;
+    --ag-header-height: 32px;
+    --ag-font-size: 11px;
+  }
+}
