@@ -135,7 +135,7 @@ const FiPaymentVouchers = () => {
       props: {
         recordId,
         plantId
-      }
+      },
     })
   }
 

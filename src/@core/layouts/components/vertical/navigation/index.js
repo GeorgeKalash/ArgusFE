@@ -21,7 +21,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { Remove } from '@mui/icons-material'
 import { Tooltip } from '@mui/material'
 import Link from 'next/link'
-import UserDropdown from '../../shared-components/UserDropdown'
+import UserDropdown from './UserDropdown'
 import Image from 'next/image'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
@@ -66,6 +66,27 @@ const Navigation = props => {
   const MenuUnlockedIcon = () => userMenuUnlockedIcon || <KeyboardArrowRightIcon />
   const theme = useTheme()
   const router = useRouter()
+
+  const [drawerWidth, setDrawerWidth] = useState(navWidth)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth
+      let newWidth
+
+      if (width <= 768) newWidth = navCollapsed ? 0 : 180
+      else if (width <= 1024) newWidth = navCollapsed ? 0 : 200
+      else if (width <= 1366) newWidth = navCollapsed ? 0 : 220
+      else newWidth = navCollapsed ? 0 : 300
+
+      setDrawerWidth(newWidth)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [navCollapsed])
 
   const MobileDrawerProps = {
     open: navVisible,
@@ -208,7 +229,21 @@ const Navigation = props => {
   }
 
   const truncateTitle = (title, level) => {
-    const maxLength = Math.max(10, 31 - level)
+    let baseLength
+
+    if (typeof window !== 'undefined') {
+      const width = window.innerWidth
+
+      if (width <= 768) baseLength = 16
+      else if (width <= 1024) baseLength = 20
+      else if (width <= 1366) baseLength = 26
+      else if (width <= 1600) baseLength = 30
+      else baseLength = 34
+    } else {
+      baseLength = 31
+    }
+
+    const maxLength = Math.max(8, baseLength - level)
 
     return title.length > maxLength ? `${title.slice(0, maxLength - 3)}...` : title
   }
@@ -253,7 +288,7 @@ const Navigation = props => {
         </div>
 
         {isOpen && isFolder && (
-          <div className={styles.children} style={{ paddingLeft: navCollapsed ? '0px' : '12px' }}>
+          <div className={styles.children} style={{ paddingLeft: navCollapsed ? '0px' : '10px' }}>
             {node.children.map(child => renderNode(child, level + 1))}
           </div>
         )}
@@ -270,14 +305,14 @@ const Navigation = props => {
         PaperProps={{
           sx: {
             backgroundColor: 'background.default',
-            width: navCollapsed ? collapsedNavWidth : navWidth,
-            ...(!hidden && navCollapsed ? { boxShadow: 9 } : {}),
+            width: drawerWidth,
+            transition: 'width 0.3s ease-in-out',
             borderRight: navigationBorderWidth === 0 ? 0 : `${navigationBorderWidth}px solid ${theme.palette.divider}`,
             ...userNavMenuPaperStyle
           },
           ...navMenuProps?.PaperProps
         }}
-        sx={{ width: navCollapsed ? collapsedNavWidth : navWidth, ...userNavMenuStyle }}
+        sx={{ width: drawerWidth, ...userNavMenuStyle }}
         {...userNavMenuProps}
       >
         <Box
@@ -296,14 +331,13 @@ const Navigation = props => {
                 <img
                   src={!navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/WhiteA.png'}
                   alt='Argus'
-                  style={{ maxHeight: '25px' }}
+                  className={styles['Argus-Icon']}
                 />
               </Link>
             )}
             {!navCollapsed && <UserDropdown settings={settings} />}
           </Box>
         </Box>
-
         <Box className={styles['menu-search-box']}>
           <TextField
             placeholder={platformLabels.Filter}
@@ -312,23 +346,18 @@ const Navigation = props => {
             size='small'
             onChange={handleSearch}
             autoComplete='off'
+            className={styles['search-field']}
             InputProps={{
-              sx: {
-                border: 'transparent',
-                background: '#231f20',
-                fieldset: { borderColor: 'transparent !important' },
-                height: '30px',
-                borderRadius: '5px',
-                pr: 1
-              },
-              endAdornment: <SearchIcon sx={{ border: '0px', fontSize: 20 }} />
+              endAdornment: <SearchIcon className={styles['search-icon']} />
             }}
           />
           <Tooltip title={platformLabels.collapse}>
-            <Remove onClick={onCollapse} width={28} />
+            <Box onClick={onCollapse} className={styles.box} sx={{ display: navCollapsed ? 'none' : 'flex' }}>
+              <Remove sx={{ fontSize: 20 }} />
+            </Box>
           </Tooltip>
           <Dropdown
-            Image={<SettingsIcon />}
+            Image={<SettingsIcon sx={{ fontSize: 20 }} />}
             TooltipTitle={platformLabels.Gear}
             onClickAction={GearItem => handleNodeClick(GearItem)}
             map={gear.gear}
@@ -336,7 +365,7 @@ const Navigation = props => {
           />
           {filterFav(menu)?.length > 0 && (
             <Dropdown
-              Image={<GradeIcon style={{ color: 'yellow' }} />}
+              Image={<GradeIcon sx={{ color: 'yellow', fontSize: 20 }} />}
               TooltipTitle={platformLabels.Favorite}
               onClickAction={favorite => handleNodeClick(favorite)}
               map={filterFav(menu)}
@@ -350,7 +379,6 @@ const Navigation = props => {
           </List>
         </Box>
       </SwipeableDrawer>
-
       {hidden ? (
         <IconButton
           disableRipple

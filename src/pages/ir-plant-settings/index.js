@@ -55,6 +55,7 @@ const PlantSettings = () => {
   ]
 
   function openForm(record) {
+    
     stack({
       Component: PlantSettingsForm,
       props: {

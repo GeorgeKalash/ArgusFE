@@ -74,12 +74,13 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
 
   const add = () => {
     node.current.nodeId = null
-
+ 
     openForm()
   }
 
   const edit = obj => {
     node.current.nodeId = obj?.recordId
+
 
     node.current.viewNodeId = obj?.recordId
     node.current.viewNodeRef = obj?.reference
@@ -95,6 +96,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
     })
     node.current.nodeId = null
 
+  
     if (node.current.viewNodeId === obj?.recordId) {
       node.current.viewNodeId = null
       node.current.viewNodeRef = ''
@@ -136,7 +138,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData }) => {
           onDelete={del}
           maxAccess={maxAccess}
           pagination={false}
-          onSelectionChange={row => {
+          onSelectionChange={row => { 
             node.current.viewNodeId = row?.recordId || null
             node.current.viewNodeRef = row?.reference || ''
             node.current.viewNodedesc = row?.description || ''

@@ -146,7 +146,7 @@ const FiPaymentVouchers = () => {
       Component: FiPaymentVouchersForm,
       props: {
         recordId
-      }
+      },
     })
   }
 

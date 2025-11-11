@@ -93,21 +93,21 @@ const PriceLevels = () => {
         <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
-        <Table
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={popup}
-          onDelete={del}
-          isLoading={false}
-          pageSize={50}
-          paginationParameters={paginationParameters}
-          paginationType='api'
-          maxAccess={access}
-          refetch={refetch}
-        />
+      <Table
+        columns={columns}
+        gridData={data}
+        rowId={['recordId']}
+        onEdit={popup}
+        onDelete={del}
+        isLoading={false}
+        pageSize={50}
+        paginationParameters={paginationParameters}
+        paginationType='api'
+        maxAccess={access}
+        refetch={refetch}
+      />
       </Grow>
-    </VertLayout>
+    </VertLayout>    
   )
 }
 

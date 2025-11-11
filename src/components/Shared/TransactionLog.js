@@ -6,7 +6,7 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateFromApi } from 'src/lib/date-helper'
 import ResourceComboBox from './ResourceComboBox'
 import { useError } from 'src/error'
 import { Grow } from './Layouts/Grow'
@@ -114,6 +114,7 @@ const TransactionLog = props => {
       const isObject = typeof value === 'object' && value !== null
 
       if (Array.isArray(value)) {
+        
         return (
           <Grid key={key} style={{ paddingLeft }}>
             <strong>{key}:</strong> [

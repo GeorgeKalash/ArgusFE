@@ -96,6 +96,7 @@ const BarcodeForm = ({ store, labels }) => {
     })
   }
 
+  
   async function fetchWithSearch({ options = {}, qry }) {
     const { _startAt = 0, _size = 50 } = options
 
@@ -119,7 +120,12 @@ const BarcodeForm = ({ store, labels }) => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} inputSearch={true} />
+        <GridToolbar 
+          onAdd={add} 
+          maxAccess={access} 
+          onSearch={search}
+          inputSearch={true} 
+        />
       </Fixed>
       <Grow>
         <Table

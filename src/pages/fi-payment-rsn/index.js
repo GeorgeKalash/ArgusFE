@@ -50,7 +50,7 @@ const PaymentReasons = () => {
 
   async function fetchWithSearch({ qry }) {
     return await getRequest({
-      extension: FinancialRepository.PaymentReasons.snapshot,
+      extension:  FinancialRepository.PaymentReasons.snapshot,
       parameters: `_filter=${qry}`
     })
   }

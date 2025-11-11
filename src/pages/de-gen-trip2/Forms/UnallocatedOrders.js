@@ -3,6 +3,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 
 export default function UnallocatedOrdersForm({ data, labels, access }) {
+
   const columnsUnallocatedOrders = [
     {
       field: 'szName',
