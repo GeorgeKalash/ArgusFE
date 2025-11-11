@@ -323,7 +323,7 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              <IconButton onClick={onReset}>
+              <IconButton onClick={onReset} className={styles.paginationBar}>
                 <CachedIcon />
               </IconButton>
             </Box>
