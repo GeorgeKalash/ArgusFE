@@ -62,7 +62,21 @@
   display: flex;
   width: 100%;
   justify-content: center;
+  gap: 4px;
 }
+
+.actionIconButton {
+  padding: 0;
+  width: 26px;
+  height: 26px;
+  min-width: 0;
+}
+
+.actionIcon {
+  width: 18px;
+  height: 18px;
+}
+
 
 .fullSizeCheckbox {
   width: 100% !important;
@@ -195,6 +209,15 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 1px 5px;
   }
+  .actionIconButton {
+    width: 22px;
+    height: 22px;
+  }
+
+  .actionIcon {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @media (max-width: 1366px) {
@@ -246,6 +269,15 @@
   .pageTextField :global(.MuiOutlinedInput-input),
   .pageTextField :global(.MuiInputBase-input) {
     padding: 1px 4px;
+  }
+  .actionIconButton {
+    width: 20px;
+    height: 20px;
+  }
+
+  .actionIcon {
+    width: 15px;
+    height: 15px;
   }
 }
 
@@ -300,6 +332,16 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 1px 3px;
   }
+
+  .actionIconButton {
+    width: 18px;
+    height: 18px;
+  }
+
+  .actionIcon {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 
@@ -353,6 +395,15 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 3px;
   }
+  .actionIconButton {
+    width: 16px;
+    height: 16px;
+  }
+
+  .actionIcon {
+    width: 13px;
+    height: 13px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -404,6 +455,15 @@
   .pageTextField :global(.MuiOutlinedInput-input),
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
+  }
+  .actionIconButton {
+    width: 15px;
+    height: 15px;
+  }
+
+  .actionIcon {
+    width: 12px;
+    height: 12px;
   }
 }
 
@@ -457,6 +517,15 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
   }
+  .actionIconButton {
+    width: 14px;
+    height: 14px;
+  }
+
+  .actionIcon {
+    width: 11px;
+    height: 11px;
+  }
 }
 
 
@@ -509,5 +578,14 @@
   .pageTextField :global(.MuiOutlinedInput-input),
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
+  }
+  .actionIconButton {
+    width: 12px;
+    height: 12px;
+  }
+
+  .actionIcon {
+    width: 10px;
+    height: 10px;
   }
 }
