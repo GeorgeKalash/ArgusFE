@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -12,6 +11,9 @@ import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ControlContext } from 'src/providers/ControlContext'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import TimeVariatrionForm from './forms/TimeVariatrionForm'
+import { Box, IconButton } from '@mui/material'
+import Image from 'next/image'
+import editTime from '/public/images/TableIcons/editTime.png'
 
 export default function TimeVariation() {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -128,6 +130,19 @@ export default function TimeVariation() {
       field: 'wipName',
       headerName: labels.wip,
       flex: 1
+    },
+    {
+      field: '',
+      flex: 0.6,
+      cellRenderer: row => (
+        <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+          <IconButton size='small' onClick={() => {}}>
+            {(row?.data?.timeCode == 20 || row?.data?.timeCode == 21 || row?.data?.timeCode == 41) && (
+              <Image src={editTime} alt='History' width={18} height={18} />
+            )}
+          </IconButton>
+        </Box>
+      )
     }
   ]
 
@@ -148,15 +163,6 @@ export default function TimeVariation() {
     })
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: TimeAttendanceRepository.TimeVariation.del,
-      record: JSON.stringify(obj)
-    })
-    invalidate()
-    toast.success(platformLabels.Deleted)
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -172,9 +178,8 @@ export default function TimeVariation() {
           paginationType='api'
           refetch={refetch}
           onEdit={edit}
-          onDelete={del}
-          deleteConfirmationType={'strict'}
           pageSize={50}
+          globalStatus={false}
           maxAccess={access}
         />
       </Grow>

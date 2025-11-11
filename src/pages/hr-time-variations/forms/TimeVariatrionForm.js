@@ -6,7 +6,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useInvalidate } from 'src/hooks/resource'
@@ -24,11 +24,16 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateForGetApI, formatDateFromApi, formatDateMDY, formatDateToApi } from 'src/lib/date-helper'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 export default function TimeVariatrionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  dayjs.extend(utc)
+  const [shiftStore, setShiftStore] = useState([])
 
   const TimeVariationDataSource = {
     GENERATED: 1,
@@ -58,7 +63,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
       clockDuration: '',
       duration: '',
       damageLevel: null,
-      justification: null,
+      justification: '',
       releaseStatus: null,
       wip: 1,
       status: 1
@@ -122,6 +127,56 @@ export default function TimeVariatrionForm({ recordId, window }) {
     // invalidate()
     // await refetchForm(res.recordId)
   }
+  function time(minutes) {
+    if (minutes == 0) return '00:00'
+    const absMinutes = Math.abs(minutes)
+    const hours = String(Math.floor(absMinutes / 60)).padStart(2, '0')
+    const mins = String(absMinutes % 60).padStart(2, '0')
+
+    return (minutes < 0 ? '-' : '') + `${hours}:${mins}`
+  }
+
+  async function fillShift(employeeId, date) {
+    if (!employeeId) return
+    let duration = 0
+
+    const { list } = await getRequest({
+      extension: TimeAttendanceRepository.FlatSchedule.qry,
+      parameters:
+        `_params=1|` + employeeId + '^2|' + dayjs(date).format('YYYYMMDD') + '^3|' + dayjs(date).format('YYYYMMDD')
+    })
+
+    const shiftData = list?.map(x => {
+      const from = dayjs.utc(formatDateFromApi(x.dtFrom)).format('hh:mm A')
+      const to = dayjs.utc(formatDateFromApi(x.dtTo)).format('hh:mm A')
+      duration += x.duration
+
+      return { ...x, dtRange: `${from} - ${to}`, duration }
+    })
+
+    setShiftStore(shiftData)
+    formik.setFieldValue(
+      'shiftId',
+      shiftData.length > 0 && formik.values.timeCode != 20 ? shiftData?.[0]?.recordId : null
+    )
+    formik.setFieldValue('duration', shiftData.length > 0 ? duration : 0)
+    formik.setFieldValue('clockDuration', shiftData.length > 0 ? time(duration) : 0)
+  }
+
+  async function updateTerminationDate(employeeId) {
+    if (!employeeId) {
+      formik.setFieldValue('terminationDate', null)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: EmployeeRepository.QuickView.get,
+      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateMDY(new Date())}`
+    })
+    formik.setFieldValue('terminationDate', res?.record?.terminationDate || null)
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
@@ -129,7 +184,11 @@ export default function TimeVariatrionForm({ recordId, window }) {
           extension: TimeAttendanceRepository.TimeVariation.get,
           parameters: `_recordId=${recordId}`
         })
-        formik.setValues({ ...res.record, date: formatDateFromApi(res.record.date) })
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res.record.date),
+          clockDuration: time(res?.record?.duration)
+        })
       }
     })()
   }, [])
@@ -177,6 +236,8 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 ]}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
+                  await fillShift(newValue?.recordId, formik.values.date)
+                  await updateTerminationDate(newValue?.recordId)
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -190,7 +251,10 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 required
                 label={labels.date}
                 value={formik.values?.date}
-                onChange={formik.setFieldValue}
+                onChange={async (_, newValue) => {
+                  await fillShift(formik.values.employeeId, newValue)
+                  formik.setFieldValue('date', newValue)
+                }}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
@@ -201,7 +265,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
               <ResourceComboBox
                 datasetId={DataSets.TIME_CODE}
                 name='timeCode'
-                readOnly={isClosed}
+                readOnly={editMode}
                 label={labels.timeCode}
                 valueField='key'
                 displayField='value'
@@ -213,17 +277,16 @@ export default function TimeVariatrionForm({ recordId, window }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
+              <CustomComboBox
                 name='shiftId'
-                endpointId={GeneralLedgerRepository.CostCenter.qry}
-                parameters={`_params=&_startAt=0&_pageSize=1000`}
                 label={labels.shift}
                 valueField='recordId'
                 displayField='dtRange'
-                values={formik.values}
+                store={shiftStore}
+                value={formik.values.shiftId}
                 readOnly={isClosed || formik.values?.clientId == 20 || formik.values?.timeCode == 20}
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('shiftId', newValue?.recordId)
+                  formik.setFieldValue('shiftId', newValue?.recordId || null)
                 }}
                 error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
                 maxAccess={maxAccess}
