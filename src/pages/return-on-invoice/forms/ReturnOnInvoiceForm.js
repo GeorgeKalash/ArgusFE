@@ -74,6 +74,23 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const systemSales = defaultsData?.list?.find(({ key }) => key === 'salesTD')?.value
   const systemPriceLevel = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
 
+  async function validateSalesPerson(spId) {
+    if (!spId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.SalesPerson.get,
+      parameters: `_recordId=${spId}`
+    })
+
+    const salesperson = res?.record
+
+    if (!salesperson || salesperson.isInactive) {
+      return null
+    }
+
+    return spId
+  }
+
   const initialValues = {
     dtId: null,
     commitItems: false,
@@ -219,7 +236,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         return {
           ...itemDetails,
           seqNo: itemSeqNo,
-          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
+          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty,
+          applyVat: values.isVattable || false
         }
       })
 
@@ -390,8 +408,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             volume: itemFound?.item?.volume,
             isMetal: itemFound?.item?.isMetal || false,
             metalid: itemFound?.item?.metalId,
-            metalPurity: itemFound?.item?.metalPurity,
-            applyVat: formik.values.isVattable
+            metalPurity: itemFound?.item?.metalPurity
           }
 
           update(itemData)
@@ -456,11 +473,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: rowTaxDetails || null,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          applyVat: formik.values.isVattable,
           trackBy: newRow?.trackBy
         })
       },
@@ -795,6 +811,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
+      valuesPath: {
+        ...formik.values,
+        notes: formik.values.description
+      },
       datasetId: ResourceIds.GLReturnOnInvoice,
       disabled: !editMode
     },
@@ -1093,7 +1113,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
@@ -1195,7 +1215,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       parameters: `_dtId=${dtId}`
     })
     formik.setFieldValue('plantId', res?.record?.plantId || null)
-    formik.setFieldValue('spId', res?.record?.spId || null)
+    const validSpId = await validateSalesPerson(res?.record?.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('postMetalToFinancials', res?.record?.postMetalToFinancials)
     formik.setFieldValue('commitItems', res?.record?.commitItems)
     formik.setFieldValue('isDefaultDtPresent', res?.record?.dtId)
@@ -1397,14 +1419,16 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     maxAccess={maxAccess}
                     readOnly={editMode || formik.values.items.some(item => item.itemId)}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
                       formik.setFieldValue('invoiceId', newValue?.recordId || null)
                       formik.setFieldValue('contactId', newValue?.contactId || null)
                       formik.setFieldValue('currencyId', newValue?.currencyId || null)
                       formik.setFieldValue('exRate', newValue?.exRate)
                       formik.setFieldValue('rateCalcMethod', newValue?.rateCalcMethod)
                       formik.setFieldValue('plantId', newValue?.plantId || null)
-                      formik.setFieldValue('spId', newValue?.spId || null)
+                      const validSpId = await validateSalesPerson(newValue?.spId)
+                      formik.setFieldValue('spId', validSpId)
+
                       formik.setFieldValue('szId', newValue?.szId || null)
                       formik.setFieldValue('isVattable', newValue?.isVattable)
                       formik.setFieldValue('tdType', newValue?.tdType || 1)
@@ -1538,6 +1562,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'spRef', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     readOnly={isPosted}
                     valueField='recordId'
                     displayField='name'

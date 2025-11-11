@@ -389,7 +389,11 @@ export default function OutwardsTransferForm({ labels, maxAccess, recordId }) {
                             name='exRate2'
                             decimalScale={5}
                             label={labels.exRateDivide}
-                            value={formik.values?.exRate ? 1 / formik.values.exRate : ''}
+                            value={
+                              formik?.values?.exRate && formik?.values?.exRate != 0
+                                ? 1 / formik?.values?.exRate
+                                : '0.00000'
+                            }
                             required
                             readOnly
                             maxAccess={maxAccess}

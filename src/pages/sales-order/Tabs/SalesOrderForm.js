@@ -79,6 +79,23 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     enabled: !recordId
   })
 
+  async function validateSalesPerson(spId) {
+    if (!spId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.SalesPerson.get,
+      parameters: `_recordId=${spId}`
+    })
+
+    const salesperson = res?.record
+
+    if (!salesperson || salesperson.isInactive) {
+      return null
+    }
+
+    return spId
+  }
+
   const initialValues = {
     recordId: recordId,
     dtId: null,
@@ -327,14 +344,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const itemPhysProp = await getItemPhysProp(newRow.itemId)
         const itemInfo = await getItem(newRow.itemId)
-        const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
 
-        const ItemConvertPrice = await getItemConvertPrice(
-          newRow.itemId,
-          update,
-          itemInfo?.defSaleMUId ? defaultMu?.recordId || filteredMeasurements?.[0]?.recordId : 0
-        )
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, update, defaultMu?.recordId || 0)
         let rowTax = null
         let rowTaxDetails = null
 
@@ -375,13 +387,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           mdAmount: formik.values.initialTdPct ? formik.values.initialTdPct : 0,
           qty: 0,
           msId: itemInfo?.msId,
-          muRef: defaultMu?.reference || filteredMeasurements?.[0]?.reference,
-          muId: defaultMu?.recordId || filteredMeasurements?.[0]?.recordId,
-          muQty: filteredMeasurements?.[0]?.qty,
+          muRef: defaultMu?.reference || '',
+          muId: defaultMu?.recordId || null,
+          muQty: 0,
           extendedPrice: 0,
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: rowTaxDetails || null,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId)
@@ -434,8 +446,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       async onChange({ row: { update, newRow } }) {
         if (!newRow?.muId) {
           update({ baseQty: 0 })
-
-          return
         }
 
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
@@ -445,7 +455,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const data = getItemPriceRow(
           {
             ...newRow,
-            baseQty: newRow?.qty * muQty,
+            baseQty: newRow?.qty * muQty || 0,
             basePrice: ItemConvertPrice?.basePrice || 0,
             unitPrice: ItemConvertPrice?.unitPrice || 0,
             upo: ItemConvertPrice?.upo || 0,
@@ -774,7 +784,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems, clientInfo) {
+  async function fillForm(soHeader, soItems) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -813,8 +823,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      tdPct: clientInfo?.record?.tdPct || 0,
-      initialTdPct: clientInfo?.record?.tdPct || 0,
+      tdPct: soHeader?.record?.tdPct || 0,
+      initialTdPct: soHeader?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -861,7 +871,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     const res = await getClient(clientId)
     formik.setFieldValue('currencyId', res?.record?.currencyId)
-    formik.setFieldValue('spId', res?.record?.spId || formik.values.spId)
+    const validSpId = await validateSalesPerson(res?.record?.spId || formik.values.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('ptId', res?.record?.ptId)
     formik.setFieldValue('plId', res?.record?.plId || defaults.systemDefaultsList.plId || 0)
     formik.setFieldValue('szId', res?.record?.szId)
@@ -1083,7 +1095,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
@@ -1142,8 +1154,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    const clientInfo = await getClient(soHeader?.record?.clientId)
-    fillForm(soHeader, soItems, clientInfo)
+    fillForm(soHeader, soItems)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1228,7 +1239,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
     })
-    formik.setFieldValue('spId', res?.record?.spId || defaults.userDefaultsList.spId || null)
+
+    const validSpId = await validateSalesPerson(res?.record?.spId || defaults.userDefaultsList.spId)
+    formik.setFieldValue('spId', validSpId)
+
     formik.setFieldValue('plantId', res?.record?.plantId || defaults.userDefaultsList.plantId || null)
   }
   useEffect(() => {
@@ -1284,8 +1298,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         const siteId = userDefaultSite ? userDefaultSite : userDefaultSASite
         const plant = defaultValues.userDefaultsList.plantId
         const salesPerson = defaultValues.userDefaultsList.spId
+        const validSpId = await validateSalesPerson(parseInt(salesPerson))
         formik.setFieldValue('siteId', parseInt(siteId))
-        formik.setFieldValue('spId', parseInt(salesPerson))
+        formik.setFieldValue('spId', validSpId)
         formik.setFieldValue('plantId', parseInt(plant))
       }
     })()
@@ -1346,6 +1361,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 <Grid item xs={4}>
                   <ResourceComboBox
                     endpointId={SaleRepository.SalesPerson.qry}
+                    filter={!editMode ? item => !item.isInactive : undefined}
                     name='spId'
                     label={labels.salesPerson}
                     columnsInDropDown={[

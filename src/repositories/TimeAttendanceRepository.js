@@ -4,15 +4,20 @@ export const TimeAttendanceRepository = {
   AttendanceScheduleFilters: {
     qry: service + 'qrySD'
   },
+  ProcessedShiftPunches: {
+    retry: service + 'retryPSP'
+  },
   OvertimeProfiles: {
     page: service + 'pageOTP',
     set: service + 'setOTP',
     get: service + 'getOTP',
-    del: service + 'delOTP'
+    del: service + 'delOTP',
+    qry: service + 'qryOTP'
   },
   PendingPunches: {
     page: service + 'pagePP',
-    del: service + 'delPP'
+    del: service + 'delPP',
+    qry: service + 'qryPP'
   },
   BiometricDevices: {
     page: service + 'pageBM',
@@ -50,11 +55,15 @@ export const TimeAttendanceRepository = {
   },
   DayTypes: {
     page: service + 'pageDT',
+    qry: service + 'qryDT',
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'
   },
   AttendanceDay: {
     qry: service + 'qryAD'
+  },
+  Schedule: {
+    qry: service + 'qrySC'
   }
 }

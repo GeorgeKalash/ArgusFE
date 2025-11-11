@@ -16,10 +16,13 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useWindow } from 'src/windows'
+import { OpeningSerialsForm } from './OpeningSerialsForm'
 
 const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.InventoryOpeningQtys.qry
@@ -30,49 +33,47 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
     initialValues: {
       recordId: recordId,
       year: '',
-      siteId: '',
+      siteId: null,
       sku: '',
-      itemId: '',
+      itemId: null,
       itemName: '',
-      qty: '',
+      qty: null,
       pieces: '',
       avgWeight: '',
       lotCategoryId: '',
       trackBy: '',
-      pieces: ''
+      pieces: '',
+      periodId: null
     },
-    validateOnChange: true,
     validationSchema: yup.object({
       year: yup.string().required(),
       siteId: yup.string().required(),
       sku: yup.string().required(),
       itemId: yup.string().required(),
       qty: yup.number().required().min(0.01),
-      avgWeight: yup.string().nullable().max(999999)
+      avgWeight: yup.string().nullable().max(999999),
+      periodId: yup.number().required()
     }),
     onSubmit: async obj => {
-      try {
-        const year = formik.values.year
-        const itemId = formik.values.itemId
-        const siteId = formik.values.siteId
+      const year = formik.values.year
+      const itemId = formik.values.itemId
+      const siteId = formik.values.siteId
 
-        await postRequest({
-          extension: InventoryRepository.InventoryOpeningQtys.set,
-          record: JSON.stringify(obj)
-        })
+      await postRequest({
+        extension: InventoryRepository.InventoryOpeningQtys.set,
+        record: JSON.stringify(obj)
+      })
 
-        if (!year && !siteId && !itemId) {
-          toast.success(platformLabels.Added)
-        } else toast.success(platformLabels.Edited)
+      if (!year && !siteId && !itemId && !periodId) {
+        toast.success(platformLabels.Added)
+      } else toast.success(platformLabels.Edited)
 
-        formik.setFieldValue(
-          'recordId',
+      formik.setFieldValue(
+        'recordId',
+        String(obj.year * 100) + String(obj.itemId * 10) + String(obj.siteId) + String(obj.periodId)
+      )
 
-          String(obj.year * 100) + String(obj.itemId * 10) + String(obj.siteId)
-        )
-
-        invalidate()
-      } catch (error) {}
+      invalidate()
     }
   })
 
@@ -80,25 +81,54 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
 
   useEffect(() => {
     ;(async function () {
-      try {
-        if (record && record.year && record.itemId && record.siteId && recordId) {
-          const res = await getRequest({
-            extension: InventoryRepository.InventoryOpeningQtys.get,
-            parameters: `_fiscalYear=${record.year}&_itemId=${record.itemId}&_siteId=${record.siteId}`
-          })
+      if (record && record.year && record.itemId && record.siteId && recordId) {
+        const res = await getRequest({
+          extension: InventoryRepository.InventoryOpeningQtys.get,
+          parameters: `_fiscalYear=${record.year}&_itemId=${record.itemId}&_siteId=${record.siteId}&_periodId=${record.periodId}`
+        })
 
-          formik.setValues({
-            ...res.record,
+        formik.setValues({
+          ...res.record,
 
-            recordId: String(res.record.year * 100) + String(res.record.itemId * 10) + String(res.record.siteId)
-          })
-        }
-      } catch (exception) {}
+          recordId:
+            String(res.record.year * 100) +
+            String(res.record.itemId * 10) +
+            String(res.record.siteId) +
+            String(res.record.periodId)
+        })
+      }
     })()
   }, [])
 
+  const OpenSerialsForm = () => {
+    stack({
+      Component: OpeningSerialsForm,
+      props: {
+        parentForm: formik.values
+      },
+      width: 700,
+      height: 600,
+      title: labels.Serials
+    })
+  }
+
+  const actions = [
+    {
+      key: 'Serials',
+      condition: true,
+      onClick: OpenSerialsForm,
+      disabled: !editMode || formik.values.trackBy != 1
+    }
+  ]
+
   return (
-    <FormShell form={formik} resourceId={ResourceIds.InventoryOpeningQtys} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      form={formik}
+      actions={actions}
+      resourceId={ResourceIds.InventoryOpeningQtys}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
@@ -114,10 +144,23 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 required
                 refresh={editMode}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('year', newValue?.fiscalYear)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('year', newValue?.fiscalYear)}
                 error={formik.touched.year && Boolean(formik.errors.year)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={SystemRepository.FiscalPeriod.qry}
+                name='periodId'
+                label={labels.fiscalPeriod}
+                valueField='periodId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
+                error={formik.touched.periodId && Boolean(formik.errors.periodId)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -131,9 +174,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 values={formik.values}
                 displayField='name'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('siteId', newValue?.recordId)
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId)}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
               />
             </Grid>
@@ -150,12 +191,12 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
                 valueShow='sku'
                 required
                 form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
+                onChange={(_, newValue) => {
                   formik.setFieldValue('itemName', newValue ? newValue.name : '')
                   formik.setFieldValue('sku', newValue ? newValue.sku : '')
                   formik.setFieldValue('trackBy', newValue ? newValue.trackBy : '')
                   formik.setFieldValue('lotCategory', newValue ? newValue.lotCategory : '')
+                  formik.setFieldValue('itemId', newValue?.recordId)
                 }}
                 errorCheck={'sku'}
                 maxAccess={maxAccess}

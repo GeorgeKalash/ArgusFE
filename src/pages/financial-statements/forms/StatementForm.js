@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { useFormik } from 'formik'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -16,8 +15,9 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { useError } from 'src/error'
+import { useForm } from 'src/hooks/form'
 
-export default function StatementForm({ labels, maxAccess, setRecId, mainRecordId }) {
+export default function StatementForm({ node, initialData, labels, maxAccess, setRecId, mainRecordId, onImportData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
@@ -28,7 +28,8 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
     endpointId: FinancialStatementRepository.FinancialStatement.page
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
+    maxAccess,
     initialValues: {
       recordId: null,
       name: '',
@@ -79,20 +80,121 @@ export default function StatementForm({ labels, maxAccess, setRecId, mainRecordI
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (mainRecordId) {
-        const res = await getRequest({
-          extension: FinancialStatementRepository.FinancialStatement.get,
-          parameters: `_recordId=${mainRecordId}`
-        })
+    if (initialData && Object.keys(initialData).length > 0) {
+      formik.setValues(initialData)
+    }
+  }, [initialData])
 
-        formik.setValues(res.record)
+  const onExport = async () => {
+    const res = await getRequest({
+      extension: FinancialStatementRepository.FinancialStatement.get2,
+      parameters: `_recordId=${mainRecordId}`
+    })
+
+    if (res.record) {
+      const jsonString = JSON.stringify(res, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `financial_statement_${mainRecordId}.json`
+
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const onImport = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.style.display = 'none'
+
+    input.onchange = async e => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      const text = await file.text()
+      const json = JSON.parse(text)
+      const pack = json.record
+
+      if (!pack?.fs) return
+
+      const clonedPack = structuredClone(pack)
+
+      const newFsId = mainRecordId || formik.values.recordId
+
+      if (!newFsId) {
+        return
       }
-    })()
-  }, [])
+
+      clonedPack.fs.recordId = newFsId
+
+      if (Array.isArray(clonedPack.nodes)) {
+        clonedPack.nodes = clonedPack.nodes.map(n => ({ ...n, fsId: newFsId }))
+      }
+
+      if (Array.isArray(clonedPack.titles)) {
+        clonedPack.titles = clonedPack.titles.map(t => ({ ...t, fsId: newFsId }))
+      }
+
+      if (Array.isArray(clonedPack.ledgers)) {
+        clonedPack.ledgers = clonedPack.ledgers.map(l => ({ ...l, fsId: newFsId }))
+      }
+
+      if (onImportData) {
+        onImportData(clonedPack)
+      }
+
+      node.current.viewNodeId = null
+      node.current.viewNodeRef = ''
+      node.current.viewNodedesc = ''
+
+      const res = await postRequest({
+        extension: FinancialStatementRepository.FinancialStatement.set2,
+        record: JSON.stringify(clonedPack)
+      })
+
+      if (res?.recordId) {
+        formik.setFieldValue('recordId', res.recordId)
+        setRecId(res.recordId)
+      }
+
+      invalidate()
+    }
+
+    document.body.appendChild(input)
+    input.click()
+    document.body.removeChild(input)
+  }
+
+  const actions = [
+    {
+      key: 'Export',
+      condition: true,
+      onClick: onExport,
+      disabled: !editMode
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImport,
+      disabled: !editMode
+    }
+  ]
 
   return (
-    <FormShell resourceId={ResourceIds.FinancialStatements} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.FinancialStatements}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

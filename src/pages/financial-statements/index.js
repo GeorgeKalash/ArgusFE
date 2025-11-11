@@ -36,6 +36,17 @@ const FinancialStatements = () => {
       field: 'name',
       headerName: labels.name,
       flex: 1
+    },
+    {
+      field: 'isConfidential',
+      headerName: labels.isConfidential,
+      flex: 1,
+      type: 'checkbox'
+    },
+    {
+      field: 'sgName',
+      headerName: labels.securityGrp,
+      flex: 1
     }
   ]
 
@@ -76,7 +87,7 @@ const FinancialStatements = () => {
         maxAccess: access,
         recordId
       },
-      width: 800,
+      width: 1000,
       height: 630,
       title: labels.financialStatement
     })

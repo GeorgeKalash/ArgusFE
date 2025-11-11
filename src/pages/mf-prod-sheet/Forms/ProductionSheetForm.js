@@ -237,15 +237,15 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
         valueField: 'sku',
         displayField: 'sku',
         mandatory: true,
-        displayFieldWidth: 2,
+        displayFieldWidth: 4,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' }
         ],
         columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Name' }
+          { key: 'sku', value: 'SKU', grid: 3 },
+          { key: 'name', value: 'Name', grid: 7 }
         ]
       }
     },

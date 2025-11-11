@@ -85,9 +85,9 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
           sourceReference: '',
           notes: '',
           functionId: functionId,
-          exRate: '',
-          amount: '',
-          baseAmount: ''
+          exRate: null,
+          amount: null,
+          baseAmount: null
         }
       ]
     },
@@ -137,6 +137,14 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
   useEffect(() => {
     if (formValues) {
       setformik(formValues)
+
+      if (formValues.notes && formik2?.values?.glTransactions?.length) {
+        const updatedRows = formik2.values.glTransactions.map(row => ({
+          ...row,
+          notes: formValues.notes
+        }))
+        formik2.setFieldValue('glTransactions', updatedRows)
+      }
     }
   }, [formValues])
 
@@ -361,8 +369,23 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
         <Grow>
           <DataGrid
             onChange={value => {
-              formik2.setFieldValue('glTransactions', value)
+              let updatedRows = [...value]
+              if (value.length > formik2.values.glTransactions.length) {
+                const newRows = value.slice(formik2.values.glTransactions.length)
+
+                const mappedNewRows = newRows.map(row => {
+                  if (!row.notes && formik?.notes) {
+                    return { ...row, notes: formik.notes }
+                  }
+
+                  return row
+                })
+
+                updatedRows = [...formik2.values.glTransactions, ...mappedNewRows]
+              }
+
               formik2.setFieldValue('editStatus', 2)
+              formik2.setFieldValue('glTransactions', updatedRows)
             }}
             allowDelete={!isProcessed}
             allowAddNewLine={!isProcessed}
@@ -573,9 +596,11 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.exRate,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 5
                 },
                 name: 'exRate',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
@@ -585,8 +610,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_RATE
                   })
                   update({
-                    amount: updatedRateRow.amount,
-                    baseAmount: updatedRateRow.baseAmount
+                    amount: updatedRateRow.amount || null,
+                    baseAmount: updatedRateRow.baseAmount || null
                   })
                 }
               },
@@ -594,9 +619,11 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.amount,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 2
                 },
                 name: 'amount',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
@@ -606,8 +633,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_AMOUNT
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
-                    baseAmount: updatedRateRow.baseAmount
+                    exRate: updatedRateRow.exRate || null,
+                    baseAmount: updatedRateRow.baseAmount || null
                   })
                 }
               },
@@ -615,9 +642,11 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                 component: 'numberfield',
                 label: _labels.baseAmount,
                 props: {
-                  readOnly: isProcessed
+                  readOnly: isProcessed,
+                  decimalScale: 2
                 },
                 name: 'baseAmount',
+                updateOn: 'blur',
                 async onChange({ row: { update, oldRow, newRow } }) {
                   const updatedRateRow = getRate({
                     amount: newRow?.amount,
@@ -627,8 +656,8 @@ const GeneralLedger = ({ functionId, values, valuesPath, datasetId, onReset, win
                     dirtyField: DIRTYFIELD_BASE_AMOUNT
                   })
                   update({
-                    exRate: updatedRateRow.exRate,
-                    amount: updatedRateRow.amount
+                    exRate: updatedRateRow.exRate || null,
+                    amount: updatedRateRow.amount || null
                   })
                 }
               }

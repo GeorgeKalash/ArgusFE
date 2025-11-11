@@ -74,6 +74,8 @@ export default function ThreeDPrintForm({ recordId, window }) {
       productionLineId: null,
       collectionId: null,
       productionStandardRef: '',
+      designGroupId: null,
+      designFamilyId: null,
       designerName: '',
       metalRef: '',
       collectionName: '',
@@ -89,8 +91,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       date: yup.date().required(),
       threeDDId: yup.number().required(),
       machineId: yup.number().required(),
-      setPcs: yup.number().nullable(),
-      collectionName: yup.string().required()
+      setPcs: yup.number().nullable()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -225,6 +226,13 @@ export default function ThreeDPrintForm({ recordId, window }) {
     }
   }, [])
 
+  const getDesign = async recordId => {
+    return await getRequest({
+      extension: ProductModelingRepository.ThreeDDrawing.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Printing}
@@ -319,7 +327,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     maxAccess={maxAccess}
                     readOnly={isPosted || isReleased}
                     required
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
                       formik.setFieldValue('threeDDRef', newValue?.reference || '')
                       formik.setFieldValue('fileReference', newValue?.fileReference || '')
                       formik.setFieldValue('designerName', newValue?.designerName || '')
@@ -333,12 +341,46 @@ export default function ThreeDPrintForm({ recordId, window }) {
                       formik.setFieldValue('collectionId', newValue?.collectionId || null)
                       formik.setFieldValue('itemGroupName', newValue?.itemGroupName || '')
                       formik.setFieldValue('itemGroupId', newValue?.itemGroupId || null)
+
+                      if (newValue?.recordId) {
+                        const res = await getDesign(newValue?.recordId)
+                        formik.setFieldValue('designFamilyId', res?.record?.designFamilyId || null)
+                        formik.setFieldValue('designGroupId', res?.record?.designGroupId || null)
+                      }
+
                       formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     }}
                     errorCheck={'threeDDId'}
                   />
                 </Grid>
-
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignFamily.qry}
+                    name='designFamilyId'
+                    label={labels.familyGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly
+                    onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                    error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignGroup.qry}
+                    name='designGroupId'
+                    label={labels.designGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly
+                    onChange={(_, newValue) => formik.setFieldValue('designGroupId', newValue?.recordId || null)}
+                    error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
@@ -539,7 +581,6 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     value={formik.values.collectionName}
                     maxAccess={maxAccess}
                     readOnly
-                    required
                     error={formik.touched.collectionName && Boolean(formik.errors.collectionName)}
                   />
                 </Grid>

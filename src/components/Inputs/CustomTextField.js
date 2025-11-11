@@ -97,9 +97,69 @@ const CustomTextField = ({
         setIsFocused(true)
         setFocus(true)
       }}
-      onBlur={e => {
-        if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
-          return
+        onBlur={e => {
+          if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) {
+            return
+          }
+        }}
+        inputProps = {{
+        autoComplete: 'off',
+        readOnly: _readOnly,
+        maxLength: maxLength,
+        ...(dir ? { dir } : {}),
+        inputMode: numberField && 'numeric',
+        pattern: numberField && '[0-9]*',
+        style: {
+          textAlign: numberField && 'right',
+          '-moz-appearance': 'textfield',
+          textTransform: forceUpperCase ? 'uppercase' : 'none'
+        },
+        tabIndex: _readOnly ? -1 : 0,
+        'data-search': search ? 'true' : 'false'
+      }}
+      autoComplete={autoComplete}
+      onInput={handleInput}
+      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
+      InputProps={{
+        endAdornment: !_readOnly && (
+          <InputAdornment position='end'>
+            {search && (
+              <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
+                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
+              </IconButton>
+            )}
+            {!clearable && !readOnly && (value || value === 0) && (
+              <IconButton
+                tabIndex={-1}
+                id={props.ClearId}
+                edge='end'
+                onClick={e => {
+                  onClear(e)
+                  setFocus(true)
+                }}
+                aria-label='clear input'
+              >
+                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+              </IconButton>
+            )}
+          </InputAdornment>
+        )
+      }}
+      sx={{
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            border: !hasBorder && 'none',
+            borderColor: '#959d9e',
+            borderRadius: '6px'
+          },
+          height: `33px !important`
+        },
+        '& .MuiInputLabel-root': {
+          fontSize: '0.90rem',
+          top: isFocused || value ? '0px' : '-3px'
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '0.90rem'
         }
         setIsFocused(false)
         setFocus(false)
