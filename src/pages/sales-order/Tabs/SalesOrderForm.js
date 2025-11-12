@@ -135,6 +135,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     rateCalcMethod: '',
     tdType: 2,
     tdPct: 0,
+    initialTdPct: 0,
     baseAmount: 0,
     volume: '',
     weight: '',
@@ -374,7 +375,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           rowTax = formik.values.taxId
           rowTaxDetails = details
         }
-
         update({
           volume: itemPhysProp?.volume || 0,
           weight: itemPhysProp?.weight || 0,
@@ -383,7 +383,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           unitPrice: ItemConvertPrice?.unitPrice || 0,
           upo: ItemConvertPrice?.upo || 0,
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.maxDiscount || 0,
+          mdAmount: formik.values.initialTdPct || 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
@@ -783,7 +783,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems, clientDiscount) {
+  async function fillForm(soHeader, soItems, client) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -823,7 +823,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       shipAddress: shipAdd,
       billAddress: billAdd,
       tdPct: soHeader?.record?.tdPct || 0,
-      maxDiscount: clientDiscount?.record?.tdPct || 0,
+      initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -1153,9 +1153,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    const clientDiscount = await getClient(soHeader?.record?.clientId)
+    const client = await getClient(soHeader?.record?.clientId)
 
-    fillForm(soHeader, soItems, clientDiscount)
+    fillForm(soHeader, soItems, client)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
@@ -1517,6 +1517,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                   formik.setFieldValue('isVattable', newValue?.isSubjectToVAT || false)
                   formik.setFieldValue('maxDiscount', newValue?.maxDiscount)
                   formik.setFieldValue('tdPct', newValue?.tdPct)
+                  formik.setFieldValue('initialTdPct', newValue?.tdPct)
                   formik.setFieldValue('taxId', newValue?.taxId)
                   setAddress({})
                   fillClientData(newValue?.recordId)
