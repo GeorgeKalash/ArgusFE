@@ -1,11 +1,12 @@
-import { Box, Grid, Autocomplete, TextField, IconButton, InputAdornment, Paper } from '@mui/material'
+import { Box, Grid, Autocomplete, TextField, IconButton, Paper } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
-import PopperComponent from '../Shared/Popper/PopperComponent'
+import PopperComponent from '../../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
+import styles from './CustomLookup.module.css'
 
 const CustomLookup = ({
   type = 'text',
@@ -52,9 +53,7 @@ const CustomLookup = ({
   const [isFocused, setIsFocused] = useState(false)
 
   const valueHighlightedOption = useRef(null)
-
   const selectFirstValue = useRef(null)
-
   const autocompleteRef = useRef(null)
 
   const [inputValue, setInputValue] = useState(firstValue || '')
@@ -82,7 +81,7 @@ const CustomLookup = ({
   return _hidden ? (
     <></>
   ) : (
-    <Grid container spacing={0} sx={{ width: '100%' }}>
+    <Grid container spacing={0} className={styles.lookupContainer}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           ref={autocompleteRef}
@@ -124,7 +123,7 @@ const CustomLookup = ({
           PaperComponent={({ children }) =>
             props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
           }
-          renderOption={(props, option) => {
+          renderOption={(propsOption, option) => {
             if (columnsInDropDown?.length > 0) {
               const columnsWithGrid = columnsInDropDown.map(col => ({
                 ...col,
@@ -135,21 +134,16 @@ const CustomLookup = ({
 
               return (
                 <Box>
-                  {props.id.endsWith('-0') && (
-                    <li className={props.className}>
+                  {propsOption.id.endsWith('-0') && (
+                    <li className={propsOption.className}>
                       {columnsWithGrid.map((header, i) => {
                         const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                         return (
                           <Box
                             key={i}
-                            sx={{
-                              fontWeight: 'bold',
-                              width: widthPercent,
-                              fontSize: '0.7rem',
-                              height: '15px',
-                              display: 'flex'
-                            }}
+                            className={styles.dropdownHeaderCell}
+                            style={{ width: widthPercent }}
                           >
                             {header.value.toUpperCase()}
                           </Box>
@@ -157,7 +151,7 @@ const CustomLookup = ({
                       })}
                     </li>
                   )}
-                  <li {...props}>
+                  <li {...propsOption}>
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
@@ -169,12 +163,8 @@ const CustomLookup = ({
                       return (
                         <Box
                           key={i}
-                          sx={{
-                            width: widthPercent,
-                            fontSize: '0.88rem',
-                            height: '20px',
-                            display: 'flex'
-                          }}
+                          className={styles.dropdownCell}
+                          style={{ width: widthPercent }}
                         >
                           {displayValue}
                         </Box>
@@ -186,22 +176,24 @@ const CustomLookup = ({
             } else {
               return (
                 <Box>
-                  {props.id.endsWith('-0') && (
-                    <li className={props.className}>
+                  {propsOption.id.endsWith('-0') && (
+                    <li className={propsOption.className}>
                       {secondDisplayField && (
-                        <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', fontWeight: 'bold' }}>
+                        <Box className={styles.dropdownHeaderCellMain}>
                           {valueField.toUpperCase()}
                         </Box>
                       )}
                       {secondDisplayField && (
-                        <Box sx={{ flex: 1, fontWeight: 'bold' }}>{displayField.toUpperCase()}</Box>
+                        <Box className={styles.dropdownHeaderCellSecondary}>
+                          {displayField.toUpperCase()}
+                        </Box>
                       )}
                     </li>
                   )}
-                  <li {...props}>
-                    <Box sx={{ flex: 1 }}>{option[valueField]}</Box>
+                  <li {...propsOption}>
+                    <Box className={styles.dropdownCellMain}>{option[valueField]}</Box>
                     {secondDisplayField && (
-                      <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex' }}>
+                      <Box className={styles.dropdownCellSecondary}>
                         {option[displayField]}
                       </Box>
                     )}
@@ -213,6 +205,14 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
+              className={[
+                styles.firstField,
+                secondDisplayField ? styles.firstFieldWithSecond : '',
+                !hasBorder ? styles.noBorder : '',
+                isFocused || firstValue ? styles.labelFocused : styles.labelUnfocused
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onChange={e => {
                 setInputValue(e.target.value)
 
@@ -253,7 +253,7 @@ const CustomLookup = ({
               }}
               inputProps={{
                 ...params.inputProps,
-                tabIndex: _readOnly ? -1 : 0 // Prevent focus if readOnly
+                tabIndex: _readOnly ? -1 : 0
               }}
               autoFocus={focus}
               error={error}
@@ -262,23 +262,20 @@ const CustomLookup = ({
                 ...params.InputProps,
                 endAdornment: !_readOnly && (
                   <Box
-                    sx={{
-                      position: 'absolute',
-                      top: hasBorder ? '42%' : '52%',
-                      transform: 'translateY(-50%)',
-                      insetInlineEnd: 4,
-                      display: 'flex'
-                    }}
+                    className={`${styles.iconAdornment} ${!hasBorder ? styles.iconAdornmentNoBorder : ''}`}
                   >
                     {!isLoading ? (
-                      <IconButton sx={{ m: 0, p: 0 }} tabIndex={-1} style={{ pointerEvents: 'none' }}>
-                        <SearchIcon style={{ cursor: 'pointer', border: '0px', fontSize: 17 }} />
+                      <IconButton
+                        className={styles.searchIconButton}
+                        tabIndex={-1}
+                      >
+                        <SearchIcon className={styles.searchIcon} />
                       </IconButton>
                     ) : (
-                      <CircularProgress size={15} sx={{ my: 5 }} />
+                      <CircularProgress size={15} className={styles.loadingSpinner} />
                     )}
                     <IconButton
-                      sx={{ my: 0, mx: 0.5, p: 0 }}
+                      className={styles.clearIconButton}
                       tabIndex={-1}
                       edge='end'
                       onClick={() => {
@@ -289,36 +286,10 @@ const CustomLookup = ({
                       }}
                       aria-label='clear input'
                     >
-                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                      <ClearIcon className={styles.clearIcon} />
                     </IconButton>
                   </Box>
                 )
-              }}
-              sx={{
-                ...(secondDisplayField && {
-                  '& .MuiAutocomplete-inputRoot': {
-                    borderTopRightRadius: 0,
-                    borderBottomRightRadius: 0
-                  }
-                }),
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    border: !hasBorder && 'none',
-                    borderColor: '#959d9e',
-                    borderTopLeftRadius: '6px',
-                    borderBottomLeftRadius: '6px'
-                  },
-                  height: '33px !important'
-                },
-                '& .MuiInputLabel-root': {
-                  fontSize: '0.90rem',
-                  top: isFocused || firstValue ? '0px' : '-3px'
-                },
-                '& .MuiInputBase-input': {
-                  fontSize: '0.90rem',
-                  color: 'black'
-                },
-                width: '100%'
               }}
             />
           )}
@@ -342,38 +313,19 @@ const CustomLookup = ({
             }}
             InputProps={{
               inputProps: {
-                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0 // Prevent focus on the input field
+                tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0
               },
               readOnly: secondField ? !secondField?.editable : _readOnly
             }}
             error={error}
             helperText={helperText}
-            sx={{
-              flex: 1,
-              display: 'flex',
-              '& .MuiInputBase-root': {
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0
-              },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  border: !hasBorder && 'none',
-                  borderColor: '#959d9e',
-                  borderTopRightRadius: '6px',
-                  borderBottomRightRadius: '6px'
-                },
-                height: '33px !important'
-              },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.90rem',
-                top: firstValue ? '0px' : '-3px'
-              },
-              '& .MuiInputBase-input': {
-                fontSize: '0.90rem',
-                color: 'black'
-              },
-              width: '100%'
-            }}
+            className={[
+              styles.secondField,
+              !hasBorder ? styles.noBorder : '',
+              firstValue ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' ')}
           />
         </Grid>
       )}

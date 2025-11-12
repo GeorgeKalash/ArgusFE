@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
+import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
   const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
@@ -41,30 +42,14 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   return ReactDOM.createPortal(
     <Box
       ref={popperRef}
-      sx={{
-        zIndex: '3 !important',
-        visibility: open ? 'visible' : 'hidden',
-        '& .MuiMultiSectionDigitalClock-root': {
-          width: '200px'
-        },
-        '& .css-n4sunj-MuiAutocomplete-listbox': {
-          maxHeight: '43vh'
-        },
-        '& .MuiMenuItem-root': {
-          paddingRight: '10px'
-        },
-        '& .MuiDateCalendar-root': {
-          height: 310
-        },
-        ...(isDateTimePicker && {
-          '& .MuiDateCalendar-root': {
-            height: 300
-          },
-          '& .MuiMultiSectionDigitalClock-root': {
-            height: '300px'
-          }
-        })
-      }}
+      className={[
+        styles.popperRoot,
+        open ? styles.popperOpen : styles.popperClosed,
+        isDateTimePicker ? styles.dateTimePopper : '',
+        props.className || ''
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         position: 'absolute',
         top: rect?.bottom / zoom,
@@ -72,7 +57,6 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none',
         ...props?.style
       }}
-      className={props.className}
     >
       {typeof children === 'function'
         ? children({
