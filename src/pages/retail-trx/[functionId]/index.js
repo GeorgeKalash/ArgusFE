@@ -15,14 +15,17 @@ import RetailTransactionsForm from './forms/RetailTransactionsForm'
 import { useResourceQuery } from 'src/hooks/resource'
 import Table from 'src/components/Shared/Table'
 import toast from 'react-hot-toast'
+import NormalDialog from 'src/components/Shared/NormalDialog'
 import { getStorageData } from 'src/storage/storage'
 import { Router } from 'src/lib/useRouter'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { functionId } = Router()
 
@@ -153,7 +156,7 @@ const RetailTrx = () => {
   })
 
   const edit = obj => {
-    openForm(obj?.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
   const getCorrectLabel = functionId => {
@@ -184,7 +187,7 @@ const RetailTrx = () => {
     }
   }
 
-  async function openForm(recordId) {
+  function openStack(recordId) {
     stack({
       Component: RetailTransactionsForm,
       props: {
@@ -193,12 +196,42 @@ const RetailTrx = () => {
         access,
         posUser: posObj?.current,
         functionId,
+        lockRecord,
         getGLResource
       },
       width: 1200,
       height: 725,
       title: getCorrectLabel(parseInt(functionId))
     })
+  }
+
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId: recordId,
+        reference: reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId,
+            reference
+          })
+          openStack(recordId)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId)
+    }
   }
 
   const add = async () => {

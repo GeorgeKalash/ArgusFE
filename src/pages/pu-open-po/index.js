@@ -84,19 +84,12 @@ const OpenPurchaseOrder = () => {
           isChecked: false,
           receiveNow: 0
         }))
-
         formik.setFieldValue('items', items)
-
         stack({
           Component: ShipmentsForm,
           props: {
-            labels: _labels,
-            recordId: res.recordId,
-            maxAccess
-          },
-          width: 1300,
-          height: 700,
-          title: _labels.shipment
+            recordId: res.recordId
+          }
         })
 
         toast.success(platformLabels.Generated)

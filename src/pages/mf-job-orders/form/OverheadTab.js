@@ -66,7 +66,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
             if (isOverheadFilled) {
               const numericValue = Number(value)
 
-              if (!value || isNaN(numericValue) || numericValue < 1) {
+              if (!value || isNaN(numericValue)) {
                 return false
               }
             }
@@ -97,7 +97,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
   })
 
   const totAmount = formik?.values?.items?.reduce((amountSum, row) => {
-    const amountValue = parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0
+    const amountValue = Math.round(parseFloat(row?.amount?.toString().replace(/,/g, '')) || 0)
 
     return amountSum + amountValue
   }, 0)

@@ -893,7 +893,7 @@ export const apiMappings = {
   },
   [ResourceIds.SalaryChangeReasonFilter]: {
     type: COMBOBOX,
-    endpoint: EmployeeRepository.SalaryChangeReasonFilters.qry,
+    endpoint: EmployeeRepository.SalaryChangeReason.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]
@@ -1212,6 +1212,16 @@ export const apiMappings = {
     displayField: ['reference', 'name'],
     columnsInDropDown: [
       { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.FiscalPeriod]: {
+    type: COMBOBOX,
+    endpoint: SystemRepository.FiscalPeriod.qry,
+    valueField: 'periodId',
+    displayField: ['periodId', 'name'],
+    columnsInDropDown: [
+      { key: 'periodId', value: 'PeriodId' },
       { key: 'name', value: 'Name' }
     ]
   }

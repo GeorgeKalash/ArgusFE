@@ -139,11 +139,20 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
   })
 
   const getPayload = obj => {
+    const updatedRateRow = getRate({
+      amount: totalAmount,
+      exRate: obj?.exRate,
+      baseAmount: 0,
+      rateCalcMethod: obj?.rateCalcMethod,
+      dirtyField: DIRTYFIELD_RATE
+    })
+
     const copy = { ...obj }
     delete copy.expenses
     copy.date = formatDateToApi(copy.date)
     copy.amount = totalAmount
-    copy.baseAmount = totalAmount
+    copy.baseAmount = updatedRateRow?.baseAmount || 0
+
     const costCentersValues = []
 
     const updatedRows = formik.values.expenses.map((expensesDetails, index) => {
@@ -590,8 +599,8 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
       })
 
       formik.setFieldValue('baseAmount', parseFloat(updatedRateRow?.baseAmount).toFixed(2) || 0)
-      formik.setFieldValue('exRate', res.record?.exRate)
-      formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
+      if (res.record?.exRate) formik.setFieldValue('exRate', res.record?.exRate)
+      if (res.record?.rateCalcMethod) formik.setFieldValue('rateCalcMethod', res.record?.rateCalcMethod)
     }
   }
   useEffect(() => {

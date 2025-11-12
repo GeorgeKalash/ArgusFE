@@ -102,7 +102,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
         jobId: yup.number().required(),
         threeDDId: yup.number().required(),
         productionLineId: yup.number().required(),
-        date: yup.date().required(),
+        date: yup.date().required()
       }),
       rows: yup.array().of(schema)
     }),
@@ -454,7 +454,7 @@ export default function SamplesForm({ labels, access, recordId, window }) {
                   <CustomNumberField
                     name='header.weight'
                     maxAccess={maxAccess}
-                    label={labels.weight}
+                    label={labels.sampleWgt}
                     value={formik.values.header.weight}
                     maxLength={10}
                     decimalScale={2}

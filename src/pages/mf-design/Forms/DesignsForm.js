@@ -132,7 +132,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      isCleared={false}
       previewReport={editMode}
     >
       <VertLayout>
@@ -232,31 +231,6 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceLookup
-                    endpointId={ManufacturingRepository.Routing.snapshot2}
-                    valueField='reference'
-                    displayField='name'
-                    name='routingId'
-                    label={labels.routing}
-                    form={formik}
-                    minChars={2}
-                    firstValue={formik.values.routingRef}
-                    secondValue={formik.values.routingName}
-                    errorCheck={'routingId'}
-                    maxAccess={maxAccess}
-                    displayFieldWidth={2}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('routingId', newValue?.recordId || null)
-                      formik.setFieldValue('routingRef', newValue?.reference || null)
-                      formik.setFieldValue('routingName', newValue?.name || null)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
                     parameters='_startAt=0&_pageSize=1000'
@@ -275,6 +249,36 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       formik.setFieldValue('lineId', newValue?.recordId || null)
                     }}
                     error={formik.touched.lineId && formik.errors.lineId}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.Routing.snapshot2}
+                    parameters={{
+                      _lineId: formik.values.lineId || 0
+                    }}
+                    valueField='reference'
+                    displayField='name'
+                    name='routingId'
+                    label={labels.routing}
+                    readOnly={!formik.values.lineId}
+                    form={formik}
+                    minChars={2}
+                    firstValue={formik.values.routingRef}
+                    secondValue={formik.values.routingName}
+                    errorCheck={'routingId'}
+                    maxAccess={maxAccess}
+                    displayFieldWidth={2}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={async (event, newValue) => {
+                      formik.setFieldValue('routingId', newValue?.recordId || null)
+                      formik.setFieldValue('routingRef', newValue?.reference || null)
+                      formik.setFieldValue('routingName', newValue?.name || null)
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -381,7 +385,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     ref={imageUploadRef}
                     resourceId={ResourceIds.Design}
                     seqNo={0}
-                    recordId={recordId}
+                    recordId={formik?.values?.recordId}
                     width={300}
                     height={'auto'}
                   />

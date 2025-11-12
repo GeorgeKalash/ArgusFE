@@ -50,6 +50,7 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 export default function RetailTransactionsForm({
   labels,
@@ -57,10 +58,12 @@ export default function RetailTransactionsForm({
   access,
   recordId,
   functionId,
+  lockRecord,
   getGLResource,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
@@ -383,7 +386,7 @@ export default function RetailTransactionsForm({
     return currentAmount
   }
 
-  function calculateBankFees(ccId) {
+  function calculateBankFees(ccId, amount = 0) {
     if (!ccId || !amount) return
     const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
     if (arrayCC.length === 0) return
@@ -425,11 +428,35 @@ export default function RetailTransactionsForm({
     const res = await postRequest({
       extension: PointofSaleRepository.RetailInvoice.unpost,
       record: JSON.stringify(formik.values.header)
-    })
+    }).then(res => {
+      toast.success(platformLabels.Posted)
+      lockRecord({
+        recordId: res.recordId,
+        reference: formik.values.header.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId,
+            reference: formik.values.header.reference
+          })
+          refetchForm(res.recordId)
+        },
+        isAlreadyLocked: name => {
+          window.close()
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              title: platformLabels.Dialog
+            },
+            title: platformLabels.Dialog
+          })
+        }
+      })
 
-    toast.success(platformLabels.Posted)
-    invalidate()
-    refetchForm(res?.recordId)
+      invalidate()
+    })
   }
 
   const actions = [
@@ -455,7 +482,7 @@ export default function RetailTransactionsForm({
       key: 'GL',
       condition: true,
       onClick: 'onClickGL',
-      valuesPath: formik.values.header,
+      valuesPath: { ...formik.values.header, notes: formik.values.header.deliveryNotes },
       datasetId: getGLResource(functionId),
       disabled: !editMode
     },
@@ -530,6 +557,20 @@ export default function RetailTransactionsForm({
       ...(addressObj?.record || {}),
       countryId: addressObj?.countryId || countryId?.value
     })
+
+    !formik.values.recordId &&
+      lockRecord({
+        recordId: retailTrxHeader.recordId,
+        reference: retailTrxHeader.reference,
+        resourceId: getResourceId[parseInt(functionId)],
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: getResourceId[parseInt(functionId)],
+            recordId: retailTrxHeader.recordId,
+            reference: retailTrxHeader.reference
+          })
+        }
+      })
   }
 
   async function getRetailTransactionPack(transactionId) {
@@ -899,8 +940,7 @@ export default function RetailTransactionsForm({
         mapping: [
           { from: 'cashAccountId', to: 'cashAccountId' },
           { from: 'cashAccountRef', to: 'cashAccountRef' },
-          { from: 'type', to: 'type' },
-          { from: 'ccId', to: 'ccId' }
+          { from: 'type', to: 'type' }
         ],
         columnsInDropDown: [
           { key: 'cashAccountRef', value: 'Reference' },
@@ -911,8 +951,11 @@ export default function RetailTransactionsForm({
       async onChange({ row: { update, newRow } }) {
         if (cashAmount == 0) update({ amount: (Number(amount) || 0).toFixed(2) })
         getFilteredCC(newRow?.cashAccountId)
+
         if (newRow?.type == 1) {
-          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
+          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
+        } else {
+          update({ ccId: null, ccRef: '', bankFees: null })
         }
       }
     },
@@ -937,7 +980,7 @@ export default function RetailTransactionsForm({
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.ccId) {
-          update({ bankFees: calculateBankFees(newRow?.ccId)?.toFixed(2) || 0 })
+          update({ bankFees: calculateBankFees(newRow?.ccId, newRow?.amount)?.toFixed(2) || 0 })
         }
       },
       propsReducer({ row, props }) {

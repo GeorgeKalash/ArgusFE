@@ -56,7 +56,7 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
       accountRef: yup
         .string()
         .required()
-        .matches(/^(?=.*\d)[\d_-]+$/)
+        .matches(/^[A-Za-z0-9-]+$/)
     }),
     onSubmit: async values => {
       const response = await postRequest({
@@ -103,7 +103,6 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
             </Grid>
             <Grid item xs={12}>
               <SegmentedInput
-                readOnly={editMode}
                 name='accountRef'
                 setFieldValue={formik.setFieldValue}
                 value={formik.values.accountRef}

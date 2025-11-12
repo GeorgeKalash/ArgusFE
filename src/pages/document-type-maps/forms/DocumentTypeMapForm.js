@@ -99,6 +99,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 label={labels.fromFunction}
                 valueField='key'
                 displayField='value'
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(event, newValue) => {
@@ -121,11 +122,12 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 label={labels.fromDocument}
                 valueField='recordId'
                 displayField='name'
+                readOnly={editMode}
                 values={formik.values}
                 parameters={
                   formik.values.fromFunctionId &&
                   (formik.values.fromFunctionId
-                    ? `_dgId=${formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${1000}`
+                    ? `_dgId=${editMode ? '0' : formik.values.fromFunctionId}&_startAt=${0}&_pageSize=${1000}`
                     : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
                 maxAccess={maxAccess}
@@ -140,6 +142,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 datasetId={DataSets.SYSTEM_FUNCTION}
                 name='toFunctionId'
                 label={labels.toFunction}
+                readOnly={editMode}
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
@@ -163,7 +166,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 name='dtId'
                 label={labels.toDocument}
                 valueField='recordId'
-                displayField='reference'
+                displayField='name'
                 maxAccess={maxAccess}
                 values={formik.values}
                 parameters={

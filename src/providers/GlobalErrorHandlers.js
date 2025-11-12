@@ -6,6 +6,7 @@ export default function GlobalErrorHandlers() {
 
   useEffect(() => {
     const onError = e => setErr(e?.message || 'Unexpected error')
+
     const onUnhandled = e => setErr((e?.reason?.message ?? String(e?.reason)) || 'Request failed')
 
     window.addEventListener('error', onError)
