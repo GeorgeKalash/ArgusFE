@@ -376,7 +376,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 displayField='name'
                 values={formik.values}
                 onChange={async (event, newValue) => {
-                  formi.setFieldValue('dtId', newValue?.recordId)
+                  formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}

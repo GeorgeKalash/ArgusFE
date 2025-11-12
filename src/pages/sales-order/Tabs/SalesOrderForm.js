@@ -1337,7 +1337,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
                       changeDT(newValue)
-                      formi.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
