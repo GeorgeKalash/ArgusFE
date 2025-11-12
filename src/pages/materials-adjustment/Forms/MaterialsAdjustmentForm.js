@@ -278,7 +278,6 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   }
 
   function calcTotalCost(rec) {
-    console.log(rec)
     if (rec.priceType === 1) return (Math.round(rec.qty * rec.unitCost * 100) / 100).toFixed(2)
     else if (rec.priceType === 2) return (Math.round(rec.qty * rec.unitCost * rec.volume * 100) / 100).toFixed(2)
     else if (rec.priceType === 3) return (Math.round(rec.qty * rec.unitCost * rec.weight * 100) / 100).toFixed(2)
@@ -303,6 +302,15 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     return res?.record
   }
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
@@ -320,6 +328,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const itemInfo = await getItem(itemIdValue)
       await getFilteredMU(itemIdValue, newRow?.msId)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+      const measurementSchedule = await getMeasurementObject(newRow?.msId)
       update({
         sku: newRow.sku,
         itemId: itemIdValue,
@@ -329,6 +338,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         totalCost,
         details: true,
         msId: itemInfo?.msId,
+        decimals: measurementSchedule?.decimals,
         muRef: filteredMeasurements?.[0]?.reference,
         muId: filteredMeasurements?.[0]?.recordId,
         metalId,
@@ -475,7 +485,11 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       name: 'qty',
       props: {
         maxLength: 11,
-        decimalScale: 3
+        onCondition: row => {
+          return {
+            decimalScale: row.decimals
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow) {
