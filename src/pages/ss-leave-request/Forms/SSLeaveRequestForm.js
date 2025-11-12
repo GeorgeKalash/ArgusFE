@@ -65,9 +65,9 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
     onSubmit: async values => {
       const payload = {
         ...values,
-        date: values.date ? formatDateToApi(values.date) : null,
-        startDate: values.startDate ? formatDateToApi(values.startDate) : null,
-        endDate: values.endDate ? formatDateToApi(values.endDate) : null
+        date: formatDateToApi(values.date),
+        startDate: formatDateToApi(values.startDate),
+        endDate: formatDateToApi(values.endDate)
       }
 
       const res = await postRequest({
@@ -120,17 +120,12 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
 
     formik.setValues({
       ...res.record,
-      date: res.record.date ? formatDateFromApi(res.record.date) : null,
-      startDate: res.record.startDate ? formatDateFromApi(res.record.startDate) : null,
-      endDate: res.record.endDate ? formatDateFromApi(res.record.endDate) : null
+      date: formatDateFromApi(res.record.date),
+      startDate: formatDateFromApi(res.record.startDate),
+      endDate: formatDateFromApi(res.record.endDate)
     })
 
-    getLeaveBalance(
-      recordId,
-      res?.record?.employeeId,
-      res?.record?.ltId,
-      formatDateFromApi(res?.record?.date)
-    )
+    getLeaveBalance(recordId, res?.record?.employeeId, res?.record?.ltId, formatDateFromApi(res?.record?.date))
   }
 
   useEffect(() => {
@@ -146,11 +141,9 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
         parameters: `_recordId=${employeeId}`
       })
 
-      if (res?.record) {
-        formik.setFieldValue('employeeId', res.record.recordId)
-        formik.setFieldValue('employeeRef', res.record.reference)
-        formik.setFieldValue('employeeName', res.record.fullName)
-      }
+      formik.setFieldValue('employeeId', res?.record?.recordId)
+      formik.setFieldValue('employeeRef', res?.record?.reference)
+      formik.setFieldValue('employeeName', res?.record?.fullName)
     }
 
     fetchEmployeeDetails()
@@ -186,9 +179,11 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
                 label={labels.date}
                 value={formik.values?.date}
                 onChange={async (e, newValue) => {
-                  formik.setFieldValue('date', newValue)
                   await getLeaveBalance(recordId, formik?.values?.employeeId, formik?.values?.ltId, newValue)
+
+                  formik.setFieldValue('date', newValue)
                 }}
+                required
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
@@ -234,6 +229,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
                 label={labels.startDate}
                 value={formik.values?.startDate}
                 max={formik.values.endDate}
+                required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
@@ -246,6 +242,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
                 label={labels.endDate}
                 value={formik.values?.endDate}
                 min={formik.values.startDate}
+                required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}

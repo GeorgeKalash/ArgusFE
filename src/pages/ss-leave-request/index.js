@@ -10,26 +10,33 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SelfServiceRepository } from 'src/repositories/SelfServiceRepository'
-import { useAuth } from 'src/hooks/useAuth'
-import { SSLeaveRequestForm } from './Forms/SSLeaveRequestForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import SSLeaveRequestForm from './Forms/SSLeaveRequestForm'
+import { useError } from 'src/error'
+import { AuthContext } from 'src/providers/AuthContext'
 
 const SSLeaveRequest = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { user } = useAuth()
+  const { stack: stackError } = useError()
+  const { user } = useContext(AuthContext)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
-    if (!user?.employeeId) return { list: [], totalCount: 0, _startAt }
+    if (!user?.employeeId) {
+      stackError({
+        message: platformLabels.notConnectedToEmployee
+      })
+
+      return { list: [], totalCount: 0, _startAt }
+    }
 
     const response = await getRequest({
       extension: SelfServiceRepository.SSLeaveRequest.page,
-      parameters: `_size=30&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_employeeId=${user?.employeeId}&_sortBy=recordId`
+      parameters: `_size=50&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_employeeId=${user?.employeeId}&_sortBy=recordId`
     })
-
 
     return { ...response, _startAt }
   }
