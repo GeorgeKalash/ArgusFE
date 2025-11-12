@@ -2,9 +2,10 @@ import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@m
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useRef, useState } from 'react'
-import PopperComponent from '../Shared/Popper/PopperComponent'
+import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
+import styles from './CustomComboBox.module.css'
 
 const CustomComboBox = ({
   type = 'text',
@@ -49,16 +50,12 @@ const CustomComboBox = ({
   )
 
   const [hover, setHover] = useState(false)
-
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
 
   const autocompleteRef = useRef(null)
-
   const valueHighlightedOption = useRef(null)
-
   const selectFirstValue = useRef(null)
-
   const filterOptions = useRef(null)
 
   useEffect(() => {
@@ -86,7 +83,9 @@ const CustomComboBox = ({
       options={store}
       key={value}
       PopperComponent={PopperComponent}
-      PaperComponent={({ children }) => <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>}
+      PaperComponent={({ children }) => (
+        <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
+      )}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
@@ -157,7 +156,7 @@ const CustomComboBox = ({
         valueHighlightedOption.current = newValue
       }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
-      renderOption={(props, option) => {
+      renderOption={(propsOption, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           const columnsWithGrid = columnsInDropDown.map(col => ({
             ...col,
@@ -168,21 +167,16 @@ const CustomComboBox = ({
 
           return (
             <Box>
-              {props.id.endsWith('-0') && (
-                <li className={props.className} style={{ borderBottom: '1px solid #ccc' }}>
+              {propsOption.id.endsWith('-0') && (
+                <li className={`${propsOption.className} ${styles.comboHeaderRow}`}>
                   {columnsWithGrid.map((header, i) => {
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
                       <Box
                         key={i}
-                        sx={{
-                          fontWeight: 'bold',
-                          width: widthPercent,
-                          fontSize: '0.7rem',
-                          height: '15px',
-                          display: 'flex'
-                        }}
+                        className={styles.comboHeaderCell}
+                        style={{ width: widthPercent }}
                       >
                         {header.value.toUpperCase()}
                       </Box>
@@ -190,12 +184,15 @@ const CustomComboBox = ({
                   })}
                 </li>
               )}
-              <li {...props} style={{ display: 'flex', alignItems: 'center' }}>
+              <li
+                {...propsOption}
+                className={`${propsOption.className} ${styles.comboOptionRow}`}
+              >
                 {option.icon && (
                   <img
                     src={option.icon}
                     alt={option[displayField]}
-                    style={{ width: 20, height: 20, marginRight: 8, objectFit: 'contain' }}
+                    className={styles.comboOptionIcon}
                   />
                 )}
                 {columnsWithGrid.map((header, i) => {
@@ -208,13 +205,8 @@ const CustomComboBox = ({
                   return (
                     <Box
                       key={i}
-                      sx={{
-                        width: widthPercent,
-                        fontSize: '0.88rem',
-                        height: '20px',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
+                      className={styles.comboOptionCell}
+                      style={{ width: widthPercent }}
                     >
                       {displayValue}
                     </Box>
@@ -226,15 +218,18 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li {...props} style={{ display: 'flex', alignItems: 'center' }}>
+              <li
+                {...propsOption}
+                className={`${propsOption.className} ${styles.comboOptionRow}`}
+              >
                 {option.icon && (
                   <img
                     src={option.icon}
                     alt={option[displayField]}
-                    style={{ width: 20, height: 20, marginRight: 8, objectFit: 'contain' }}
+                    className={styles.comboOptionIcon}
                   />
                 )}
-                <Box sx={{ flex: 1, fontSize: '0.88rem', height: '20px', display: 'flex', alignItems: 'center' }}>
+                <Box className={styles.comboOptionSingleText}>
                   {option[displayField]}
                 </Box>
               </li>
@@ -245,6 +240,13 @@ const CustomComboBox = ({
       renderInput={params => (
         <TextField
           {...params}
+          className={[
+            styles.customComboTextField,
+            !hasBorder ? styles.noBorder : '',
+            isFocused || value ? styles.labelFocused : styles.labelUnfocused
+          ]
+            .filter(Boolean)
+            .join(' ')}
           inputProps={{
             ...params.inputProps,
             tabIndex: _readOnly ? -1 : 0,
@@ -271,7 +273,7 @@ const CustomComboBox = ({
               <img
                 src={value.icon}
                 alt={value[displayField]}
-                style={{ width: 20, height: 20, marginRight: 4, marginLeft: 4, objectFit: 'contain' }}
+                className={styles.comboStartIcon}
               />
             ) : (
               props?.startAdornment || params.InputProps.startAdornment
@@ -288,10 +290,7 @@ const CustomComboBox = ({
                         onClick={fetchData}
                         aria-label='refresh data'
                         tabIndex={-1}
-                        sx={{
-                          p: '0px !important',
-                          marginRight: '-10px'
-                        }}
+                        className={styles.refreshIconButton}
                       >
                         <RefreshIcon size={17} />
                       </IconButton>
@@ -300,29 +299,6 @@ const CustomComboBox = ({
                 {params.InputProps.endAdornment}
               </React.Fragment>
             )
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                border: !hasBorder && 'none',
-                borderColor: '#959d9e',
-                borderRadius: '6px'
-              },
-              height: `33px !important`
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: '0.90rem',
-              top: isFocused || value ? '0px' : '-3px'
-            },
-            '& .MuiInputBase-input': {
-              fontSize: '0.90rem',
-              color: 'black'
-            },
-            '& .MuiAutocomplete-clearIndicator': {
-              pl: '0px !important',
-              marginRight: '-10px',
-              visibility: 'visible'
-            }
           }}
         />
       )}
