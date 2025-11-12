@@ -20,14 +20,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import FormShell from 'src/components/Shared/FormShell'
-import { useAuth } from 'src/hooks/useAuth'
 
-export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
+export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employeeId }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
-
-  const { user } = useAuth()
   const { platformLabels } = useContext(ControlContext)
-  const employeeId = user?.employeeId
 
   const editMode = !!recordId
 

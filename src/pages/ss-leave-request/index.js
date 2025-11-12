@@ -89,7 +89,8 @@ const SSLeaveRequest = () => {
       props: {
         recordId,
         labels,
-        maxAccess: access
+        maxAccess: access,
+        employeeId: user?.employeeId,
       },
       width: 800,
       height: 550,
