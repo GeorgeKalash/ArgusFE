@@ -3,7 +3,7 @@
   width: 100%;
   height: auto;
   max-height: none;
-  --ag-font-size: 12px;
+  --ag-font-size: 14px;
 }
 
 .agGridFlex {
@@ -31,13 +31,12 @@
   flex: 1 1 auto;
   min-width: 0;
   background-color: #fff;
-  /* border-top: 1px solid #ccc; */
   font-size: 0.9rem;
   padding: 2px 6px;
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 30px; 
+  height: 36px;
   line-height: 1;
 }
 
@@ -134,7 +133,7 @@
 }
 
 .agGridContainer :global(.ag-row) {
-  height: 32px !important;
+  height: 36px !important;
 }
 
 .agGridContainer :global(.ag-header-cell-text),
@@ -165,7 +164,7 @@
 
 @media (min-width: 1025px) and (max-width: 1600px) {
   .agGridContainer {
-    --ag-font-size: 11px;
+    --ag-font-size: 13px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -175,11 +174,11 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 26px !important;
+    height: 30px !important;
   }
 
   .paginationBar {
-    height: 24px;
+    height: 35px;
     padding: 2px 4px;
     font-size: 0.85rem;
     gap: 3px;
@@ -222,7 +221,7 @@
 
 @media (max-width: 1366px) {
   .agGridContainer {
-    --ag-font-size: 10px;
+    --ag-font-size: 12px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -232,7 +231,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 24px !important;
+    height: 28px !important;
   }
 
   .paginationWrapper {
@@ -240,7 +239,7 @@
   }
 
   .paginationBar {
-    height: 22px;
+    height: 32px;
     padding: 1px 4px;
     font-size: 0.8rem;
     gap: 3px;
@@ -284,7 +283,7 @@
 
 @media (max-width: 1024px) {
   .agGridContainer {
-    --ag-font-size: 9.5px;
+    --ag-font-size: 11.5px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -294,7 +293,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 22px !important;
+    height: 26px !important;
   }
 
   .paginationWrapper {
@@ -302,7 +301,7 @@
   }
 
   .paginationBar {
-    height: 20px;
+    height: 30px;
     padding: 1px 3px;
     font-size: 0.78rem;
     gap: 3px;
@@ -347,7 +346,7 @@
 
 @media (max-width: 768px) {
   .agGridContainer {
-    --ag-font-size: 9px;
+    --ag-font-size: 11px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -357,7 +356,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 20px !important;
+    height: 24px !important;
   }
 
   .paginationWrapper {
@@ -365,7 +364,7 @@
   }
 
   .paginationBar {
-    height: 18px;
+    height: 28px;
     padding: 1px 2px;
     font-size: 0.72rem;
     gap: 2px;
@@ -408,7 +407,7 @@
 
 @media (max-width: 600px) {
   .agGridContainer {
-    --ag-font-size: 8.5px;
+    --ag-font-size: 10.5px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -418,7 +417,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 19px !important;
+    height: 23px !important;
   }
 
   .paginationWrapper {
@@ -426,7 +425,7 @@
   }
 
   .paginationBar {
-    height: 16px;
+    height: 27px;
     padding: 0 2px;
     font-size: 0.68rem;
     gap: 2px;
@@ -469,7 +468,7 @@
 
 @media (max-width: 480px) {
   .agGridContainer {
-    --ag-font-size: 8px;
+    --ag-font-size: 10px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -479,7 +478,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 18px !important;
+    height: 22px !important;
   }
 
   .paginationWrapper {
@@ -487,7 +486,7 @@
   }
 
   .paginationBar {
-    height: 14px;
+    height: 26px;
     padding: 0 2px;
     font-size: 0.64rem;
     gap: 2px;
@@ -531,7 +530,7 @@
 
 @media (max-width: 375px) {
   .agGridContainer {
-    --ag-font-size: 7.5px;
+    --ag-font-size: 9.5px;
   }
 
   .agGridContainer :global(.ag-header),
@@ -541,7 +540,7 @@
   }
 
   .agGridContainer :global(.ag-row) {
-    height: 17px !important;
+    height: 21px !important;
   }
 
   .paginationWrapper {
@@ -549,7 +548,7 @@
   }
 
   .paginationBar {
-    height: 12px;
+    height: 25px;
     padding: 0 2px;
     font-size: 0.58rem;
     gap: 2px;

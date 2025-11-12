@@ -18,8 +18,7 @@
 .agContainer :global(.ag-header-row) {
   height: var(--ag-header-height) !important;
   min-height: var(--ag-header-height) !important;
-  background: var(--ag-header-bg);
-}
+  background: var(--ag-header-bg, #f5f5f5);}
 
 .agContainer :global(.ag-row) {
   height: var(--ag-row-height) !important;
