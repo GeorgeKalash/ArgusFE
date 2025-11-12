@@ -118,6 +118,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 value={formik.values.decimals}
                 decimalScale={0}
                 required
+                readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('decimals', e.target.value)}
                 onClear={() => formik.setFieldValue('decimals', 0)}
