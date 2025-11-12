@@ -7,8 +7,9 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
-import PopperComponent from '../Shared/Popper/PopperComponent'
+import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomDatePickerHijri.module.css'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -72,31 +73,13 @@ export default function CustomDatePickerHijri({
         maxDate={moment(new Date(2075, 11, 31))}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        shouldDisableDate={disabledDate && shouldDisableDate} // Enable this prop for date disabling
+        shouldDisableDate={disabledDate && shouldDisableDate}
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
           popper: PopperComponent
         }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: '#959d9e',
-              borderRadius: '6px'
-            },
-            height: `33px !important`
-          },
-          '& .MuiInputLabel-root': {
-            fontSize: '0.90rem',
-            top: isFocused || value ? '0px' : '-3px'
-          },
-          '& .MuiInputBase-input': {
-            fontSize: '0.90rem',
-            color: 'black'
-          }
-        }}
         slotProps={{
           textField: {
-            required: _required,
             required: _required,
             readOnly: _readOnly,
             size: size,
@@ -104,16 +87,31 @@ export default function CustomDatePickerHijri({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
+            className: [
+              styles.customHijriDateTextField,
+              isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' '),
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {Boolean(value) && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                    <IconButton
+                      tabIndex={-1}
+                      edge='start'
+                      onClick={() => onChange(name, null)}
+                      className={styles.clearIconButton}
+                    >
+                      <ClearIcon className={styles.dateIcon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon sx={{ border: '0px', fontSize: 18 }} />
+                  <IconButton
+                    tabIndex={-1}
+                    onClick={() => setOpenDatePicker(true)}
+                    className={styles.eventIconButton}
+                  >
+                    <EventIcon className={styles.dateIcon} />
                   </IconButton>
                 </InputAdornment>
               )

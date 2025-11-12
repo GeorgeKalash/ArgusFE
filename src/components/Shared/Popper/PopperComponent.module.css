@@ -1,0 +1,35 @@
+.popperRoot {
+  z-index: 3 !important;
+}
+
+.popperOpen {
+  visibility: visible;
+}
+
+.popperClosed {
+  visibility: hidden;
+}
+
+.popperRoot :global(.MuiMultiSectionDigitalClock-root) {
+  width: 200px;
+}
+
+.popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
+  max-height: 43vh;
+}
+
+.popperRoot :global(.MuiMenuItem-root) {
+  padding-right: 10px;
+}
+
+.popperRoot :global(.MuiDateCalendar-root) {
+  height: 310px;
+}
+
+.dateTimePopper :global(.MuiDateCalendar-root) {
+  height: 300px;
+}
+
+.dateTimePopper :global(.MuiMultiSectionDigitalClock-root) {
+  height: 300px;
+}
