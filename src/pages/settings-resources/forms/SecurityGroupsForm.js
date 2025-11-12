@@ -6,7 +6,6 @@ import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { useForm } from 'src/hooks/form'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
@@ -38,8 +37,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
       })
     ])
 
-    const merged = responseSG.list.map(item => {
-      const match = responseAccess.list.find(sg => sg.sgId === item.recordId)
+    const merged = responseSG?.list.map(item => {
+      const match = responseAccess?.list.find(sg => sg.sgId === item.recordId)
       if (!match)
         return {
           ...item,
@@ -65,59 +64,36 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     return { list: merged }
   }
 
-  const { formik } = useForm({
-    validateOnChange: true,
-    initialValues: {
+  async function onSubmit() {
+    const sgList = data?.list ?? []
+
+    const payload = {
       resourceId: row.resourceId,
-      data: [
-        {
-          sgId: row.sgId,
-          resourceId: row.resourceId,
-          moduleId: row.moduleId,
-          accessFlags: {
-            get: false,
-            add: false,
-            edit: false,
-            del: false,
-            close: false,
-            post: false,
-            unpost: false,
-            reopen: false
-          }
+      data: sgList.map(item => ({
+        sgId: item?.sgId ?? null,
+        resourceId: row?.resourceId,
+        moduleId: row?.moduleId,
+        accessFlags: {
+          get: item?.get || false,
+          add: item?.add || false,
+          edit: item?.edit || false,
+          del: item?.del || false,
+          close: item?.close || false,
+          post: item?.post || false,
+          unpost: item?.unpost || false,
+          reopen: item?.reopen || false
         }
-      ]
-    },
-    onSubmit: async () => {
-      const sgList = data?.list ?? []
-
-      const payload = {
-        resourceId: row.resourceId,
-        data: sgList.map(item => ({
-          sgId: item.sgId ?? null,
-          resourceId: row.resourceId,
-          moduleId: row.moduleId,
-          accessFlags: {
-            get: item.get || false,
-            add: item.add || false,
-            edit: item.edit || false,
-            del: item.del || false,
-            close: item.close || false,
-            post: item.post || false,
-            unpost: item.unpost || false,
-            reopen: item.reopen || false
-          }
-        }))
-      }
-
-      await postRequest({
-        extension: AccessControlRepository.ModuleClass.set2,
-        record: JSON.stringify(payload)
-      })
-
-      toast.success(platformLabels.Updated)
-      window.close()
+      }))
     }
-  })
+
+    await postRequest({
+      extension: AccessControlRepository.ModuleClass.set2,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Updated)
+    window.close()
+  }
 
   const columns = [
     {
@@ -189,7 +165,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   ]
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
+    <Form onSave={onSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -197,7 +173,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
               <CustomTextField
                 name='resourceId'
                 label={labels.resourceId}
-                value={formik.values.resourceId}
+                value={row.resourceId}
                 readOnly
                 maxAccess={maxAccess}
               />
@@ -207,7 +183,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
               <CustomTextField
                 name='resourceName'
                 label={labels.resourceName}
-                value={formik.values.resourceName}
+                value={row.resourceName}
                 readOnly
                 maxAccess={maxAccess}
               />
