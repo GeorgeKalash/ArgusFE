@@ -77,7 +77,7 @@ const RequestsProvider = ({ showLoading = false, children }) => {
           showError({
             message: error,
             height: error.response?.status === 404 || error.response?.status === 500 ? 400 : '',
-            fullScreen: body?.fullScreen
+            spacing: body?.spacing
           })
 
           if (throwError) reject(error)

@@ -54,7 +54,7 @@ const Window = React.memo(
     onApply,
     disabledApply,
     isLoading = true,
-    fullScreen,
+    spacing = true,
     ...props
   }) => {
     const { settings } = useSettings()
@@ -108,8 +108,8 @@ const Window = React.memo(
           sx={{
             bottom: 0,
             position: 'fixed',
-            width: fullScreen ? '100%' : containerWidth,
-            height: fullScreen ? '100%' : containerHeight,
+            width: spacing ? containerWidth : '100%',
+            height: spacing ? containerHeight : '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
             display: 'flex',
             justifyContent: 'center',
