@@ -17,9 +17,9 @@ import SerialsLots from './SerialsLots'
 import Form from 'src/components/Shared/Form'
 
 export default function ItemTab({ labels, maxAccess, store }) {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const recordId = store?.recordId
+  const { recordId, jobItems } = store || {}
   const { stack } = useWindow()
 
   const conditions = {
@@ -181,26 +181,25 @@ export default function ItemTab({ labels, maxAccess, store }) {
         }, 0)
       : 0
 
-  async function fetchGridData() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobOrdersItem.qry,
-      parameters: `_jobId=${recordId}`
-    })
-
-    if (res?.list?.length > 0) {
-      const updateItemsList = res.list.map((item, index) => ({
-        ...item,
-        id: index + 1,
-        extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
-      }))
-
-      formik.setFieldValue('items', updateItemsList)
-    }
-  }
-
   useEffect(() => {
-    if (recordId) fetchGridData()
-  }, [recordId])
+    ;(async function () {
+      formik.setValues({
+        jobId: recordId,
+        items:
+          jobItems?.length > 0
+            ? await Promise.all(
+                jobItems?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1,
+                    extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
+                  }
+                })
+              )
+            : formik.initialValues.items
+      })
+    })()
+  }, [jobItems])
 
   return (
     <Form

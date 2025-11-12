@@ -18,10 +18,11 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
   const { platformLabels } = useContext(ControlContext)
   const operationStore = useRef([])
   const [allWorkCenters, setWorkCenters] = useState([])
-  const { recordId, jobReference } = store
+  const { recordId, jobReference, jobRoutings } = store || {}
   const editMode = !!recordId
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       jobId: recordId,
       jobReference,
@@ -217,31 +218,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     }
   ]
 
-  async function fetchGridData() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobRouting.qry,
-      parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
-    })
-
-    const updateRoutingList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res?.list?.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : [{ id: 1 }]
-
-    formik.setValues({
-      jobId: recordId,
-      jobReference,
-      routings: updateRoutingList
-    })
-  }
-
   async function fillOperation(wcId) {
     operationStore.current = []
     const currentWc = allWorkCenters?.find(wc => parseInt(wc.workCenterId) === wcId)
@@ -259,11 +235,30 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
   useEffect(() => {
     ;(async function () {
       if (!refetchRouting || !recordId) return
-      await fetchGridData()
       await fetchAllWorkCenters()
       setRefetchRouting(false)
     })()
   }, [recordId, refetchRouting])
+
+  useEffect(() => {
+    ;(async function () {
+      formik.setValues({
+        jobId: recordId,
+        jobReference,
+        routings:
+          jobRoutings?.length > 0
+            ? await Promise.all(
+                jobRoutings?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1
+                  }
+                })
+              )
+            : [{ id: 1 }]
+      })
+    })()
+  }, [jobRoutings])
 
   return (
     <Form

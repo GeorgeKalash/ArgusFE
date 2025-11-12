@@ -1,28 +1,12 @@
-import { useContext } from 'react'
-import { useResourceQuery } from 'src/hooks/resource'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function MaterialsTab({ store, maxAccess, labels }) {
-  const { getRequest } = useContext(RequestsContext)
-  const recordId = store?.recordId
-
-  const {
-    query: { data }
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    enabled: Boolean(recordId),
-    endpointId: ManufacturingRepository.JobMaterial.qry,
-    params: { disabledReqParams: true, maxAccess },
-    datasetId: ResourceIds.MFJobOrders
-  })
+  const jobMaterials = store?.jobMaterials || []
 
   const columns = [
     {
@@ -72,28 +56,12 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
     }
   ]
 
-  const totQty = data?.list?.reduce((qtySum, row) => {
+  const totQty = jobMaterials?.reduce((qtySum, row) => {
     const qtyValue = parseFloat(row?.qty?.toString().replace(/,/g, '')) || 0
     const loss = parseFloat(row?.loss?.toString().replace(/,/g, '')) || 0
 
     return qtySum + qtyValue - loss
   }, 0)
-
-  async function fetchGridData() {
-    if (!recordId) return { list: [] }
-
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobMaterial.qry,
-      parameters: `_jobId=${recordId}&_seqNo=0`
-    })
-
-    res.list = res?.list?.map(item => ({
-      ...item,
-      netCost: parseFloat(item?.qty * item?.unitCost).toFixed(2)
-    }))
-
-    return res
-  }
 
   return (
     <VertLayout>
@@ -101,7 +69,7 @@ export default function MaterialsTab({ store, maxAccess, labels }) {
         <Table
           name='materialsTable'
           columns={columns}
-          gridData={data}
+          gridData={{ list: jobMaterials }}
           rowId={['itemId']}
           maxAccess={maxAccess}
           pagination={false}
