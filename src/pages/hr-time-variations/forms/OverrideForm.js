@@ -12,8 +12,6 @@ import { useForm } from 'src/hooks/form'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
-import useResourceParams from 'src/hooks/useResourceParams'
-import useSetWindow from 'src/hooks/useSetWindow'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
@@ -26,19 +24,15 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import Form from 'src/components/Shared/Form'
+import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
+import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
 
-export default function TimeVariatrionForm({ recordId, window }) {
+export default function OverrideForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  dayjs.extend(utc)
   const shiftStore = useRef([])
-
-  const { labels, access: maxAccess } = useResourceParams({
-    datasetId: ResourceIds.TimeVariation,
-    editMode: !!recordId
-  })
-
-  useSetWindow({ title: labels?.timeVariation, window })
+  dayjs.extend(utc)
 
   const invalidate = useInvalidate({
     endpointId: TimeAttendanceRepository.TimeVariation.page
@@ -53,10 +47,9 @@ export default function TimeVariatrionForm({ recordId, window }) {
       employeeId: null,
       dataSource: 2,
       timeCode: 20,
-      clockDuration: time(0),
       duration: 0,
       damageLevel: null,
-      justification: '',
+      punches: '',
       releaseStatus: null,
       wip: 1,
       status: 1
@@ -70,84 +63,13 @@ export default function TimeVariatrionForm({ recordId, window }) {
     onSubmit: async values => {
       await postRequest({
         extension: TimeAttendanceRepository.TimeVariation.gen,
-        record: JSON.stringify({ ...values, clockDuration: 0, date: formatDateToApi(values.date) })
+        record: JSON.stringify({ ...values, date: formatDateToApi(values.date) })
       })
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }
   })
-  const editMode = !!formik.values.recordId
-  const isClosed = formik.values.wip == 2
-  const isCancelled = formik.values.status == -1
-
-  const actions = [
-    {
-      key: 'Approval',
-      condition: true,
-      onClick: 'onApproval',
-      disabled: !isClosed
-    },
-    {
-      key: 'Close',
-      condition: !isClosed,
-      onClick: 'onCloseConfirmation',
-      action: onClose,
-      disabled: isCancelled || isClosed || !editMode
-    },
-    {
-      key: 'Reopen',
-      condition: isClosed,
-      onClick: 'onOpenConfirmation',
-      action: onReopen,
-      disabled: isCancelled || !isClosed || !editMode
-    },
-    {
-      key: 'Cancel',
-      condition: true,
-      onClick: onCancel,
-      disabled: !editMode || isClosed || isCancelled
-    }
-  ]
-
-  async function onClose() {
-    const res = await postRequest({
-      extension: TimeAttendanceRepository.TimeVariation.close,
-      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values?.date), clockDuration: 0 })
-    })
-    toast.success(platformLabels.Closed)
-    invalidate()
-    refetchForm(res.recordId)
-  }
-
-  async function onReopen() {
-    const res = await postRequest({
-      extension: TimeAttendanceRepository.TimeVariation.reopen,
-      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values?.date), clockDuration: 0 })
-    })
-    toast.success(platformLabels.Reopened)
-    invalidate()
-    refetchForm(res.recordId)
-  }
-
-  async function onCancel() {
-    const res = await postRequest({
-      extension: TimeAttendanceRepository.TimeVariation.cancel,
-      record: JSON.stringify({ ...formik.values, date: formatDateToApi(formik.values?.date), clockDuration: 0 })
-    })
-    toast.success(platformLabels.Cancelled)
-    invalidate()
-    refetchForm(res.recordId)
-  }
-
-  function time(minutes = 0) {
-    if (minutes == 0) return '00:00'
-    const absMinutes = Math.abs(minutes)
-    const hours = String(Math.floor(absMinutes / 60)).padStart(2, '0')
-    const mins = String(absMinutes % 60).padStart(2, '0')
-
-    return (minutes < 0 ? '-' : '') + `${hours}:${mins}`
-  }
 
   async function getShiftData(employeeId, date) {
     const { list } = await getRequest({
@@ -185,8 +107,6 @@ export default function TimeVariatrionForm({ recordId, window }) {
     const { recordId, duration } = shiftData[0]
     if (timeCode != 20) {
       formik.setFieldValue('shiftId', recordId)
-      formik.setFieldValue('duration', duration)
-      formik.setFieldValue('clockDuration', time(duration))
     }
   }
 
@@ -206,8 +126,6 @@ export default function TimeVariatrionForm({ recordId, window }) {
 
   function resetShiftFields() {
     formik.setFieldValue('shiftId', null)
-    formik.setFieldValue('duration', 0)
-    formik.setFieldValue('clockDuration', time(0))
   }
 
   async function refetchForm(recordId) {
@@ -219,8 +137,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
     })
     formik.setValues({
       ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      clockDuration: time(res?.record?.duration)
+      date: formatDateFromApi(res?.record?.date)
     })
 
     return res
@@ -236,30 +153,10 @@ export default function TimeVariatrionForm({ recordId, window }) {
   }, [])
 
   return (
-    <FormShell
-      form={formik}
-      resourceId={ResourceIds.TimeVariation}
-      maxAccess={maxAccess}
-      editMode={editMode}
-      actions={actions}
-      isCleared={false}
-      functionId={SystemFunction.TimeVariation}
-    >
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='reference'
-                label={labels?.reference}
-                value={formik.values?.reference}
-                readOnly
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('reference', '')}
-                error={formik.touched.reference && Boolean(formik.errors.reference)}
-              />
-            </Grid>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={EmployeeRepository.Employee.snapshot}
@@ -268,7 +165,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 displayField='fullName'
                 name='employeeId'
                 required
-                readOnly={isCancelled || isClosed}
+                readOnly
                 label={labels.employee}
                 form={formik}
                 displayFieldWidth={2}
@@ -280,8 +177,6 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 ]}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
-                  await fillShift(newValue?.recordId, formik.values.date, formik.values.timeCode)
-                  await updateTerminationDate(newValue?.recordId)
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -293,38 +188,13 @@ export default function TimeVariatrionForm({ recordId, window }) {
               <CustomDatePicker
                 name='date'
                 required
+                readOnly
                 label={labels.date}
                 value={formik.values?.date}
-                onChange={async (_, newValue) => {
-                  await fillShift(formik.values.employeeId, newValue, formik.values.timeCode)
-                  formik.setFieldValue('date', newValue)
-                }}
-                onClear={() => {
-                  resetShiftFields()
-                  formik.setFieldValue('date', null)
-                }}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
                 maxAccess={maxAccess}
-                readOnly={isCancelled || isClosed}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceComboBox
-                datasetId={DataSets.TIME_CODE}
-                name='timeCode'
-                readOnly={isCancelled || editMode}
-                label={labels.timeCode}
-                valueField='key'
-                displayField='value'
-                required
-                values={formik.values}
-                maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
-                  if (!newValue || newValue?.key == 20) resetShiftFields()
-                  await fillShift(formik.values.employeeId, formik.values.date, newValue?.key)
-                  formik.setFieldValue('timeCode', newValue?.key || null)
-                }}
-                error={formik.touched.timeCode && Boolean(formik.errors.timeCode)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -335,71 +205,100 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 displayField='dtRange'
                 store={shiftStore?.current}
                 value={formik.values.shiftId}
-                readOnly={isCancelled || isClosed || formik.values?.timeCode == 20}
+                readOnly={formik.values?.timeCode == 20}
                 onChange={(_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
                 error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
-                name='clockDuration'
-                label={labels?.clockDuration}
-                value={formik.values?.clockDuration}
+              <CustomTextArea
+                name='punches'
+                label={labels.punches}
+                value={formik.values.punches}
+                rows={2}
                 readOnly
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('clockDuration', time(0))}
-                error={formik.touched.clockDuration && Boolean(formik.errors.clockDuration)}
                 maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomNumberField
-                name='duration'
-                label={labels.duration}
-                value={formik.values.duration}
-                maxAccess={maxAccess}
-                readOnly={isCancelled || isClosed || formik.values?.timeCode == 20 || formik.values?.timeCode == 21}
-                min={formik.values.timeCode == 20 || formik.values.timeCode == 21 ? 0 : 1}
                 onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('duration', null)}
-                error={formik.touched.duration && Boolean(formik.errors.duration)}
+                onClear={() => formik.setFieldValue('punches', '')}
+                error={formik.touched.punches && Boolean(formik.errors.punches)}
               />
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                name='damageLevel'
-                label={labels.damage}
-                datasetId={DataSets.DAMAGE_LEVEL}
-                values={formik.values}
+                datasetId={DataSets.TIME_CODE}
+                name='timeCode'
+                label={labels.timeCode}
                 valueField='key'
                 displayField='value'
                 required
-                readOnly={isCancelled || isClosed}
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('damageLevel', newValue?.key || null)}
-                error={formik.touched.damageLevel && Boolean(formik.errors.damageLevel)}
+                onChange={async (_, newValue) => formik.setFieldValue('timeCode', newValue?.key || null)}
+                error={formik.touched.timeCode && Boolean(formik.errors.timeCode)}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextArea
-                name='justification'
-                label={labels.justification}
-                value={formik.values.justification}
-                rows={2}
-                readOnly={isCancelled || isClosed}
+              <ResourceComboBox
+                endpointId={companyStructureRepository.BranchFilters.qry}
+                name='branchId'
+                label={labels.branch}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
                 maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('justification', '')}
-                error={formik.touched.justification && Boolean(formik.errors.justification)}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('branchId', newValue?.recordId || null)}
+                error={formik.touched.branchId && Boolean(formik.errors.branchId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={TimeAttendanceRepository.BiometricDevices.qry}
+                name='udId'
+                label={labels.biometricDevice}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                maxAccess={maxAccess}
+                values={formik.values}
+                onChange={(_, newValue) => formik.setFieldValue('udId', newValue?.recordId || null)}
+                error={formik.touched.udId && Boolean(formik.errors.udId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CHECK_IN_OUT}
+                name='inOut'
+                label={labels.checkType}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={async (_, newValue) => formik.setFieldValue('inOut', newValue?.key || null)}
+                error={formik.touched.inOut && Boolean(formik.errors.inOut)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDateTimePicker
+                name='clockStamp'
+                label={labels.clockStamp}
+                value={formik.values.clockStamp}
+                onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
+                onClear={() => formik.setFieldValue('clockStamp', null)}
+                error={formik.touched.clockStamp && Boolean(formik.errors.clockStamp)}
               />
             </Grid>
           </Grid>
         </Grow>
       </VertLayout>
-    </FormShell>
+    </Form>
   )
 }
-
-TimeVariatrionForm.width = 550
-TimeVariatrionForm.height = 550

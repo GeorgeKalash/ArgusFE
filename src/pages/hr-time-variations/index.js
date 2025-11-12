@@ -8,16 +8,15 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { ControlContext } from 'src/providers/ControlContext'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import TimeVariatrionForm from './forms/TimeVariatrionForm'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import editTime from '/public/images/TableIcons/editTime.png'
+import OverrideForm from './forms/OverrideForm'
 
 export default function TimeVariation() {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   const {
@@ -25,7 +24,6 @@ export default function TimeVariation() {
     labels,
     filterBy,
     paginationParameters,
-    invalidate,
     access,
     refetch
   } = useResourceQuery({
@@ -136,7 +134,22 @@ export default function TimeVariation() {
       flex: 0.6,
       cellRenderer: row => (
         <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-          <IconButton size='small' onClick={() => {}}>
+          <IconButton
+            size='small'
+            onClick={() => {
+              stack({
+                Component: OverrideForm,
+                props: {
+                  recordId: row?.data?.recordId,
+                  labels,
+                  maxAccess: access
+                },
+                height: 550,
+                width: 500,
+                title: labels.overrideTimeVariations
+              })
+            }}
+          >
             {(row?.data?.timeCode == 20 || row?.data?.timeCode == 21 || row?.data?.timeCode == 41) && (
               <Image src={editTime} alt='History' width={18} height={18} />
             )}

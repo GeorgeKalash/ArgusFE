@@ -21,6 +21,7 @@ export const TimeAttendanceRepository = {
   },
   BiometricDevices: {
     page: service + 'pageBM',
+    qry: service + 'qryBM',
     del: service + 'delBM',
     set: service + 'setBM',
     get: service + 'getBM'
@@ -39,7 +40,11 @@ export const TimeAttendanceRepository = {
     page: service + 'pageTV',
     get: service + 'getTV',
     set: service + 'setTV',
-    del: service + 'delTV'
+    del: service + 'delTV',
+    gen: service + 'genTV',
+    close: service + 'closeTV',
+    reopen: service + 'reopenTV',
+    cancel: service + 'cancelTV'
   },
   ShitLeave: {
     page: service + 'pageLQ',
