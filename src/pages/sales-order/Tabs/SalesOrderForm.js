@@ -317,7 +317,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'isInactive', to: 'isInactive' }
+          { from: 'isInactive', to: 'isInactive' },
+          { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
