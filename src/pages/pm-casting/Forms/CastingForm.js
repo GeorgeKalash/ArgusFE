@@ -26,6 +26,7 @@ import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 import { useWindow } from 'src/windows'
 import { KVSRepository } from 'src/repositories/KVSRepository'
 import { DataSets } from 'src/resources/DataSets'
+import { InventoryRepository } from 'src/repositories/InventoryRepository'
 
 export default function CastingForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -53,6 +54,11 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       threeDPId: null,
       productionLineId: null,
       castingType: null,
+      designGroupId: null,
+      designFamilyId: null,
+      metalId: null,
+      itemGroupId: null,
+      productionStandardId: null,
       laborId: null,
       mould: '',
       setPcs: null,
@@ -152,6 +158,20 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
     })()
   }, [])
 
+  const getProduct = async recordId => {
+    return await getRequest({
+      extension: ProductModelingRepository.Printing.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
+  const getDesign = async recordId => {
+    return await getRequest({
+      extension: ProductModelingRepository.ThreeDDesign.get,
+      parameters: `_recordId=${recordId}`
+    })
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Casting}
@@ -233,7 +253,6 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 error={formik.touched.productionLineId && formik.errors.productionLineId}
               />
             </Grid>
-
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={ProductModelingRepository.Printing.snapshot2}
@@ -254,11 +273,97 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
                 readOnly={isPosted}
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('threeDPId', newValue?.recordId || null)
+                onChange={async (_, newValue) => {
+                  if (newValue?.recordId) {
+                    const res = await getProduct(newValue?.recordId)
+                    const res2 = await getDesign(newValue?.threeDDId)
+                    formik.setFieldValue('designFamilyId', res?.record?.designFamilyId || null)
+                    formik.setFieldValue('designGroupId', res?.record?.designGroupId || null)
+                    formik.setFieldValue('productionStandardId', res2?.record?.productionStandardId || null)
+                    formik.setFieldValue('itemGroupId', res2?.record?.itemGroupId || null)
+                    formik.setFieldValue('metalId', res2?.record?.metalId || null)
+                  }
                   formik.setFieldValue('threeDPRef', newValue?.reference || '')
+
+                  formik.setFieldValue('threeDPId', newValue?.recordId || null)
                 }}
                 errorCheck={'threeDPId'}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.DesignFamily.qry}
+                name='designFamilyId'
+                label={labels.familyGroup}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.DesignGroup.qry}
+                name='designGroupId'
+                label={labels.designGroup}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('designGroupId', newValue?.recordId || null)}
+                error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionStandard.qry}
+                values={formik.values}
+                name='productionStandardId'
+                label={labels.productionStandard}
+                valueField='recordId'
+                displayField='reference'
+                maxAccess={maxAccess}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('productionStandardId', newValue?.recordId || null)}
+                error={formik?.touched?.productionStandardId && Boolean(formik?.errors?.productionStandardId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Metals.qry}
+                name='metalId'
+                label={labels.metal}
+                valueField='recordId'
+                displayField='reference'
+                values={formik.values}
+                readOnly
+                onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null)}
+                error={formik.touched.metalId && Boolean(formik.errors.metalId)}
+                maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Group.qry}
+                parameters='_startAt=0&_pageSize=1000'
+                values={formik.values}
+                name='itemGroupId'
+                label={labels.itemGroup}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                displayFieldWidth={1}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                readOnly
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('itemGroupId', newValue?.recordId || null)}
+                error={formik.touched.itemGroupId && formik.errors.itemGroupId}
               />
             </Grid>
             <Grid item xs={12}>

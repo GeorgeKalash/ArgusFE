@@ -32,10 +32,12 @@ export const ResourceIds = {
   PendingPunches: 60308,
   TodaysTimeVariationsDetails: 60309,
   BalanceAdjustment: 73204,
+  ProcessedPunches: 72215,
   PayCode: 75104,
   LedgerGroup: 75114,
   Loans: 74201,
   RightToWork: 70114,
+  Salaries: 71206,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,

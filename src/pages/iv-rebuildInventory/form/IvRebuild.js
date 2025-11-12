@@ -23,11 +23,10 @@ export default function RebuildForm({ _labels, access }) {
   const { stack } = useWindow()
 
   const { formik } = useForm({
-    initialValues: { year: '', itemId: 0, date: new Date(), recordId: 'N/A' },
+    initialValues: { itemId: 0, date: new Date(), recordId: 'N/A' },
     maxAccess: access,
     validateOnChange: true,
     validationSchema: yup.object({
-      year: yup.string().required(),
       date: yup.string().required()
     }),
     onSubmit: async obj => {
@@ -81,22 +80,6 @@ export default function RebuildForm({ _labels, access }) {
         <Grow>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={SystemRepository.FiscalYears.qry}
-                name='year'
-                label={_labels.year}
-                valueField='fiscalYear'
-                displayField='fiscalYear'
-                values={formik.values}
-                required
-                maxAccess={access}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('year', newValue?.fiscalYear)
-                }}
-                error={formik.touched.year && Boolean(formik.errors.year)}
-              />
-            </Grid>
-            <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
                 name='itemId'
@@ -105,6 +88,7 @@ export default function RebuildForm({ _labels, access }) {
                 displayField='name'
                 valueShow='itemRef'
                 secondValueShow='itemName'
+                displayFieldWidth={2}
                 form={formik}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || 0)

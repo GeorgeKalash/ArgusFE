@@ -117,7 +117,7 @@ const InventoryOpeningQtysForm = ({ labels, maxAccess, recordId, record }) => {
       key: 'Serials',
       condition: true,
       onClick: OpenSerialsForm,
-      disabled: !editMode || formik.values.trackBy !== 1 || 2
+      disabled: !editMode || formik.values.trackBy != 1
     }
   ]
 

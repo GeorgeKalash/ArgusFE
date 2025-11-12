@@ -59,6 +59,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
       itemGroupId: null,
       productionClassId: null,
       productionStandardId: null,
+      designGroupId: null,
+      designFamilyId: null,
       metalId: null,
       collectionId: null,
       source: null,
@@ -72,7 +74,8 @@ export default function SketchForm({ recordId, invalidate, window }) {
     validationSchema: yup.object({
       date: yup.date().required(),
       itemGroupId: yup.string().required(),
-      source: yup.string().required()
+      source: yup.string().required(),
+      productionLineId: yup.number().required()
     }),
     onSubmit: async values => {
       const data = { ...values, date: formatDateToApi(values?.date) }
@@ -295,6 +298,36 @@ export default function SketchForm({ recordId, invalidate, window }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignFamily.qry}
+                    name='designFamilyId'
+                    label={labels.familyGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    onChange={(_, newValue) => formik.setFieldValue('designFamilyId', newValue?.recordId || null)}
+                    error={formik?.touched?.designFamilyId && Boolean(formik?.errors?.designFamilyId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DesignGroup.qry}
+                    name='designGroupId'
+                    label={labels.designGroup}
+                    valueField='recordId'
+                    displayField='name'
+                    values={formik.values}
+                    readOnly={isPosted || isClosed}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('designGroupId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <CustomDatePicker
                     name='date'
                     label={labels.date}
@@ -399,6 +432,20 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
                   />
                 </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ImageUpload
+                    ref={imageUploadRef}
+                    resourceId={ResourceIds.Sketch}
+                    seqNo={0}
+                    recordId={recordId}
+                    width={250}
+                    height={'auto'}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.ProductionLine.qry}
@@ -409,6 +456,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
+                    required
                     onChange={(event, newValue) => {
                       formik.setFieldValue('productionLineId', newValue?.recordId || null)
                     }}
@@ -434,17 +482,6 @@ export default function SketchForm({ recordId, invalidate, window }) {
                   />
                 </Grid>
               </Grid>
-            </Grid>
-
-            <Grid item xs={6}>
-              <ImageUpload
-                ref={imageUploadRef}
-                resourceId={ResourceIds.Sketch}
-                seqNo={0}
-                recordId={recordId}
-                width={250}
-                height={'auto'}
-              />
             </Grid>
           </Grid>
         </Fixed>

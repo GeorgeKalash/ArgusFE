@@ -95,7 +95,7 @@ const UndeliveredCreditOrder = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item sx={{ display: 'flex', width: '300px' }}>
+            <Grid item xs={2.5}>
               <ResourceComboBox
                 endpointId={RemittanceSettingsRepository.Correspondent.qry}
                 label={labels.correspondent}

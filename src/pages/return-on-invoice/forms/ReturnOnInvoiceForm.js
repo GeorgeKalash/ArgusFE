@@ -236,7 +236,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         return {
           ...itemDetails,
           seqNo: itemSeqNo,
-          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty
+          qty: itemDetails.sku ? itemDetails.returnNowQty || itemDetails.qty : itemDetails.qty,
+          applyVat: values.isVattable || false
         }
       })
 
@@ -407,8 +408,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             volume: itemFound?.item?.volume,
             isMetal: itemFound?.item?.isMetal || false,
             metalid: itemFound?.item?.metalId,
-            metalPurity: itemFound?.item?.metalPurity,
-            applyVat: formik.values.isVattable
+            metalPurity: itemFound?.item?.metalPurity
           }
 
           update(itemData)
@@ -473,11 +473,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
-          taxDetails: formik.values.isVattable ? rowTaxDetails : null,
+          taxDetails: rowTaxDetails || null,
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          applyVat: formik.values.isVattable,
           trackBy: newRow?.trackBy
         })
       },
@@ -1114,7 +1113,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: parseFloat(item?.vatAmount),
         tdPct,
-        taxDetails: item.taxDetails
+        taxDetails: formik.values.isVattable ? item.taxDetails : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, parseFloat(vatCalcRow?.vatAmount).toFixed(2))
     })
