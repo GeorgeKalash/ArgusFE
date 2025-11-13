@@ -22,6 +22,15 @@ const SSLeaveRequest = () => {
   const { stack: stackError } = useError()
   const { user } = useContext(AuthContext)
 
+  function formatDotNetDate(dotNetDateString) {
+    if (!dotNetDateString) return ''
+    const match = dotNetDateString.match(/\d+/)
+    if (!match) return ''
+    const date = new Date(parseInt(match[0], 10))
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
@@ -37,6 +46,12 @@ const SSLeaveRequest = () => {
       extension: SelfServiceRepository.SSLeaveRequest.page,
       parameters: `_size=50&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_employeeId=${user?.employeeId}&_sortBy=recordId`
     })
+
+    response.list = response?.list?.map(item => ({
+      ...item,
+      startDateFormatted: formatDotNetDate(item?.startDate),
+      endDateFormatted: formatDotNetDate(item?.endDate)
+    }))
 
     return { ...response, _startAt }
   }
@@ -56,16 +71,14 @@ const SSLeaveRequest = () => {
 
   const columns = [
     {
-      field: 'startDate',
+      field: 'startDateFormatted',
       headerName: labels.startDate,
-      flex: 1,
-      type: 'date'
+      flex: 1
     },
     {
-      field: 'endDate',
+      field: 'endDateFormatted',
       headerName: labels.endDate,
-      flex: 1,
-      type: 'date'
+      flex: 1
     },
     {
       field: 'destination',
@@ -84,18 +97,23 @@ const SSLeaveRequest = () => {
   }
 
   function openForm(recordId) {
-    stack({
-      Component: SSLeaveRequestForm,
-      props: {
-        recordId,
-        labels,
-        maxAccess: access,
-        employeeId: user?.employeeId,
-      },
-      width: 800,
-      height: 550,
-      title: labels.SSLeaveRequest
-    })
+    if (!user?.employeeId) {
+      stackError({
+        message: platformLabels.notConnectedToEmployee
+      })
+    } else {
+      stack({
+        Component: SSLeaveRequestForm,
+        props: {
+          recordId,
+          labels,
+          maxAccess: access
+        },
+        width: 800,
+        height: 550,
+        title: labels.SSLeaveRequest
+      })
+    }
   }
 
   const edit = obj => {
@@ -124,7 +142,6 @@ const SSLeaveRequest = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

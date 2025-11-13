@@ -20,10 +20,13 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import FormShell from 'src/components/Shared/FormShell'
+import { AuthContext } from 'src/providers/AuthContext'
 
-export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employeeId }) {
+export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { user } = useContext(AuthContext)
+  const employeeId = user?.employeeId
 
   const editMode = !!recordId
 
@@ -36,7 +39,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
     initialValues: {
       recordId,
       startDate: new Date(),
-      endDate: new Date(),
+      endDate: null,
       date: new Date(),
       employeeId,
       justification: '',
@@ -152,7 +155,6 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      previewReport={editMode}
     >
       <VertLayout>
         <Grow>
@@ -287,6 +289,9 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
                 onClear={() => formik.setFieldValue('leaveBalance', null)}
                 error={formik.touched.leaveBalance && Boolean(formik.errors.leaveBalance)}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField name='statusName' label={labels.statusName} readOnly value={formik.values.statusName} />
             </Grid>
           </Grid>
         </Grow>
