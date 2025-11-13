@@ -39,7 +39,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
-      decimals: yup.number().min(0).required()
+      decimals: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -118,6 +118,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 value={formik.values.decimals}
                 decimalScale={0}
                 required
+                allowNegative={false}
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('decimals', e.target.value)}
