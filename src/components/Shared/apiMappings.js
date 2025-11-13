@@ -893,7 +893,7 @@ export const apiMappings = {
   },
   [ResourceIds.SalaryChangeReasonFilter]: {
     type: COMBOBOX,
-    endpoint: EmployeeRepository.SalaryChangeReasonFilters.qry,
+    endpoint: EmployeeRepository.SalaryChangeReason.qry,
     valueField: 'recordId',
     displayField: ['name'],
     columnsInDropDown: [{ key: 'name', value: 'Name' }]

@@ -182,10 +182,11 @@ const CustomLayoutForm = ({ labels, maxAccess, row, window }) => {
       extension: SystemRepository.ReportTemplate.qry,
       parameters: `_resourceId=${row.resourceId}`
     }).then(res => {
-      const modifiedList = res.list?.map((itemPartsItem, index) => ({
-        ...itemPartsItem,
-        id: index + 1
-      }))
+      const modifiedList = res.list
+        ?.map((itemPartsItem, index) => ({
+          ...itemPartsItem,
+          id: index + 1
+        }))
       formik.setValues({
         ...formik.values,
         items: modifiedList

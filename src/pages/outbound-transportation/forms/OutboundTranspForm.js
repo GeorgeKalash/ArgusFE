@@ -336,6 +336,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
           { from: 'clientRef', to: 'clientRef' },
           { from: 'clientName', to: 'clientName' },
           { from: 'volume', to: 'soVolume' },
+          { from: 'szName', to: 'szName' },
           { from: 'wipName', to: 'soWipStatusName' }
         ],
         columnsInDropDown: [{ key: 'reference', value: 'Reference' }],
@@ -360,6 +361,14 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
       component: 'textfield',
       label: labels.client,
       name: 'clientName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.szName,
+      name: 'szName',
       props: {
         readOnly: true
       }

@@ -7,88 +7,71 @@ import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { AuthContext } from 'src/providers/AuthContext'
-import { createConditionalSchema } from 'src/lib/validation'
-import { useError } from 'src/error'
 import Form from 'src/components/Shared/Form'
+import { useError } from 'src/error'
+import { useForm } from 'src/hooks/form'
 
-const LedgerForm = ({ node, labels, maxAccess }) => {
-  const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc} = node?.current || {}
+const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchData }) => {
+  const { viewNodeId: nodeId, viewNodeRef: nodeRef, viewNodedesc: nodedesc } = node?.current || {}
 
-  const { getRequest, postRequest } = useContext(RequestsContext)
+  const ledgers = initialData?.ledgers
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { user } = useContext(AuthContext)
-  const { stack: stackError } = useError()
   const lastValidNodeId = useRef(nodeId || null)
+  const { stack: stackError } = useError()
 
-  const conditions = {
-    sign: row => {
-      const hasSeg = row?.seg0 || row?.seg1 || row?.seg2 || row?.seg3 || row?.seg4 || row?.ccRef || row?.ccgRef
-
-      return hasSeg ? true : !!row.sign
-    }
-  }
-
-  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'ledgers')
-
-  const makeInitialValues = fsNodeId => ({
+  const makeInitialValues = seqNo => ({
     nodeRef,
     ledgers: [
       {
         id: 1,
-        seqNo: 1,
-        fsNodeId: fsNodeId || null,
+        seqNo: seqNo || null,
         seg0: '',
         seg1: '',
         seg2: '',
         seg3: '',
         seg4: '',
         ccgRef: '',
-        ccRef: '',
-        sign: '',
-        signName: ''
+        ccRef: ''
       }
     ]
   })
 
-  const formik = useFormik({
+  const { formik } = useForm({
     initialValues: makeInitialValues(nodeId),
-    enableReinitialize: false,
-    conditionSchema: ['ledgers'],
     validationSchema: yup.object({
-      nodeRef: yup.string().required(),
-      ledgers: yup.array().of(schema)
+      nodeRef: yup.string().required()
     }),
+    maxAccess,
     onSubmit: async obj => {
-      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4 && l.sign)
+      const hasInvalidLedger = obj?.ledgers?.some(l => !l.seg0 && !l.seg1 && !l.seg2 && !l.seg3 && !l.seg4)
 
       if (hasInvalidLedger) {
-        stackError({ 
+        stackError({
           message: labels.mandatorySeg
-         })
+        })
 
         return
       }
 
       const data = {
-        fsNodeId: nodeId,
-        ledgers: obj?.ledgers
-          ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-          ?.map((ledger, index) => ({
-            ...ledger,
-            seqNo: index + 1,
-            fsNodeId: nodeId
-          }))
+        fsId: mainRecordId,
+        seqNo: nodeId,
+        ledgers: obj?.ledgers?.map((ledger, index) => ({
+          ...ledger,
+          seqNo: nodeId,
+          ledgerSeqNo: index + 1
+        }))
       }
 
       await postRequest({
         extension: FinancialStatementRepository.Ledger.set2,
         record: JSON.stringify(data)
       })
+
+      fetchData()
       toast.success(platformLabels.Edited)
     }
   })
@@ -149,66 +132,31 @@ const LedgerForm = ({ node, labels, maxAccess }) => {
       props: {
         maxLength: 10
       }
-    },
-    {
-      component: 'resourcecombobox',
-      label: labels.sign,
-      name: 'sign',
-      props: {
-        datasetId: DataSets.GLFS_SIGN,
-        valueField: 'key',
-        displayField: 'value',
-        displayFieldWidth: 1.5,
-        mapping: [
-          { from: 'key', to: 'sign' },
-          { from: 'value', to: 'signName' }
-        ]
-      }
     }
   ]
 
-  async function getLedgers(fsNodeId) {
-    const res = await getRequest({
-      extension: FinancialStatementRepository.Ledger.qry,
-      parameters: `_fsNodeId=${fsNodeId}`
-    })
-
-    const ledgers = res?.list ?? []
-    if (ledgers.length === 0) {
-      formik.setFieldValue('ledgers', makeInitialValues(fsNodeId).ledgers)
-
-      return
-    }
-
-    const titlesXML = await getRequest({
-      extension: SystemRepository.KeyValueStore,
-      parameters: `_dataset=${DataSets.GLFS_SIGN}&_language=${user.languageId}`
-    })
-
-    const titlesMap = new Map((titlesXML?.list ?? []).map(item => [item.key, item.value]))
-
-    const updatedLedgers = ledgers.map((ledger, index) => ({
-      id: index + 1,
-      ...ledger,
-      signName: ledger?.sign != null ? titlesMap.get(String(ledger.sign)) || '' : ''
-    }))
-
-    formik.setFieldValue('ledgers', updatedLedgers)
-  }
-
   useEffect(() => {
-    if (nodeId) {
+    if (!mainRecordId) return
+    if (ledgers?.length && nodeId) {
+      const nodeLedgers = ledgers.filter(
+        l => Number(l.seqNo) === Number(nodeId) || Number(l.ledgerSeqNo) === Number(nodeId)
+      )
 
-      lastValidNodeId.current = nodeId
-
-      formik.resetForm({ values: makeInitialValues(nodeId) })
-
-      getLedgers(nodeId)
+      const normalized = nodeLedgers.map((l, i) => ({
+        id: i + 1,
+        ...l
+      }))
+      formik.setValues({
+        nodeRef,
+        ledgers: normalized.length ? normalized : makeInitialValues(nodeId).ledgers
+      })
 
       return
     }
-    formik.resetForm({ values: makeInitialValues(null) })
-  }, [nodeId]) 
+
+    if (nodeId) lastValidNodeId.current = nodeId
+    formik.resetForm({ values: makeInitialValues(nodeId || null) })
+  }, [nodeId, mainRecordId, ledgers])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>

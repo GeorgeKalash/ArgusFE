@@ -4,42 +4,37 @@ import NodeList from '../forms/NodeList'
 import LedgerForm from '../forms/LedgerForm'
 import TreeForm from '../forms/TreeForm'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
-import { useContext, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { FinancialStatementRepository } from 'src/repositories/FinancialStatementRepository'
 
 const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [mainRecordId, setRecId] = useState(recordId)
-  const node = useRef({ nodeId: null , viewNodeId: null, viewNodeRef: '', viewNodedesc: ''})
-
+  const node = useRef({ viewNodeId: null, viewNodeRef: '', viewNodedesc: '' })
   const { getRequest } = useContext(RequestsContext)
-  const [treeDataWithNodes, setTreeDataWithNodes] = useState([])
+  const [loadedData, setLoadedData] = useState(null)
 
-  const fetchTreeData = async (languageId = 1) => {
+  const fetchFullFinancialStatement = async () => {
     if (!mainRecordId) return
 
-    const [dataRes, labelsRes] = await Promise.all([
-      getRequest({
-        extension: FinancialStatementRepository.Node.qry,
-        parameters: `_fsId=${mainRecordId}`
-      }),
-      getRequest({
-        extension: FinancialStatementRepository.Title.qry,
-        parameters: `_fsNodeId=0`
-      })
-    ])
+    const res = await getRequest({
+      extension: FinancialStatementRepository.FinancialStatement.get2,
+      parameters: `_recordId=${mainRecordId}`
+    })
 
-    const filteredLabels =
-      labelsRes?.list?.filter(label => label.languageId?.toString() === languageId?.toString()) ?? []
+    setLoadedData(res?.record)
 
-    const enrichedData =
-      dataRes?.list?.map(item => ({
-        ...item,
-        name: filteredLabels.find(f => f.fsNodeId === item.recordId)?.title || 'undefined'
-      })) ?? []
+    return res?.record
+  }
 
-    setTreeDataWithNodes(enrichedData || [])
+  useEffect(() => {
+    fetchFullFinancialStatement()
+  }, [mainRecordId])
+
+  const handleImportData = data => {
+    setLoadedData(data)
+    setRecId(data?.fs?.recordId)
   }
 
   const tabs = [
@@ -53,23 +48,50 @@ const StatementWindow = ({ labels, maxAccess, recordId }) => {
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
       <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
-        <StatementForm labels={labels} maxAccess={maxAccess} setRecId={setRecId} mainRecordId={mainRecordId} />
+        <StatementForm
+          labels={labels}
+          node={node}
+          maxAccess={maxAccess}
+          setRecId={setRecId}
+          mainRecordId={mainRecordId}
+          initialData={loadedData?.fs ?? {}}
+          onImportData={handleImportData}
+        />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <NodeList
           maxAccess={maxAccess}
           labels={labels}
           mainRecordId={mainRecordId}
-          setRecId={setRecId}
           node={node}
-          fetchData={fetchTreeData}
+          fetchData={fetchFullFinancialStatement}
+          initialData={{
+            nodes: loadedData?.nodes ?? [],
+            titles: loadedData?.titles ?? []
+          }}
         />
       </CustomTabPanel>
+
       <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
-        <LedgerForm maxAccess={maxAccess} labels={labels} node={node} />
+        <LedgerForm
+          maxAccess={maxAccess}
+          labels={labels}
+          node={node}
+          mainRecordId={mainRecordId}
+          initialData={loadedData}
+          fetchData={fetchFullFinancialStatement}
+        />
       </CustomTabPanel>
+
       <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
-        <TreeForm maxAccess={maxAccess} treeDataWithNodes={treeDataWithNodes} fetchData={fetchTreeData} />
+        <TreeForm
+          maxAccess={maxAccess}
+          initialData={{
+            nodes: loadedData?.nodes ?? [],
+            titles: loadedData?.titles ?? []
+          }}
+          fetchData={fetchFullFinancialStatement}
+        />
       </CustomTabPanel>
     </>
   )

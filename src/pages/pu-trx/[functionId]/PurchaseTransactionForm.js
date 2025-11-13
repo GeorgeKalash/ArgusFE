@@ -128,7 +128,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       plId: null,
       ptId: null,
       maxDiscount: '',
-      currentDiscount: '',
+      currentDiscount: 0,
       exRate: 1,
       rateCalcMethod: 1,
       tdType: cycleButtonState.value,
@@ -1036,7 +1036,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         isVattable: object?.isTaxable || false,
         tdAmount: object?.tradeDiscount,
         tdPct: object?.tradeDiscount,
-        currentDiscount: object?.tradeDiscount,
+        currentDiscount: object?.tradeDiscount || 0,
         tdType: currenctTdType,
         taxId: object?.taxId,
         paymentMethod: object?.paymentMethod
@@ -1217,7 +1217,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     const itemPriceRow = getIPR({
       priceType: newRow?.priceType,
-      basePrice: newRow?.basePrice || 0,
+      basePrice: parseFloat(newRow?.basePrice) || 0,
       volume: newRow?.volume || 0,
       weight: newRow?.weight,
       unitPrice: newRow?.unitPrice || 0,
@@ -1227,7 +1227,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdAmount: mdAmount,
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
       totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
@@ -1856,7 +1856,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 errorCheck={'header.vendorId'}
                 maxAccess={maxAccess}
                 required
-                readOnly={isPosted}
+                readOnly={isPosted || (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)}
                 displayFieldWidth={3}
                 editMode={editMode}
               />
