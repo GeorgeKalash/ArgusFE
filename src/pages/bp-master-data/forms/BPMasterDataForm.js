@@ -26,6 +26,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const editMode = !!recordId
 
   const { changeDT, maxAccess } = useRefBehavior({
     access,
@@ -56,6 +57,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       legalStatusId: null,
       isBlackListed: false
     },
+    enableReinitialize: false,
     validateOnChange: true,
     validationSchema: yup.object({
       category: yup.string().required(),
@@ -100,8 +102,6 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       invalidate()
     }
   })
-
-  const editMode = !!formik.values.recordId
 
   const filterIdCategory = async categId => {
     const res = await getRequest({

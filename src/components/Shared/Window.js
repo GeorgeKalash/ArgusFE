@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } 
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import MinimizeIcon from '@mui/icons-material/Minimize'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
 import WindowToolbar from './WindowToolbar'
@@ -60,6 +61,7 @@ const Window = React.memo(
     const { settings } = useSettings()
     const { navCollapsed } = settings
     const [expanded, setExpanded] = useState(false)
+    const [minimized, setMinimized] = useState(false)
     const paperRef = useRef(null)
     const maxAccess = props.maxAccess?.record.maxAccess
 
@@ -70,10 +72,12 @@ const Window = React.memo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
     )
-    const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-    const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
-    const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
+
+    const containerWidth = window.innerWidth - (navCollapsed ? 10 : 310)
+    const containerHeight = window.innerHeight - 40
+    const containerHeightPanel = window.innerHeight - 180
     const heightPanel = height - 120
+
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
       if (transactionLogInfo) {
@@ -88,6 +92,19 @@ const Window = React.memo(
     }, [])
 
     useEffect(() => {
+      const body = document.body
+      if (expanded || minimized) {
+        body.style.overflow = 'hidden'
+      } else {
+        body.style.overflow = ''
+      }
+
+      return () => {
+        body.style.overflow = ''
+      }
+    }, [expanded, minimized])
+
+    useEffect(() => {
       if (!loading) {
         const timer = setTimeout(() => {
           setShowOverlay(true)
@@ -99,6 +116,11 @@ const Window = React.memo(
 
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
+    }, [])
+
+    const handleMinimizeToggle = useCallback(() => {
+      if (expanded) setExpanded(false)
+      setMinimized(prev => !prev)
     }, [expanded])
 
     return (
@@ -106,14 +128,18 @@ const Window = React.memo(
         <Box
           id='parent'
           sx={{
+            top: 0,
+            left: 0,
+            right: 0,
             bottom: 0,
             position: 'absolute',
+            overflow: 'hidden',
             width: spacing ? containerWidth : '100%',
             height: spacing ? containerHeight : '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: minimized ? 'flex-end' : 'center',
             zIndex: 2
           }}
           onKeyDown={e => {
@@ -126,20 +152,40 @@ const Window = React.memo(
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded && { x: 0, y: 0 }}
+            position={expanded || minimized ? { x: 0, y: 0 } : undefined}
             onStart={() => draggable}
           >
-            <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
+            <Box
+              sx={{
+                position: 'relative',
+                pointerEvents: 'all',
+                mb: minimized ? '5px' : 0
+              }}
+            >
               <Paper
                 ref={paperRef}
                 tabIndex={-1}
                 sx={{
-                  transition: 'width 0.3s, height 0.3s',
-                  height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
+                  transition:
+                    'max-height 0.35s ease, width 0.35s ease, background-color 0.35s ease, opacity 0.25s ease',
+                  height: !minimized
+                    ? controlled
+                      ? expanded
+                        ? containerHeight
+                        : height
+                      : expanded
+                      ? containerHeight
+                      : height
+                    : '40px',
+                  opacity: minimized ? 0.85 : 1,
                   width: expanded ? containerWidth : width,
                   display: controlled ? 'flex' : 'block',
                   flexDirection: controlled ? 'column' : 'unset',
-                  '&:focus': { outline: 'none', boxShadow: 'none' }
+                  '&:focus': { outline: 'none', boxShadow: 'none' },
+                  backgroundColor: minimized ? 'rgba(255, 255, 255, 0.4)' : 'background.paper',
+                  backdropFilter: minimized ? 'blur(4px)' : 'none',
+                  boxShadow: minimized ? 'none' : 6,
+                  overflow: 'hidden'
                 }}
               >
                 <DialogTitle
@@ -155,17 +201,25 @@ const Window = React.memo(
                     backgroundColor: '#231F20',
                     borderTopLeftRadius: '5px',
                     borderTopRightRadius: '5px',
-                    borderBottomLeftRadius: '0px',
-                    borderBottomRightRadius: '0px',
-                    height: '40px'
+                    height: '40px',
+                    zIndex: 10
                   }}
                 >
                   <Box>
                     <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: 'white !important' }}>
-                      {nextToTitle ? Title + ' ' + nextToTitle : Title}
+                      {nextToTitle ? `${Title} ${nextToTitle}` : Title}
                     </Typography>
                   </Box>
                   <Box>
+                    <IconButton
+                      tabIndex={-1}
+                      edge='end'
+                      onClick={handleMinimizeToggle}
+                      aria-label='minimize'
+                      sx={{ color: 'white !important' }}
+                    >
+                      <MinimizeIcon />
+                    </IconButton>
                     {refresh && (
                       <IconButton
                         tabIndex={-1}
@@ -177,12 +231,11 @@ const Window = React.memo(
                         <RefreshIcon />
                       </IconButton>
                     )}
-                    {expandable && (
+                    {expandable && !minimized && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
                         onClick={handleExpandToggle}
-                        data-is-expanded={expanded}
                         aria-label='expand'
                         sx={{ color: 'white !important' }}
                       >
@@ -203,7 +256,7 @@ const Window = React.memo(
                   </Box>
                 </DialogTitle>
                 {tabs && (
-                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                  <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                     {tabs.map((tab, i) => (
                       <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                     ))}
@@ -227,12 +280,12 @@ const Window = React.memo(
                     )}
                   </>
                 ) : (
-                  React.Children.map(children, child => {
-                    return React.cloneElement(child, {
+                  React.Children.map(children, child =>
+                    React.cloneElement(child, {
                       expanded: expanded,
                       height: expanded ? containerHeightPanel : heightPanel
                     })
-                  })
+                  )
                 )}
               </Paper>
             </Box>
