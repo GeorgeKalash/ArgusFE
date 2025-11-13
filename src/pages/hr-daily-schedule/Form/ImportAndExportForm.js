@@ -12,11 +12,12 @@ import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceReposit
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
+import { ImportExportMode } from '../index'
 
 export default function ImportExportRangeForm({ mode, labels, maxAccess, values, window }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const isExport = mode === 'export'
+  const isExport = mode === ImportExportMode.EXPORT
 
   const { formik } = useForm({
     maxAccess,

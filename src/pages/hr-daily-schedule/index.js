@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import arLocale from '@fullcalendar/core/locales/ar'
+import enLocale from '@fullcalendar/core/locales/en-gb'
 import interactionPlugin from '@fullcalendar/interaction'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
@@ -22,12 +24,19 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { AuthContext } from 'src/providers/AuthContext'
+
+export const ImportExportMode = {
+  IMPORT: 'import',
+  EXPORT: 'export'
+}
 
 export default function Calendar() {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const [events, setEvents] = useState([])
   const { stack } = useWindow()
   const { platformLabels } = useContext(ControlContext)
+  const { user } = useContext(AuthContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.DailySchedules
@@ -105,7 +114,7 @@ export default function Calendar() {
       },
       width: 500,
       height: 350,
-      title: mode === 'import' ? platformLabels.import : platformLabels.Export
+      title: mode === ImportExportMode.IMPORT ? platformLabels.import : platformLabels.Export
     })
   }
 
@@ -145,11 +154,20 @@ export default function Calendar() {
 
   return (
     <>
+      <style>
+        {`
+          .fc .fc-button-primary {
+            background-color: #000;
+            border-color: #000;
+            color: white;
+          }
+        `}
+      </style>
       <Form onSave={formik.handleSubmit} isSaved={false}>
         <VertLayout>
           <Grow>
-            <Grid container spacing={2}>
-              <Grid item xs={2}>
+            <Grid container spacing={2} paddingBottom={2}>
+              <Grid item xs={3}>
                 <ResourceLookup
                   endpointId={EmployeeRepository.Employee.snapshot}
                   parameters={{ _branchId: 0 }}
@@ -199,28 +217,29 @@ export default function Calendar() {
                   error={formik.touched.toDate && Boolean(formik.errors.toDate)}
                 />
               </Grid>
-
               <Grid item xs={0.5}>
                 <CustomButton
                   onClick={formik.handleSubmit}
-                  tooltipText={platformLabels.Preview}
+                  label={platformLabels.Preview}
                   image='preview.png'
-                  color='#000'
+                  color='primary'
                 />
               </Grid>
+
+              <Grid item xs={2.3}></Grid>
               <Grid item xs={0.5}>
                 <CustomButton
-                  onClick={() => onImportExport('import')}
+                  onClick={() => onImportExport(ImportExportMode.IMPORT)}
                   label={platformLabels.import}
-                  color='#000'
+                  color='primary'
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
               <Grid item xs={0.5}>
                 <CustomButton
-                  onClick={() => onImportExport('export')}
+                  onClick={() => onImportExport(ImportExportMode.EXPORT)}
                   label={platformLabels.Export}
-                  color='#000'
+                  color='primary'
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
@@ -228,7 +247,7 @@ export default function Calendar() {
                 <CustomButton
                   onClick={onDelete}
                   label={platformLabels.Delete}
-                  color='#000'
+                  color='primary'
                   disabled={!formik.values.employeeId || !formik.values.fromDate || !formik.values.toDate}
                 />
               </Grid>
@@ -236,7 +255,7 @@ export default function Calendar() {
                 <CustomButton
                   onClick={onGenerate}
                   label={platformLabels.Generate}
-                  color='#000'
+                  color='primary'
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
@@ -253,8 +272,11 @@ export default function Calendar() {
               allDaySlot={false}
               height='auto'
               events={events}
+              locale={user?.languageId === 2 ? arLocale : enLocale}
+              direction={user?.languageId === 2 ? 'rtl' : 'ltr'}
               timeZone='UTC'
               eventDisplay='block'
+              firstDay={1}
               eventContent={arg => (
                 <div
                   style={{
