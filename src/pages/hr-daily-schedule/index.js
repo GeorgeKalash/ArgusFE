@@ -158,7 +158,7 @@ export default function Calendar() {
                   displayField='fullName'
                   name='employeeRef'
                   label={labels.employee}
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   valueShow='employeeRef'
                   secondValueShow='employeeName'
                   displayFieldWidth={2}
@@ -179,7 +179,7 @@ export default function Calendar() {
                   value={formik.values.fromDate}
                   max={formik.values.toDate}
                   required
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('fromDate', null)}
                   error={formik.touched.fromDate && Boolean(formik.errors.fromDate)}
@@ -193,7 +193,7 @@ export default function Calendar() {
                   value={formik.values.toDate}
                   required
                   min={formik.values.fromDate}
-                  maxAccess={maxAccess}
+                  maxAccess={access}
                   onChange={formik.setFieldValue}
                   onClear={() => formik.setFieldValue('toDate', null)}
                   error={formik.touched.toDate && Boolean(formik.errors.toDate)}
@@ -213,8 +213,6 @@ export default function Calendar() {
                   onClick={() => onImportExport('import')}
                   label={platformLabels.import}
                   color='#000'
-                  image='import.png'
-                  tooltipText={platformLabels.import}
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
@@ -223,18 +221,14 @@ export default function Calendar() {
                   onClick={() => onImportExport('export')}
                   label={platformLabels.Export}
                   color='#000'
-                  image='export.png'
-                  tooltipText={platformLabels.Export}
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
               <Grid item xs={0.5}>
                 <CustomButton
                   onClick={onDelete}
-                  image='delete-icon.png'
                   label={platformLabels.Delete}
                   color='#000'
-                  tooltipText={platformLabels.Delete}
                   disabled={!formik.values.employeeId || !formik.values.fromDate || !formik.values.toDate}
                 />
               </Grid>
@@ -242,9 +236,7 @@ export default function Calendar() {
                 <CustomButton
                   onClick={onGenerate}
                   label={platformLabels.Generate}
-                  image='generate.png'
                   color='#000'
-                  tooltipText={platformLabels.Generate}
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
