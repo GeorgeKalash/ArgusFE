@@ -882,8 +882,10 @@ const Table = ({
           className={[
             'ag-theme-alpine',
             styles.agGridContainer,
+            hasImageColumn ? styles.hasImageRows : '',
             !props.maxHeight && !props.height ? styles.agGridFlex : ''
-          ].join(' ')}        >
+          ].join(' ')}
+        >
           {hoveredTable && !pagination && (
             <Box className={styles.hoverReset}>
               <IconButton size='small' onClick={onReset}>
@@ -905,7 +907,6 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            getRowHeight={(params) => (hasImageColumn ? 70 : undefined)}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}

@@ -76,7 +76,6 @@
   height: 18px;
 }
 
-
 .fullSizeCheckbox {
   width: 100% !important;
   height: 100% !important;
@@ -125,7 +124,6 @@
   border: 1px solid #ccc;
 }
 
-
 .agGridContainer :global(.ag-header),
 .agGridContainer :global(.ag-header-cell) {
   height: 40px !important;
@@ -134,6 +132,10 @@
 
 .agGridContainer :global(.ag-row) {
   height: 36px !important;
+}
+
+.hasImageRows :global(.ag-row) {
+  height: 70px !important;
 }
 
 .agGridContainer :global(.ag-header-cell-text),
@@ -177,6 +179,10 @@
     height: 30px !important;
   }
 
+  .hasImageRows :global(.ag-row) {
+    height: 60px !important;
+  }
+
   .paginationBar {
     height: 35px;
     padding: 2px 4px;
@@ -208,6 +214,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 1px 5px;
   }
+
   .actionIconButton {
     width: 22px;
     height: 22px;
@@ -218,6 +225,7 @@
     height: 16px;
   }
 }
+
 
 @media (max-width: 1366px) {
   .agGridContainer {
@@ -232,6 +240,10 @@
 
   .agGridContainer :global(.ag-row) {
     height: 28px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 56px !important;
   }
 
   .paginationWrapper {
@@ -269,6 +281,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 1px 4px;
   }
+
   .actionIconButton {
     width: 20px;
     height: 20px;
@@ -294,6 +307,10 @@
 
   .agGridContainer :global(.ag-row) {
     height: 26px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 52px !important;
   }
 
   .paginationWrapper {
@@ -359,6 +376,10 @@
     height: 24px !important;
   }
 
+  .hasImageRows :global(.ag-row) {
+    height: 48px !important;
+  }
+
   .paginationWrapper {
     gap: 4px;
   }
@@ -394,6 +415,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 3px;
   }
+
   .actionIconButton {
     width: 16px;
     height: 16px;
@@ -404,6 +426,7 @@
     height: 13px;
   }
 }
+
 
 @media (max-width: 600px) {
   .agGridContainer {
@@ -418,6 +441,10 @@
 
   .agGridContainer :global(.ag-row) {
     height: 23px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 44px !important;
   }
 
   .paginationWrapper {
@@ -455,6 +482,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
   }
+
   .actionIconButton {
     width: 15px;
     height: 15px;
@@ -465,6 +493,7 @@
     height: 12px;
   }
 }
+
 
 @media (max-width: 480px) {
   .agGridContainer {
@@ -479,6 +508,10 @@
 
   .agGridContainer :global(.ag-row) {
     height: 22px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 42px !important;
   }
 
   .paginationWrapper {
@@ -516,6 +549,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
   }
+
   .actionIconButton {
     width: 14px;
     height: 14px;
@@ -526,7 +560,6 @@
     height: 11px;
   }
 }
-
 
 @media (max-width: 375px) {
   .agGridContainer {
@@ -541,6 +574,10 @@
 
   .agGridContainer :global(.ag-row) {
     height: 21px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 40px !important;
   }
 
   .paginationWrapper {
@@ -578,6 +615,7 @@
   .pageTextField :global(.MuiInputBase-input) {
     padding: 0 2px;
   }
+
   .actionIconButton {
     width: 12px;
     height: 12px;
