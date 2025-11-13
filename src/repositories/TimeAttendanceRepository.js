@@ -44,7 +44,8 @@ export const TimeAttendanceRepository = {
     gen: service + 'genTV',
     close: service + 'closeTV',
     reopen: service + 'reopenTV',
-    cancel: service + 'cancelTV'
+    cancel: service + 'cancelTV',
+    override: service + 'overrideTV'
   },
   ShitLeave: {
     page: service + 'pageLQ',
@@ -75,5 +76,8 @@ export const TimeAttendanceRepository = {
   },
   Schedule: {
     qry: service + 'qrySC'
+  },
+  FlatPunch: {
+    qry: service + 'qryFP'
   }
 }

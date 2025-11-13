@@ -30,8 +30,8 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 export default function TimeVariatrionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  dayjs.extend(utc)
   const shiftStore = useRef([])
+  dayjs.extend(utc)
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.TimeVariation,
@@ -77,6 +77,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
       window.close()
     }
   })
+
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip == 2
   const isCancelled = formik.values.status == -1
@@ -210,27 +211,36 @@ export default function TimeVariatrionForm({ recordId, window }) {
     formik.setFieldValue('clockDuration', time(0))
   }
 
-  async function refetchForm(recordId) {
+  async function loadData(recordId) {
     if (!recordId) return
 
     const res = await getRequest({
       extension: TimeAttendanceRepository.TimeVariation.get,
       parameters: `_recordId=${recordId}`
     })
+
+    return res
+  }
+
+  async function refetchForm(recordId) {
+    const res = await loadData(recordId)
     formik.setValues({
       ...res.record,
       date: formatDateFromApi(res?.record?.date),
       clockDuration: time(res?.record?.duration)
     })
-
-    return res
   }
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await refetchForm(recordId)
-        getShiftData(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
+        const res = await loadData(recordId)
+        await getShiftData(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res?.record?.date),
+          clockDuration: time(res?.record?.duration)
+        })
       }
     })()
   }, [])
@@ -296,7 +306,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 label={labels.date}
                 value={formik.values?.date}
                 onChange={async (_, newValue) => {
-                  await fillShift(formik.values.employeeId, newValue, formik.values.timeCode)
+                  await fillShift(formik.values?.employeeId, newValue, formik.values?.timeCode)
                   formik.setFieldValue('date', newValue)
                 }}
                 onClear={() => {
@@ -321,7 +331,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => {
                   if (!newValue || newValue?.key == 20) resetShiftFields()
-                  await fillShift(formik.values.employeeId, formik.values.date, newValue?.key)
+                  await fillShift(formik.values?.employeeId, formik.values?.date, newValue?.key)
                   formik.setFieldValue('timeCode', newValue?.key || null)
                 }}
                 error={formik.touched.timeCode && Boolean(formik.errors.timeCode)}

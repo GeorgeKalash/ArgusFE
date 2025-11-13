@@ -47,23 +47,10 @@ export default function TimeVariation() {
       parameters: `_startAt=${_startAt}&_size=${_pageSize}&_sortBy=recordId&_params=${params || ''}`
     })
 
-    response.list = (response?.list || []).map(record => {
-      const dayId = record?.dayId
-      let formattedDay = ''
-
-      if (dayId && dayId.length === 8) {
-        const year = dayId.slice(0, 4)
-        const month = dayId.slice(4, 6)
-        const day = dayId.slice(6, 8)
-        formattedDay = `${day}/${month}/${year}`
-      }
-
-      return {
-        ...record,
-        clockDuration: time(record?.duration),
-        dayId: formattedDay
-      }
-    })
+    response.list = (response?.list || []).map(record => ({
+      ...record,
+      clockDuration: time(record?.duration)
+    }))
 
     return { ...response, _startAt }
   }
@@ -84,9 +71,10 @@ export default function TimeVariation() {
       flex: 1
     },
     {
-      field: 'dayId',
+      field: 'date',
       headerName: labels.date,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'employeeName',
@@ -192,7 +180,6 @@ export default function TimeVariation() {
           refetch={refetch}
           onEdit={edit}
           pageSize={50}
-          globalStatus={false}
           maxAccess={access}
         />
       </Grow>

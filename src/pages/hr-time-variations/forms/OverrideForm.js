@@ -1,8 +1,5 @@
 import { Grid } from '@mui/material'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import FormShell from 'src/components/Shared/FormShell'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
@@ -18,12 +15,10 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { DataSets } from 'src/resources/DataSets'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { formatDateFromApi, formatDateMDY, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
-import { SystemFunction } from 'src/resources/SystemFunction'
 import Form from 'src/components/Shared/Form'
 import { companyStructureRepository } from 'src/repositories/companyStructureRepository'
 import CustomDateTimePicker from 'src/components/Inputs/CustomDateTimePicker'
@@ -42,36 +37,51 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
     maxAccess,
     initialValues: {
       recordId,
-      reference: '',
-      date: new Date(),
+      date: null,
       employeeId: null,
+      shiftId: null,
       dataSource: 2,
-      timeCode: 20,
-      duration: 0,
-      damageLevel: null,
+      timeCode: null,
       punches: '',
       releaseStatus: null,
-      wip: 1,
-      status: 1
+      clockStamp: null,
+      inOut: null,
+      udId: null,
+      branchId: null
     },
     validationSchema: yup.object({
       employeeId: yup.number().required(),
       date: yup.date().required(),
       timeCode: yup.number().required(),
-      damageLevel: yup.number().required()
+      branchId: yup.number().required(),
+      udId: yup.number().required()
     }),
     onSubmit: async values => {
       await postRequest({
-        extension: TimeAttendanceRepository.TimeVariation.gen,
-        record: JSON.stringify({ ...values, date: formatDateToApi(values.date) })
+        extension: TimeAttendanceRepository.TimeVariation.override,
+        record: JSON.stringify({
+          ...values,
+          date: formatDateToApi(values.date),
+          clockStamp: values.clockStamp ? formatDateToApi(values.clockStamp) : null
+        })
       })
-      toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Edited)
       invalidate()
       window.close()
     }
   })
 
-  async function getShiftData(employeeId, date) {
+  const parseToGmtDate = date => {
+    const timestamp = date && parseInt(date.match(/-?\d+/)[0], 10)
+    if (!timestamp) return null
+
+    const d = new Date(timestamp)
+
+    // Force output in GMT (no timezone shift)
+    return d.toUTCString()
+  }
+
+  async function fillShift(employeeId, date) {
     const { list } = await getRequest({
       extension: TimeAttendanceRepository.FlatSchedule.qry,
       parameters:
@@ -87,67 +97,43 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
 
     shiftStore.current = shiftData || []
 
-    return shiftData || []
-  }
-
-  async function fillShift(employeeId, date, timeCode) {
-    if (!employeeId) {
-      resetShiftFields()
-
-      return
-    }
-    const shiftData = await getShiftData(employeeId, date)
-
-    if (!shiftData?.length) {
-      resetShiftFields()
-
-      return
-    }
-
-    const { recordId, duration } = shiftData[0]
-    if (timeCode != 20) {
+    if (!shiftData.length) return
+    const { recordId, dtTo, dtFrom } = shiftData[0]
+    if (formik.values?.timeCode != 20) {
       formik.setFieldValue('shiftId', recordId)
+      console.log('parseToGmtDate', new Date(parseToGmtDate(dtTo)))
+      formik.setFieldValue('dtTo', dtTo ? new Date(parseToGmtDate(dtTo)) : null)
+      formik.setFieldValue('dtFrom', dtFrom ? new Date(parseToGmtDate(dtTo)) : null)
     }
-  }
-
-  async function updateTerminationDate(employeeId) {
-    if (!employeeId) {
-      formik.setFieldValue('terminationDate', null)
-
-      return
-    }
-
-    const res = await getRequest({
-      extension: EmployeeRepository.QuickView.get,
-      parameters: `_recordId=${employeeId}&_asOfDate=${formatDateMDY(new Date())}`
-    })
-    formik.setFieldValue('terminationDate', res?.record?.terminationDate || null)
-  }
-
-  function resetShiftFields() {
-    formik.setFieldValue('shiftId', null)
-  }
-
-  async function refetchForm(recordId) {
-    if (!recordId) return
-
-    const res = await getRequest({
-      extension: TimeAttendanceRepository.TimeVariation.get,
-      parameters: `_recordId=${recordId}`
-    })
-    formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date)
-    })
-
-    return res
   }
 
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await refetchForm(recordId)
-        getShiftData(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
+        let punches = ''
+
+        const res = await getRequest({
+          extension: TimeAttendanceRepository.TimeVariation.get,
+          parameters: `_recordId=${recordId}`
+        })
+
+        const punchList = await getRequest({
+          extension: TimeAttendanceRepository.FlatPunch.qry,
+          parameters: `_date=${res?.record?.dayId}&_employeeId=${res?.record?.employeeId}&_sortBy=clockStamp&_shiftId=0&_size=50&_startAt=0`
+        })
+
+        punchList?.list?.map(x => {
+          punches = dayjs.utc(formatDateFromApi(x.clockStamp)).format('DD/MM/YYYY HH:mm').toString() + '\n'
+        })
+
+        formik.setValues({
+          ...res.record,
+          date: formatDateFromApi(res?.record?.date),
+          punches,
+          udId: res?.record.udId || null
+        })
+
+        await fillShift(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
       }
     })()
   }, [])
@@ -205,8 +191,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 displayField='dtRange'
                 store={shiftStore?.current}
                 value={formik.values.shiftId}
-                readOnly={formik.values?.timeCode == 20}
-                onChange={(_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
+                onChange={async (_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
                 error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
                 maxAccess={maxAccess}
               />
@@ -232,6 +217,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 valueField='key'
                 displayField='value'
                 required
+                readOnly
                 values={formik.values}
                 maxAccess={maxAccess}
                 onChange={async (_, newValue) => formik.setFieldValue('timeCode', newValue?.key || null)}
@@ -249,6 +235,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                required
                 maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('branchId', newValue?.recordId || null)}
@@ -266,6 +253,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                   { key: 'reference', value: 'Reference' },
                   { key: 'name', value: 'Name' }
                 ]}
+                required
                 maxAccess={maxAccess}
                 values={formik.values}
                 onChange={(_, newValue) => formik.setFieldValue('udId', newValue?.recordId || null)}
@@ -281,7 +269,11 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => formik.setFieldValue('inOut', newValue?.key || null)}
+                onChange={async (_, newValue) => {
+                  const { dtFrom, dtTo } = formik.values
+                  formik.setFieldValue('clockStamp', newValue?.key == 1 ? dtFrom : newValue?.key == 2 ? dtTo : null)
+                  formik.setFieldValue('inOut', newValue?.key || null)
+                }}
                 error={formik.touched.inOut && Boolean(formik.errors.inOut)}
               />
             </Grid>
