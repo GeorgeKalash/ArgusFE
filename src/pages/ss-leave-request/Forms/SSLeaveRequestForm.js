@@ -21,6 +21,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import FormShell from 'src/components/Shared/FormShell'
 import { AuthContext } from 'src/providers/AuthContext'
+import { DataSets } from 'src/resources/DataSets'
 
 export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -291,7 +292,20 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField name='statusName' label={labels.statusName} readOnly value={formik.values.statusName} />
+              <ResourceComboBox
+                name='status'
+                label={labels.statusName}
+                datasetId={DataSets.DOCUMENT_STATUS}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                readOnly
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('status', newValue?.key || null)
+                }}
+                error={formik.touched.status && Boolean(formik.errors.status)}
+                maxAccess={maxAccess}
+              />
             </Grid>
           </Grid>
         </Grow>
