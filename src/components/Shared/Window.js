@@ -53,8 +53,8 @@ const Window = React.memo(
     disabledInfo,
     onApply,
     disabledApply,
-    spacing,
     isLoading = true,
+    spacing = true,
     ...props
   }) => {
     const { settings } = useSettings()
@@ -107,7 +107,7 @@ const Window = React.memo(
           id='parent'
           sx={{
             bottom: 0,
-            position: 'absolute',
+            position: 'fixed',
             width: spacing ? containerWidth : '100%',
             height: spacing ? containerHeight : '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
