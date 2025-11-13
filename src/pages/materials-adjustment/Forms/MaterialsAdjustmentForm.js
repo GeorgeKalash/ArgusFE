@@ -330,6 +330,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       const measurementSchedule = await getMeasurementObject(newRow?.msId)
       update({
+        qty: 0,
         sku: newRow.sku,
         itemId: itemIdValue,
         weight,
@@ -487,7 +488,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         maxLength: 11,
         onCondition: row => {
           return {
-            decimalScale: row.decimals
+            decimalScale: row?.decimals,
+            readOnly: !row?.itemId
           }
         }
       },

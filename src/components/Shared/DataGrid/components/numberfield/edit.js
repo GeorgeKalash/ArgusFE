@@ -7,6 +7,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
   const { systemChecks } = useContext(ControlContext)
   const checkCondition = props?.onCondition && props?.onCondition(data)
   const decimalScale = checkCondition?.decimalScale || props?.decimalScale
+  const readOnly = checkCondition?.readOnly || props?.readOnly
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
   const typing = useRef(false)
 
@@ -38,7 +39,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
           : value?.[field]
       }
       label={''}
-      readOnly={props?.readOnly}
+      readOnly={readOnly}
       decimalScale={decimalScale}
       autoFocus
       autoSelect
