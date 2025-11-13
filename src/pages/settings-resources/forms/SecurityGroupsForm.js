@@ -21,7 +21,6 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     query: { data }
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.SecurityGroup.qry,
     datasetId: ResourceIds.SettingsResources
   })
 
@@ -65,11 +64,9 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   }
 
   async function onSubmit() {
-    const sgList = data?.list ?? []
-
     const payload = {
       resourceId: row.resourceId,
-      data: sgList.map(item => ({
+      data: (data?.list || []).map(item => ({
         sgId: item?.sgId ?? null,
         resourceId: row?.resourceId,
         moduleId: row?.moduleId,
@@ -168,8 +165,8 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     <Form onSave={onSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
+          <Grid container spacing={2} xs={4}>
+            <Grid item xs={12}>
               <CustomTextField
                 name='resourceId'
                 label={labels.resourceId}
@@ -178,8 +175,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid xs={5}></Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12}>
               <CustomTextField
                 name='resourceName'
                 label={labels.resourceName}
