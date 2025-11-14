@@ -15,58 +15,44 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const requiredIfAny = (otherFields, message, customCheck) => {
-    return yup.string().test('required-if-any', message, function (value) {
-      const index = this.options.index
-      const parent = this.parent
-
-      const isAnyFilled = otherFields.some(field => !!parent[field])
-      const isFirst = index === 0
-
-      const isValid = customCheck ? customCheck(value) : !!value
-
-      return isFirst ? !isAnyFilled || isValid : isValid
-    })
+  const conditions = {
+    workCenterId: row => row?.workCenterId,
+    operationId: row => row?.operationId,
+    sku: row => row?.sku,
+    designQty: row => row?.designQty
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'data')
 
   const { formik } = useForm({
-    validateOnChange: true,
     maxAccess,
+    conditionSchema: ['data'],
     initialValues: {
       designId: recordId,
-      items: [
+      data: [
         {
           id: 1,
+          workCenterId: null,
           designId: recordId,
           operationId: '',
           rmSeqNo: 1,
           itemId: '',
-          designQty: 0,
-          designPcs: 0
+          designQty: null,
+          designPcs: null
         }
       ]
     },
     validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object().shape({
-          operationId: requiredIfAny(['itemId', 'designQty', 'designPcs'], 'Operation is required'),
-          itemId: requiredIfAny(['operationId', 'designQty', 'designPcs'], 'Item is required'),
-          designQty: requiredIfAny(
-            ['operationId', 'itemId', 'designPcs'],
-            'Design Qty is required and must be a number',
-            value => !!value && !isNaN(Number(value))
-          )
-        })
-      )
+      data: yup.array().of(schema)
     }),
     onSubmit: async values => {
-      const modifiedItems = values?.items
+      const modifiedItems = values?.data
         .map((details, index) => {
           return {
             ...details,
@@ -75,7 +61,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
             designId: recordId
           }
         })
-        .filter(item => item.operationId || item.itemId || item.designQty)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
       await postRequest({
         extension: ManufacturingRepository.DesignRawMaterial.set2,
@@ -105,12 +91,12 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
               }
             })
           )
-        : formik.initialValues.items
+        : formik.initialValues.data
 
     formik.setValues({
       designId: recordId,
       recordId,
-      items: updateItemsList
+      data: updateItemsList
     })
   }
 
@@ -120,17 +106,51 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
     })()
   }, [])
 
-  const totalQty = formik.values.items.reduce((qty, row) => qty + (Number(row.designQty) || 0), 0)
-  const totalPcs = formik.values.items.reduce((pcs, row) => pcs + (Number(row.designPcs) || 0), 0)
+  const totalQty = formik.values.data.reduce((qty, row) => qty + (Number(row.designQty) || 0), 0)
+  const totalPcs = formik.values.data.reduce((pcs, row) => pcs + (Number(row.designPcs) || 0), 0)
 
   const columns = [
+    {
+      component: 'resourcelookup',
+      label: labels.workCenter,
+      name: 'workCenterId',
+      flex: 2,
+      props: {
+        endpointId: ManufacturingRepository.WorkCenter.snapshot,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'workCenterId' },
+          { from: 'reference', to: 'workCenterRef' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.workCenterId) {
+          update({
+            operationId: null,
+            operationName: ''
+          })
+
+          return
+        }
+        update({
+          workCenterId: newRow?.workCenterId,
+          workCenterRef: newRow?.workCenterRef
+        })
+      }
+    },
     {
       component: 'resourcecombobox',
       label: labels.operation,
       name: 'operationId',
+      variableParameters: [{ key: 'workCenterId', value: 'workCenterId' }],
       props: {
         endpointId: ManufacturingRepository.Operation.qry,
-        parameters: `_workCenterId=0&_startAt=0&_pageSize=1000&`,
         valueField: 'recordId',
         displayField: 'name',
         mapping: [
@@ -139,9 +159,13 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           { from: 'reference', to: 'operationRef' }
         ],
         columnsInDropDown: [
-          { key: 'name', value: 'Name' },
-          { key: 'reference', value: 'Reference' }
-        ]
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 3
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.workCenterId }
       }
     },
     {
@@ -159,15 +183,43 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'name', to: 'itemName' },
-          { from: 'sku', to: 'sku' }
+          { from: 'sku', to: 'sku' },
+          { from: 'categoryName', to: 'categoryName' }
         ],
         displayFieldWidth: 2
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow?.itemId) {
+          const res = await getRequest({
+            extension: InventoryRepository.ItemProduction.get,
+            parameters: `_recordId=${newRow.itemId}`
+          })
+          update({ rmCategoryName: res?.record?.rmcName })
+        } else {
+          update({ rmCategoryName: '' })
+        }
       }
     },
     {
       component: 'textfield',
       label: labels.item,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.rmCategory,
+      name: 'rmCategoryName',
       props: {
         readOnly: true
       }
@@ -203,10 +255,12 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
       <VertLayout>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
-            value={formik.values.items}
-            error={formik.errors.items}
+            onChange={value => formik.setFieldValue('data', value)}
+            value={formik.values.data}
+            error={formik.errors.data}
             columns={columns}
+            name='data'
+            maxAccess={maxAccess}
           />
         </Grow>
         <Fixed>

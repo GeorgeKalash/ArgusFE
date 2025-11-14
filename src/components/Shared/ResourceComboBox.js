@@ -65,6 +65,8 @@ export default function ResourceComboBox({
   }, [parameters])
 
   const fetchData = async (refresh = true) => {
+    if (rest?.readOnly) return
+
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
