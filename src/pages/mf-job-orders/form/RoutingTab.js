@@ -159,12 +159,12 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 2.5
       },
       propsReducer({ row, props }) {
         return {
           ...props,
-          readOnly: [1, 2, 3, 4].includes(row.status)
+          readOnly: [1, 2, 3, 4].includes(row.status) || !row.workCenterId
         }
       }
     },
