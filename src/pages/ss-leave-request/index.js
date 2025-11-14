@@ -14,6 +14,7 @@ import GridToolbar from 'src/components/Shared/GridToolbar'
 import SSLeaveRequestForm from './Forms/SSLeaveRequestForm'
 import { useError } from 'src/error'
 import { AuthContext } from 'src/providers/AuthContext'
+import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 
 const SSLeaveRequest = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -21,20 +22,12 @@ const SSLeaveRequest = () => {
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { user } = useContext(AuthContext)
-
-  function formatDotNetDate(dotNetDateString) {
-    if (!dotNetDateString) return ''
-    const match = dotNetDateString.match(/\d+/)
-    if (!match) return ''
-    const date = new Date(parseInt(match[0], 10))
-
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
+  const employeeId = user?.employeeId
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
-    if (!user?.employeeId) {
+    if (!employeeId) {
       stackError({
         message: platformLabels.notConnectedToEmployee
       })
@@ -46,12 +39,6 @@ const SSLeaveRequest = () => {
       extension: SelfServiceRepository.SSLeaveRequest.page,
       parameters: `_size=50&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_employeeId=${user?.employeeId}&_sortBy=recordId`
     })
-
-    response.list = response?.list?.map(item => ({
-      ...item,
-      startDateFormatted: formatDotNetDate(item?.startDate),
-      endDateFormatted: formatDotNetDate(item?.endDate)
-    }))
 
     return { ...response, _startAt }
   }
@@ -71,14 +58,16 @@ const SSLeaveRequest = () => {
 
   const columns = [
     {
-      field: 'startDateFormatted',
+      field: 'startDate',
       headerName: labels.startDate,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
     {
-      field: 'endDateFormatted',
+      field: 'endDate',
       headerName: labels.endDate,
-      flex: 1
+      flex: 1,
+      type: 'date'
     },
     {
       field: 'destination',
@@ -96,18 +85,24 @@ const SSLeaveRequest = () => {
     openForm()
   }
 
-  function openForm(recordId) {
-    if (!user?.employeeId) {
+  async function openForm(recordId) {
+    if (!employeeId) {
       stackError({
         message: platformLabels.notConnectedToEmployee
       })
     } else {
+      const res = await getRequest({
+        extension: EmployeeRepository.Employee.get1,
+        parameters: `_recordId=${employeeId}`
+      })
+
       stack({
         Component: SSLeaveRequestForm,
         props: {
           recordId,
           labels,
-          maxAccess: access
+          maxAccess: access,
+          employeeRecord: res.record
         },
         width: 800,
         height: 550,

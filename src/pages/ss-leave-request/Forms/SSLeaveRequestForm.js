@@ -23,7 +23,7 @@ import FormShell from 'src/components/Shared/FormShell'
 import { AuthContext } from 'src/providers/AuthContext'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
+export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employeeRecord }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
@@ -43,13 +43,14 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
       endDate: null,
       date: new Date(),
       employeeId,
+      employeeRef: employeeRecord?.reference,
+      employeeName: employeeRecord?.fullName,
       justification: '',
       reference: '',
       destination: '',
       ltId: null,
       isPaid: false,
       status: 1,
-      employeeName: '',
       leaveBalance: 0,
       multiDayLeave: 2,
       wip: 1
@@ -94,15 +95,10 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
     })
 
     const lsIdValue = res?.record?.lsId
-    if (!lsIdValue) {
-      formik.setFieldValue('leaveBalance', 0)
-
-      return
-    }
 
     const res2 = await getRequest({
       extension: LoanManagementRepository.Leaves.qry,
-      parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue}&_asOfDate=${
+      parameters: `_recordId=${recordId}&_employeeId=${employeeId}&_lsId=${lsIdValue || 0}&_asOfDate=${
         asOfDate ? formatDateTimeForGetAPI(asOfDate) : formatDateTimeForGetAPI(new Date())
       }`
     })
@@ -124,8 +120,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
       startDate: formatDateFromApi(res.record.startDate),
       endDate: formatDateFromApi(res.record.endDate)
     })
-
-    getLeaveBalance(recordId, res?.record?.employeeId, res?.record?.ltId, formatDateFromApi(res?.record?.date))
+    await getLeaveBalance(recordId, res?.record?.employeeId, res?.record?.ltId, formatDateFromApi(res?.record?.date))
   }
 
   useEffect(() => {
