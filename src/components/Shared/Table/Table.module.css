@@ -76,10 +76,18 @@
   height: 18px;
 }
 
-.fullSizeCheckbox {
+.agGridContainer :global(.MuiCheckbox-root) {
   width: 100% !important;
   height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+  font-size: 22px !important;
+}
+
 
 .pointerNone {
   pointer-events: none;
@@ -291,7 +299,9 @@
     width: 15px;
     height: 15px;
   }
-}
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 20px !important;
+  }}
 
 
 @media (max-width: 1024px) {
@@ -357,6 +367,9 @@
   .actionIcon {
     width: 14px;
     height: 14px;
+  }
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 18px !important;
   }
 }
 
@@ -425,6 +438,9 @@
     width: 13px;
     height: 13px;
   }
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 16px !important;
+  }
 }
 
 
@@ -491,6 +507,9 @@
   .actionIcon {
     width: 12px;
     height: 12px;
+  }
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 14px !important;
   }
 }
 
@@ -559,6 +578,9 @@
     width: 11px;
     height: 11px;
   }
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 13px !important;
+  }
 }
 
 @media (max-width: 375px) {
@@ -624,5 +646,8 @@
   .actionIcon {
     width: 10px;
     height: 10px;
+  }
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 12px !important;
   }
 }
