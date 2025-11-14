@@ -25,16 +25,23 @@ const SmsRequestLog = () => {
     resourceId: ''
   })
 
-  async function fetchWithFilter({ filters }) {
-    const resourceId = filters?.resourceId
+  async function fetchWithFilter({ filters, pagination }) {
     if (!filters || !filters?.resourceId) {
       return { list: [] }
     } else {
-      return await getRequest({
-        extension: SystemRepository.SMSRequest.qry,
-        parameters: `_filter=&_resourceId=${resourceId}`
-      })
+      return fetchGridData({ _startAt: pagination._startAt || 0, filters })
     }
+  }
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, filters } = options
+
+    const response = await getRequest({
+      extension: SystemRepository.SMSRequest.page,
+      parameters: `_resourceId=${filters?.resourceId}&_startAt=${_startAt}&_pageSize=${_pageSize}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
@@ -43,11 +50,12 @@ const SmsRequestLog = () => {
     labels: labels,
     filterBy,
     access,
-    filters
+    filters,
+    paginationParameters
   } = useResourceQuery({
     datasetId: ResourceIds.SmsRequestLog,
     filter: {
-      endpointId: SystemRepository.SMSRequest.qry,
+      endpointId: SystemRepository.SMSRequest.page,
       filterFn: fetchWithFilter
     }
   })
@@ -138,11 +146,11 @@ const SmsRequestLog = () => {
           ]}
           gridData={data && filters?.resourceId ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
