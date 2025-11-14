@@ -65,7 +65,7 @@ export default function ResourceComboBox({
   }, [parameters])
 
   const fetchData = async (refresh = true) => {
-    if (rest?.readOnly) return
+    if (rest?.readOnly && dataGrid) return
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
