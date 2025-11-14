@@ -1,0 +1,177 @@
+.outlinedRoot {
+  height: 33px !important;
+}
+
+.outlinedFieldset {
+  border-color: #959d9e;
+  border-radius: 6px;
+}
+
+.outlinedNoBorder {
+  border: none;
+}
+
+.inputLabel {
+  font-size: 14px !important;
+}
+
+.inputBase {
+  font-size: 14px !important ;
+}
+
+.search-icon {
+  font-size: 18px !important;
+  border: 0 !important;
+  padding: 0px !important;
+  margin: 1px !important;
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .outlinedRoot {
+    height: 30px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 5px !important;
+  }
+
+  .inputLabel {
+    font-size: 12px !important;
+    top: -3px;
+  }
+
+  .inputLabelFocused {
+    font-size: 12px !important;
+    top: 0px;
+  }
+  .inputBase {
+    font-size: 12px !important ;
+  }
+
+  .search-icon {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .inputLabel {
+    font-size: 11px !important;
+  }
+
+  .inputBase {
+    font-size: 11px !important ;
+  }
+
+  .outlinedRoot {
+    height: 28px !important;
+  }
+
+  .search-icon {
+    font-size: 14px !important;
+  }
+}
+@media (max-width: 1024px) {
+  .outlinedRoot {
+    height: 26px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 4px !important;
+  }
+
+  .inputLabel {
+    font-size: 10px !important;
+    top: -2px;
+  }
+
+  .inputLabelFocused {
+    font-size: 10px !important;
+    top: 0px;
+  }
+
+  .inputBase {
+    font-size: 10px !important;
+  }
+
+  .search-icon {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .outlinedRoot {
+    height: 24px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 3px !important;
+  }
+
+  .inputLabel {
+    font-size: 9px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 9px !important;
+  }
+
+  .inputBase {
+    font-size: 9px !important;
+  }
+
+  .search-icon {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .outlinedRoot {
+    height: 22px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 8px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 8px !important;
+  }
+
+  .inputBase {
+    font-size: 8px !important;
+  }
+
+  .search-icon {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .outlinedRoot {
+    height: 20px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 7px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 7px !important;
+  }
+
+  .inputBase {
+    font-size: 7px !important;
+  }
+
+  .search-icon {
+    font-size: 10px !important;
+  }
+}

@@ -1,0 +1,44 @@
+.customDateTimeTextField :global(.MuiOutlinedInput-root) {
+    height: 33px !important;
+  }
+  
+  .customDateTimeTextField :global(.MuiOutlinedInput-root fieldset) {
+    border-color: #959d9e;
+    border-radius: 6px;
+  }
+  
+  .noBorder :global(.MuiOutlinedInput-root fieldset) {
+    border: none !important;
+  }
+  
+  .customDateTimeTextField :global(.MuiInputLabel-root) {
+    font-size: 0.9rem;
+  }
+  
+  .labelUnfocused :global(.MuiInputLabel-root) {
+    top: -3px;
+  }
+  
+  .labelFocused :global(.MuiInputLabel-root) {
+    top: 0px;
+  }
+  
+  .customDateTimeTextField :global(.MuiInputBase-input) {
+    font-size: 0.9rem;
+    color: black;
+  }
+  
+  .clearIconButton {
+    margin-right: -14px !important;
+  }
+  
+  .eventIconButton {
+    margin-left: 4px !important;
+    margin-right: -10px !important;
+  }
+  
+  .dateIcon {
+    border: 0;
+    font-size: 18px !important;
+  }
+  
