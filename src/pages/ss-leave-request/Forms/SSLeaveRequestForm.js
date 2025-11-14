@@ -23,13 +23,11 @@ import FormShell from 'src/components/Shared/FormShell'
 import { AuthContext } from 'src/providers/AuthContext'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employeeRecord }) {
+export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { user } = useContext(AuthContext)
   const employeeId = user?.employeeId
-
-  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: SelfServiceRepository.SSLeaveRequest.page
@@ -38,13 +36,11 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      recordId,
+      recordId: null,
       startDate: new Date(),
       endDate: null,
       date: new Date(),
       employeeId,
-      employeeRef: employeeRecord?.reference,
-      employeeName: employeeRecord?.fullName,
       justification: '',
       reference: '',
       destination: '',
@@ -81,6 +77,9 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
       invalidate()
     }
   })
+
+  
+  const editMode = !!formik.values.recordId
 
   const getLeaveBalance = async (recordId, employeeId, ltId, asOfDate) => {
     if (!employeeId || !ltId) {
@@ -142,7 +141,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess, employ
     }
 
     fetchEmployeeDetails()
-  }, [employeeId])
+  }, [])
 
   return (
     <FormShell

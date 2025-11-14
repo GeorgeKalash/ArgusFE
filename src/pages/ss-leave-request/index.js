@@ -91,18 +91,12 @@ const SSLeaveRequest = () => {
         message: platformLabels.notConnectedToEmployee
       })
     } else {
-      const res = await getRequest({
-        extension: EmployeeRepository.Employee.get1,
-        parameters: `_recordId=${employeeId}`
-      })
-
       stack({
         Component: SSLeaveRequestForm,
         props: {
           recordId,
           labels,
-          maxAccess: access,
-          employeeRecord: res.record
+          maxAccess: access
         },
         width: 800,
         height: 550,
