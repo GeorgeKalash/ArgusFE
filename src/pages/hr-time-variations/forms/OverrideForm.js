@@ -142,7 +142,6 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
       }
     })()
   }, [])
-  console.log('check ', formik)
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>

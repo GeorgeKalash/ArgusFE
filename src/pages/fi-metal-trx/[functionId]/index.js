@@ -152,8 +152,7 @@ export default function MetalTrxFinancial() {
       field: 'isVerified',
       headerName: labels.isVerified,
       type: 'checkbox',
-      flex: 1,
-      editable: true
+      flex: 1
     },
     {
       field: 'statusName',
