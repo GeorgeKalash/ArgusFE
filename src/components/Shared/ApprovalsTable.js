@@ -32,6 +32,7 @@ import SalesOrderForm from '../../pages/sales-order/Tabs/SalesOrderForm'
 import PurchaseRquisitionForm from '../../pages/purchase-requisition/form/PurchaseRquisitionForm'
 import LoanWindow from '../../pages/hr-loans/Window/LoanWindow'
 import PurchaseOrderForm from 'src/pages/pu-ord/forms/PurchaseOrderForm'
+import TimeVariatrionForm from 'src/pages/hr-time-variations/forms/TimeVariatrionForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -158,6 +159,8 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.PurchaseOrder:
         relevantComponent = PurchaseOrderForm
+      case SystemFunction.TimeVariation:
+        relevantComponent = TimeVariatrionForm
       default:
         // Handle default case if needed
         break

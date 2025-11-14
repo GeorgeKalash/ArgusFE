@@ -17,7 +17,6 @@ import { TrxType, accessMap } from 'src/resources/AccessLevels'
 import deleteIcon from '../../../public/images/TableIcons/delete.png'
 import { useWindow } from 'src/windows'
 import DeleteDialog from './DeleteDialog'
-import StrictDeleteConfirmation from './StrictDeleteConfirmation'
 import { HIDDEN, accessLevel } from 'src/services/api/maxAccess'
 import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from 'src/lib/date-helper'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
@@ -27,6 +26,7 @@ import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
+import StrictConfirmation from './StrictConfirmation'
 
 const Table = ({
   name,
@@ -511,11 +511,12 @@ const Table = ({
   }
   function openDeleteConfirmation(obj) {
     stack({
-      Component: StrictDeleteConfirmation,
+      Component: StrictConfirmation,
       props: {
         action() {
           props?.onDelete(obj)
-        }
+        },
+        type: 'delete'
       },
       refresh: false
     })
