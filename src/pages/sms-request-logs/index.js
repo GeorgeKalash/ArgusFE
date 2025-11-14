@@ -29,16 +29,16 @@ const SmsRequestLog = () => {
     if (!filters || !filters?.resourceId) {
       return { list: [] }
     } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params, filters })
+      return fetchGridData({ _startAt: pagination._startAt || 0, filters })
     }
   }
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [], filters } = options
+    const { _startAt = 0, _pageSize = 50, filters } = options
 
     const response = await getRequest({
       extension: SystemRepository.SMSRequest.page,
-      parameters: `_filter=&_resourceId=${filters?.resourceId}&_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}`
+      parameters: `_resourceId=${filters?.resourceId}&_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
