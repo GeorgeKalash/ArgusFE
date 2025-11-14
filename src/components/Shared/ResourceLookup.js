@@ -22,9 +22,11 @@ export const ResourceLookup = ({
   const [store, setStore] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [renderOption, setRenderOption] = useState(false)
+  const [success, setSuccess] = useState(false)
   const lookupRequestId = useRef(0)
 
   const onLookup = async searchQry => {
+    setSuccess(false)
     setStore([])
     setRenderOption(false)
 
@@ -32,8 +34,8 @@ export const ResourceLookup = ({
 
     if (!endpointId) {
       if (rest.onLookup) {
+        setSuccess(true)
         const res = await rest?.onLookup(searchQry)
-
         if (currentRequestId !== lookupRequestId.current) return
         setStore(res)
         setRenderOption(true)
@@ -142,6 +144,7 @@ export const ResourceLookup = ({
           firstValue: _firstValue,
           secondValue: _secondValue,
           error,
+          success,
           onKeyUp,
           onFocus,
           onBlur,
