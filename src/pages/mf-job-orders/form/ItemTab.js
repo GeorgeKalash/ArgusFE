@@ -93,7 +93,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'trackBy', to: 'trackBy' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
