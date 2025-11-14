@@ -161,6 +161,19 @@ export default function Calendar() {
             border-color: #000;
             color: white;
           }
+            
+          .fc-view-harness {
+            z-index: 0 !important;
+            position: relative !important;
+          }
+
+          .fc-header-toolbar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 2 !important;
+            background: white;
+          }
+
         `}
       </style>
       <Form onSave={formik.handleSubmit} isSaved={false}>
@@ -261,39 +274,40 @@ export default function Calendar() {
               </Grid>
             </Grid>
 
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView='dayGridMonth'
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-              }}
-              allDaySlot={false}
-              height='auto'
-              events={events}
-              locale={user?.languageId === 2 ? arLocale : enLocale}
-              direction={user?.languageId === 2 ? 'rtl' : 'ltr'}
-              timeZone='UTC'
-              eventDisplay='block'
-              firstDay={1}
-              eventContent={arg => (
-                <div
-                  style={{
-                    backgroundColor: arg.event.backgroundColor,
-                    color: arg.event.textColor,
-                    padding: '4px',
-                    borderRadius: '6px',
-                    textAlign: 'center',
-                    fontSize: '0.8rem',
-                    whiteSpace: 'normal',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {arg.event.title}
-                </div>
-              )}
-            />
+            <div style={{ height: '100vh', overflowY: 'auto' }}>
+              <FullCalendar
+                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                initialView='dayGridMonth'
+                stickyHeaderDates={true}
+                headerToolbar={{
+                  left: 'prev,next today',
+                  center: 'title',
+                  right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                }}
+                allDaySlot={false}
+                height='auto'
+                events={events}
+                locale={user?.languageId === 2 ? arLocale : enLocale}
+                direction={user?.languageId === 2 ? 'rtl' : 'ltr'}
+                timeZone='UTC'
+                firstDay={1}
+                eventDisplay='block'
+                eventContent={arg => (
+                  <div
+                    style={{
+                      backgroundColor: arg.event.backgroundColor,
+                      color: arg.event.textColor,
+                      padding: '4px',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '0.8rem'
+                    }}
+                  >
+                    {arg.event.title}
+                  </div>
+                )}
+              />
+            </div>
           </Grow>
         </VertLayout>
       </Form>
