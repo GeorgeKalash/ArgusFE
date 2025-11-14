@@ -37,7 +37,7 @@ const Measurement = () => {
     access,
     invalidate,
     refetch,
-    paginationParameters,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: InventoryRepository.Measurement.page,
@@ -53,6 +53,11 @@ const Measurement = () => {
     {
       field: 'name',
       headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'decimals',
+      headerName: _labels.decimals,
       flex: 1
     }
   ]
