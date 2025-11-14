@@ -54,7 +54,10 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
       date: yup.date().required(),
       timeCode: yup.number().required(),
       branchId: yup.number().required(),
-      udId: yup.number().required()
+      udId: yup.number().required(),
+      shiftId: yup.number().required(),
+      inOut: yup.number().required(),
+      clockStamp: yup.date().required()
     }),
     onSubmit: async values => {
       await postRequest({
@@ -71,14 +74,15 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
     }
   })
 
-  const parseToGmtDate = date => {
-    const timestamp = date && parseInt(date.match(/-?\d+/)[0], 10)
-    if (!timestamp) return null
-
-    const d = new Date(timestamp)
-
-    // Force output in GMT (no timezone shift)
-    return d.toUTCString()
+  const parseToGmtDate = utc => {
+    return new Date(
+      utc.getUTCFullYear(),
+      utc.getUTCMonth(),
+      utc.getUTCDate(),
+      utc.getUTCHours(),
+      utc.getUTCMinutes(),
+      utc.getUTCSeconds()
+    )
   }
 
   async function fillShift(employeeId, date) {
@@ -97,13 +101,12 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
 
     shiftStore.current = shiftData || []
 
-    if (!shiftData.length) return
+    if (!shiftData?.length) return
     const { recordId, dtTo, dtFrom } = shiftData[0]
     if (formik.values?.timeCode != 20) {
       formik.setFieldValue('shiftId', recordId)
-      console.log('parseToGmtDate', new Date(parseToGmtDate(dtTo)))
-      formik.setFieldValue('dtTo', dtTo ? new Date(parseToGmtDate(dtTo)) : null)
-      formik.setFieldValue('dtFrom', dtFrom ? new Date(parseToGmtDate(dtTo)) : null)
+      formik.setFieldValue('dtTo', dtTo ? parseToGmtDate(formatDateFromApi(dtTo)) : null)
+      formik.setFieldValue('dtFrom', dtFrom ? parseToGmtDate(formatDateFromApi(dtFrom)) : null)
     }
   }
 
@@ -130,13 +133,16 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
           ...res.record,
           date: formatDateFromApi(res?.record?.date),
           punches,
-          udId: res?.record.udId || null
+          udId: res?.record?.udId || null,
+          inOut: res?.record?.inOut || null,
+          clockStamp: res?.record?.clockStamp ? parseToGmtDate(formatDateFromApi(res?.record.clockStamp)) : null
         })
 
         await fillShift(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
       }
     })()
   }, [])
+  console.log('check ', formik)
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
@@ -189,6 +195,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 label={labels.shift}
                 valueField='recordId'
                 displayField='dtRange'
+                required
                 store={shiftStore?.current}
                 value={formik.values.shiftId}
                 onChange={async (_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
@@ -269,6 +276,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 displayField='value'
                 values={formik.values}
                 maxAccess={maxAccess}
+                required
                 onChange={async (_, newValue) => {
                   const { dtFrom, dtTo } = formik.values
                   formik.setFieldValue('clockStamp', newValue?.key == 1 ? dtFrom : newValue?.key == 2 ? dtTo : null)
@@ -284,6 +292,8 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 value={formik.values.clockStamp}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
+                formatTime='HH:mm'
+                required
                 onClear={() => formik.setFieldValue('clockStamp', null)}
                 error={formik.touched.clockStamp && Boolean(formik.errors.clockStamp)}
               />
