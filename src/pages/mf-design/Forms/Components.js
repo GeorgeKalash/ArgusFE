@@ -131,7 +131,7 @@ const Components = ({ store, maxAccess, labels }) => {
             extension: InventoryRepository.ItemProduction.get,
             parameters: `_recordId=${newRow.itemId}`
           })
-          update({ rmCategoryName: res?.record?.rmcName })
+          update({ rmCategoryName: res?.record?.rmcName || '' })
         } else {
           update({ rmCategoryName: '' })
         }

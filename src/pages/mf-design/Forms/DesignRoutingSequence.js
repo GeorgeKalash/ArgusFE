@@ -139,8 +139,8 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           return
         }
         update({
-          workCenterId: newRow?.workCenterId,
-          workCenterRef: newRow?.workCenterRef
+          workCenterId: newRow?.workCenterId || null,
+          workCenterRef: newRow?.workCenterRef || ''
         })
       }
     },
@@ -194,7 +194,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
             extension: InventoryRepository.ItemProduction.get,
             parameters: `_recordId=${newRow.itemId}`
           })
-          update({ rmCategoryName: res?.record?.rmcName })
+          update({ rmCategoryName: res?.record?.rmcName || '' })
         } else {
           update({ rmCategoryName: '' })
         }
