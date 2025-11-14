@@ -1,33 +1,37 @@
- .root {
+.root {
   flex: 1;
 }
 
 .agContainer {
   height: 100%;
   width: 100%;
-  font-size: 0.9rem;
+}
+
+.agContainer.ag-theme-alpine {
+  --ag-row-height: 35px;
+  --ag-header-height: 40px;
+  --ag-font-size: 0.9rem;
 }
 
 .agContainer :global(.ag-header),
-.agContainer :global(.ag-header-cell) {
-  height: 40px !important;
-  min-height: 40px !important;
+.agContainer :global(.ag-header-cell),
+.agContainer :global(.ag-header-row) {
+  height: var(--ag-header-height) !important;
+  min-height: var(--ag-header-height) !important;
+  background: var(--ag-header-bg, #f5f5f5);}
+
+.agContainer :global(.ag-row) {
+  height: var(--ag-row-height) !important;
 }
 
-.agContainer :global(.ag-header-row) {
-  background: var(--ag-header-bg);
-  height: 35px !important;
-  min-height: 35px !important;
+.agContainer :global(.ag-header-cell-text) {
+  font-size: 0.9rem;
 }
 
 .agContainer :global(.ag-cell) {
   border-right: 1px solid #d0d0d0 !important;
   font-size: 0.8rem !important;
-}
-.agContainer.ag-theme-alpine {
-  --ag-row-height: 35px;     
-  --ag-header-height: 40px;   
-  --ag-font-size: 0.9rem;
+  line-height: 1.1;
 }
 
 .agContainer :global(.ag-cell .MuiBox-root) {
@@ -74,11 +78,28 @@
   margin-left: 50px !important;
 }
 
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .agContainer {
-    --ag-font-size: 11px;
+@media (min-width: 1920px) {
+  .agContainer.ag-theme-alpine {
+    --ag-row-height: 38px;
+    --ag-header-height: 44px;
+    --ag-font-size: 1rem;
   }
 
+  .agContainer :global(.ag-header-cell-text) {
+    font-size: 1rem;
+  }
+
+  .agContainer :global(.ag-cell) {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 1599px) {
+  .agContainer.ag-theme-alpine {
+    --ag-row-height: 26px;
+    --ag-header-height: 32px;
+    --ag-font-size: 11px;
+  }
 
   .agContainer :global(.ag-header),
   .agContainer :global(.ag-header-cell),
@@ -91,31 +112,56 @@
     height: 26px !important;
   }
 
+  .agContainer :global(.ag-header-cell-text),
   .agContainer :global(.ag-cell) {
-    padding-top: 2px;
-    padding-bottom: 2px;
-    line-height: 1.1;
-    font-size: 0.75rem !important;
+    font-size: 11px !important;
   }
+}
 
-  .cellBox,
-  .cellEditorBox {
-    font-size: 0.8rem;
-  }
-
-  .deleteIcon {
-    font-size: 1.1rem !important;
-  }
-
-  .headerCheckbox {
-    width: 16px;
-    height: 16px;
-    margin-left: 32px !important;
-    
-  }
+@media (max-width: 1024px) {
   .agContainer.ag-theme-alpine {
-    --ag-row-height: 26px;
-    --ag-header-height: 32px;
-    --ag-font-size: 11px;
+    --ag-row-height: 24px;
+    --ag-header-height: 30px;
+    --ag-font-size: 10px;
+  }
+
+  .agContainer :global(.ag-header),
+  .agContainer :global(.ag-header-cell),
+  .agContainer :global(.ag-header-row) {
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+
+  .agContainer :global(.ag-row) {
+    height: 24px !important;
+  }
+
+  .agContainer :global(.ag-header-cell-text),
+  .agContainer :global(.ag-cell) {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 834px) {
+  .agContainer.ag-theme-alpine {
+    --ag-row-height: 22px;
+    --ag-header-height: 26px;
+    --ag-font-size: 9px;
+  }
+
+  .agContainer :global(.ag-header),
+  .agContainer :global(.ag-header-cell),
+  .agContainer :global(.ag-header-row) {
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+
+  .agContainer :global(.ag-row) {
+    height: 22px !important;
+  }
+
+  .agContainer :global(.ag-header-cell-text),
+  .agContainer :global(.ag-cell) {
+    font-size: 9px !important;
   }
 }

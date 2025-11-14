@@ -6,8 +6,9 @@ import ClearIcon from '@mui/icons-material/Clear'
 import EventIcon from '@mui/icons-material/Event'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
-import PopperComponent from '../Shared/Popper/PopperComponent'
+import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomDatePicker.module.css'
 
 const CustomDatePicker = ({
   name,
@@ -107,24 +108,6 @@ const CustomDatePicker = ({
           onAccept(value)
         }}
         fullWidth={fullWidth}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              border: !hasBorder && 'none',
-              borderColor: '#959d9e',
-              borderRadius: '6px'
-            },
-            height: `33px !important`
-          },
-          '& .MuiInputLabel-root': {
-            fontSize: '0.90rem',
-            top: isFocused || value ? '0px' : '-3px'
-          },
-          '& .MuiInputBase-input': {
-            fontSize: '0.90rem',
-            color: 'black'
-          }
-        }}
         autoFocus={autoFocus}
         format={dateFormat}
         onChange={newValue => {
@@ -137,7 +120,7 @@ const CustomDatePicker = ({
         open={openDatePicker}
         disabled={disabled}
         readOnly={_readOnly}
-        clearable //bug from mui not working for now
+        clearable // bug from mui not working for now
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
           textField: {
@@ -153,25 +136,37 @@ const CustomDatePicker = ({
             onBlur: e => {
               onBlur(e, inputValue?.current || value)
             },
-            InputProps: {
-              endAdornment: !(_readOnly || disabled) && (
-                <InputAdornment position='end'>
-                  {value && (
+            className: [
+              styles.customDateTextField,
+              !hasBorder ? styles.noBorder : '',
+              isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' '),
+              InputProps: {
+                endAdornment: !(_readOnly || disabled) && (
+                  <InputAdornment position='end'>
+                    {value && (
+                      <IconButton
+                        tabIndex={-1}
+                        edge='start'
+                        onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
+                        className={styles.clearIconButton}
+                      >
+                        <ClearIcon className={styles.dateIcon} />
+                      </IconButton>
+                    )}
                     <IconButton
                       tabIndex={-1}
-                      edge='start'
-                      onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
-                      sx={{ mr: -3 }}
+                      onClick={() => setOpenDatePicker(true)}
+                      className={styles.eventIconButton}
                     >
-                      <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                      <EventIcon className={styles.dateIcon} />
                     </IconButton>
-                  )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} sx={{ mr: -2 }}>
-                    <EventIcon sx={{ border: '0px', fontSize: 17 }} />
-                  </IconButton>
-                </InputAdornment>
-              )
-            }
+                  </InputAdornment>
+                )
+              }
+              
           },
           actionBar: {
             actions: ['accept', 'today']

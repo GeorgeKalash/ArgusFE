@@ -323,7 +323,7 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              <IconButton onClick={onReset}>
+              <IconButton onClick={onReset} className={styles.paginationBar}>
                 <CachedIcon />
               </IconButton>
             </Box>
@@ -725,8 +725,10 @@ const Table = ({
                   onClick={e => {
                     props?.onEdit(data)
                   }}
+                  className={styles.actionIconButton}
+
                 >
-                  <Image src={editIcon} alt='Edit' width={18} height={18} />
+                  <Image src={editIcon} alt='Edit' className={styles.actionIcon} />
                 </IconButton>
               )}
 
@@ -741,8 +743,11 @@ const Table = ({
                     }
                   }}
                   color='error'
+                  className={styles.actionIconButton}
+
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                  <Image src={deleteIcon} alt={platformLabels.Delete}  className={styles.actionIcon}
+/>
                 </IconButton>
               )}
               {globalStatus &&
@@ -761,8 +766,10 @@ const Table = ({
                       }
                     }}
                     color='error'
+                    className={styles.actionIconButton}
+
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} width={18} height={18} />
+                    <Image src={deleteIcon} alt={platformLabels.Delete}  className={styles.actionIcon} />
                   </IconButton>
                 )}
             </Box>
@@ -920,3 +927,5 @@ const Table = ({
 }
 
 export default Table
+
+

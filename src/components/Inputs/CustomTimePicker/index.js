@@ -6,8 +6,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import PopperComponent from '../Shared/Popper/PopperComponent'
+import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomTimePicker.module.css'
 
 const CustomTimePicker = ({
   name,
@@ -53,24 +54,6 @@ const CustomTimePicker = ({
         maxTime={max}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              border: !hasBorder && 'none',
-              borderColor: '#959d9e',
-              borderRadius: '6px'
-            },
-            height: '33px !important'
-          },
-          '& .MuiInputLabel-root': {
-            fontSize: '0.90rem',
-            top: isFocused || value ? '0px' : '-3px'
-          },
-          '& .MuiInputBase-input': {
-            fontSize: '0.90rem',
-            color: 'black'
-          }
-        }}
         autoFocus={autoFocus}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenTimePicker(false)}
@@ -85,16 +68,32 @@ const CustomTimePicker = ({
             fullWidth,
             error: !!error,
             helperText: typeof error === 'string' ? error : helperText,
+            className: [
+              styles.customTimeTextField,
+              !hasBorder ? styles.noBorder : '',
+              isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' '),
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {value && (
-                    <IconButton tabIndex={-1} edge='start' onClick={() => onChange(name, null)} sx={{ mr: -3 }}>
-                      <ClearIcon sx={{ border: '0px', fontSize: 20 }} />
+                    <IconButton
+                      tabIndex={-1}
+                      edge='start'
+                      onClick={() => onChange(name, null)}
+                      className={styles.clearIconButton}
+                    >
+                      <ClearIcon className={styles.dateIcon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenTimePicker(true)} sx={{ mr: -2 }}>
-                    <AccessTimeIcon />
+                  <IconButton
+                    tabIndex={-1}
+                    onClick={() => setOpenTimePicker(true)}
+                    className={styles.eventIconButton}
+                  >
+                    <AccessTimeIcon className={styles.dateIcon} />
                   </IconButton>
                 </InputAdornment>
               )
