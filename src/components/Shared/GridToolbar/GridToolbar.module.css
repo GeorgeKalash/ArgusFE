@@ -1,0 +1,177 @@
+.dialogActions {
+  padding: 4px 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.gridContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 14px;
+}
+
+.addButtonWrapper {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.searchFieldWrapper {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.searchFieldWrapper input {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.actionButtonsWrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0 !important;
+}
+
+.actionButton {
+  margin-right: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .gridContainer {
+    padding: 0 12px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .gridContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 8px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 5px 10px;
+    font-size: 12.5px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 12.5px;
+    padding: 5px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gridContainer {
+    padding: 0 6px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 4px 9px;
+    font-size: 12px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 12px;
+    padding: 4px 7px;
+  }
+}
+
+@media (max-width: 600px) {
+  .gridContainer {
+    padding: 0 4px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 4px 8px;
+    font-size: 11.5px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 11.5px;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gridContainer {
+    padding: 0 3px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+}
+
+@media (max-width: 375px) {
+  .gridContainer {
+    padding: 0 2px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 3px 5px;
+    font-size: 10.5px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 10.5px;
+    padding: 3px 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .gridContainer {
+    padding: 0 1px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 2px 4px;
+    font-size: 10px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 10px;
+    padding: 2px 3px;
+  }
+}
+
+@media (max-width: 320px) {
+  .gridContainer {
+    padding: 0 1px;
+  }
+
+  .addButton,
+  .actionButton {
+    padding: 2px 3px;
+    font-size: 9.5px;
+  }
+
+  .searchFieldWrapper input {
+    font-size: 9.5px;
+    padding: 2px 2px;
+  }
+}

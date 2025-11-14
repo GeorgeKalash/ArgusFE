@@ -1,17 +1,17 @@
-// ** MUI Imports
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomTextField.module.css'
 
 const CustomTextField = ({
-  type = 'text', //any valid HTML5 input type
-  variant = 'outlined', //outlined, standard, filled
+  type = 'text',
+  variant = 'outlined',
   value,
   onClear,
   onSearch,
-  size = 'small', //small, medium
+  size = 'small',
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
@@ -62,7 +62,6 @@ const CustomTextField = ({
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
-
       props?.onChange(e)
     }
 
@@ -124,15 +123,27 @@ const CustomTextField = ({
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
+        classes: {
+          root: styles.outlinedRoot,
+          notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
+          input: styles.inputBase
+        },
         endAdornment: !_readOnly && (
           <InputAdornment position='end'>
             {search && (
-              <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
-                <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
+              <IconButton
+                className={styles['search-icon']}
+                tabIndex={-1}
+                edge='start'
+                onClick={() => onSearch(value)}
+                aria-label='search input'
+              >
+                <SearchIcon className={styles['search-icon']} />
               </IconButton>
             )}
             {!clearable && !readOnly && (value || value === 0) && (
               <IconButton
+                className={styles['search-icon']}
                 tabIndex={-1}
                 id={props.ClearId}
                 edge='end'
@@ -142,28 +153,14 @@ const CustomTextField = ({
                 }}
                 aria-label='clear input'
               >
-                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                <ClearIcon className={styles['search-icon']} />
               </IconButton>
             )}
           </InputAdornment>
         )
       }}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            border: !hasBorder && 'none',
-            borderColor: '#959d9e',
-            borderRadius: '6px'
-          },
-          height: `33px !important`
-        },
-        '& .MuiInputLabel-root': {
-          fontSize: '0.90rem',
-          top: isFocused || value ? '0px' : '-3px'
-        },
-        '& .MuiInputBase-input': {
-          fontSize: '0.90rem'
-        }
+      InputLabelProps={{
+        className: isFocused || value ? styles.inputLabelFocused : styles.inputLabel
       }}
       required={_required}
       {...props}

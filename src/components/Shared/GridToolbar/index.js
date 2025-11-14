@@ -1,13 +1,14 @@
 import { Grid, DialogActions } from '@mui/material'
-import CustomTextField from '../Inputs/CustomTextField'
+import CustomTextField from '../../Inputs/CustomTextField'
 import { useState, useContext, useEffect } from 'react'
 import { accessMap, TrxType } from 'src/resources/AccessLevels'
 import { ControlContext } from 'src/providers/ControlContext'
-import { getButtons } from './Buttons'
+import { getButtons } from '../Buttons'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import ReportGenerator from './ReportGenerator'
-import CustomButton from '../Inputs/CustomButton'
+import styles from './GridToolbar.module.css'
+import ReportGenerator from '../ReportGenerator'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,
@@ -83,24 +84,26 @@ const GridToolbar = ({
   const buttons = getButtons(platformLabels)
 
   return (
-    <DialogActions sx={{ px: '0px !important', py: '4px !important', flexDirection: 'column' }}>
-      <Grid container spacing={2} sx={{ display: 'flex', px: 2, width: '100%', justifyContent: 'space-between' }}>
-        <Grid item xs={previewReport ? 6 : rightSection ? 9 : 12}>
+    <DialogActions className={styles.dialogActions}>
+      <Grid container spacing={2} className={styles.gridContainer}>
+        <Grid item xs={previewReport ? 6 : 9}>
           <Grid container spacing={zoomSpacing}>
             {onAdd && addBtnVisible && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Grid item className={styles.buttonWrapper}>
                 <CustomButton
                   onClick={onAdd}
-                  style={{ border: '1px solid #4eb558' }}
                   color={'transparent'}
                   disabled={disableAdd}
                   image={'add.png'}
+                  border='1px solid #4eb558'
                 />
               </Grid>
             )}
+
             {leftSection}
+
             {inputSearch && (
-              <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', mt: '1px !important' }}>
+              <Grid item className={styles.searchFieldWrapper}>
                 <CustomTextField
                   name='search'
                   value={searchValue}
@@ -115,8 +118,10 @@ const GridToolbar = ({
                 />
               </Grid>
             )}
+
             {middleSection}
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
+
+            <Grid item className={styles.actionButtonsWrapper}>
               {buttons
                 .filter(button => actions.some(action => action.key === button.key))
                 .map((button, index) => {
@@ -141,6 +146,7 @@ const GridToolbar = ({
             </Grid>
           </Grid>
         </Grid>
+
         {previewReport && (
           <ReportGenerator
             getReportLayout={getReportLayout}
@@ -149,12 +155,12 @@ const GridToolbar = ({
             reportStore={reportStore}
           />
         )}
-        {rightSection && (
-          <Grid item xs={3}>
-            {rightSection}
-          </Grid>
-        )}
+
+        <Grid item xs={3}>
+          {rightSection}
+        </Grid>
       </Grid>
+
       {bottomSection}
     </DialogActions>
   )
