@@ -77,6 +77,7 @@ const Navigation = props => {
       if (width <= 768) newWidth = navCollapsed ? 0 : 180
       else if (width <= 1024) newWidth = navCollapsed ? 0 : 200
       else if (width <= 1366) newWidth = navCollapsed ? 0 : 220
+      else if (width <= 1600) newWidth = navCollapsed ? 0 : 240
       else newWidth = navCollapsed ? 0 : 300
 
       setDrawerWidth(newWidth)

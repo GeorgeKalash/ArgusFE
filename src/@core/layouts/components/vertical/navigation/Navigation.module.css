@@ -277,8 +277,6 @@
   padding-left: 4px;
 }
 
-/* ---------------- Responsive Breakpoints ---------------- */
-
 @media (min-width: 1025px) and (max-width: 1600px) {
   .menu-header-wrapper {
     min-height: 30px;
