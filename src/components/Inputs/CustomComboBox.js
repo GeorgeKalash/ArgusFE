@@ -120,6 +120,9 @@ const CustomComboBox = ({
         }
       }}
       onOpen={onOpen}
+      loading={isLoading}
+      loadingText='Loading...'
+      noOptionsText='No options'
       filterOptions={(options, { inputValue }) => {
         var results
         filterOptions.current = ''
