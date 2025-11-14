@@ -411,7 +411,6 @@ export default function JobOrderForm({
           })
         }
       })
-    setRefetchRouting(true)
 
     return jobOrder?.reference
   }

@@ -36,6 +36,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onOpen,
   onBlur = () => {},
   ...props
 }) => {
@@ -118,6 +119,7 @@ const CustomComboBox = ({
           else return ''
         }
       }}
+      onOpen={onOpen}
       filterOptions={(options, { inputValue }) => {
         var results
         filterOptions.current = ''
