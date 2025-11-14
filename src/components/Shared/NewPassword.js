@@ -99,7 +99,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           size='small'
           fullWidth
           label={labels.newPassword}
-          type={showNewPassword ? 'text' : 'password'}
+          displayType={showNewPassword ? 'text' : 'password'}
           value={formik.values.newPassword}
           onChange={onPasswordChange}
           error={formik.touched.newPassword && formik.errors.newPassword}
@@ -143,7 +143,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           size='small'
           fullWidth
           label={labels.confirmPassword}
-          type={showConfirmNewPassword ? 'text' : 'password'}
+          displayType={showConfirmNewPassword ? 'text' : 'password'}
           value={formik.values.confirmPassword}
           onChange={onConfirmPasswordChange}
           error={formik.touched.confirmPassword && formik.errors.confirmPassword}
