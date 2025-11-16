@@ -1,32 +1,19 @@
+
 import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } from 'react'
 import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
-import WindowToolbar from './WindowToolbar'
+import WindowToolbar from '../WindowToolbar'
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { TrxType } from 'src/resources/AccessLevels'
 import { CacheDataProvider } from 'src/providers/CacheDataContext.js'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import styles from './Window.module.css'
 
 function LoadingOverlay() {
-  return (
-    <Box
-      style={{
-        position: 'absolute',
-        top: 40,
-        right: 0,
-        left: 0,
-        bottom: 50,
-        backgroundColor: 'rgba(250, 250, 250, 1)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999
-      }}
-    ></Box>
-  )
+  return <Box className={styles.loadingOverlay}></Box>
 }
 
 const Window = React.memo(
@@ -65,15 +52,33 @@ const Window = React.memo(
 
     const { loading } = useContext(RequestsContext)
     const [showOverlay, setShowOverlay] = useState(false)
+    const overlayRef = useRef(null)
 
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
     )
-    const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-    const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
-    const containerHeightPanel = `calc(calc(100 * var(--vh)) - 180px)`
-    const heightPanel = height - 120
+
+        const overlayRect = overlayRef.current?.getBoundingClientRect()
+
+        const containerWidth = overlayRect?.width ?? window.innerWidth
+        const containerHeight = overlayRect?.height ?? window.innerHeight
+
+        const baseWidth = Math.min(width, containerWidth)
+        const baseHeight = Math.min(height, containerHeight)
+
+        const containerHeightPanel = containerHeight 
+        const heightPanel = baseHeight 
+
+        const paperStyle = {
+          '--window-paper-width': expanded ? `${containerWidth}px` : `${baseWidth}px`,
+          '--window-paper-height': expanded ? `${containerHeight}px` : `${baseHeight}px`
+        }
+
+
+
+
+
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
       if (transactionLogInfo) {
@@ -101,21 +106,22 @@ const Window = React.memo(
       setExpanded(prev => !prev)
     }, [expanded])
 
+    const overlayClassName = `${styles.overlay} ${
+      spacing
+        ? navCollapsed
+          ? styles.overlaySpacingCollapsed
+          : styles.overlaySpacingExpanded
+        : styles.overlayFull
+    }`
+
+   
+
     return (
       <CacheDataProvider>
         <Box
           id='parent'
-          sx={{
-            bottom: 0,
-            position: 'absolute',
-            width: spacing ? containerWidth : '100%',
-            height: spacing ? containerHeight : '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 2
-          }}
+          ref={overlayRef}
+          className={overlayClassName}
           onKeyDown={e => {
             if (e.key === 'Escape' && closable) {
               onClose()
@@ -129,39 +135,23 @@ const Window = React.memo(
             position={expanded && { x: 0, y: 0 }}
             onStart={() => draggable}
           >
-            <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
-              <Paper
-                ref={paperRef}
-                tabIndex={-1}
-                sx={{
-                  transition: 'width 0.3s, height 0.3s',
-                  height: controlled ? (expanded ? containerHeight : height) : expanded ? containerHeight : height,
-                  width: expanded ? containerWidth : width,
-                  display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset',
-                  '&:focus': { outline: 'none', boxShadow: 'none' }
-                }}
-              >
+            <Box className={styles.draggableContainer}>
+            <Paper
+  ref={paperRef}
+  tabIndex={-1}
+  data-expanded={expanded ? 'true' : 'false'}
+  className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
+  style={paperStyle}
+>
+
                 <DialogTitle
                   id='draggable-dialog-title'
-                  sx={{
-                    cursor: draggable ? 'move' : 'default',
-                    pl: '15px !important',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    py: '0px !important',
-                    margin: '0px !important',
-                    backgroundColor: '#231F20',
-                    borderTopLeftRadius: '5px',
-                    borderTopRightRadius: '5px',
-                    borderBottomLeftRadius: '0px',
-                    borderBottomRightRadius: '0px',
-                    height: '40px'
-                  }}
+                  className={`${styles.dialogTitle} ${
+                    draggable ? styles.dialogTitleDraggable : styles.dialogTitleDefault
+                  }`}
                 >
                   <Box>
-                    <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: 'white !important' }}>
+                    <Typography className={styles.titleText}>
                       {nextToTitle ? Title + ' ' + nextToTitle : Title}
                     </Typography>
                   </Box>
@@ -172,7 +162,7 @@ const Window = React.memo(
                         edge='end'
                         onClick={props?.onRefresh}
                         aria-label='refresh'
-                        sx={{ color: 'white !important' }}
+                        className={styles.headerIconButton}
                       >
                         <RefreshIcon />
                       </IconButton>
@@ -184,7 +174,7 @@ const Window = React.memo(
                         onClick={handleExpandToggle}
                         data-is-expanded={expanded}
                         aria-label='expand'
-                        sx={{ color: 'white !important' }}
+                        className={styles.headerIconButton}
                       >
                         <OpenInFullIcon />
                       </IconButton>
@@ -193,9 +183,9 @@ const Window = React.memo(
                       <IconButton
                         tabIndex={-1}
                         edge='end'
-                        sx={{ color: 'white !important' }}
                         onClick={onClose}
                         aria-label='clear input'
+                        className={styles.headerIconButton}
                       >
                         <ClearIcon />
                       </IconButton>
@@ -213,7 +203,7 @@ const Window = React.memo(
 
                 {!controlled ? (
                   <>
-                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
+                    <DialogContent className={styles.dialogContent}>{children}</DialogContent>
                     {windowToolbarVisible && (
                       <WindowToolbar
                         onSave={onSave}
