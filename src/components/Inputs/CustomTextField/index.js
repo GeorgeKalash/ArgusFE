@@ -28,6 +28,10 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
+
+  // 🔥 NEW PROP — array of icons/buttons to show exactly like search icon
+  endIcons = [],
+
   ...props
 }) => {
   const name = props.name
@@ -123,40 +127,49 @@ const CustomTextField = ({
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
+        ...props.InputProps,
+
         classes: {
           root: styles.outlinedRoot,
           notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
           input: styles.inputBase
         },
-        endAdornment: !_readOnly && (
-          <InputAdornment position='end'>
-            {search && (
-              <IconButton
-                className={styles['search-icon']}
-                tabIndex={-1}
-                edge='start'
-                onClick={() => onSearch(value)}
-                aria-label='search input'
-              >
-                <SearchIcon className={styles['search-icon']} />
-              </IconButton>
+
+        endAdornment: (
+          <>
+            {props.InputProps?.endAdornment}
+            {!_readOnly && search && (
+              <InputAdornment position='end'>
+                <IconButton className={styles['search-icon']} tabIndex={-1} onClick={() => onSearch(value)}>
+                  <SearchIcon className={styles['search-icon']} />
+                </IconButton>
+              </InputAdornment>
             )}
-            {!clearable && !readOnly && (value || value === 0) && (
-              <IconButton
-                className={styles['search-icon']}
-                tabIndex={-1}
-                id={props.ClearId}
-                edge='end'
-                onClick={e => {
-                  onClear(e)
-                  setFocus(true)
-                }}
-                aria-label='clear input'
-              >
-                <ClearIcon className={styles['search-icon']} />
-              </IconButton>
+            {!_readOnly && !clearable && (value || value === 0) && (
+              <InputAdornment position='end'>
+                <IconButton
+                  className={styles['search-icon']}
+                  tabIndex={-1}
+                  id={props.ClearId}
+                  onClick={e => {
+                    onClear(e)
+                    setFocus(true)
+                  }}
+                >
+                  <ClearIcon className={styles['search-icon']} />
+                </IconButton>
+              </InputAdornment>
             )}
-          </InputAdornment>
+            {endIcons.map((iconBtn, index) => (
+              <InputAdornment key={index} position='end'>
+                {iconBtn && (
+                  <IconButton className={styles['search-icon']} tabIndex={-1}>
+                    {iconBtn}
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ))}
+          </>
         )
       }}
       InputLabelProps={{

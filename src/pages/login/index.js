@@ -16,9 +16,10 @@ import { useWindow } from 'src/windows'
 import ChangePassword from 'src/components/Shared/ChangePassword'
 import axios from 'axios'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
+import styles from './LoginPage.module.css'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
-  fontSize: '0.875rem',
+  fontSize: '0.7rem',
   textDecoration: 'none',
   color: theme.palette.primary.main
 }))
@@ -103,15 +104,9 @@ const LoginPage = () => {
     try {
       const user = getUS2
       const accessToken = loggedUser.accessToken
-      if (!accessToken) {
-        throw new Error('Failed to retrieve access token')
-      }
+      if (!accessToken) throw new Error('Failed to retrieve access token')
 
-      const updateUser = {
-        ...user,
-        umcpnl: false
-      }
-
+      const updateUser = { ...user, umcpnl: false }
       var bodyFormData = new FormData()
       bodyFormData.append('record', JSON.stringify(updateUser))
 
@@ -124,7 +119,7 @@ const LoginPage = () => {
           LanguageId: languageId
         },
         data: bodyFormData
-      }).then(res => {})
+      })
     } catch (error) {
       stackError({ message: error.message })
     }
@@ -133,31 +128,23 @@ const LoginPage = () => {
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
-        <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+        <Box className={styles.contentCenter}>
+          <Card className={styles.loginCard}>
             <Box
+              className={styles.loginCardHeader}
               sx={{
-                height: 60,
-                backgroundColor: theme.palette.primary.main,
-                p: 4,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                backgroundColor: theme.palette.primary.main
               }}
             >
               <CardMedia
                 component='img'
                 image='/images/logos/ArgusLogo.png'
                 alt='ArgusERP'
-                sx={{
-                  height: '100%',
-                  maxWidth: '100%',
-                  objectFit: 'contain'
-                }}
+                sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
               />
             </Box>
-            <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
-              <Grid container spacing={5}>
+            <CardContent className={styles.cardContent} onKeyDown={handleKeyDown}>
+              <Grid container spacing={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}>
                 <Grid item xs={12}>
                   <CustomTextField
                     readOnly
@@ -186,59 +173,41 @@ const LoginPage = () => {
                   <CustomTextField
                     name='password'
                     size='small'
-                    fullWidth
                     label={platformLabels.password}
                     type={showPassword ? 'text' : 'password'}
                     value={validation.values.password}
                     onChange={validation.handleChange}
+                    endIcons={[
+                      // eslint-disable-next-line react/jsx-key
+                      <Icon
+                        icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
+                        onClick={() => setShowPassword(prev => !prev)}
+                        onMouseDown={e => e.preventDefault()}
+                      />
+                    ]}
                     error={validation.touched.password && validation.errors.password}
                     helperText={validation.touched.password && validation.errors.password}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton
-                            edge='end'
-                            onClick={() => setShowPassword(!showPassword)}
-                            onMouseDown={e => e.preventDefault()}
-                          >
-                            <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
                   />
                 </Grid>
               </Grid>
-              <Box
-                sx={{
-                  mb: 4,
-                  mt: 4,
-                  ml: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between'
-                }}
-              >
+              <Box className={styles.linksRow}>
                 <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
               </Box>
               <Button
                 fullWidth
-                size='large'
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
+                className={styles.loginButton}
                 onClick={validation.handleSubmit}
               >
                 {platformLabels.Login}
               </Button>
             </CardContent>
           </Card>
-
-          {/* Language Selection Section */}
-          <Box sx={{ my: 5, display: 'flex', gap: 3, mt: 'auto' }}>
+          <Box className={styles.languageRow}>
             <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
+            <Box className={styles.languageLinks}>
               <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
                 English
               </LinkStyled>
@@ -250,17 +219,17 @@ const LoginPage = () => {
               </LinkStyled>
             </Box>
           </Box>
-
-          {/* Footer Section */}
-          <Box component='footer' sx={{ mt: 'auto' }}>
+          <Box component='footer' className={styles.footer}>
             © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
           </Box>
         </Box>
+
         <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </>
     )
   )
 }
+
 LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
 LoginPage.guestGuard = true
 
