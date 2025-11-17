@@ -15,10 +15,10 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function IntegrationLogicForm({ labels, maxAccess, setStore, store, editMode }) {
+export default function IntegrationLogicForm({ labels, maxAccess, setStore, store, editMode, onImportData }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { recordId } = store
+  const { recordId, header } = store
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.IntegrationLogic.page
@@ -55,20 +55,121 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
   })
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-        const res = await getRequest({
-          extension: GeneralLedgerRepository.IntegrationLogic.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        formik.setValues(res.record)
-      }
-    })()
+    if (header) {
+      formik.setValues({
+        recordId: header.recordId,
+        name: header.name,
+        distributionLevel: header.distributionLevel
+      })
+    }
   }, [])
 
+  const onExport = async () => {
+    const res = await getRequest({
+      extension: GeneralLedgerRepository.IntegrationLogic.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    if (res.record) {
+      const jsonString = JSON.stringify(res, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `integration_logic_${recordId}.json`
+
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const onImport = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.style.display = 'none'
+
+    input.onchange = async e => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      const text = await file.text()
+      const json = JSON.parse(text)
+
+      const pack = {
+        ...json.record,
+        recordId: formik.values.recordId || store.recordId
+      }
+
+      if (!pack?.header) return
+
+      const clonedPack = structuredClone(pack)
+      let newRecordId = store.recordId || formik.values.recordId
+      if (!newRecordId) return
+
+      clonedPack.header.recordId = newRecordId
+      clonedPack.items =
+        clonedPack.items?.map(i => ({
+          ...i,
+          ilId: newRecordId
+        })) ?? []
+
+      setStore(prev => ({ ...prev, recordId: newRecordId }))
+
+      await postRequest({
+        extension: GeneralLedgerRepository.IntegrationLogic.set2,
+        record: JSON.stringify({
+          header: clonedPack.header,
+          items: clonedPack.items
+        })
+      })
+
+      setStore(prev => ({
+        ...prev,
+        recordId: newRecordId,
+        header: clonedPack.header,
+        items: clonedPack.items
+      }))
+
+      invalidate()
+
+      if (onImportData) {
+        onImportData(clonedPack)
+      }
+    }
+
+    document.body.appendChild(input)
+    input.click()
+    document.body.removeChild(input)
+  }
+
+  const actions = [
+    {
+      key: 'Export',
+      condition: true,
+      onClick: onExport,
+      disabled: !editMode
+    },
+    {
+      key: 'Import',
+      condition: true,
+      onClick: onImport,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.IntegrationLogics} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.IntegrationLogics}
+      actions={actions}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
@@ -94,9 +195,7 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('distributionLevel', newValue ? newValue.key : '')
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('distributionLevel', newValue ? newValue.key : '')}
                 error={formik.touched.distributionLevel && Boolean(formik.errors.distributionLevel)}
               />
             </Grid>
