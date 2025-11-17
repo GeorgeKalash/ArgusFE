@@ -104,6 +104,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     szId: null,
     siteId: null,
     invoiceId: null,
+    invoiceRef: '',
     clientId: null,
     clientRef: '',
     clientName: '',
@@ -1388,7 +1389,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'keywords', value: 'Keywords' },
                       { key: 'cgName', value: 'Client Group' }
                     ]}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('clientId', newValue?.recordId || null)
                       formik.setFieldValue('clientName', newValue?.name)
                       formik.setFieldValue('clientRef', newValue?.reference)
@@ -1419,8 +1420,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     maxAccess={maxAccess}
                     readOnly={editMode || formik.values.items.some(item => item.itemId)}
                     values={formik.values}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('invoiceId', newValue?.recordId || null)
+                      formik.setFieldValue('invoiceRef', newValue?.reference || '')
                       formik.setFieldValue('contactId', newValue?.contactId || null)
                       formik.setFieldValue('currencyId', newValue?.currencyId || null)
                       formik.setFieldValue('exRate', newValue?.exRate)
