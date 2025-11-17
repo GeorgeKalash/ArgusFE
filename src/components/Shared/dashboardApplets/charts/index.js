@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import styles from './Charts.module.css'
+import styles from './charts.module.css'
 
 const getCssVar = (el, name, fallback) => {
   if (!el) return fallback
