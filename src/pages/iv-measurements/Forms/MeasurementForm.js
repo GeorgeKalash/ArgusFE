@@ -117,6 +117,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 label={labels.decimals}
                 value={formik.values.decimals}
                 decimalScale={0}
+                maxLength={2}
                 required
                 allowNegative={false}
                 readOnly={editMode}
