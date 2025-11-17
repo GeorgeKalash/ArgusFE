@@ -124,9 +124,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
 
   useEffect(() => {
     refetchData(recordId)
-  }, [])
 
-  useEffect(() => {
     const fetchEmployeeDetails = async () => {
       if (!employeeId) return
 
