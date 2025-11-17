@@ -189,7 +189,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
         items:
           jobItems?.length > 0
             ? await Promise.all(
-                jobItems?.map(async (item, index) => {
+                jobItems?.map((item, index) => {
                   return {
                     ...item,
                     id: index + 1,

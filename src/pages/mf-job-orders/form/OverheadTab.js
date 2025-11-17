@@ -190,7 +190,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
         'items',
         jobOverheads?.length > 0
           ? await Promise.all(
-              jobOverheads?.map(async (item, index) => {
+              jobOverheads?.map((item, index) => {
                 return {
                   ...item,
                   id: index + 1
