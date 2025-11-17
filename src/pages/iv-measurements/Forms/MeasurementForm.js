@@ -13,6 +13,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useInvalidate } from 'src/hooks/resource'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function MeasurementForm({ labels, maxAccess, setStore, store }) {
   const { recordId } = store
@@ -30,13 +31,15 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
       reference: '',
       name: '',
       type: 0,
+      decimals: 0,
       serialItems: false
     },
     maxAccess,
     validateOnChange: true,
     validationSchema: yup.object({
       reference: yup.string().required(),
-      name: yup.string().required()
+      name: yup.string().required(),
+      decimals: yup.number().required()
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -106,6 +109,22 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 onChange={event => formik.setFieldValue('serialItems', event.target.checked)}
                 label={labels.serialItem}
                 maxAccess={maxAccess}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='decimals'
+                label={labels.decimals}
+                value={formik.values.decimals}
+                decimalScale={0}
+                maxLength={2}
+                required
+                allowNegative={false}
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('decimals', e.target.value)}
+                onClear={() => formik.setFieldValue('decimals', 0)}
+                error={formik.touched.decimals && Boolean(formik.errors.decimals)}
               />
             </Grid>
           </Grid>
