@@ -4,40 +4,45 @@ import { Box } from '@mui/material'
 import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
-  const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
+  const [rect, setRect] = useState(anchorEl ? anchorEl.getBoundingClientRect() : null)
   const popperRef = useRef(null)
 
   useEffect(() => {
-    const handleScroll = () => {
+    if (!anchorEl) return
+
+    const updateRect = () => {
       if (anchorEl) {
         setRect(anchorEl.getBoundingClientRect())
       }
     }
 
-    const handleResize = () => {
-      if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
-      }
-    }
+    updateRect()
 
-    const mutationObserver = new MutationObserver(() => handleResize())
+    const mutationObserver = new MutationObserver(updateRect)
+    mutationObserver.observe(anchorEl, { attributes: true, childList: true, subtree: true })
 
-    if (anchorEl) {
-      mutationObserver.observe(anchorEl, { attributes: true, childList: true, subtree: true })
-    }
-    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('scroll', updateRect, true)
+    window.addEventListener('resize', updateRect)
 
     return () => {
-      if (anchorEl) {
-        mutationObserver.disconnect()
-      }
-      window.removeEventListener('scroll', handleScroll, true)
+      mutationObserver.disconnect()
+      window.removeEventListener('scroll', updateRect, true)
+      window.removeEventListener('resize', updateRect)
     }
   }, [anchorEl])
 
-  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+  // read zoom with safe fallback
+  const zoomValue = typeof window !== 'undefined'
+    ? parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+    : 1
+  const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1
 
-  const canRenderBelow = window.innerHeight - rect?.bottom > popperRef?.current?.getBoundingClientRect()?.height
+  const anchorWidth = rect ? rect.width / zoom : undefined
+  const top = rect ? rect.bottom / zoom : 0
+  const left = rect ? rect.left / zoom : 0
+
+  const popperHeight = popperRef.current?.getBoundingClientRect()?.height || 0
+  const canRenderBelow = rect ? window.innerHeight - top > popperHeight : true
 
   return ReactDOM.createPortal(
     <Box
@@ -52,18 +57,20 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         .join(' ')}
       style={{
         position: 'absolute',
-        top: rect?.bottom / zoom,
-        left: rect?.left / zoom,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none',
-        ...props?.style
+        top,
+        left,
+        width: anchorWidth,
+        transform: !canRenderBelow && rect
+          ? `translateY(calc(-100% - 10px - ${rect.height / zoom}px))`
+          : 'none',
+        ...(props.style || {}),
+        width: anchorWidth
       }}
     >
       {typeof children === 'function'
         ? children({
             placement: 'top-start',
-            TransitionProps: {
-              in: true
-            }
+            TransitionProps: { in: true }
           })
         : children}
     </Box>,
