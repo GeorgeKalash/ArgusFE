@@ -6,7 +6,7 @@ import { SystemChecks } from 'src/resources/SystemChecks'
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
   const checkCondition = props?.onCondition && props?.onCondition(data)
-  const decimalScale = checkCondition?.decimalScale ?? props?.decimalScale;
+  const decimalScale = checkCondition?.decimalScale ?? props?.decimalScale
   const readOnly = checkCondition?.readOnly ?? props?.readOnly
   const viewDecimals = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
   const typing = useRef(false)
@@ -29,15 +29,16 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
 
   return (
     <CustomNumberField
-      value={
-        viewDecimals
-          ? typing.current
-            ? value?.[field]
-            : formatValue(value?.[field])
-          : decimalScale != undefined && !typing.current
-          ? Number(value?.[field]).toFixed(decimalScale)
-          : value?.[field]
-      }
+      value={value?.[field]}
+      // value={
+      //   viewDecimals
+      //     ? typing.current
+      //       ? value?.[field]
+      //       : formatValue(value?.[field])
+      //     : decimalScale != undefined && !typing.current
+      //     ? Number(value?.[field]).toFixed(decimalScale)
+      //     : value?.[field]
+      // }
       label={''}
       readOnly={readOnly}
       decimalScale={decimalScale}

@@ -839,7 +839,7 @@ export function DataGrid({
       newValue = isNaN(newValue) ? null : newValue
 
       const changes = {
-        [colDef?.field]: newValue || undefined
+        [colDef?.field]: newValue || null
       }
       setData(changes, params)
       commit(changes)

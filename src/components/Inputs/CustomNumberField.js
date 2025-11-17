@@ -59,16 +59,22 @@ const CustomNumberField = ({
   }
 
   const parseInputValue = (val, blur) => {
-    val = val.replace(/,/g, '')
+    if (val === null || val === undefined) return null
+
+    val = val?.replace(/,/g, '')
+
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
 
-    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) return val.toString()
+    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) {
+      return val === '.' ? val : Number(val)
+    }
 
     if (val?.endsWith('.') && !blur) {
       return val
     }
+
     if (isDotFollowedByOnlyZeros(val) && !blur) {
       return val.startsWith('.') ? ('0' + val).toString() : val.toString()
     }
@@ -77,9 +83,19 @@ const CustomNumberField = ({
       return null
     }
 
-    const num = val != '' ? val : null
+    if (typeof val === 'number') {
+      return Number.isNaN(val) ? null : val
+    }
 
-    return isNaN(num) ? null : num
+    if (typeof val === 'string') {
+      const trimmed = val?.trim()
+      if (!trimmed) return null
+      const num = Number(trimmed)
+
+      return Number.isNaN(num) ? null : num
+    }
+
+    return null
   }
 
   const handleNumberChangeValue = (e, blur) => {
