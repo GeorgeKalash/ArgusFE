@@ -1,13 +1,20 @@
 import React from 'react'
-import { CircularItem } from './../circularItem'
-import styles from './CircularData.module.css'
+import { CircularItem } from './circularItem'
+import styled from 'styled-components'
+
+const CircleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  flex: 0;
+`
 
 const formatNumberWithCommas = number => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 export const CircularData = ({ data, list }) => (
-  <div className={styles.circleContainer}>
+  <CircleContainer>
     {list.map((item, index) => (
       <CircularItem
         key={index}
@@ -16,5 +23,5 @@ export const CircularData = ({ data, list }) => (
         isPercentage={item.isPercentage}
       />
     ))}
-  </div>
+  </CircleContainer>
 )
