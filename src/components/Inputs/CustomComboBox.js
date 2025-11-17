@@ -1,10 +1,11 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import PopperComponent from '../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CustomComboBox = ({
   type = 'text',
@@ -36,6 +37,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onOpen,
   onBlur = () => {},
   ...props
 }) => {
@@ -52,6 +54,7 @@ const CustomComboBox = ({
 
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
 
@@ -118,6 +121,9 @@ const CustomComboBox = ({
           else return ''
         }
       }}
+      onOpen={onOpen}
+      loading={isLoading}
+      loadingText={`${platformLabels.loading}...`}
       filterOptions={(options, { inputValue }) => {
         var results
         filterOptions.current = ''
