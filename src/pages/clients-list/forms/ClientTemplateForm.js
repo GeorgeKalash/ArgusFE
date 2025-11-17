@@ -961,7 +961,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         <CustomTextField
                           name='idNo'
                           label={labels.idNo}
-                          type={showAsPassword ? 'password' : ''}
+                          displayType={showAsPassword ? 'password' : ''}
                           value={formik.values?.idNo}
                           required
                           onChange={e => {
@@ -971,6 +971,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                           onCopy={handleCopy}
                           onPaste={handleCopy}
                           onBlur={e => {
+                            console.log(e?.relatedTarget?.id)
                             if (e?.relatedTarget?.id === 'idNo') return
                             formik.handleChange(e)
                             checkTypes(e.target.value), setShowAsPassword(true)

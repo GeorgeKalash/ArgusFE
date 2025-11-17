@@ -1,7 +1,7 @@
 // ** MUI Imports
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
 import { checkAccess } from 'src/lib/maxAccess'
 
@@ -11,12 +11,15 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  onChange,
+  onBlur,
+  name,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
   readOnly = false,
   clearable = false,
-  autoComplete = 'off',
+  autoComplete = 'new-password',
   numberField = false,
   editMode = false,
   maxLength = '1000',
@@ -28,10 +31,9 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
+  displayType,
   ...props
 }) => {
-  const name = props.name
-
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
   const inputRef = useRef(null)
@@ -54,32 +56,46 @@ const CustomTextField = ({
   const handleInput = e => {
     const inputValue = e.target.value
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (phone) {
-      const truncatedValue = inputValue.slice(0, maxLength)
-      e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
-
-      props?.onChange(e)
+      e.target.value = inputValue.slice(0, maxLength)
     }
-
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
-      props?.onChange(e)
     }
 
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
-      props?.onChange(e)
     }
+  }
+
+  function getElement(e) {
+    return {
+      ...e,
+      target: {
+        ...e.target,
+        name,
+        value: e.target?.value,
+        type: e.target?.type
+      },
+      currentTarget: {
+        ...e?.currentTarget,
+        name
+      }
+    }
+  }
+
+  const handleChange = e => {
+    onChange?.(getElement(e))
+  }
+
+  const handleBlur = e => {
+    onBlur?.(getElement(e))
   }
 
   useEffect(() => {
@@ -87,6 +103,8 @@ const CustomTextField = ({
       inputRef.current.focus()
     }
   }, [autoFocus, inputRef.current, value])
+
+  const id = useMemo(() => `${name}-${Math.random().toString(36).slice(2)}`, [])
 
   return _hidden ? (
     <></>
@@ -102,11 +120,14 @@ const CustomTextField = ({
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
-      onBlur={() => {
-        setIsFocused(false), setFocus(false)
+      onBlur={e => {
+        setIsFocused(false)
+        setFocus(false)
+        if (onBlur) handleBlur(e)
       }}
+      onChange={handleChange}
       inputProps={{
-        autoComplete: 'off',
+        autoComplete,
         readOnly: _readOnly,
         maxLength: maxLength,
         ...(dir ? { dir } : {}),
@@ -115,10 +136,12 @@ const CustomTextField = ({
         style: {
           textAlign: numberField && 'right',
           '-moz-appearance': 'textfield',
-          textTransform: forceUpperCase ? 'uppercase' : 'none'
+          textTransform: forceUpperCase ? 'uppercase' : 'none',
+          WebkitTextSecurity: displayType === 'password' ? 'disc' : 'none'
         },
         tabIndex: _readOnly ? -1 : 0,
-        'data-search': search ? 'true' : 'false'
+        'data-search': search ? 'true' : 'false',
+        name: id
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
