@@ -230,7 +230,7 @@ export default function Calendar() {
                   error={formik.touched.toDate && Boolean(formik.errors.toDate)}
                 />
               </Grid>
-              <Grid item xs={0.5}>
+              <Grid item xs={0.3}>
                 <CustomButton
                   onClick={formik.handleSubmit}
                   label={platformLabels.Preview}
@@ -239,8 +239,8 @@ export default function Calendar() {
                 />
               </Grid>
 
-              <Grid item xs={2.3}></Grid>
-              <Grid item xs={0.5}>
+              <Grid item xs={2}></Grid>
+              <Grid item xs={0.6}>
                 <CustomButton
                   onClick={() => onImportExport(ImportExportMode.IMPORT)}
                   label={platformLabels.import}
@@ -248,7 +248,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
-              <Grid item xs={0.5}>
+              <Grid item xs={0.6}>
                 <CustomButton
                   onClick={() => onImportExport(ImportExportMode.EXPORT)}
                   label={platformLabels.Export}
@@ -256,7 +256,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
-              <Grid item xs={0.5}>
+              <Grid item xs={0.6}>
                 <CustomButton
                   onClick={onDelete}
                   label={platformLabels.Delete}
@@ -264,7 +264,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId || !formik.values.fromDate || !formik.values.toDate}
                 />
               </Grid>
-              <Grid item xs={0.5}>
+              <Grid item xs={0.6}>
                 <CustomButton
                   onClick={onGenerate}
                   label={platformLabels.Generate}
@@ -279,13 +279,14 @@ export default function Calendar() {
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView='dayGridMonth'
                 stickyHeaderDates={true}
+                hiddenDays={[]}
                 headerToolbar={{
                   left: 'prev,next today',
                   center: 'title',
                   right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 }}
                 allDaySlot={false}
-                height='auto'
+                height='100%'
                 events={events}
                 locale={user?.languageId === 2 ? arLocale : enLocale}
                 direction={user?.languageId === 2 ? 'rtl' : 'ltr'}
