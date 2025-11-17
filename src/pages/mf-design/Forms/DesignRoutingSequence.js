@@ -162,7 +162,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 3
+        displayFieldWidth: 4
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: !row.workCenterId }
@@ -186,7 +186,7 @@ const DesignRoutingSequence = ({ store, maxAccess, labels }) => {
           { from: 'sku', to: 'sku' },
           { from: 'categoryName', to: 'categoryName' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
         if (newRow?.itemId) {
