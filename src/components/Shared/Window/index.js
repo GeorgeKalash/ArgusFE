@@ -128,13 +128,14 @@ const Window = React.memo(
             disabled={isSmallScreen}
           >
             <Box className={styles.draggableContainer}>
-              <Paper
-                ref={paperRef}
-                tabIndex={-1}
-                data-expanded={expanded ? 'true' : 'false'}
-                className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
-                style={paperStyle}
-              >
+            <Paper
+            ref={paperRef}
+            tabIndex={-1}
+            data-expanded={expanded ? 'true' : 'false'}
+            className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
+            style={paperStyle}
+          >
+
                 <DialogTitle
                   id='draggable-dialog-title'
                   className={`${styles.dialogTitle} ${
