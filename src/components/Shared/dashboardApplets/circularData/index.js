@@ -1,6 +1,6 @@
 import React from 'react'
 import { CircularItem } from './../circularItem'
-import styles from './CircularData.module.css'
+import styles from './charts.module.css'
 
 const formatNumberWithCommas = number => {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
