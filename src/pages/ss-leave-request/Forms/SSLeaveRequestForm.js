@@ -138,7 +138,7 @@ export default function SSLeaveRequestForm({ recordId, labels, maxAccess }) {
       formik.setFieldValue('employeeName', res?.record?.fullName)
     }
 
-    fetchEmployeeDetails()
+    if (!recordId) fetchEmployeeDetails()
   }, [])
 
   return (
