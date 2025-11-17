@@ -55,6 +55,7 @@ export const TimeAttendanceRepository = {
   },
   DayTypes: {
     page: service + 'pageDT',
+    qry: service + 'qryDT',
     set: service + 'setDT',
     get: service + 'getDT',
     del: service + 'delDT'

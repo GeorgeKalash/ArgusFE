@@ -37,6 +37,7 @@ export const ResourceIds = {
   LedgerGroup: 75114,
   Loans: 74201,
   RightToWork: 70114,
+  Salaries: 71206,
 
   // Authorization Dashboard
   PendingAuthorizationRequests: 60400,
