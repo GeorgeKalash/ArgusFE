@@ -1,38 +1,56 @@
 import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
+import styles from './Charts.module.css'
 
-const predefinedColors = [
-  'rgba(88, 2, 1)',
-  'rgba(67, 67, 72)',
-  'rgba(144, 237, 125)',
-  'rgba(247, 163, 92)',
-  'rgba(54, 162, 235)',
-  'rgba(153, 102, 255)',
-  'rgba(201, 203, 207)'
+const getCssVar = (el, name, fallback) => {
+  if (!el) return fallback
+  const value = getComputedStyle(el).getPropertyValue(name)
+  
+  return value?.trim() || fallback
+}
+
+const predefinedColors = canvas => [
+  getCssVar(canvas, '--chart-mixed-1'),
+  getCssVar(canvas, '--chart-mixed-2'),
+  getCssVar(canvas, '--chart-mixed-3'),
+  getCssVar(canvas, '--chart-mixed-4'),
+  getCssVar(canvas, '--chart-mixed-5'),
+  getCssVar(canvas, '--chart-mixed-6'),
+  getCssVar(canvas, '--chart-mixed-7')
 ]
 
-const generateColors = dataLength => {
+const generateColors = (dataLength, canvas) => {
+  const colors = predefinedColors(canvas)
+
   const backgroundColors = []
   const borderColors = []
 
   for (let i = 0; i < dataLength; i++) {
-    const color = predefinedColors[i % predefinedColors.length]
+    const color = colors[i % colors.length]
     backgroundColors.push(color)
-    borderColors.push(color.replace('rgba', 'rgb'))
+    borderColors.push(color)
   }
 
   return { backgroundColors, borderColors }
 }
 
-const getChartOptions = (label, type) => {
+const getChartOptions = (label, type, canvas) => {
+  const legendLabelColor = getCssVar(canvas, '--chart-legend-label-color')
+  const titleColor = getCssVar(canvas, '--chart-title-color')
+  const axisColor = getCssVar(canvas, '--chart-axis-color')
+
+  const tooltipBg = getCssVar(canvas, '--chart-tooltip-bg')
+  const tooltipTitleColor = getCssVar(canvas, '--chart-tooltip-title-color')
+  const tooltipBodyColor = getCssVar(canvas, '--chart-tooltip-body-color')
+
   const baseOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         labels: {
-          color: '#f0f0f0'
+          color: legendLabelColor
         }
       },
       title: {
@@ -42,7 +60,7 @@ const getChartOptions = (label, type) => {
           size: 20,
           weight: 'bold'
         },
-        color: '#f0f0f0'
+        color: titleColor
       },
       tooltip: {
         enabled: true,
@@ -51,9 +69,9 @@ const getChartOptions = (label, type) => {
             return `${context.dataset.label}: ${context.raw}`
           }
         },
-        backgroundColor: '#f0f0f0',
-        titleColor: '#231F20',
-        bodyColor: '#231F20'
+        backgroundColor: tooltipBg,
+        titleColor: tooltipTitleColor,
+        bodyColor: tooltipBodyColor
       }
     }
   }
@@ -64,13 +82,17 @@ const getChartOptions = (label, type) => {
       scales: {
         r: {
           pointLabels: {
-            color: '#f0f0f0'
+            color: axisColor
           },
           grid: {
-            color: '#f0f0f0'
+            color: axisColor
           },
           angleLines: {
-            color: '#f0f0f0'
+            color: axisColor
+          },
+          ticks: {
+            backdropColor: 'transparent',
+            color: axisColor
           }
         }
       }
@@ -80,18 +102,17 @@ const getChartOptions = (label, type) => {
   return {
     ...baseOptions,
     scales: {
-      y: {
-        beginAtZero: true,
+      x: {
         ticks: {
-          color: '#f0f0f0'
+          color: axisColor
         },
         grid: {
           display: false
         }
       },
-      x: {
+      y: {
         ticks: {
-          color: '#f0f0f0'
+          color: axisColor
         },
         grid: {
           display: false
@@ -103,7 +124,17 @@ const getChartOptions = (label, type) => {
 
 export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
+    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg')
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -113,14 +144,14 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
           {
             label: label1 || null,
             data: data1,
-            backgroundColor: 'rgb(88, 2, 1)',
-            hoverBackgroundColor: 'rgb(113, 27, 26)'
+            backgroundColor: bar1Bg,
+            hoverBackgroundColor: bar1HoverBg
           },
           {
             label: label2 || null,
             data: data2,
-            backgroundColor: 'rgb(5, 28, 104)',
-            hoverBackgroundColor: 'rgb(33, 58, 141)'
+            backgroundColor: bar2Bg,
+            hoverBackgroundColor: bar2HoverBg
           }
         ]
       },
@@ -163,7 +194,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
 
               const barHeight = (value / maxValue) * chartHeight
 
-              return barHeight >= 120 ? '#fff' : '#000'
+              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             rotation: rotation || 0,
@@ -172,14 +203,14 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
             },
             formatter: (value, context) => {
               const datasetIndex = context.datasetIndex
-              const label = datasetIndex === 0 ? label1 : label2
+              const lbl = datasetIndex === 0 ? label1 : label2
               const roundedValue = Math.ceil(value)
 
               if (hasLegend) {
                 return `${roundedValue.toLocaleString()}`
               }
 
-              return `${label ? label + ':\n' : ''}${roundedValue.toLocaleString()}`
+              return `${lbl ? lbl + ':\n' : ''}${roundedValue.toLocaleString()}`
             }
           },
           legend: {
@@ -211,7 +242,13 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     }
   }, [id, labels, data1, data2, label1, label2, rotation])
 
-  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
@@ -223,7 +260,15 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
       chartInstanceRef.current.destroy()
     }
 
-    const ctx = chartRef.current.getContext('2d')
+    const canvas = chartRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartInstanceRef.current = new Chart(ctx, {
       type: 'bar',
@@ -233,15 +278,15 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
           {
             label,
             data,
-            backgroundColor: color || 'rgb(88, 2, 1)',
-            hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
+            backgroundColor: barBg,
+            hoverBackgroundColor: barHoverBg,
             borderWidth: 1
           }
         ]
       },
       options: {
         indexAxis: 'y',
-        responsive: false,
+        responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
@@ -281,7 +326,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
               const maxValue = chart.scales.x.max
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 65 ? '#fff' : '#000'
+              return barWidth >= 65 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             font: {
@@ -306,16 +351,30 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     }
   }, [id, labels, data, label, color, hoverColor])
 
-  const baseHeight = 200
-  const barHeight = 25
-  const dynamicHeight = baseHeight + labels.length * barHeight
+return (
+  <div  className={ styles.charthight}>
 
-  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
+
+    <canvas
+      id={id}
+      ref={chartRef}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+    ></canvas>
+    </div>
+  )
 }
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -325,8 +384,8 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
           {
             label,
             data,
-            backgroundColor: color || 'rgb(88, 2, 1)',
-            hoverBackgroundColor: hoverColor || 'rgb(113, 27, 26)',
+            backgroundColor: barBg,
+            hoverBackgroundColor: barHoverBg,
             borderWidth: 1
           }
         ]
@@ -370,7 +429,7 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
 
               const barHeight = (value / maxValue) * chartHeight
 
-              return barHeight >= 120 ? '#fff' : '#000'
+              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             rotation: -90,
@@ -392,13 +451,24 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
 
 export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
-    const colors = generateColors(data.length)
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const colors = generateColors(data.length, canvas)
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -453,19 +523,18 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
 
               const barHeight = (value / maxValue) * chartHeight
 
-              return barHeight >= 120 ? '#fff' : '#000'
+              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             font: {
               size: 14
             },
             formatter: (value, context) => {
-              const dataset = context.dataset
-              const label = dataset.label || ''
-
+              const datasetIndex = context.datasetIndex
+              const lbl = label
               const roundedValue = Math.ceil(value)
 
-              return `${label}:\n${roundedValue.toLocaleString()}`
+              return `${lbl ? lbl + ':\n' : ''}${roundedValue.toLocaleString()}`
             }
           },
           legend: {
@@ -481,12 +550,23 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id} style={{ width: '100%', height: '300px', position: 'relative' }}></canvas>
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
 
 export const CompositeBarChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const barBg = getCssVar(canvas, '--chart-primary-bar-bg')
+    const barBorder = getCssVar(canvas, '--chart-primary-bar-border')
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -496,13 +576,13 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
           {
             label,
             data,
-            backgroundColor: '#6673FD',
-            borderColor: '#6673FD',
+            backgroundColor: barBg,
+            borderColor: barBorder,
             borderWidth: 1
           }
         ]
       },
-      options: getChartOptions(label, 'bar')
+      options: getChartOptions(label, 'bar', canvas)
     })
 
     return () => {
@@ -510,7 +590,7 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
 export const LineChart = ({ id, labels, data, label }) => {
@@ -521,7 +601,16 @@ export const LineChart = ({ id, labels, data, label }) => {
     if (chartInstanceRef.current) {
       chartInstanceRef.current.destroy()
     }
-    const ctx = chartRef.current.getContext('2d')
+
+    const canvas = chartRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const lineColor = getCssVar(canvas, '--chart-line-1-color')
+    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover')
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartInstanceRef.current = new Chart(ctx, {
       type: 'line',
@@ -532,9 +621,9 @@ export const LineChart = ({ id, labels, data, label }) => {
             label,
             data,
             fill: false,
-            borderColor: 'rgb(102, 115, 253)',
-            backgroundColor: 'rgb(102, 115, 253)',
-            hoverBackgroundColor: 'rgb(126, 135, 243)',
+            borderColor: lineColor,
+            backgroundColor: lineColor,
+            hoverBackgroundColor: lineHoverColor,
             borderWidth: 1,
             tension: 0.1
           }
@@ -542,7 +631,7 @@ export const LineChart = ({ id, labels, data, label }) => {
       },
       options: {
         indexAxis: 'x',
-        responsive: false,
+        responsive: true,
         maintainAspectRatio: false,
         scales: {
           x: {
@@ -582,7 +671,7 @@ export const LineChart = ({ id, labels, data, label }) => {
               const maxValue = chart.scales.x.max
               const barWidth = (value / maxValue) * chartWidth
 
-              return barWidth >= 65 ? '#fff' : '#000'
+              return barWidth >= 65 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             font: {
@@ -603,36 +692,47 @@ export const LineChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  const baseHeight = 200
-  const barHeight = 25
-  const dynamicHeight = baseHeight + labels.length * barHeight
-
-  return <canvas id={id} ref={chartRef} height={dynamicHeight} width={window.innerWidth / 2.5}></canvas>
+  return (
+    <div  className={ styles.charthight}>
+    <canvas
+      id={id}
+      ref={chartRef}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+    ></canvas>
+    </div>
+  )
 }
 
 export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
     const datasetConfig = datasets
       .map((data, index) => {
-        if (data.length === 0) return null
+        const color = getColorForIndex(index, canvas)
 
-        const color = getColorForIndex(index)
-        const label = datasetLabels && datasetLabels[index] ? datasetLabels[index] : ``
-
-        return {
-          label,
-          data,
-          fill: false,
-          borderColor: color,
-          backgroundColor: color,
-          borderWidth: 2,
-          pointRadius: 5,
-          tension: 0.2
+        if (data.some(value => value !== 0)) {
+          return {
+            label: datasetLabels[index],
+            data,
+            borderColor: color,
+            backgroundColor: color,
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3,
+            spanGaps: true
+          }
         }
+
+        return null
       })
-      .filter(Boolean)
+      .filter(dataset => dataset !== null)
+
+    if (datasetConfig.length === 0) {
+      return
+    }
 
     const chart = new Chart(ctx, {
       type: 'line',
@@ -646,19 +746,33 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
         plugins: {
           legend: {
             display: datasetConfig.length > 0,
-            position: 'left'
+            position: 'left',
+            labels: {
+              usePointStyle: true,
+              padding: 10
+            }
           },
           tooltip: {
-            enabled: true,
             mode: 'index',
             intersect: false
           }
         },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
         scales: {
+          x: {
+            grid: {
+              display: false
+            }
+          },
           y: {
-            beginAtZero: false,
+            beginAtZero: true,
             ticks: {
-              callback: value => value.toLocaleString()
+              callback: function (value) {
+                return value.toLocaleString()
+              }
             }
           }
         }
@@ -670,18 +784,38 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
     }
   }, [id, labels, datasets, datasetLabels])
 
-  return <canvas id={id}></canvas>
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
 
-const getColorForIndex = index => {
-  const colors = ['#808000', '#1F3BB3', '#00FF00', '#FF5733', '#FFC300', '#800080']
+const getColorForIndex = (index, canvas) => {
+  const colors = [
+    getCssVar(canvas, '--chart-line-multi-1'),
+    getCssVar(canvas, '--chart-line-multi-2'),
+    getCssVar(canvas, '--chart-line-multi-3'),
+    getCssVar(canvas, '--chart-line-multi-4'),
+    getCssVar(canvas, '--chart-line-multi-5'),
+    getCssVar(canvas, '--chart-line-multi-6')
+  ]
 
   return colors[index % colors.length]
 }
 
 export const PieChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     const chart = new Chart(ctx, {
       type: 'pie',
@@ -691,11 +825,11 @@ export const PieChart = ({ id, labels, data, label }) => {
           {
             label,
             data,
-            backgroundColor: ['#6673FD', '#FF6384', '#36A2EB', '#FFCE56']
+            backgroundColor: [c1, c2, c3, c4]
           }
         ]
       },
-      options: getChartOptions(label, 'pie')
+      options: getChartOptions(label, 'pie', canvas)
     })
 
     return () => {
@@ -703,12 +837,19 @@ export const PieChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
 export const DoughnutChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     const chart = new Chart(ctx, {
       type: 'doughnut',
@@ -718,11 +859,11 @@ export const DoughnutChart = ({ id, labels, data, label }) => {
           {
             label,
             data,
-            backgroundColor: ['#6673FD', '#FF6384', '#36A2EB', '#FFCE56']
+            backgroundColor: [c1, c2, c3, c4]
           }
         ]
       },
-      options: getChartOptions(label, 'doughnut')
+      options: getChartOptions(label, 'doughnut', canvas)
     })
 
     return () => {
@@ -730,12 +871,18 @@ export const DoughnutChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
 export const RadarChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const fill = getCssVar(canvas, '--chart-radar-fill')
+    const border = getCssVar(canvas, '--chart-radar-border')
+    const point = getCssVar(canvas, '--chart-radar-point')
 
     const chart = new Chart(ctx, {
       type: 'radar',
@@ -745,13 +892,13 @@ export const RadarChart = ({ id, labels, data, label }) => {
           {
             label,
             data,
-            backgroundColor: 'rgba(102, 115, 253, 0.2)',
-            borderColor: '#6673FD',
-            pointBackgroundColor: '#6673FD'
+            backgroundColor: fill,
+            borderColor: border,
+            pointBackgroundColor: point
           }
         ]
       },
-      options: getChartOptions(label, 'radar')
+      options: getChartOptions(label, 'radar', canvas)
     })
 
     return () => {
@@ -759,12 +906,19 @@ export const RadarChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
 export const PolarAreaChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = document.getElementById(id).getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     const chart = new Chart(ctx, {
       type: 'polarArea',
@@ -774,11 +928,11 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
           {
             label,
             data,
-            backgroundColor: ['#6673FD', '#FF6384', '#36A2EB', '#FFCE56']
+            backgroundColor: [c1, c2, c3, c4]
           }
         ]
       },
-      options: getChartOptions(label, 'polarArea')
+      options: getChartOptions(label, 'polarArea', canvas)
     })
 
     return () => {
@@ -786,13 +940,22 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
     }
   }, [id, labels, data, label])
 
-  return <canvas id={id}></canvas>
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
 export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   useEffect(() => {
     if (!collapsed) {
-      const ctx = document.getElementById(id).getContext('2d')
+      const canvas = document.getElementById(id)
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
+
+      const barBg = getCssVar(canvas, '--chart-compbar-bg')
+      const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg')
+      const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color')
+      const yTickColor = xTickColor
+      const gridColor = getCssVar(canvas, '--chart-compbar-grid-color')
+      const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color')
 
       const chart = new Chart(ctx, {
         type: 'bar',
@@ -801,8 +964,8 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
           datasets: [
             {
               data: datasets,
-              backgroundColor: 'rgba(0, 123, 255, 0.5)',
-              hoverBackgroundColor: 'rgb(255, 255, 0)',
+              backgroundColor: barBg,
+              hoverBackgroundColor: barHoverBg,
               borderWidth: 1
             }
           ]
@@ -837,7 +1000,7 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
 
                 return barHeight >= 120 ? 'center' : 'end'
               },
-              color: 'black',
+              color: datalabelColor,
               offset: 0,
               rotation: -90,
               font: { size: 14, weight: 'bold' },
@@ -847,16 +1010,16 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
           scales: {
             x: {
               ticks: {
-                color: '#000'
+                color: xTickColor
               },
               grid: {
                 display: true,
-                color: 'rgba(255, 255, 255, 0.2)'
+                color: gridColor
               }
             },
             y: {
               ticks: {
-                color: '#000'
+                color: yTickColor
               }
             }
           }
@@ -870,5 +1033,11 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
     }
   }, [labels, datasets, collapsed])
 
-  return <canvas id={id} style={{ height: '350px', width: '100%' }}></canvas>
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
