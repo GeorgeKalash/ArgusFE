@@ -138,7 +138,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
           clockStamp: res?.record?.clockStamp ? parseToGmtDate(formatDateFromApi(res?.record.clockStamp)) : null
         })
 
-        await fillShift(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
+        fillShift(res?.record?.employeeId, formatDateFromApi(res?.record?.date))
       }
     })()
   }, [])
@@ -167,7 +167,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                   { key: 'fullName', value: 'Name' }
                 ]}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('employeeRef', newValue?.reference || '')
                   formik.setFieldValue('employeeName', newValue?.fullName || '')
                   formik.setFieldValue('employeeId', newValue?.recordId || null)
@@ -197,7 +197,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 required
                 store={shiftStore?.current}
                 value={formik.values.shiftId}
-                onChange={async (_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
+                onChange={(_, newValue) => formik.setFieldValue('shiftId', newValue?.recordId || null)}
                 error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
                 maxAccess={maxAccess}
               />
@@ -226,7 +226,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 readOnly
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (_, newValue) => formik.setFieldValue('timeCode', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('timeCode', newValue?.key || null)}
                 error={formik.touched.timeCode && Boolean(formik.errors.timeCode)}
               />
             </Grid>
@@ -276,7 +276,7 @@ export default function OverrideForm({ labels, maxAccess, recordId, window }) {
                 values={formik.values}
                 maxAccess={maxAccess}
                 required
-                onChange={async (_, newValue) => {
+                onChange={(_, newValue) => {
                   const { dtFrom, dtTo } = formik.values
                   formik.setFieldValue('clockStamp', newValue?.key == 1 ? dtFrom : newValue?.key == 2 ? dtTo : null)
                   formik.setFieldValue('inOut', newValue?.key || null)

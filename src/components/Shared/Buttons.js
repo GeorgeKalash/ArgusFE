@@ -670,10 +670,10 @@ export const getButtons = platformLabels => [
     image: 'Serials.png',
     main: false
   },
-    {
+  {
     key: 'Confirm',
     label: platformLabels.Confirm,
-    color: '#838282ff',
+    color: '#231f20',
     main: false
-  },
+  }
 ]

@@ -14,10 +14,12 @@ import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import editTime from '/public/images/TableIcons/editTime.png'
 import OverrideForm from './forms/OverrideForm'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function TimeVariation() {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
 
   const {
     query: { data },
@@ -138,8 +140,8 @@ export default function TimeVariation() {
               })
             }}
           >
-            {(row?.data?.timeCode == 20 || row?.data?.timeCode == 21 || row?.data?.timeCode == 41) && (
-              <Image src={editTime} alt='History' width={18} height={18} />
+            {[20, 21, 41].includes(row?.data?.timeCode) && row?.data?.status != -1 && (
+              <Image src={editTime} alt={platformLabels.History} width={18} height={18} />
             )}
           </IconButton>
         </Box>

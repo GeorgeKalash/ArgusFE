@@ -8,67 +8,81 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 
 const StrictConfirmation = ({ window, action, type = '' }) => {
-  const [confirmationText, setConfirmationText] = useState('')
-  const [confirmationTitle, setConfirmationTitle] = useState('')
-  const [actionMsg, setActionMsg] = useState('')
-  const [typeText, setTypeText] = useState('')
-  const [placeHolder, setPlaceHolder] = useState('')
-  const [key, setButtonKey] = useState('')
-
   const { platformLabels } = useContext(ControlContext)
+
+  const [confirmation, setConfirmation] = useState({
+    text: '',
+    title: '',
+    actionMsg: '',
+    typeText: '',
+    placeHolder: '',
+    buttonKey: ''
+  })
 
   useEffect(() => {
     switch (type) {
       case 'close':
-        setConfirmationTitle(platformLabels.closeConfirmation)
-        setActionMsg(platformLabels.youAreAboutToClose)
-        setTypeText(platformLabels.typeClose)
-        setPlaceHolder(platformLabels.placeHolderClose)
-        setButtonKey('Confirm')
+        setConfirmation({
+          text: '',
+          title: platformLabels.closeConfirmation,
+          actionMsg: platformLabels.youAreAboutToClose,
+          typeText: platformLabels.typeClose,
+          placeHolder: platformLabels.placeHolderClose,
+          buttonKey: 'Confirm'
+        })
         break
 
       case 'open':
-        setConfirmationTitle(platformLabels.openConfirmation)
-        setActionMsg(platformLabels.youAreAboutToOpen)
-        setTypeText(platformLabels.typeOpen)
-        setPlaceHolder(platformLabels.placeHolderOpen)
-        setButtonKey('Confirm')
+        setConfirmation({
+          text: '',
+          title: platformLabels.openConfirmation,
+          actionMsg: platformLabels.youAreAboutToOpen,
+          typeText: platformLabels.typeOpen,
+          placeHolder: platformLabels.placeHolderOpen,
+          buttonKey: 'Confirm'
+        })
         break
 
       case 'delete':
-        setConfirmationTitle(platformLabels.DeleteConfirmation)
-        setActionMsg(platformLabels.youAreAbout)
-        setTypeText(platformLabels.typeDelete)
-        setPlaceHolder(platformLabels.placeHolder)
-        setButtonKey('Delete')
+        setConfirmation({
+          text: '',
+          title: platformLabels.DeleteConfirmation,
+          actionMsg: platformLabels.youAreAbout,
+          typeText: platformLabels.typeDelete,
+          placeHolder: platformLabels.placeHolder,
+          buttonKey: 'Delete'
+        })
         break
 
       default:
-        setConfirmationTitle('')
-        setActionMsg('')
-        setTypeText('')
-        setPlaceHolder('')
-        setButtonKey('')
+        setConfirmation({
+          text: '',
+          title: '',
+          actionMsg: '',
+          typeText: '',
+          placeHolder: '',
+          buttonKey: ''
+        })
         break
     }
   }, [type, platformLabels])
 
-  useSetWindow({ title: confirmationTitle, window })
+  useSetWindow({ title: confirmation.title, window })
 
-  const handleChange = event => setConfirmationText(event.target.value)
-  const handleClear = () => setConfirmationText('')
+  const handleChange = event => setConfirmation(prev => ({ ...prev, text: event.target.value }))
+  const handleClear = () => setConfirmation(prev => ({ ...prev, text: '' }))
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     action()
     window.close()
   }
 
   const actions = [
     {
-      key: key,
+      key: confirmation.buttonKey,
       condition: true,
       onClick: handleSubmit,
-      disabled: confirmationText.toLowerCase() !== type
+      disabled: confirmation.text.toLowerCase() !== type
     }
   ]
 
@@ -77,27 +91,27 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
       actions={actions}
       isSaved={false}
       onSave={handleSubmit}
-      disabledSubmit={confirmationText.toLowerCase() !== type}
+      disabledSubmit={confirmation.text.toLowerCase() !== type}
       isParentWindow={false}
     >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <p style={{ fontWeight: 'bold', paddingLeft: '2rem' }}>
+              <p style={{ fontWeight: 'bold' }}>
                 {platformLabels.areYouSure}
                 <br />
-                {actionMsg}
+                {confirmation.actionMsg}
               </p>
-              <p style={{ paddingLeft: '2rem' }}>{typeText}</p>
+              <p>{confirmation.typeText}</p>
             </Grid>
-            <Grid item xs={12} marginLeft='1rem' marginRight='1rem'>
+            <Grid item xs={12}>
               <CustomTextField
                 name='confirmation'
-                value={confirmationText}
+                value={confirmation.text}
                 onChange={handleChange}
                 onClear={handleClear}
-                placeholder={placeHolder}
+                placeholder={confirmation.placeHolder}
                 autoFocus
               />
             </Grid>

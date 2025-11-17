@@ -254,6 +254,7 @@ export default function TimeVariatrionForm({ recordId, window }) {
       actions={actions}
       isCleared={false}
       functionId={SystemFunction.TimeVariation}
+      disabledSubmit={isCancelled || isClosed}
     >
       <VertLayout>
         <Grow>
