@@ -1,16 +1,13 @@
-/* Wrapper around the whole timeline component */
 .timelineWrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  /* Height is flexible but keeps a nice band */
   min-height: 160px;
   max-height: 220px;
   color: #f0f0f0;
 }
 
-/* Title above the line */
 .timelineTitle {
   margin: 0 0 8px;
   text-align: center;
@@ -18,7 +15,6 @@
   font-weight: 600;
 }
 
-/* Scrollable horizontal line area */
 .timelineContainer {
   display: flex;
   justify-content: center;
@@ -34,12 +30,10 @@
   box-sizing: border-box;
 }
 
-/* Hide scrollbar in WebKit */
 .timelineContainer::-webkit-scrollbar {
   display: none;
 }
 
-/* The main horizontal line + arrow */
 .timelineArrow {
   position: absolute;
   top: 50%;
@@ -64,19 +58,17 @@
   border-bottom: 8px solid transparent;
 }
 
-/* Each point on the timeline */
 .timelineItem {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 40px; /* spacing between items */
+  margin: 0 40px; 
   text-align: center;
   z-index: 2;
-  flex-shrink: 0; /* prevent items from shrinking too much */
+  flex-shrink: 0; 
 }
 
-/* The label box above or below the point */
 .timelineContent {
   position: absolute;
   background: #555;
@@ -87,17 +79,14 @@
   white-space: nowrap;
 }
 
-/* Above the line */
 .timelineContentTop {
   bottom: calc(100% + 10px);
 }
 
-/* Below the line */
 .timelineContentBottom {
   top: calc(100% + 10px);
 }
 
-/* Circle on the line */
 .timelineIcon {
   width: 20px;
   height: 20px;
@@ -110,9 +99,7 @@
   font-size: 12px;
 }
 
-/* ================== RESPONSIVE TWEAKS ================== */
 
-/* Tablets / small laptops */
 @media (max-width: 1024px) {
   .timelineWrapper {
     max-height: 200px;
@@ -128,7 +115,6 @@
   }
 }
 
-/* Phones */
 @media (max-width: 600px) {
   .timelineWrapper {
     min-height: 150px;
