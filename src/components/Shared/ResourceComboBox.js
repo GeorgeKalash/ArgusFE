@@ -62,19 +62,17 @@ export default function ResourceComboBox({
     }
 
     !noCache && fetchDataAsync()
-    !noCache && fetchDataAsync()
   }, [parameters])
 
   const fetchData = async (refresh = true) => {
     if (rest?.readOnly && dataGrid) return
+
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
       const data =
         cacheStore?.[key] && !refresh
-        cacheStore?.[key] && !refresh
           ? cacheStore?.[key]
-          : cacheAvailable
           : cacheAvailable
           ? await fetchWithCache({
               queryKey: [datasetId || endpointId, parameters],
@@ -84,7 +82,6 @@ export default function ResourceComboBox({
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
-      if (!cacheStore?.[key]) {
       if (!cacheStore?.[key]) {
         endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
       }
