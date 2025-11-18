@@ -15,9 +15,8 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
     header: null,
     items: []
   })
-  const editMode = !!store.recordId
 
-  const tabs = [{ label: labels.integrationLogic }, { label: labels.integrationLogicDetails, disabled: !editMode }]
+  const tabs = [{ label: labels.integrationLogic }, { label: labels.integrationLogicDetails, disabled: !store.recordId }]
 
   const getData = async () => {
     if (!recordId) return
@@ -40,15 +39,6 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
     getData()
   }, [recordId])
 
-  const handleImportData = data => {
-    setStore(prev => ({
-      ...prev,
-      header: data?.header,
-      recordId: data?.header?.recordId,
-      items: data?.items
-    }))
-  }
-
   return (
     <>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
@@ -58,9 +48,7 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
           labels={labels}
           setStore={setStore}
           store={store}
-          editMode={editMode}
           maxAccess={maxAccess}
-          onImportData={handleImportData}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>

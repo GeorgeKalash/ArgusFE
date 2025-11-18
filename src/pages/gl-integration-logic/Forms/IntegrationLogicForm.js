@@ -15,10 +15,11 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import { useInvalidate } from 'src/hooks/resource'
 
-export default function IntegrationLogicForm({ labels, maxAccess, setStore, store, editMode, onImportData }) {
+export default function IntegrationLogicForm({ labels, maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, header } = store
+  const editMode = !!recordId
 
   const invalidate = useInvalidate({
     endpointId: GeneralLedgerRepository.IntegrationLogic.page
@@ -56,11 +57,7 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
 
   useEffect(() => {
     if (header) {
-      formik.setValues({
-        recordId: header.recordId,
-        name: header.name,
-        distributionLevel: header.distributionLevel
-      })
+      formik.setValues(header)
     }
   }, [header])
 
@@ -136,10 +133,6 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
       }))
 
       invalidate()
-
-      if (onImportData) {
-        onImportData(clonedPack)
-      }
     }
 
     document.body.appendChild(input)

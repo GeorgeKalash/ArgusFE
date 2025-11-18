@@ -14,10 +14,11 @@ import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepositor
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import Form from 'src/components/Shared/Form'
 
-export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getData, window, store }) {
+export default function IntegrationLogicDetailsForm({ recordId, labels, maxAccess, getData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!store.recordId
+  const ilId = store?.recordId
+  const editMode = !!ilId
 
   const { formik } = useForm({
     initialValues: {

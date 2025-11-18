@@ -20,7 +20,7 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store, getData }) => {
   const { recordId, items } = store
 
   const getGridData = () => {
-    setGridData(items ? items : [])
+    setGridData(items || [])
   }
 
   useEffect(() => {
@@ -93,7 +93,6 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store, getData }) => {
         maxAccess,
         store,
         recordId: id,
-        ilId: recordId,
         getData
       },
       width: 650,
@@ -115,7 +114,7 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store, getData }) => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          api={getGridData}
+          maxAccess={maxAccess}
           pagination={false}
         />
       </Grow>
