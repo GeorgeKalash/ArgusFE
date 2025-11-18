@@ -62,8 +62,6 @@ export default function Calendar() {
   const { formik } = useForm({
     initialValues: {
       employeeId: null,
-      employeeRef: '',
-      employeeName: '',
       fromDate: null,
       toDate: null
     },
@@ -103,7 +101,7 @@ export default function Calendar() {
     }
   })
 
-  const onImportExport = async mode => {
+  const onImportExport = mode => {
     stack({
       Component: ImportExportRangeForm,
       props: {
