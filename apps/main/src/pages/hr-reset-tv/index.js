@@ -1,0 +1,10 @@
+import React from 'react'
+import { ImmediateWindow } from '@argus/shared-providers/providers/windows'
+import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import ResetTVForm from './Forms/ResetTVForm'
+
+const ResetTV = () => {
+  return <ImmediateWindow datasetId={ResourceIds.ResetTimeVariation} labelKey={'resetTV'} Component={ResetTVForm} />
+}
+
+export default ResetTV

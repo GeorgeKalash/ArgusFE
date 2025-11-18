@@ -1,8 +1,23 @@
 {
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "paths": {
+      "@argus/shared-ui/*": ["packages/shared-ui/src/*"],
+      "@argus/shared-hooks/*": ["packages/shared-hooks/src/*"],
+      "@argus/shared-domain/*": ["packages/shared-domain/src/*"],
+      "@argus/shared-providers/*": ["packages/shared-providers/src/*"],
+      "@argus/shared-inputs/*": ["packages/shared-inputs/src/*"],
+      "@argus/shared-layouts/*": ["packages/shared-layouts/src/*"],
+      "@argus/shared-errors/*": ["packages/shared-errors/src/*"],
+      "@argus/shared-reusable-components/*": ["packages/shared-reusable-components/src/*"],
+      "@argus/repositories/*": ["packages/repositories/src/*"],
+      "@argus/shared-utils/*": ["packages/shared-utils/src/*"]
+      
+    }
   },
   "include": [
-    "src"
-,  ]
+    "apps/main/src",
+    "packages/*/src"
+  ]
 }
