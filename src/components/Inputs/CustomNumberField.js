@@ -1,6 +1,4 @@
-import PercentIcon from '@mui/icons-material/Percent'
-import PinIcon from '@mui/icons-material/Pin'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -41,8 +39,11 @@ const CustomNumberField = ({
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
+  const isEmptyBlurFunction = onBlur.toString() === '()=>{}'
+
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const valueShow = useRef(null)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -59,24 +60,33 @@ const CustomNumberField = ({
   }
 
   const parseInputValue = (val, blur) => {
-    if (val === null || val === undefined) return null
+    if (val === null || val === undefined) {
+      valueShow.current = null
+
+      return null
+    }
 
     val = val?.replace(/,/g, '')
 
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
-
-    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) {
-      return val === '.' ? val : Number(val)
-    }
+    valueShow.current = val
 
     if (val?.endsWith('.') && !blur) {
       return val
     }
 
-    if (isDotFollowedByOnlyZeros(val) && !blur) {
-      return val.startsWith('.') ? ('0' + val).toString() : val.toString()
+    if ((isDotFollowedByOnlyZeros(val) || val.startsWith('.') || val.startsWith('-.')) && !blur) {
+      const newVal = val.startsWith('.')
+        ? ('0' + val).toString()
+        : val.startsWith('-.')
+        ? ('-0.' + val?.toString().split('.')[1]).toString()
+        : val.toString()
+
+      valueShow.current = newVal
+
+      return Number(newVal)
     }
 
     if (val == '.' && blur) {
@@ -95,6 +105,8 @@ const CustomNumberField = ({
       return Number.isNaN(num) ? null : num
     }
 
+    valueShow.current = null
+
     return null
   }
 
@@ -103,6 +115,13 @@ const CustomNumberField = ({
     if (value) e.target.value = value
 
     onChange(e, parseInputValue(value, blur))
+  }
+
+  const handleNumberBlurValue = (e, blur) => {
+    const value = formatNumber(e)
+    if (value) e.target.value = value
+
+    onBlur(e, parseInputValue(value, blur))
   }
 
   const handleNumberMouseLeave = e => {
@@ -154,7 +173,7 @@ const CustomNumberField = ({
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
-      value={value ?? ''}
+      value={valueShow.current || (value ?? '')}
       variant={variant}
       size={size}
       fullWidth
@@ -164,8 +183,9 @@ const CustomNumberField = ({
       onInput={handleInput}
       onFocus={e => autoSelect && e.target.select()}
       onBlur={e => {
-        onBlur(e)
-        if (e.target.value?.endsWith('.')) {
+        if (!isEmptyBlurFunction) {
+          handleNumberBlurValue(e, true)
+        } else if (e.target.value?.endsWith('.')) {
           handleNumberChangeValue(e, true)
         }
       }}
@@ -187,7 +207,15 @@ const CustomNumberField = ({
               </IconButton>
             )}
             {displayButtons && (value || value === 0) && (
-              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
+              <IconButton
+                tabIndex={-1}
+                edge='end'
+                onClick={e => {
+                  onClear(e)
+                  valueShow.current = null
+                }}
+                aria-label='clear input'
+              >
                 <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}

@@ -548,8 +548,13 @@ export function DataGrid({
     async function update({ field, value }) {
       const oldRow = params.data
 
+      const newValue =
+        value?.toString()?.endsWith('.') && params.colDef.component === 'numberfield'
+          ? Number(value?.toString().split('.')[0])
+          : value
+
       const changes = {
-        [field]: value ?? column.colDef?.defaultValue ?? ''
+        [field]: newValue ?? column.colDef?.defaultValue ?? ''
       }
 
       setCurrentValue(changes)
@@ -832,14 +837,13 @@ export function DataGrid({
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
     if (newValue == currentValue && newValue !== '.') return
-
     if (newValue?.toString()?.endsWith('.') && colDef.component === 'numberfield') {
       newValue = newValue.slice(0, -1).replace(/,/g, '')
       newValue = newValue != '' ? Number(newValue) : null
       newValue = isNaN(newValue) ? null : newValue
 
       const changes = {
-        [colDef?.field]: newValue || null
+        [colDef?.field]: newValue || undefined
       }
       setData(changes, params)
       commit(changes)

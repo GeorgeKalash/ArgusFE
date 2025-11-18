@@ -478,7 +478,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
-        console.log(newRow.qty)
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const filteredItems = filteredMeasurements?.current.find(item => item.recordId === newRow?.muId)
         const muQty = newRow?.muQty ?? filteredItems?.qty

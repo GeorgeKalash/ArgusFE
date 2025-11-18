@@ -29,16 +29,15 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
 
   return (
     <CustomNumberField
-      value={value?.[field]}
-      // value={
-      //   viewDecimals
-      //     ? typing.current
-      //       ? value?.[field]
-      //       : formatValue(value?.[field])
-      //     : decimalScale != undefined && !typing.current
-      //     ? Number(value?.[field]).toFixed(decimalScale)
-      //     : value?.[field]
-      // }
+      value={
+        viewDecimals
+          ? typing.current
+            ? value?.[field]
+            : formatValue(value?.[field])
+          : decimalScale != undefined && !typing.current && value?.[field] !== ''
+          ? Number(value?.[field]).toFixed(decimalScale)
+          : value?.[field]
+      }
       label={''}
       readOnly={readOnly}
       decimalScale={decimalScale}

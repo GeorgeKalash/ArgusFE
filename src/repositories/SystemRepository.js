@@ -208,7 +208,7 @@ export const SystemRepository = {
     get: service + 'getTHD'
   },
   SMSRequest: {
-    qry: service + 'qrySMS'
+    page: service + 'pageSMS'
   },
   FiscalYears: {
     page: service + 'pageFY',
