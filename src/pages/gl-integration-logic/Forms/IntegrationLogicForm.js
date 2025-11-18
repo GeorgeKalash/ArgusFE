@@ -62,7 +62,7 @@ export default function IntegrationLogicForm({ labels, maxAccess, setStore, stor
         distributionLevel: header.distributionLevel
       })
     }
-  }, [])
+  }, [header])
 
   const onExport = async () => {
     const res = await getRequest({
