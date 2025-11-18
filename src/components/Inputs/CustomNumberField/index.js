@@ -7,6 +7,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
 import { checkAccess } from 'src/lib/maxAccess'
 import { iconMap } from 'src/utils/iconMap'
+import styles from './CustomNumberField.module.css'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -159,52 +160,37 @@ const CustomNumberField = ({
           max: max,
           type: arrow ? 'number' : 'text',
           tabIndex: readOnly ? -1 : 0,
-          onKeyPress: handleKeyPress
+          onKeyPress: handleKeyPress,
+          style: { textAlign: align }
         },
         autoComplete: 'off',
         readOnly: _readOnly,
+        classes: {
+          root: styles.outlinedRoot,
+          notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
+          input: styles.inputBase
+        },
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
-          <InputAdornment position='end'>
-            {iconMap[props?.iconKey] && (
-              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick}>
-                {iconMap[props?.iconKey]}
-              </IconButton>
-            )}
-            {displayButtons && (value || value === 0) && (
-              <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
-              </IconButton>
-            )}
-          </InputAdornment>
-        )
+            <InputAdornment position='end'>
+              {iconMap[props?.iconKey] && (
+                <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={styles['search-icon']}>
+                  {iconMap[props?.iconKey]}
+                </IconButton>
+              )}
+              {displayButtons && (value || value === 0) && (
+                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input' className={styles['search-icon']} >
+                  <ClearIcon className={styles['search-icon']} />
+                </IconButton>
+              )}
+            </InputAdornment>
+          )
+      }}
+      InputLabelProps={{
+        className: styles.inputLabel
       }}
       customInput={TextField}
       onChange={e => handleNumberChangeValue(e)}
       onMouseLeave={e => handleNumberMouseLeave(e)}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            border: !hasBorder && 'none',
-            borderColor: '#959D9E',
-            borderRadius: '6px'
-          },
-          height: `33px !important`
-        },
-        '& .MuiInputLabel-root': {
-          fontSize: '0.90rem',
-          top: '0px'
-        },
-        '& .MuiInputBase-input': {
-          fontSize: '0.90rem',
-          color: 'black',
-          textAlign: align
-        },
-        '& .MuiAutocomplete-clearIndicator': {
-          pl: '0px !important',
-          marginRight: '-10px',
-          visibility: 'visible'
-        }
-      }}
       {...props}
     />
   )

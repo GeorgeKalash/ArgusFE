@@ -5,6 +5,7 @@ import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '/public/images/buttonsIcons/add.png'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomTextArea.module.css'
 
 const CustomTextArea = ({
   type = 'text', //any valid HTML5 input type
@@ -44,7 +45,6 @@ const CustomTextArea = ({
   const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
-    // Save the cursor position before the value changes
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
@@ -77,39 +77,44 @@ const CustomTextArea = ({
           paddingRight: paddingRight
         }
       }}
-      sx={{
-        '& .MuiOutlinedInput-root': {
-          '& fieldset': {
-            borderColor: '#959d9e',
-            borderRadius: '6px'
-          }
-        },
-        '& .MuiInputLabel-root': {
-          fontSize: '0.90rem',
-          top: isFocused || value ? '0px' : '-3px'
-        },
-        '& .MuiInputBase-input': {
-          fontSize: '0.90rem',
-          color: 'black'
-        }
-      }}
       autoComplete={autoComplete}
+      InputLabelProps={{
+        className:
+          isFocused || value ? styles.textAreaInputLabelFocused : styles.textAreaInputLabel
+      }}
       InputProps={{
+        classes: {
+          root: styles.textAreaOutlinedRoot,
+          notchedOutline: styles.textAreaOutlinedFieldset,
+          input: styles.textAreaInputBase
+        },
         endAdornment: (
           <InputAdornment position='end'>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className={styles.textAreaEndAdornmentContainer}>
               {!_readOnly && value && (
                 <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon sx={{ border: '0px', fontSize: 17 }} />
+                  <ClearIcon className={styles.textAreaClearIcon} />
                 </IconButton>
               )}
               {viewAdd && (
-                <IconButton tabIndex={-1} edge='end' onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
+                <IconButton
+                  tabIndex={-1}
+                  edge='end'
+                  onClick={handleAddAction}
+                  aria-label='Add'
+                  disabled={_disabled}
+                >
                   <Image src={AddAction} alt='Add' width={18} height={18} />
                 </IconButton>
               )}
               {viewDropDown && (
-                <IconButton tabIndex={-1} edge='end' onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
+                <IconButton
+                  tabIndex={-1}
+                  edge='end'
+                  onClick={onDropDown}
+                  aria-label='Drop down'
+                  disabled={_disabled}
+                >
                   <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
                 </IconButton>
               )}

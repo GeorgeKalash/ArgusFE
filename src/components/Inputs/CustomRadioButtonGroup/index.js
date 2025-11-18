@@ -1,6 +1,7 @@
 import React from 'react'
 import { RadioGroup, FormControlLabel, Radio } from '@mui/material'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomRadioButtonGroup.module.css'
 
 const CustomRadioButtonGroup = ({
   options = [],
@@ -21,21 +22,7 @@ const CustomRadioButtonGroup = ({
   const _disabled = _readOnly || _hidden
 
   return _hidden ? null : (
-    <RadioGroup
-      row={row}
-      value={value}
-      onChange={onChange}
-      sx={{
-        ml: 2,
-        '.MuiFormControlLabel-label': {
-          fontSize: 15
-        },
-        '.MuiSvgIcon-root': {
-          fontSize: 15
-        }
-      }}
-      {...props}
-    >
+    <RadioGroup row={row} value={value} onChange={onChange} className={styles.radioGroup} {...props}>
       {options.map(({ label, value, disabled = false }) => {
         const _optionDisabled = _disabled || disabled
 
@@ -43,10 +30,11 @@ const CustomRadioButtonGroup = ({
           <FormControlLabel
             key={value}
             value={value}
-            control={<Radio />}
+            control={<Radio className={styles.radio} />}
             label={label}
             disabled={_optionDisabled}
             required={_required}
+            className={styles.formControl}
           />
         )
       })}

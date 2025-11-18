@@ -5,6 +5,7 @@ import 'react-phone-input-2/lib/material.css'
 import { ControlContext } from 'src/providers/ControlContext'
 import ClearIcon from '@mui/icons-material/Clear'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomPhoneNumber.module.css'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {
   const prefix = '+'
@@ -45,27 +46,16 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     if (inputElement) {
       inputElement.type = type
     }
-  }, [type])
+  }, [type, name])
 
   return _hidden ? (
     <></>
   ) : (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div className={styles.phoneWrapper}>
       {label && (
-        <label
-          style={{
-            position: 'absolute',
-            zIndex: 1,
-            top: '-8px',
-            left: '12px',
-            fontSize: '11px',
-            background: 'white',
-            padding: '0 4px',
-            fontWeight: '500',
-            color: '#666'
-          }}
-        >
-          {label} {_required && <span>*</span>}
+        <label className={styles.phoneLabel}>
+          {label}{' '}
+          {_required && <span className={styles.phoneLabelRequired}>*</span>}
         </label>
       )}
 
@@ -85,34 +75,21 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
           onCopy: props.onCopy,
           readOnly: _readOnly
         }}
-        containerStyle={{
-          border: `1px solid ${error ? 'red' : '#ccc'}`,
-          borderRadius: '6px',
-          display: 'flex',
-          alignItems: 'center'
-        }}
-        inputStyle={{
-          width: '100%',
-          border: 'none'
-        }}
-        specialLabel={''}
+        containerClass={styles.phoneContainer}
+        inputClass={styles.phoneInput}
+        specialLabel=''
         {...props}
       />
+
       {(value || value === 0) && !_readOnly && (
         <IconButton
           tabIndex={-1}
           edge='end'
           onClick={() => props.onClear(code)}
           aria-label='clear input'
-          sx={{
-            position: 'absolute',
-            right: '15px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            padding: '5px'
-          }}
+          className={styles.phoneClearButton}
         >
-          <ClearIcon sx={{ fontSize: 17 }} />
+          <ClearIcon className={styles.phoneClearIcon} />
         </IconButton>
       )}
     </div>

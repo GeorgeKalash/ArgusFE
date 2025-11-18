@@ -1,0 +1,152 @@
+.customTabPanel {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 !important;
+  overflow: auto;
+  padding-top: 5px;
+  position: relative;
+  background-color: white;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.tabsContainer {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  height: 40px;
+  overflow: auto;
+}
+
+.tabsWrapper {
+  background-color: #231f20;
+  padding-top: 5px;
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.tabs {
+  min-height: 35px !important;
+}
+
+.tabName {
+  font-size: 20px;
+}
+
+.tabRoot {
+  color: white !important;
+  background-color: #868686 !important;
+  min-height: 35px !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  padding: 0px 5px !important;
+  margin-right: 2px !important;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tabRoot:hover {
+  color: grey !important;
+  background-color: #ddd !important;
+}
+
+.tabDisabled {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  color: #949494 !important;
+  background-color: #555555 !important;
+}
+
+.selectedTab {
+  color: #231f20 !important;
+  background-color: white !important;
+}
+
+.tabsIndicator {
+  background-color: white !important;
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .tabs {
+    min-height: 25px !important;
+  }
+  .tabRoot {
+    min-height: 25px !important;
+    padding: 0px 3px !important;
+  }
+  .tabName {
+    font-size: 11px !important;
+  }
+  .tabsContainer {
+    height: 30px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .tabs {
+    min-height: 27px !important;
+  }
+  .tabRoot {
+    min-height: 22px !important;
+    padding: 0px 6px !important;
+  }
+  .tabName {
+    font-size: 9px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    min-height: 20px !important;
+  }
+  .tabRoot {
+    min-height: 20px !important;
+    padding: 0px 5px !important;
+  }
+  .tabName {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .tabs {
+    min-height: 18px !important;
+  }
+  .tabRoot {
+    min-height: 18px !important;
+    padding: 0px 4px !important;
+  }
+  .tabName {
+    font-size: 7px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs {
+    min-height: 16px !important;
+  }
+  .tabRoot {
+    min-height: 16px !important;
+    padding: 0px 3px !important;
+  }
+  .tabName {
+    font-size: 6px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .tabs {
+    min-height: 14px !important;
+  }
+  .tabRoot {
+    min-height: 14px !important;
+    padding: 0px 2px !important;
+  }
+  .tabName {
+    font-size: 5.5px !important;
+  }
+}

@@ -7,6 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { ControlContext } from 'src/providers/ControlContext'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { useInvalidate } from 'src/hooks/resource'
+import styles from './FileUpload.module.css'
 
 const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
@@ -66,14 +67,12 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
           folderName: null,
           date: day + '/' + month + '/' + year,
           url: null,
-          file: selectedFile,
-          folderId: null
+          file: selectedFile
         }
 
         const fileSizeInKB = Math.round(selectedFile.size / 1024)
         if (parseInt(fileSizeInKB) > 500) {
           alert(platformLabels.MaxFileSize)
-
           continue
         }
 
@@ -154,45 +153,17 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
 
   return (
     <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          borderRadius: '4px',
-          flex: 1,
-          border: 'grey dashed 1px',
-          cursor: 'pointer'
-        }}
-      >
+      <Box className={styles.container}>
         {files.length > 0 && (
-          <Box
-            sx={{
-              width: '95%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1,
-              flex: 0,
-              margin: 3,
-              borderRadius: '4px'
-            }}
-          >
+          <Box className={styles.filesContainer}>
             {files.map((file, index) => (
-              <Box
-                key={index}
-                sx={{
-                  border: 'black solid 1px',
-                  borderRadius: '4px',
-                  p: 1,
-                  mb: 1
-                }}
-              >
-                <Grid container alignItems='center' spacing={1} padding={1}>
+              <Box key={index} className={styles.fileItem}>
+                <Grid container alignItems='center' spacing={1} className={styles.gridPadding}>
                   <Grid item xs={8}>
-                    <Typography variant='body2' component='span'>
+                    <Typography variant='body2' component='span' className={styles.fileName}>
                       {file.fileName}
                     </Typography>
-                    <Typography variant='body2' component='span' sx={{ ml: 1 }}>
+                    <Typography variant='body2' component='span' className={styles.fileSize}>
                       ({Math.round(file.file.size / 1024)} KB)
                     </Typography>
                   </Grid>
@@ -220,7 +191,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
                   </Grid>
 
                   <Grid item xs={1}>
-                    <IconButton onClick={() => handleRemoveFile(index)} size='small' sx={{ color: 'red' }}>
+                    <IconButton onClick={() => handleRemoveFile(index)} className={styles.deleteButton}>
                       <DeleteIcon />
                     </IconButton>
                   </Grid>
@@ -230,40 +201,17 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
           </Box>
         )}
 
-        <Box sx={{ flex: 1, display: 'flex', width: '100%' }}>
+        <Box className={styles.uploadBox}>
           <input hidden type='file' ref={hiddenInputRef} onChange={handleInputFileChange} multiple />
-          <Box
-            onClick={handleClick}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              flex: 1
-            }}
-          >
+          <Box onClick={handleClick} className={styles.uploadArea}>
             <span>{platformLabels.fileUpload}</span>
           </Box>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', width: '100%' }}>
-        <Button
-          onClick={handleInputFileReset}
-          variant='contained'
-          sx={{
-            mr: 1,
-            backgroundColor: '#f44336',
-            '&:hover': {
-              backgroundColor: '#f44336',
-              opacity: 0.8
-            },
-            width: '50px',
-            height: '35px',
-            objectFit: 'contain',
-            minWidth: '30px'
-          }}
-        >
-          <img src={`/images/buttonsIcons/clear.png`} alt={'clear'} style={{ width: '20px', height: '20px' }} />
+
+      <Box className={styles.buttonsBox}>
+        <Button onClick={handleInputFileReset} variant='contained' className={styles.clearButton}>
+          <img src={`/images/buttonsIcons/clear.png`} alt='clear' className={styles.clearIcon} />
         </Button>
       </Box>
     </>
