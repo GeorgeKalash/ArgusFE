@@ -1,37 +1,50 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
 import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
-  const [rect, setRect] = useState(anchorEl ? anchorEl.getBoundingClientRect() : null)
+  const [rect, setRect] = useState(null)
   const popperRef = useRef(null)
-
   const [isPickerContent, setIsPickerContent] = useState(false)
 
-  useEffect(() => {
+  const updateRect = useCallback(() => {
     if (!anchorEl) return
 
-    const updateRect = () => {
-      if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
+    const nextRect = anchorEl.getBoundingClientRect()
+
+    setRect(prev => {
+      if (
+        !prev ||
+        prev.top !== nextRect.top ||
+        prev.left !== nextRect.left ||
+        prev.width !== nextRect.width ||
+        prev.height !== nextRect.height
+      ) {
+        return nextRect
       }
-    }
+      
+      return prev
+    })
+  }, [anchorEl])
+
+  useEffect(() => {
+    if (!anchorEl || !open) return
 
     updateRect()
 
-    const mutationObserver = new MutationObserver(updateRect)
-    mutationObserver.observe(anchorEl, { attributes: true, childList: true, subtree: true })
+    const handleScroll = () => {
+      updateRect()
+    }
 
-    window.addEventListener('scroll', updateRect, true)
-    window.addEventListener('resize', updateRect)
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleScroll)
 
     return () => {
-      mutationObserver.disconnect()
-      window.removeEventListener('scroll', updateRect, true)
-      window.removeEventListener('resize', updateRect)
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleScroll)
     }
-  }, [anchorEl])
+  }, [anchorEl, open, updateRect])
 
   const zoomValue =
     typeof window !== 'undefined'
@@ -42,9 +55,6 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   const anchorWidth = rect ? rect.width / zoom : undefined
   const top = rect ? rect.bottom / zoom : 0
   const left = rect ? rect.left / zoom : 0
-
-  const popperHeight = popperRef.current?.getBoundingClientRect()?.height || 0
-  const canRenderBelow = rect ? window.innerHeight - top > popperHeight : true
 
   useEffect(() => {
     if (!open || !popperRef.current) return
@@ -60,6 +70,19 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   }, [open, rect, isPickerContent])
 
   const isPicker = isPickerContent || isDateTimePicker
+
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+
+  const estimatedPopperHeight = (() => {
+    if (isPicker) {
+      return 320 / zoom
+    }
+
+   
+    return viewportHeight ? viewportHeight * 0.43 : 300
+  })()
+
+  const canRenderBelow = rect ? viewportHeight - top > estimatedPopperHeight : true
 
   const baseStyle = {
     position: 'absolute',
