@@ -21,6 +21,7 @@ import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
 import { useError } from 'src/error'
 import Form from './Form'
+import StrictConfirmation from './StrictConfirmation'
 
 export default function FormShell({
   form,
@@ -278,6 +279,30 @@ export default function FormShell({
               Component: StrictUnpostConfirmation,
               props: {
                 onSuccess: action.onSuccess
+              },
+              expandable: false
+            })
+          }
+          break
+        case 'onCloseConfirmation':
+          action.onClick = () => {
+            stack({
+              Component: StrictConfirmation,
+              props: {
+                action: action.action,
+                type: 'close'
+              },
+              expandable: false
+            })
+          }
+          break
+        case 'onOpenConfirmation':
+          action.onClick = () => {
+            stack({
+              Component: StrictConfirmation,
+              props: {
+                action: action.action,
+                type: 'open'
               },
               expandable: false
             })
