@@ -1,0 +1,50 @@
+.radioGroup {
+  margin-left: 8px; /* same as sx: ml: 2 */
+}
+
+/* Label text size */
+.formControl :global(.MuiFormControlLabel-label) {
+  font-size: 15px;
+}
+
+/* Radio icon size */
+.radio :global(.MuiSvgIcon-root) {
+  font-size: 15px;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1280px) {
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 14px;
+  }
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 960px) {
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 13px;
+  }
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 12px;
+  }
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 11px;
+  }
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 11px;
+  }
+}
