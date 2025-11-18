@@ -1,18 +1,23 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import styles from './charts.module.css'
 
-Chart.register(ChartDataLabels)
+const getCssVar = (el, name, fallback) => {
+  if (!el) return fallback
+  const value = getComputedStyle(el).getPropertyValue(name)
+  
+  return value?.trim() || fallback
+}
 
-const predefinedColors = [
-  'rgba(88, 2, 1)',
-  'rgba(67, 67, 72)',
-  'rgba(144, 237, 125)',
-  'rgba(247, 163, 92)',
-  'rgba(54, 162, 235)',
-  'rgba(153, 102, 255)',
-  'rgba(201, 203, 207)'
+const predefinedColors = canvas => [
+  getCssVar(canvas, '--chart-mixed-1'),
+  getCssVar(canvas, '--chart-mixed-2'),
+  getCssVar(canvas, '--chart-mixed-3'),
+  getCssVar(canvas, '--chart-mixed-4'),
+  getCssVar(canvas, '--chart-mixed-5'),
+  getCssVar(canvas, '--chart-mixed-6'),
+  getCssVar(canvas, '--chart-mixed-7')
 ]
 
 const generateColors = (dataLength, canvas) => {
@@ -117,27 +122,21 @@ const getChartOptions = (label, type, canvas) => {
   }
 }
 
-export const MixedBarChart = ({
-  labels,
-  data1,
-  data2,
-  label1,
-  label2,
-  rotation = 0,
-  hasLegend = false,
-  height = 320
-}) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
-
+export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   useEffect(() => {
-    if (!canvasRef.current) return
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
-    const ctx = canvasRef.current.getContext('2d')
+    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
+    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg')
 
-    chartRef.current?.destroy()
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
-    chartRef.current = new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -158,55 +157,78 @@ export const MixedBarChart = ({
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        aspectRatio: ratio,
         plugins: {
           datalabels: {
-            anchor: ctx => {
-              const ch = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * h >= 120 ? 'center' : 'end'
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
             },
-            align: ctx => {
-              const ch = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * h >= 120 ? 'center' : 'end'
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
             },
-            color: ctx => {
-              const ch = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * h >= 120 ? '#fff' : '#000'
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
-            rotation,
-            font: { size: 14 },
-            formatter: (value, ctx) => {
-              const dsIndex = ctx.datasetIndex
-              const lab = dsIndex === 0 ? label1 : label2
-              const rounded = Math.ceil(value)
-              if (hasLegend) return `${rounded.toLocaleString()}`
+            rotation: rotation || 0,
+            font: {
+              size: 14
+            },
+            formatter: (value, context) => {
+              const datasetIndex = context.datasetIndex
+              const lbl = datasetIndex === 0 ? label1 : label2
+              const roundedValue = Math.ceil(value)
 
-              return `${lab ? lab + ':\n' : ''}${rounded.toLocaleString()}`
+              if (hasLegend) {
+                return `${roundedValue.toLocaleString()}`
+              }
+
+              return `${lbl ? lbl + ':\n' : ''}${roundedValue.toLocaleString()}`
             }
           },
-          legend: { display: hasLegend }
+          legend: {
+            display: hasLegend || false
+          }
         },
+
         scales: {
           y: {
             ticks: {
-              callback: val => {
-                if (val >= 1e6) return `${(val / 1e6).toFixed(1)}M`
-                if (val >= 1e3) return `${(val / 1e3).toFixed(1)}K`
+              callback: function (value) {
+                if (value >= 1e6) {
+                  return `${(value / 1e6).toFixed(1)}M`
+                } else if (value >= 1e3) {
+                  return `${(value / 1e3).toFixed(1)}K`
+                }
 
-                return val
+                return value
               }
             }
           }
@@ -214,27 +236,29 @@ export const MixedBarChart = ({
       },
       plugins: [ChartDataLabels]
     })
-  }, [label1, label2, labels, data1, data2])
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data1, data2, label1, label2, rotation])
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height
-      }}
-    >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
-    </div>
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
   )
 }
 
-export const HorizontalBarChartDark = ({ labels, data, label, color, hoverColor }) => {
+export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
   useEffect(() => {
-    if (chartInstanceRef.current) return
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
 
     const canvas = chartRef.current
     if (!canvas) return
@@ -321,31 +345,38 @@ export const HorizontalBarChartDark = ({ labels, data, label, color, hoverColor 
       },
       plugins: [ChartDataLabels]
     })
-  }, [labels, data, label])
+
+    return () => {
+      chartInstanceRef.current.destroy()
+    }
+  }, [id, labels, data, label, color, hoverColor])
 
 return (
   <div  className={ styles.charthight}>
 
-      <canvas
-        ref={chartRef}
-        height={dynamicHeight}
-        width={window.innerWidth / 2.5}
-        style={{ position: 'absolute' }}
-      ></canvas>
+
+    <canvas
+      id={id}
+      ref={chartRef}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+    ></canvas>
     </div>
   )
 }
 
-export const CompositeBarChartDark = ({ labels, data, label, color, hoverColor, height = 300 }) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
-
+export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   useEffect(() => {
-    if (chartRef.current || !canvasRef.current) return
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
-    const ctx = canvasRef.current.getContext('2d')
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
-    chartRef.current = new Chart(ctx, {
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
+
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -361,68 +392,85 @@ export const CompositeBarChartDark = ({ labels, data, label, color, hoverColor, 
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        aspectRatio: ratio,
         plugins: {
           datalabels: {
-            anchor: c => {
-              const ch = c.chart
-              const v = c.dataset.data[c.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * h >= 120 ? 'center' : 'end'
-            },
-            align: c => {
-              const ch = c.chart
-              const v = c.dataset.data[c.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
 
-              return (v / max) * h >= 120 ? 'center' : 'end'
-            },
-            color: c => {
-              const ch = c.chart
-              const v = c.dataset.data[c.dataIndex]
-              const h = ch.scales.y.bottom - ch.scales.y.top
-              const max = ch.scales.y.max
+              const barHeight = (value / maxValue) * chartHeight
 
-              return (v / max) * h >= 120 ? '#fff' : '#000'
+              return barHeight >= 120 ? 'center' : 'end'
             },
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? 'center' : 'end'
+            },
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
+
+              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+              const maxValue = chart.scales.y.max
+
+              const barHeight = (value / maxValue) * chartHeight
+
+              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
+            },
+            offset: 0,
             rotation: -90,
-            font: { size: 14 },
-            formatter: v => v.toLocaleString()
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
           },
-          legend: { display: false }
+          legend: {
+            display: false
+          }
         }
       },
       plugins: [ChartDataLabels]
     })
-  }, [data, labels, label])
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height
-      }}
-    >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />
-    </div>
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
   )
 }
 
-export const MixedColorsBarChartDark = ({ labels = [], data = [], label, height = 300 }) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
-
+export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) => {
   useEffect(() => {
-    if (chartRef.current || !canvasRef.current) return
-    const colors = generateColors(data?.length || 0)
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const colors = generateColors(data.length, canvas)
 
-    const ctx = canvasRef.current.getContext('2d')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
-    chartRef.current = new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -438,7 +486,7 @@ export const MixedColorsBarChartDark = ({ labels = [], data = [], label, height 
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        aspectRatio: ratio,
         plugins: {
           datalabels: {
             anchor: context => {
@@ -496,29 +544,31 @@ export const MixedColorsBarChartDark = ({ labels = [], data = [], label, height 
       },
       plugins: [ChartDataLabels]
     })
-  }, [data, labels, label])
+
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height
-      }}
-    >
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', position: 'absolute' }}></canvas>
-    </div>
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
   )
 }
 
-export const CompositeBarChart = ({ labels = [], data = [], label = '' }) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
-
+export const CompositeBarChart = ({ id, labels, data, label }) => {
   useEffect(() => {
-    const ctx = canvasRef.current.getContext('2d')
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
-    chartRef.current = new Chart(ctx, {
+    const barBg = getCssVar(canvas, '--chart-primary-bar-bg')
+    const barBorder = getCssVar(canvas, '--chart-primary-bar-border')
+
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
@@ -531,38 +581,38 @@ export const CompositeBarChart = ({ labels = [], data = [], label = '' }) => {
             borderWidth: 1
           }
         ]
-      }
+      },
+      options: getChartOptions(label, 'bar', canvas)
     })
 
-    return () => chartRef.current?.destroy()
-  }, [])
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, data, label])
 
-  useEffect(() => {
-    if (!chartRef.current) return
-    const chart = chartRef.current
-
-    chart.data.labels = [...labels]
-    chart.data.datasets[0].label = label
-    chart.data.datasets[0].data = [...data]
-    chart.update()
-  }, [labels, data, label])
-
-  return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <canvas ref={canvasRef} />
-    </div>
-  )
+  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
-export const LineChart = ({ labels, data, label, height = 450 }) => {
-  const canvasRef = useRef(null)
+export const LineChart = ({ id, labels, data, label }) => {
   const chartRef = useRef(null)
+  const chartInstanceRef = useRef(null)
 
   useEffect(() => {
-    if (chartRef.current || !canvasRef.current) return
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy()
+    }
 
-    const ctx = canvasRef.current.getContext('2d')
-    chartRef.current = new Chart(ctx, {
+    const canvas = chartRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const lineColor = getCssVar(canvas, '--chart-line-1-color')
+    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover')
+
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
+
+    chartInstanceRef.current = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
@@ -570,115 +620,137 @@ export const LineChart = ({ labels, data, label, height = 450 }) => {
           {
             label,
             data,
-            borderWidth: 1,
-            borderColor: 'rgb(102, 115, 253)',
-            backgroundColor: 'rgb(102, 115, 253)',
-            hoverBackgroundColor: 'rgb(126, 135, 243)',
             fill: false,
+            borderColor: lineColor,
+            backgroundColor: lineColor,
+            hoverBackgroundColor: lineHoverColor,
+            borderWidth: 1,
             tension: 0.1
           }
         ]
       },
       options: {
+        indexAxis: 'x',
         responsive: true,
         maintainAspectRatio: false,
-        resizeDelay: 0,
-        layout: { padding: 0 },
+        scales: {
+          x: {
+            max: Math.max(...data) * 1.1
+          }
+        },
         plugins: {
-          legend: { display: false },
           datalabels: {
-            anchor: ctx => {
-              const chart = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const w = chart.scales.x.right - chart.scales.x.left
-              const max = Math.max(...(data.length ? data : [1]))
+            anchor: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * w >= 65 ? 'center' : 'end'
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'end'
             },
-            align: ctx => {
-              const chart = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const w = chart.scales.x.right - chart.scales.x.left
-              const max = Math.max(...(data.length ? data : [1]))
+            align: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * w >= 65 ? 'center' : 'right'
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? 'center' : 'right'
             },
-            color: ctx => {
-              const chart = ctx.chart
-              const v = ctx.dataset.data[ctx.dataIndex]
-              const w = chart.scales.x.right - chart.scales.x.left
-              const max = Math.max(...(data.length ? data : [1]))
+            color: context => {
+              const chart = context.chart
+              const dataset = context.dataset
+              const value = dataset.data[context.dataIndex]
 
-              return (v / max) * w >= 65 ? '#fff' : '#000'
+              const chartWidth = chart.scales.x.right - chart.scales.x.left
+              const maxValue = chart.scales.x.max
+              const barWidth = (value / maxValue) * chartWidth
+
+              return barWidth >= 65 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
-            font: { size: 14 },
-            formatter: v => Number(v).toLocaleString()
+            font: {
+              size: 14
+            },
+            formatter: value => value.toLocaleString()
+          },
+          legend: {
+            display: false
           }
         }
-      }
+      },
+      plugins: [ChartDataLabels]
     })
-  }, [labels, data, label])
+
+    return () => {
+      chartInstanceRef.current.destroy()
+    }
+  }, [id, labels, data, label])
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%'
-        }}
-      />
+    <div  className={ styles.charthight}>
+    <canvas
+      id={id}
+      ref={chartRef}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+    ></canvas>
     </div>
   )
 }
 
-export const LineChartDark = ({ labels = [], datasets = [], datasetLabels }) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
+export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+  useEffect(() => {
+    const canvas = document.getElementById(id)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
 
-  const datasetConfig = useMemo(
-    () =>
-      datasets
-        .map((data, index) => {
-          if (!data?.length) return null
-          const color = getColorForIndex(index)
+    const datasetConfig = datasets
+      .map((data, index) => {
+        const color = getColorForIndex(index, canvas)
 
+        if (data.some(value => value !== 0)) {
           return {
-            label: datasetLabels?.[index] ?? '',
+            label: datasetLabels[index],
             data,
-            fill: false,
             borderColor: color,
             backgroundColor: color,
             borderWidth: 2,
-            pointRadius: 5,
-            tension: 0.2
+            tension: 0.3,
+            pointRadius: 3,
+            spanGaps: true
           }
-        })
-        .filter(Boolean),
-    [datasets, datasetLabels]
-  )
+        }
 
-  useEffect(() => {
-    const ctx = canvasRef.current.getContext('2d')
+        return null
+      })
+      .filter(dataset => dataset !== null)
 
-    chartRef.current = new Chart(ctx, {
+    if (datasetConfig.length === 0) {
+      return
+    }
+
+    const chart = new Chart(ctx, {
       type: 'line',
-      data: { labels, datasets: datasetConfig },
+      data: {
+        labels,
+        datasets: datasetConfig
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: datasetConfig.length > 0, position: 'left' },
-          datalabels: {
-            display: false
+          legend: {
+            display: datasetConfig.length > 0,
+            position: 'left',
+            labels: {
+              usePointStyle: true,
+              padding: 10
+            }
           },
           tooltip: {
             mode: 'index',
@@ -707,17 +779,18 @@ export const LineChartDark = ({ labels = [], datasets = [], datasetLabels }) => 
       }
     })
 
-    return () => chartRef.current?.destroy()
-  }, [datasetConfig, labels])
+    return () => {
+      chart.destroy()
+    }
+  }, [id, labels, datasets, datasetLabels])
 
-  useEffect(() => {
-    if (!chartRef.current) return
-    chartRef.current.data.labels = [...labels]
-    chartRef.current.data.datasets = datasetConfig
-    chartRef.current.update()
-  }, [labels, datasetConfig])
-
-  return <canvas ref={canvasRef} />
+  return (
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
+  )
 }
 
 const getColorForIndex = (index, canvas) => {
@@ -870,110 +943,101 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
   return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
 }
 
-export const CompBarChart = ({ labels = [], datasets = [], height = 350 }) => {
-  const canvasRef = useRef(null)
-  const chartRef = useRef(null)
-
+export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   useEffect(() => {
-    if (!canvasRef.current || chartRef.current) return
+    if (!collapsed) {
+      const canvas = document.getElementById(id)
+      if (!canvas) return
+      const ctx = canvas.getContext('2d')
 
-    const ctx = canvasRef.current.getContext('2d')
-    chartRef.current = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            data: datasets,
-            backgroundColor: 'rgba(0, 123, 255, 0.5)',
-            hoverBackgroundColor: 'rgb(255, 255, 0)',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          datalabels: {
-            anchor: ctx => {
-              const chart = ctx.chart
-              const value = ctx.dataset.data[ctx.dataIndex]
-              const y = chart.scales?.y
-              if (!y || !isFinite(value)) return 'end'
-              const chartHeight = y.bottom - y.top
-              const maxValue = y.max || 1
-              const barHeight = (value / maxValue) * chartHeight
+      const barBg = getCssVar(canvas, '--chart-compbar-bg')
+      const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg')
+      const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color')
+      const yTickColor = xTickColor
+      const gridColor = getCssVar(canvas, '--chart-compbar-grid-color')
+      const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color')
 
-              return barHeight >= 120 ? 'center' : 'end'
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              data: datasets,
+              backgroundColor: barBg,
+              hoverBackgroundColor: barHoverBg,
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              align: context => {
+                const chart = context.chart
+                const dataset = context.dataset
+                const value = dataset.data[context.dataIndex]
+
+                const chartHeight = chart.scales.y.bottom - chart.scales.y.top
+                const maxValue = chart.scales.y.max
+
+                const barHeight = (value / maxValue) * chartHeight
+
+                return barHeight >= 120 ? 'center' : 'end'
+              },
+              color: datalabelColor,
+              offset: 0,
+              rotation: -90,
+              font: { size: 14, weight: 'bold' },
+              formatter: val => val?.toLocaleString()
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: xTickColor
+              },
+              grid: {
+                display: true,
+                color: gridColor
+              }
             },
-            align: ctx => {
-              const chart = ctx.chart
-              const value = ctx.dataset.data[ctx.dataIndex]
-              const y = chart.scales?.y
-              if (!y || !isFinite(value)) return 'end'
-              const chartHeight = y.bottom - y.top
-              const maxValue = y.max || 1
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            color: 'black',
-            offset: 0,
-            rotation: -90,
-            font: { size: 14, weight: 'bold' },
-            formatter: val => (val ?? '').toLocaleString?.() ?? val
+            y: {
+              ticks: {
+                color: yTickColor
+              }
+            }
           }
         },
-        scales: {
-          x: {
-            ticks: { color: '#000' },
-            grid: { display: true, color: 'rgba(255, 255, 255, 0.2)' }
-          },
-          y: {
-            ticks: { color: '#000' }
-          }
-        }
+        plugins: [ChartDataLabels]
+      })
+
+      return () => {
+        chart.destroy()
       }
-    })
-
-    return () => {
-      chartRef.current?.destroy()
-      chartRef.current = null
     }
-  }, [])
-
-  useEffect(() => {
-    const chart = chartRef.current
-    if (!chart) return
-
-    chart.data.labels = Array.isArray(labels) ? [...labels] : []
-
-    if (Array.isArray(datasets) && !Array.isArray(datasets[0])) {
-      if (!chart.data.datasets[0]) {
-        chart.data.datasets = [
-          {
-            data: [],
-            backgroundColor: 'rgba(0, 123, 255, 0.5)',
-            hoverBackgroundColor: 'rgb(255, 255, 0)',
-            borderWidth: 1
-          }
-        ]
-      }
-      chart.data.datasets[0].data = [...datasets]
-    } else if (Array.isArray(datasets)) {
-      chart.data.datasets = datasets.map(ds => ({ ...ds }))
-    } else {
-      chart.data.datasets = []
-    }
-
-    chart.update()
-  }, [labels, datasets])
+  }, [labels, datasets, collapsed])
 
   return (
-    <div style={{ position: 'relative', width: '100%', height }}>
-      <canvas ref={canvasRef} />
-    </div>
+    <canvas
+      id={id}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      
+    ></canvas>
   )
 }
