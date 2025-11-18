@@ -1,5 +1,8 @@
+// CustomCheckBox.jsx
+import React from 'react'
 import { FormControlLabel, Checkbox } from '@mui/material'
 import { checkAccess } from 'src/lib/maxAccess'
+import styles from './CustomCheckBox.module.css'
 
 const CustomCheckBox = ({
   value,
@@ -18,12 +21,11 @@ const CustomCheckBox = ({
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
+
   const _disabled = _readOnly || _hidden || disabled
 
   const handleChange = event => {
-    if (onChange) {
-      onChange(event)
-    }
+    if (onChange) onChange(event)
   }
 
   return _hidden ? null : (
@@ -36,34 +38,17 @@ const CustomCheckBox = ({
           onChange={handleChange}
           disabled={_disabled}
           inputProps={{ 'aria-label': label }}
-          sx={{
-            ml: 2,
-            '&.Mui-disabled': {
-              opacity: 0.7,
-              color: 'rgba(0, 0, 0, 0.44)'
-            },
-            '& .MuiSvgIcon-root': { fontSize: 15 },
-            ...(error && {
-              color: '#fd3535ff',
-              '&.Mui-checked': {
-                color: '#fd3535ff'
-              }
-            })
-          }}
+          className={[
+            styles.checkbox,
+            error ? styles.errorCheckbox : '',
+            _disabled ? styles.disabledCheckbox : ''
+          ].join(' ')}
           {...props}
         />
       }
       label={label}
-      sx={{
-        '& .MuiFormControlLabel-label': {
-          fontSize: 15,
-          ...(error && { color: '#fd3535ff' })
-        },
-        '&.Mui-disabled .MuiFormControlLabel-label': {
-          opacity: 0.7,
-          color: 'rgba(0, 0, 0, 0.72)'
-        }
-      }}
+      className={styles.formControl}
+      disabled={_disabled}
     />
   )
 }

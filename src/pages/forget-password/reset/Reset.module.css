@@ -1,0 +1,37 @@
+.contentCenter {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.card {
+  z-index: 0;
+  width: 24vw;
+  margin-top: auto;
+}
+
+.cardHeader {
+  padding-left: 15px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  color: white !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #231f20;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 40px;
+}
+
+.submitBtn {
+  margin-bottom: 56px;
+}
+
+.footer {
+  margin-top: auto;
+}

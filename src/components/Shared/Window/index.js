@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } from 'react'
-import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
+import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton, useMediaQuery } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -59,25 +58,23 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-        const overlayRect = overlayRef.current?.getBoundingClientRect()
+    const isSmallScreen = useMediaQuery('(max-width:600px)')
+    const isMediumScreen = useMediaQuery('(max-width:960px)')
 
-        const containerWidth = overlayRect?.width ?? window.innerWidth
-        const containerHeight = overlayRect?.height ?? window.innerHeight
+    const overlayRect = overlayRef.current?.getBoundingClientRect()
+    const containerWidth = overlayRect?.width ?? window.innerWidth
+    const containerHeight = overlayRect?.height ?? window.innerHeight
 
-        const baseWidth = Math.min(width, containerWidth)
-        const baseHeight = Math.min(height, containerHeight)
+    const baseWidth = Math.min(width, containerWidth * (isSmallScreen ? 0.95 : isMediumScreen ? 0.85 : 0.7))
+    const baseHeight = Math.min(height, containerHeight * (isSmallScreen ? 0.8 : isMediumScreen ? 0.85 : 0.7))
 
-        const containerHeightPanel = containerHeight 
-        const heightPanel = baseHeight 
+    const containerHeightPanel = containerHeight
+    const heightPanel = baseHeight
 
-        const paperStyle = {
-          '--window-paper-width': expanded ? `${containerWidth}px` : `${baseWidth}px`,
-          '--window-paper-height': expanded ? `${containerHeight}px` : `${baseHeight}px`
-        }
-
-
-
-
+    const paperStyle = {
+      '--window-paper-width': expanded ? `${containerWidth}px` : `${baseWidth}px`,
+      '--window-paper-height': expanded ? `${containerHeight}px` : `${baseHeight}px`
+    }
 
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
@@ -107,14 +104,8 @@ const Window = React.memo(
     }, [expanded])
 
     const overlayClassName = `${styles.overlay} ${
-      spacing
-        ? navCollapsed
-          ? styles.overlaySpacingCollapsed
-          : styles.overlaySpacingExpanded
-        : styles.overlayFull
+      spacing ? (navCollapsed ? styles.overlaySpacingCollapsed : styles.overlaySpacingExpanded) : styles.overlayFull
     }`
-
-   
 
     return (
       <CacheDataProvider>
@@ -132,22 +123,22 @@ const Window = React.memo(
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded && { x: 0, y: 0 }}
-            onStart={() => draggable}
+            position={expanded || isSmallScreen ? { x: 0, y: 0 } : undefined}
+            onStart={() => draggable && !isSmallScreen}
+            disabled={isSmallScreen}
           >
             <Box className={styles.draggableContainer}>
-            <Paper
-  ref={paperRef}
-  tabIndex={-1}
-  data-expanded={expanded ? 'true' : 'false'}
-  className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
-  style={paperStyle}
->
-
+              <Paper
+                ref={paperRef}
+                tabIndex={-1}
+                data-expanded={expanded ? 'true' : 'false'}
+                className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
+                style={paperStyle}
+              >
                 <DialogTitle
                   id='draggable-dialog-title'
                   className={`${styles.dialogTitle} ${
-                    draggable ? styles.dialogTitleDraggable : styles.dialogTitleDefault
+                    draggable && !isSmallScreen ? styles.dialogTitleDraggable : styles.dialogTitleDefault
                   }`}
                 >
                   <Box>
@@ -184,7 +175,7 @@ const Window = React.memo(
                         tabIndex={-1}
                         edge='end'
                         onClick={onClose}
-                        aria-label='clear input'
+                        aria-label='close'
                         className={styles.headerIconButton}
                       >
                         <ClearIcon />
@@ -193,13 +184,18 @@ const Window = React.memo(
                   </Box>
                 </DialogTitle>
                 {tabs && (
-                  <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+                  <Tabs
+                    value={activeTab}
+                    onChange={(event, newValue) => setActiveTab(newValue)}
+                    variant={isSmallScreen ? 'scrollable' : 'standard'}
+                    scrollButtons={isSmallScreen ? 'auto' : 'off'}
+                  >
                     {tabs.map((tab, i) => (
                       <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                     ))}
                   </Tabs>
                 )}
-                {!showOverlay && isLoading && LoadingOverlay()}
+                {!showOverlay && isLoading && <LoadingOverlay />}
 
                 {!controlled ? (
                   <>

@@ -71,15 +71,7 @@ const ResetPassForm = ({ labels, username = '' }) => {
               value={formik.values.code}
               onChange={formik.handleChange}
               error={formik.touched.code && formik.errors.code}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <IconButton edge='start'>
-                      <img src='/images/password/forgotPWD1.png' />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
+              startIcons={[<img key='forgot-icon' src='/images/password/forgotPWD1.png' alt='icon' />]}
             />
           </Grid>
         </Grid>

@@ -1,7 +1,7 @@
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
 import SearchIcon from '@mui/icons-material/Search'
+import { useEffect, useRef, useState } from 'react'
 import { checkAccess } from 'src/lib/maxAccess'
 import styles from './CustomTextField.module.css'
 
@@ -19,7 +19,7 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
-  maxLength = '1000',
+  maxLength = 1000,
   position,
   dir = '',
   hidden = false,
@@ -28,10 +28,8 @@ const CustomTextField = ({
   language = '',
   hasBorder = true,
   forceUpperCase = false,
-
-  // 🔥 NEW PROP — array of icons/buttons to show exactly like search icon
+  startIcons = [],
   endIcons = [],
-
   ...props
 }) => {
   const name = props.name
@@ -134,7 +132,20 @@ const CustomTextField = ({
           notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
           input: styles.inputBase
         },
-
+        startAdornment: (
+          <>
+            {props.InputProps?.startAdornment}
+            {startIcons.map((iconBtn, index) => (
+              <InputAdornment key={index} position='start'>
+                {iconBtn && (
+                  <IconButton className={styles['search-icon']} tabIndex={-1}>
+                    {iconBtn}
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ))}
+          </>
+        ),
         endAdornment: (
           <>
             {props.InputProps?.endAdornment}

@@ -1,6 +1,6 @@
-// ** MUI Imports
 import { Box } from '@mui/material'
 import PropTypes from 'prop-types'
+import styles from './CustomTabPanel.module.css'
 import { HIDDEN } from 'src/services/api/maxAccess'
 
 const CustomTabPanel = props => {
@@ -19,17 +19,7 @@ const CustomTabPanel = props => {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      sx={{
-        display: value !== index ? 'none !important' : 'flex !important',
-        flexDirection: 'column',
-        width: '100%',
-        flex: '1 !important',
-        position: 'relative',
-        overflow: 'auto',
-        '.MuiDialogContent-root': {
-          padding: '10px !important'
-        }
-      }}
+      className={`${styles.tabPanel} ${value !== index ? styles.hidden : ''}`}
       {...other}
     >
       {children}
