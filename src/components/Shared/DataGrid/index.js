@@ -861,6 +861,7 @@ export function DataGrid({
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
+              domLayout="autoHeight"
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
