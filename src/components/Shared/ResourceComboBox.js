@@ -62,6 +62,7 @@ export default function ResourceComboBox({
     }
 
     !noCache && fetchDataAsync()
+    !noCache && fetchDataAsync()
   }, [parameters])
 
   const fetchData = async (refresh = true) => {
@@ -71,7 +72,9 @@ export default function ResourceComboBox({
 
       const data =
         cacheStore?.[key] && !refresh
+        cacheStore?.[key] && !refresh
           ? cacheStore?.[key]
+          : cacheAvailable
           : cacheAvailable
           ? await fetchWithCache({
               queryKey: [datasetId || endpointId, parameters],
@@ -81,6 +84,7 @@ export default function ResourceComboBox({
 
       setApiResponse(!!datasetId ? { list: data } : data)
 
+      if (!cacheStore?.[key]) {
       if (!cacheStore?.[key]) {
         endpointId ? updateCacheStore(endpointId, data.list) : updateCacheStore(datasetId, data)
       }
@@ -139,7 +143,7 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
-        onOpen: () => noCache && fetchData(true),
+        onOpen: () => noCache && fetchData(),
         onBlur,
         isLoading
       }}
