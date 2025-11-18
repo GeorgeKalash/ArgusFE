@@ -77,6 +77,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       wgtAfter: null,
       eopQty: 0,
       damagedPcs: null,
+      shiftId: null,
       category: '',
       pgItemName: '',
       itemCategoryName: ''
@@ -632,6 +633,22 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     label={labels.endTime}
                     value={formik.values?.endTime}
                     maxAccess={access}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.ProductionShifts.qry}
+                    name='shiftId'
+                    label={labels.shift}
+                    maxAccess={access}
+                    readOnly={isPosted}
+                    valueField='recordId'
+                    displayField={'name'}
+                    values={formik.values}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('shiftId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.shiftId && Boolean(formik.errors.shiftId)}
                   />
                 </Grid>
               </Grid>
