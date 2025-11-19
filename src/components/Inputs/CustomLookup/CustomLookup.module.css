@@ -7,7 +7,7 @@
 }
 
 .firstField :global(.MuiOutlinedInput-root) {
-  height: 33px !important;  
+  height: 33px !important;
 }
 
 .firstField :global(.MuiOutlinedInput-root fieldset) {
@@ -26,7 +26,7 @@
 }
 
 .firstField :global(.MuiInputLabel-root) {
-  font-size: 14px !important; 
+  font-size: 14px !important;
 }
 
 .firstField :global(.MuiInputBase-input) {
@@ -54,7 +54,7 @@
 }
 
 .secondField :global(.MuiOutlinedInput-root) {
-  height: 33px !important; 
+  height: 33px !important;
 }
 
 .secondField :global(.MuiOutlinedInput-root fieldset) {
@@ -73,11 +73,13 @@
 }
 
 
+
 .dropdownHeaderCell {
   font-weight: bold;
   font-size: 0.7rem;
   height: 15px;
   display: flex;
+  align-items: center;
 }
 
 .dropdownHeaderCellMain {
@@ -85,6 +87,7 @@
   font-size: 0.88rem;
   height: 20px;
   display: flex;
+  align-items: center;
   font-weight: bold;
 }
 
@@ -97,6 +100,7 @@
   font-size: 0.88rem;
   height: 20px;
   display: flex;
+  align-items: center;
 }
 
 .dropdownCellMain {
@@ -108,6 +112,14 @@
   font-size: 0.88rem;
   height: 20px;
   display: flex;
+  align-items: center;
+}
+
+.dropdownOptionRow {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px !important; 
+  min-height: 28px !important; 
 }
 
 
@@ -183,6 +195,23 @@
   .clearIcon {
     font-size: 16px !important;
   }
+
+  .dropdownOptionRow {
+    padding: 3px 8px !important;
+    min-height: 24px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.72rem;
+    height: 17px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.84rem;
+    height: 19px;
+  }
 }
 
 @media (max-width: 1280px) {
@@ -204,6 +233,23 @@
   .searchIcon,
   .clearIcon {
     font-size: 14px !important;
+  }
+
+  .dropdownOptionRow {
+    padding: 3px 8px !important;
+    min-height: 22px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.7rem;
+    height: 16px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.82rem;
+    height: 18px;
   }
 }
 
@@ -237,6 +283,23 @@
   .clearIcon {
     font-size: 13px !important;
   }
+
+  .dropdownOptionRow {
+    padding: 2px 6px !important;
+    min-height: 20px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.68rem;
+    height: 15px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.8rem;
+    height: 17px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -268,6 +331,23 @@
   .searchIcon,
   .clearIcon {
     font-size: 12px !important;
+  }
+
+  .dropdownOptionRow {
+    padding: 2px 6px !important;
+    min-height: 18px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.66rem;
+    height: 14px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.78rem;
+    height: 16px;
   }
 }
 
@@ -301,6 +381,23 @@
   .clearIcon {
     font-size: 11px !important;
   }
+
+  .dropdownOptionRow {
+    padding: 1px 4px !important;
+    min-height: 18px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.64rem;
+    height: 13px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.74rem;
+    height: 15px;
+  }
 }
 
 @media (max-width: 360px) {
@@ -322,5 +419,22 @@
   .searchIcon,
   .clearIcon {
     font-size: 10px !important;
+  }
+
+  .dropdownOptionRow {
+    padding: 0px 4px !important;
+    min-height: 16px !important;
+  }
+
+  .dropdownHeaderCell {
+    font-size: 0.6rem;
+    height: 12px;
+  }
+
+  .dropdownCell,
+  .dropdownCellSecondary,
+  .dropdownHeaderCellMain {
+    font-size: 0.7rem;
+    height: 14px;
   }
 }

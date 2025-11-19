@@ -1,259 +1,386 @@
-.customComboTextField :global(.MuiOutlinedInput-root) {
-  height: 33px !important; 
-}
 
-.customComboTextField :global(.MuiOutlinedInput-root fieldset) {
-  border-color: #959d9e;
-  border-radius: 6px;
-}
 
-.noBorder :global(.MuiOutlinedInput-root fieldset) {
-  border: none !important;
-}
-
-.customComboTextField :global(.MuiInputLabel-root) {
-  font-size: 14px !important;
-}
-
-.labelUnfocused :global(.MuiInputLabel-root) {
-  top: -3px;
-}
-
-.labelFocused :global(.MuiInputLabel-root) {
-  top: 0px;
-}
-
-.customComboTextField :global(.MuiInputBase-input) {
-  font-size: 14px !important;
-  color: black;
-}
-
-.customComboTextField :global(.MuiAutocomplete-clearIndicator) {
-  padding: 0 !important;
-  margin: 0 !important;
-  visibility: visible;
-}
-
-.comboStartIcon {
-  width: 20px;
-  height: 20px;
-  margin-right: 4px;
-  margin-left: 4px;
-  object-fit: contain;
-}
-
-.refreshIconButton {
-  padding: 2px !important;
-  margin: 0 !important;
-  min-width: 0 !important;
-}
-
-.customComboTextField :global(.MuiAutocomplete-endAdornment) {
-  right: 6px;
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.customComboTextField :global(.MuiSvgIcon-root) {
-  font-size: 18px;
-}
-.comboHeaderRow {
-  border-bottom: 1px solid #ccc;
-}
-
-.comboHeaderCell {
-  font-weight: bold;
-  font-size: 0.7rem;
-  height: 15px;
-  display: flex;
-}
-
-.comboOptionRow {
-  display: flex;
-  align-items: center;
-}
-
-.comboOptionIcon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-  object-fit: contain;
-}
-
-.comboOptionCell {
-  font-size: 0.88rem;
-  height: 20px;
-  display: flex;
-  align-items: center;
-}
-
-.comboOptionSingleText {
-  flex: 1;
-  font-size: 0.88rem;
-  height: 20px;
-  display: flex;
-  align-items: center;
-}
-
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 30px !important;
+   .customComboTextField :global(.MuiOutlinedInput-root) {
+    height: 33px !important; 
   }
-
+  
   .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
-    border-radius: 5px !important;
+    border-color: #959d9e;
+    border-radius: 6px;
   }
-
+  
+  .noBorder :global(.MuiOutlinedInput-root fieldset) {
+    border: none !important;
+  }
+  
   .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 12px !important;
+    font-size: 14px !important;
   }
-
+  
   .labelUnfocused :global(.MuiInputLabel-root) {
     top: -3px;
   }
-
+  
   .labelFocused :global(.MuiInputLabel-root) {
-    font-size: 12px !important;
     top: 0px;
   }
-
+  
   .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 12px !important;
+    font-size: 14px !important;
+    color: black;
   }
-
+  
+  .customComboTextField :global(.MuiAutocomplete-clearIndicator) {
+    padding: 0 !important;
+    margin: 0 !important;
+    visibility: visible;
+  }
+  
+  .comboStartIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+    margin-left: 4px;
+    object-fit: contain;
+  }
+  
+  .refreshIconButton {
+    padding: 2px !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+  }
+  
+  .customComboTextField :global(.MuiAutocomplete-endAdornment) {
+    right: 6px;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+  }
+  
   .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 16px;
+    font-size: 18px;
   }
-}
+  
 
-@media (max-width: 1366px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 28px !important;
+  .comboHeaderRow {
+    border-bottom: 1px solid #6a6464;
   }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 11px !important;
-    padding: 0px !important;
-    margin: 0px !important;
+  
+  .comboHeaderCell {
+    font-weight: bold;
+    font-size: 0.8rem; 
+    height: 22px;
+    display: flex;
+    align-items: center;
   }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 11px !important;
+  
+  .comboOptionRow {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px !important; 
+    min-height: 28px !important;
   }
-
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 14px;
+  
+  .comboOptionIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    object-fit: contain;
   }
-}
-
-@media (max-width: 1024px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 26px !important;
+  
+  .comboOptionCell {
+    font-size: 0.9rem; 
+    height: 22px;
+    display: flex;
+    align-items: center;
   }
-
-  .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
-    border-radius: 4px !important;
-  }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 10px !important;
-  }
-
-  .labelUnfocused :global(.MuiInputLabel-root) {
-    top: -2px;
-  }
-
-  .labelFocused :global(.MuiInputLabel-root) {
-    font-size: 10px !important;
-    top: 0px;
-  }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 10px !important;
+  
+  .comboOptionSingleText {
+    flex: 1;
+    font-size: 0.9rem;
+    height: 22px;
+    display: flex;
+    align-items: center;
   }
 
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 13px;
+  @media (min-width: 1025px) and (max-width: 1600px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 30px !important;
+    }
+  
+    .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
+      border-radius: 5px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 12px !important;
+    }
+  
+    .labelFocused :global(.MuiInputLabel-root) {
+      font-size: 12px !important;
+      top: 0px;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 12px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 16px;
+    }
+  
+    .comboOptionRow {
+      padding: 3px 8px !important;
+      min-height: 24px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.75rem;
+      height: 20px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.86rem;
+      height: 20px;
+    }
+  
+    .comboOptionIcon {
+      width: 19px;
+      height: 19px;
+    }
   }
-}
-
-@media (max-width: 768px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 24px !important;
+  
+  @media (max-width: 1280px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 28px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 11px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 11px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 14px;
+    }
+  
+    .comboOptionRow {
+      padding: 3px 8px !important;
+      min-height: 22px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.72rem;
+      height: 18px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.84rem;
+      height: 19px;
+    }
+  
+    .comboOptionIcon {
+      width: 18px;
+      height: 18px;
+      margin-right: 6px;
+    }
   }
-
-  .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
-    border-radius: 3px !important;
+  
+  @media (max-width: 1024px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 26px !important;
+    }
+  
+    .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
+      border-radius: 4px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 10px !important;
+    }
+  
+    .labelFocused :global(.MuiInputLabel-root) {
+      font-size: 10px !important;
+      top: 0px;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 10px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 13px;
+    }
+  
+    .comboOptionRow {
+      padding: 2px 6px !important;
+      min-height: 20px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.7rem;
+      height: 17px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.8rem;
+      height: 18px;
+    }
+  
+    .comboOptionIcon {
+      width: 17px;
+      height: 17px;
+      margin-right: 6px;
+    }
   }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 9px !important;
+  
+  @media (max-width: 768px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 24px !important;
+    }
+  
+    .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
+      border-radius: 3px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 9px !important;
+    }
+  
+    .labelFocused :global(.MuiInputLabel-root) {
+      font-size: 9px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 9px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 12px;
+    }
+  
+    .comboOptionRow {
+      padding: 2px 6px !important;
+      min-height: 18px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.68rem;
+      height: 16px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.76rem;
+      height: 17px;
+    }
+  
+    .comboOptionIcon {
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+    }
   }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 9px !important;
+  
+  @media (max-width: 480px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 22px !important;
+    }
+  
+    .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
+      border-radius: 2px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 8px !important;
+    }
+  
+    .labelFocused :global(.MuiInputLabel-root) {
+      font-size: 8px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 8px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 11px;
+    }
+  
+    .comboOptionRow {
+      padding: 1px 4px !important;
+      min-height: 18px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.65rem;
+      height: 15px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.72rem;
+      height: 16px;
+    }
+  
+    .comboOptionIcon {
+      width: 15px;
+      height: 15px;
+    }
   }
-
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 12px;
+  
+  @media (max-width: 360px) {
+    .customComboTextField :global(.MuiOutlinedInput-root) {
+      height: 20px !important;
+    }
+  
+    .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
+      border-radius: 2px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputLabel-root) {
+      font-size: 7px !important;
+    }
+  
+    .labelFocused :global(.MuiInputLabel-root) {
+      font-size: 7px !important;
+    }
+  
+    .customComboTextField :global(.MuiInputBase-input) {
+      font-size: 7px !important;
+    }
+  
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 10px;
+    }
+  
+    .comboOptionRow {
+      padding: 0px 4px !important;
+      min-height: 16px !important;
+    }
+  
+    .comboHeaderCell {
+      font-size: 0.6rem;
+      height: 14px;
+    }
+  
+    .comboOptionCell,
+    .comboOptionSingleText {
+      font-size: 0.68rem;
+      height: 14px;
+    }
+  
+    .comboOptionIcon {
+      width: 14px;
+      height: 14px;
+    }
   }
-}
-
-@media (max-width: 600px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 24px !important;
-  }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 9px !important;
-  }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 9px !important;
-  }
-
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 22px !important;
-  }
-
-  .customComboTextField :global(.MuiOutlinedInput-root fieldset) {
-    border-radius: 2px !important;
-  }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 8px !important;
-  }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 8px !important;
-  }
-
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 375px) {
-  .customComboTextField :global(.MuiOutlinedInput-root) {
-    height: 20px !important;
-  }
-
-  .customComboTextField :global(.MuiInputLabel-root) {
-    font-size: 7px !important;
-  }
-
-  .customComboTextField :global(.MuiInputBase-input) {
-    font-size: 7px !important;
-  }
-
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 10px;
-  }
-}
+  
