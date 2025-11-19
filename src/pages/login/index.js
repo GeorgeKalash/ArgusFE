@@ -1,7 +1,7 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useContext, useEffect, useRef } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
 import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
@@ -31,7 +31,7 @@ const LoginPage = () => {
   const auth = useAuth()
   const { companyName, deployHost } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
-  const companyStore = useRef([])
+  const [companyStore, setCompanyStore] = useState([])
   const { stack } = useWindow()
 
   const validation = useFormik({
@@ -39,7 +39,8 @@ const LoginPage = () => {
       username: '',
       password: '',
       rememberMe: false,
-      accountId: ''
+      accountId: '',
+      companyName
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -136,7 +137,7 @@ const LoginPage = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/qryAC`)
-        companyStore.current = response?.data?.list || []
+        setCompanyStore(response?.data?.list || [])
       } catch (error) {
         console.error(error)
       }
@@ -179,7 +180,7 @@ const LoginPage = () => {
                     label={platformLabels?.CompanyName}
                     valueField='accountId'
                     displayField='companyName'
-                    store={companyStore.current}
+                    store={companyStore}
                     value={validation.values.accountId}
                     required
                     refresh={false}
