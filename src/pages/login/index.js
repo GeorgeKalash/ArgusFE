@@ -1,7 +1,7 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
 import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
@@ -16,6 +16,7 @@ import { useWindow } from 'src/windows'
 import ChangePassword from 'src/components/Shared/ChangePassword'
 import axios from 'axios'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
+import CustomComboBox from 'src/components/Inputs/CustomComboBox'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.875rem',
@@ -28,15 +29,17 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName } = useContext(AuthContext)
+  const { companyName, deployHost } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
+  const companyStore = useRef([])
   const { stack } = useWindow()
 
   const validation = useFormik({
     initialValues: {
       username: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+      accountId: ''
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -124,11 +127,23 @@ const LoginPage = () => {
           LanguageId: languageId
         },
         data: bodyFormData
-      }).then(res => {})
+      })
     } catch (error) {
       stackError({ message: error.message })
     }
   }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/qryAC`)
+        companyStore.current = response?.data?.list || []
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
@@ -158,16 +173,37 @@ const LoginPage = () => {
             </Box>
             <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
               <Grid container spacing={5}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    readOnly
-                    name='companyName'
-                    value={companyName}
-                    size='small'
-                    fullWidth
-                    label={platformLabels.CompanyName}
-                  />
-                </Grid>
+                {!deployHost ? (
+                  <Grid item xs={12}>
+                    <CustomComboBox
+                      name='accountId'
+                      label={platformLabels.CompanyName}
+                      valueField='accountId'
+                      displayField='companyName'
+                      store={companyStore.current}
+                      value={validation.values.accountId}
+                      required
+                      refresh={false}
+                      onChange={(_, newValue) => {
+                        validation.setFieldValue('accountId', newValue?.accountId || null)
+                        validation.setFieldValue('companyName', newValue?.companyName || '')
+                        auth.fetchData(newValue.companyName)
+                      }}
+                    />
+                  </Grid>
+                ) : (
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      readOnly
+                      name='companyName'
+                      value={companyName}
+                      size='small'
+                      fullWidth
+                      label={platformLabels.CompanyName}
+                    />
+                  </Grid>
+                )}
+
                 <Grid item xs={12}>
                   <CustomTextField
                     name='username'
@@ -228,6 +264,7 @@ const LoginPage = () => {
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
+                disabled={!deployHost && !validation.values.accountId}
                 onClick={validation.handleSubmit}
               >
                 {platformLabels.Login}

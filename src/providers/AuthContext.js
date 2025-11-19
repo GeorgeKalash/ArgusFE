@@ -32,6 +32,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [companyName, setCompanyName] = useState('')
+  const [deployHost, setDeployHost] = useState('')
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
@@ -51,17 +52,17 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-  const fetchData = async () => {
+  const fetchData = async companyName => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-    const accountName = matchHostname ? matchHostname[1] : 'cipa-deploy'
-
+    const accountName = matchHostname?.toLowerCase() == 'deploy' || !matchHostname ? companyName : matchHostname?.[1]
+    setDeployHost(matchHostname)
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-      setCompanyName(response.data.record.companyName)
-      setGetAC(response)
-      window.localStorage.setItem('apiUrl', response.data.record.api)
+      if (accountName) {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+        setCompanyName(response.data.record.companyName)
+        setGetAC(response)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -88,12 +89,12 @@ const AuthProvider = ({ children }) => {
       }
 
       const signIn3Params = `_email=${params.username}&_password=${encryptePWD(params.password)}&_accountId=${
-        getAC.data.record.accountId
+        params.accountId || getAC.data.record.accountId
       }&_userId=${getUS2.data.record.recordId}`
 
       const signIn3 = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/signIn3?${signIn3Params}`, {
         headers: {
-          accountId: JSON.parse(getAC.data.record.accountId),
+          accountId: params.accountId || JSON.parse(getAC.data.record.accountId),
           dbe: JSON.parse(getAC.data.record.dbe),
           dbs: JSON.parse(getAC.data.record.dbs)
         }
@@ -210,11 +211,13 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     companyName,
+    deployHost,
     languageId,
     setUser,
     setLoading,
     login: handleLogin,
     logout: handleLogout,
+    fetchData,
     getAccessToken,
     encryptePWD,
     EnableLogin,
