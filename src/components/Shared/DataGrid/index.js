@@ -31,8 +31,7 @@ export function DataGrid({
   initialValues,
   bg,
   searchValue,
-  onValidationRequired,
-  isDeleteDisabled
+  onValidationRequired
 }) {
   const gridApiRef = useRef(null)
 
@@ -628,20 +627,12 @@ export function DataGrid({
       if (shouldHide) return null
     }
 
-    const disabledForRow = typeof isDeleteDisabled === 'function' ? isDeleteDisabled(params.data) : false
-
     return (
       <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-          pointerEvents: disabledForRow ? 'none' : 'auto'
-        }}
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}
         onClick={() => openDelete(params)}
       >
-        <IconButton disabled={disabledForRow}>
+        <IconButton>
           <GridDeleteIcon sx={{ fontSize: '1.3rem' }} />
         </IconButton>
       </Box>

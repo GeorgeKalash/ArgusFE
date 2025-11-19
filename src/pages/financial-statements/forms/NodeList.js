@@ -52,7 +52,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
           displayOrder: null,
           description: '',
           flag: true,
-          seqNo: null,
+          seqNo: 1,
           flags: 0
         }
       ],
@@ -65,8 +65,9 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
       const itemsWithSeq =
         values.items
           ?.filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
-          .map(row => ({
+          .map((row, index) => ({
             ...row,
+            seqNo: index + 1,
             fsId: mainRecordId
           })) ?? []
 
@@ -291,16 +292,17 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         <Grow>
           <DataGrid
             name='items'
-            onChange={(value, action) => {
+            onChange={(value, action, row) => {
               if (action === 'delete') {
                 node.current.viewNodeId = null
                 node.current.viewNodeRef = ''
                 node.current.viewNodedesc = ''
               }
 
-              const normalized = value.map(v => ({
+              const normalized = value.map((v, i) => ({
                 ...v,
-                seqNo: v.seqNo ?? (value?.length ? Math.max(...value.map(item => item.seqNo)) : 0) + 1
+                id: v.id ?? i + 1,
+                seqNo: v.id ?? i + 1
               }))
 
               parents.current = normalized
@@ -312,11 +314,10 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
             maxAccess={maxAccess}
             initialValues={formik.initialValues.items?.[0]}
             onSelectionChange={row => {
-              node.current.viewNodeId = row?.seqNo || null
+              node.current.viewNodeId = row?.id || null
               node.current.viewNodeRef = row?.reference || ''
               node.current.viewNodedesc = row?.description || ''
             }}
-            isDeleteDisabled={row => formik.values.items?.find(item => item?.parentSeqNo == row?.seqNo)}
           />
         </Grow>
       </VertLayout>

@@ -138,7 +138,9 @@ const LedgerForm = ({ node, labels, maxAccess, mainRecordId, initialData, fetchD
   useEffect(() => {
     if (!mainRecordId) return
     if (ledgers?.length && nodeId) {
-      const nodeLedgers = ledgers.filter(l => Number(l.seqNo) === Number(nodeId))
+      const nodeLedgers = ledgers.filter(
+        l => Number(l.seqNo) === Number(nodeId) || Number(l.ledgerSeqNo) === Number(nodeId)
+      )
 
       const normalized = nodeLedgers.map((l, i) => ({
         id: i + 1,
