@@ -30,8 +30,8 @@
   }
   
   .customComboTextField :global(.MuiAutocomplete-clearIndicator) {
-    padding-left: 0 !important;
-    margin-right: -10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
     visibility: visible;
   }
   
@@ -44,11 +44,21 @@
   }
   
   .refreshIconButton {
-    padding: 0 !important;
-    margin-right: -10px !important;
+    padding: 2px !important;
+    margin: 0 !important;
     min-width: 0 !important;
   }
-  
+
+  .customComboTextField :global(.MuiAutocomplete-endAdornment) {
+    right: 6px;             
+    display: flex;
+    align-items: center;
+    gap: 1px;              
+  }
+
+  .customComboTextField :global(.MuiSvgIcon-root) {
+    font-size: 18px;
+  }
   .comboHeaderRow {
     border-bottom: 1px solid #ccc;
   }
@@ -112,6 +122,10 @@
       width: 19px;
       height: 19px;
     }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 17px;
+    }
   }
   
   @media (max-width: 1366px) {
@@ -136,6 +150,10 @@
     .comboOptionIcon {
       width: 18px;
       height: 18px;
+    }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 16px;
     }
   }
   
@@ -166,6 +184,10 @@
       height: 18px;
       margin-right: 6px;
     }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 15px;
+    }
   }
   
   
@@ -195,6 +217,10 @@
       height: 17px;
       margin-right: 6px;
     }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 14px;
+    }
   }
   
   
@@ -223,6 +249,10 @@
       height: 16px;
       margin-right: 5px;
     }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 13px;
+    }
   }
   
   @media (max-width: 480px) {
@@ -248,6 +278,10 @@
     .comboOptionIcon {
       width: 15px;
       height: 15px;
+    }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 12px;
     }
   }
   
@@ -276,6 +310,10 @@
       width: 14px;
       height: 14px;
       margin-right: 4px;
+    }
+
+    .customComboTextField :global(.MuiSvgIcon-root) {
+      font-size: 11px;
     }
   }
   

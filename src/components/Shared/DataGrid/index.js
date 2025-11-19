@@ -645,6 +645,8 @@ export function DataGrid({
       ...column,
       ...{ width: column.width + additionalWidth },
       field: column.name,
+      
+      // minWidth: 50,  
       headerName: column.label || column.name,
       headerTooltip: column.label,
       editable: !_disabled,

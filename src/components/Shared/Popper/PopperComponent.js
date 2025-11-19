@@ -5,8 +5,9 @@ import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
   const [rect, setRect] = useState(null)
-  const popperRef = useRef(null)
+  const [measuredHeight, setMeasuredHeight] = useState(null)
   const [isPickerContent, setIsPickerContent] = useState(false)
+  const popperRef = useRef(null)
 
   const updateRect = useCallback(() => {
     if (!anchorEl) return
@@ -33,16 +34,16 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
 
     updateRect()
 
-    const handleScroll = () => {
+    const handleScrollOrResize = () => {
       updateRect()
     }
 
-    window.addEventListener('scroll', handleScroll, true)
-    window.addEventListener('resize', handleScroll)
+    window.addEventListener('scroll', handleScrollOrResize, true)
+    window.addEventListener('resize', handleScrollOrResize)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll, true)
-      window.removeEventListener('resize', handleScroll)
+      window.removeEventListener('scroll', handleScrollOrResize, true)
+      window.removeEventListener('resize', handleScrollOrResize)
     }
   }, [anchorEl, open, updateRect])
 
@@ -52,8 +53,9 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
       : 1
   const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1
 
+  const anchorTop = rect ? rect.top / zoom : 0
+  const anchorBottom = rect ? rect.bottom / zoom : 0
   const anchorWidth = rect ? rect.width / zoom : undefined
-  const top = rect ? rect.bottom / zoom : 0
   const left = rect ? rect.left / zoom : 0
 
   useEffect(() => {
@@ -71,29 +73,29 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
 
   const isPicker = isPickerContent || isDateTimePicker
 
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+  useEffect(() => {
+    if (!open || !popperRef.current) return
 
-  const estimatedPopperHeight = (() => {
-    if (isPicker) {
-      return 320 / zoom
+    const r = popperRef.current.getBoundingClientRect()
+    if (r.height > 0 && r.height !== measuredHeight) {
+      setMeasuredHeight(r.height)
     }
+  }, [open, rect, measuredHeight])
 
-   
-    return viewportHeight ? viewportHeight * 0.43 : 300
-  })()
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+  const defaultEstimate = isPicker ? 320 / zoom : viewportHeight * 0.43
+  const popperHeightForFlip = measuredHeight ?? defaultEstimate
 
-  const canRenderBelow = rect ? viewportHeight - top > estimatedPopperHeight : true
+  const openAbove = rect
+    ? viewportHeight - anchorBottom <= popperHeightForFlip
+    : false
 
   const baseStyle = {
     position: 'absolute',
-    top,
     left,
-
+    top: openAbove ? anchorTop : anchorBottom,
     ...(rect && !isPicker ? { width: anchorWidth } : {}),
-    transform:
-      !canRenderBelow && rect
-        ? `translateY(calc(-100% - 10px - ${rect.height / zoom}px))`
-        : 'none'
+    transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none'
   }
 
   const mergedStyle = {
@@ -116,7 +118,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     >
       {typeof children === 'function'
         ? children({
-            placement: 'top-start',
+            placement: openAbove ? 'top-start' : 'bottom-start',
             TransitionProps: { in: true }
           })
         : children}
