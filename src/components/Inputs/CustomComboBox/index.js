@@ -237,71 +237,86 @@ const CustomComboBox = ({
           )
         }
       }}
-      renderInput={params => (
-        <TextField
-          {...params}
-          className={[
-            styles.customComboTextField,
-            !hasBorder ? styles.noBorder : '',
-            isFocused || value ? styles.labelFocused : styles.labelUnfocused
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          inputProps={{
-            ...params.inputProps,
-            tabIndex: _readOnly ? -1 : 0,
-            ...(neverPopulate && { value: '' })
-          }}
-          type={type}
-          variant={variant}
-          label={label}
-          required={_required}
-          autoFocus={focus}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          onFocus={() => setIsFocused(true)}
-          error={error}
-          helperText={helperText}
-          onBlur={e => {
-            const allowSelect =
-              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
-            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
-          }}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: value?.icon ? (
-              <img
-                src={value.icon}
-                alt={value[displayField]}
-                className={styles.comboStartIcon}
-              />
-            ) : (
-              props?.startAdornment || params.InputProps.startAdornment
-            ),
-            endAdornment: !_readOnly && (
-              <React.Fragment>
-                {hover &&
-                  (_disabled ? null : isLoading ? (
-                    <CircularProgress color='inherit' size={17} />
-                  ) : (
-                    refresh &&
-                    !readOnly && (
-                      <IconButton
-                        onClick={fetchData}
-                        aria-label='refresh data'
-                        tabIndex={-1}
-                        className={styles.refreshIconButton}
-                      >
-                        <RefreshIcon size={17} />
-                      </IconButton>
-                    )
-                  ))}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            )
-          }}
-        />
-      )}
+      renderInput={params => {
+        const defaultEndAdornment = params.InputProps.endAdornment
+      
+        const mergedEndAdornment =
+          !_readOnly && React.isValidElement(defaultEndAdornment)
+            ? React.cloneElement(defaultEndAdornment, {
+                className: `${defaultEndAdornment.props.className || ''} ${styles.endAdornment}`,
+                children: (
+                  <>
+                    {hover &&
+                      (_disabled ? null : isLoading ? (
+                        <CircularProgress color='inherit' size={17} />
+                      ) : (
+                        refresh &&
+                        !readOnly && (
+                          <IconButton
+                            onClick={fetchData}
+                            aria-label='refresh data'
+                            tabIndex={-1}
+                            className={styles.refreshIconButton}
+                          >
+                            <RefreshIcon fontSize='small' />
+                          </IconButton>
+                        )
+                      ))}
+                    {defaultEndAdornment.props.children}
+                  </>
+                )
+              })
+            : _readOnly
+              ? null 
+              : defaultEndAdornment
+      
+        return (
+          <TextField
+            {...params}
+            className={[
+              styles.customComboTextField,
+              !hasBorder ? styles.noBorder : '',
+              isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            inputProps={{
+              ...params.inputProps,
+              tabIndex: _readOnly ? -1 : 0,
+              ...(neverPopulate && { value: '' })
+            }}
+            type={type}
+            variant={variant}
+            label={label}
+            required={_required}
+            autoFocus={focus}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            onFocus={() => setIsFocused(true)}
+            error={error}
+            helperText={helperText}
+            onBlur={e => {
+              const allowSelect =
+                selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+              onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
+            }}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: value?.icon ? (
+                <img
+                  src={value.icon}
+                  alt={value[displayField]}
+                  className={styles.comboStartIcon}
+                />
+              ) : (
+                props?.startAdornment || params.InputProps.startAdornment
+              ),
+              endAdornment: mergedEndAdornment
+            }}
+          />
+        )
+      }}
+      
       {...props}
     />
   )
