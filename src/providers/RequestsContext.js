@@ -5,14 +5,20 @@ import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
 import { useSettings } from 'src/@core/hooks/useSettings'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const RequestsContext = createContext()
 
 function LoadingOverlay() {
   const { settings } = useSettings()
   const { navCollapsed } = settings
-  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
-  const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
+  const { width } = useWindowDimensions()
+  const menuWidth = width <= 768 ? 180 : width <= 1024 ? 200 : width <= 1366 ? 220 : width <= 1600 ? 240 : 300
+
+  const sidebarWidth = navCollapsed ? 10 : menuWidth
+
+  const containerWidth = `calc(100vw - ${sidebarWidth}px)`
+  const containerHeight = 'calc(100vh  - 20px)'
 
   return (
     <Box
