@@ -84,7 +84,12 @@ const CustomComboBox = ({
       key={value}
       PopperComponent={PopperComponent}
       PaperComponent={({ children }) => (
-        <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
+        <Paper
+        style={{
+          minWidth: `${displayFieldWidth * 100}%`,
+          width: 'max-content',
+        }}
+      >{children}</Paper>
       )}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
