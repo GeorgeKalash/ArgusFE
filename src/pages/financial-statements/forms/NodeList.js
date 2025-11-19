@@ -291,7 +291,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
         <Grow>
           <DataGrid
             name='items'
-            onChange={(value, action, row) => {
+            onChange={(value, action) => {
               if (action === 'delete') {
                 node.current.viewNodeId = null
                 node.current.viewNodeRef = ''
@@ -316,6 +316,7 @@ const NodeList = ({ node, mainRecordId, labels, maxAccess, fetchData, initialDat
               node.current.viewNodeRef = row?.reference || ''
               node.current.viewNodedesc = row?.description || ''
             }}
+            isDeleteDisabled={row => formik.values.items?.find(item => item?.parentSeqNo == row?.seqNo)}
           />
         </Grow>
       </VertLayout>
