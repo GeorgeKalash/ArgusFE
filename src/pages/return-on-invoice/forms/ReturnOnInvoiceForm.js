@@ -104,6 +104,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     szId: null,
     siteId: null,
     invoiceId: null,
+    invoiceRef: '',
     clientId: null,
     clientRef: '',
     clientName: '',
@@ -1388,7 +1389,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       { key: 'keywords', value: 'Keywords' },
                       { key: 'cgName', value: 'Client Group' }
                     ]}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('clientId', newValue?.recordId || null)
                       formik.setFieldValue('clientName', newValue?.name)
                       formik.setFieldValue('clientRef', newValue?.reference)
@@ -1406,37 +1407,53 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     errorCheck={'clientId'}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={formik.values.clientId && formik.values.date && SaleRepository.ReturnOnInvoice.balance}
-                    parameters={`_clientId=${formik.values.clientId}&_returnDate=${
-                      formik?.values?.date?.toISOString().split('T')[0] + 'T00:00:00'
-                    }`}
-                    name='invoiceId'
-                    label={labels.invoice}
-                    valueField='recordId'
-                    displayField='reference'
-                    maxAccess={maxAccess}
-                    readOnly={editMode || formik.values.items.some(item => item.itemId)}
-                    values={formik.values}
-                    onChange={async (event, newValue) => {
-                      formik.setFieldValue('invoiceId', newValue?.recordId || null)
-                      formik.setFieldValue('contactId', newValue?.contactId || null)
-                      formik.setFieldValue('currencyId', newValue?.currencyId || null)
-                      formik.setFieldValue('exRate', newValue?.exRate)
-                      formik.setFieldValue('rateCalcMethod', newValue?.rateCalcMethod)
-                      formik.setFieldValue('plantId', newValue?.plantId || null)
-                      const validSpId = await validateSalesPerson(newValue?.spId)
-                      formik.setFieldValue('spId', validSpId)
+                {!editMode && (
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={
+                        formik.values.clientId && formik.values.date && SaleRepository.ReturnOnInvoice.balance
+                      }
+                      parameters={`_clientId=${formik.values.clientId}&_returnDate=${
+                        formik?.values?.date?.toISOString().split('T')[0]
+                      }T00:00:00`}
+                      name='invoiceId'
+                      label={labels.invoice}
+                      valueField='recordId'
+                      displayField='reference'
+                      maxAccess={maxAccess}
+                      readOnly={editMode || formik.values.items.some(item => item.itemId)}
+                      values={formik.values}
+                      onChange={async (_, newValue) => {
+                        formik.setFieldValue('invoiceId', newValue?.recordId || null)
+                        formik.setFieldValue('invoiceRef', newValue?.reference || '')
+                        formik.setFieldValue('contactId', newValue?.contactId || null)
+                        formik.setFieldValue('currencyId', newValue?.currencyId || null)
+                        formik.setFieldValue('exRate', newValue?.exRate)
+                        formik.setFieldValue('rateCalcMethod', newValue?.rateCalcMethod)
+                        formik.setFieldValue('plantId', newValue?.plantId || null)
+                        const validSpId = await validateSalesPerson(newValue?.spId)
+                        formik.setFieldValue('spId', validSpId)
 
-                      formik.setFieldValue('szId', newValue?.szId || null)
-                      formik.setFieldValue('isVattable', newValue?.isVattable)
-                      formik.setFieldValue('tdType', newValue?.tdType || 1)
-                      formik.setFieldValue('tdAmount', newValue?.tdAmount)
-                    }}
-                    error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
-                  />
-                </Grid>
+                        formik.setFieldValue('szId', newValue?.szId || null)
+                        formik.setFieldValue('isVattable', newValue?.isVattable)
+                        formik.setFieldValue('tdType', newValue?.tdType || 1)
+                        formik.setFieldValue('tdAmount', newValue?.tdAmount)
+                      }}
+                      error={formik.touched.invoiceId && Boolean(formik.errors.invoiceId)}
+                    />
+                  </Grid>
+                )}
+                {editMode && (
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='invoiceRef'
+                      label={labels.invoice}
+                      value={formik?.values?.invoiceRef}
+                      readOnly
+                    />
+                  </Grid>
+                )}
+
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='KGmetalPrice'
