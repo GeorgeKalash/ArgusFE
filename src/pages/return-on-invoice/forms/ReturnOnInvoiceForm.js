@@ -1414,8 +1414,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                         formik.values.clientId && formik.values.date && SaleRepository.ReturnOnInvoice.balance
                       }
                       parameters={`_clientId=${formik.values.clientId}&_returnDate=${
-                        formik?.values?.date?.toISOString().split('T')[0] + 'T00:00:00'
-                      }`}
+                        formik?.values?.date?.toISOString().split('T')[0]
+                      }T00:00:00`}
                       name='invoiceId'
                       label={labels.invoice}
                       valueField='recordId'
