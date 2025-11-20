@@ -1,11 +1,11 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import CustomTextArea from '@argus/shared-ui/components/Inputs/CustomTextArea'
-import CustomDatePicker from '@argus/shared-ui/components/Inputs/CustomDatePicker'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function PuDetailsForm({ labels, access, form, window }) {
   const { formik } = useForm({

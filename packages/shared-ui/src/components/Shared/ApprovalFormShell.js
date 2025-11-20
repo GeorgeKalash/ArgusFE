@@ -1,4 +1,4 @@
-import { useWindow } from 'src/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import FormShell from './FormShell'
 import Approvals from './Approvals'
 

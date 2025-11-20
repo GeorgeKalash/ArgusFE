@@ -1,5 +1,5 @@
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
-import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from '@argus/shared-domain/src/lib/maxAccess'
+import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 
 const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
   const generalMaxAccess = maxAccess && maxAccess.record?.accessFlags

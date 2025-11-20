@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import { useWindow } from 'src/windows'
-import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
-import { useError } from 'src/error'
-import { ControlContext } from 'src/providers/ControlContext'
+import { useError } from '@argus/shared-domain/src/lib/error'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const RPBGridToolbar = ({
   add,

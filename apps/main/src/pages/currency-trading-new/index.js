@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 import TransactionForm from '../currency-trading/forms/TransactionForm'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams'
-import { useError } from '@argus/shared-domain/lib/error'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { useError } from '@argus/shared-domain/src/lib/error'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function CurrencyTrading() {
   const { getRequest } = useContext(RequestsContext)

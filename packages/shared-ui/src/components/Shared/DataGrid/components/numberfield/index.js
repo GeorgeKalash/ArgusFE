@@ -1,9 +1,9 @@
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 import edit from './edit'
-import { SystemChecks } from 'src/resources/SystemChecks'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useContext } from 'react'
-import { ControlContext } from 'src/providers/ControlContext'
-import { iconMapView } from 'src/utils/iconMap'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { iconMapView } from '@argus/shared-utils/src/utils/iconMap'
 
 export function View({ value, data, ...props }) {
   const { systemChecks } = useContext(ControlContext)

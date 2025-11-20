@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 import {
   CompositeBarChartDark,
@@ -9,20 +9,20 @@ import {
   MixedColorsBarChartDark,
   LineChart
 } from '../../components/Shared/dashboardApplets/charts'
-import { getStorageData } from '@argus/shared-domain/storage/storage'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/repositories/DashboardRepository'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { debounce } from 'lodash'
-import { SummaryFiguresItem } from 'src/resources/DashboardFigures'
-import Table from '@argus/shared-ui/components/Shared/Table'
+import { SummaryFiguresItem } from '@argus/shared-domain/src/DashboardFigures'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Box } from '@mui/material'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
-import { formatDateForGetApI } from '@argus/shared-domain/lib/date-helper'
-import ApprovalsTable from '@argus/shared-ui/components/Shared/ApprovalsTable'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
+import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
 
 const Frame = styled.div`
   display: flex;

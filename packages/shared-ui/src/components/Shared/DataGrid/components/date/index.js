@@ -1,4 +1,4 @@
-import { formatTimestampToDate } from 'src/lib/date-helper'
+import { formatTimestampToDate } from '@argus/shared-domain/src/lib/date-helper'
 import edit from './edit'
 
 export default {

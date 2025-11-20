@@ -1,13 +1,13 @@
 import { useContext } from 'react'
-import { useResourceQuery } from 'src/hooks/resource'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import Table from 'src/components/Shared/Table'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Shared/Layouts/Grow'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const SalesTrxForm = ({ functionId, recordId, itemId, clientId, window }) => {
   const { getRequest } = useContext(RequestsContext)

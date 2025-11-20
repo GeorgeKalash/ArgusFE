@@ -1,10 +1,10 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useContext, useEffect } from 'react'
 import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useFormik } from 'formik'
-import Form from '@argus/shared-ui/components/Shared/Form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@mui/material'
 
 const BeneficiaryListWindow = ({ form, maxAccess, labels, onSubmit, window }) => {

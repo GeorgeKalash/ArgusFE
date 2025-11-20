@@ -1,9 +1,9 @@
 import { Box, Grid } from '@mui/material'
 import { useContext, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { getButtons } from './Buttons'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomButton from '../Inputs/CustomButton'
 import ReportGenerator from './ReportGenerator'
 

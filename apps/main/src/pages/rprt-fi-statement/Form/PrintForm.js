@@ -1,9 +1,9 @@
 import { Grid, Typography } from '@mui/material'
 import React, { useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import CustomButton from '@argus/shared-ui/components/Inputs/CustomButton'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import PrintableTable from '@argus/shared-ui/components/Shared/PrintTable'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import PrintableTable from '@argus/shared-ui/src/components/Shared/PrintTable'
 
 const PrintForm = ({ labels, tableData, columns, rpbParams }) => {
   const printRef = useRef()

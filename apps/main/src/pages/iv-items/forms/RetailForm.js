@@ -1,14 +1,14 @@
 import { useState, useEffect, useContext } from 'react'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import toast from 'react-hot-toast'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const RetailForm = ({ store, maxAccess }) => {
   const [data, setData] = useState([])

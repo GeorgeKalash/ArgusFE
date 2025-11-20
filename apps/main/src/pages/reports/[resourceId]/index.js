@@ -1,5 +1,5 @@
-import ReportViewer from '@argus/shared-ui/components/Shared/ReportViewer'
-import { Router } from '@argus/shared-domain/lib/useRouter'
+import ReportViewer from '@argus/shared-ui/src/components/Shared/ReportViewer'
+import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
 const Reports = () => {
   const { resourceId } = Router()

@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { AuthContext } from 'src/providers/AuthContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 
 const CommonContext = createContext()
 

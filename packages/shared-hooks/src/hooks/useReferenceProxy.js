@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
-import refBehavior from 'src/lib/referenceBehavior'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import refBehavior from '@argus/shared-domain/src/lib/referenceBehavior'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 export function useRefBehavior({ access, readOnlyOnEditMode, name }) {
   const { getRequest } = useContext(RequestsContext)

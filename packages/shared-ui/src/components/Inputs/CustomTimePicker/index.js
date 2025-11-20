@@ -7,7 +7,7 @@ import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomTimePicker.module.css'
 
 const CustomTimePicker = ({

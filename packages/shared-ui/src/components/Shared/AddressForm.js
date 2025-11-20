@@ -1,9 +1,9 @@
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { AddressFormShell } from 'src/components/Shared/AddressFormShell'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { AddressFormShell } from '@argus/shared-ui/src/components/Shared/AddressFormShell'
 import { useContext, useEffect, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const AddressForm = ({
   recordId,

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import PageError from 'src/components/Shared/PageError'
+import PageError from '@argus/shared-ui/src/components/Shared/PageError'
 
 const ErrorContext = React.createContext(null)
 

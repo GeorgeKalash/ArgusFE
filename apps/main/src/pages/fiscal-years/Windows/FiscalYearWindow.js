@@ -1,8 +1,8 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import FiscalYearForm from '../forms/FiscalYearForm'
 import PeriodsForm from '../forms/PeriodsForm'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 
 const FiscalYearWindow = ({ labels, maxAccess, recordId, window }) => {
   const [activeTab, setActiveTab] = useState(0)

@@ -1,7 +1,7 @@
 import { useContext, useRef } from 'react'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { ControlContext } from 'src/providers/ControlContext'
-import { SystemChecks } from 'src/resources/SystemChecks'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)

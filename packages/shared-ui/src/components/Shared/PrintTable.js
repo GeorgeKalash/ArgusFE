@@ -1,5 +1,5 @@
 import React from 'react'
-import { formatDateDefault, formatDateTimeDefault } from 'src/lib/date-helper'
+import { formatDateDefault, formatDateTimeDefault } from '@argus/shared-domain/src/lib/date-helper'
 
 export default function PrintableTable({
   columns = [],

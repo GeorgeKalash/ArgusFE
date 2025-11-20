@@ -1,15 +1,15 @@
 import { Box } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import FormShell from '@argus/shared-ui/components/Shared/FormShell'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { CurrencyTradingSettingsRepository } from '@argus/repositories/repositories/CurrencyTradingSettingsRepository'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const IdFieldsForm = ({ store, setStore, labels, editMode, height, expanded, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

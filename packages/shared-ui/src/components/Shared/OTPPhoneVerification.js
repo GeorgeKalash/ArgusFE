@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import styles from '../../../styles/phoneVerification.module.css'
-import { CTCLRepository } from 'src/repositories/CTCLRepository'
+import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const OTPPhoneVerification = ({
   values,

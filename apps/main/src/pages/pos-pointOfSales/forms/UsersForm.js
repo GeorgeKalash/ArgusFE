@@ -1,17 +1,17 @@
 import { useFormik } from 'formik'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 
 import { useContext, useEffect } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { PointofSaleRepository } from '@argus/repositories/repositories/PointofSaleRepository'
 import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const UsersForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store

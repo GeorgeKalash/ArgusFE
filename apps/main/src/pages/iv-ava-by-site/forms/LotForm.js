@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const LotForm = ({ labels, maxAccess, lotId, itemId, siteId }) => {
   const { getRequest } = useContext(RequestsContext)

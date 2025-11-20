@@ -1,15 +1,15 @@
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import ResourceComboBox from '@argus/shared-ui/components/Shared/ResourceComboBox'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext, useState } from 'react'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ProductAgentForm = ({
   store,

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DashboardRepository } from '@argus/repositories/repositories/DashboardRepository'
 import { CircularData } from '../../components/Shared/dashboardApplets/circularData'
 import { CompositeBarChart } from '../../components/Shared/dashboardApplets/charts'
 import ProgressBarComponent from '../../components/Shared/dashboardApplets/ProgressBar'
 import HorizontalTimeline from '../../components/Shared/dashboardApplets/HorizontalTimeline'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
 const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');

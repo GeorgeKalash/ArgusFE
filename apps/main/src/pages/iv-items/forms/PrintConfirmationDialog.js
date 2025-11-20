@@ -1,15 +1,15 @@
 import React, { useContext, useRef } from 'react'
 import WindowToolbar from '../../../components/Shared/WindowToolbar'
 import { Grid, Typography } from '@mui/material'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import useSetWindow from '@argus/shared-hooks/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { forwardRef } from 'react'
-import { useWindow } from '@argus/shared-providers/providers/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CopyToClipboardForm from './CopyToClipboardForm'
 import { useReactToPrint } from 'react-to-print'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 
 const PrintConfirmationDialog = forwardRef(({ window, Print, barcode }) => {
   const { platformLabels } = useContext(ControlContext)

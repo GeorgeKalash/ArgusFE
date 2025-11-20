@@ -1,10 +1,10 @@
-import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const AddressGridTab = ({
   addressGridData,

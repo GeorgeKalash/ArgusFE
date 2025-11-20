@@ -1,6 +1,6 @@
 import React from 'react'
 import { RadioGroup, FormControlLabel, Radio } from '@mui/material'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomRadioButtonGroup.module.css'
 
 const CustomRadioButtonGroup = ({

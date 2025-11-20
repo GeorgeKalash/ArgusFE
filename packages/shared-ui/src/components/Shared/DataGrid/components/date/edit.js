@@ -1,4 +1,4 @@
-import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 
 export default function DateEdit({ column: { props, field }, id, value, update }) {
   return (

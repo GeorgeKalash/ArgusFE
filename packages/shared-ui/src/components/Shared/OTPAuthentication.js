@@ -3,12 +3,12 @@ import Grid from '@mui/system/Unstable_Grid/Grid'
 import styles from '../../../styles/phoneVerification.module.css'
 import toast from 'react-hot-toast'
 import axios from 'axios'
-import { useAuth } from 'src/hooks/useAuth'
-import { useError } from 'src/error'
-import { ControlContext } from 'src/providers/ControlContext'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
+import { useError } from '@argus/shared-domain/src/lib/error'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const OTPAuthentication = ({ loggedUser, onClose, window, PlantSupervisors = false, values }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])

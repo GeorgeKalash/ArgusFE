@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box, Button, DialogActions, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
-import Icon from 'src/@core/components/icon'
+import Icon from '@argus/shared-core/src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 
 const NewPassword = ({ formik, labels, score, setScore }) => {

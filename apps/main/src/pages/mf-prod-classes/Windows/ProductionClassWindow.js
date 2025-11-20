@@ -1,5 +1,5 @@
-import Window from '@argus/shared-ui/components/Shared/Window'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import Window from '@argus/shared-ui/src/components/Shared/Window'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import ProductionClassForm from '../forms/ProductionClassForm'
 import SFItemForm from '../forms/SFItemForm'
 

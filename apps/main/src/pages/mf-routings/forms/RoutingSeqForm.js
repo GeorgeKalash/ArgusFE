@@ -1,15 +1,15 @@
 import * as yup from 'yup'
 import { useEffect, useContext, useState, useRef } from 'react'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { createConditionalSchema } from '@argus/shared-domain/lib/validation'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

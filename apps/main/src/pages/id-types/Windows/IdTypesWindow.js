@@ -1,10 +1,10 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import IdTypesForm from '../forms/IdTypesForm'
 import IdFieldsForm from '../forms/IdFieldsForm'
-import { InterfacesForm } from '@argus/shared-ui/components/Shared/InterfacesForm'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { InterfacesForm } from '@argus/shared-ui/src/components/Shared/InterfacesForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const IdTypesWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
   const [activeTab, setActiveTab] = useState(0)

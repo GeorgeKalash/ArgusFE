@@ -1,13 +1,13 @@
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { AuthContext } from '@argus/shared-providers/AuthContext'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import Form from '@argus/shared-ui/components/Shared/Form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const NodesTitleForm = ({ labels, maxAccess, node, mainRecordId, onOk, window, initialData = [] }) => {
   const { getRequest } = useContext(RequestsContext)

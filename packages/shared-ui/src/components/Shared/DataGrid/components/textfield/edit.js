@@ -1,4 +1,4 @@
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import IconButton from '@mui/material/IconButton'
 import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'

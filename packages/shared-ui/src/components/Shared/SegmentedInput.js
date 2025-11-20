@@ -1,7 +1,7 @@
 import InputMask from 'react-input-mask'
 import { FormControl, InputLabel, OutlinedInput } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')

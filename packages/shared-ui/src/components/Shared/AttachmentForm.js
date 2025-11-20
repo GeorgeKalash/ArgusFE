@@ -1,13 +1,13 @@
 import { useContext, useRef } from 'react'
 import toast from 'react-hot-toast'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
 import FileUpload from '../Inputs/FileUpload'
-import { useForm } from 'src/hooks/form'
-import { useInvalidate } from 'src/hooks/resource'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
 
 const AttachmentForm = ({ resourceId, recordId, seqNo, window }) => {

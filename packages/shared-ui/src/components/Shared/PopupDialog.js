@@ -1,5 +1,5 @@
 import { Button, Box } from '@mui/material'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useContext } from 'react'
 
 const PopupDialog = ({ DialogText, window }) => {

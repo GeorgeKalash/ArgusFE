@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
-import { useError } from 'src/error'
-import documentType from 'src/lib/docRefBehaviors'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { useError } from '@argus/shared-domain/src/lib/error'
+import documentType from '@argus/shared-domain/src/lib/docRefBehaviors'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 export function useDocumentTypeProxy({ functionId, action, hasDT }) {
   const { getRequest } = useContext(RequestsContext)

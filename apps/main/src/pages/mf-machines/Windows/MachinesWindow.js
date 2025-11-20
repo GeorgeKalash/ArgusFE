@@ -1,6 +1,6 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import MachinesForm from '../forms/MachinesForm'
 import MachineSpecificationForm from '../forms/MachineSpecificationForm'
 

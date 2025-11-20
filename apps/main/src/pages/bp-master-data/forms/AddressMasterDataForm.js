@@ -1,13 +1,13 @@
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext } from 'react'
 import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
-import AddressGridTab from '@argus/shared-ui/components/Shared/AddressGridTab'
-import { useWindow } from '@argus/shared-providers/providers/windows'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import AddressForm from '@argus/shared-ui/components/Shared/AddressForm'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
+import AddressGridTab from '@argus/shared-ui/src/components/Shared/AddressGridTab'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 
 const AddressMasterDataForm = ({ store, editMode, ...props }) => {
   const { recordId } = store

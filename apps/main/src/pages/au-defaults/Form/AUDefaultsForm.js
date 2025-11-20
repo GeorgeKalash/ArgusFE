@@ -1,15 +1,15 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
-import ResourceComboBox from '@argus/shared-ui/components/Shared/ResourceComboBox'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function AUDefaultsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)

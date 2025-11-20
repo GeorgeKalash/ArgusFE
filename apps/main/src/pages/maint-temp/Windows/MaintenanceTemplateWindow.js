@@ -1,5 +1,5 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import InfoTab from '../Forms/InfoTab'
 import TasksTab from '../Forms/TasksTab'
 import { useState } from 'react'

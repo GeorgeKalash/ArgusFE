@@ -1,10 +1,10 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useContext } from 'react'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 
 export default function BenificiaryHistoryForm({ client, beneficiary }) {
   const { getRequest } = useContext(RequestsContext)

@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const UserSecretOTPQrCodeForm = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState('')

@@ -1,8 +1,8 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
 import IntegrationLogicForm from '../Forms/IntegrationLogicForm'
 import IntegrationLogicDetails from '../Forms/IntegrationLogicDetails'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 
 const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)

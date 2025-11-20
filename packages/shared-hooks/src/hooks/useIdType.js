@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
-import { CurrencyTradingSettingsRepository } from 'src/repositories/CurrencyTradingSettingsRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { CurrencyTradingSettingsRepository } from '@argus/repositories/repositories/CurrencyTradingSettingsRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 export default function useIdType() {
   const [store, setStore] = useState()

@@ -1,6 +1,6 @@
 import { useFormik } from 'formik'
 import { useEffect } from 'react'
-import { DISABLED, HIDDEN, MANDATORY } from 'src/services/api/maxAccess'
+import { DISABLED, HIDDEN, MANDATORY } from '@argus/shared-domain/src/lib/maxAccess'
 import * as yup from 'yup'
 
 export function useForm({ documentType = {}, conditionSchema = [], maxAccess, validate = () => {}, ...formikProps }) {

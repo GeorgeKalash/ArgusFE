@@ -1,17 +1,17 @@
 import React, { useContext, useState, useEffect } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { useFormik } from 'formik'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Table from './Table'
 import { ResourceLookup } from './ResourceLookup'
-import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Fixed } from './Layouts/Fixed'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
-import useSetWindow from 'src/hooks/useSetWindow'
-import { ControlContext } from 'src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const AccountBalance = ({ window }) => {
   const { getRequest } = useContext(RequestsContext)

@@ -1,11 +1,11 @@
 import { useContext } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import OrgChart from '@argus/shared-ui/components/Shared/OrgChart'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import OrgChart from '@argus/shared-ui/src/components/Shared/OrgChart'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 function transformToOrgChartData(records) {
   return records.map(emp => {

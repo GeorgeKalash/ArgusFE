@@ -1,16 +1,16 @@
 import React, { useContext, useEffect } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { RTCLRepository } from 'src/repositories/RTCLRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { RTCLRepository } from '@argus/repositories/src/repositories/RTCLRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grid } from '@mui/material'
 import CustomNumberField from '../Inputs/CustomNumberField'
-import { useForm } from 'src/hooks/form'
-import useResourceParams from 'src/hooks/useResourceParams'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import FormShell from './FormShell'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 export const ClientBalance = ({ recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)

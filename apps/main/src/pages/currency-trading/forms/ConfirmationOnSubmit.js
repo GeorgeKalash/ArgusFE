@@ -1,10 +1,10 @@
 import React from 'react'
 import { useFormik } from 'formik'
 import { Grid } from '@mui/material'
-import CustomTextField from '@argus/shared-ui/components/Inputs/CustomTextField'
-import FormShell from '@argus/shared-ui/components/Shared/FormShell'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 export default function ConfirmationOnSubmit({ formik, labels, window }) {
   const fetchFormik = useFormik({

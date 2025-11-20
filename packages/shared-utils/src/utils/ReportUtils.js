@@ -1,5 +1,5 @@
-import { DevExpressRepository } from 'src/repositories/DevExpressRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { DevExpressRepository } from '@argus/repositories/src/repositories/DevExpressRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export const generateReport = async ({
   paramsDict,

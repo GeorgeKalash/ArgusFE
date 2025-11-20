@@ -1,15 +1,15 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/components/Shared/GridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
-import { useWindow } from '@argus/shared-providers/providers/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import RelationForm from './RelationForm'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const RelationList = ({ store, labels, maxAccess }) => {
   const { recordId } = store

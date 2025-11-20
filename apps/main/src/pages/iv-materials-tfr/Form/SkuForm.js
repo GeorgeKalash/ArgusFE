@@ -1,10 +1,10 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import CustomTextField from '@argus/shared-ui/components/Inputs/CustomTextField'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
 
 export default function SkuForm({ labels, maxAccess, plId, itemId }) {

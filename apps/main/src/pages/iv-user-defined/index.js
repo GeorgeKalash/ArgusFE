@@ -1,10 +1,10 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import UserTextForm from './forms/UserTextForm'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import UserDefinedForm from './forms/UserDefinedForm'
 
 const PropertiesWindow = () => {

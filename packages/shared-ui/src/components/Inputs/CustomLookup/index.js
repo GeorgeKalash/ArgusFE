@@ -4,8 +4,8 @@ import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
-import { checkAccess } from 'src/lib/maxAccess'
-import { formatDateDefault } from 'src/lib/date-helper'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
+import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomLookup.module.css'
 
 const CustomLookup = ({

@@ -1,12 +1,12 @@
 import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

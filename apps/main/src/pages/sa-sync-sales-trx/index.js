@@ -1,6 +1,6 @@
 import React from 'react'
-import { ImmediateWindow } from '@argus/shared-providers/providers/windows'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ImmediateWindow } from '@argus/shared-providers/src/providers/windows'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import SyncSalesTransactionForm from './Forms/SyncSalesTrxForm'
 
 const SyncSalesTransaction = () => {

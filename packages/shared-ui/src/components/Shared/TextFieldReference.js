@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import CustomTextField from '../Inputs/CustomTextField'
 
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { reference } from 'src/lib/reference-helper'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { reference } from '@argus/shared-domain/src/lib/reference-helper'
 
 export const TextFieldReference = ({ endpointId, param = '', setReferenceRequired, editMode, ...rest }) => {
   const { getRequest } = useContext(RequestsContext)

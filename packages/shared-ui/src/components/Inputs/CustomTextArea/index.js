@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import DropDownArrow from '/public/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '/public/images/buttonsIcons/add.png'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomTextArea.module.css'
 
 const CustomTextArea = ({

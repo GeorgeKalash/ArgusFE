@@ -1,9 +1,9 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
-import CustomNumberField from '@argus/shared-ui/components/Inputs/CustomNumberField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function JobMaterialsForm({ store, access, labels }) {
   const columns = [

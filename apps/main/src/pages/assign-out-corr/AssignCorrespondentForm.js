@@ -1,14 +1,14 @@
 import { useContext } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { ResourceLookup } from '@argus/shared-ui/components/Shared/ResourceLookup'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
 import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function AssignCorrespondentForm({ maxAccess, labels, outwardsList, refetch, window }) {
   const { postRequest } = useContext(RequestsContext)

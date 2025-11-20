@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import fieldBehaviors from 'src/lib/fieldBehaviors'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import fieldBehaviors from '@argus/shared-domain/src/lib/fieldBehaviors'
 
 export function useFieldBehavior({ access, fieldName, editMode = true }) {
   const { getRequest } = useContext(RequestsContext)

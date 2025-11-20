@@ -1,14 +1,14 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import AgentBranchForm from 'src/pages/correspondent-agent-branches/forms/AgentBranchForm'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState, useEffect, useContext } from 'react'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 import toast from 'react-hot-toast'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { AddressFormShell } from '@argus/shared-ui/components/Shared/AddressFormShell'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { AddressFormShell } from '@argus/shared-ui/src/components/Shared/AddressFormShell'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const AgentBranchWindow = ({ labels, maxAccess, recordId, height }) => {
   const [store, setStore] = useState({

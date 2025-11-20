@@ -1,14 +1,14 @@
 import { Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/lib/date-helper'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import CustomDatePicker from '@argus/shared-ui/components/Inputs/CustomDatePicker'
-import CustomTextArea from '@argus/shared-ui/components/Inputs/CustomTextArea'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import CustomNumberField from '@argus/shared-ui/components/Inputs/CustomNumberField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function PreviewForm({ labels, maxAccess, clientId }) {
   const { getRequest } = useContext(RequestsContext)

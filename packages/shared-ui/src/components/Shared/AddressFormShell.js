@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
-import { useForm } from 'src/hooks/form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import * as yup from 'yup'

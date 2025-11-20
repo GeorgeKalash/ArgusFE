@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Grid } from '@mui/material'
 import { RGFinancialRepository } from '@argus/repositories/repositories/RGFinancialRepository'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import CustomTextField from '@argus/shared-ui/components/Inputs/CustomTextField'
-import Table from '@argus/shared-ui/components/Shared/Table'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 
 const TrialBalanceForm = ({ access, labels, obj, params }) => {
   const { getRequest } = useContext(RequestsContext)

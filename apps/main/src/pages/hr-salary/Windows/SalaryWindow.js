@@ -1,14 +1,14 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useContext, useRef, useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import SalaryTab from '../forms/SalaryTab'
 import EntitlementsTab from '../forms/EntitlementsTab'
 import DeductionsTab from '../forms/DeductionsTab'
 import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { getFormattedNumber } from '@argus/shared-domain/lib/numberField-helper'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function SalaryWindow({ labels, maxAccess, recordId, employeeInfo, window }) {
   const { getRequest } = useContext(RequestsContext)

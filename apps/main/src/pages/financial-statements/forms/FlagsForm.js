@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function FlagsForm({ nodeForm, labels, maxAccess, window, updateNodeFlags }) {
   const { getAllKvsByDataset } = useContext(CommonContext)

@@ -1,16 +1,16 @@
 import { useFormik } from 'formik'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import FormShell from '@argus/shared-ui/components/Shared/FormShell'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useContext, useEffect } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const CorrespondentCurrenciesForm = ({ store, labels, maxAccess, expanded, editMode }) => {
   const { recordId } = store

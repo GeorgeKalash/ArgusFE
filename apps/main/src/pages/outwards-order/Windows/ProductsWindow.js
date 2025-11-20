@@ -1,14 +1,14 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useContext, useEffect, useState } from 'react'
 import { Button } from '@mui/material'
-import { useWindow } from '@argus/shared-providers/providers/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import SelectAgent from '../Tabs/SelectAgent'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { RemittanceBankInterface } from '@argus/repositories/repositories/RemittanceBankInterface'
-import { useError } from '@argus/shared-domain/lib/error'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { useError } from '@argus/shared-domain/src/lib/error'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ProductsWindow = ({
   labels,

@@ -1,10 +1,10 @@
 import { Box } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
-import { useForm } from 'src/hooks/form'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomButton from './CustomButton'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ImageUpload = forwardRef(
   (

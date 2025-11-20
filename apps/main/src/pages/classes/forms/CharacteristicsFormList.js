@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import GridToolbar from '@argus/shared-ui/components/Shared/GridToolbar'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import CharacteristicForm from '../forms/CharacteristicForm'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { useWindow } from '@argus/shared-providers/providers/windows'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const CharacteristicsForm = ({ labels, store, maxAccess, height }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

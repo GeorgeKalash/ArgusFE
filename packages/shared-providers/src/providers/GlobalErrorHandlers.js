@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
+import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
 
 export default function GlobalErrorHandlers() {
   const [err, setErr] = useState(null)

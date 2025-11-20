@@ -1,15 +1,15 @@
-import { useForm } from '@argus/shared-hooks/hooks/form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const PeriodsModuleForm = ({ recordId, labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

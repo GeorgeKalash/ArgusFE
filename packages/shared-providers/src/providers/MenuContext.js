@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import ErrorWindow from 'src/components/Shared/ErrorWindow'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
+import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 
 const MenuContext = createContext()
 

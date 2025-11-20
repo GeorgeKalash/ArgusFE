@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import barcodeFieldBehaviours from 'src/lib/barcodeFieldBehaviours'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import barcodeFieldBehaviours from '@argus/shared-domain/src/lib/barcodeFieldBehaviours'
 
 export function useBarcodeFieldBehaviours({ access, fieldName, editMode = true, store }) {
   const { getRequest } = useContext(RequestsContext)

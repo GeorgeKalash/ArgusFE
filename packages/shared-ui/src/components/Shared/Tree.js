@@ -8,8 +8,8 @@ import { useReactToPrint } from 'react-to-print'
 import WindowToolbar from './WindowToolbar'
 
 import { DialogActions, DialogContent } from '@mui/material'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const getAllNodeIds = nodes => {
   let nodeIds = []

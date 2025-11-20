@@ -1,14 +1,14 @@
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/lib/date-helper'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const IDNumberForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store

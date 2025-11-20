@@ -1,8 +1,8 @@
 import { Box, DialogContent } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import WindowToolbar from './WindowToolbar'
-import { TrxType } from 'src/resources/AccessLevels'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 function LoadingOverlay() {
   return (

@@ -1,7 +1,7 @@
 // ** React Imports
 import { useState, useContext } from 'react'
 
-import { useWindow } from '@argus/shared-providers/providers/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 // ** MUI Imports
 import { Box } from '@mui/material'
@@ -9,19 +9,19 @@ import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
 
 // ** Custom Imports
-import Table from '@argus/shared-ui/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/components/Shared/GridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 
 // ** API
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 // ** Resources
 import PreReqsForm from './PrereqForm'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const PreReqsList = ({ store, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

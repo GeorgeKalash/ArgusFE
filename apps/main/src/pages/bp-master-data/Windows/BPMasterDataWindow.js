@@ -1,11 +1,11 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import BPMasterDataForm from '../forms/BPMasterDataForm'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import IDNumberForm from '../forms/IDNumberForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from 'src/pages/bp-master-data/forms/RelationList'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import RolesTab from '../forms/RolesTab'
 
 const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {

@@ -7,7 +7,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomDateTimePicker.module.css'
 
 const CustomDateTimePicker = ({

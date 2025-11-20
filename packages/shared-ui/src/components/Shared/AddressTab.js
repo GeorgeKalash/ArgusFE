@@ -1,13 +1,13 @@
 import { useContext, useEffect, useMemo, useRef } from 'react'
-import CustomTextField from 'src/components/Inputs/CustomTextField'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import ResourceComboBox from './ResourceComboBox'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceLookup } from './ResourceLookup'
-import FormGrid from 'src/components/form'
-import useResourceParams from 'src/hooks/useResourceParams'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import FormGrid from '@argus/shared-ui/src/components/form'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 const AddressTab = ({
   address,

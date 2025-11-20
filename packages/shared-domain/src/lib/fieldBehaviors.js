@@ -1,5 +1,5 @@
-import { SystemRepository } from 'src/repositories/SystemRepository'
-import { DISABLED, MANDATORY } from 'src/services/api/maxAccess'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { DISABLED, MANDATORY } from '@argus/shared-domain/src/lib/maxAccess'
 
 const getData = async (getRequest, id) => {
   try {

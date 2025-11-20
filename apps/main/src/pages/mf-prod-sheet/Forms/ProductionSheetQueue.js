@@ -1,11 +1,11 @@
 import { useContext } from 'react'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function ProductionSheetQueue({ recordId, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)

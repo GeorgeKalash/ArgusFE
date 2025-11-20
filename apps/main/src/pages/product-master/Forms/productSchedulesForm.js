@@ -1,16 +1,16 @@
 import { useFormik } from 'formik'
 import { useContext, useEffect, useRef, useState } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ProductSchedulesForm = ({ store, labels, setStore, editMode, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

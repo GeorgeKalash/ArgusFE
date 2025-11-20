@@ -1,13 +1,13 @@
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext } from 'react'
-import AddressGridTab from '@argus/shared-ui/components/Shared/AddressGridTab'
-import { useWindow } from '@argus/shared-providers/providers/windows'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import AddressGridTab from '@argus/shared-ui/src/components/Shared/AddressGridTab'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import AddressForm from '@argus/shared-ui/components/Shared/AddressForm'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const ClientsAddressTab = ({ store, window, setStore, ...props }) => {
   const { recordId } = store

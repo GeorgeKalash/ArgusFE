@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function useResourceParams({ datasetId, DatasetIdAccess, editMode, cacheOnlyMode }) {
   const [labels, setLabels] = useState(null)

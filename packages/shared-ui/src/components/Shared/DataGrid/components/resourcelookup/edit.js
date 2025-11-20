@@ -1,4 +1,4 @@
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
 export default function ResourceLookupEdit({ id, column: { props, field }, value, updateRow, update }) {
   let changes = props?.mapping

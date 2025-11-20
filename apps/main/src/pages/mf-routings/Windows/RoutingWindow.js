@@ -1,7 +1,7 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import RoutingForm from '../forms/RoutingForm'
 import RoutingSeqForm from '../forms/RoutingSeqForm'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 
 const RoutingWindow = ({ labels, maxAccess, recordId }) => {

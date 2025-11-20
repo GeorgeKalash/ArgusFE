@@ -1,15 +1,15 @@
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { useForm } from '@argus/shared-hooks/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ScrapForm = ({ store, maxAccess, labels }) => {
   const { recordId } = store

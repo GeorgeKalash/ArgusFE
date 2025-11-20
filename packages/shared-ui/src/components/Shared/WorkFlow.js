@@ -1,10 +1,10 @@
 import React, { useContext, useEffect } from 'react'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { Box } from '@mui/material'
-import { AuthContext } from 'src/providers/AuthContext'
-import useSetWindow from 'src/hooks/useSetWindow'
-import { ControlContext } from 'src/providers/ControlContext'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const WorkFlow = ({ functionId, recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)

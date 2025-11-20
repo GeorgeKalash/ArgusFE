@@ -1,13 +1,13 @@
 import { Grid } from '@mui/material'
 import * as yup from 'yup'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import CustomTextArea from '@argus/shared-ui/components/Inputs/CustomTextArea'
-import CustomDatePicker from '@argus/shared-ui/components/Inputs/CustomDatePicker'
-import ResourceComboBox from '@argus/shared-ui/components/Shared/ResourceComboBox'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function InvDetailsForm({ labels, access, values, setValues, window }) {
   const { formik } = useForm({

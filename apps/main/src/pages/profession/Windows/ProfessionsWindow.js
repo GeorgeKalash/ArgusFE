@@ -1,9 +1,9 @@
 import ProfessionsForm from '../forms/ProfessionsForm'
-import { InterfacesForm } from '@argus/shared-ui/components/Shared/InterfacesForm'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { InterfacesForm } from '@argus/shared-ui/src/components/Shared/InterfacesForm'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const ProfessionWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)

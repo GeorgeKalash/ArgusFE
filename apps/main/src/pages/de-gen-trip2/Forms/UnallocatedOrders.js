@@ -1,6 +1,6 @@
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 export default function UnallocatedOrdersForm({ data, labels, access }) {
 

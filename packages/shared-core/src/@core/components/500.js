@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 
 // ** Layout Import
-import BlankLayout from 'src/@core/layouts/BlankLayout'
+import BlankLayout from '@argus/shared-core/src/@core/layouts/BlankLayout'
 
 // ** Styled Components
 const BoxWrapper = styled(Box)(({ theme }) => ({
@@ -31,18 +31,27 @@ const Img = styled('img')(({ theme }) => ({
   }
 }))
 
-const Error401 = () => {
+const TreeIllustration = styled('img')(({ theme }) => ({
+  left: 0,
+  bottom: '5rem',
+  position: 'absolute',
+  [theme.breakpoints.down('lg')]: {
+    bottom: 0
+  }
+}))
+
+const Error500 = () => {
   return (
     <Box className='content-center'>
       <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
         <BoxWrapper>
-          <Typography variant='h1'>401</Typography>
+          <Typography variant='h1'>500</Typography>
           <Typography variant='h5' sx={{ mb: 1, fontSize: '1.5rem !important' }}>
-            You are not authorized! 🔐
+            Internal server error 👨🏻‍💻
           </Typography>
-          <Typography variant='body2'>You don&prime;t have permission to access this page. Go Home!</Typography>
+          <Typography variant='body2'>Oops, something went wrong!</Typography>
         </BoxWrapper>
-        <Img height='487' alt='error-illustration' src='/images/pages/401.png' />
+        <Img height='487' alt='error-illustration' src='/images/pages/500.png' />
         <Button href='/' component={Link} variant='contained' sx={{ px: 5.5 }}>
           Back to Home
         </Button>
@@ -50,6 +59,6 @@ const Error401 = () => {
     </Box>
   )
 }
-Error401.getLayout = page => <BlankLayout>{page}</BlankLayout>
+Error500.getLayout = page => <BlankLayout>{page}</BlankLayout>
 
-export default Error401
+export default Error500

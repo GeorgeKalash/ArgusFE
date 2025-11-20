@@ -1,4 +1,4 @@
-import { accessMap, TrxType } from 'src/resources/AccessLevels'
+import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 
 export const getButtons = platformLabels => [
   {

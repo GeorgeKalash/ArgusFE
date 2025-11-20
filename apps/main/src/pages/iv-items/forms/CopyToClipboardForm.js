@@ -1,12 +1,12 @@
 import { Grid } from '@mui/material'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import CustomTextField from '@argus/shared-ui/components/Inputs/CustomTextField'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import WindowToolbar from '@argus/shared-ui/components/Shared/WindowToolbar'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import WindowToolbar from '@argus/shared-ui/src/components/Shared/WindowToolbar'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 
 export default function CopyToClipboardForm({ barcode, window }) {
   const { labels, access: maxAccess } = useResourceQuery({

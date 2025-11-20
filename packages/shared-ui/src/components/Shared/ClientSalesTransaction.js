@@ -1,13 +1,13 @@
 import React, { useContext, useState, useEffect } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Table from './Table'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import useSetWindow from 'src/hooks/useSetWindow'
-import { ControlContext } from 'src/providers/ControlContext'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ClientSalesTransaction = ({ functionId, clientId, window }) => {
   const { getRequest } = useContext(RequestsContext)

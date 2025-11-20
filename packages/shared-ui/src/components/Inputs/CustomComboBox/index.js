@@ -3,8 +3,8 @@ import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useEffect, useRef, useState } from 'react'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
-import { checkAccess } from 'src/lib/maxAccess'
-import { formatDateDefault } from 'src/lib/date-helper'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
+import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
 
 const CustomComboBox = ({

@@ -1,11 +1,11 @@
 import React, { useContext } from 'react'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const HistoryList = ({ recordId }) => {
   const { getRequest } = useContext(RequestsContext)

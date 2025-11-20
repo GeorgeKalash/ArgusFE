@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
 import { HorizontalBarChartDark } from '../../components/Shared/dashboardApplets/charts'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { debounce } from 'lodash'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const Frame = styled.div`
   display: flex;

@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import GridToolbar from '@argus/shared-ui/components/Shared/GridToolbar'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import ValueForm from '../forms/ValueForm'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { useWindow } from '@argus/shared-providers/providers/windows'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const ValueFormList = ({ labels, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

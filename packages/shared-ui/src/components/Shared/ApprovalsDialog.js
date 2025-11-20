@@ -1,7 +1,7 @@
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ConfirmationDialog from '../ConfirmationDialog'
 import { useContext } from 'react'
-import useSetWindow from 'src/hooks/useSetWindow'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const ApprovalsDialog = ({ window, w, responseValue, onConfirm, fullScreen }) => {
   const { platformLabels } = useContext(ControlContext)

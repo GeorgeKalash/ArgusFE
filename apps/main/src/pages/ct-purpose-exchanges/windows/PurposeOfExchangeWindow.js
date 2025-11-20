@@ -1,10 +1,10 @@
 import PurposeOfExchangeForm from '../forms/PurposeOfExchangeForm'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
-import { InterfacesForm } from '@argus/shared-ui/components/Shared/InterfacesForm'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
+import { InterfacesForm } from '@argus/shared-ui/src/components/Shared/InterfacesForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 
 const PurposeOfExchangeWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)

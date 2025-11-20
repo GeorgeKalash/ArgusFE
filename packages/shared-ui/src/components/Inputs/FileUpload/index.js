@@ -1,12 +1,12 @@
 import { Box, Typography, IconButton, Button, Grid } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
-import { useForm } from 'src/hooks/form'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { ControlContext } from 'src/providers/ControlContext'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { useInvalidate } from 'src/hooks/resource'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import styles from './FileUpload.module.css'
 
 const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {

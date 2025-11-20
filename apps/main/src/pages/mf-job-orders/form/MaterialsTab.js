@@ -1,14 +1,14 @@
 import { useContext } from 'react'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
-import CustomNumberField from '@argus/shared-ui/components/Inputs/CustomNumberField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function MaterialsTab({ store, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)

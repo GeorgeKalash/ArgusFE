@@ -1,14 +1,14 @@
-import MatrixGrid from '@argus/shared-ui/components/Shared/MatrixTable'
+import MatrixGrid from '@argus/shared-ui/src/components/Shared/MatrixTable'
 import { useContext, useEffect, useState } from 'react'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function WorkCenterTransferMap() {
   const { postRequest, getRequest } = useContext(RequestsContext)

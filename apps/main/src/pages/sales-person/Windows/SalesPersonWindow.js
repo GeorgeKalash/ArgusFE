@@ -1,7 +1,7 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import GeneralForm from 'src/pages/sales-person/Forms/GeneralForm'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import TargetForm from '../Forms/TargetForm'
 import MonthlyTargetForm from '../Forms/MonthlyTargetForm'
 

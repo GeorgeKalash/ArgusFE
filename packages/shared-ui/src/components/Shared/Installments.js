@@ -1,11 +1,11 @@
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useForm } from 'src/hooks/form'
-import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useResourceQuery } from 'src/hooks/resource'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Shared/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { DataGrid } from './DataGrid'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import Form from './Form'
 
 export default function Installments({ data, onOk, window }) {

@@ -1,15 +1,15 @@
 import { useState, useContext, useEffect } from 'react'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import toast from 'react-hot-toast'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ModuleDeactivation = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

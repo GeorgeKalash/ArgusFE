@@ -1,14 +1,14 @@
 import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const TargetForm = ({ labels, maxAccess, store }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

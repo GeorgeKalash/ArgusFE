@@ -1,6 +1,6 @@
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import Table from '@argus/shared-ui/components/Shared/Table'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 
 const AvailabilitiesTab = ({ data, pagination, refetch, access, labels: _labels }) => {
   const columns = [

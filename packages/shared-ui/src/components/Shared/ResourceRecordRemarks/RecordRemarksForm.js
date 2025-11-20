@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomTextArea from '../../Inputs/CustomTextArea'
 import { Box, Button } from '@mui/material'
 import toast from 'react-hot-toast'
-import { useForm } from 'src/hooks/form'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { formatDateDefault, formatDateToApi } from 'src/lib/date-helper'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate } from 'src/hooks/resource'
+import { formatDateDefault, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)

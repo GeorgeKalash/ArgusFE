@@ -1,9 +1,9 @@
 import CbBanksForm from '../forms/CbBanksForm'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { InterfacesForm } from '@argus/shared-ui/components/Shared/InterfacesForm'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { InterfacesForm } from '@argus/shared-ui/src/components/Shared/InterfacesForm'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const CbBanksWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)

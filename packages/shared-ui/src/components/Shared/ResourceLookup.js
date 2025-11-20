@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import CustomLookup from '../Inputs/CustomLookup'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 export const ResourceLookup = ({
   endpointId,

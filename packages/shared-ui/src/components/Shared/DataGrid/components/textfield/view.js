@@ -1,4 +1,4 @@
-import { getFormattedNumber } from 'src/lib/numberField-helper'
+import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 
 export default function TextFieldView({ value, column: { props }, id }) {
   let UpdatedValue = value

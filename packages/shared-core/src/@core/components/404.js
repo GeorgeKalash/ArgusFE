@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 
 // ** Layout Import
-import BlankLayout from 'src/@core/layouts/BlankLayout'
+import BlankLayout from '@argus/shared-core/src/@core/layouts/BlankLayout'
 
 // ** Styled Components
 const BoxWrapper = styled(Box)(({ theme }) => ({

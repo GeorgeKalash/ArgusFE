@@ -1,14 +1,14 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
 import FiOpeningBalancesForm from './forms/FiOpeningBalancesForm'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { useWindow } from '@argus/shared-providers/providers/windows'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import RPBGridToolbar from '@argus/shared-ui/components/Shared/RPBGridToolbar'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const FiOpeningBalance = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

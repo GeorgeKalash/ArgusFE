@@ -1,13 +1,13 @@
 import { useContext } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import Table from '@argus/shared-ui/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import RPBGridToolbar from '@argus/shared-ui/components/Shared/RPBGridToolbar'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const CurrentCost = () => {
   const { getRequest } = useContext(RequestsContext)

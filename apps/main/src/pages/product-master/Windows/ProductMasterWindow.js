@@ -1,7 +1,7 @@
 // ** Custom Imports
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { useState } from 'react'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import ProductAgentForm from '../Forms/productAgentForm'
 import ProductLegForm from '../Forms/productLegForm'
 import ProductSchedulesForm from '../Forms/productSchedulesForm'

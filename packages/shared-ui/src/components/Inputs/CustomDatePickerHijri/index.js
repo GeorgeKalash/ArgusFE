@@ -8,7 +8,7 @@ import EventIcon from '@mui/icons-material/Event'
 import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomDatePickerHijri.module.css'
 
 export default function CustomDatePickerHijri({

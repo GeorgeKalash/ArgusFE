@@ -1,14 +1,14 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../../Inputs/CustomTextField'
 import { useState, useContext, useEffect } from 'react'
-import { accessMap, TrxType } from 'src/resources/AccessLevels'
-import { ControlContext } from 'src/providers/ControlContext'
+import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getButtons } from '../Buttons'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import styles from './GridToolbar.module.css'
 import ReportGenerator from '../ReportGenerator'
-import CustomButton from 'src/components/Inputs/CustomButton'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const GridToolbar = ({
   onAdd,

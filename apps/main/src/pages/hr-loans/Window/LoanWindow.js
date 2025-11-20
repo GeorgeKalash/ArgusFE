@@ -1,11 +1,11 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import LoansForm from '../Forms/LoansForm'
 import DeductionTab from '../Forms/DeductionTab'
-import useSetWindow from '@argus/shared-hooks/hooks/useSetWindow'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const LoanWindow = ({ recordId, window }) => {
   const [activeTab, setActiveTab] = useState(0)

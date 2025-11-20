@@ -7,7 +7,7 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import { Grid } from '@mui/material'
 import FieldSet from './FieldSet'
-import { AuthContext } from 'src/providers/AuthContext'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 
 const ItemSelectorWindow = ({
   initialAllListData,

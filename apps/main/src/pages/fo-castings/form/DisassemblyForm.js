@@ -1,14 +1,14 @@
 import { useContext, useEffect } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { useForm } from '@argus/shared-hooks/hooks/form'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import toast from 'react-hot-toast'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
 import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function DisassemblyForm({ labels, maxAccess, store, setStore }) {
   const { postRequest, getRequest } = useContext(RequestsContext)

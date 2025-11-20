@@ -1,13 +1,13 @@
 import { useContext, useEffect } from 'react'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { DataSets } from '@argus/shared-domain/resources/DataSets'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SerialProfileSequences = ({ store, maxAccess, labels }) => {
   const { recordId } = store

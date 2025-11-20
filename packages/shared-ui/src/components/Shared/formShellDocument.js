@@ -2,9 +2,9 @@ import { DialogContent } from '@mui/material'
 import { useState } from 'react'
 import WindowToolbar from './WindowToolbar'
 import TransactionLog from './TransactionLog'
-import { TrxType } from 'src/resources/AccessLevels'
+import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ClientRelationList } from './ClientRelationList'
-import { useWindow } from 'src/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WindowToolbarDocuments from './windowToolBarDocuments'
 
 export default function FormShellDocument({

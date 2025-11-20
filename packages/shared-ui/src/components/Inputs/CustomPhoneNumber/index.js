@@ -2,9 +2,9 @@ import { IconButton } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/material.css'
-import { ControlContext } from 'src/providers/ControlContext'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ClearIcon from '@mui/icons-material/Clear'
-import { checkAccess } from 'src/lib/maxAccess'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomPhoneNumber.module.css'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {

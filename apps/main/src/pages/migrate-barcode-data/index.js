@@ -1,5 +1,5 @@
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { ImmediateWindow } from '@argus/shared-providers/providers/windows'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ImmediateWindow } from '@argus/shared-providers/src/providers/windows'
 import MigrateBarcodeForm from './forms/migrateBarcodeForm'
 
 const MigrateBarcodeData = () => {

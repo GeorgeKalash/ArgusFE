@@ -1,12 +1,12 @@
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import WorksheetForm from '../forms/WorksheetForm.js'
 import MaterialsTab from '../forms/MaterialsTab.js'
 import OperationsTab from '../forms/OperationsTab.js'
-import useSetWindow from '@argus/shared-hooks/hooks/useSetWindow.js'
-import { ResourceIds } from 'src/resources/ResourceIds.js'
-import useResourceParams from '@argus/shared-hooks/hooks/useResourceParams.js'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow.js'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams.js'
 
 const WorksheetWindow = ({ recordId, window, joInvalidate }) => {
   const [activeTab, setActiveTab] = useState(0)

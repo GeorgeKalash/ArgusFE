@@ -1,4 +1,4 @@
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 const reference = async (getRequest, endpointId, param) => {
   let parameters = '_key=' + param

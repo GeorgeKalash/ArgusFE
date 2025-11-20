@@ -1,16 +1,16 @@
 import React, { useContext, useState } from 'react'
 import Table from './Table'
-import { ResourceIds } from 'src/resources/ResourceIds'
-import { useResourceQuery } from 'src/hooks/resource'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grow } from './Layouts/Grow'
-import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { Fixed } from './Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '../Inputs/CustomNumberField'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const InventoryTransaction = props => {
   const { recordId, functionId, window } = props

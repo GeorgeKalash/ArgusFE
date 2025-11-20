@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { useContext } from 'react'
-import { AuthContext } from 'src/providers/AuthContext'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 
 const FixedGrid = ({ children, ...props }) => {
   const { languageId } = useContext(AuthContext)

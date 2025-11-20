@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import ConfirmationDialog from '../ConfirmationDialog'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const ClearGridConfirmation = ({ window, onConfirm, fullScreen, open, dialogText }) => {
   const { platformLabels } = useContext(ControlContext)

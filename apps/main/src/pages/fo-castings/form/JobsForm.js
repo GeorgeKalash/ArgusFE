@@ -1,18 +1,18 @@
 import { useContext, useEffect } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { useForm } from '@argus/shared-hooks/hooks/form'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
 
 import toast from 'react-hot-toast'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
-import CustomNumberField from '@argus/shared-ui/components/Inputs/CustomNumberField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function JobsForm({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)

@@ -1,12 +1,12 @@
 // ** Custom Imports
-import Window from '@argus/shared-ui/components/Shared/Window'
+import Window from '@argus/shared-ui/src/components/Shared/Window'
 
 import SourceOfIncomeForm from '../forms/sourceOfIncomeForm'
-import { CustomTabs } from '@argus/shared-ui/components/Shared/CustomTabs'
-import CustomTabPanel from '@argus/shared-ui/components/Shared/CustomTabPanel'
-import { InterfacesForm } from '@argus/shared-ui/components/Shared/InterfacesForm'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
+import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
+import { InterfacesForm } from '@argus/shared-ui/src/components/Shared/InterfacesForm'
 import { useState } from 'react'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 const SourceOfIncomeWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)

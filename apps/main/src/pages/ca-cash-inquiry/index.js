@@ -1,13 +1,13 @@
 import { useContext } from 'react'
-import Table from '@argus/shared-ui/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
-import RPBGridToolbar from '@argus/shared-ui/components/Shared/RPBGridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const CashEnquiry = () => {
   const { getRequest } = useContext(RequestsContext)

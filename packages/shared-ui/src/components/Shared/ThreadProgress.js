@@ -1,15 +1,15 @@
 import styled from 'styled-components'
 import React, { useContext, useEffect, useState } from 'react'
 import FormShell from './FormShell'
-import { RequestsContext } from 'src/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import { Grid } from '@mui/material'
 import CustomTextArea from '../Inputs/CustomTextArea'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomTextField from '../Inputs/CustomTextField'
-import { ControlContext } from 'src/providers/ControlContext'
-import useSetWindow from 'src/hooks/useSetWindow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const ProgressBarLabel = styled.span`
   font-size: 16px;

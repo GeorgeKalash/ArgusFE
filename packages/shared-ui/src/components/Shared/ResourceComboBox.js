@@ -1,9 +1,9 @@
-import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import { useContext, useEffect, useState, useRef } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { CommonContext } from 'src/providers/CommonContext'
-import { useCacheDataContext } from 'src/providers/CacheDataContext'
-import { useCacheStoreContext } from 'src/providers/CacheStoreContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
+import { useCacheDataContext } from '@argus/shared-providers/src/providers/CacheDataContext'
+import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
 export default function ResourceComboBox({
   endpointId,

@@ -1,16 +1,16 @@
 import { Grid } from '@mui/material'
-import ResourceComboBox from '@argus/shared-ui/components/Shared/ResourceComboBox'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useContext } from 'react'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ReleaseCodeForm = ({ labels, maxAccess, storeRecordId, invalidate, window }) => {
   const { postRequest } = useContext(RequestsContext)

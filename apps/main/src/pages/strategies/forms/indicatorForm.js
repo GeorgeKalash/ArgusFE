@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react'
 import * as yup from 'yup'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { DataGrid } from '@argus/shared-ui/components/Shared/DataGrid'
-import { useForm } from '@argus/shared-hooks/hooks/form'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import Form from '@argus/shared-ui/components/Shared/Form'
+import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const IndicatorForm = ({ labels, editMode, maxAccess, store }) => {
   const [valueGridData, setValueGridData] = useState([])

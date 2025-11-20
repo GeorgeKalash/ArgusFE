@@ -4,29 +4,29 @@ import { useState, useContext } from 'react'
 // ** MUI Imports
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-import { useWindow } from '@argus/shared-providers/providers/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 // ** Custom Imports
-import Table from '@argus/shared-ui/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/components/Shared/GridToolbar'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import StrategiesWindow from './windows/strategiesWindow'
 
 // ** API
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 
 // ** Windows
 
 // ** Helpers
-import ErrorWindow from '@argus/shared-ui/components/Shared/ErrorWindow'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/hooks/resource'
+import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
+import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 
 // ** Resources
-import { ResourceIds } from '@argus/shared-domain/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/components/Layouts/Grow'
-import { ControlContext } from '@argus/shared-providers/providers/ControlContext'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const Strategies2 = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

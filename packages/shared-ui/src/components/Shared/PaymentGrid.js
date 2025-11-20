@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react'
-import { DataSets } from 'src/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { DataGrid } from './DataGrid'
-import { ResourceIds } from 'src/resources/ResourceIds'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
-import { useWindow } from 'src/windows'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
-import useResourceParams from 'src/hooks/useResourceParams'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const editMode = !!rest.data.recordId

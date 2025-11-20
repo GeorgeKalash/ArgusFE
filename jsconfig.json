@@ -3,17 +3,16 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "paths": {
-      "@argus/shared-ui/*": ["packages/shared-ui/src/*"],
-      "@argus/shared-hooks/*": ["packages/shared-hooks/src/*"],
-      "@argus/shared-domain/*": ["packages/shared-domain/src/*"],
-      "@argus/shared-providers/*": ["packages/shared-providers/src/*"],
-      "@argus/shared-inputs/*": ["packages/shared-inputs/src/*"],
-      "@argus/shared-layouts/*": ["packages/shared-layouts/src/*"],
-      "@argus/shared-errors/*": ["packages/shared-errors/src/*"],
-      "@argus/shared-reusable-components/*": ["packages/shared-reusable-components/src/*"],
-      "@argus/repositories/*": ["packages/repositories/src/*"],
-      "@argus/shared-utils/*": ["packages/shared-utils/src/*"]
-      
+      "@argus/repositories/*": ["packages/repositories/*"],
+      "@argus/shared-domain/*": ["packages/shared-domain/*"],
+      "@argus/shared-hooks/*": ["packages/shared-hooks/*"],
+      "@argus/shared-providers/*": ["packages/shared-providers/*"],
+      "@argus/shared-ui/*": ["packages/shared-ui/*"],
+      "@argus/shared-utils/*": ["packages/shared-utils/s*"],
+      "@argus/shared-configs/*": ["packages/shared-configs/*"],
+      "@argus/shared-core/*": ["packages/shared-core/*"],
+      "@argus/shared-layouts/*": ["packages/shared-layouts/*"],
+      "@argus/shared-store/*": ["packages/shared-store/*"]      
     }
   },
   "include": [

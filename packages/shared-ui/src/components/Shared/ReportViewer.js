@@ -1,15 +1,15 @@
 import { useEffect, useState, useContext } from 'react'
 import { Box, Grid } from '@mui/material'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { SystemRepository } from 'src/repositories/SystemRepository'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import ResourceComboBox from './ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
-import { CommonContext } from 'src/providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

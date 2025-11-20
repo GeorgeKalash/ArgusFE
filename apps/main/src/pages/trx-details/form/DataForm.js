@@ -1,8 +1,8 @@
 import { DialogContent, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import { Fixed } from '@argus/shared-ui/components/Layouts/Fixed'
-import { VertLayout } from '@argus/shared-ui/components/Layouts/VertLayout'
-import { RequestsContext } from '@argus/shared-providers/providers/RequestsContext'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
 
 export default function DataForm({ obj }) {

@@ -4,9 +4,9 @@ import React, { useEffect, useState, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { getNumberWithoutCommas } from 'src/lib/numberField-helper'
-import { checkAccess } from 'src/lib/maxAccess'
-import { iconMap } from 'src/utils/iconMap'
+import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField-helper'
+import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
+import { iconMap } from '@argus/shared-utils/src/utils/iconMap'
 import styles from './CustomNumberField.module.css'
 
 const CustomNumberField = ({
