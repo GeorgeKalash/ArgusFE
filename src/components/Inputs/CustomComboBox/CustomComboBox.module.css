@@ -384,3 +384,41 @@
     }
   }
   
+
+  /* 
+   */
+@media (max-height: 800px) {
+  .comboHeaderCell {
+    font-size: 0.72rem;
+    height: 16px;
+  }
+
+  .comboOptionRow {
+    padding: 2px 6px !important;
+    min-height: 20px !important;
+  }
+
+  .comboOptionCell,
+  .comboOptionSingleText {
+    font-size: 0.8rem;
+    height: 16px;
+  }
+}
+
+@media (max-height: 700px) {
+  .comboHeaderCell {
+    font-size: 0.68rem;
+    height: 14px;
+  }
+
+  .comboOptionRow {
+    padding: 1px 4px !important;
+    min-height: 18px !important;
+  }
+
+  .comboOptionCell,
+  .comboOptionSingleText {
+    font-size: 0.76rem;
+    height: 14px;
+  }
+}
