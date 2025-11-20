@@ -1,0 +1,14 @@
+.gridTextEditor {
+    flex-grow: 1;
+    border: none;
+  }
+  
+  .gridTextEditor :global(.MuiOutlinedInput-root) {
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  
+  .gridTextEditor :global(.MuiOutlinedInput-root fieldset) {
+    border: none !important;
+  }
+  

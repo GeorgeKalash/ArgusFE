@@ -121,7 +121,7 @@ const CustomLookup = ({
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
-            props.renderOption && <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
+            props.renderOption && <Paper style={{ minWidth: `${displayFieldWidth * 100}%`,width: 'max-content', }}>{children}</Paper>
           }
           renderOption={(propsOption, option) => {
             if (columnsInDropDown?.length > 0) {
@@ -135,7 +135,7 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={propsOption.className}>
+                    <li  className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
                       {columnsWithGrid.map((header, i) => {
                         const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
@@ -151,7 +151,10 @@ const CustomLookup = ({
                       })}
                     </li>
                   )}
-                  <li {...propsOption}>
+                  <li
+                    {...propsOption}
+                    className={`${propsOption.className} ${styles.dropdownOptionRow}`}
+                  >
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
@@ -177,7 +180,9 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={propsOption.className}>
+                    <li
+                      className={`${propsOption.className} ${styles.dropdownOptionRow}`}
+                    >
                       {secondDisplayField && (
                         <Box className={styles.dropdownHeaderCellMain}>
                           {valueField.toUpperCase()}
@@ -190,7 +195,10 @@ const CustomLookup = ({
                       )}
                     </li>
                   )}
-                  <li {...propsOption}>
+                  <li
+                    {...propsOption}
+                    className={`${propsOption.className} ${styles.dropdownOptionRow}`}
+                  >
                     <Box className={styles.dropdownCellMain}>{option[valueField]}</Box>
                     {secondDisplayField && (
                       <Box className={styles.dropdownCellSecondary}>

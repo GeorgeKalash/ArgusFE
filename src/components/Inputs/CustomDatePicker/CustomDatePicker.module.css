@@ -1,44 +1,228 @@
 .customDateTextField :global(.MuiOutlinedInput-root) {
-    height: 33px !important;
+  height: 33px !important;
+}
+
+.customDateTextField :global(.MuiOutlinedInput-root fieldset) {
+  border-color: #959d9e;
+  border-radius: 6px;
+}
+
+.noBorder :global(.MuiOutlinedInput-root fieldset) {
+  border: none !important;
+}
+
+.customDateTextField :global(.MuiInputLabel-root) {
+  font-size: 14px !important;
+}
+
+.labelUnfocused :global(.MuiInputLabel-root) {
+  top: -3px;
+}
+
+.labelFocused :global(.MuiInputLabel-root) {
+  top: 0px;
+}
+
+.customDateTextField :global(.MuiInputBase-input) {
+  font-size: 14px !important;
+  color: black;
+}
+
+.customDateTextField :global(.MuiSvgIcon-root) {
+  font-size: 18px;
+}
+
+.clearIconButton {
+  padding: 10px !important;
+  margin-right: -14px !important;
+  min-width: 0 !important;
+}
+
+.eventIconButton {
+  padding: 2px !important;
+  margin-left: 4px !important;
+  margin-right: -10px !important;
+  min-width: 0 !important;
+}
+
+.dateIcon {
+  border: 0;
+  font-size: 18px !important;
+}
+
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 30px !important;
   }
-  
+
   .customDateTextField :global(.MuiOutlinedInput-root fieldset) {
-    border-color: #959d9e;
-    border-radius: 6px;
+    border-radius: 5px !important;
   }
-  
-  .noBorder :global(.MuiOutlinedInput-root fieldset) {
-    border: none !important;
-  }
-  
+
   .customDateTextField :global(.MuiInputLabel-root) {
-    font-size: 0.9rem;
+    font-size: 12px !important;
   }
-  
-  .labelUnfocused :global(.MuiInputLabel-root) {
-    top: -3px;
-  }
-  
+
   .labelFocused :global(.MuiInputLabel-root) {
+    font-size: 12px !important;
     top: 0px;
   }
-  
+
   .customDateTextField :global(.MuiInputBase-input) {
-    font-size: 0.9rem;
-    color: black;
+    font-size: 12px !important;
   }
-  
-  .clearIconButton {
-    margin-right: -14px !important;
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 16px;
   }
-  
-  .eventIconButton {
-    margin-left: 4px !important;
-    margin-right: -10px !important;
-  }
-  
+
   .dateIcon {
-    border: 0;
-    font-size: 18px !important;
+    font-size: 16px !important;
   }
-  
+}
+
+@media (max-width: 1280px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 28px !important;
+  }
+
+  .customDateTextField :global(.MuiInputLabel-root) {
+    font-size: 11px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .customDateTextField :global(.MuiInputBase-input) {
+    font-size: 11px !important;
+  }
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 14px;
+  }
+
+  .dateIcon {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 26px !important;
+  }
+
+  .customDateTextField :global(.MuiOutlinedInput-root fieldset) {
+    border-radius: 4px !important;
+  }
+
+  .customDateTextField :global(.MuiInputLabel-root) {
+    font-size: 10px !important;
+  }
+
+  .labelFocused :global(.MuiInputLabel-root) {
+    font-size: 10px !important;
+    top: 0px;
+  }
+
+  .customDateTextField :global(.MuiInputBase-input) {
+    font-size: 10px !important;
+  }
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 13px;
+  }
+
+  .dateIcon {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 24px !important;
+  }
+
+  .customDateTextField :global(.MuiOutlinedInput-root fieldset) {
+    border-radius: 3px !important;
+  }
+
+  .customDateTextField :global(.MuiInputLabel-root) {
+    font-size: 9px !important;
+  }
+
+  .labelFocused :global(.MuiInputLabel-root) {
+    font-size: 9px !important;
+  }
+
+  .customDateTextField :global(.MuiInputBase-input) {
+    font-size: 9px !important;
+  }
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 12px;
+  }
+
+  .dateIcon {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 22px !important;
+  }
+
+  .customDateTextField :global(.MuiOutlinedInput-root fieldset) {
+    border-radius: 2px !important;
+  }
+
+  .customDateTextField :global(.MuiInputLabel-root) {
+    font-size: 8px !important;
+  }
+
+  .labelFocused :global(.MuiInputLabel-root) {
+    font-size: 8px !important;
+  }
+
+  .customDateTextField :global(.MuiInputBase-input) {
+    font-size: 8px !important;
+  }
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 11px;
+  }
+
+  .dateIcon {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .customDateTextField :global(.MuiOutlinedInput-root) {
+    height: 20px !important;
+  }
+
+  .customDateTextField :global(.MuiOutlinedInput-root fieldset) {
+    border-radius: 2px !important;
+  }
+
+  .customDateTextField :global(.MuiInputLabel-root) {
+    font-size: 7px !important;
+  }
+
+  .labelFocused :global(.MuiInputLabel-root) {
+    font-size: 7px !important;
+  }
+
+  .customDateTextField :global(.MuiInputBase-input) {
+    font-size: 7px !important;
+  }
+
+  .customDateTextField :global(.MuiSvgIcon-root) {
+    font-size: 10px;
+  }
+
+  .dateIcon {
+    font-size: 10px !important;
+  }
+}
