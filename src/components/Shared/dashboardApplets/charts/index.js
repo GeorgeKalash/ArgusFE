@@ -160,6 +160,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
       options: {
         responsive: true,
         aspectRatio: ratio,
+        maintainAspectRatio: false,
         plugins: {
           datalabels: {
             anchor: context => {
@@ -241,11 +242,13 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
   }, [labels, data1, data2, label1, label2, rotation, hasLegend, ratio])
 
   return (
+    <div className={styles.charthight}>
     <canvas
       id={id}
       ref={canvasRef}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
     />
+    </div>
   )
 }
 
@@ -394,6 +397,7 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
       options: {
         responsive: true,
         aspectRatio: ratio,
+        maintainAspectRatio: false,
         plugins: {
           datalabels: {
             anchor: context => {
@@ -453,11 +457,13 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
   }, [labels, data, label, color, hoverColor, ratio])
 
   return (
+    <div className={styles.charthight}>
     <canvas
       id={id}
       ref={canvasRef}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
     />
+    </div>
   )
 }
 
@@ -491,6 +497,7 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
       options: {
         responsive: true,
         aspectRatio: ratio,
+        maintainAspectRatio: false,
         plugins: {
           datalabels: {
             anchor: context => {
@@ -552,11 +559,13 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
   }, [labels, data, label, ratio])
 
   return (
+    <div className={styles.charthight}>
     <canvas
       id={id}
       ref={canvasRef}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
     />
+    </div>
   )
 }
 
@@ -743,6 +752,7 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
       },
       options: {
         responsive: true,
+        aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
           legend: {
@@ -786,11 +796,13 @@ export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
   }, [id, labels, datasets, datasetLabels])
 
   return (
+    <div className={styles.charthight}>
     <canvas
       id={id}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
       
     ></canvas>
+    </div>
   )
 }
 
@@ -973,6 +985,7 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
         },
         options: {
           responsive: true,
+          aspectRatio: ratio,
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
@@ -1035,10 +1048,11 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   }, [labels, datasets, collapsed])
 
   return (
+    <div className={styles.charthight}>
     <canvas
       id={id}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
-      
     ></canvas>
+    </div>
   )
 }
