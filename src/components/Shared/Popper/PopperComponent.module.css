@@ -1,37 +1,86 @@
-
 .popperRoot {
-    z-index: 3 !important;
-  }
-  
-  .popperOpen {
-    visibility: visible;
-  }
-  
-  .popperClosed {
-    visibility: hidden;
-  }
-  
-  .popperRoot :global(.MuiMultiSectionDigitalClock-root) {
-    width: 200px;
-  }
-  
-  .popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
-    max-height: 43vh;
-  }
-  
-  .popperRoot :global(.MuiMenuItem-root) {
-    padding-right: 10px;
-  }
-  
-  .popperRoot :global(.MuiDateCalendar-root) {
-    height: 310px;
-  }
-  
+  z-index: 3 !important;
+}
+
+.popperOpen {
+  visibility: visible;
+}
+
+.popperClosed {
+  visibility: hidden;
+}
+
+.popperRoot :global(.MuiMultiSectionDigitalClock-root) {
+  width: 200px;
+}
+
+.popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
+  max-height: 43vh;
+}
+
+.popperRoot :global(.MuiMenuItem-root) {
+  padding-right: 10px;
+}
+
+.popperRoot :global(.MuiDateCalendar-root) {
+  width: 320px;
+  height: 320px;
+}
+
+.dateTimePopper :global(.MuiDateCalendar-root) {
+  width: 300px;
+  height: 300px;
+}
+
+.dateTimePopper :global(.MuiMultiSectionDigitalClock-root) {
+  height: 300px;
+}
+
+@media (max-width: 1600px) {
   .dateTimePopper :global(.MuiDateCalendar-root) {
-    height: 300px;
+    width: 280px;
+    height: 280px;
   }
-  
-  .dateTimePopper :global(.MuiMultiSectionDigitalClock-root) {
-    height: 300px;
+}
+
+@media (max-width: 1366px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 260px;
+    height: 240px;
   }
-  
+}
+
+@media (max-width: 1024px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 220px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 210px;
+    height: 210px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 375px) {
+  .dateTimePopper :global(.MuiDateCalendar-root) {
+    width: 190px;
+    height: 190px;
+  }
+}
