@@ -1,18 +1,43 @@
 import CustomTabPanel from 'src/components/Shared/CustomTabPanel'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import IntegrationLogicForm from '../Forms/IntegrationLogicForm'
 import IntegrationLogicDetails from '../Forms/IntegrationLogicDetails'
 import { CustomTabs } from 'src/components/Shared/CustomTabs'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
 const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)
+  const { getRequest } = useContext(RequestsContext)
 
   const [store, setStore] = useState({
-    recordId: recordId || null
+    recordId: recordId || null,
+    header: null,
+    items: []
   })
-  const editMode = !!store.recordId
 
-  const tabs = [{ label: labels.integrationLogic }, { label: labels.integrationLogicDetails, disabled: !editMode }]
+  const tabs = [{ label: labels.integrationLogic }, { label: labels.integrationLogicDetails, disabled: !store.recordId }]
+
+  const getData = async () => {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: GeneralLedgerRepository.IntegrationLogic.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    setStore(prev => ({
+      ...prev,
+      header: res?.record?.header,
+      items: res?.record?.items
+    }))
+
+    return res?.record
+  }
+
+  useEffect(() => {
+    getData()
+  }, [recordId])
 
   return (
     <>
@@ -23,12 +48,11 @@ const IntegrationLogicWindow = ({ labels, maxAccess, recordId }) => {
           labels={labels}
           setStore={setStore}
           store={store}
-          editMode={editMode}
           maxAccess={maxAccess}
         />
       </CustomTabPanel>
       <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
-        <IntegrationLogicDetails labels={labels} maxAccess={maxAccess} store={store} />
+        <IntegrationLogicDetails labels={labels} maxAccess={maxAccess} store={store} getData={getData} />
       </CustomTabPanel>
     </>
   )

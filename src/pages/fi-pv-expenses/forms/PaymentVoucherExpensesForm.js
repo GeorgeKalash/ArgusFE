@@ -71,7 +71,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
     exRate: 1,
     rateCalcMethod: 1,
     baseAmount: null,
-    cashAccountId: parseInt(cashAccountId),
+    cashAccountId: parseInt(cashAccountId) || null,
     dtId: null,
     status: 1,
     releaseStatus: null,
@@ -228,9 +228,9 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
         extension: CashBankRepository.CbBankAccounts.get,
         parameters: `_recordId=${cashAccountId}`
       })
-      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
-      formik.setFieldValue('cashAccountRef', cashAccountResult.reference)
-      formik.setFieldValue('cashAccountName', cashAccountResult.name)
+      formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
+      formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
+      formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
 
       return cashAccountResult.paymentMethod
     } else {

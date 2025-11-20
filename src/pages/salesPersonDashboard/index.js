@@ -281,7 +281,6 @@ const SalesPersonDashboard = () => {
               <DataHalf>
                 <CompositeBarContainer>
                   <CompositeBarChart
-                    id='compositebarc'
                     labels={Object.keys(data.aging)}
                     data={Object.values(data.aging)}
                     label={labels.aging}
@@ -302,7 +301,6 @@ const SalesPersonDashboard = () => {
               <DataHalf>
                 <CompositeBarContainer>
                   <CompositeBarChart
-                    id='compositebara'
                     labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
                     data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
                     label={labels.unitsSold}
@@ -312,7 +310,6 @@ const SalesPersonDashboard = () => {
               <DataHalf>
                 <CompositeBarContainer>
                   <CompositeBarChart
-                    id='compositebarb'
                     labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
                     data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
                     label={labels.clientsAcquired}

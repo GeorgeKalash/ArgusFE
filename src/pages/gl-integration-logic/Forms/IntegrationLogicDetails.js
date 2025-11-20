@@ -2,32 +2,30 @@ import { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
-import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
 import IntegrationLogicDetailsForm from './IntegrationLogicDetailsForm'
+import { GeneralLedgerRepository } from 'src/repositories/GeneralLedgerRepository'
+import { RequestsContext } from 'src/providers/RequestsContext'
 
-const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
+const IntegrationLogicDetails = ({ labels, maxAccess, store, getData }) => {
+  const { postRequest } = useContext(RequestsContext)
+
   const { platformLabels } = useContext(ControlContext)
   const [gridData, setGridData] = useState([])
   const { stack } = useWindow()
-  const { recordId } = store
+  const { recordId, items } = store
 
-  const getGridData = async ilId => {
-    try {
-      const response = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationLogicDetails.qry,
-        parameters: `_ilId=${ilId}`
-      })
-
-      setGridData(response)
-    } catch (error) {}
+  const getGridData = () => {
+    setGridData(items || [])
   }
+
+  useEffect(() => {
+    getGridData()
+  }, [recordId, items])
 
   const columns = [
     {
@@ -70,15 +68,13 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
   ]
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: GeneralLedgerRepository.IntegrationLogicDetails.del,
-        record: JSON.stringify(obj)
-      })
+    await postRequest({
+      extension: GeneralLedgerRepository.IntegrationLogicDetails.del,
+      record: JSON.stringify(obj)
+    })
 
-      toast.success(platformLabels.Deleted)
-      await getGridData(recordId)
-    } catch (exception) {}
+    toast.success(platformLabels.Deleted)
+    getData()
   }
 
   const add = () => {
@@ -97,20 +93,13 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
         maxAccess,
         store,
         recordId: id,
-        ilId: recordId,
-        getGridData
+        getData
       },
       width: 650,
       height: 550,
       title: labels.integrationLogicDetails
     })
   }
-
-  useEffect(() => {
-    if (recordId) {
-      getGridData(recordId)
-    }
-  }, [recordId])
 
   return (
     <VertLayout>
@@ -119,13 +108,13 @@ const IntegrationLogicDetails = ({ labels, maxAccess, store }) => {
       </Fixed>
       <Grow>
         <Table
+          table='table'
           columns={columns}
-          gridData={gridData}
+          gridData={{ list: gridData }}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          api={getGridData}
-          isLoading={false}
+          maxAccess={maxAccess}
           pagination={false}
         />
       </Grow>

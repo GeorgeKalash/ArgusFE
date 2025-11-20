@@ -208,7 +208,7 @@ export default function SaleTransactionForm({
           mdType: MDTYPE_PCT,
           basePrice: 0,
           baseLaborPrice: 0,
-          totPricePerG: 0,
+          totalWeightPerG: 0,
           mdValue: 0,
           unitPrice: 0,
           unitCost: 0,
@@ -379,13 +379,13 @@ export default function SaleTransactionForm({
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
     const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
-
+    const measurementSchedule = await getMeasurementObject(newRow?.msId)
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-    const totPricePerG = basePriceValue + baseLaborPrice
-    const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totPricePerG : ItemConvertPrice?.unitPrice || 0
+    const totalWeightPerG = basePriceValue + baseLaborPrice
+    const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totalWeightPerG : ItemConvertPrice?.unitPrice || 0
 
     const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
     let rowTax = null
@@ -450,6 +450,8 @@ export default function SaleTransactionForm({
 
     result = {
       ...result,
+      qty: 0,
+      decimals: measurementSchedule?.decimals,
       isMetal,
       metalId,
       metalPurity,
@@ -458,7 +460,7 @@ export default function SaleTransactionForm({
       weight,
       basePrice: isMetal === false ? ItemConvertPrice?.basePrice || 0 : metalPurity > 0 ? basePriceValue : 0,
       baseLaborPrice,
-      totPricePerG,
+      totalWeightPerG,
       unitPrice,
       upo: ItemConvertPrice?.upo || 0,
       priceType: ItemConvertPrice?.priceType || 1,
@@ -555,6 +557,7 @@ export default function SaleTransactionForm({
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
           getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
+
           const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
           await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
         } else {
@@ -712,7 +715,12 @@ export default function SaleTransactionForm({
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals,
+            readOnly: !row?.itemId
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -782,7 +790,7 @@ export default function SaleTransactionForm({
     {
       component: 'numberfield',
       label: labels.totalPPG,
-      name: 'totPricePerG',
+      name: 'totalWeightPerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
@@ -1155,6 +1163,15 @@ export default function SaleTransactionForm({
     }
   ]
 
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
+
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
@@ -1187,7 +1204,7 @@ export default function SaleTransactionForm({
               }
             }),
           priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
-          totPricePerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
+          totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
       })
@@ -1472,7 +1489,7 @@ export default function SaleTransactionForm({
       mdType: newRow?.mdType,
       mdValue: newRow?.mdValue,
       baseLaborPrice: parseFloat(newRow?.baseLaborPrice || 0),
-      totalWeightPerG: newRow?.totPricePerG || 0,
+      totalWeightPerG: newRow?.totalWeightPerG || 0,
       tdPct: formik?.values?.header?.tdPct || 0,
       dirtyField: dirtyField
     })
@@ -1505,7 +1522,7 @@ export default function SaleTransactionForm({
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
-      totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
+      totalWeightPerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
       vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
       priceWithVAT: calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)

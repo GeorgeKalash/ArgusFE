@@ -4,22 +4,26 @@ import jwt from 'jwt-decode'
 import { AuthContext } from 'src/providers/AuthContext'
 import { useError } from 'src/error'
 import { Box, CircularProgress } from '@mui/material'
+import { useSettings } from 'src/@core/hooks/useSettings'
 
 const RequestsContext = createContext()
 
 function LoadingOverlay() {
+  const { settings } = useSettings()
+  const { navCollapsed } = settings
+  const containerWidth = `calc(calc(100 * var(--vw)) - ${navCollapsed ? '10px' : '310px'})`
+  const containerHeight = `calc(calc(100 * var(--vh)) - 40px)`
+
   return (
     <Box
-      style={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        left: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      sx={{
+        position: 'fixed',
+        width: containerWidth,
+        height: containerHeight,
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
         zIndex: 9999
       }}
     >
@@ -72,7 +76,8 @@ const RequestsProvider = ({ showLoading = false, children }) => {
         .catch(error => {
           showError({
             message: error,
-            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : ''
+            height: error.response?.status === 404 || error.response?.status === 500 ? 400 : '',
+            spacing: body?.spacing
           })
 
           if (throwError) reject(error)

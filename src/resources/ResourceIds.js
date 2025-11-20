@@ -544,7 +544,7 @@ export const ResourceIds = {
   JobInfos: 71207,
   EarnedLeave: 73304,
   OpenPaymentOrder: 31334,
-  ResetTimeVariation: 72203,
+  TimeVariation: 72203,
   RebuildAC: 41509,
   ShiftLeave: 72210,
   OrganizationChart: 70113,
@@ -602,6 +602,7 @@ export const ResourceIds = {
   LeaveRequestODOM: 73201,
   PenaltyType: 75106,
   DailySchedules: 72201,
+  SSLeaveRequest: 80106,
 
   // GL
   GLSalesInvoice: 51604,
