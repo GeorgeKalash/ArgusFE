@@ -601,6 +601,7 @@ export const ResourceIds = {
   ProcessNotifications: 76102,
   LeaveRequestODOM: 73201,
   PenaltyType: 75106,
+  DailySchedules: 72201,
   SSLeaveRequest: 80106,
 
   // GL
