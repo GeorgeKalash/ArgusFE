@@ -13,6 +13,7 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import ResetPassForm from '../forms/ResetPassForm'
 import styles from './Reset.module.css'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const Reset = () => {
   const { platformLabels } = useContext(ControlContext)
@@ -103,16 +104,8 @@ const Reset = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12} container justifyContent='flex-end'>
-                  <Button
-                    size='small'
-                    type='submit'
-                    variant='contained'
-                    className={styles.submitBtn}
-                    onClick={formik.handleSubmit}
-                  >
-                    {platformLabels.Reset}
-                  </Button>
+                <Grid item xs={12} container justifyContent='flex-end' className={styles.contentButton}>
+                  <CustomButton label={platformLabels.Reset} onClick={formik.handleSubmit} color='#231f20' />
                 </Grid>
               </Grid>
             </Grow>
