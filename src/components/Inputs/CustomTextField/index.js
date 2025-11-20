@@ -19,7 +19,7 @@ const CustomTextField = ({
   autoComplete = 'off',
   numberField = false,
   editMode = false,
-  maxLength = 1000,
+  maxLength = '1000',
   position,
   dir = '',
   hidden = false,
@@ -89,6 +89,22 @@ const CustomTextField = ({
     }
   }, [autoFocus, inputRef.current, value])
 
+  const dynamicStartAdornment =
+    props.InputProps?.startAdornment || startIcons.length > 0 ? (
+      <>
+        {props.InputProps?.startAdornment}
+        {startIcons.map((iconBtn, index) => (
+          <InputAdornment key={index} position='start'>
+            {iconBtn && (
+              <IconButton className={styles['search-icon']} tabIndex={-1}>
+                {iconBtn}
+              </IconButton>
+            )}
+          </InputAdornment>
+        ))}
+      </>
+    ) : undefined
+
   return _hidden ? (
     <></>
   ) : (
@@ -132,20 +148,7 @@ const CustomTextField = ({
           notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
           input: styles.inputBase
         },
-        startAdornment: (
-          <>
-            {props.InputProps?.startAdornment}
-            {startIcons.map((iconBtn, index) => (
-              <InputAdornment key={index} position='start'>
-                {iconBtn && (
-                  <IconButton className={styles['search-icon']} tabIndex={-1}>
-                    {iconBtn}
-                  </IconButton>
-                )}
-              </InputAdornment>
-            ))}
-          </>
-        ),
+        startAdornment: dynamicStartAdornment,
         endAdornment: (
           <>
             {props.InputProps?.endAdornment}

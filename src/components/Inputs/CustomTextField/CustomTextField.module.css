@@ -19,6 +19,10 @@
   font-size: 14px !important ;
 }
 
+.inputBase::placeholder {
+  font-size: 14px !important;
+}
+
 .search-icon {
   font-size: 18px !important;
   border: 0 !important;
@@ -44,8 +48,13 @@
     font-size: 12px !important;
     top: 0px;
   }
+
   .inputBase {
     font-size: 12px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 12px !important;
   }
 
   .search-icon {
@@ -64,6 +73,10 @@
     font-size: 11px !important ;
   }
 
+  .inputBase::placeholder {
+    font-size: 11px !important;
+  }
+
   .outlinedRoot {
     height: 28px !important;
   }
@@ -72,6 +85,7 @@
     font-size: 14px !important;
   }
 }
+
 @media (max-width: 1024px) {
   .outlinedRoot {
     height: 26px !important;
@@ -92,6 +106,10 @@
   }
 
   .inputBase {
+    font-size: 10px !important;
+  }
+
+  .inputBase::placeholder {
     font-size: 10px !important;
   }
 
@@ -121,6 +139,10 @@
     font-size: 9px !important;
   }
 
+  .inputBase::placeholder {
+    font-size: 9px !important;
+  }
+
   .search-icon {
     font-size: 12px !important;
   }
@@ -147,6 +169,10 @@
     font-size: 8px !important;
   }
 
+  .inputBase::placeholder {
+    font-size: 8px !important;
+  }
+
   .search-icon {
     font-size: 11px !important;
   }
@@ -170,6 +196,10 @@
   }
 
   .inputBase {
+    font-size: 7px !important;
+  }
+
+  .inputBase::placeholder {
     font-size: 7px !important;
   }
 
