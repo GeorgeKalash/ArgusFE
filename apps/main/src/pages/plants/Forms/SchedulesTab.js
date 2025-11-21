@@ -9,7 +9,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SchedulesTab = ({ store, setStore, _labels, editMode, maxAccess }) => {

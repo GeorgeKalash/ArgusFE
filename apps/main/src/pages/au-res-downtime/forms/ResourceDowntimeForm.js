@@ -14,7 +14,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'

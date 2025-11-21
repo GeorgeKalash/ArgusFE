@@ -17,7 +17,7 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import JobOrderWindow from '../mf-job-orders/window/JobOrderWindow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 
 const JobInProcess = () => {

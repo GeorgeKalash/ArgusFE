@@ -18,7 +18,7 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'

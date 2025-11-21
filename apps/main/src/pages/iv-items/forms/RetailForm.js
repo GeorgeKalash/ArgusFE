@@ -4,7 +4,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import toast from 'react-hot-toast'

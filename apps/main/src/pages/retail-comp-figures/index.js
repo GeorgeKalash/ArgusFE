@@ -14,7 +14,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ReportPSGeneratorRepository } from '@argus/repositories/src/repositories/ReportPSGeneratorRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'

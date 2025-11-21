@@ -13,7 +13,7 @@ import { DeliveryRepository } from '@argus/repositories/src/repositories/Deliver
 import OutboundTranspForm from './forms/OutboundTranspForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
 const OutboundTransp = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

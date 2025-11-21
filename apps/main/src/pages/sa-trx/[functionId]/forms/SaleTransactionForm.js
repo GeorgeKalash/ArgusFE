@@ -62,7 +62,7 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 

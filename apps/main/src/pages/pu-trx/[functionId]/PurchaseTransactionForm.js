@@ -51,7 +51,7 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ItemCostHistory from '@argus/shared-ui/src/components/Shared/ItemCostHistory'
 import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import ItemPromotion from '@argus/shared-ui/src/components/Shared/ItemPromotion'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'

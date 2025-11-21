@@ -30,7 +30,7 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import Samples from './Samples'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
 export default function JobOrderForm({
   labels,

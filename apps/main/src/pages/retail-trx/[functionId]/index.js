@@ -18,7 +18,7 @@ import toast from 'react-hot-toast'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
-import { LockedScreensContext } from '@argus/shared-providers/LockedScreensContext'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

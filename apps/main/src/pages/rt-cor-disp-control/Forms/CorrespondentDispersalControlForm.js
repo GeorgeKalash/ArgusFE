@@ -15,7 +15,7 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { RemittanceBankInterface } from '@argus/repositories/src/repositories/RemittanceBankInterface'
-import { CommonContext } from '@argus/shared-providers/CommonContext'
+import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
