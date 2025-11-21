@@ -146,6 +146,10 @@ const LoginPage = () => {
     fetchData()
   }, [])
 
+  useEffect(() => {
+    validation.setFieldValue('companyName', companyName || '')
+  }, [companyName])
+
   return (
     <>
       <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -184,10 +188,14 @@ const LoginPage = () => {
                     value={validation.values.accountId}
                     required
                     refresh={false}
+                    columnsInDropDown={[
+                      { key: 'companyName', value: 'Company Name' },
+                      { key: 'accountName', value: 'Account Name' }
+                    ]}
                     onChange={(_, newValue) => {
                       validation.setFieldValue('accountId', newValue?.accountId || null)
                       validation.setFieldValue('companyName', newValue?.companyName || '')
-                      auth.fetchData(newValue?.companyName)
+                      auth.fetchData(newValue?.accountName)
                     }}
                   />
                 </Grid>
