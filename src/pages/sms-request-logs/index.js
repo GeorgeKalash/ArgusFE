@@ -1,9 +1,8 @@
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
-
 import { ResourceIds } from 'src/resources/ResourceIds'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import GridToolbar from 'src/components/Shared/GridToolbar'
@@ -25,15 +24,16 @@ const SmsRequestLog = () => {
     resourceId: ''
   })
 
-  async function fetchWithFilter({ filters }) {
-    const resourceId = filters?.resourceId
+  async function fetchWithFilter({ filters, pagination }) {
     if (!filters || !filters?.resourceId) {
       return { list: [] }
     } else {
-      return await getRequest({
-        extension: SystemRepository.SMSRequest.qry,
-        parameters: `_filter=&_resourceId=${resourceId}`
+      const response = await getRequest({
+        extension: SystemRepository.SMSRequest.page,
+        parameters: `_resourceId=${filters?.resourceId}&_startAt=${pagination?._startAt || 0}&_pageSize=50`
       })
+
+      return { ...response, _startAt: pagination?._startAt || 0 }
     }
   }
 
@@ -43,11 +43,12 @@ const SmsRequestLog = () => {
     labels: labels,
     filterBy,
     access,
-    filters
+    filters,
+    paginationParameters
   } = useResourceQuery({
     datasetId: ResourceIds.SmsRequestLog,
     filter: {
-      endpointId: SystemRepository.SMSRequest.qry,
+      endpointId: SystemRepository.SMSRequest.page,
       filterFn: fetchWithFilter
     }
   })
@@ -66,38 +67,40 @@ const SmsRequestLog = () => {
           }}
           labels={labels}
           leftSection={
-            <Grid container sx={{ width: '700px', m: 1 }} spacing={2}>
-              <Grid item xs={5}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.KeyValueStore}
-                  parameters={`_dataset=${datasetId}&_language=${languageId}`}
-                  label={labels.Module}
-                  name='moduleId'
-                  values={values}
-                  valueField='key'
-                  displayField='value'
-                  required
-                  onChange={(event, newValue) => {
-                    setValues({ moduleId: newValue?.key || '10', resourceId: '' })
-                  }}
-                  sx={{ pr: 2 }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <ResourceComboBox
-                  endpointId={SystemRepository.ModuleClassRES.qry}
-                  parameters={`_moduleId=${values.moduleId}&_filter=`}
-                  label={labels.ResourceId}
-                  name='resourceId'
-                  values={values}
-                  required
-                  valueField='key'
-                  displayField='value'
-                  onChange={(event, newValue) => {
-                    onChange(newValue?.key || '')
-                    setValues({ ...values, resourceId: newValue?.key || '' })
-                  }}
-                />
+            <Grid item xs={7}>
+              <Grid container spacing={2}>
+                <Grid item xs={5}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.KeyValueStore}
+                    parameters={`_dataset=${datasetId}&_language=${languageId}`}
+                    label={labels.Module}
+                    name='moduleId'
+                    values={values}
+                    valueField='key'
+                    displayField='value'
+                    required
+                    onChange={(event, newValue) => {
+                      setValues({ moduleId: newValue?.key || '10', resourceId: '' })
+                    }}
+                    sx={{ pr: 2 }}
+                  />
+                </Grid>
+                <Grid item xs={7}>
+                  <ResourceComboBox
+                    endpointId={SystemRepository.ModuleClassRES.qry}
+                    parameters={`_moduleId=${values.moduleId}&_filter=`}
+                    label={labels.ResourceId}
+                    name='resourceId'
+                    values={values}
+                    required
+                    valueField='key'
+                    displayField='value'
+                    onChange={(event, newValue) => {
+                      onChange(newValue?.key || '')
+                      setValues({ ...values, resourceId: newValue?.key || '' })
+                    }}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           }
@@ -138,11 +141,11 @@ const SmsRequestLog = () => {
           ]}
           gridData={data && filters?.resourceId ? data : { list: [] }}
           rowId={['recordId']}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           refetch={refetch}
-          paginationType='client'
+          paginationParameters={paginationParameters}
+          paginationType='api'
         />
       </Grow>
     </VertLayout>
