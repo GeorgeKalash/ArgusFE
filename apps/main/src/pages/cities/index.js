@@ -6,7 +6,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import CityForm from 'src/pages/cities/Forms/CityForm'
+import CityForm from './Forms/CityForm.js'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'

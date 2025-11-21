@@ -35,9 +35,9 @@ import {
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
 
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 
 import {
   getDiscValues,
@@ -45,7 +45,7 @@ import {
   getSubtotal,
   DIRTYFIELD_TDPLAIN,
   DIRTYFIELD_TDPCT
-} from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/FooterCalculator'
 
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'

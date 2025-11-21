@@ -21,7 +21,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'

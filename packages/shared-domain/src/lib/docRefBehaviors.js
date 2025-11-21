@@ -1,7 +1,7 @@
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DISABLED, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
-import { getStorageData } from 'src/storage/storage'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 
 const getData = async (getRequest, extension, parameters) => {
   try {

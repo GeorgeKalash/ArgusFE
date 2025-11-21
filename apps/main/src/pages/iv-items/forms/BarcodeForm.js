@@ -8,7 +8,8 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
+
+// import BarcodesForm from 'src/pages/iv-barcodes/Forms/BarcodesForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -80,20 +81,20 @@ const BarcodeForm = ({ store, labels }) => {
   }
 
   function openForm(obj) {
-    stack({
-      Component: BarcodesForm,
-      props: {
-        labels: _labels,
-        recordId: obj?.recordId,
-        barcode: obj?.barcode,
-        access: access,
-        store,
-        msId: store?._msId
-      },
-      width: 750,
-      height: 500,
-      title: _labels.Barcodes
-    })
+    // stack({
+    //   Component: BarcodesForm,
+    //   props: {
+    //     labels: _labels,
+    //     recordId: obj?.recordId,
+    //     barcode: obj?.barcode,
+    //     access: access,
+    //     store,
+    //     msId: store?._msId
+    //   },
+    //   width: 750,
+    //   height: 500,
+    //   title: _labels.Barcodes
+    // })
   }
 
   

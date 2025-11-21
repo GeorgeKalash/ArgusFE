@@ -37,7 +37,8 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
-import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
+
+// import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
 import CustomSwitch from '@argus/shared-ui/src/components/Inputs/CustomSwitch'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -781,14 +782,15 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   async function openRV() {
     window.close()
     const cashAccountId = await getCashAccountId()
-    stack({
-      Component: ReceiptVoucherForm,
-      props: {
-        recordId: header?.receiptId,
-        cashAccountId: cashAccountId,
-        form: header?.receiptId ? null : header
-      }
-    })
+    
+    // stack({
+    //   Component: ReceiptVoucherForm,
+    //   props: {
+    //     recordId: header?.receiptId,
+    //     cashAccountId: cashAccountId,
+    //     form: header?.receiptId ? null : header
+    //   }
+    // })
   }
 
   async function getDefaultCountry() {

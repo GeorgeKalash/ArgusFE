@@ -37,15 +37,15 @@ import {
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import {
   getDiscValues,
   getFooterTotals,
   getSubtotal,
   DIRTYFIELD_TDPLAIN,
   DIRTYFIELD_TDPCT
-} from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/FooterCalculator'
 import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFilterForm'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
@@ -55,7 +55,7 @@ import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'

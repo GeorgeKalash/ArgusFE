@@ -24,7 +24,7 @@ import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {

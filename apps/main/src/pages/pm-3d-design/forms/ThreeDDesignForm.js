@@ -23,7 +23,8 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
-import SketchForm from 'src/pages/pm-sketch/Forms/SketchForm'
+
+// import SketchForm from 'src/pages/pm-sketch/Forms/SketchForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
@@ -193,14 +194,14 @@ const ThreeDDesignForm = ({ recordId, window }) => {
   }
 
   async function onSketch() {
-    stack({
-      Component: SketchForm,
-      props: {
-        labels: labels,
-        recordId: formik?.values?.sketchId,
-        maxAccess: access
-      }
-    })
+    // stack({
+    //   Component: SketchForm,
+    //   props: {
+    //     labels: labels,
+    //     recordId: formik?.values?.sketchId,
+    //     maxAccess: access
+    //   }
+    // })
   }
 
   const actions = [

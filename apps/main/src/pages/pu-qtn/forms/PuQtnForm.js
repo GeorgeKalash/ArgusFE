@@ -34,9 +34,9 @@ import {
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_AMOUNT,
   MDTYPE_PCT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
-import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'

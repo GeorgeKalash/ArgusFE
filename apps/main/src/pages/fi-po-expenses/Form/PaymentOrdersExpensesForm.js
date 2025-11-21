@@ -23,7 +23,7 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import ExpensesCostCenters from '@argus/shared-ui/src/components/Shared/ExpensesCostCenters'

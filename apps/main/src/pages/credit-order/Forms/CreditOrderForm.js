@@ -19,7 +19,8 @@ import { CTTRXrepository } from '@argus/repositories/src/repositories/CTTRXRepos
 import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
+
+// import CreditInvoiceForm from 'src/pages/credit-invoice/Forms/CreditInvoiceForm'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -195,15 +196,15 @@ const CreditOrderForm = ({ recordId, window }) => {
     await refetchForm(formik.values.recordId)
     window.close()
 
-    stack({
-      Component: CreditInvoiceForm,
-      props: {
-        recordId: res?.recordId
-      },
-      width: 900,
-      height: 600,
-      title: labels.creditInvoice
-    })
+    // stack({
+    //   Component: CreditInvoiceForm,
+    //   props: {
+    //     recordId: res?.recordId
+    //   },
+    //   width: 900,
+    //   height: 600,
+    //   title: labels.creditInvoice
+    // })
   }
 
   const totalCUR = formik?.values?.rows?.length

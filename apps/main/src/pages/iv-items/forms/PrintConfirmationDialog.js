@@ -1,5 +1,5 @@
 import React, { useContext, useRef } from 'react'
-import WindowToolbar from '../../../components/Shared/WindowToolbar'
+import WindowToolbar from '@argus/shared-ui/src/components/Shared/WindowToolbar'
 import { Grid, Typography } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'

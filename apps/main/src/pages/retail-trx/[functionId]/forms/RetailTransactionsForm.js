@@ -34,9 +34,9 @@ import {
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
-import { getFooterTotals, getSubtotal } from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'

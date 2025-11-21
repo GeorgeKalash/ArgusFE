@@ -18,7 +18,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { formatDateFromApi, formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { ChangeDeductionsAmount, ChangeEntitlementsAmount } from '@argus/shared-utils/utils/Payroll'
+import { ChangeDeductionsAmount, ChangeEntitlementsAmount } from '@argus/shared-utils/src/utils/Payroll'
 
 export default function SalaryTab({
   labels,

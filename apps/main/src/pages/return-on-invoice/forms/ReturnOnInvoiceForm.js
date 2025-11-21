@@ -36,9 +36,9 @@ import {
   DIRTYFIELD_BASE_LABOR_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
-import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFilterForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'

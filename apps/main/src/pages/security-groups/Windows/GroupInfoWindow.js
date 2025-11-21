@@ -1,6 +1,6 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
-import GroupInfoTab from 'src/pages/security-groups/Tabs/GroupInfoTab'
-import SGUsersTab from 'src/pages/security-groups/Tabs/SGUsersTab'
+import GroupInfoTab from '../Tabs/GroupInfoTab'
+import SGUsersTab from '../Tabs/SGUsersTab'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
 import SGAccessLevelTab from '../Tabs/SGAccessLevelTab'

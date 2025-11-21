@@ -1,4 +1,4 @@
-import GlobalIntegrationGrid from "src/components/Shared/GlobalIntegrationGrid"
+import GlobalIntegrationGrid from "@argus/shared-ui/src/components/Shared/GlobalIntegrationGrid"
 
 
 const GlobalIntegration = () => {

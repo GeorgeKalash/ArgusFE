@@ -12,7 +12,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { calculateFixed } from '@argus/shared-utils/utils/Payroll'
+import { calculateFixed } from '@argus/shared-utils/src/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function DeductionsForm({

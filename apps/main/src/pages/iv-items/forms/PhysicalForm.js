@@ -13,7 +13,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from '@argus/shared-utils/utils/PhysicalPropertyCalc'
+import { DirtyField, GeometricShape, PhysicalPropertyCalculatorCtrl } from '@argus/shared-utils/src/utils/PhysicalPropertyCalc'
 
 const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)

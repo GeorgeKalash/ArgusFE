@@ -23,7 +23,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 

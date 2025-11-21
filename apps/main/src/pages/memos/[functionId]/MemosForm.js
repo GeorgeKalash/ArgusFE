@@ -26,7 +26,7 @@ import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiC
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
 

@@ -29,7 +29,7 @@ import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/Mu
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
-import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/utils/RateCalculator'
+import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {

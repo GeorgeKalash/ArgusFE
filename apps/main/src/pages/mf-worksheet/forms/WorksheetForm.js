@@ -24,7 +24,8 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import DamageForm from 'src/pages/damages/forms/DamageForm'
+
+// import DamageForm from 'src/pages/damages/forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
@@ -182,15 +183,15 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
   }
 
   const onDamage = () => {
-    stack({
-      Component: DamageForm,
-      props: {
-        jobId: formik?.values?.jobId
-      },
-      width: 1000,
-      height: 700,
-      title: labels.Damage
-    })
+    // stack({
+    //   Component: DamageForm,
+    //   props: {
+    //     jobId: formik?.values?.jobId
+    //   },
+    //   width: 1000,
+    //   height: 700,
+    //   title: labels.Damage
+    // })
   }
 
   const actions = [

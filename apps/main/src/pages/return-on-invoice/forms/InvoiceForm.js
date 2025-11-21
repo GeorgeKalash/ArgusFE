@@ -10,8 +10,8 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
-import { getIPR, DIRTYFIELD_QTY } from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
+import { getIPR, DIRTYFIELD_QTY } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

@@ -36,9 +36,9 @@ import {
   DIRTYFIELD_EXTENDED_PRICE,
   MDTYPE_PCT,
   MDTYPE_AMOUNT
-} from '@argus/shared-utils/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
-import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/utils/FooterCalculator'
+} from '@argus/shared-utils/src/utils/ItemPriceCalculator'
+import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { getDiscValues, getFooterTotals, getSubtotal } from '@argus/shared-utils/src/utils/FooterCalculator'
 import AddressFilterForm from '@argus/shared-ui/src/components/Shared/AddressFilterForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -50,7 +50,8 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import ProductionOrderForm from 'src/pages/mf-prod-order/Forms/ProductionOrderForm'
+
+// import ProductionOrderForm from 'src/pages/mf-prod-order/Forms/ProductionOrderForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -724,12 +725,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       record: JSON.stringify({ soId: formik.values.recordId })
     })
 
-    stack({
-      Component: ProductionOrderForm,
-      props: {
-        recordId: res.recordId
-      }
-    })
+    // stack({
+    //   Component: ProductionOrderForm,
+    //   props: {
+    //     recordId: res.recordId
+    //   }
+    // })
     toast.success(platformLabels.Generated)
   }
 

@@ -8,7 +8,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useWindowDimensions } from '@argus/shared-domi/useWindowDimensions'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'

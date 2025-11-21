@@ -1,5 +1,5 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
-import AgentBranchForm from 'src/pages/correspondent-agent-branches/forms/AgentBranchForm'
+import AgentBranchForm from '../forms/AgentBranchForm'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState, useEffect, useContext } from 'react'

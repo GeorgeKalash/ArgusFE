@@ -7,7 +7,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import ResourceComboBox from './ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { generateReport } from 'src/utils/ReportUtils'
+import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 
