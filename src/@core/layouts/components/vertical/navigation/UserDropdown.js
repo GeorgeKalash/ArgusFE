@@ -54,12 +54,8 @@ const UserDropdown = props => {
         anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
       >
-        <Box sx={{ pt: 2, pb: 3, px: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
+          <Box className={styles.userHeader}>
               <Typography className={styles.userName}>{auth?.user?.username}</Typography>
-            </Box>
-          </Box>
         </Box>
 
         <Divider className={styles.userMenuDivider} />

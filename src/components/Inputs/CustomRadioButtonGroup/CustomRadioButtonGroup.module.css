@@ -1,50 +1,73 @@
 .radioGroup {
-  margin-left: 8px; /* same as sx: ml: 2 */
+  margin-left: 8px; 
 }
 
-/* Label text size */
 .formControl :global(.MuiFormControlLabel-label) {
-  font-size: 15px;
+  font-size: 14px;           
 }
 
-/* Radio icon size */
 .radio :global(.MuiSvgIcon-root) {
-  font-size: 15px;
+  font-size: 18px;          
 }
 
-/* Responsive breakpoints */
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 12px;         
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 16px;         
+  }
+}
+
 @media (max-width: 1280px) {
-  .radio :global(.MuiSvgIcon-root) {
-    font-size: 14px;
-  }
   .formControl :global(.MuiFormControlLabel-label) {
-    font-size: 14px;
+    font-size: 11px;        
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 14px;        
   }
 }
 
-@media (max-width: 960px) {
-  .radio :global(.MuiSvgIcon-root) {
-    font-size: 13px;
-  }
+@media (max-width: 1024px) {
   .formControl :global(.MuiFormControlLabel-label) {
-    font-size: 13px;
+    font-size: 10px;         
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 13px;        
   }
 }
 
-@media (max-width: 600px) {
-  .radio :global(.MuiSvgIcon-root) {
-    font-size: 12px;
-  }
+@media (max-width: 768px) {
   .formControl :global(.MuiFormControlLabel-label) {
-    font-size: 12px;
+    font-size: 9px;          
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 12px;        
   }
 }
 
 @media (max-width: 480px) {
-  .radio :global(.MuiSvgIcon-root) {
-    font-size: 11px;
-  }
   .formControl :global(.MuiFormControlLabel-label) {
-    font-size: 11px;
+    font-size: 8px;          
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 11px;       
+  }
+}
+
+@media (max-width: 360px) {
+  .formControl :global(.MuiFormControlLabel-label) {
+    font-size: 7px;          
+  }
+
+  .radio :global(.MuiSvgIcon-root) {
+    font-size: 10px;        
   }
 }
