@@ -180,7 +180,7 @@ const AddressTab = ({
             { key: 'flName', value: 'Foreign Language Name' }
           ]}
           values={addressValidation.values}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             addressValidation.setFieldValue('stateId', null)
             addressValidation.setFieldValue('cityId', null)
             addressValidation.setFieldValue('city', '')
@@ -208,7 +208,7 @@ const AddressTab = ({
           displayField='name'
           readOnly={readOnly || !addressValidation.values?.countryId}
           values={addressValidation.values}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             addressValidation.setFieldValue('stateId', newValue?.recordId || null)
             addressValidation.setFieldValue('stateName', newValue?.name || '')
             addressValidation.setFieldValue('cityId', null)
@@ -258,13 +258,13 @@ const AddressTab = ({
           }
           valueField='name'
           displayField='name'
-          name='cityDistrictId'
+          name='cityDistrict'
           label={labels.cityDistrict}
           readOnly={readOnly || !addressValidation.values.cityId}
           form={addressValidation}
           secondDisplayField={false}
           valueShow='cityDistrict'
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             if (newValue) {
               addressValidation.setFieldValue('cityDistrictId', newValue?.recordId)
               addressValidation.setFieldValue('cityDistrict', newValue?.name)
@@ -273,7 +273,7 @@ const AddressTab = ({
               addressValidation.setFieldValue('cityDistrict', '')
             }
           }}
-          errorCheck={'cityDistrictId'}
+          errorCheck={'cityDistrict'}
           maxAccess={maxAccess}
         />
       </FormGrid>
