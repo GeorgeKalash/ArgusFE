@@ -135,10 +135,12 @@ export const ManufacturingRepository = {
     page: service + 'pageDES'
   },
   MFJobOrder: {
+    pack: service + 'packJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
     set: service + 'setJOB',
     get: service + 'getJOB',
+    get2: service + 'get2JOB',
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
