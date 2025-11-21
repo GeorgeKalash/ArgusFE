@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -16,12 +16,11 @@ import Form from 'src/components/Shared/Form'
 export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const operationStore = useRef([])
-  const [allWorkCenters, setWorkCenters] = useState([])
-  const { recordId, jobReference } = store
+  const { recordId, jobReference, jobRoutings } = store || {}
   const editMode = !!recordId
 
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       jobId: recordId,
       jobReference,
@@ -127,7 +126,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           workCenterRef: newRow?.workCenterRef,
           workCenterName: newRow?.workCenterName
         })
-        await fillOperation(newRow?.workCenterId)
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
@@ -147,8 +145,9 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.operation,
       name: 'operationName',
       flex: 2,
+      variableParameters: [{ key: 'workCenterId', value: 'workCenterId' }],
       props: {
-        store: operationStore?.current,
+        endpointId: ManufacturingRepository.Operation.qry,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -160,13 +159,12 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 2.5
       },
       propsReducer({ row, props }) {
         return {
           ...props,
-          store: operationStore.current,
-          readOnly: [1, 2, 3, 4].includes(row.status)
+          readOnly: [1, 2, 3, 4].includes(row.status) || !row.workCenterId
         }
       }
     },
@@ -217,53 +215,55 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     }
   ]
 
-  async function fetchGridData() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobRouting.qry,
-      parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
-    })
-
-    const updateRoutingList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res?.list?.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : [{ id: 1 }]
-
-    formik.setValues({
-      jobId: recordId,
-      jobReference,
-      routings: updateRoutingList
-    })
-  }
-
-  async function fillOperation(wcId) {
-    operationStore.current = []
-    const currentWc = allWorkCenters?.find(wc => parseInt(wc.workCenterId) === wcId)
-    if (currentWc) operationStore.current = [currentWc]
-  }
-
-  async function fetchAllWorkCenters() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.Operation.qry,
-      parameters: `_workCenterId=${0}&_startAt=0&_pageSize=1000&`
-    })
-    setWorkCenters(res?.list)
-  }
-
   useEffect(() => {
     ;(async function () {
       if (!refetchRouting || !recordId) return
-      await fetchGridData()
-      await fetchAllWorkCenters()
+
+      const res = await getRequest({
+        extension: ManufacturingRepository.JobRouting.qry,
+        parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
+      })
+
+      const updateRoutingList =
+        res?.list?.length != 0
+          ? await Promise.all(
+              res?.list?.map(async (item, index) => {
+                return {
+                  ...item,
+                  id: index + 1
+                }
+              })
+            )
+          : [{ id: 1 }]
+
+      formik.setValues({
+        jobId: recordId,
+        jobReference,
+        routings: updateRoutingList
+      })
       setRefetchRouting(false)
     })()
-  }, [recordId, refetchRouting])
+  }, [refetchRouting])
+
+  useEffect(() => {
+    ;(async function () {
+      formik.setValues({
+        jobId: recordId,
+        jobReference,
+        routings:
+          jobRoutings?.length > 0
+            ? await Promise.all(
+                jobRoutings?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1
+                  }
+                })
+              )
+            : [{ id: 1 }]
+      })
+    })()
+  }, [jobRoutings])
 
   return (
     <Form
@@ -293,9 +293,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
             deleteHideCondition={{ status: [1, 2, 3, 4] }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'operationName') fillOperation(row?.workCenterId)
-            }}
           />
         </Grow>
       </VertLayout>
