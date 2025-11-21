@@ -11,8 +11,8 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
@@ -27,9 +27,9 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import ImportSerials from '@argus/shared-ui/src/components/Shared/ImportSerials'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
-import { useError } from '@argus/shared-domain/src/lib/error'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
-import { LogisticsRepository } from '@argus/repositories/repositories/LogisticsRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 
 export default function DraftTransfer({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

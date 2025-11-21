@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PaymentReasonsForm from './Forms/PaymentReasonsForm'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 
 const PaymentReasons = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

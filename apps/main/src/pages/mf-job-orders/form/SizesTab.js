@@ -3,7 +3,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
@@ -12,7 +12,7 @@ import toast from 'react-hot-toast'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function SizesTab({ labels, maxAccess, store }) {

@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import FOCastingWindow from './window/FOCastingWindow'
-import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 
 const FoCastings = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

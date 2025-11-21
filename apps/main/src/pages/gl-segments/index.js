@@ -10,13 +10,13 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { GeneralLedgerRepository } from '@argus/repositories/repositories/GeneralLedgerRepository'
+import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grid } from '@mui/material'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import SegmentForm from './form/SegmentForm'
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 const Segments = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

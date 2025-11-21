@@ -8,7 +8,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 

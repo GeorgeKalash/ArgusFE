@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
+import { BusinessPartnerRepository } from '@argus/repositories/src/repositories/BusinessPartnerRepository'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import * as yup from 'yup'

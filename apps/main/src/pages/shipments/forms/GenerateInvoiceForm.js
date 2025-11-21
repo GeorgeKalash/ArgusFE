@@ -9,13 +9,13 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, window }) {

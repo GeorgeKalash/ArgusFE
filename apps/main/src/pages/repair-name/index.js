@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import RepairNameForm from './Forms/RepairNameForm'
-import { RepairAndServiceRepository } from '@argus/repositories/repositories/RepairAndServiceRepository'
+import { RepairAndServiceRepository } from '@argus/repositories/src/repositories/RepairAndServiceRepository'
 
 const RepairName = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

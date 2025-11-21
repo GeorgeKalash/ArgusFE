@@ -7,7 +7,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { LoanManagementRepository } from '@argus/repositories/repositories/LoanManagementRepository'
+import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
 import PeriodsForm from './PeriodsForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 

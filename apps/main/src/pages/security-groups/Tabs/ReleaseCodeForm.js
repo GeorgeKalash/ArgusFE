@@ -8,8 +8,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function ReleaseCodeForm({ labels, maxAccess, recordId, window }) {

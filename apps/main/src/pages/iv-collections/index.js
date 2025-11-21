@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CollectionsForm from './Forms/CollectionsForm'
 
 const Collections = () => {

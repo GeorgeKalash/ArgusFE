@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import FinalSettlementForm from './Form/FinalSettlementForm'
 
 const FinalSettlement = () => {

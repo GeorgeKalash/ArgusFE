@@ -19,7 +19,7 @@ import SalesTrxForm from './SalesTrxForm'
 import StrictUnpostConfirmation from './StrictUnpostConfirmation'
 import ClientSalesTransaction from './ClientSalesTransaction'
 import AttachmentList from './AttachmentList'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from './Form'
 
 export default function FormShell({

@@ -1,25 +1,25 @@
 import React, { useEffect, useState, useContext } from 'react'
 import styled from 'styled-components'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
   CompositeBarChartDark,
   HorizontalBarChartDark,
   MixedBarChart,
   MixedColorsBarChartDark,
   LineChart
-} from '../../components/Shared/dashboardApplets/charts'
+} from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
-import { DashboardRepository } from '@argus/repositories/repositories/DashboardRepository'
+import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { debounce } from 'lodash'
-import { SummaryFiguresItem } from '@argus/shared-domain/src/DashboardFigures'
+import { SummaryFiguresItem } from '@argus/shared-domain/src/resources/DashboardFigures'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Box } from '@mui/material'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'

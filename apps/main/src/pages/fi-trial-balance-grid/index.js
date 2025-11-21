@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { RGFinancialRepository } from '@argus/repositories/repositories/RGFinancialRepository'
+import { RGFinancialRepository } from '@argus/repositories/src/repositories/RGFinancialRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import TrialBalanceForm from './forms/TrialBalanceForm'
 

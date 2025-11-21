@@ -33,26 +33,26 @@ const CustomTextField = ({
   ...props
 }) => {
   const name = props.name
-
+ 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
-
+ 
   const inputRef = useRef(null)
-
+ 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
-
+ 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
       inputRef.current.focus()
     }
   }, [value])
-
+ 
   useEffect(() => {
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
-
+ 
   const handleInput = e => {
     const inputValue = e.target.value
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
@@ -60,35 +60,35 @@ const CustomTextField = ({
       e.target.value = truncatedValue
       props?.onChange(e)
     }
-
+ 
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
       props?.onChange(e)
     }
-
+ 
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
       props?.onChange(e)
     }
-
+ 
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
       props?.onChange(e)
     }
-
+ 
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
     }
   }
-
+ 
   useEffect(() => {
     if (autoFocus && inputRef.current && value == '' && !focus) {
       inputRef.current.focus()
     }
   }, [autoFocus, inputRef.current, value])
-
+ 
   return _hidden ? (
     <></>
   ) : (
@@ -126,7 +126,7 @@ const CustomTextField = ({
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
         ...props.InputProps,
-
+ 
         classes: {
           root: styles.outlinedRoot,
           notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
@@ -191,5 +191,5 @@ const CustomTextField = ({
     />
   )
 }
-
+ 
 export default CustomTextField

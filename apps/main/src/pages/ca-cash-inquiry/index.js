@@ -6,7 +6,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const CashEnquiry = () => {

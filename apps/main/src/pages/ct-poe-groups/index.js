@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PurposeOfExchangeGroupForm from './forms/PurposeOfExchangeGroupForm'
-import { CurrencyTradingSettingsRepository } from '@argus/repositories/repositories/CurrencyTradingSettingsRepository'
+import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
 
 const PurposeOfExchangeGroup = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

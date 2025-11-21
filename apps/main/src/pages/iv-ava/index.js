@@ -8,7 +8,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { ReportIvGenerator } from '@argus/repositories/repositories/ReportIvGeneratorRepository'
+import { ReportIvGenerator } from '@argus/repositories/src/repositories/ReportIvGeneratorRepository'
 import AvailabilityList from './form/AvailabilityList'
 
 const AvailabilitiesBySite = () => {

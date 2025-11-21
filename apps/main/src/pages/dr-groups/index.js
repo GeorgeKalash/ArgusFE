@@ -11,7 +11,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 
 // ** API
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 
 // ** Helpers
 import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'

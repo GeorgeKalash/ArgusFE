@@ -9,10 +9,10 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import BiometricDevicesForm from './Form/BiometricDevicesForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 const BiometricDevices = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

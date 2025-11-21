@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import FormShell from './FormShell'
 import AddressTab from './AddressTab'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { VertLayout } from './Layouts/VertLayout'
-import { Fixed } from './Layouts/Fixed'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import * as yup from 'yup'
 
 export const AddressFormShell = ({

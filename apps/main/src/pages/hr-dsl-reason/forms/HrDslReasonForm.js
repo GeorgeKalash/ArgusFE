@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 
 export default function HrDsl({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

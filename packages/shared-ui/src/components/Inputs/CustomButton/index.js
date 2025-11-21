@@ -23,6 +23,7 @@ const CustomButton = ({
   const handleButtonMouseLeave = () => {
     setTooltip(null)
   }
+  const icon = require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`);
 
   return (
     <div className={styles.buttonContainer} onMouseEnter={handleButtonMouseEnter} onMouseLeave={handleButtonMouseLeave}>
@@ -47,7 +48,7 @@ const CustomButton = ({
         {viewLoader ? (
           <CircularProgress size={20} color='inherit' sx={{ color: 'black' }} />
         ) : image ? (
-          <img className={styles.buttonImage} src={`/images/buttonsIcons/${image}`} alt={label} />
+          <img className={styles.buttonImage} src={icon.default.src} alt={label} />
         ) : (
           label
         )}

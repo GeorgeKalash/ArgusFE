@@ -13,8 +13,8 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ThreadProgress } from '@argus/shared-ui/src/components/Shared/ThreadProgress'
 

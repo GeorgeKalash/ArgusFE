@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { Box, IconButton } from '@mui/material'
 import PreviewForm from './forms/PreviewForm'
 

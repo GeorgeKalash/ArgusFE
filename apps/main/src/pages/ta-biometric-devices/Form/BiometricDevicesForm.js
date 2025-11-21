@@ -12,8 +12,8 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
-import { companyStructureRepository } from '@argus/repositories/repositories/companyStructureRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
+import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
 export default function BiometricDevicesForm({ labels, maxAccess, recordId }) {

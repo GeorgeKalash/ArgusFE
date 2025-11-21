@@ -11,7 +11,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 
 export default function DeliveryMethodsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

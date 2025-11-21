@@ -1,5 +1,5 @@
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useContext, useEffect, useState } from 'react'
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
 const CurrencyForm = ({ store, labels, maxAccess }) => {

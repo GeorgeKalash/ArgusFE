@@ -11,10 +11,10 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
+import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

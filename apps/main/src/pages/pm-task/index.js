@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import PreventiveMaintenanceTaskForm from './Forms/PreventiveMaintenanceTaskForm'
-import { RepairAndServiceRepository } from '@argus/repositories/repositories/RepairAndServiceRepository'
+import { RepairAndServiceRepository } from '@argus/repositories/src/repositories/RepairAndServiceRepository'
 
 export default function PreventiveMaintenanceTask() {
   const { getRequest, postRequest } = useContext(RequestsContext)

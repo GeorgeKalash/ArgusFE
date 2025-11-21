@@ -14,12 +14,12 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 
 const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)

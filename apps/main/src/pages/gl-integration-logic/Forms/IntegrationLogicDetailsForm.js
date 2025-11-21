@@ -10,7 +10,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { GeneralLedgerRepository } from '@argus/repositories/repositories/GeneralLedgerRepository'
+import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

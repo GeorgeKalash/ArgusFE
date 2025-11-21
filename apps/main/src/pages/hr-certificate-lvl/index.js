@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import HrCertificateForm from './forms/HrCertificateForm'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 
 const HrCert = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

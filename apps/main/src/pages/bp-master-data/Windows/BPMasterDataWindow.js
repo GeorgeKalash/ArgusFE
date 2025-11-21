@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import IDNumberForm from '../forms/IDNumberForm'
 import AddressMasterDataForm from '../forms/AddressMasterDataForm'
-import RelationList from 'src/pages/bp-master-data/forms/RelationList'
+import RelationList from '../forms/RelationList'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import RolesTab from '../forms/RolesTab'
 

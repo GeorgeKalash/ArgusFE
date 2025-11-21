@@ -10,9 +10,9 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
 export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, functionId }) {

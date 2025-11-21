@@ -3,7 +3,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useContext } from 'react'
 import AddressGridTab from '@argus/shared-ui/src/components/Shared/AddressGridTab'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'

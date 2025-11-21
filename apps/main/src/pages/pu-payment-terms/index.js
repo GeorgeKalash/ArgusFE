@@ -10,7 +10,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import PaymentTermsForm from './forms/PaymentTermsForm'
 
 const PaymentTerm = () => {

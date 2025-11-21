@@ -12,7 +12,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
-import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
+import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 
 export default function ExpenseTypesForms({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

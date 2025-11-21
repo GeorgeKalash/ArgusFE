@@ -13,7 +13,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function IndemnityForm({ labels, maxAccess, store, setStore }) {

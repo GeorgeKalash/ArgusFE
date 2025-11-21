@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function JobsForm({ labels, maxAccess, store }) {

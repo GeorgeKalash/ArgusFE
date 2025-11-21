@@ -1,7 +1,7 @@
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useContext } from 'react'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useFormik } from 'formik'
@@ -11,7 +11,7 @@ import BenificiaryBankForm from '@argus/shared-ui/src/components/Shared/Benifici
 import BenificiaryHistoryForm from '../forms/BenificiaryHistoryForm'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
-import historyIcon from '/public/images/TableIcons/history.png'
+import historyIcon from '@argus/shared-ui/src/components/images/TableIcons/history.png'
 
 const BeneficiaryWindow = ({ clientId }) => {
   const { stack } = useWindow()

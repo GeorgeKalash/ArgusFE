@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { AdministrationRepository } from '@argus/repositories/repositories/AdministrationRepository'
+import { AdministrationRepository } from '@argus/repositories/src/repositories/AdministrationRepository'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'

@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import HrDsl from './forms/HrDslReasonForm'
 
 const HrDSl = () => {

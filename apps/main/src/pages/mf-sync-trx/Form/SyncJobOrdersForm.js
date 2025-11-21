@@ -11,7 +11,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ThreadProgress } from '@argus/shared-ui/src/components/Shared/ThreadProgress'
 import { formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function SyncJobOrdersForm({ _labels, access }) {

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { CostAllocationRepository } from '@argus/repositories/repositories/CostAllocationRepository'
+import { CostAllocationRepository } from '@argus/repositories/src/repositories/CostAllocationRepository'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'

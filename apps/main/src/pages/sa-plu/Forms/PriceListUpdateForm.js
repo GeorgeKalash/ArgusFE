@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
@@ -19,9 +19,9 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 export default function PriceListUpdateForm({ labels, maxAccess: access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -11,7 +11,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { Grid } from '@mui/material'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 const ItemPartForm = ({ labels, maxAccess, obj }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

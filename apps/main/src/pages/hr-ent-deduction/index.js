@@ -10,7 +10,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import EntDeductionForm from './Forms/EntDeductionForm'
 
 const EntDeduction = () => {

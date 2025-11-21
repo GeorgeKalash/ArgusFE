@@ -10,8 +10,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 export default function GenFiscalForm({ _labels, maxAccess }) {
   const { postRequest } = useContext(RequestsContext)

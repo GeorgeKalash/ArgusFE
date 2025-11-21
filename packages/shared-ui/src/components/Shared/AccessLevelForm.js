@@ -5,7 +5,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form.js'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
-import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomCheckBox from '../Inputs/CustomCheckBox'

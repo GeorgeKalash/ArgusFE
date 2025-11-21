@@ -10,7 +10,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function IvPartsForm({ labels, maxAccess, recordId }) {

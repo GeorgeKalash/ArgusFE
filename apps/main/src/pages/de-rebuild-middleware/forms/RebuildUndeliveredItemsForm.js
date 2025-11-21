@@ -10,7 +10,7 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ThreadProgress } from '@argus/shared-ui/src/components/Shared/ThreadProgress'
-import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
+import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import { formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

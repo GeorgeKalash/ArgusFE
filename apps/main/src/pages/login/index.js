@@ -1,6 +1,6 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
-import { AuthContext } from '@argus/shared-providers/AuthContext'
+import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useState, useContext } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
@@ -23,7 +23,7 @@ const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
   color: theme.palette.primary.main
 }))
-
+ 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -32,7 +32,7 @@ const LoginPage = () => {
   const { companyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-
+ 
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -61,7 +61,7 @@ const LoginPage = () => {
       })
     }
   })
-
+ 
   function viewOTP(loggedUser) {
     stack({
       Component: OTPAuthentication,
@@ -74,13 +74,13 @@ const LoginPage = () => {
       spacing: false
     })
   }
-
+ 
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
       validation.handleSubmit()
     }
   }
-
+ 
   function openForm(username, loggedUser, onClose) {
     stack({
       Component: ChangePassword,
@@ -97,19 +97,19 @@ const LoginPage = () => {
       spacing: false
     })
   }
-
+ 
   const { apiUrl, languageId } = useAuth()
-
+ 
   const updateUmcpnl = async (loggedUser, getUS2) => {
     try {
       const user = getUS2
       const accessToken = loggedUser.accessToken
       if (!accessToken) throw new Error('Failed to retrieve access token')
-
+ 
       const updateUser = { ...user, umcpnl: false }
       var bodyFormData = new FormData()
       bodyFormData.append('record', JSON.stringify(updateUser))
-
+ 
       await axios({
         method: 'POST',
         url: `${apiUrl}SY.asmx/setUS`,
@@ -124,7 +124,7 @@ const LoginPage = () => {
       stackError({ message: error.message })
     }
   }
-
+ 
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
@@ -223,14 +223,14 @@ const LoginPage = () => {
             © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
           </Box>
         </Box>
-
+ 
         <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </>
     )
   )
 }
-
+ 
 LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
 LoginPage.guestGuard = true
-
+ 
 export default LoginPage

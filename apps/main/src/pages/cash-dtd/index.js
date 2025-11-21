@@ -10,7 +10,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CaDocumentTypeDefaultForm from './form/CaDocumentTypeDefaultForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 

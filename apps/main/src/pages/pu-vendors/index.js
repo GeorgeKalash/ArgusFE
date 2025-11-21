@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import VendorsWindow from './windows/VendorsWindow'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const PuVendors = () => {

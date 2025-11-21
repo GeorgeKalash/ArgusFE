@@ -18,10 +18,10 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function ResignationReqForm({ recordId, labels, maxAccess }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

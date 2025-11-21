@@ -10,8 +10,8 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import CustomTextField from '../Inputs/CustomTextField'
-import { Grow } from './Layouts/Grow'
-import { VertLayout } from './Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Form from './Form'
 
 export const InterfacesForm = ({ recordId, resourceId, name }) => {

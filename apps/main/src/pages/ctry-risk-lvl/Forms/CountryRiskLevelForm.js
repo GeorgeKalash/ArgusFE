@@ -11,9 +11,9 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { CurrencyTradingSettingsRepository } from '@argus/repositories/repositories/CurrencyTradingSettingsRepository'
-import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
+import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 
 export default function CountryRiskLevelForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

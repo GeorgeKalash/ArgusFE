@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
-import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const NormalDialog = ({ DialogText, bottomSection }) => {
   return (

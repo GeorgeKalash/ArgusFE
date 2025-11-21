@@ -13,8 +13,8 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
   const { platformLabels } = useContext(ControlContext)

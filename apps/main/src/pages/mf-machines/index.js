@@ -9,7 +9,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import MachinesWindow from './Windows/MachinesWindow'
 

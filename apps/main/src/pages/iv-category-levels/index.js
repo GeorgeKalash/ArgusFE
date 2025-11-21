@@ -10,8 +10,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { useError } from '@argus/shared-domain/src/lib/error'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const CategoryLevels = () => {

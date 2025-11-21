@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import MasterDataDTDForm from './Form/MasterDataDTDForm'
-import { CurrencyTradingSettingsRepository } from '@argus/repositories/repositories/CurrencyTradingSettingsRepository'
+import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
 
 const MasterDataDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

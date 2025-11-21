@@ -6,7 +6,7 @@ import TreeForm from '../forms/TreeForm'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { FinancialStatementRepository } from '@argus/repositories/repositories/FinancialStatementRepository'
+import { FinancialStatementRepository } from '@argus/repositories/src/repositories/FinancialStatementRepository'
 
 const StatementWindow = ({ labels, maxAccess, recordId }) => {
   const [activeTab, setActiveTab] = useState(0)

@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ProductModelingRepository } from '@argus/repositories/repositories/ProductModelingRepository'
+import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import DesignerForm from './Forms/DesignerForm'
 
 const Designer = () => {

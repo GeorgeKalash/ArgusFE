@@ -12,7 +12,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import WaxDTDForm from './Forms/WaxDTDForm'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 const WaxDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

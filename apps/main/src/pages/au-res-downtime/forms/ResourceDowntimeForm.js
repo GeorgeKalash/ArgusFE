@@ -7,7 +7,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -17,7 +17,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { CommonContext } from '@argus/shared-providers/CommonContext'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import dayjs from 'dayjs'
 
 export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {

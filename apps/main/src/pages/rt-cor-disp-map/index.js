@@ -4,7 +4,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import * as yup from 'yup'
-import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
+import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

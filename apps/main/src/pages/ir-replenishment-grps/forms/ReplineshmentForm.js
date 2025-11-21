@@ -12,7 +12,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { IVReplenishementRepository } from '@argus/repositories/repositories/IVReplenishementRepository'
+import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 
 export default function ReplineshmentForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -8,10 +8,10 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { formatDateDefault, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import ResourceComboBox from './ResourceComboBox'
-import { useError } from '@argus/shared-domain/src/lib/error'
-import { Grow } from './Layouts/Grow'
-import { VertLayout } from './Layouts/VertLayout'
-import { Fixed } from './Layouts/Fixed'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
 const TransactionLog = props => {

@@ -7,7 +7,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'

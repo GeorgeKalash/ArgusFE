@@ -10,7 +10,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { FixedAssetsRepository } from '@argus/repositories/repositories/FixedAssetsRepository'
+import { FixedAssetsRepository } from '@argus/repositories/src/repositories/FixedAssetsRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 

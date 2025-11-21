@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ReplineshmentForm from '../ir-replenishment-grps/forms/ReplineshmentForm'
-import { IVReplenishementRepository } from '@argus/repositories/repositories/IVReplenishementRepository'
+import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 
 const ReplenishmentGroups = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -12,7 +12,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

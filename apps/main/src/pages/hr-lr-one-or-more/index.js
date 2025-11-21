@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/repositories/LoanManagementRepository'
+import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
 import { LeaveForm } from '@argus/shared-ui/src/components/Shared/LeaveForm'
 
 const LeaveRequestOneDayOrMore = () => {

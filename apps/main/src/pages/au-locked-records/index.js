@@ -9,7 +9,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 
 const LockedRecords = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

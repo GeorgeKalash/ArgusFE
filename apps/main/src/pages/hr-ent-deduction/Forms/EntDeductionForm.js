@@ -14,9 +14,9 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
-import { MathExpressionRepository } from '@argus/repositories/repositories/MathExpressionRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import { MathExpressionRepository } from '@argus/repositories/src/repositories/MathExpressionRepository'
 import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 
 export default function EntDeductionForm({ labels, recordId, maxAccess, window }) {

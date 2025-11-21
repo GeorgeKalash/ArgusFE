@@ -11,9 +11,9 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ThreadProgress } from '@argus/shared-ui/src/components/Shared/ThreadProgress'
 import { formatDateToISO } from '@argus/shared-domain/src/lib/date-helper'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

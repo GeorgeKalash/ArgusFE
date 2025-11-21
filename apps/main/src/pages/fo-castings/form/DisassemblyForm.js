@@ -6,8 +6,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import toast from 'react-hot-toast'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function DisassemblyForm({ labels, maxAccess, store, setStore }) {

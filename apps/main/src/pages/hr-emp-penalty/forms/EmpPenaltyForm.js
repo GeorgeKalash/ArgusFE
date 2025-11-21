@@ -17,10 +17,10 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 
 export default function EmpPenaltyForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -8,7 +8,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SCRepository } from '@argus/repositories/repositories/SCRepository'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 
 const ItemList = ({ recordId: tlId, labels, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

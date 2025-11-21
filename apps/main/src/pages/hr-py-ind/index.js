@@ -10,7 +10,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import IndemnityWindow from './Windows/IndemnityWindow'
 
 const PyIndemnity = () => {

@@ -5,7 +5,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 

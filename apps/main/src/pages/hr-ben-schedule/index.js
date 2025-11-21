@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import BenefitScheduleForm from './Forms/BenefitScheduleForm'
-import { BenefitsRepository } from '@argus/repositories/repositories/BenefitsRepository'
+import { BenefitsRepository } from '@argus/repositories/src/repositories/BenefitsRepository'
 
 const BenefitSchedule = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

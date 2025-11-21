@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ExtraIncomeForm from './form/ExtraIncomeForm'
-import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
+import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 
 const ExtraIncome = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

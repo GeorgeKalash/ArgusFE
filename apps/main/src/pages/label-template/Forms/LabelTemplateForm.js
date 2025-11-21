@@ -12,7 +12,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { SCRepository } from '@argus/repositories/repositories/SCRepository'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 
 const LabelTemplateForm = ({ labels, maxAccess, store, setStore }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

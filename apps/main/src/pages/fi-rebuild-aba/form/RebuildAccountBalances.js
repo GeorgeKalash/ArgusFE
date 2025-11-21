@@ -9,9 +9,9 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function RebuildAccountBalances({ _labels, access }) {

@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import AdjDocTypeDefaultsForm from './form/AdjDocTypeDefaultsForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 

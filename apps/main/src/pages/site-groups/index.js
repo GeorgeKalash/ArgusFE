@@ -6,7 +6,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import SiteGroupsForm from './forms/SiteGroupsForm'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'

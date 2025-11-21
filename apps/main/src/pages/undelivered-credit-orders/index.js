@@ -5,10 +5,10 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import ErrorWindow from '@argus/shared-ui/src/components/Shared/ErrorWindow'
-import { CTTRXrepository } from '@argus/repositories/repositories/CTTRXRepository'
+import { CTTRXrepository } from '@argus/repositories/src/repositories/CTTRXRepository'
 
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
+import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'

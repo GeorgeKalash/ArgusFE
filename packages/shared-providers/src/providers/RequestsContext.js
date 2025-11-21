@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import jwt from 'jwt-decode'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import { Box, CircularProgress } from '@mui/material'
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 

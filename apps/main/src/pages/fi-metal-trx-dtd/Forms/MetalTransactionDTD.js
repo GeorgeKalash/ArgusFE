@@ -8,12 +8,12 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 
 export default function MetalTransactionDTDForm({ labels, maxAccess, recordId, functionId, window }) {
   const { platformLabels } = useContext(ControlContext)

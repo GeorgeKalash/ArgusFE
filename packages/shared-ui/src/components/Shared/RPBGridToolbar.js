@@ -3,7 +3,7 @@ import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/ReportParameterBrowser'
 import { Grid } from '@mui/material'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const RPBGridToolbar = ({

@@ -1,6 +1,6 @@
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useContext, useEffect } from 'react'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useFormik } from 'formik'
 import Form from '@argus/shared-ui/src/components/Shared/Form'

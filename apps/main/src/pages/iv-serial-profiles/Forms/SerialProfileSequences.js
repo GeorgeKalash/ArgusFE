@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

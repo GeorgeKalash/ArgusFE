@@ -9,7 +9,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 

@@ -12,8 +12,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { SCRepository } from '@argus/repositories/repositories/SCRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 
 export default function StockCountControllerForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

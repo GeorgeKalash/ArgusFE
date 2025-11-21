@@ -8,8 +8,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

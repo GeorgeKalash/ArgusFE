@@ -5,7 +5,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SCRepository } from '@argus/repositories/repositories/SCRepository'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import toast from 'react-hot-toast'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'

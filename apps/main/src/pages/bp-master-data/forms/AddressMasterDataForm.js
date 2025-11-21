@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext } from 'react'
-import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
+import { BusinessPartnerRepository } from '@argus/repositories/src/repositories/BusinessPartnerRepository'
 import AddressGridTab from '@argus/shared-ui/src/components/Shared/AddressGridTab'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'

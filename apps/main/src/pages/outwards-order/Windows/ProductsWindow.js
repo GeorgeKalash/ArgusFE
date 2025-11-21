@@ -6,8 +6,8 @@ import { Button } from '@mui/material'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import SelectAgent from '../Tabs/SelectAgent'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { RemittanceBankInterface } from '@argus/repositories/repositories/RemittanceBankInterface'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { RemittanceBankInterface } from '@argus/repositories/src/repositories/RemittanceBankInterface'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const ProductsWindow = ({

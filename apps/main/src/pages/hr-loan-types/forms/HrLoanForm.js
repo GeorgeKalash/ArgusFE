@@ -14,7 +14,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { LoanTrackingRepository } from '@argus/repositories/repositories/LoanTrackingRepository'
+import { LoanTrackingRepository } from '@argus/repositories/src/repositories/LoanTrackingRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function HrLoanForm({ labels, maxAccess, recordId }) {

@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import toast from 'react-hot-toast'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'

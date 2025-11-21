@@ -7,7 +7,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'

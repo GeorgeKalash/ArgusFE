@@ -3,7 +3,7 @@ import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,7 +12,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import SalaryBatchForm from './forms/SalaryBatchForm'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 
 const SalaryBatch = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

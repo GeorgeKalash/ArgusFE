@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -12,7 +12,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { getIPR, DIRTYFIELD_QTY } from '@argus/shared-utils/utils/ItemPriceCalculator'
 import { getVatCalc } from '@argus/shared-utils/utils/VatCalculator'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function InvoiceForm({ form, maxAccess, labels, setReCal, window }) {

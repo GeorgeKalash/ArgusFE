@@ -4,10 +4,10 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function PreviewForm({ labels, maxAccess, clientId }) {

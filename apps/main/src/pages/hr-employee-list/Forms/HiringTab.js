@@ -15,8 +15,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

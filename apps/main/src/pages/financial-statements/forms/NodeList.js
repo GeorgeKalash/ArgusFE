@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { FinancialStatementRepository } from '@argus/repositories/repositories/FinancialStatementRepository'
+import { FinancialStatementRepository } from '@argus/repositories/src/repositories/FinancialStatementRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'

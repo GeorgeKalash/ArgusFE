@@ -7,7 +7,7 @@ import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { IVReplenishementRepository } from '@argus/repositories/repositories/IVReplenishementRepository'
+import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 
 const IvReplenishementsList = ({ store, labels, maxAccess }) => {
   const { getRequest } = useContext(RequestsContext)

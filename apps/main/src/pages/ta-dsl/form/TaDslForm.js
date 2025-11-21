@@ -17,8 +17,8 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
 

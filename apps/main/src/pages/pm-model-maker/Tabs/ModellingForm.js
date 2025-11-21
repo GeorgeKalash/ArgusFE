@@ -17,15 +17,15 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import { ProductModelingRepository } from '@argus/repositories/repositories/ProductModelingRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 export default function ModellingForm({ labels, access, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

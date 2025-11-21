@@ -10,11 +10,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { FixedAssetsRepository } from '@argus/repositories/repositories/FixedAssetsRepository'
+import { FixedAssetsRepository } from '@argus/repositories/src/repositories/FixedAssetsRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { SystemRepository } from '../../../repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { GeneralLedgerRepository } from '@argus/repositories/repositories/GeneralLedgerRepository'
+import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 
 export default function LocationForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

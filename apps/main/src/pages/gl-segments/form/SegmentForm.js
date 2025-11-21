@@ -9,7 +9,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { GeneralLedgerRepository } from '@argus/repositories/repositories/GeneralLedgerRepository'
+import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, fetchGridData }) {

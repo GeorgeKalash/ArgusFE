@@ -9,8 +9,8 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 
 const PendingPunches = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

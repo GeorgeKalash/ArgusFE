@@ -8,8 +8,8 @@ import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PointofSaleRepository } from '@argus/repositories/repositories/PointofSaleRepository'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
+import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SalesPersonForm = ({ store, labels, maxAccess }) => {

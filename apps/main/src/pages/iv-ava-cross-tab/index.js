@@ -9,12 +9,12 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import SerialTable from './forms/SerialTable'
-import serialIcon from 'public/images/TableIcons/imgSerials.png'
-import lotIcon from 'public/images/TableIcons/lot.png'
+import serialIcon from '@argus/shared-ui/src/components/images/TableIcons/imgSerials.png'
+import lotIcon from '@argus/shared-ui/src/components/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import LotForm from './forms/LotForm'
-import { ReportIvGenerator } from '@argus/repositories/repositories/ReportIvGeneratorRepository'
+import { ReportIvGenerator } from '@argus/repositories/src/repositories/ReportIvGeneratorRepository'
 
 const AvailabilityCrossTab = () => {
   const { getRequest } = useContext(RequestsContext)

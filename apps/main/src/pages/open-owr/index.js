@@ -6,11 +6,11 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
-import { KVSRepository } from '@argus/repositories/repositories/KVSRepository'
+import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 
 const OpenOutwardsReturn = () => {
   const { getRequest } = useContext(RequestsContext)

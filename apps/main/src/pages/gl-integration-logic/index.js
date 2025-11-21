@@ -9,7 +9,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { GeneralLedgerRepository } from '@argus/repositories/repositories/GeneralLedgerRepository'
+import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
 import IntegrationLogicWindow from './Windows/IntegrationLogicWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 

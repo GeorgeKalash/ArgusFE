@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { LoanManagementRepository } from '@argus/repositories/repositories/LoanManagementRepository'
+import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
 import LeaveScheduleWindow from './Windows/LeaveScheduleWindow'
 
 const HRLeaveSchedule = () => {

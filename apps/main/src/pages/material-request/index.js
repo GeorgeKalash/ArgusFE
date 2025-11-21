@@ -12,7 +12,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { IVReplenishementRepository } from '@argus/repositories/repositories/IVReplenishementRepository'
+import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 import MaterialRequestForm from './Forms/MaterialRequestForm'
 
 const IvMaterialsTransfer = () => {

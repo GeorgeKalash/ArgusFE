@@ -6,7 +6,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function InvDetailsForm({ labels, access, values, setValues, window }) {

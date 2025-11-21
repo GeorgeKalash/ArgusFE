@@ -9,7 +9,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PointofSaleRepository } from '@argus/repositories/repositories/PointofSaleRepository'
+import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import PointOfSalesWindow from './windows/PointOfSalesWindow'

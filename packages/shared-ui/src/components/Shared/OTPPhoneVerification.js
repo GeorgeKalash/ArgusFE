@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import styles from '../../../styles/phoneVerification.module.css'
+import styles from '@argus/shared-ui/src/components/styles/phoneVerification.module.css'
 import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
 import toast from 'react-hot-toast'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'

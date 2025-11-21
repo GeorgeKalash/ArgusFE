@@ -10,8 +10,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { SaleRepository } from '@argus/repositories/repositories/SaleRepository'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const SalesZonesLevels = () => {

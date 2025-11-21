@@ -11,10 +11,10 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function ProdSheetDtdForm({ labels, maxAccess, recordId }) {

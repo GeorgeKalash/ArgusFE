@@ -4,9 +4,9 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function MeasurementScheduleMapForm({ _labels: labels, maxAccess }) {

@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import StockCountDocumentTypeDefaultForm from './forms/StockCountDocTypeDefaultsForm'
-import { SCRepository } from '@argus/repositories/repositories/SCRepository'
+import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const StockCountDocTypeDefaults = () => {

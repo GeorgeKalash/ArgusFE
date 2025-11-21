@@ -5,8 +5,8 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 
 export default function AuditForm({ labels, formik }) {
   const { getRequest } = useContext(RequestsContext)

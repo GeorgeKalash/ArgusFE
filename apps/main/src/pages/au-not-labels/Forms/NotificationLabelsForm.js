@@ -11,7 +11,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 
 export default function NotificationLabelsForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { ReportIvGenerator } from '@argus/repositories/repositories/ReportIvGeneratorRepository'
+import { ReportIvGenerator } from '@argus/repositories/src/repositories/ReportIvGeneratorRepository'
 
 const PriceListInquiries = () => {
   const { getRequest } = useContext(RequestsContext)

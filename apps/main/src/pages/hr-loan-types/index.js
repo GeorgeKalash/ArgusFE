@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import HrLoanForm from './forms/HrLoanForm'
-import { LoanTrackingRepository } from '@argus/repositories/repositories/LoanTrackingRepository'
+import { LoanTrackingRepository } from '@argus/repositories/src/repositories/LoanTrackingRepository'
 
 const HrLoanTypesPage = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

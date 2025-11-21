@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import documentType from '@argus/shared-domain/src/lib/docRefBehaviors'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 

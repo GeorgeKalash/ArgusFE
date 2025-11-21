@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
 import MouldForm from './Form/MouldsForm'
 
 const FOMoulds = () => {

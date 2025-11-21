@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
+import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import ProfessionsWindow from './Windows/ProfessionsWindow'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'

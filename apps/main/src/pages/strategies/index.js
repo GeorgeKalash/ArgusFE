@@ -22,7 +22,7 @@ import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/r
 
 // ** Resources
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'

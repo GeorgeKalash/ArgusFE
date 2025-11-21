@@ -11,11 +11,11 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { CashBankRepository } from '@argus/repositories/repositories/CashBankRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 export default function RVDocTypeDefaultsForm({ labels, maxAccess, recordId }) {

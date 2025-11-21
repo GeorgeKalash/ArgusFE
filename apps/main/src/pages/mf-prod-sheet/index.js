@@ -11,8 +11,8 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import ProductionSheetForm from './Forms/ProductionSheetForm'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const ProductionSheet = () => {

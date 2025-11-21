@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Tree from '@argus/shared-ui/src/components/Shared/Tree'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import CategoryWindow from './window/CategoryWindow'
 
 const Category = () => {

@@ -9,9 +9,9 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { RGGeneralRepository } from '@argus/repositories/repositories/RGGeneralRepository'
+import { RGGeneralRepository } from '@argus/repositories/src/repositories/RGGeneralRepository'
 
 export default function GlEoyClosingForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)

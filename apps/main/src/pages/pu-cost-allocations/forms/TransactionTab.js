@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { CostAllocationRepository } from '@argus/repositories/repositories/CostAllocationRepository'
+import { CostAllocationRepository } from '@argus/repositories/src/repositories/CostAllocationRepository'
 import { Grid } from '@mui/material'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'

@@ -10,8 +10,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function LotForm({ labels, maxAccess, form }) {

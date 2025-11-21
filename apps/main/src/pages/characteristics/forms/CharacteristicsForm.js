@@ -10,7 +10,7 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

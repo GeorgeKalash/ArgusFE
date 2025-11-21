@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import SerialProfileWindow from './Windows/SerialProfileWindow'
 
 const SerialProfiles = () => {

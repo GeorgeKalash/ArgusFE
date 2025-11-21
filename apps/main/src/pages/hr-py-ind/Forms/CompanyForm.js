@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import WindowToolbar from '@argus/shared-ui/src/components/Shared/WindowToolbar'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
-import { PayrollRepository } from '@argus/repositories/repositories/PayrollRepository'
+import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const CompanyForm = ({ labels, maxAccess, store }) => {

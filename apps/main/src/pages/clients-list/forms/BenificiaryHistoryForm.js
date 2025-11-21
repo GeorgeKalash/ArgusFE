@@ -1,7 +1,7 @@
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useContext } from 'react'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

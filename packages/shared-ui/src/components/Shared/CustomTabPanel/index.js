@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import PropTypes from 'prop-types'
 import styles from './CustomTabPanel.module.css'
-import { HIDDEN } from '@argus/shared-domain/src/lib/maxAccess'
+import { HIDDEN } from '@argus/shared-utils/src/utils/maxAccess'
 
 const CustomTabPanel = props => {
   const { children, value, height, index, maxAccess, ...other } = props

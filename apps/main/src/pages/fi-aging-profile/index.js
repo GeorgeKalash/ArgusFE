@@ -9,7 +9,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import AgingForm from './forms/AgingForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 

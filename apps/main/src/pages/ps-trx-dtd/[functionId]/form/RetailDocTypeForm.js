@@ -11,9 +11,9 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { PointofSaleRepository } from '@argus/repositories/repositories/PointofSaleRepository'
+import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 
 export default function RetailDocTypeForm({ labels, maxAccess, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

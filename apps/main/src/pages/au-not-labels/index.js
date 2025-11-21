@@ -10,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { AccessControlRepository } from '@argus/repositories/repositories/AccessControlRepository'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import NotificationLabelsForm from './Forms/NotificationLabelsForm'
 
 const NotificationLabel = () => {

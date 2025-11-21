@@ -35,11 +35,11 @@ import 'react-perfect-scrollbar/dist/css/styles.css'
 import '../iconify-bundle/icons-bundle-react'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/saga-blue/theme.css'
-import '../../styles/globals.css'
-import '../../styles/formgrid.css'
+import '@argus/shared-ui/src/components/styles/globals.css'
+import '@argus/shared-ui/src/components/styles/formgrid.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WindowProvider } from '@argus/shared-providers/src/providers/windows'
-import { ErrorProvider } from '@argus/shared-domain/src/lib/error'
+import { ErrorProvider } from '@argus/shared-providers/src/providers/error'
 import { useContext } from 'react'
 import { LabelsAccessContextProvider } from '@argus/shared-providers/src/providers/LabelsAccessContext'
 import { LockedScreensProvider } from '@argus/shared-providers/src/providers/LockedScreensContext'
@@ -98,6 +98,7 @@ const App = props => {
   const authGuard = Component.authGuard ?? true
   const guestGuard = Component.guestGuard ?? false
   const aclAbilities = Component.acl ?? defaultACLObj
+
 
   return (
     <Provider store={store}>

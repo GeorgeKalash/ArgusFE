@@ -4,8 +4,8 @@ import { Grid } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
-import { VertLayout } from './Layouts/VertLayout'
-import { Grow } from './Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const StrictUnpostConfirmation = ({ window, onSuccess }) => {
   const [confirmationText, setConfirmationText] = useState('')

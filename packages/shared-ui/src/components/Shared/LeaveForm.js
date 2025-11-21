@@ -1,5 +1,5 @@
-import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/src/components/Shared/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { format } from 'date-fns'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grid } from '@mui/material'
@@ -24,7 +24,7 @@ import CustomNumberField from '../Inputs/CustomNumberField'
 import dayjs from 'dayjs'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { DataGrid } from './DataGrid'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export const LeaveForm = ({ recordId, window }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)

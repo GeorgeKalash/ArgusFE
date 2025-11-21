@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
+import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 import VehiclesForm from './forms/VehiclesForm'
 
 const Vehicles = () => {

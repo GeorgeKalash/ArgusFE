@@ -10,12 +10,12 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { calculateFixed } from '@argus/shared-utils/utils/Payroll'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
-import { TimeAttendanceRepository } from '@argus/repositories/repositories/TimeAttendanceRepository'
+import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 
 export default function EntitlementForm({
   labels,

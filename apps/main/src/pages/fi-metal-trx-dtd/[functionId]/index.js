@@ -12,7 +12,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import MetalTransactionDTDForm from '../Forms/MetalTransactionDTD'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 
 const MetalTransactionDTD = () => {

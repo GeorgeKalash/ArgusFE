@@ -11,7 +11,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import RequisitionDocTypeDefaultForm from './Form/RequisitionDocTypeDefaultForm'
 
 const RequisitionDocTypeDefault = () => {

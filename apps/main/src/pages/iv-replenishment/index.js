@@ -8,7 +8,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { IVReplenishementRepository } from '@argus/repositories/repositories/IVReplenishementRepository'
+import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 import IvReplenishementsWindow from './windows/IvReplenishementsWindow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 

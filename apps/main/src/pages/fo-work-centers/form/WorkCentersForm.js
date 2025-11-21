@@ -11,8 +11,8 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { FoundryRepository } from '@argus/repositories/repositories/FoundryRepository'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 export default function WorkCentersForm({ labels, recordId, maxAccess }) {

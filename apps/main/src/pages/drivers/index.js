@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import DriversForm from './forms/DriversForm'
-import { DeliveryRepository } from '@argus/repositories/repositories/DeliveryRepository'
+import { DeliveryRepository } from '@argus/repositories/src/repositories/DeliveryRepository'
 
 const Drivers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

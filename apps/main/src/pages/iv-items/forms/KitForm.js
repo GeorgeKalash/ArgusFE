@@ -11,7 +11,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { InventoryRepository } from '@argus/repositories/repositories/InventoryRepository'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
 const KitForm = ({ store, labels, maxAccess }) => {
   const { recordId } = store

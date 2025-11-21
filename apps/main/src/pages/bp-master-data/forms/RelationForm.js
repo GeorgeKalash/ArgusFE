@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { BusinessPartnerRepository } from '@argus/repositories/repositories/BusinessPartnerRepository'
+import { BusinessPartnerRepository } from '@argus/repositories/src/repositories/BusinessPartnerRepository'
 import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'

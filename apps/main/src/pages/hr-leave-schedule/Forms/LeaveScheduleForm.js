@@ -10,7 +10,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { LoanManagementRepository } from '@argus/repositories/repositories/LoanManagementRepository'
+import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const iconOptions = [

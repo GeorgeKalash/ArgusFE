@@ -14,7 +14,7 @@ import lotIcon from '../../../public/images/TableIcons/lot.png'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import LotForm from './forms/LotForm'
-import { ReportIvGenerator } from '@argus/repositories/repositories/ReportIvGeneratorRepository'
+import { ReportIvGenerator } from '@argus/repositories/src/repositories/ReportIvGeneratorRepository'
 
 const AvailabilitiesBySite = () => {
   const { getRequest } = useContext(RequestsContext)

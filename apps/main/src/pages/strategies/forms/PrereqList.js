@@ -6,7 +6,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 // ** MUI Imports
 import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
-import { DocumentReleaseRepository } from '@argus/repositories/repositories/DocumentReleaseRepository'
+import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 
 // ** Custom Imports
 import Table from '@argus/shared-ui/src/components/Shared/Table'

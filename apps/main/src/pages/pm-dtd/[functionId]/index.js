@@ -11,7 +11,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
-import { ProductModelingRepository } from '@argus/repositories/repositories/ProductModelingRepository'
+import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import ProductModelingDTDForm from './form/ProductModelingDTDForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 

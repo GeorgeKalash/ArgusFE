@@ -4,7 +4,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import toast from 'react-hot-toast'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'

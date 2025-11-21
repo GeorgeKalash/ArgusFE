@@ -1,5 +1,5 @@
-import { VertLayout } from '@argus/shared-ui/src/components/Shared/Layouts/VertLayout'
-import { Grow } from '@argus/shared-ui/src/components/Shared/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grid } from '@mui/material'
 import CustomTextField from '../Inputs/CustomTextField'

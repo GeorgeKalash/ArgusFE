@@ -4,7 +4,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
-import { CTTRXrepository } from '@argus/repositories/repositories/CTTRXRepository'
+import { CTTRXrepository } from '@argus/repositories/src/repositories/CTTRXRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CreditInvoiceForm from './Forms/CreditInvoiceForm'
@@ -14,7 +14,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 const CreditInvoice = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

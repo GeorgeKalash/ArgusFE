@@ -7,7 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import * as yup from 'yup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
-import { RemittanceOutwardsRepository } from '@argus/repositories/repositories/RemittanceOutwardsRepository'
+import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

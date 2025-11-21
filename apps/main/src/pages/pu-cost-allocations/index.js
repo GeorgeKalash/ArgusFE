@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import PuCostAllocationWindow from './window/PuCostAllocationWindow'
-import { CostAllocationRepository } from '@argus/repositories/repositories/CostAllocationRepository'
+import { CostAllocationRepository } from '@argus/repositories/src/repositories/CostAllocationRepository'
 
 const PuCostAllocations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

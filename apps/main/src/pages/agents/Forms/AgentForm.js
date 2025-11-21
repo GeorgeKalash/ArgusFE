@@ -7,7 +7,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/repositories/SystemRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { RemittanceSettingsRepository } from '@argus/repositories/repositories/RemittanceRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

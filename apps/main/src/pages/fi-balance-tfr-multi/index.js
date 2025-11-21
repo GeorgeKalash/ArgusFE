@@ -13,7 +13,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import BalanceTransferMultiForm from './Forms/BalanceTransferMultiForm'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 
 const BalanceTransferMultiAccounts = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

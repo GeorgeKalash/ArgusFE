@@ -3,7 +3,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Grid } from '@mui/material'
-import { RGFinancialRepository } from '@argus/repositories/repositories/RGFinancialRepository'
+import { RGFinancialRepository } from '@argus/repositories/src/repositories/RGFinancialRepository'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Table from '@argus/shared-ui/src/components/Shared/Table'

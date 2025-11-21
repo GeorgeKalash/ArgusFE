@@ -8,8 +8,8 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
-import { PurchaseRepository } from '@argus/repositories/repositories/PurchaseRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
+import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const PUFinancialIntegrators = () => {

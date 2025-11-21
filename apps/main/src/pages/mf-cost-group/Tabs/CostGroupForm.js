@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
-import { ManufacturingRepository } from '@argus/repositories/repositories/ManufacturingRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
 export default function CostGroupForm({ labels, access: maxAccess, setStore, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

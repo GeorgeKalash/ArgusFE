@@ -16,7 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { formatDateFromApi, formatDateFromApiInline, formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { fontSize } from '@mui/system'
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from '@argus/shared-domain/src/lib/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY, accessLevel } from '@argus/shared-utils/src/utils/maxAccess'
 
 const CustomPaper = (props, widthDropDown) => {
   return <Paper sx={{ width: `${widthDropDown ? widthDropDown + '%' : 'auto'}` }} {...props} />

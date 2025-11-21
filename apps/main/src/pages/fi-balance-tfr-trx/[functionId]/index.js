@@ -12,7 +12,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { FinancialRepository } from '@argus/repositories/repositories/FinancialRepository'
+import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import BalanceTransferForm from './forms/BalanceTransferForm'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 

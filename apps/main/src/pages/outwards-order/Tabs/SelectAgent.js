@@ -5,7 +5,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { RemittanceBankInterface } from '@argus/repositories/repositories/RemittanceBankInterface'
+import { RemittanceBankInterface } from '@argus/repositories/src/repositories/RemittanceBankInterface'
 import * as yup from 'yup'
 
 const SelectAgent = ({

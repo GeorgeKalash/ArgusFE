@@ -11,7 +11,7 @@ import UserDefinedTab from '../Forms/UserDefinedTab'
 import AttachmentList from '@argus/shared-ui/src/components/Shared/AttachmentList'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
-import { EmployeeRepository } from '@argus/repositories/repositories/EmployeeRepository'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { formatDateMDY } from '@argus/shared-domain/src/lib/date-helper'
 

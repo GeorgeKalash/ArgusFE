@@ -1,4 +1,4 @@
-import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from '@argus/shared-domain/src/lib/maxAccess'
+import { DISABLED, FORCE_ENABLED, HIDDEN, MANDATORY } from '@argus/shared-utils/src/utils/maxAccess'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 
 const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
@@ -18,7 +18,6 @@ const checkAccess = (name, maxAccess, required, readOnly, hidden, disabled) => {
   const _required = (required && !_readOnly) || (readOnly && required) || accessLevel === MANDATORY
 
   const _disabled = disabled || accessLevel === DISABLED
-
   return { _readOnly, _required, _hidden, _disabled }
 }
 
