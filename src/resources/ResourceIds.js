@@ -603,6 +603,7 @@ export const ResourceIds = {
   PenaltyType: 75106,
   DailySchedules: 72201,
   SSLeaveRequest: 80106,
+  ItemDisposal: 42349,
 
   // GL
   GLSalesInvoice: 51604,

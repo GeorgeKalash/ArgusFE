@@ -421,5 +421,18 @@ export const ManufacturingRepository = {
   },
   ProductionOrderFromSaleOrder: {
     gen: service + 'generatePOFromSO'
+  },
+  Disposal: {
+    page: service + 'pageDIS',
+    snapshot: service + 'snapshotDIS',
+    get: service + 'getDIS',
+    set2: service + 'set2DIS',
+    del: service + 'delDIS'
+  },
+  DisposalItem: {
+    qry: service + 'qryDII'
+  },
+  DisposalSerial: {
+    qry: service + 'qryDISRL'
   }
 }
