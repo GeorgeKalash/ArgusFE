@@ -13,11 +13,15 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Form from 'src/components/Shared/Form'
 
-export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
+export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting, setRefetchJob }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId, jobReference, jobRoutings } = store || {}
   const editMode = !!recordId
+
+  const status = {
+    Unreached: { key: 5, value: 'Unreached' }
+  }
 
   const { formik } = useForm({
     maxAccess,
@@ -32,7 +36,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           name: '',
           workCenterId: '',
           operationId: '',
-          status: 5,
+          status: status.Unreached.key,
           qty: '',
           qtyIn: '',
           pcs: '',
@@ -55,7 +59,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       const modifiedRoutings = obj.routings.map(routing => ({
         ...routing,
         seqNo: parseInt(routing.seqNo),
-        status: routing.status || 5,
+        status: routing.status || status.Unreached.key,
         jobId: recordId
       }))
       await postRequest({
@@ -63,6 +67,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
         record: JSON.stringify({ jobId: recordId, data: modifiedRoutings })
       })
       toast.success(platformLabels.Edited)
+      setRefetchJob(true)
     }
   })
 
@@ -215,6 +220,37 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     }
   ]
 
+  const actions = [
+    {
+      key: 'Sync',
+      condition: true,
+      onClick: syncRoutings,
+      disabled: store?.status != 1
+    }
+  ]
+
+  async function syncRoutings() {
+    if (!store?.routingId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.RoutingSequence.qry,
+      parameters: `_routingId=${store?.routingId}`
+    })
+
+    const list = (res?.list || []).map((item, index) => ({
+      ...item,
+      id: index + 1,
+      status: status.Unreached.key,
+      statusName: status.Unreached.value,
+      qtyIn: 0,
+      pcsIn: 0,
+      qty: 0,
+      pcs: 0
+    }))
+
+    formik.setFieldValue('routings', list)
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!refetchRouting || !recordId) return
@@ -270,6 +306,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
+      actions={actions}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
