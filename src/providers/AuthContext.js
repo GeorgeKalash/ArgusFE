@@ -52,7 +52,7 @@ const AuthProvider = ({ children }) => {
   }
 
   const fetchData = async () => {
-    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
+    const matchHostname = window.location.hostname.match(/^(.+)\.(softmachine\.co|argus-bup\.com)$/);
 
     const accountName = matchHostname ? matchHostname[1] : 'cil3'
 
