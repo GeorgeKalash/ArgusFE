@@ -7,7 +7,9 @@ export const GeneralLedgerRepository = {
     set: service + 'setIL',
     get: service + 'getIL',
     del: service + 'delIL',
-    snapshot: service + 'snapshotIL'
+    snapshot: service + 'snapshotIL',
+    get2: service + 'get2IL',
+    set2: service + 'set2IL'
   },
 
   CostCenter: {

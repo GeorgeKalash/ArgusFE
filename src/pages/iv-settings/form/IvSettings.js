@@ -17,13 +17,14 @@ const IvSettings = ({ _labels, access }) => {
   const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
   const { postRequest } = useContext(RequestsContext)
 
-  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize']
+  const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize']
 
   const { formik } = useForm({
     maxAccess: access,
     initialValues: arrayAllow.reduce((acc, key) => ({ ...acc, [key]: null }), {}),
     validationSchema: yup.object({
-      iv_minSerialSize: yup.number().min(1).max(20).nullable()
+      iv_minSerialSize: yup.number().min(1).max(20).nullable(),
+      minItemSearchTextSize: yup.number().min(3).max(20).required()
     }),
     onSubmit: async obj => {
       const data = []
@@ -91,6 +92,17 @@ const IvSettings = ({ _labels, access }) => {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('iv_minSerialSize', '')}
                 error={formik.touched.iv_minSerialSize && Boolean(formik.errors.iv_minSerialSize)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomNumberField
+                name='minItemSearchTextSize'
+                label={_labels.minItemSearchTextSize}
+                value={formik.values.minItemSearchTextSize}
+                onChange={formik.handleChange}
+                required
+                onClear={() => formik.setFieldValue('minItemSearchTextSize', '')}
+                error={formik.touched.minItemSearchTextSize && Boolean(formik.errors.minItemSearchTextSize)}
               />
             </Grid>
           </Grid>

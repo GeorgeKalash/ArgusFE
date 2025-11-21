@@ -317,6 +317,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
+          { from: 'msId', to: 'msId' },
           { from: 'isInactive', to: 'isInactive' }
         ],
         columnsInDropDown: [
@@ -375,7 +376,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           rowTax = formik.values.taxId
           rowTaxDetails = details
         }
-
         update({
           volume: itemPhysProp?.volume || 0,
           weight: itemPhysProp?.weight || 0,
@@ -384,7 +384,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           unitPrice: ItemConvertPrice?.unitPrice || 0,
           upo: ItemConvertPrice?.upo || 0,
           priceType: ItemConvertPrice?.priceType || 1,
-          mdAmount: formik.values.initialTdPct ? formik.values.initialTdPct : 0,
+          mdAmount: formik.values.initialTdPct || 0,
           qty: 0,
           msId: itemInfo?.msId,
           muRef: defaultMu?.reference || '',
@@ -784,7 +784,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems) {
+  async function fillForm(soHeader, soItems, client) {
     const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
     const billAdd = await getAddress(soHeader?.record?.billToAddressId)
 
@@ -793,7 +793,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       : setCycleButtonState({ text: '%', value: 2 })
 
     const modifiedList =
-      soItems?.list.length != 0
+      soItems?.list?.length != 0
         ? await Promise.all(
             soItems.list?.map(async (item, index) => {
               const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
@@ -824,7 +824,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       shipAddress: shipAdd,
       billAddress: billAdd,
       tdPct: soHeader?.record?.tdPct || 0,
-      initialTdPct: soHeader?.record?.tdPct || 0,
+      initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
     })
   }
@@ -1154,7 +1154,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   async function refetchForm(recordId) {
     const soHeader = await getSalesOrder(recordId)
     const soItems = await getSalesOrderItems(recordId)
-    fillForm(soHeader, soItems)
+    const client = await getClient(soHeader?.record?.clientId)
+
+    fillForm(soHeader, soItems, client)
   }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {

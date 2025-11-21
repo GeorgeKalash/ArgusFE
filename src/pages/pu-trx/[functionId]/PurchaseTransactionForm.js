@@ -503,7 +503,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals,
+            readOnly: !row?.itemId
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -1128,8 +1133,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
 
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
+    const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
     update({
+      decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
       itemId: itemInfo?.recordId || null,
@@ -1357,6 +1364,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
 
     return res
+  }
+
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
   }
 
   async function onChangeDtId(recordId) {

@@ -61,6 +61,7 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         qty: 0,
         sfItemId: null,
         itemId: null,
+        shiftId: null,
         date: new Date(),
         status: 1,
         notes: '',
@@ -556,6 +557,22 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 value={formik?.values?.header?.weight}
                 maxAccess={maxAccess}
                 readOnly
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionShifts.qry}
+                name='header.shiftId'
+                label={labels.shift}
+                maxAccess={access}
+                readOnly={isPosted}
+                valueField='recordId'
+                displayField={'name'}
+                values={formik.values?.header}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('header.shiftId', newValue?.recordId || null)
+                }}
+                error={formik.touched?.header?.shiftId && Boolean(formik.errors?.header?.shiftId)}
               />
             </Grid>
           </Grid>
