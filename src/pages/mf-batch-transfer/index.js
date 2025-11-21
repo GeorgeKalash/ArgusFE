@@ -33,21 +33,18 @@ const BatchTransfer = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: ManufacturingRepository.BatchTransfer.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: ManufacturingRepository.BatchTransfer.snapshot,
+      parameters: `_filter=${qry}`
+    })
   }
 
   const {
     query: { data },
     labels: labels,
-    filterBy,
+    search,
+    clear,
     paginationParameters,
     refetch,
     access,
@@ -56,8 +53,8 @@ const BatchTransfer = () => {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.BatchTransfer.page,
     datasetId: ResourceIds.BatchTransfer,
-    filter: {
-      filterFn: fetchWithFilter
+    search: {
+      searchFn: fetchWithSearch
     }
   })
 
@@ -139,7 +136,14 @@ const BatchTransfer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar labels={labels} onAdd={add} maxAccess={access} filterBy={filterBy} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
