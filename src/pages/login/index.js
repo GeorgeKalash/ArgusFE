@@ -190,8 +190,10 @@ const LoginPage = () => {
                   />
                 </Grid>
               </Grid>
-              <Box className={styles.linksRow}>
-                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
+              <Box>
+                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                  {platformLabels.ForgotPass}
+                </LinkStyled>
               </Box>
               <Button
                 fullWidth
@@ -205,16 +207,18 @@ const LoginPage = () => {
               </Button>
             </CardContent>
           </Card>
-          <Box className={styles.languageRow}>
-            <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
+          <Box sx={{ display: 'flex' }}>
+            <Typography variant='body2' className={styles.language}>
+              {platformLabels.ArgusOfferedIn}
+            </Typography>
             <Box className={styles.languageLinks}>
-              <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-en' className={styles.language} sx={{ color: 'red' }}>
                 English
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-fr' className={styles.language} sx={{ color: 'red' }}>
                 Français
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-ar' className={styles.language} sx={{ color: 'red' }}>
                 عربي
               </LinkStyled>
             </Box>
