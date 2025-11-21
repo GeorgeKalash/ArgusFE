@@ -31,7 +31,7 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
-    access: access,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -204,7 +204,7 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
           itemName: res.record?.itemName || '',
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
-          groupName: res2.record?.groupName || '',
+          itemGroupName: res2.record?.itemGroupName || '',
           pcs: res.record?.pcs || 0,
           qty: res.record?.qty || 0
         })
@@ -230,7 +230,7 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
     {
       component: 'textfield',
       label: labels.itemGroup,
-      name: 'groupName',
+      name: 'itemGroupName',
       flex: 2,
       props: {
         readOnly: true
