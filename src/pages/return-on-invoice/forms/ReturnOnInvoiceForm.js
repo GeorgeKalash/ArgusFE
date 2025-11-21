@@ -163,6 +163,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         volume: 0,
         weight: 0,
         unitPrice: 0,
+        msId: null,
         upo: 0,
         qty: 0,
         mdAmount: 0,
@@ -286,6 +287,17 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         hidden: true
       }
     }
+  }
+
+  async function getMeasurementObject(msId) {
+    if (!msId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
   }
 
   const columns = [
@@ -424,6 +436,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           getItemConvertPrice(newRow.itemId, update)
         ])
 
+        const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
+
         let rowTax
         let rowTaxDetails
         const effectiveTaxId = formik.values.taxId || itemInfo.taxId
@@ -478,7 +492,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           mdType: 1,
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
-          trackBy: newRow?.trackBy
+          trackBy: newRow?.trackBy,
+          decimals: measurementSchedule?.decimals || 0
         })
       },
       propsReducer({ row, props }) {
@@ -499,6 +514,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       label: labels.qty,
       name: 'returnNowQty',
       updateOn: 'blur',
+      props: {
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals
+          }
+        }
+      },
       onChange({ row: { update, newRow } }) {
         const { returnNowQty, balanceQty, invoiceId } = newRow
         const validQty = invoiceId && Number(returnNowQty) > Number(balanceQty) ? balanceQty : returnNowQty
