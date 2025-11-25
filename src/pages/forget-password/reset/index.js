@@ -93,7 +93,9 @@ const Reset = () => {
                     error={formik.touched.username && Boolean(formik.errors.username)}
                     placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
-                    startIcons={[<img key='icon' src='/images/password/mail.png' alt='mail icon' />]}
+                    startIcons={[
+                      <img key='icon' src='/images/password/mail.png' alt='mail icon' class={styles.imageMail} />
+                    ]}
                     onClear={() => formik.setFieldValue('username', '')}
                   />
                 </Grid>
