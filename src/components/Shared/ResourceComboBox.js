@@ -66,6 +66,7 @@ export default function ResourceComboBox({
 
   const fetchData = async (refresh = true) => {
     if (rest?.readOnly && dataGrid) return
+
     if (parameters && !data && (datasetId || endpointId)) {
       setIsLoading(true)
 
@@ -139,7 +140,7 @@ export default function ResourceComboBox({
         store: finalItemsList,
         valueField,
         value: _value,
-        onOpen: () => noCache && fetchData(true),
+        onOpen: () => noCache && fetchData(),
         onBlur,
         isLoading
       }}

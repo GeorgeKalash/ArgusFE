@@ -115,7 +115,7 @@ const GlobalAuthorization = () => {
         invalidate,
         resourceId: ResourceIds.SettingsResources
       },
-      width: 1000,
+      width: 1200,
       height: 600,
       title: labels.securityGroup
     })
@@ -139,7 +139,7 @@ const GlobalAuthorization = () => {
           labels={labels}
           inputSearch={true}
           leftSection={
-            <Grid item sx={{ width: '350px' }}>
+            <Grid item xs={2.5}>
               <ResourceComboBox
                 datasetId={DataSets.MODULE}
                 label={labels.module}

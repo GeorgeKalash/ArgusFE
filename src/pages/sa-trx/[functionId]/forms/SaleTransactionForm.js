@@ -379,7 +379,7 @@ export default function SaleTransactionForm({
     const isMetal = itemPhysProp?.isMetal ?? false
     const metalId = itemPhysProp?.metalId ?? null
     const baseLaborPrice = ItemConvertPrice?.baseLaborPrice ?? 0
-
+    const measurementSchedule = await getMeasurementObject(newRow?.msId)
     const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
@@ -450,6 +450,8 @@ export default function SaleTransactionForm({
 
     result = {
       ...result,
+      qty: 0,
+      decimals: measurementSchedule?.decimals,
       isMetal,
       metalId,
       metalPurity,
@@ -555,6 +557,7 @@ export default function SaleTransactionForm({
           const itemPhysProp = await getItemPhysProp(ItemConvertPrice?.itemId)
           const itemInfo = await getItem(ItemConvertPrice?.itemId)
           getFilteredMU(itemInfo?.itemId, itemInfo?.msId)
+
           const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
           await barcodeSkuSelection(update, newRow, ItemConvertPrice, itemPhysProp, itemInfo, true, defaultMu)
         } else {
@@ -712,7 +715,12 @@ export default function SaleTransactionForm({
       name: 'qty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        onCondition: row => {
+          return {
+            decimalScale: row?.decimals,
+            readOnly: !row?.itemId
+          }
+        }
       },
       async onChange({ row: { update, newRow } }) {
         const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
@@ -1154,6 +1162,15 @@ export default function SaleTransactionForm({
       disabled: !formik.values.header.isVerified
     }
   ]
+
+  async function getMeasurementObject(msId) {
+    const res = await getRequest({
+      extension: InventoryRepository.Measurement.get,
+      parameters: `_recordId=${msId}`
+    })
+
+    return res?.record
+  }
 
   async function fillForm(saTrxPack, dtInfo) {
     const saTrxHeader = saTrxPack?.header

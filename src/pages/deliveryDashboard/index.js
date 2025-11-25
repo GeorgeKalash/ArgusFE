@@ -105,7 +105,6 @@ const DashboardLayout = () => {
               {labels.deliveryVolumes} - {chart.zoneName}
             </Title>
             <HorizontalBarChartDark
-              id={`zonesVolumeChart-${index}`}
               labels={chart.volumes.map(v => v.subZone)}
               data={chart.volumes.map(v => v.volume)}
               label={labels.deliveryVolumes}

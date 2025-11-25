@@ -40,6 +40,8 @@ export default function JobOrderForm({
   setRefetchRouting,
   invalidate,
   lockRecord,
+  refetchJob,
+  setRefetchJob,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -395,6 +397,8 @@ export default function JobOrderForm({
       isPosted: jobOrder?.status == 3,
       jobReference: jobOrder?.reference,
       isCancelled: jobOrder?.status == -1,
+      status: jobOrder?.status,
+      routingId: jobOrder?.routingId || null,
       ...rest
     }))
 
@@ -591,6 +595,11 @@ export default function JobOrderForm({
         }
     })()
   }, [formik.values.dtId])
+
+  useEffect(() => {
+    if (recordId && refetchJob) refetchForm(recordId)
+    setRefetchJob(false)
+  }, [refetchJob])
 
   useEffect(() => {
     ;(async function () {
