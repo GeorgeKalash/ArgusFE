@@ -24,8 +24,6 @@ const CustomButton = ({
     setTooltip(null)
   }
 
-  console.log(props.fullSize)
-
   return (
     <div
       className={!props.fullWidth && styles.buttonContainer}

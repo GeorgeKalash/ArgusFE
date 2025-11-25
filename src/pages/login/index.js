@@ -200,24 +200,23 @@ const LoginPage = () => {
                 fullWidth
                 type='submit'
                 variant='contained'
-                sx={{ mb: 7 }}
                 onClick={validation.handleSubmit}
                 label={platformLabels.Login}
               />
             </CardContent>
           </Card>
           <Box className={styles.languageRow}>
-            <Typography variant='body2' className={styles.language}>
+            <Typography variant='body2' className={styles.offered}>
               {platformLabels.ArgusOfferedIn}
             </Typography>
             <Box className={styles.languageLinks}>
-              <LinkStyled href='/pages/auth/login-en' className={styles.language} sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-en' className={styles.language}>
                 English
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' className={styles.language} sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-fr' className={styles.language}>
                 Français
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' className={styles.language} sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-ar' className={styles.language}>
                 عربي
               </LinkStyled>
             </Box>
