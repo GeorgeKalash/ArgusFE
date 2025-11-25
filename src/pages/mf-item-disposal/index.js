@@ -9,9 +9,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ItemDisposalForm from './Forms/ItemDisposalForm'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
 export default function ItemDisposal() {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -130,7 +130,19 @@ export default function ItemDisposal() {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} />
+        <Fixed>
+          <GridToolbar
+            onAdd={add}
+            maxAccess={access}
+            onSearch={value => {
+              filterBy('qry', value)
+            }}
+            onSearchClear={() => {
+              clearFilter('qry')
+            }}
+            inputSearch={true}
+          />
+        </Fixed>
       </Fixed>
       <Grow>
         <Table
