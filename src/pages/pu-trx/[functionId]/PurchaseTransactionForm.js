@@ -63,11 +63,12 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import Installments from 'src/components/Shared/Installments'
 import { PUSerialsForm } from 'src/components/Shared/PUSerialsForm'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
@@ -77,6 +78,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const { stack: stackError } = useError()
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -100,6 +102,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const initialValues = {
     recordId: recordId,
+    disableSKULookup: false,
     header: {
       dtId: null,
       dgId: functionId,
@@ -366,6 +369,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     filteredMeasurements.current = arrayMU
   }
 
+  async function fillSkuData(update, itemId) {
+    const phycialProperty = await getItemPhysProp(itemId)
+    const itemInfo = await getItem(itemId)
+    const vendorPrice = await getVendorPrice(itemId, formik.values.header)
+    await fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
@@ -383,57 +393,84 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       flex: 2,
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
-        displayField: 'sku',
-        valueField: 'sku',
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'trackBy', to: 'trackBy' },
-          { from: 'msId', to: 'msId' },
-          { from: 'isInactive', to: 'isInactive' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Item Name' }
-        ],
-        displayFieldWidth: 5,
-        minChars: 2
+        ...(!formik.values.disableSKULookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
+          displayField: 'sku',
+          valueField: 'sku',
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'trackBy', to: 'trackBy' },
+            { from: 'msId', to: 'msId' },
+            { from: 'isInactive', to: 'isInactive' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'name', value: 'Item Name' }
+          ],
+          displayFieldWidth: 5,
+          minChars: 2
+        })
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.itemId) {
-          update({
-            enabled: false
-          })
+        if (!formik.values.disableSKULookup) {
+          if (!newRow?.itemId) {
+            update({
+              enabled: false
+            })
 
-          return
+            return
+          }
+          if (newRow.isInactive) {
+            update({
+              ...formik.initialValues.items[0],
+              id: newRow.id
+            })
+            stackError({
+              message: labels.inactiveItem
+            })
+
+            return
+          }
+          fillSkuData(update, newRow?.itemId)
+        } else {
+          if (!newRow?.sku) {
+            update({
+              ...formik.initialValues.rows[0],
+              id: newRow.id
+            })
+
+            return
+          }
+
+          const skuInfo = await getRequest({
+            extension: InventoryRepository.Items.get2,
+            parameters: `_sku=${newRow.sku}`
+          })
+          if (!skuInfo.record) {
+            update({
+              ...formik.initialValues.rows[0],
+              id: newRow.id
+            })
+            stackError({
+              message: labels.invalidSKU
+            })
+
+            return
+          }
+          if (newRow?.sku) {
+            fillSkuData(update, skuInfo?.record?.recordId)
+          }
         }
-        if (newRow.isInactive) {
-          update({
-            ...formik.initialValues.items[0],
-            id: newRow.id
-          })
-          stackError({
-            message: labels.inactiveItem
-          })
-
-          return
-        }
-        const phycialProperty = await getItemPhysProp(newRow.itemId)
-        const itemInfo = await getItem(newRow.itemId)
-
-        const vendorPrice =
-          newRow?.promotionTypeId === '3' || newRow?.promotionTypeId === '4'
-            ? undefined
-            : await getVendorPrice(newRow, formik.values.header)
-        await fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -1075,10 +1112,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     return res?.list
   }
-  async function getVendorPrice(object, form) {
+  async function getVendorPrice(itemId, form) {
     const res = await getRequest({
       extension: PurchaseRepository.VendorPrice.get,
-      parameters: `_itemId=${object.itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
+      parameters: `_itemId=${itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
     })
 
     return res?.record
@@ -1150,7 +1187,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       TotPricePerG: TotPricePerG,
       unitPrice: unitPrice,
       priceType: itemInfo?.priceType || 1,
-      qty: 0,
+      qty: 1,
       msId: itemInfo?.msId,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
@@ -1396,6 +1433,19 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     fillMetalPrice()
   }
 
+  async function sKULookupInfo(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: PurchaseRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+    formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+  }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
@@ -1465,6 +1515,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   useEffect(() => {
     if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    sKULookupInfo(formik.values.header.dtId)
   }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {
