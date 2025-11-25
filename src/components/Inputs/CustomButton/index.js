@@ -24,12 +24,18 @@ const CustomButton = ({
     setTooltip(null)
   }
 
+  console.log(props.fullSize)
+
   return (
-    <div className={styles.buttonContainer} onMouseEnter={handleButtonMouseEnter} onMouseLeave={handleButtonMouseLeave}>
+    <div
+      className={!props.fullWidth && styles.buttonContainer}
+      onMouseEnter={handleButtonMouseEnter}
+      onMouseLeave={handleButtonMouseLeave}
+    >
       <Button
         onClick={onClick}
         variant='contained'
-        className={styles.responsiveButton}
+        className={!props.fullWidth ? styles.responsiveButton : styles.responsiveButtonFullWidth}
         sx={{
           mr: 1,
           backgroundColor: color,

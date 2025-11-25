@@ -85,19 +85,14 @@
   }
 
   .language {
-    display: flex;
-    gap: 1rem;
-    font-size: 18px !important;
-    padding-top: 200px;
-    padding-bottom: 200px;
+    font-size: 20px !important;
   }
   .languageLinks {
     display: flex;
     gap: 1rem;
-    font-size: 18px !important;
   }
   .footer {
-    font-size: 18px !important;
+    font-size: 20px !important;
   }
 }
 

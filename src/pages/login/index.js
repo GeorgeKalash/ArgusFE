@@ -17,6 +17,7 @@ import ChangePassword from 'src/components/Shared/ChangePassword'
 import axios from 'axios'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import styles from './LoginPage.module.css'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -195,19 +196,17 @@ const LoginPage = () => {
                   {platformLabels.ForgotPass}
                 </LinkStyled>
               </Box>
-              <Button
+              <CustomButton
                 fullWidth
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
-                className={styles.loginButton}
                 onClick={validation.handleSubmit}
-              >
-                {platformLabels.Login}
-              </Button>
+                label={platformLabels.Login}
+              />
             </CardContent>
           </Card>
-          <Box sx={{ display: 'flex' }}>
+          <Box className={styles.languageRow}>
             <Typography variant='body2' className={styles.language}>
               {platformLabels.ArgusOfferedIn}
             </Typography>

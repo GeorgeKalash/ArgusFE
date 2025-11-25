@@ -46,7 +46,11 @@
   .responsiveButton {
     width: auto !important;
     height: auto !important;
-    border-radius: 7px !important;
+    font-size: 18px !important;
+    padding: 9px 14px !important;
+  }
+  .responsiveButtonFullWidth {
+    height: auto !important;
     font-size: 18px !important;
     padding: 9px 14px !important;
   }
@@ -63,8 +67,14 @@
     width: auto !important;
     height: auto !important;
     border-radius: 7px !important;
-    font-size: 18px !important;
-    padding: 7px 12px !important;
+    font-size: 16px !important;
+    padding: 6px 9px !important;
+  }
+  .responsiveButtonFullWidth {
+    height: auto !important;
+    border-radius: 7px !important;
+    font-size: 16px !important;
+    padding: 9px 14px !important;
   }
   .toast {
     top: -30px !important;
@@ -78,7 +88,7 @@
   }
   .responsiveButton {
     height: 30px !important;
-    border-radius: 7px !important;
+    border-radius: 5px !important;
     padding: 5px 5px !important;
   }
   .toast {
@@ -92,6 +102,7 @@
     height: 17px !important;
   }
   .responsiveButton {
+    padding: 9px 9px !important;
   }
   .toast {
     font-size: 13px;
@@ -102,8 +113,6 @@
   .responsiveButton img {
     height: 16px !important;
   }
-  .responsiveButton {
-  }
 }
 
 @media (max-width: 1024px) {
@@ -113,8 +122,16 @@
   .responsiveButton {
     height: 28px !important;
     font-size: 10px !important;
+    border-radius: 5px !important;
     width: auto !important;
     height: auto !important;
+    padding: 4px 7px !important;
+  }
+  .responsiveButtonFullWidth {
+    height: auto !important;
+    border-radius: 5px !important;
+    font-size: 10px !important;
+    padding: 5px 5px !important;
   }
   .toast {
     font-size: 12px;
@@ -157,6 +174,7 @@
   .responsiveButton {
     height: 18px !important;
   }
+
   .toast {
     font-size: 9px;
     top: -18px !important;
