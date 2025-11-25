@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 const defaultProvider = {
@@ -32,6 +32,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [companyName, setCompanyName] = useState('')
+  const [deployHost, setDeployHost] = useState('')
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
   const router = useRouter()
@@ -51,17 +52,21 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-  const fetchData = async () => {
-    const matchHostname = window.location.hostname.match(/^(.+)\.(softmachine\.co|argus-bup\.com)$/)
+  const fetchData = async companyName => {
+    const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
 
-    const accountName = matchHostname ? matchHostname[1] : 'neg2x'
+    const accountName =
+      !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy' ? companyName : matchHostname?.[1]
+    setDeployHost(matchHostname)
+    setCompanyName('')
 
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-
-      setCompanyName(response.data.record.companyName)
-      setGetAC(response)
-      window.localStorage.setItem('apiUrl', response.data.record.api)
+      if (accountName) {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+        setCompanyName(response.data.record.companyName)
+        setGetAC(response)
+        window.localStorage.setItem('apiUrl', response.data.record.api)
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -210,11 +215,13 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     companyName,
+    deployHost,
     languageId,
     setUser,
     setLoading,
     login: handleLogin,
     logout: handleLogout,
+    fetchData,
     getAccessToken,
     encryptePWD,
     EnableLogin,
