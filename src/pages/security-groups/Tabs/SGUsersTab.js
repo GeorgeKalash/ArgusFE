@@ -52,9 +52,10 @@ const SGUsersTab = ({ labels, maxAccess, storeRecordId }) => {
       label: labels.name,
       props: {
         endpointId: SystemRepository.Users.qry,
-        parameters: `_startAt=0&_pageSize=100&_size=50&_sortBy=fullName&_filter=`,
+        parameters: `_startAt=0&_size=1000&_sortBy=fullName&_filter=`,
         valueField: 'recordId',
         displayField: 'fullName',
+        displayFieldWidth: 1.5,
         columnsInDropDown: [
           { key: 'fullName', value: 'Name' },
           { key: 'email', value: 'Email' }
