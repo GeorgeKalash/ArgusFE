@@ -25,11 +25,7 @@ const CustomButton = ({
   }
 
   return (
-    <div
-      className={!props.fullWidth && styles.buttonContainer}
-      onMouseEnter={handleButtonMouseEnter}
-      onMouseLeave={handleButtonMouseLeave}
-    >
+    <div className={styles.buttonContainer} onMouseEnter={handleButtonMouseEnter} onMouseLeave={handleButtonMouseLeave}>
       <Button
         onClick={onClick}
         variant='contained'
