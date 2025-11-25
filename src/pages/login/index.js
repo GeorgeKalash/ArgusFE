@@ -177,7 +177,7 @@ const LoginPage = () => {
           </Box>
           <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
             <Grid container spacing={5}>
-              {!deployHost ? (
+              {deployHost ? (
                 <Grid item xs={12}>
                   <CustomComboBox
                     name='accountId'
@@ -279,7 +279,7 @@ const LoginPage = () => {
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
-                disabled={!deployHost && !validation.values.accountId}
+                disabled={deployHost && !validation.values.accountId}
                 onClick={validation.handleSubmit}
               >
                 {platformLabels?.Login}

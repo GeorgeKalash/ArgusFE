@@ -54,10 +54,9 @@ const AuthProvider = ({ children }) => {
 
   const fetchData = async companyName => {
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-    const accountName =
-      !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy' ? companyName : matchHostname?.[1]
-    setDeployHost(matchHostname)
+    const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
+    const accountName = isDeploy ? companyName : matchHostname?.[1]
+    setDeployHost(isDeploy)
     setCompanyName('')
 
     try {
