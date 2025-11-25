@@ -112,7 +112,7 @@ export default function ItemDisposal() {
         recordId,
         access
       },
-      width: 700,
+      width: 900,
       height: 600,
       title: labels.itemDisposal
     })
