@@ -1,7 +1,7 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
@@ -37,6 +37,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onOpen,
   onBlur = () => {},
   ...props
 }) => {
@@ -52,6 +53,7 @@ const CustomComboBox = ({
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
   const valueHighlightedOption = useRef(null)
@@ -85,11 +87,13 @@ const CustomComboBox = ({
       PopperComponent={PopperComponent}
       PaperComponent={({ children }) => (
         <Paper
-        style={{
-          minWidth: `${displayFieldWidth * 100}%`,
-          width: 'max-content',
-        }}
-      >{children}</Paper>
+          style={{
+            minWidth: `${displayFieldWidth * 100}%`,
+            width: 'max-content'
+          }}
+        >
+          {children}
+        </Paper>
       )}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
@@ -122,6 +126,9 @@ const CustomComboBox = ({
           else return ''
         }
       }}
+      onOpen={onOpen}
+      loading={isLoading}
+      loadingText={`${platformLabels.loading}...`}
       filterOptions={(options, { inputValue }) => {
         var results
         filterOptions.current = ''
@@ -178,28 +185,15 @@ const CustomComboBox = ({
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
-                      <Box
-                        key={i}
-                        className={styles.comboHeaderCell}
-                        style={{ width: widthPercent }}
-                      >
+                      <Box key={i} className={styles.comboHeaderCell} style={{ width: widthPercent }}>
                         {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
               )}
-              <li
-                {...propsOption}
-                className={`${propsOption.className} ${styles.comboOptionRow}`}
-              >
-                {option.icon && (
-                  <img
-                    src={option.icon}
-                    alt={option[displayField]}
-                    className={styles.comboOptionIcon}
-                  />
-                )}
+              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
+                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -208,11 +202,7 @@ const CustomComboBox = ({
                   }
 
                   return (
-                    <Box
-                      key={i}
-                      className={styles.comboOptionCell}
-                      style={{ width: widthPercent }}
-                    >
+                    <Box key={i} className={styles.comboOptionCell} style={{ width: widthPercent }}>
                       {displayValue}
                     </Box>
                   )
@@ -223,20 +213,9 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li
-                {...propsOption}
-                className={`${propsOption.className} ${styles.comboOptionRow}`}
-              >
-                {option.icon && (
-                  <img
-                    src={option.icon}
-                    alt={option[displayField]}
-                    className={styles.comboOptionIcon}
-                  />
-                )}
-                <Box className={styles.comboOptionSingleText}>
-                  {option[displayField]}
-                </Box>
+              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
+                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
+                <Box className={styles.comboOptionSingleText}>{option[displayField]}</Box>
               </li>
             </Box>
           )
@@ -244,7 +223,7 @@ const CustomComboBox = ({
       }}
       renderInput={params => {
         const defaultEndAdornment = params.InputProps.endAdornment
-      
+
         const mergedEndAdornment =
           !_readOnly && React.isValidElement(defaultEndAdornment)
             ? React.cloneElement(defaultEndAdornment, {
@@ -272,9 +251,9 @@ const CustomComboBox = ({
                 )
               })
             : _readOnly
-              ? null 
-              : defaultEndAdornment
-      
+            ? null
+            : defaultEndAdornment
+
         return (
           <TextField
             {...params}
@@ -308,11 +287,7 @@ const CustomComboBox = ({
             InputProps={{
               ...params.InputProps,
               startAdornment: value?.icon ? (
-                <img
-                  src={value.icon}
-                  alt={value[displayField]}
-                  className={styles.comboStartIcon}
-                />
+                <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
               ) : (
                 props?.startAdornment || params.InputProps.startAdornment
               ),
@@ -321,7 +296,6 @@ const CustomComboBox = ({
           />
         )
       }}
-      
       {...props}
     />
   )
