@@ -148,7 +148,7 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
 
     toast.success(platformLabels.Posted)
     invalidate()
-    window.close()
+    refetchForm(formik.values.recordId)
   }
 
   async function refetchForm(recordId) {
