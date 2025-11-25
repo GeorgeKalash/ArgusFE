@@ -675,5 +675,17 @@ export const getButtons = platformLabels => [
     label: platformLabels.Confirm,
     color: '#231f20',
     main: false
+  },
+  {
+    key: 'Inventory',
+    label: platformLabels.Inventory,
+    color: '#231f20',
+    main: false
+  },
+  {
+    key: 'Import From Transfer',
+    label: platformLabels.importFromTransfer,
+    color: '#231f20',
+    main: false
   }
 ]

@@ -22,6 +22,8 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { formatDateFromApi } from 'src/lib/date-helper'
+import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -48,7 +50,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       notes: '',
       status: 1,
       wip: 1,
-      DisposalItem: [
+      disposalItem: [
         {
           id: 1,
           trxId: null,
@@ -60,7 +62,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           trackby: null
         }
       ],
-      DisposalSerial: []
+      disposalSerial: []
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -74,6 +76,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   const editMode = !!formik.values.recordId
 
   const onCondition = row => {
+    console.log('check row', row)
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -85,6 +88,17 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         hidden: true
       }
     }
+  }
+
+  async function getGroupInfo(grpId) {
+    if (!grpId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Group.get,
+      parameters: `_recordId=${grpId}`
+    })
+
+    return res?.record?.reference || ''
   }
 
   const columns = [
@@ -100,14 +114,30 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' }
+          { from: 'name', to: 'itemName' },
+          { from: 'groupId', to: 'groupId' },
+          { from: 'trackBy', to: 'trackBy' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
         ]
       },
-      async onChange({ row: { update, newRow } }) {}
+      async onChange({ row: { update, newRow } }) {
+        if (newRow?.isInactive) {
+          update({
+            ...formik.initialValues.disposalItem[0],
+            id: newRow.id
+          })
+          stackError({
+            message: labels.inactiveItem
+          })
+
+          return
+        }
+        const itemGroupRef = await getGroupInfo(newRow?.groupId)
+        update({ itemGroupRef })
+      }
     },
     {
       component: 'textfield',
@@ -120,7 +150,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     {
       component: 'textfield',
       label: labels.itemGroup,
-      name: 'itemGroupName',
+      name: 'itemGroupRef',
       props: {
         readOnly: true
       }
@@ -145,7 +175,6 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
             props: {
               labels,
               row,
-              disabled: isPosted || isClosed,
               siteId: formik?.values?.siteId,
               maxAccess,
               checkForSiteId: true,
@@ -158,22 +187,67 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     {
       component: 'numberfield',
       label: labels.serialCount,
-      name: 'serialCount',
-      async onChange({ row: { update, newRow } }) {}
+      name: 'serialCount'
     }
   ]
 
-  async function refetchForm() {}
+  const actions = [
+    {
+      key: 'Inventory',
+      condition: true,
+      onClick: () => formik.handleSubmit(),
+      disabled: !editMode
+    },
+    {
+      key: 'Import From Transfer',
+      condition: true,
+      onClick: () => formik.handleSubmit()
+    }
+  ]
+
+  async function getDisposal(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.Disposal.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    return { ...res?.record, date: formatDateFromApi(res?.record?.date) }
+  }
+
+  async function getDisposalItem(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.DisposalItem.qry,
+      parameters: `_trxId=${recordId}`
+    })
+
+    return res?.list?.length
+      ? res.list.map((item, index) => ({ ...item, id: index + 1 }))
+      : formik?.initialValues?.disposalItem
+  }
+
+  async function refetchForm(recordId) {
+    const header = await getDisposal(recordId)
+    const items = await getDisposalItem(recordId)
+
+    formik.setValues({ ...header, disposalItem: items })
+  }
 
   useEffect(() => {
-    ;(async function () {
-      if (recordId) {
-      }
-    })()
+    refetchForm(recordId)
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.ItemDisposal} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.ItemDisposal}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      actions={actions}
+    >
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
@@ -273,11 +347,11 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         </Fixed>
         <Grow>
           <DataGrid
-            name='DisposalItem'
-            onChange={value => formik?.setFieldValue('DisposalItem', value)}
+            name='disposalItem'
+            onChange={value => formik?.setFieldValue('disposalItem', value)}
             maxAccess={maxAccess}
-            value={formik?.values?.DisposalItem}
-            error={formik?.errors?.DisposalItem}
+            value={formik?.values?.disposalItem}
+            error={formik?.errors?.disposalItem}
             columns={columns}
           />
         </Grow>
