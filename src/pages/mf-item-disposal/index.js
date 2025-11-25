@@ -12,6 +12,8 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ItemDisposalForm from './Forms/ItemDisposalForm'
 import GridToolbar from 'src/components/Shared/GridToolbar'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
 
 export default function ItemDisposal() {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -96,9 +98,14 @@ export default function ItemDisposal() {
     }
   ]
 
-  const add = () => {
-    openForm()
+  const add = async () => {
+    proxyAction()
   }
+
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.ItemDisposal,
+    action: openForm
+  })
 
   const edit = obj => {
     openForm(obj?.recordId)
@@ -113,7 +120,7 @@ export default function ItemDisposal() {
         access
       },
       width: 900,
-      height: 600,
+      height: 650,
       title: labels.itemDisposal
     })
   }

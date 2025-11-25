@@ -21,14 +21,12 @@ import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { SaleRepository } from 'src/repositories/SaleRepository'
-import { FinancialRepository } from 'src/repositories/FinancialRepository'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
-  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ItemDisposal,
@@ -284,7 +282,14 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           />
         </Grow>
         <Fixed>
-          <Grid container></Grid>
+          <Grid container spacing={2} justifyContent='flex-end'>
+            <Grid item xs={3}>
+              <CustomNumberField name='totalQty' maxAccess={maxAccess} value='' label={labels.totalQty} readOnly />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='totalPcs' maxAccess={maxAccess} value='' label={labels.totalPcs} readOnly />
+            </Grid>
+          </Grid>
         </Fixed>
       </VertLayout>
     </FormShell>
