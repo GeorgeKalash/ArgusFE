@@ -14,10 +14,11 @@ import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/Ge
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
-export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, maxAccess, getGridData, window, store }) {
+export default function IntegrationLogicDetailsForm({ recordId, labels, maxAccess, getData, window, store }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const editMode = !!store.recordId
+  const ilId = store?.recordId
+  const editMode = !!ilId
 
   const { formik } = useForm({
     initialValues: {
@@ -31,7 +32,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
       description: '',
       costCenterSource: null
     },
-    validateOnChange: true,
+    maxAccess,
     validationSchema: yup.object({
       sign: yup.string().required(),
       tagId: yup.string().required(),
@@ -51,14 +52,14 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
         details: updatedList
       }
 
-      const response = await postRequest({
+      await postRequest({
         extension: GeneralLedgerRepository.IntegrationLogicDetails.set2,
         record: JSON.stringify(dataToSave)
       })
 
-      !recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+      getData()
 
-      await getGridData(response.recordId)
+      toast.success(recordId ? platformLabels.Edited : platformLabels.Added)
       window.close()
     }
   })
@@ -104,10 +105,11 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 valueShow='ptRef'
                 secondValueShow='ptName'
                 form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('postTypeId', newValue?.recordId || null)
+                onChange={(_, newValue) => {
                   formik.setFieldValue('ptRef', newValue?.reference || '')
                   formik.setFieldValue('ptName', newValue?.name || '')
+
+                  formik.setFieldValue('postTypeId', newValue?.recordId || null)
                 }}
                 error={formik.touched.postTypeId && Boolean(formik.errors.postTypeId)}
                 maxAccess={maxAccess}
@@ -123,8 +125,8 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('sign', newValue?.key || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('sign', newValue?.key || null)
                 }}
                 error={formik.touched.sign && Boolean(formik.errors.sign)}
               />
@@ -139,8 +141,8 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('masterSource', newValue?.key || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('masterSource', newValue?.key || null)
                 }}
                 error={formik.touched.masterSource && Boolean(formik.errors.masterSource)}
               />
@@ -155,8 +157,8 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('tagId', newValue?.key || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('tagId', newValue?.key || null)
                 }}
                 error={formik.touched.tagId && Boolean(formik.errors.tagId)}
               />
@@ -171,8 +173,8 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 displayField='value'
                 required
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
-                  formik && formik.setFieldValue('integrationLevel', newValue?.key || null)
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('integrationLevel', newValue?.key || null)
                 }}
                 error={formik.touched.integrationLevel && Boolean(formik.errors.integrationLevel)}
               />
@@ -186,7 +188,7 @@ export default function IntegrationLogicDetailsForm({ ilId, recordId, labels, ma
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => formik.setFieldValue('costCenterSource', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('costCenterSource', newValue?.key || null)}
                 error={formik.touched.costCenterSource && Boolean(formik.errors.costCenterSource)}
               />
             </Grid>

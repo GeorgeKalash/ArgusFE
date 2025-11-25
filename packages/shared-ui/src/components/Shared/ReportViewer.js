@@ -8,8 +8,9 @@ import RPBGridToolbar from './RPBGridToolbar'
 import ResourceComboBox from './ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
-import CustomButton from '../Inputs/CustomButton'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,6 +20,7 @@ const ReportViewer = ({ resourceId }) => {
   const [pdf, setPDF] = useState(null)
   const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
+  const { width } = useWindowDimensions()
 
   const getExportFormats = async () => {
     await getAllKvsByDataset({
@@ -35,6 +37,9 @@ const ReportViewer = ({ resourceId }) => {
       }
     })
   }
+
+  const zoom =
+    width <= 768 ? 90 : width <= 1024 ? 90 : width <= 1366 ? 100 : width <= 1600 ? 100 : width <= 1920 ? 140 : 180
 
   const getReportLayout = () => {
     getRequest({
@@ -177,7 +182,13 @@ const ReportViewer = ({ resourceId }) => {
 
       {pdf && (
         <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
-          <iframe title={report.selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          <iframe
+            title={report.selectedReport?.layoutName}
+            src={`${pdf}#zoom=${zoom}`}
+            width='100%'
+            height='100%'
+            allowFullScreen
+          />
           <Box position='absolute' top={20} right={130} zIndex={1}>
             <CustomButton
               image='popup.png'

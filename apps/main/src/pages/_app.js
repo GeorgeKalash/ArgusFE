@@ -99,7 +99,6 @@ const App = props => {
   const guestGuard = Component.guestGuard ?? false
   const aclAbilities = Component.acl ?? defaultACLObj
 
-
   return (
     <Provider store={store}>
       <CacheProvider value={emotionCache}>

@@ -1,11 +1,12 @@
 import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const CustomComboBox = ({
   type = 'text',
@@ -37,6 +38,7 @@ const CustomComboBox = ({
   fetchData,
   refresh = true,
   isLoading,
+  onOpen,
   onBlur = () => {},
   ...props
 }) => {
@@ -52,6 +54,7 @@ const CustomComboBox = ({
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const [isFocused, setIsFocused] = useState(false)
+  const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
   const valueHighlightedOption = useRef(null)
@@ -84,7 +87,14 @@ const CustomComboBox = ({
       key={value}
       PopperComponent={PopperComponent}
       PaperComponent={({ children }) => (
-        <Paper style={{ width: `${displayFieldWidth * 100}%` }}>{children}</Paper>
+        <Paper
+          style={{
+            minWidth: `${displayFieldWidth * 100}%`,
+            width: 'max-content'
+          }}
+        >
+          {children}
+        </Paper>
       )}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
@@ -117,6 +127,9 @@ const CustomComboBox = ({
           else return ''
         }
       }}
+      onOpen={onOpen}
+      loading={isLoading}
+      loadingText={`${platformLabels.loading}...`}
       filterOptions={(options, { inputValue }) => {
         var results
         filterOptions.current = ''
@@ -173,28 +186,15 @@ const CustomComboBox = ({
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
-                      <Box
-                        key={i}
-                        className={styles.comboHeaderCell}
-                        style={{ width: widthPercent }}
-                      >
+                      <Box key={i} className={styles.comboHeaderCell} style={{ width: widthPercent }}>
                         {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
               )}
-              <li
-                {...propsOption}
-                className={`${propsOption.className} ${styles.comboOptionRow}`}
-              >
-                {option.icon && (
-                  <img
-                    src={option.icon}
-                    alt={option[displayField]}
-                    className={styles.comboOptionIcon}
-                  />
-                )}
+              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
+                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -203,11 +203,7 @@ const CustomComboBox = ({
                   }
 
                   return (
-                    <Box
-                      key={i}
-                      className={styles.comboOptionCell}
-                      style={{ width: widthPercent }}
-                    >
+                    <Box key={i} className={styles.comboOptionCell} style={{ width: widthPercent }}>
                       {displayValue}
                     </Box>
                   )
@@ -218,90 +214,89 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li
-                {...propsOption}
-                className={`${propsOption.className} ${styles.comboOptionRow}`}
-              >
-                {option.icon && (
-                  <img
-                    src={option.icon}
-                    alt={option[displayField]}
-                    className={styles.comboOptionIcon}
-                  />
-                )}
-                <Box className={styles.comboOptionSingleText}>
-                  {option[displayField]}
-                </Box>
+              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
+                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
+                <Box className={styles.comboOptionSingleText}>{option[displayField]}</Box>
               </li>
             </Box>
           )
         }
       }}
-      renderInput={params => (
-        <TextField
-          {...params}
-          className={[
-            styles.customComboTextField,
-            !hasBorder ? styles.noBorder : '',
-            isFocused || value ? styles.labelFocused : styles.labelUnfocused
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          inputProps={{
-            ...params.inputProps,
-            tabIndex: _readOnly ? -1 : 0,
-            ...(neverPopulate && { value: '' })
-          }}
-          type={type}
-          variant={variant}
-          label={label}
-          required={_required}
-          autoFocus={focus}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          onFocus={() => setIsFocused(true)}
-          error={error}
-          helperText={helperText}
-          onBlur={e => {
-            const allowSelect =
-              selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
-            onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
-          }}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: value?.icon ? (
-              <img
-                src={value.icon}
-                alt={value[displayField]}
-                className={styles.comboStartIcon}
-              />
-            ) : (
-              props?.startAdornment || params.InputProps.startAdornment
-            ),
-            endAdornment: !_readOnly && (
-              <React.Fragment>
-                {hover &&
-                  (_disabled ? null : isLoading ? (
-                    <CircularProgress color='inherit' size={17} />
-                  ) : (
-                    refresh &&
-                    !readOnly && (
-                      <IconButton
-                        onClick={fetchData}
-                        aria-label='refresh data'
-                        tabIndex={-1}
-                        className={styles.refreshIconButton}
-                      >
-                        <RefreshIcon size={17} />
-                      </IconButton>
-                    )
-                  ))}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            )
-          }}
-        />
-      )}
+      renderInput={params => {
+        const defaultEndAdornment = params.InputProps.endAdornment
+
+        const mergedEndAdornment =
+          !_readOnly && React.isValidElement(defaultEndAdornment)
+            ? React.cloneElement(defaultEndAdornment, {
+                className: `${defaultEndAdornment.props.className || ''} ${styles.endAdornment}`,
+                children: (
+                  <>
+                    {hover &&
+                      (_disabled ? null : isLoading ? (
+                        <CircularProgress color='inherit' size={17} />
+                      ) : (
+                        refresh &&
+                        !readOnly && (
+                          <IconButton
+                            onClick={fetchData}
+                            aria-label='refresh data'
+                            tabIndex={-1}
+                            className={styles.refreshIconButton}
+                          >
+                            <RefreshIcon fontSize='small' />
+                          </IconButton>
+                        )
+                      ))}
+                    {defaultEndAdornment.props.children}
+                  </>
+                )
+              })
+            : _readOnly
+            ? null
+            : defaultEndAdornment
+
+        return (
+          <TextField
+            {...params}
+            className={[
+              styles.customComboTextField,
+              !hasBorder ? styles.noBorder : '',
+              isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            inputProps={{
+              ...params.inputProps,
+              tabIndex: _readOnly ? -1 : 0,
+              ...(neverPopulate && { value: '' })
+            }}
+            type={type}
+            variant={variant}
+            label={label}
+            required={_required}
+            autoFocus={focus}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            onFocus={() => setIsFocused(true)}
+            error={error}
+            helperText={helperText}
+            onBlur={e => {
+              const allowSelect =
+                selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
+              onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
+            }}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: value?.icon ? (
+                <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
+              ) : (
+                props?.startAdornment || params.InputProps.startAdornment
+              ),
+              endAdornment: mergedEndAdornment
+            }}
+          />
+        )
+      }}
       {...props}
     />
   )

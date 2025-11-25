@@ -21,6 +21,7 @@ export const TimeAttendanceRepository = {
   },
   BiometricDevices: {
     page: service + 'pageBM',
+    qry: service + 'qryBM',
     del: service + 'delBM',
     set: service + 'setBM',
     get: service + 'getBM'
@@ -31,10 +32,20 @@ export const TimeAttendanceRepository = {
     get: service + 'getLR',
     del: service + 'delLR'
   },
-  ResetTV: {
+  TimeVariation: {
     reset: service + 'resetTV',
     qry: service + 'qryTV',
-    qry2: service + 'qryTV2'
+    qry2: service + 'qryTV2',
+    snapshot: service + 'snapshotTV',
+    page: service + 'pageTV',
+    get: service + 'getTV',
+    set: service + 'setTV',
+    del: service + 'delTV',
+    gen: service + 'genTV',
+    close: service + 'closeTV',
+    reopen: service + 'reopenTV',
+    cancel: service + 'cancelTV',
+    override: service + 'overrideTV'
   },
   ShitLeave: {
     page: service + 'pageLQ',
@@ -45,7 +56,11 @@ export const TimeAttendanceRepository = {
     reopen: service + 'reopenLQ'
   },
   FlatSchedule: {
-    qry: service + 'qryFS'
+    qry: service + 'qryFS',
+    qry2: service + 'qryFS2',
+    copyRange: service + 'copyRangeFS',
+    range: service + 'rangeFS',
+    del: service + 'delRangeFS'
   },
   DSLReason: {
     qry: service + 'qryLR'
@@ -65,5 +80,8 @@ export const TimeAttendanceRepository = {
   },
   Schedule: {
     qry: service + 'qrySC'
+  },
+  FlatPunch: {
+    qry: service + 'qryFP'
   }
 }

@@ -13,7 +13,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 
 export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -28,7 +27,7 @@ export default function AdjDocTypeDefaultsForm({ labels, maxAccess, recordId, fu
       dtId: '',
       plantId: '',
       recordId: recordId || '',
-      cashAccountId: null,
+      cashAccountId: null
     },
     maxAccess,
     validateOnChange: true,

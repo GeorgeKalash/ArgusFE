@@ -18,17 +18,16 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 export default function SizesTab({ labels, maxAccess, store }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const recordId = store?.recordId
-  const editMode = !!recordId
+  const { jobItemSizes, isCancelled, isPosted, recordId } = store
 
   const { formik } = useForm({
     validateOnChange: true,
     initialValues: {
-      jobId: recordId,
+      jobId: null,
       jobItemSizes: [
         {
           id: 1,
-          jobId: recordId,
+          jobId: null,
           sizeId: '',
           expectedQty: 0,
           expectedPcs: 0,
@@ -158,43 +157,31 @@ export default function SizesTab({ labels, maxAccess, store }) {
     }
   ]
 
-  async function fetchGridData() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobItemSize.qry,
-      parameters: `_jobId=${recordId}`
-    })
-
-    const updateItemsList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res.list.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : formik.initialValues.jobItemSizes
-
-    formik.setValues({
-      jobId: recordId,
-      jobItemSizes: updateItemsList
-    })
-  }
-
   useEffect(() => {
     ;(async function () {
-      if (recordId) await fetchGridData()
+      formik.setValues({
+        jobId: recordId,
+        jobItemSizes:
+          jobItemSizes?.length > 0
+            ? await Promise.all(
+                jobItemSizes?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1
+                  }
+                })
+              )
+            : formik.initialValues.jobItemSizes
+      })
     })()
-  }, [recordId])
+  }, [jobItemSizes])
 
   return (
     <Form
       resourceId={ResourceIds.MFJobOrders}
       onSave={formik.handleSubmit}
       maxAccess={maxAccess}
-      editMode={editMode}
-      disabledSubmit={store?.isCancelled || store?.isPosted}
+      disabledSubmit={isCancelled || isPosted}
     >
       <VertLayout>
         <Grow>
@@ -206,7 +193,7 @@ export default function SizesTab({ labels, maxAccess, store }) {
             columns={columns}
             name='jobItemSizes'
             maxAccess={maxAccess}
-            allowDelete={!store?.isPosted && !store?.isCancelled}
+            allowDelete={isPosted && isCancelled}
           />
         </Grow>
         <Fixed>

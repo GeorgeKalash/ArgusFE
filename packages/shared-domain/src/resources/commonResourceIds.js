@@ -32,5 +32,6 @@ export const commonResourceIds = [
   ResourceIds.WorkCenterConsumptions,
   ResourceIds.Loans,
   ResourceIds.ProductionOrder,
-  ResourceIds.LeaveRequestODOM
+  ResourceIds.LeaveRequestODOM,
+  ResourceIds.TimeVariation
 ]

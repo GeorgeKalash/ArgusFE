@@ -13,7 +13,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-import { useError } from '@argus/shared-domain/src/lib/error'
+import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 

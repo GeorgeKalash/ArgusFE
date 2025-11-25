@@ -19,11 +19,51 @@
   font-size: 14px !important ;
 }
 
+.inputBase::placeholder {
+  font-size: 14px !important;
+}
+
 .search-icon {
   font-size: 18px !important;
   border: 0 !important;
   padding: 0px !important;
   margin: 1px !important;
+}
+
+@media (min-width: 2048px) and (max-width: 2566px) {
+  .outlinedRoot {
+    height: 45px !important;
+  }
+
+  .inputLabel {
+    font-size: 20px !important;
+    background-color: white;
+  }
+
+  .inputLabelFocused {
+    font-size: 22px !important;
+    margin-top: -4px !important;
+    background-color: white;
+    padding-right: 10px !important;
+  }
+
+  .inputBase {
+    font-size: 17.5px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 19px !important;
+  }
+
+  .search-icon {
+    font-size: 24px !important;
+  }
+  .labelRoot {
+    font-size: 23px !important;
+    margin-top: -4px !important;
+    background-color: white;
+    padding-right: 10px !important;
+  }
 }
 
 @media (min-width: 1025px) and (max-width: 1600px) {
@@ -41,11 +81,16 @@
   }
 
   .inputLabelFocused {
-    font-size: 12px !important;
+    font-size: 14px !important;
     top: 0px;
   }
+
   .inputBase {
     font-size: 12px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 12px !important;
   }
 
   .search-icon {
@@ -64,6 +109,10 @@
     font-size: 11px !important ;
   }
 
+  .inputBase::placeholder {
+    font-size: 11px !important;
+  }
+
   .outlinedRoot {
     height: 28px !important;
   }
@@ -72,6 +121,7 @@
     font-size: 14px !important;
   }
 }
+
 @media (max-width: 1024px) {
   .outlinedRoot {
     height: 26px !important;
@@ -83,20 +133,29 @@
 
   .inputLabel {
     font-size: 10px !important;
-    top: -2px;
+    top: -4px !important;
   }
 
   .inputLabelFocused {
     font-size: 10px !important;
-    top: 0px;
+    margin-top: 4px;
   }
 
   .inputBase {
     font-size: 10px !important;
   }
 
+  .inputBase::placeholder {
+    font-size: 10px !important;
+  }
+
   .search-icon {
     font-size: 13px !important;
+  }
+  .labelRoot {
+    font-size: 14px !important;
+    background-color: white;
+    padding-right: 10px !important;
   }
 }
 
@@ -118,6 +177,10 @@
   }
 
   .inputBase {
+    font-size: 9px !important;
+  }
+
+  .inputBase::placeholder {
     font-size: 9px !important;
   }
 
@@ -147,6 +210,10 @@
     font-size: 8px !important;
   }
 
+  .inputBase::placeholder {
+    font-size: 8px !important;
+  }
+
   .search-icon {
     font-size: 11px !important;
   }
@@ -170,6 +237,10 @@
   }
 
   .inputBase {
+    font-size: 7px !important;
+  }
+
+  .inputBase::placeholder {
     font-size: 7px !important;
   }
 

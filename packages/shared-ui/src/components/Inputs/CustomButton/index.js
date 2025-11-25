@@ -23,14 +23,19 @@ const CustomButton = ({
   const handleButtonMouseLeave = () => {
     setTooltip(null)
   }
-  const icon = require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`);
+
+  const icon = image ? require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`) : '' ;
 
   return (
-    <div className={styles.buttonContainer} onMouseEnter={handleButtonMouseEnter} onMouseLeave={handleButtonMouseLeave}>
+    <div
+      className={!props.fullWidth && styles.buttonContainer}
+      onMouseEnter={handleButtonMouseEnter}
+      onMouseLeave={handleButtonMouseLeave}
+    >
       <Button
         onClick={onClick}
         variant='contained'
-        className={styles.responsiveButton}
+        className={!props.fullWidth ? styles.responsiveButton : styles.responsiveButtonFullWidth}
         sx={{
           mr: 1,
           backgroundColor: color,
