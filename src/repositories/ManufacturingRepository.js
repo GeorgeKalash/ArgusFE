@@ -433,11 +433,6 @@ export const ManufacturingRepository = {
     unpost: service + 'unpostBTFR'
   },
   BatchTransferJob: {
-    qry: service + 'qryBTFJ',
-    set: service + 'setBTFJ',
-    del: service + 'delBTFJ',
-    snapshot: service + 'snapshotBTFJ',
-    get: service + 'getBTFJ',
-    post: service + 'postBTFJ'
+    qry: service + 'qryBTFJ'
   }
 }

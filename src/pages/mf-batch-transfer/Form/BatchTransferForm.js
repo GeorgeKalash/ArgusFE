@@ -313,7 +313,6 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    displayFieldWidth={1.5}
                     values={formik.values.header}
                     onChange={async (event, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
