@@ -1,7 +1,7 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useContext } from 'react'
 import axios from 'axios'
-import { Card, CardContent, Button, Grid, Box, IconButton, InputAdornment, CardHeader } from '@mui/material'
+import { Card, CardContent, Grid, Box } from '@mui/material'
 import * as yup from 'yup'
 import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { ControlContext } from 'src/providers/ControlContext'
@@ -79,7 +79,7 @@ const Reset = () => {
         <CardContent className={styles.cardContent}>
           <VertLayout>
             <Grow>
-              <Grid container spacing={2} pt={1}>
+              <Grid container spacing={2} pt={1.5}>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='username'
@@ -93,15 +93,10 @@ const Reset = () => {
                     error={formik.touched.username && Boolean(formik.errors.username)}
                     placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position='start'>
-                          <IconButton edge='start' disabled>
-                            <img src='/images/password/mail.png' alt='mail icon' />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
+                    startIcons={[
+                      <img key='icon' src='/images/password/mail.png' alt='mail icon' class={styles.imageMail} />
+                    ]}
+                    onClear={() => formik.setFieldValue('username', '')}
                   />
                 </Grid>
                 <Grid item xs={12} container justifyContent='flex-end' className={styles.contentButton}>

@@ -30,6 +30,7 @@ const CustomTextField = ({
   forceUpperCase = false,
   startIcons = [],
   endIcons = [],
+  InputLabelProps,
   ...props
 }) => {
   const name = props.name
@@ -187,7 +188,12 @@ const CustomTextField = ({
         )
       }}
       InputLabelProps={{
-        className: isFocused || value ? styles.inputLabelFocused : styles.inputLabel
+        ...InputLabelProps,
+        className: InputLabelProps?.shrink
+          ? styles.labelRoot
+          : isFocused || value
+          ? styles.inputLabelFocused
+          : styles.inputLabel
       }}
       required={_required}
       {...props}

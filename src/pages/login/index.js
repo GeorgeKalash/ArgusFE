@@ -17,6 +17,7 @@ import ChangePassword from 'src/components/Shared/ChangePassword'
 import axios from 'axios'
 import OTPAuthentication from 'src/components/Shared/OTPAuthentication'
 import styles from './LoginPage.module.css'
+import CustomButton from 'src/components/Inputs/CustomButton'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -190,31 +191,33 @@ const LoginPage = () => {
                   />
                 </Grid>
               </Grid>
-              <Box className={styles.linksRow}>
-                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
+              <Box>
+                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                  {platformLabels.ForgotPass}
+                </LinkStyled>
               </Box>
-              <Button
+              <CustomButton
                 fullWidth
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
-                className={styles.loginButton}
                 onClick={validation.handleSubmit}
-              >
-                {platformLabels.Login}
-              </Button>
+                label={platformLabels.Login}
+              />
             </CardContent>
           </Card>
           <Box className={styles.languageRow}>
-            <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
+            <Typography variant='body2' className={styles.language}>
+              {platformLabels.ArgusOfferedIn}
+            </Typography>
             <Box className={styles.languageLinks}>
-              <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-en' className={styles.language} sx={{ color: 'red' }}>
                 English
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-fr' className={styles.language} sx={{ color: 'red' }}>
                 Français
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-ar' className={styles.language} sx={{ color: 'red' }}>
                 عربي
               </LinkStyled>
             </Box>

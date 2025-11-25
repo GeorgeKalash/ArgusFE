@@ -4,7 +4,6 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-bottom: 50px;
 }
 
 .card {
@@ -39,7 +38,7 @@
   margin-bottom: 100px;
 }
 
-@media (max-width: 2560px) {
+@media (min-width: 2048px) and (max-width: 2566px) {
   .card {
     width: 36rem;
     margin-top: 500px;
@@ -48,6 +47,9 @@
     height: 50px;
     padding: 8px;
     font-size: 22px !important;
+  }
+  .imageMail {
+    width: 30px;
   }
 }
 
