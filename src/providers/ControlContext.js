@@ -117,7 +117,7 @@ const ControlProvider = ({ children }) => {
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
-  }, [apiUrl, user?.languageId, languageId])
+  }, [user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -128,7 +128,6 @@ const ControlProvider = ({ children }) => {
     : {}
 
   const getPlatformLabels = (resourceId, callback) => {
-    if (!apiUrl) return
     const disableLoading = false
     !disableLoading && !loading && setLoading(true)
 
