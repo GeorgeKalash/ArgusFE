@@ -25,6 +25,7 @@
     "@argus/shared-core": "file:../../packages/shared-core",
     "@argus/shared-layouts": "file:../../packages/shared-layouts",
     "@argus/shared-store": "file:../../packages/shared-store",
+    "@argus/module-sales": "file:../../packages/module-sales",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",

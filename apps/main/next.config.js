@@ -6,6 +6,7 @@ const nextConfig = {
   reactStrictMode: false,
 
   transpilePackages: [
+    '@argus/module-sales',
     '@argus/repositories',
     '@argus/shared-domain',
     '@argus/shared-hooks',
