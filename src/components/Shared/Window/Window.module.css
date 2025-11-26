@@ -58,17 +58,21 @@
 
 @media (max-width: 1600px) {
   .dialogTitle {
-    font-size: 1rem;
-    height: 30px;
+    font-size: 1rem !important;
+    height: 35px !important;
   }
   .iconButton svg {
-    font-size: 1.3rem;
+    font-size: 1.3rem !important;
   }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1300px) {
   .dialogTitle {
-    font-size: 0.9rem;
+    font-size: 0.9rem !important;
+    height: 30px !important;
+  }
+  .iconButton svg {
+    font-size: 1rem !important;
   }
 }
 
