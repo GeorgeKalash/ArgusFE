@@ -146,8 +146,7 @@ const ReportViewer = ({ resourceId }) => {
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
           leftSection={
-            <Grid item xs={2.5}>
-              <Grid container spacing={2}>
+              <Grid container spacing={4} alignItems='center'>
                 <Grid item xs={10}>
                   <ResourceComboBox
                     store={reportStore}
@@ -167,13 +166,12 @@ const ReportViewer = ({ resourceId }) => {
                     }
                   />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={1}>
                   <CustomButton
                     onClick={cycleFormat}
                     image={`${report.selectedFormat?.value || 'PDF'}.png`}
                     disabled={exportFormats.length === 0 || !report.selectedReport}
                   />
-                </Grid>
               </Grid>
             </Grid>
           }

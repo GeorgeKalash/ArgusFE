@@ -5,6 +5,7 @@ import ReportParameterBrowser from 'src/components/Shared/ReportParameterBrowser
 import { Grid } from '@mui/material'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
+import styles from './RPBGridToolbar.module.css'
 
 const RPBGridToolbar = ({
   add,
@@ -17,6 +18,7 @@ const RPBGridToolbar = ({
   hasSearch = true,
   filterBy,
   paramsRequired = false,
+  leftSection,
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -123,10 +125,17 @@ const RPBGridToolbar = ({
       }}
       inputSearch={hasSearch}
       actions={actions}
+      leftSection={
+        leftSection && (
+          <Grid item className={styles.leftSectionGridItem}>
+            {leftSection}
+          </Grid>
+        )
+      }
       bottomSection={
         rpbParams &&
         rpbParams.length > 0 && (
-          <Grid container sx={{ display: 'flex', pt: 2, margin: '0px !important' }}>
+          <Grid container className={styles.bottomSectionContainer}>
             {rpbParams.map(
               (param, i) =>
                 param.display && (
