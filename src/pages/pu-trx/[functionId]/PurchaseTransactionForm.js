@@ -959,42 +959,44 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = await Promise.all(
-      puTrxItems?.map(async (item, index) => {
-        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
-        const taxDetailsResponse = []
+    const modifiedList = puTrxItems.length
+      ? await Promise.all(
+          puTrxItems?.map(async (item, index) => {
+            const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
+            const taxDetailsResponse = []
 
-        const updatedpuTrxTaxes =
-          puTrxTaxes?.map(tax => {
-            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+            const updatedpuTrxTaxes =
+              puTrxTaxes?.map(tax => {
+                const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+
+                return {
+                  ...tax,
+                  taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+                }
+              }) || null
 
             return {
-              ...tax,
-              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+              ...item,
+              id: index + 1,
+              basePrice: item.basePrice ? item.basePrice : 0,
+              unitPrice: item.unitPrice ? item.unitPrice : 0,
+              vatAmount: item.vatAmount ? item.vatAmount : 0,
+              totalWeight: item.weight * item.qty,
+              extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
+              puTrx: true,
+              serials: puTrxSerials
+                ?.filter(row => row.seqNo == item.seqNo)
+                ?.map((serialDetail, index) => {
+                  return {
+                    ...serialDetail,
+                    id: index
+                  }
+                }),
+              taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
             }
-          }) || null
-
-        return {
-          ...item,
-          id: index + 1,
-          basePrice: item.basePrice ? item.basePrice : 0,
-          unitPrice: item.unitPrice ? item.unitPrice : 0,
-          vatAmount: item.vatAmount ? item.vatAmount : 0,
-          totalWeight: item.weight * item.qty,
-          extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
-          puTrx: true,
-          serials: puTrxSerials
-            ?.filter(row => row.seqNo == item.seqNo)
-            ?.map((serialDetail, index) => {
-              return {
-                ...serialDetail,
-                id: index
-              }
-            }),
-          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
-        }
-      })
-    )
+          })
+        )
+      : formik.initialValues.items
 
     formik.setValues({
       ...formik.values,
