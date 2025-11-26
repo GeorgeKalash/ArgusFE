@@ -6,6 +6,7 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import { formatDateDefault } from 'src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const CustomComboBox = ({
   type = 'text',
