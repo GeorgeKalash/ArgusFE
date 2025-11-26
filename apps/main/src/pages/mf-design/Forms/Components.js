@@ -15,29 +15,24 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 const Components = ({ store, maxAccess, labels }) => {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const requiredIfAny = (otherFields, message, customCheck) => {
-    return yup.string().test('required-if-any', message, function (value) {
-      const index = this.options.index
-      const parent = this.parent
-
-      const isAnyFilled = otherFields.some(field => !!parent[field])
-      const isFirst = index === 0
-
-      const isValid = customCheck ? customCheck(value) : !!value
-
-      return isFirst ? !isAnyFilled || isValid : isValid
-    })
+  const conditions = {
+    itemId: row => row?.itemId,
+    qty: row => row?.qty != null,
+    pcs: row => row?.pcs != null && row?.pcs <= 2147483647
   }
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     validateOnChange: true,
     maxAccess,
+    conditionSchema: ['items'],
     initialValues: {
       designId: recordId,
       items: [
@@ -46,27 +41,13 @@ const Components = ({ store, maxAccess, labels }) => {
           designId: recordId,
           itemId: '',
           seqNo: 1,
-          qty: 0,
-          pcs: 0
+          qty: null,
+          pcs: null
         }
       ]
     },
     validationSchema: yup.object({
-      items: yup.array().of(
-        yup.object().shape({
-          itemId: requiredIfAny(['qty', 'pcs'], 'Item is required'),
-          qty: requiredIfAny(
-            ['itemId', 'pcs'],
-            'Qty is required and must be a number',
-            value => !!value && !isNaN(Number(value))
-          ),
-          pcs: requiredIfAny(['itemId', 'qty'], 'PCS is required and must be a number ≤ 2147483647', value => {
-            const numeric = Number(value)
-
-            return !!value && !isNaN(numeric) && numeric <= 2147483647
-          })
-        })
-      )
+      items: yup.array().of(schema)
     }),
     onSubmit: async values => {
       const modifiedItems = values.items
@@ -75,7 +56,7 @@ const Components = ({ store, maxAccess, labels }) => {
           seqNo: index + 1,
           id: index + 1
         }))
-        .filter(item => item.itemId || item.qty || item.pcs)
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
 
       await postRequest({
         extension: ManufacturingRepository.Components.set2,
@@ -139,15 +120,43 @@ const Components = ({ store, maxAccess, labels }) => {
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'name', to: 'itemName' },
-          { from: 'sku', to: 'sku' }
+          { from: 'sku', to: 'sku' },
+          { from: 'categoryName', to: 'categoryName' }
         ],
         displayFieldWidth: 2
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow?.itemId) {
+          const res = await getRequest({
+            extension: InventoryRepository.ItemProduction.get,
+            parameters: `_recordId=${newRow.itemId}`
+          })
+          update({ rmCategoryName: res?.record?.rmcName || '' })
+        } else {
+          update({ rmCategoryName: '' })
+        }
       }
     },
     {
       component: 'textfield',
       label: labels.itemName,
       name: 'itemName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.category,
+      name: 'categoryName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.rmCategory,
+      name: 'rmCategoryName',
       props: {
         readOnly: true
       }
@@ -187,6 +196,8 @@ const Components = ({ store, maxAccess, labels }) => {
             value={formik.values.items}
             error={formik.errors.items}
             columns={columns}
+            name='items'
+            maxAccess={maxAccess}
           />
         </Grow>
         <Fixed>

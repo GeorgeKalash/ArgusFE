@@ -1,7 +1,7 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { useContext } from 'react'
 import axios from 'axios'
-import { Card, CardContent, Button, Grid, Box, IconButton, InputAdornment, CardHeader } from '@mui/material'
+import { Card, CardContent, Grid, Box } from '@mui/material'
 import * as yup from 'yup'
 import BlankLayout from '@argus/shared-core/src/@core/layouts/BlankLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -13,6 +13,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import ResetPassForm from '../forms/ResetPassForm'
 import styles from './Reset.module.css'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const Reset = () => {
   const { platformLabels } = useContext(ControlContext)
@@ -78,7 +79,7 @@ const Reset = () => {
         <CardContent className={styles.cardContent}>
           <VertLayout>
             <Grow>
-              <Grid container spacing={2} pt={1}>
+              <Grid container spacing={2} pt={1.5}>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='username'
@@ -92,27 +93,14 @@ const Reset = () => {
                     error={formik.touched.username && Boolean(formik.errors.username)}
                     placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position='start'>
-                          <IconButton edge='start' disabled>
-                            <img src='/images/password/mail.png' alt='mail icon' />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
+                    startIcons={[
+                      <img key='icon' src='/images/password/mail.png' alt='mail icon' class={styles.imageMail} />
+                    ]}
+                    onClear={() => formik.setFieldValue('username', '')}
                   />
                 </Grid>
-                <Grid item xs={12} container justifyContent='flex-end'>
-                  <Button
-                    size='small'
-                    type='submit'
-                    variant='contained'
-                    className={styles.submitBtn}
-                    onClick={formik.handleSubmit}
-                  >
-                    {platformLabels.Reset}
-                  </Button>
+                <Grid item xs={12} container justifyContent='flex-end' className={styles.contentButton}>
+                  <CustomButton label={platformLabels.Reset} onClick={formik.handleSubmit} color='#231f20' />
                 </Grid>
               </Grid>
             </Grow>

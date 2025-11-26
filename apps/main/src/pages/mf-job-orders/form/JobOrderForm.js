@@ -40,6 +40,8 @@ export default function JobOrderForm({
   setRefetchRouting,
   invalidate,
   lockRecord,
+  refetchJob,
+  setRefetchJob,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -377,41 +379,44 @@ export default function JobOrderForm({
     if (!recordId) return
 
     const res = await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.get,
+      extension: ManufacturingRepository.MFJobOrder.get2,
       parameters: `_recordId=${recordId}`
     })
+    const { jobOrder, ...rest } = res?.record || {}
     formik.setValues({
-      ...res.record,
-      date: formatDateFromApi(res?.record?.date),
-      endingDT: formatDateFromApi(res?.record?.endingDT),
-      startingDT: formatDateFromApi(res?.record?.startingDT),
-      deliveryDate: formatDateFromApi(res?.record?.deliveryDate)
+      ...jobOrder,
+      date: formatDateFromApi(jobOrder?.date),
+      endingDT: formatDateFromApi(jobOrder?.endingDT),
+      startingDT: formatDateFromApi(jobOrder?.startingDT),
+      deliveryDate: formatDateFromApi(jobOrder?.deliveryDate)
     })
 
     setStore(prevStore => ({
       ...prevStore,
-      recordId: res?.record?.recordId,
-      isPosted: res?.record.status == 3,
-      jobReference: res?.record.reference,
-      isCancelled: res?.record.status == -1
+      recordId: jobOrder?.recordId,
+      isPosted: jobOrder?.status == 3,
+      jobReference: jobOrder?.reference,
+      isCancelled: jobOrder?.status == -1,
+      status: jobOrder?.status,
+      routingId: jobOrder?.routingId || null,
+      ...rest
     }))
 
     !formik.values.recordId &&
       lockRecord({
-        recordId: res?.record?.recordId,
-        reference: res?.record.reference,
+        recordId: jobOrder?.recordId,
+        reference: jobOrder?.reference,
         resourceId: ResourceIds.MFJobOrders,
         onSuccess: () => {
           addLockedScreen({
             resourceId: ResourceIds.MFJobOrders,
-            recordId: res?.record.recordId,
-            reference: res?.record.reference
+            recordId: jobOrder?.recordId,
+            reference: jobOrder?.reference
           })
         }
       })
-    setRefetchRouting(true)
 
-    return res?.record.reference
+    return jobOrder?.reference
   }
 
   async function getRouting(recordId) {
@@ -592,6 +597,11 @@ export default function JobOrderForm({
   }, [formik.values.dtId])
 
   useEffect(() => {
+    if (recordId && refetchJob) refetchForm(recordId)
+    setRefetchJob(false)
+  }, [refetchJob])
+
+  useEffect(() => {
     ;(async function () {
       const res = await getRequest({
         extension: SystemRepository.Defaults.get,
@@ -621,8 +631,8 @@ export default function JobOrderForm({
             <Grid container spacing={2} xs={8}>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={SystemRepository.DocumentType.qry}
-                  parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.JobOrder}`}
+                  endpointId={ManufacturingRepository.MFJobOrder.pack}
+                  reducer={response => response?.record?.documentTypes}
                   name='dtId'
                   label={labels.documentType}
                   columnsInDropDown={[
@@ -703,7 +713,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={SystemRepository.Plant.qry}
+                        endpointId={ManufacturingRepository.MFJobOrder.pack}
+                        reducer={response => response?.record?.plants}
                         name='plantId'
                         label={platformLabels.plant}
                         valueField='recordId'
@@ -745,7 +756,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item>
                       <ResourceComboBox
-                        endpointId={InventoryRepository.ItemSizes.qry}
+                        endpointId={ManufacturingRepository.MFJobOrder.pack}
+                        reducer={response => response?.record?.itemSizes}
                         name='sizeId'
                         label={labels.size}
                         readOnly={isCancelled || isReleased || isPosted}
@@ -971,7 +983,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.ProductionClass.qry}
+                        endpointId={ManufacturingRepository.MFJobOrder.pack}
+                        reducer={response => response?.record?.productionClasses}
                         values={formik.values}
                         name='classId'
                         label={labels.productionClass}
@@ -987,7 +1000,8 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.ProductionStandard.qry}
+                        endpointId={ManufacturingRepository.MFJobOrder.pack}
+                        reducer={response => response?.record?.productionStandards}
                         values={formik.values}
                         name='standardId'
                         label={labels.productionStandard}
@@ -1022,7 +1036,8 @@ export default function JobOrderForm({
 
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={ManufacturingRepository.JobCategory.qry}
+                  endpointId={ManufacturingRepository.MFJobOrder.pack}
+                  reducer={response => response?.record?.jobCategories}
                   name='categoryId'
                   label={labels.category}
                   columnsInDropDown={[
@@ -1042,8 +1057,8 @@ export default function JobOrderForm({
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={InventoryRepository.Category.qry}
-                  parameters='_pagesize=1000&_startAt=0&_name='
+                  endpointId={ManufacturingRepository.MFJobOrder.pack}
+                  reducer={response => response?.record?.categories}
                   name='itemCategoryId'
                   label={labels.itemCategory}
                   readOnly
@@ -1095,7 +1110,8 @@ export default function JobOrderForm({
               </Grid>
               <Grid item xs={12}>
                 <ResourceComboBox
-                  endpointId={SaleRepository.SalesPerson.qry}
+                  endpointId={ManufacturingRepository.MFJobOrder.pack}
+                  reducer={response => response?.record?.salesPeople}
                   name='spId'
                   label={labels.orderedBy}
                   columnsInDropDown={[

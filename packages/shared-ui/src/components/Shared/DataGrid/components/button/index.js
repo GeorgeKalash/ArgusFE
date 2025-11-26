@@ -1,4 +1,5 @@
 import { Button } from '@mui/material'
+import styles from './button.module.css'
 
 function DataGridButton({ data, column: { props, field, ...column }, update, updateRow, isEditMode }) {
   const checkCondition = props?.onCondition && props?.onCondition(data)
@@ -8,13 +9,7 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
   return (
     !hiddenButton && (
       <Button
-        sx={{
-          opacity: 1,
-          '&:hover': { opacity: 0.7 },
-          width: '10px !important',
-          height: '30px',
-          objectFit: 'contain'
-        }}
+        className={styles.gridButton}
         autoFocus={isEditMode}
         onClick={e => {
           column?.onClick(e, data, update, updateRow)
@@ -22,23 +17,11 @@ function DataGridButton({ data, column: { props, field, ...column }, update, upd
         variant={!!imgSrc ? '' : 'contained'}
         disabled={checkCondition?.disabled}
       >
-        {!!imgSrc ? (
-          <img
-            src={imgSrc}
-            sx={{
-              height: '10px'
-            }}
-            alt='popup'
-          />
-        ) : (
-          <img
-            src='/images/buttonsIcons/popup.png'
-            sx={{
-              height: '10px'
-            }}
-            alt='popup'
-          />
-        )}
+        <img
+          src={imgSrc || '/images/buttonsIcons/popup.png'}
+          className={styles.gridButtonImage}
+          alt='popup'
+        />
       </Button>
     )
   )

@@ -2,6 +2,7 @@ import { useContext, useRef } from 'react'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
+import styles from './numberfield.module.css'   
 
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
@@ -29,6 +30,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
 
   return (
     <CustomNumberField
+      className={styles.gridNumberEditor}
       value={
         viewDecimals
           ? typing.current

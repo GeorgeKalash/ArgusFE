@@ -32,7 +32,8 @@ export function DataGrid({
   initialValues,
   bg,
   searchValue,
-  onValidationRequired
+  onValidationRequired,
+  isDeleteDisabled
 }) {
   const gridApiRef = useRef(null)
 
@@ -516,9 +517,7 @@ export function DataGrid({
       column.colDef.component === 'icon'
 
     return (
-      <Box
-        className={`${styles.cellBox} ${centered ? styles.cellBoxCentered : ''}`}
-      >
+      <Box className={`${styles.cellBox} ${centered ? styles.cellBoxCentered : ''}`}>
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -582,9 +581,7 @@ export function DataGrid({
     const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
 
     return (
-      <Box
-        className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''}`}
-      >
+      <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''}`}>
         <Component
           id={params.node.data.id}
           {...params}
@@ -617,12 +614,17 @@ export function DataGrid({
       if (shouldHide) return null
     }
 
+    const disabledForRow = typeof isDeleteDisabled === 'function' ? isDeleteDisabled(params.data) : false
+
     return (
       <Box
         className={styles.actionCell}
         onClick={() => openDelete(params)}
+        sx={{
+          pointerEvents: disabledForRow ? 'none' : 'auto'
+        }}
       >
-        <IconButton>
+        <IconButton disabled={disabledForRow}>
           <GridDeleteIcon className={styles.deleteIcon} />
         </IconButton>
       </Box>
@@ -645,6 +647,8 @@ export function DataGrid({
       ...column,
       ...{ width: column.width + additionalWidth },
       field: column.name,
+
+      // minWidth: 50,
       headerName: column.label || column.name,
       headerTooltip: column.label,
       editable: !_disabled,
@@ -861,6 +865,7 @@ export function DataGrid({
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
+              domLayout='autoHeight'
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
@@ -874,7 +879,6 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
-
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}

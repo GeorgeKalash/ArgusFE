@@ -14,12 +14,13 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 export default function OverheadTab({ labels, maxAccess, store }) {
-  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const recordId = store?.recordId
+  const { jobOverheads, recordId, isPosted, isCancelled } = store || {}
   const editMode = !!recordId
 
   const { formik } = useForm({
+    maxAccess,
     validateOnChange: true,
     initialValues: {
       items: [
@@ -171,7 +172,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
       key: 'GenerateJob',
       condition: true,
       onClick: generateOVH,
-      disabled: store?.isPosted || store?.isCancelled
+      disabled: isPosted || isCancelled
     }
   ]
 
@@ -183,32 +184,23 @@ export default function OverheadTab({ labels, maxAccess, store }) {
     toast.success(platformLabels.Generated)
   }
 
-  async function fetchGridData() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.JobOverhead.qry,
-      parameters: `_jobId=${recordId}`
-    })
-
-    const updateItemsList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res?.list?.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : formik.initialValues.items
-
-    formik.setFieldValue('items', updateItemsList)
-  }
-
   useEffect(() => {
     ;(async function () {
-      if (recordId) await fetchGridData()
+      formik.setFieldValue(
+        'items',
+        jobOverheads?.length > 0
+          ? await Promise.all(
+              jobOverheads?.map((item, index) => {
+                return {
+                  ...item,
+                  id: index + 1
+                }
+              })
+            )
+          : formik.initialValues.items
+      )
     })()
-  }, [recordId])
+  }, [jobOverheads])
 
   return (
     <Form
@@ -217,7 +209,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
       editMode={editMode}
       actions={actions}
       isCleared
-      disabledSubmit={store?.isCancelled || store?.isPosted}
+      disabledSubmit={isCancelled || isPosted}
     >
       <VertLayout>
         <Grow>
@@ -229,7 +221,7 @@ export default function OverheadTab({ labels, maxAccess, store }) {
             initialValues={formik?.initialValues?.items?.[0]}
             name='items'
             maxAccess={maxAccess}
-            allowDelete={!store?.isPosted && !store?.isCancelled}
+            allowDelete={!isPosted && !isCancelled}
           />
         </Grow>
         <Fixed>

@@ -4,7 +4,7 @@ import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useState, useContext } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
-import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
+import { Card, CardContent, Grid, Box, CardMedia } from '@mui/material'
 import { styled, useTheme } from '@mui/material/styles'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import { useFormik } from 'formik'
@@ -17,13 +17,14 @@ import ChangePassword from '@argus/shared-ui/src/components/Shared/ChangePasswor
 import axios from 'axios'
 import OTPAuthentication from '@argus/shared-ui/src/components/Shared/OTPAuthentication'
 import styles from './LoginPage.module.css'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
   textDecoration: 'none',
   color: theme.palette.primary.main
 }))
- 
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -32,7 +33,7 @@ const LoginPage = () => {
   const { companyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
- 
+
   const validation = useFormik({
     initialValues: {
       username: '',
@@ -61,7 +62,7 @@ const LoginPage = () => {
       })
     }
   })
- 
+
   function viewOTP(loggedUser) {
     stack({
       Component: OTPAuthentication,
@@ -74,13 +75,13 @@ const LoginPage = () => {
       spacing: false
     })
   }
- 
+
   const handleKeyDown = event => {
     if (event.key === 'Enter') {
       validation.handleSubmit()
     }
   }
- 
+
   function openForm(username, loggedUser, onClose) {
     stack({
       Component: ChangePassword,
@@ -97,19 +98,19 @@ const LoginPage = () => {
       spacing: false
     })
   }
- 
+
   const { apiUrl, languageId } = useAuth()
- 
+
   const updateUmcpnl = async (loggedUser, getUS2) => {
     try {
       const user = getUS2
       const accessToken = loggedUser.accessToken
       if (!accessToken) throw new Error('Failed to retrieve access token')
- 
+
       const updateUser = { ...user, umcpnl: false }
       var bodyFormData = new FormData()
       bodyFormData.append('record', JSON.stringify(updateUser))
- 
+
       await axios({
         method: 'POST',
         url: `${apiUrl}SY.asmx/setUS`,
@@ -124,7 +125,7 @@ const LoginPage = () => {
       stackError({ message: error.message })
     }
   }
- 
+
   return (
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
@@ -138,7 +139,7 @@ const LoginPage = () => {
             >
               <CardMedia
                 component='img'
-                image='/images/logos/ArgusLogo.png'
+                image='@argus/shared-ui/src/components/images/logos/ArgusLogo.png'
                 alt='ArgusERP'
                 sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
               />
@@ -190,31 +191,33 @@ const LoginPage = () => {
                   />
                 </Grid>
               </Grid>
-              <Box className={styles.linksRow}>
-                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
+              <Box>
+                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                  {platformLabels.ForgotPass}
+                </LinkStyled>
               </Box>
-              <Button
+              <CustomButton
                 fullWidth
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
-                className={styles.loginButton}
                 onClick={validation.handleSubmit}
-              >
-                {platformLabels.Login}
-              </Button>
+                label={platformLabels.Login}
+              />
             </CardContent>
           </Card>
           <Box className={styles.languageRow}>
-            <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
+            <Typography variant='body2' className={styles.language}>
+              {platformLabels.ArgusOfferedIn}
+            </Typography>
             <Box className={styles.languageLinks}>
-              <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-en' className={styles.language} sx={{ color: 'red' }}>
                 English
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-fr' className={styles.language} sx={{ color: 'red' }}>
                 Français
               </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              <LinkStyled href='/pages/auth/login-ar' className={styles.language} sx={{ color: 'red' }}>
                 عربي
               </LinkStyled>
             </Box>
@@ -223,14 +226,14 @@ const LoginPage = () => {
             © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
           </Box>
         </Box>
- 
+
         <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </>
     )
   )
 }
- 
+
 LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
 LoginPage.guestGuard = true
- 
+
 export default LoginPage

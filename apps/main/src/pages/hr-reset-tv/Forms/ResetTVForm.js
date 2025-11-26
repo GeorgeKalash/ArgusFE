@@ -58,7 +58,7 @@ export default function ResetTVForm({ _labels, maxAccess }) {
       }
 
       await postRequest({
-        extension: TimeAttendanceRepository.ResetTV.reset,
+        extension: TimeAttendanceRepository.TimeVariation.reset,
         record: JSON.stringify(dataFormatted)
       })
 

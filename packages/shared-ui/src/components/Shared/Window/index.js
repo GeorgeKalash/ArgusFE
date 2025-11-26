@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } from 'react'
-import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton, useMediaQuery } from '@mui/material'
+import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import RefreshIcon from '@mui/icons-material/Refresh'
@@ -10,9 +10,10 @@ import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { CacheDataProvider } from '@argus/shared-providers/src/providers/CacheDataContext.js'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import styles from './Window.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 function LoadingOverlay() {
-  return <Box className={styles.loadingOverlay}></Box>
+  return <div className={styles.loadingOverlay}></div>
 }
 
 const Window = React.memo(
@@ -45,36 +46,57 @@ const Window = React.memo(
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
-    const [expanded, setExpanded] = useState(false)
-    const paperRef = useRef(null)
-    const maxAccess = props.maxAccess?.record.maxAccess
-
     const { loading } = useContext(RequestsContext)
+    const paperRef = useRef(null)
+    const [expanded, setExpanded] = useState(false)
     const [showOverlay, setShowOverlay] = useState(false)
-    const overlayRef = useRef(null)
+    const maxAccess = props.maxAccess?.record.maxAccess
 
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
     )
 
-    const isSmallScreen = useMediaQuery('(max-width:600px)')
-    const isMediumScreen = useMediaQuery('(max-width:960px)')
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
-    const overlayRect = overlayRef.current?.getBoundingClientRect()
-    const containerWidth = overlayRect?.width ?? window.innerWidth
-    const containerHeight = overlayRect?.height ?? window.innerHeight
+    const menuWidth =
+      screenWidth <= 768 ? 180 : screenWidth <= 1024 ? 200 : screenWidth <= 1366 ? 220 : screenWidth <= 1600 ? 240 : 300
 
-    const baseWidth = Math.min(width, containerWidth * (isSmallScreen ? 0.95 : isMediumScreen ? 0.85 : 0.7))
-    const baseHeight = Math.min(height, containerHeight * (isSmallScreen ? 0.8 : isMediumScreen ? 0.85 : 0.7))
+    const tabsHeight =
+      screenWidth <= 768 ? 25 : screenWidth <= 1024 ? 20 : screenWidth <= 1366 ? 28 : screenWidth <= 1600 ? 30 : 40
 
-    const containerHeightPanel = containerHeight
-    const heightPanel = baseHeight
+    const sidebarWidth = navCollapsed ? 10 : menuWidth
+    const containerWidth = `calc(100vw - ${sidebarWidth}px)`
+    const containerHeight = `calc(100vh - ${tabsHeight}px)`
+    const containerHeightPanel = screenHeight - 180
+    const heightPanel = height - 120
 
-    const paperStyle = {
-      '--window-paper-width': expanded ? `${containerWidth}px` : `${baseWidth}px`,
-      '--window-paper-height': expanded ? `${containerHeight}px` : `${baseHeight}px`
-    }
+    const scaleFactor = useMemo(() => {
+      if (screenWidth > 1600) return 1
+      if (screenWidth > 1400) return 0.8
+      if (screenWidth > 1366) return 0.83
+      if (screenWidth > 768) return 0.8
+      if (screenWidth > 600) return 0.75
+      if (screenWidth > 480) return 0.7
+      if (screenWidth > 375) return 0.65
+
+      return 0.6
+    }, [screenWidth])
+
+    const heightScaleFactor = useMemo(() => {
+      if (screenWidth > 1600) return 1
+      if (screenWidth > 1359) return 0.85
+      if (screenWidth > 1024) return 0.95
+      if (screenWidth > 768) return 0.9
+      if (screenWidth > 600) return 0.85
+      if (screenWidth > 480) return 0.8
+      if (screenWidth > 375) return 0.75
+
+      return 0.75
+    }, [screenWidth])
+
+    const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
+    const scaledHeight = expanded ? containerHeight : Math.max(200, height * heightScaleFactor)
 
     useEffect(() => {
       const transactionLogInfo = document.querySelector('[data-unique-id]')
@@ -84,16 +106,12 @@ const Window = React.memo(
     }, [expanded])
 
     useEffect(() => {
-      if (paperRef.current) {
-        paperRef.current.focus()
-      }
+      if (paperRef.current) paperRef.current.focus()
     }, [])
 
     useEffect(() => {
       if (!loading) {
-        const timer = setTimeout(() => {
-          setShowOverlay(true)
-        }, 50)
+        const timer = setTimeout(() => setShowOverlay(true), 50)
 
         return () => clearTimeout(timer)
       }
@@ -101,48 +119,42 @@ const Window = React.memo(
 
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
-    }, [expanded])
-
-    const overlayClassName = `${styles.overlay} ${
-      spacing ? (navCollapsed ? styles.overlaySpacingCollapsed : styles.overlaySpacingExpanded) : styles.overlayFull
-    }`
+    }, [])
 
     return (
       <CacheDataProvider>
         <Box
           id='parent'
-          ref={overlayRef}
-          className={overlayClassName}
-          onKeyDown={e => {
-            if (e.key === 'Escape' && closable) {
-              onClose()
-            }
+          className={styles.parentBox}
+          style={{
+            width: spacing ? containerWidth : '100vw',
+            height: spacing ? containerHeight : '100vh'
           }}
+          onKeyDown={e => e.key === 'Escape' && closable && onClose()}
         >
           <Draggable
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded || isSmallScreen ? { x: 0, y: 0 } : undefined}
-            onStart={() => draggable && !isSmallScreen}
-            disabled={isSmallScreen}
+            position={expanded ? { x: 0, y: 0 } : undefined}
+            onStart={() => draggable}
           >
-            <Box className={styles.draggableContainer}>
+            <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
               <Paper
                 ref={paperRef}
                 tabIndex={-1}
-                data-expanded={expanded ? 'true' : 'false'}
-                className={`${styles.windowPaper} ${controlled ? styles.windowPaperControlled : ''}`}
-                style={paperStyle}
+                className={styles.paper}
+                data-expanded={expanded}
+                style={{
+                  width: scaledWidth,
+                  height: scaledHeight,
+                  display: controlled ? 'flex' : 'block',
+                  flexDirection: controlled ? 'column' : 'unset'
+                }}
               >
-                <DialogTitle
-                  id='draggable-dialog-title'
-                  className={`${styles.dialogTitle} ${
-                    draggable && !isSmallScreen ? styles.dialogTitleDraggable : styles.dialogTitleDefault
-                  }`}
-                >
+                <DialogTitle id='draggable-dialog-title' className={styles.dialogTitle}>
                   <Box>
-                    <Typography className={styles.titleText}>
+                    <Typography className={styles.dialogTitleText}>
                       {nextToTitle ? Title + ' ' + nextToTitle : Title}
                     </Typography>
                   </Box>
@@ -153,7 +165,7 @@ const Window = React.memo(
                         edge='end'
                         onClick={props?.onRefresh}
                         aria-label='refresh'
-                        className={styles.headerIconButton}
+                        className={styles.iconButton}
                       >
                         <RefreshIcon />
                       </IconButton>
@@ -165,7 +177,7 @@ const Window = React.memo(
                         onClick={handleExpandToggle}
                         data-is-expanded={expanded}
                         aria-label='expand'
-                        className={styles.headerIconButton}
+                        className={styles.iconButton}
                       >
                         <OpenInFullIcon />
                       </IconButton>
@@ -175,8 +187,8 @@ const Window = React.memo(
                         tabIndex={-1}
                         edge='end'
                         onClick={onClose}
-                        aria-label='close'
-                        className={styles.headerIconButton}
+                        aria-label='clear input'
+                        className={styles.iconButton}
                       >
                         <ClearIcon />
                       </IconButton>
@@ -184,22 +196,16 @@ const Window = React.memo(
                   </Box>
                 </DialogTitle>
                 {tabs && (
-                  <Tabs
-                    value={activeTab}
-                    onChange={(event, newValue) => setActiveTab(newValue)}
-                    variant={isSmallScreen ? 'scrollable' : 'standard'}
-                    scrollButtons={isSmallScreen ? 'auto' : 'off'}
-                  >
+                  <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
                     {tabs.map((tab, i) => (
                       <Tab key={i} label={tab.label} disabled={tab?.disabled} />
                     ))}
                   </Tabs>
                 )}
                 {!showOverlay && isLoading && <LoadingOverlay />}
-
                 {!controlled ? (
                   <>
-                    <DialogContent className={styles.dialogContent}>{children}</DialogContent>
+                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
                     {windowToolbarVisible && (
                       <WindowToolbar
                         onSave={onSave}
@@ -213,12 +219,12 @@ const Window = React.memo(
                     )}
                   </>
                 ) : (
-                  React.Children.map(children, child => {
-                    return React.cloneElement(child, {
-                      expanded: expanded,
+                  React.Children.map(children, child =>
+                    React.cloneElement(child, {
+                      expanded,
                       height: expanded ? containerHeightPanel : heightPanel
                     })
-                  })
+                  )
                 )}
               </Paper>
             </Box>

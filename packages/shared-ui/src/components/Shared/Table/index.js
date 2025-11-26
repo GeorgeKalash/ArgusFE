@@ -17,7 +17,7 @@ import { TrxType, accessMap } from '@argus/shared-domain/src/resources/AccessLev
 import deleteIcon from '@argus/shared-ui/src/components/images/TableIcons/delete.png'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
-import StrictDeleteConfirmation from '../StrictDeleteConfirmation'
+import StrictConfirmation from '../StrictConfirmation'
 import { HIDDEN, accessLevel } from '@argus/shared-utils/src/utils/maxAccess'
 import { formatDateDefault, getTimeInTimeZone, formatDateTimeDefault } from '@argus/shared-domain/src/lib/date-helper'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
@@ -481,11 +481,12 @@ const Table = ({
   }
   function openDeleteConfirmation(obj) {
     stack({
-      Component: StrictDeleteConfirmation,
+      Component: StrictConfirmation,
       props: {
         action() {
           props?.onDelete(obj)
-        }
+        },
+        type: 'delete'
       },
       refresh: false
     })
@@ -568,14 +569,8 @@ const Table = ({
 
     return (
       <Box>
-        {tooltipOpen && (
-          <Box className={styles.copiedTooltip}>Copied!</Box>
-        )}
-        <Box
-          onClick={handleClick}
-          onDoubleClick={handleDoubleClick}
-          className={styles.fieldWrapper}
-        >
+        {tooltipOpen && <Box className={styles.copiedTooltip}>Copied!</Box>}
+        <Box onClick={handleClick} onDoubleClick={handleDoubleClick} className={styles.fieldWrapper}>
           {params.value}
         </Box>
       </Box>
@@ -726,7 +721,6 @@ const Table = ({
                     props?.onEdit(data)
                   }}
                   className={styles.actionIconButton}
-
                 >
                   <Image src={editIcon} alt='Edit' className={styles.actionIcon} />
                 </IconButton>
@@ -744,10 +738,8 @@ const Table = ({
                   }}
                   color='error'
                   className={styles.actionIconButton}
-
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete}  className={styles.actionIcon}
-/>
+                  <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
                 </IconButton>
               )}
               {globalStatus &&
@@ -767,9 +759,8 @@ const Table = ({
                     }}
                     color='error'
                     className={styles.actionIconButton}
-
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete}  className={styles.actionIcon} />
+                    <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
                   </IconButton>
                 )}
             </Box>
@@ -907,7 +898,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            getRowHeight={(params) => (hasImageColumn ? undefined : undefined)}
+            getRowHeight={params => (hasImageColumn ? undefined : undefined)}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}
@@ -929,5 +920,3 @@ const Table = ({
 }
 
 export default Table
-
-

@@ -29,19 +29,18 @@ const GLIntegrationLogic = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    try {
-      const response = await getRequest({
-        extension: GeneralLedgerRepository.IntegrationLogic.page,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
-      })
 
-      return { ...response, _startAt: _startAt }
-    } catch (error) {}
+    const response = await getRequest({
+      extension: GeneralLedgerRepository.IntegrationLogic.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     access,
     invalidate,
     refetch,
@@ -60,7 +59,7 @@ const GLIntegrationLogic = () => {
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     }
   ]
@@ -74,27 +73,25 @@ const GLIntegrationLogic = () => {
   }
 
   const del = async obj => {
-    try {
-      await postRequest({
-        extension: GeneralLedgerRepository.IntegrationLogic.del,
-        record: JSON.stringify(obj)
-      })
-      invalidate()
-      toast.success(platformLabels.Deleted)
-    } catch (exception) {}
+    await postRequest({
+      extension: GeneralLedgerRepository.IntegrationLogic.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
   }
 
   function openForm(recordId) {
     stack({
       Component: IntegrationLogicWindow,
       props: {
-        labels: _labels,
+        labels,
         recordId,
         maxAccess: access
       },
       width: 1100,
       height: 500,
-      title: _labels.integrationLogic
+      title: labels.integrationLogic
     })
   }
 
@@ -106,19 +103,19 @@ const GLIntegrationLogic = () => {
           maxAccess={access}
           onSearch={search}
           onSearchClear={clear}
-          labels={_labels}
+          labels={labels}
           inputSearch={true}
         />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

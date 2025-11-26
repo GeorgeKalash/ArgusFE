@@ -244,9 +244,32 @@
   cursor: pointer;
 }
 
+.userDropdownIcon svg {
+  font-size: 1.3rem !important;
+  width: 1.3rem !important;
+  height: 1.3rem !important;
+}
+
 .userMenu {
   background-color: #f4f5fa !important;
-  margin-top: 4px !important;
+  margin-top: 12px !important;
+  min-width: 283px !important;
+  max-width: 283px !important;
+  padding: 5px !important;
+}
+.userHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;    
+  padding: 4px 8px !important;    
+  width: 100%;
+  box-sizing: border-box;
+}
+.userMenu :global(.MuiBox-root) {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
 }
 
 .userMenuDivider {
@@ -254,28 +277,36 @@
 }
 
 .userName {
-  color: #383838 !important ;
+  color: #383838 !important;
   font-weight: 600 !important;
   padding-right: 16px;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
 }
 
 .logoutMenuItem {
   padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  display: flex;
-  align-items: center;
+  padding-bottom: 2px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 24px !important; 
 }
 
 .logoutMenuItem svg {
-  margin-right: 8px;
-  font-size: 1.375rem;
+  margin-right: 10px;
+  font-size: 1.05rem !important;
   color: #383838 !important;
 }
 
 .logoutText {
   color: #383838 !important;
   padding-left: 4px;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
 }
+
 
 @media (min-width: 1025px) and (max-width: 1600px) {
   .menu-header-wrapper {
@@ -316,6 +347,44 @@
   .search-icon {
     font-size: 15px !important;
   }
+
+  .userMenu {
+    min-width: 218px !important;
+    max-width: 218px !important;
+  }
+
+  .userDropdownIcon svg {
+    font-size: 1.2rem !important;
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 6px !important;
+    padding-bottom: 3px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+
+  .userName {
+    font-size: 0.8rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+    min-height: 22px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 1rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.9rem !important;
+  }
 }
 
 @media (max-width: 1366px) {
@@ -327,9 +396,9 @@
     height: 16px !important;
   }
   .userDropdownIcon svg {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
+    font-size: 1.1rem !important;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
   }
   .node-icon img {
     width: 18px !important;
@@ -338,6 +407,38 @@
   .arrow svg {
     font-size: 16px !important;
   }
+
+  .userMenu {
+    min-width: 201px !important;
+    max-width: 201px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .userName {
+    font-size: 0.74rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    min-height: 20px !important;
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.95rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.8rem !important;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -345,9 +446,9 @@
   .box svg,
   .collapse-button svg,
   .userDropdownIcon svg {
-    font-size: 14px !important;
-    width: 14px !important;
-    height: 14px !important;
+    font-size: 0.95rem !important;
+    width: 0.95rem !important;
+    height: 0.95rem !important;
   }
   .node-icon img {
     width: 16px !important;
@@ -356,6 +457,38 @@
   .arrow svg {
     font-size: 14px !important;
   }
+
+  .userMenu {
+    min-width: 187px !important;
+    max-width: 187px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .userName {
+    font-size: 0.7rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    min-height: 18px !important;
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.9rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.7rem !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -363,9 +496,9 @@
   .box svg,
   .collapse-button svg,
   .userDropdownIcon svg {
-    font-size: 12px !important;
-    width: 12px !important;
-    height: 12px !important;
+    font-size: 0.85rem !important;
+    width: 0.85rem !important;
+    height: 0.85rem !important;
   }
   .node-icon img {
     width: 14px !important;
@@ -374,6 +507,38 @@
   .arrow svg {
     font-size: 12px !important;
   }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .userName {
+    font-size: 0.68rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    min-height: 18px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.85rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.66rem !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -381,9 +546,9 @@
   .box svg,
   .collapse-button svg,
   .userDropdownIcon svg {
-    font-size: 10px !important;
-    width: 10px !important;
-    height: 10px !important;
+    font-size: 0.75rem !important;
+    width: 0.75rem !important;
+    height: 0.75rem !important;
   }
   .node-icon img {
     width: 12px !important;
@@ -414,6 +579,38 @@
   .search-icon {
     font-size: 12px !important;
   }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .userName {
+    font-size: 0.64rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    min-height: 16px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.8rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.6rem !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -421,9 +618,9 @@
   .box svg,
   .collapse-button svg,
   .userDropdownIcon svg {
-    font-size: 9px !important;
-    width: 9px !important;
-    height: 9px !important;
+    font-size: 0.7rem !important;
+    width: 0.7rem !important;
+    height: 0.7rem !important;
   }
   .node-icon img {
     width: 10px !important;
@@ -454,6 +651,38 @@
   .search-icon {
     font-size: 10px !important;
   }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .userName {
+    font-size: 0.6rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    min-height: 16px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.75rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.56rem !important;
+  }
 }
 
 @media (max-width: 375px) {
@@ -461,9 +690,9 @@
   .box svg,
   .collapse-button svg,
   .userDropdownIcon svg {
-    font-size: 8px !important;
-    width: 8px !important;
-    height: 8px !important;
+    font-size: 0.65rem !important;
+    width: 0.65rem !important;
+    height: 0.65rem !important;
   }
   .node-icon img {
     width: 8px !important;
@@ -493,5 +722,37 @@
   }
   .search-icon {
     font-size: 9px !important;
+  }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .userName {
+    font-size: 0.56rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    min-height: 14px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.7rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.52rem !important;
   }
 }

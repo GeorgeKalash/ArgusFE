@@ -1,6 +1,13 @@
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
-export default function ResourceComboBoxEdit({ id, column: { props, field, variableParameters }, value, updateRow, update, data }) {
+export default function ResourceComboBoxEdit({
+  id,
+  column: { props, field, variableParameters },
+  value,
+  updateRow,
+  update,
+  data
+}) {
   let dynamicParams = ''
 
   if (variableParameters) {
