@@ -9,6 +9,7 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
 import { checkAccess } from 'src/lib/maxAccess'
 import styles from './CustomDateTimePicker.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomDateTimePicker = ({
   name,
@@ -121,14 +122,20 @@ const CustomDateTimePicker = ({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
-            className: [
-              styles.customDateTimeTextField,
-              !hasBorder ? styles.noBorder : '',
-              isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' '),
+
+            // className: [
+            //   styles.customDateTimeTextField,
+            //   !hasBorder ? styles.noBorder : '',
+            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            // ]
+            //   .filter(Boolean)
+            //   .join(' '),
             InputProps: {
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end'>
                   {resolvedValue && (
@@ -141,15 +148,14 @@ const CustomDateTimePicker = ({
                       <ClearIcon className={styles.dateIcon} />
                     </IconButton>
                   )}
-                  <IconButton
-                    tabIndex={-1}
-                    onClick={() => setOpenDatePicker(true)}
-                    className={styles.eventIconButton}
-                  >
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={styles.eventIconButton}>
                     <EventIcon className={styles.dateIcon} />
                   </IconButton>
                 </InputAdornment>
               )
+            },
+            InputLabelProps: {
+              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
             }
           },
           actionBar: {

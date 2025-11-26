@@ -10,6 +10,7 @@ import moment from 'moment-hijri'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import styles from './CustomDatePickerHijri.module.css'
+import inputs from '../Inputs.module.css'
 
 export default function CustomDatePickerHijri({
   variant = 'outlined',
@@ -25,6 +26,7 @@ export default function CustomDatePickerHijri({
   hidden = false,
   required = false,
   editMode = false,
+  hasBorder = true,
   ...props
 }) {
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
@@ -87,34 +89,40 @@ export default function CustomDatePickerHijri({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
-            className: [
-              styles.customHijriDateTextField,
-              isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' '),
+
+            // className: [
+            //   styles.customHijriDateTextField,
+            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            // ]
+            //   .filter(Boolean)
+            //   .join(' '),
             InputProps: {
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
+
               endAdornment: !(_readOnly || disabled) && (
-                <InputAdornment position='end'>
+                <InputAdornment position='end' className={inputs.inputAdornment}>
                   {Boolean(value) && (
                     <IconButton
                       tabIndex={-1}
                       edge='start'
                       onClick={() => onChange(name, null)}
-                      className={styles.clearIconButton}
+                      className={inputs['search-icon']}
                     >
-                      <ClearIcon className={styles.dateIcon} />
+                      <ClearIcon className={inputs['search-icon']} />
                     </IconButton>
                   )}
-                  <IconButton
-                    tabIndex={-1}
-                    onClick={() => setOpenDatePicker(true)}
-                    className={styles.eventIconButton}
-                  >
-                    <EventIcon className={styles.dateIcon} />
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs['search-icon']}>
+                    <EventIcon className={inputs['search-icon']} />
                   </IconButton>
                 </InputAdornment>
               )
+            },
+            InputLabelProps: {
+              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
             }
           }
         }}

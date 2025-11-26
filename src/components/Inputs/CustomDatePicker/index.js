@@ -9,6 +9,7 @@ import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from 'src/lib/maxAccess'
 import styles from './CustomDatePicker.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomDatePicker = ({
   name,
@@ -130,43 +131,49 @@ const CustomDatePicker = ({
             error: error,
             helperText: helperText,
             inputRef: inputRef,
+
+            // className: [styles.customDateTextField],
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
             onBlur: e => {
               onBlur(e, inputValue?.current || value)
             },
-            className: [
-              styles.customDateTextField,
-              !hasBorder ? styles.noBorder : '',
-              isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' '),
-              InputProps: {
-                endAdornment: !(_readOnly || disabled) && (
-                  <InputAdornment position='end'>
-                    {value && (
-                      <IconButton
-                        tabIndex={-1}
-                        edge='start'
-                        onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
-                        className={styles.clearIconButton}
-                      >
-                        <ClearIcon className={styles.dateIcon} />
-                      </IconButton>
-                    )}
+
+            // className: [
+            //   styles.customDateTextField,
+            //   !hasBorder ? styles.noBorder : '',
+            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
+            // ]
+            //   .filter(Boolean)
+            //   .join(' '),
+            InputProps: {
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
+              endAdornment: !(_readOnly || disabled) && (
+                <InputAdornment position='end' className={inputs.inputAdornment}>
+                  {value && (
                     <IconButton
                       tabIndex={-1}
-                      onClick={() => setOpenDatePicker(true)}
-                      className={styles.eventIconButton}
+                      edge='start'
+                      onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
+                      className={inputs['search-icon']}
                     >
-                      <EventIcon className={styles.dateIcon} />
+                      <ClearIcon className={inputs['search-icon']} />
                     </IconButton>
-                  </InputAdornment>
-                )
-              }
-              
+                  )}
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs['search-icon']}>
+                    <EventIcon className={inputs['search-icon']} />
+                  </IconButton>
+                </InputAdornment>
+              )
+            },
+            InputLabelProps: {
+              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+            }
           },
           actionBar: {
             actions: ['accept', 'today']

@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import { useEffect, useRef, useState } from 'react'
 import { checkAccess } from 'src/lib/maxAccess'
 import styles from './CustomTextField.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomTextField = ({
   type = 'text',
@@ -145,25 +146,23 @@ const CustomTextField = ({
         ...props.InputProps,
 
         classes: {
-          root: styles.outlinedRoot,
-          notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
-          input: styles.inputBase
+          root: inputs.outlinedRoot,
+          notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+          input: inputs.inputBase
         },
         startAdornment: dynamicStartAdornment,
         endAdornment: (
           <>
             {props.InputProps?.endAdornment}
-            {!_readOnly && search && (
-              <InputAdornment position='end'>
-                <IconButton className={styles['search-icon']} tabIndex={-1} onClick={() => onSearch(value)}>
-                  <SearchIcon className={styles['search-icon']} />
+            <InputAdornment position='end'>
+              {!_readOnly && search && (
+                <IconButton className={inputs['search-icon']} tabIndex={-1} onClick={() => onSearch(value)}>
+                  <SearchIcon className={inputs['search-icon']} />
                 </IconButton>
-              </InputAdornment>
-            )}
-            {!_readOnly && !clearable && (value || value === 0) && (
-              <InputAdornment position='end'>
+              )}
+              {!_readOnly && !clearable && (value || value === 0) && (
                 <IconButton
-                  className={styles['search-icon']}
+                  className={inputs['search-icon']}
                   tabIndex={-1}
                   id={props.ClearId}
                   onClick={e => {
@@ -171,29 +170,30 @@ const CustomTextField = ({
                     setFocus(true)
                   }}
                 >
-                  <ClearIcon className={styles['search-icon']} />
+                  <ClearIcon className={inputs['search-icon']} />
                 </IconButton>
-              </InputAdornment>
-            )}
-            {endIcons.map((iconBtn, index) => (
-              <InputAdornment key={index} position='end'>
-                {iconBtn && (
-                  <IconButton className={styles['search-icon']} tabIndex={-1}>
-                    {iconBtn}
-                  </IconButton>
-                )}
-              </InputAdornment>
-            ))}
+              )}
+              {endIcons.map((iconBtn, index) => (
+                <>
+                  {iconBtn && (
+                    <IconButton className={inputs['search-icon']} tabIndex={-1}>
+                      {iconBtn}
+                    </IconButton>
+                  )}
+                </>
+              ))}
+            </InputAdornment>
           </>
         )
       }}
       InputLabelProps={{
         ...InputLabelProps,
+
         className: InputLabelProps?.shrink
-          ? styles.labelRoot
+          ? inputs.labelRoot
           : isFocused || value
-          ? styles.inputLabelFocused
-          : styles.inputLabel
+          ? inputs.inputLabelFocused
+          : inputs.inputLabel
       }}
       required={_required}
       {...props}
