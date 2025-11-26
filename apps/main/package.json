@@ -15,7 +15,6 @@
     "build:icons": "node src/iconify-bundle/bundle-icons-react.js"
   },
   "dependencies": {
-    "@argus/repositories": "file:../../packages/repositories",
     "@argus/shared-domain": "file:../../packages/shared-domain",
     "@argus/shared-hooks": "file:../../packages/shared-hooks",
     "@argus/shared-providers": "file:../../packages/shared-providers",
