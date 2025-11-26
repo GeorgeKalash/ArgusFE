@@ -171,6 +171,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         basePrice: 0,
         baseLaborPrice: 0,
         TotPricePerG: 0,
+        totalWeightPerG: 0,
         mdValue: 0,
         unitPrice: 0,
         unitCost: 0,
@@ -369,11 +370,15 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     filteredMeasurements.current = arrayMU
   }
 
-  async function fillSkuData(update, itemId) {
-    const phycialProperty = await getItemPhysProp(itemId)
-    const itemInfo = await getItem(itemId)
-    const vendorPrice = await getVendorPrice(itemId, formik.values.header)
-    await fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+  async function fillSkuData(update, addRow, newRow) {
+    const phycialProperty = await getItemPhysProp(newRow?.itemId)
+    const itemInfo = await getItem(newRow?.itemId)
+
+    const vendorPrice =
+      newRow?.promotionType === '3' || newRow?.promotionType === '4'
+        ? undefined
+        : await getVendorPrice(newRow?.itemId, formik.values.header)
+    await fillItemObject(update, addRow, newRow, phycialProperty, itemInfo, vendorPrice)
   }
 
   const columns = [
@@ -421,56 +426,54 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           minChars: 2
         })
       },
-      async onChange({ row: { update, newRow } }) {
-        if (!formik.values.disableSKULookup) {
-          if (!newRow?.itemId) {
-            update({
-              enabled: false
-            })
-
-            return
-          }
-          if (newRow.isInactive) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-            stackError({
-              message: labels.inactiveItem
-            })
-
-            return
-          }
-          fillSkuData(update, newRow?.itemId)
-        } else {
-          if (!newRow?.sku) {
-            update({
-              ...formik.initialValues.rows[0],
-              id: newRow.id
-            })
-
-            return
-          }
-
-          const skuInfo = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${newRow.sku}`
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        const resetRow = id =>
+          update({
+            ...formik.initialValues.items[0],
+            id,
+            enabled: false
           })
-          if (!skuInfo.record) {
-            update({
-              ...formik.initialValues.rows[0],
-              id: newRow.id
-            })
-            stackError({
-              message: labels.invalidSKU
-            })
+
+        if (!formik.values.disableSKULookup) {
+          if (!newRow?.itemId) return resetRow(newRow.id)
+
+          if (newRow.isInactive) {
+            resetRow(newRow.id)
+            stackError({ message: labels.inactiveItem })
 
             return
           }
-          if (newRow?.sku) {
-            fillSkuData(update, skuInfo?.record?.recordId)
-          }
+
+          return fillSkuData(update, addRow, newRow)
         }
+
+        if (!newRow?.sku) return resetRow(newRow.id)
+
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        const record = skuInfo?.record
+
+        if (!record) {
+          resetRow(newRow.id)
+          stackError({ message: labels.invalidSKU })
+
+          return
+        }
+
+        if (record.isInactive) {
+          resetRow(newRow.id)
+          stackError({ message: labels.inactiveItem })
+
+          return
+        }
+
+        return fillSkuData(update, addRow, {
+          ...newRow,
+          itemId: record.recordId
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -1121,7 +1124,11 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     return res?.record
   }
 
-  async function fillItemObject(update, itemPhysProp, itemInfo, vendorPrice) {
+  function isValidPrice(value) {
+    return value != null && value != '' && !isNaN(value) && value != 0
+  }
+
+  async function fillItemObject(update, addRow, newRow, itemPhysProp, itemInfo, vendorPrice) {
     const weight = itemPhysProp?.weight || 0
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
@@ -1172,7 +1179,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
-    update({
+    const updatedRowValues = {
+      id: newRow?.id,
       decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
@@ -1199,12 +1207,35 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdValue: 0,
       taxId: rowTax,
       taxDetails: rowTaxDetails
-    })
+    }
+    let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
+
+    const dirtyField = isValidPrice(updatedRowValues.baseLaborPrice)
+      ? DIRTYFIELD_BASE_LABOR_PRICE
+      : isValidPrice(updatedRowValues.unitPrice)
+      ? DIRTYFIELD_UNIT_PRICE
+      : null
+
+    if (dirtyField) data = getItemPriceRow(data, dirtyField)
 
     formik.setFieldValue(
       'header.mdAmount',
       formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
     )
+
+    if (!jumpToNextLine) {
+      return update(data)
+    }
+
+    if (formik.values.disableSKULookup) {
+      return addRow({
+        fieldName: 'sku',
+        changes: data
+      })
+    }
+
+    update(data)
+    addRow()
   }
 
   async function getTaxDetails(taxId) {
@@ -1717,7 +1748,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='header.dtId'
-                readOnly={editMode}
+                readOnly={editMode || formik?.values?.items?.some(item => item.sku)}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
