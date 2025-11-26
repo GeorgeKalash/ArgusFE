@@ -953,6 +953,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
+    const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -999,6 +1000,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
+      disableSKULookup: disableLookup || false,
       installments: puTrxInstallments?.map((installment, index) => {
         return {
           ...installment,
@@ -1020,7 +1022,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     itemsUpdate.current = modifiedList
   }
-
   async function getPurchaseTransactionPack(transactionId) {
     const res = await getRequest({
       extension: PurchaseRepository.PurchaseInvoiceHeader.get2,
@@ -1476,6 +1477,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       parameters: `_dtId=${dtId}`
     })
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+
+    return res?.record?.disableSKULookup || false
   }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
@@ -1545,8 +1548,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [defaultsDataState])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
-    sKULookupInfo(formik.values.header.dtId)
+    if (!recordId) {
+      if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
+      sKULookupInfo(formik.values.header.dtId)
+    }
   }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {
