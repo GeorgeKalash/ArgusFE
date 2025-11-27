@@ -19,6 +19,7 @@ const RPBGridToolbar = ({
   filterBy,
   paramsRequired = false,
   leftSection,
+  disableActionsPadding,
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -125,6 +126,7 @@ const RPBGridToolbar = ({
       }}
       inputSearch={hasSearch}
       actions={actions}
+      disableActionsPadding={disableActionsPadding} 
       leftSection={
         leftSection && (
           <Grid item className={styles.leftSectionGridItem}>

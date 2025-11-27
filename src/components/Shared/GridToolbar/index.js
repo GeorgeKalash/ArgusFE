@@ -23,6 +23,7 @@ const GridToolbar = ({
   disableAdd = false,
   actions = [],
   previewReport,
+  disableActionsPadding, 
   ...props
 }) => {
   const maxAccess = props.maxAccess && props.maxAccess?.record?.accessFlags
@@ -82,6 +83,13 @@ const GridToolbar = ({
   }
 
   const buttons = getButtons(platformLabels)
+  
+  const actionButtonsClassName = [
+    styles.actionButtonsWrapper,
+    disableActionsPadding && styles.actionButtonsWrapperNoPadding
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <DialogActions className={styles.dialogActions}>
@@ -120,9 +128,10 @@ const GridToolbar = ({
             )}
 
             {middleSection}
+            <Grid item className={actionButtonsClassName}>
 
-            <Grid item className={styles.actionButtonsWrapper}>
-              {buttons
+       
+            {buttons
                 .filter(button => actions.some(action => action.key === button.key))
                 .map((button, index) => {
                   const correspondingAction = actions.find(action => action.key === button.key)

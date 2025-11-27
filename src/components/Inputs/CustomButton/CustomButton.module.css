@@ -20,6 +20,7 @@
 
 .buttonImage {
   height: 20px !important;
+  width: 20px !important; 
   object-fit: contain;
 }
 
@@ -38,6 +39,7 @@
 @media (min-width: 2049px) and (max-width: 2566px) {
   .buttonImage {
     height: 18px !important;
+    width: 18px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -56,6 +58,7 @@
 @media (min-width: 1601px) and (max-width: 2048px) {
   .buttonImage {
     height: 18px !important;
+    width: 18px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -76,6 +79,7 @@
 @media (min-width: 1025px) and (max-width: 1600px) {
   .buttonImage {
     height: 18px !important;
+    width: 18px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -91,6 +95,7 @@
 @media (max-width: 1366px) {
   .buttonImage {
     height: 17px !important;
+    width: 17px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -104,12 +109,14 @@
 @media (max-width: 1280px) {
   .buttonImage {
     height: 16px !important;
+    width: 16px !important; 
   }
 }
 
 @media (max-width: 1024px) {
   .buttonImage {
     height: 15px !important;
+    width: 15px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -130,6 +137,7 @@
 @media (max-width: 768px) {
   .buttonImage {
     height: 14px !important;
+    width: 14px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -144,6 +152,7 @@
 @media (max-width: 480px) {
   .buttonImage {
     height: 12px !important;
+    width: 12px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {
@@ -158,6 +167,7 @@
 @media (max-width: 360px) {
   .buttonImage {
     height: 11px !important;
+    width: 11px !important; 
   }
   .responsiveButton,
   .responsiveButtonFullWidth {

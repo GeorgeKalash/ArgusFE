@@ -31,8 +31,11 @@
   display: flex;
   justify-content: flex-start;
   margin: 0 !important;
-}
 
+}
+.actionButtonsWrapperNoPadding {
+  padding-left: 0 !important;
+}
 .actionButton {
   margin-right: 6px;
   padding: 6px 12px;

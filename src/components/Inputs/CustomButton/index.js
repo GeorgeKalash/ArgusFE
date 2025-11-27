@@ -79,7 +79,7 @@ const CustomButton = ({
             style={{
               top: tooltip.top,
               left: tooltip.left,
-              transform: 'translate(-40%, -75%)'
+              transform: 'translate(-50%, -75%)'
             }}
           >
             {tooltipText}
