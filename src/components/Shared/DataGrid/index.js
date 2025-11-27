@@ -12,9 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from 'src/resources/AccessLevels'
 import { AuthContext } from 'src/providers/AuthContext'
+import styles from './DataGrid.module.css'
 
 export function DataGrid({
-  name, // maxAccess
+  name,
   columns,
   value,
   error,
@@ -510,20 +511,13 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
+    const centered =
+      column.colDef.component === 'checkbox' ||
+      column.colDef.component === 'button' ||
+      column.colDef.component === 'icon'
+
     return (
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
-          padding: '0 0px',
-          display: 'flex',
-          justifyContent:
-            (column.colDef.component === 'checkbox' ||
-              column.colDef.component === 'button' ||
-              column.colDef.component === 'icon') &&
-            'center'
-        }}
-      >
+      <Box className={`${styles.cellBox} ${centered ? styles.cellBoxCentered : ''}`}>
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -531,7 +525,7 @@ export function DataGrid({
 
   const CustomCellEditor = params => {
     const { column, data, maxAccess } = params
-    const [currentValue, setCurrentValue] = useState(params?.node?.data) // Capture current data state
+    const [currentValue, setCurrentValue] = useState(params?.node?.data)
 
     const Component =
       typeof column?.colDef?.component === 'string'
@@ -584,18 +578,10 @@ export function DataGrid({
     }
 
     const comp = column.colDef.component
+    const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
 
     return (
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
-          padding: '0 0px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: (comp === 'checkbox' || comp === 'button' || comp === 'icon') && 'center'
-        }}
-      >
+      <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''}`}>
         <Component
           id={params.node.data.id}
           {...params}
@@ -632,17 +618,14 @@ export function DataGrid({
 
     return (
       <Box
+        className={styles.actionCell}
+        onClick={() => openDelete(params)}
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
           pointerEvents: disabledForRow ? 'none' : 'auto'
         }}
-        onClick={() => openDelete(params)}
       >
         <IconButton disabled={disabledForRow}>
-          <GridDeleteIcon sx={{ fontSize: '1.3rem' }} />
+          <GridDeleteIcon className={styles.deleteIcon} />
         </IconButton>
       </Box>
     )
@@ -664,6 +647,8 @@ export function DataGrid({
       ...column,
       ...{ width: column.width + additionalWidth },
       field: column.name,
+
+      // minWidth: 50,
       headerName: column.label || column.name,
       headerTooltip: column.label,
       editable: !_disabled,
@@ -680,16 +665,12 @@ export function DataGrid({
           }
 
           return (
-            <Grid container justifyContent='center' alignItems='center'>
+            <Grid container className={styles.headerCheckboxContainer}>
               <CustomCheckBox
+                className={styles.headerCheckbox}
                 checked={column?.checkAll?.value}
                 onChange={e => {
                   selectAll(e)
-                }}
-                sx={{
-                  width: '20%',
-                  height: '20%',
-                  marginLeft: '50px !important'
                 }}
                 disabled={column.checkAll?.disabled}
               />
@@ -873,40 +854,18 @@ export function DataGrid({
   }, [searchValue])
 
   return (
-    <Box sx={{ height: height || 'auto', flex: 1 }}>
+    <Box className={styles.root} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
         <Box
-          className='ag-theme-alpine'
-          style={{ height: '100%', width: '100%' }}
-          sx={{
-            fontSize: '0.9rem',
-            '.ag-header': {
-              height: '40px !important',
-              minHeight: '40px !important'
-            },
-            '.ag-header-cell': {
-              height: '40px !important',
-              minHeight: '40px !important'
-            },
-            '.ag-cell': {
-              borderRight: '1px solid #d0d0d0 !important',
-              fontSize: '0.8rem !important'
-            },
-            '.ag-cell .MuiBox-root': {
-              padding: '0px !important'
-            },
-            '.ag-header-row': {
-              background: bg,
-              height: '35px !important',
-              minHeight: '35px !important'
-            }
-          }}
+          className={`ag-theme-alpine ${styles.agContainer}`}
           ref={gridContainerRef}
+          style={{ '--ag-header-bg': bg }}
         >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
+              domLayout='autoHeight'
               columnDefs={columnDefs}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
@@ -920,7 +879,6 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
-              rowHeight={35}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}

@@ -1,85 +1,125 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
+import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, ...props }) => {
-  const [rect, setRect] = useState(anchorEl?.getBoundingClientRect())
+  const [rect, setRect] = useState(null)
+  const [measuredHeight, setMeasuredHeight] = useState(null)
+  const [isPickerContent, setIsPickerContent] = useState(false)
   const popperRef = useRef(null)
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
+  const updateRect = useCallback(() => {
+    if (!anchorEl) return
+
+    const nextRect = anchorEl.getBoundingClientRect()
+
+    setRect(prev => {
+      if (
+        !prev ||
+        prev.top !== nextRect.top ||
+        prev.left !== nextRect.left ||
+        prev.width !== nextRect.width ||
+        prev.height !== nextRect.height
+      ) {
+        return nextRect
       }
-    }
-
-    const handleResize = () => {
-      if (anchorEl) {
-        setRect(anchorEl.getBoundingClientRect())
-      }
-    }
-
-    const mutationObserver = new MutationObserver(() => handleResize())
-
-    if (anchorEl) {
-      mutationObserver.observe(anchorEl, { attributes: true, childList: true, subtree: true })
-    }
-    window.addEventListener('scroll', handleScroll, true)
-
-    return () => {
-      if (anchorEl) {
-        mutationObserver.disconnect()
-      }
-      window.removeEventListener('scroll', handleScroll, true)
-    }
+      
+      return prev
+    })
   }, [anchorEl])
 
-  const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+  useEffect(() => {
+    if (!anchorEl || !open) return
 
-  const canRenderBelow = window.innerHeight - rect?.bottom > popperRef?.current?.getBoundingClientRect()?.height
+    updateRect()
+
+    const handleScrollOrResize = () => {
+      updateRect()
+    }
+
+    window.addEventListener('scroll', handleScrollOrResize, true)
+    window.addEventListener('resize', handleScrollOrResize)
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true)
+      window.removeEventListener('resize', handleScrollOrResize)
+    }
+  }, [anchorEl, open, updateRect])
+
+  const zoomValue =
+    typeof window !== 'undefined'
+      ? parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
+      : 1
+  const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1
+
+  const anchorTop = rect ? rect.top / zoom : 0
+  const anchorBottom = rect ? rect.bottom / zoom : 0
+  const anchorWidth = rect ? rect.width / zoom : undefined
+  const left = rect ? rect.left / zoom : 0
+
+  useEffect(() => {
+    if (!open || !popperRef.current) return
+
+    const pickerNode = popperRef.current.querySelector(
+      '.MuiDateCalendar-root, .MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
+    )
+
+    const nextIsPicker = !!pickerNode
+    if (nextIsPicker !== isPickerContent) {
+      setIsPickerContent(nextIsPicker)
+    }
+  }, [open, rect, isPickerContent])
+
+  const isPicker = isPickerContent || isDateTimePicker
+
+  useEffect(() => {
+    if (!open || !popperRef.current) return
+
+    const r = popperRef.current.getBoundingClientRect()
+    if (r.height > 0 && r.height !== measuredHeight) {
+      setMeasuredHeight(r.height)
+    }
+  }, [open, rect, measuredHeight])
+
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+  const defaultEstimate = isPicker ? 320 / zoom : viewportHeight * 0.43
+  const popperHeightForFlip = measuredHeight ?? defaultEstimate
+
+  const openAbove = rect
+    ? viewportHeight - anchorBottom <= popperHeightForFlip
+    : false
+
+  const baseStyle = {
+    position: 'absolute',
+    left,
+    top: openAbove ? anchorTop : anchorBottom,
+    ...(rect && !isPicker ? { width: anchorWidth } : {}),
+    transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none'
+  }
+
+  const mergedStyle = {
+    ...baseStyle,
+    ...(props.style || {})
+  }
 
   return ReactDOM.createPortal(
     <Box
       ref={popperRef}
-      sx={{
-        zIndex: '3 !important',
-        visibility: open ? 'visible' : 'hidden',
-        '& .MuiMultiSectionDigitalClock-root': {
-          width: '200px'
-        },
-        '& .css-n4sunj-MuiAutocomplete-listbox': {
-          maxHeight: '43vh'
-        },
-        '& .MuiMenuItem-root': {
-          paddingRight: '10px'
-        },
-        '& .MuiDateCalendar-root': {
-          height: 310
-        },
-        ...(isDateTimePicker && {
-          '& .MuiDateCalendar-root': {
-            height: 300
-          },
-          '& .MuiMultiSectionDigitalClock-root': {
-            height: '300px'
-          }
-        })
-      }}
-      style={{
-        position: 'absolute',
-        top: rect?.bottom / zoom,
-        left: rect?.left / zoom,
-        transform: !canRenderBelow ? `translateY(calc(-100% - 10px - ${rect?.height}px))` : 'none',
-        ...props?.style
-      }}
-      className={props.className}
+      className={[
+        styles.popperRoot,
+        open ? styles.popperOpen : styles.popperClosed,
+        isPicker ? styles.dateTimePopper : '',
+        props.className || ''
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={mergedStyle}
     >
       {typeof children === 'function'
         ? children({
-            placement: 'top-start',
-            TransitionProps: {
-              in: true
-            }
+            placement: openAbove ? 'top-start' : 'bottom-start',
+            TransitionProps: { in: true }
           })
         : children}
     </Box>,

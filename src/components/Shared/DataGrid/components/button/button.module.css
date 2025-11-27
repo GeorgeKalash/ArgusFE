@@ -1,0 +1,16 @@
+
+.gridButton {
+    opacity: 1;
+    width: 10px !important;
+    height: 30px;
+    object-fit: contain; 
+  }
+  
+  .gridButton:hover {
+    opacity: 0.7;
+  }
+  
+  .gridButtonImage {
+    height: 10px; 
+  }
+  

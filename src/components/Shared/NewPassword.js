@@ -103,28 +103,20 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           value={formik.values.newPassword}
           onChange={onPasswordChange}
           error={formik.touched.newPassword && formik.errors.newPassword}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <IconButton edge='start'>
-                  <div style={{ width: '20px', height: '20px' }}>
-                    <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
-                  </div>
-                </IconButton>
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position='end'>
-                <IconButton
-                  edge='end'
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  onMouseDown={e => e.preventDefault()}
-                >
-                  <Icon icon={showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
+          startIcons={[
+            <div key='lock-icon' style={{ width: '20px', height: '20px' }}>
+              <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+            </div>
+          ]}
+          endIcons={[
+            <IconButton
+              key='toggle-new-password'
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              onMouseDown={e => e.preventDefault()}
+            >
+              <Icon icon={showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+            </IconButton>
+          ]}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
           <LinearProgress
@@ -147,28 +139,20 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           value={formik.values.confirmPassword}
           onChange={onConfirmPasswordChange}
           error={formik.touched.confirmPassword && formik.errors.confirmPassword}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <IconButton edge='start'>
-                  <div style={{ width: '20px', height: '20px' }}>
-                    <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
-                  </div>
-                </IconButton>
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position='end'>
-                <IconButton
-                  edge='end'
-                  onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                  onMouseDown={e => e.preventDefault()}
-                >
-                  <Icon icon={showConfirmNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
+          startIcons={[
+            <div key='lock-icon-confirm' style={{ width: '20px', height: '20px' }}>
+              <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+            </div>
+          ]}
+          endIcons={[
+            <IconButton
+              key='toggle-confirm-password'
+              onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+              onMouseDown={e => e.preventDefault()}
+            >
+              <Icon icon={showConfirmNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+            </IconButton>
+          ]}
         />
       </Grid>
       <DialogActions>
@@ -187,10 +171,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
             sx={{
               mr: 1,
               backgroundColor: '#4eb558',
-              '&:hover': {
-                backgroundColor: '#4eb558',
-                opacity: 0.8
-              },
+              '&:hover': { backgroundColor: '#4eb558', opacity: 0.8 },
               width: '50px !important',
               height: '35px',
               objectFit: 'contain',

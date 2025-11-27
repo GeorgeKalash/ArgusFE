@@ -2,6 +2,7 @@ import { useContext, useRef } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
+import styles from './numberfield.module.css'   
 
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
   const { systemChecks } = useContext(ControlContext)
@@ -29,6 +30,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
 
   return (
     <CustomNumberField
+      className={styles.gridNumberEditor}
       value={
         viewDecimals
           ? typing.current

@@ -10,6 +10,7 @@ import { DataSets } from 'src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
 import { CommonContext } from 'src/providers/CommonContext'
+import { useWindowDimensions } from 'src/lib/useWindowDimensions'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,6 +20,7 @@ const ReportViewer = ({ resourceId }) => {
   const [pdf, setPDF] = useState(null)
   const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
+  const { width } = useWindowDimensions()
 
   const getExportFormats = async () => {
     await getAllKvsByDataset({
@@ -35,6 +37,9 @@ const ReportViewer = ({ resourceId }) => {
       }
     })
   }
+
+  const zoom =
+    width <= 768 ? 90 : width <= 1024 ? 90 : width <= 1366 ? 100 : width <= 1600 ? 100 : width <= 1920 ? 140 : 180
 
   const getReportLayout = () => {
     getRequest({
@@ -140,44 +145,51 @@ const ReportViewer = ({ resourceId }) => {
           onApply={onApply}
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
+          disableActionsPadding
           leftSection={
-            <Grid item xs={2.5}>
-              <Grid container spacing={2}>
-                <Grid item xs={10}>
-                  <ResourceComboBox
-                    store={reportStore}
-                    label='Select a report template'
-                    name='selectedReport'
-                    valueField='layoutName'
-                    displayField='layoutName'
-                    values={report}
-                    required
-                    displayFieldWidth={1.5}
-                    defaultIndex={0}
-                    onChange={(e, newValue) =>
-                      setReport(prevState => ({
-                        ...prevState,
-                        selectedReport: newValue
-                      }))
-                    }
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <CustomButton
-                    onClick={cycleFormat}
-                    image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                    disabled={exportFormats.length === 0 || !report.selectedReport}
-                  />
-                </Grid>
+            <Grid container spacing={2} alignItems='center' wrap='nowrap'>
+              <Grid item xs>
+                <ResourceComboBox
+                  store={reportStore}
+                  label='Select a report template'
+                  name='selectedReport'
+                  valueField='layoutName'
+                  displayField='layoutName'
+                  values={report}
+                  required
+                  defaultIndex={0}
+                  fullWidth
+                  onChange={(e, newValue) =>
+                    setReport(prevState => ({
+                      ...prevState,
+                      selectedReport: newValue
+                    }))
+                  }
+                />
+              </Grid>
+          
+              <Grid item>
+                <CustomButton
+                  onClick={cycleFormat}
+                  image={`${report.selectedFormat?.value || 'PDF'}.png`}
+                  disabled={exportFormats.length === 0 || !report.selectedReport}
+                />
               </Grid>
             </Grid>
           }
+          
         />
       </Fixed>
 
       {pdf && (
         <Box id='reportContainer' sx={{ flex: 1, display: 'flex', p: 2, position: 'relative' }}>
-          <iframe title={report.selectedReport?.layoutName} src={pdf} width='100%' height='100%' allowFullScreen />
+          <iframe
+            title={report.selectedReport?.layoutName}
+            src={`${pdf}#zoom=${zoom}`}
+            width='100%'
+            height='100%'
+            allowFullScreen
+          />
           <Box position='absolute' top={20} right={130} zIndex={1}>
             <CustomButton
               image='popup.png'

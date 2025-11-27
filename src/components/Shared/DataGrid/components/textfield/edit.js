@@ -4,6 +4,7 @@ import PercentIcon from '@mui/icons-material/Percent'
 import PinIcon from '@mui/icons-material/Pin'
 import InputAdornment from '@mui/material/InputAdornment'
 import ClearIcon from '@mui/icons-material/Clear'
+import styles from './textfield.module.css'
 
 export default function TextFieldEdit({ id, column: { props, field, ...column }, value, update, updateRow }) {
   const isPercentIcon = props?.gridData ? props?.gridData[id - 1]?.mdType === 1 : false
@@ -42,6 +43,7 @@ export default function TextFieldEdit({ id, column: { props, field, ...column },
 
   return (
     <CustomTextField
+      className={styles.gridTextEditor} 
       value={value?.[field] || undefined}
       label={''}
       autoFocus
@@ -61,16 +63,6 @@ export default function TextFieldEdit({ id, column: { props, field, ...column },
       inputMode={props.type === 'numeric' ? 'decimal' : 'text'}
       onClear={() => update({ id, field, value: '' })}
       {...props}
-      sx={{
-        flexGrow: 1,
-        border: 'none',
-        '& .MuiOutlinedInput-root': {
-          borderRadius: 0,
-          '& fieldset': {
-            border: 'none'
-          }
-        }
-      }}
     />
   )
 }
