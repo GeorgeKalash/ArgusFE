@@ -4,7 +4,7 @@
 
 .outlinedFieldset {
   border-color: #959d9e;
-  border-radius: 6px;
+  /* border-radius: 6px; */
 }
 
 .outlinedNoBorder {
@@ -54,6 +54,10 @@
   .inputBase::placeholder {
     font-size: 19px !important;
   }
+  /* .icon {
+    font-size: 24px !important;
+    margin-right: -5px !important;
+  } */
 
   .search-icon {
     font-size: 24px !important;
@@ -69,11 +73,12 @@
 @media (min-width: 1025px) and (max-width: 1600px) {
   .outlinedRoot {
     height: 30px !important;
+    padding: 0px !important;
   }
 
-  .outlinedFieldset {
+  /* .outlinedFieldset {
     border-radius: 5px !important;
-  }
+  } */
 
   .inputLabel {
     font-size: 12px !important;
@@ -123,8 +128,8 @@
 }
 
 @media (max-width: 1024px) {
-  .outlinedRoot {
-    height: 26px !important;
+  .outlinedRoot :global(.MuiOutlinedInput-root) {
+    height: 30px !important;
   }
 
   .outlinedFieldset {
@@ -151,6 +156,9 @@
 
   .search-icon {
     font-size: 13px !important;
+  }
+  .inputAdornment {
+    margin: -10px !important;
   }
   .labelRoot {
     font-size: 14px !important;

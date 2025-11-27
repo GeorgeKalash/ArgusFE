@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomLookup.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomLookup = ({
   type = 'text',
@@ -121,7 +122,9 @@ const CustomLookup = ({
           }}
           PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
-            props.renderOption && <Paper style={{ minWidth: `${displayFieldWidth * 100}%`,width: 'max-content', }}>{children}</Paper>
+            props.renderOption && (
+              <Paper style={{ minWidth: `${displayFieldWidth * 100}%`, width: 'max-content' }}>{children}</Paper>
+            )
           }
           renderOption={(propsOption, option) => {
             if (columnsInDropDown?.length > 0) {
@@ -135,26 +138,19 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li  className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
                       {columnsWithGrid.map((header, i) => {
                         const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                         return (
-                          <Box
-                            key={i}
-                            className={styles.dropdownHeaderCell}
-                            style={{ width: widthPercent }}
-                          >
+                          <Box key={i} className={styles.dropdownHeaderCell} style={{ width: widthPercent }}>
                             {header.value.toUpperCase()}
                           </Box>
                         )
                       })}
                     </li>
                   )}
-                  <li
-                    {...propsOption}
-                    className={`${propsOption.className} ${styles.dropdownOptionRow}`}
-                  >
+                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
@@ -164,11 +160,7 @@ const CustomLookup = ({
                       const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                       return (
-                        <Box
-                          key={i}
-                          className={styles.dropdownCell}
-                          style={{ width: widthPercent }}
-                        >
+                        <Box key={i} className={styles.dropdownCell} style={{ width: widthPercent }}>
                           {displayValue}
                         </Box>
                       )
@@ -180,31 +172,18 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li
-                      className={`${propsOption.className} ${styles.dropdownOptionRow}`}
-                    >
+                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellMain}>
-                          {valueField.toUpperCase()}
-                        </Box>
+                        <Box className={styles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
                       )}
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellSecondary}>
-                          {displayField.toUpperCase()}
-                        </Box>
+                        <Box className={styles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
                       )}
                     </li>
                   )}
-                  <li
-                    {...propsOption}
-                    className={`${propsOption.className} ${styles.dropdownOptionRow}`}
-                  >
+                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
                     <Box className={styles.dropdownCellMain}>{option[valueField]}</Box>
-                    {secondDisplayField && (
-                      <Box className={styles.dropdownCellSecondary}>
-                        {option[displayField]}
-                      </Box>
-                    )}
+                    {secondDisplayField && <Box className={styles.dropdownCellSecondary}>{option[displayField]}</Box>}
                   </li>
                 </Box>
               )
@@ -213,14 +192,7 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
-              className={[
-                styles.firstField,
-                secondDisplayField ? styles.firstFieldWithSecond : '',
-                !hasBorder ? styles.noBorder : '',
-                isFocused || firstValue ? styles.labelFocused : styles.labelUnfocused
-              ]
-                .filter(Boolean)
-                .join(' ')}
+              className={[secondDisplayField ? styles.firstFieldWithSecond : ''].filter(Boolean).join(' ')}
               onChange={e => {
                 setInputValue(e.target.value)
 
@@ -268,15 +240,15 @@ const CustomLookup = ({
               helperText={helperText}
               InputProps={{
                 ...params.InputProps,
+                classes: {
+                  root: inputs.outlinedRoot,
+                  notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                  input: inputs.inputBase
+                },
                 endAdornment: !_readOnly && (
-                  <Box
-                    className={`${styles.iconAdornment} ${!hasBorder ? styles.iconAdornmentNoBorder : ''}`}
-                  >
+                  <Box className={`${styles.iconAdornment} ${!hasBorder ? styles.iconAdornmentNoBorder : ''}`}>
                     {!isLoading ? (
-                      <IconButton
-                        className={styles.searchIconButton}
-                        tabIndex={-1}
-                      >
+                      <IconButton className={styles.searchIconButton} tabIndex={-1}>
                         <SearchIcon className={styles.searchIcon} />
                       </IconButton>
                     ) : (
@@ -299,6 +271,9 @@ const CustomLookup = ({
                   </Box>
                 )
               }}
+              InputLabelProps={{
+                className: isFocused ? inputs.inputLabelFocused : inputs.inputLabel
+              }}
             />
           )}
           readOnly={_readOnly}
@@ -320,20 +295,19 @@ const CustomLookup = ({
               }
             }}
             InputProps={{
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
               inputProps: {
                 tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0
               },
               readOnly: secondField ? !secondField?.editable : _readOnly
             }}
+            className={[styles.secondField].filter(Boolean).join(' ')}
             error={error}
             helperText={helperText}
-            className={[
-              styles.secondField,
-              !hasBorder ? styles.noBorder : '',
-              firstValue ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' ')}
           />
         </Grid>
       )}

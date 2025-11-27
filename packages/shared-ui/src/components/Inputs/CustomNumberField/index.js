@@ -8,6 +8,7 @@ import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { iconMap } from '@argus/shared-utils/src/utils/iconMap'
 import styles from './CustomNumberField.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomNumberField = ({
   variant = 'outlined',
@@ -44,6 +45,7 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -147,12 +149,16 @@ const CustomNumberField = ({
       helperText={helperText}
       required={_required}
       onInput={handleInput}
-      onFocus={e => autoSelect && e.target.select()}
+      onFocus={e => {
+        autoSelect && e.target.select()
+        setIsFocused(true)
+      }}
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
           handleNumberChangeValue(e, true)
         }
+        setIsFocused(false)
       }}
       InputProps={{
         inputProps: {
@@ -166,27 +172,33 @@ const CustomNumberField = ({
         autoComplete: 'off',
         readOnly: _readOnly,
         classes: {
-          root: styles.outlinedRoot,
-          notchedOutline: hasBorder ? styles.outlinedFieldset : styles.outlinedNoBorder,
-          input: styles.inputBase
+          root: inputs.outlinedRoot,
+          notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+          input: inputs.inputBase
         },
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
-            <InputAdornment position='end'>
-              {iconMap[props?.iconKey] && (
-                <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={styles['search-icon']}>
-                  {iconMap[props?.iconKey]}
-                </IconButton>
-              )}
-              {displayButtons && (value || value === 0) && (
-                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input' className={styles['search-icon']} >
-                  <ClearIcon className={styles['search-icon']} />
-                </IconButton>
-              )}
-            </InputAdornment>
-          )
+          <InputAdornment position='end'>
+            {iconMap[props?.iconKey] && (
+              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={styles['search-icon']}>
+                {iconMap[props?.iconKey]}
+              </IconButton>
+            )}
+            {displayButtons && (value || value === 0) && (
+              <IconButton
+                tabIndex={-1}
+                edge='end'
+                onClick={onClear}
+                aria-label='clear input'
+                className={styles['search-icon']}
+              >
+                <ClearIcon className={styles['search-icon']} />
+              </IconButton>
+            )}
+          </InputAdornment>
+        )
       }}
       InputLabelProps={{
-        className: styles.inputLabel
+        className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
       }}
       customInput={TextField}
       onChange={e => handleNumberChangeValue(e)}

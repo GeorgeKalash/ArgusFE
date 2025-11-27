@@ -75,9 +75,9 @@ const Window = React.memo(
       if (screenWidth > 1600) return 1
       if (screenWidth > 1400) return 0.8
       if (screenWidth > 1366) return 0.83
-      if (screenWidth > 768) return 0.8
+      if (screenWidth > 768) return 0.6
       if (screenWidth > 600) return 0.75
-      if (screenWidth > 480) return 0.7
+      if (screenWidth > 480) return 0.5
       if (screenWidth > 375) return 0.65
 
       return 0.6
@@ -87,9 +87,9 @@ const Window = React.memo(
       if (screenWidth > 1600) return 1
       if (screenWidth > 1359) return 0.85
       if (screenWidth > 1024) return 0.95
-      if (screenWidth > 768) return 0.9
+      if (screenWidth > 768) return 0.7
       if (screenWidth > 600) return 0.85
-      if (screenWidth > 480) return 0.8
+      if (screenWidth > 480) return 0.6
       if (screenWidth > 375) return 0.75
 
       return 0.75

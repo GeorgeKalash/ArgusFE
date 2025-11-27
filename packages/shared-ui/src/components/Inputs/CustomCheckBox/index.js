@@ -1,4 +1,3 @@
-// CustomCheckBox.jsx
 import React from 'react'
 import { FormControlLabel, Checkbox } from '@mui/material'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'

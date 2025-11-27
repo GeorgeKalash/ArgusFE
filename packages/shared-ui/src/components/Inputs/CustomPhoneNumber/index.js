@@ -54,8 +54,7 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     <div className={styles.phoneWrapper}>
       {label && (
         <label className={styles.phoneLabel}>
-          {label}{' '}
-          {_required && <span className={styles.phoneLabelRequired}>*</span>}
+          {label} {_required && <span className={styles.phoneLabelRequired}>*</span>}
         </label>
       )}
 

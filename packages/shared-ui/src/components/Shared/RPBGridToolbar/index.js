@@ -5,6 +5,7 @@ import ReportParameterBrowser from '@argus/shared-ui/src/components/Shared/Repor
 import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import styles from './RPBGridToolbar.module.css'
 
 const RPBGridToolbar = ({
   add,
@@ -17,6 +18,8 @@ const RPBGridToolbar = ({
   hasSearch = true,
   filterBy,
   paramsRequired = false,
+  leftSection,
+  disableActionsPadding,
   ...rest
 }) => {
   const { stack } = useWindow()
@@ -123,10 +126,18 @@ const RPBGridToolbar = ({
       }}
       inputSearch={hasSearch}
       actions={actions}
+      disableActionsPadding={disableActionsPadding} 
+      leftSection={
+        leftSection && (
+          <Grid item className={styles.leftSectionGridItem}>
+            {leftSection}
+          </Grid>
+        )
+      }
       bottomSection={
         rpbParams &&
         rpbParams.length > 0 && (
-          <Grid container sx={{ display: 'flex', pt: 2, margin: '0px !important' }}>
+          <Grid container className={styles.bottomSectionContainer}>
             {rpbParams.map(
               (param, i) =>
                 param.display && (

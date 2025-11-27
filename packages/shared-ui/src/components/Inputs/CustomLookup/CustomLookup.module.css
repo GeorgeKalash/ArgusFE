@@ -6,14 +6,10 @@
   width: 100% !important;
 }
 
-.firstField :global(.MuiOutlinedInput-root) {
-  height: 33px !important;
-}
-
 .firstField :global(.MuiOutlinedInput-root fieldset) {
   border-color: #959d9e !important;
-  border-top-left-radius: 6px !important;
-  border-bottom-left-radius: 6px !important;
+  /* border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important; */
 }
 
 .firstFieldWithSecond :global(.MuiAutocomplete-inputRoot) {
@@ -21,57 +17,10 @@
   border-bottom-right-radius: 0 !important;
 }
 
-.noBorder :global(.MuiOutlinedInput-root fieldset) {
-  border: none !important;
-}
-
-.firstField :global(.MuiInputLabel-root) {
-  font-size: 14px !important;
-}
-
-.firstField :global(.MuiInputBase-input) {
-  font-size: 14px !important;
-  color: black !important;
-}
-
-.labelUnfocused :global(.MuiInputLabel-root) {
-  top: -3px !important;
-}
-
-.labelFocused :global(.MuiInputLabel-root) {
-  top: 0px !important;
-}
-
-.secondField {
-  flex: 1 !important;
-  display: flex !important;
-  width: 100% !important;
-}
-
 .secondField :global(.MuiInputBase-root) {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
-
-.secondField :global(.MuiOutlinedInput-root) {
-  height: 33px !important;
-}
-
-.secondField :global(.MuiOutlinedInput-root fieldset) {
-  border-color: #959d9e !important;
-  border-top-right-radius: 6px !important;
-  border-bottom-right-radius: 6px !important;
-}
-
-.secondField :global(.MuiInputLabel-root) {
-  font-size: 14px !important;
-}
-
-.secondField :global(.MuiInputBase-input) {
-  font-size: 14px !important;
-  color: black !important;
-}
-
 
 .dropdownHeaderCell {
   font-weight: bold !important;
@@ -117,10 +66,9 @@
 .dropdownOptionRow {
   display: flex !important;
   align-items: center !important;
-  padding: 4px 8px !important; 
-  min-height: 28px !important; 
+  padding: 4px 8px !important;
+  min-height: 28px !important;
 }
-
 
 .iconAdornment {
   position: absolute !important;
@@ -158,39 +106,18 @@
   margin-right: 4px !important;
   padding: 0 !important;
 }
+.secondField {
+  flex: 1 !important;
+  display: flex !important;
+  width: 100% !important;
+}
 
 .clearIcon {
   border: 0 !important;
   font-size: 17px !important;
 }
 
-
 @media (min-width: 1025px) and (max-width: 1600px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 30px !important;
-  }
-
-  .firstField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-left-radius: 5px !important;
-    border-bottom-left-radius: 5px !important;
-  }
-
-  .secondField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-right-radius: 5px !important;
-    border-bottom-right-radius: 5px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 12px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 12px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 16px !important;
@@ -215,21 +142,6 @@
 }
 
 @media (max-width: 1280px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 28px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 11px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 11px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 14px !important;
@@ -254,31 +166,6 @@
 }
 
 @media (max-width: 1024px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 26px !important;
-  }
-
-  .firstField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-left-radius: 4px !important;
-    border-bottom-left-radius: 4px !important;
-  }
-
-  .secondField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 4px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 10px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 10px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 13px !important;
@@ -303,31 +190,6 @@
 }
 
 @media (max-width: 768px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 24px !important;
-  }
-
-  .firstField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-left-radius: 3px !important;
-    border-bottom-left-radius: 3px !important;
-  }
-
-  .secondField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-right-radius: 3px !important;
-    border-bottom-right-radius: 3px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 9px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 9px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 12px !important;
@@ -352,31 +214,6 @@
 }
 
 @media (max-width: 480px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 22px !important;
-  }
-
-  .firstField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-left-radius: 2px !important;
-    border-bottom-left-radius: 2px !important;
-  }
-
-  .secondField :global(.MuiOutlinedInput-root fieldset) {
-    border-top-right-radius: 2px !important;
-    border-bottom-right-radius: 2px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 8px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 8px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 11px !important;
@@ -401,21 +238,6 @@
 }
 
 @media (max-width: 360px) {
-  .firstField :global(.MuiOutlinedInput-root),
-  .secondField :global(.MuiOutlinedInput-root) {
-    height: 20px !important;
-  }
-
-  .firstField :global(.MuiInputLabel-root),
-  .secondField :global(.MuiInputLabel-root) {
-    font-size: 7px !important;
-  }
-
-  .firstField :global(.MuiInputBase-input),
-  .secondField :global(.MuiInputBase-input) {
-    font-size: 7px !important;
-  }
-
   .searchIcon,
   .clearIcon {
     font-size: 10px !important;
@@ -438,7 +260,6 @@
     height: 14px !important;
   }
 }
-
 
 @media (max-height: 800px) {
   .dropdownHeaderCell,

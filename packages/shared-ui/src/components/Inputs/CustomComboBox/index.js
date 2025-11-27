@@ -7,6 +7,7 @@ import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import inputs from '../Inputs.module.css'
 
 const CustomComboBox = ({
   type = 'text',
@@ -60,6 +61,8 @@ const CustomComboBox = ({
   const valueHighlightedOption = useRef(null)
   const selectFirstValue = useRef(null)
   const filterOptions = useRef(null)
+
+  // console.log('TextDecoderStream', isFocused, name, value)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -258,13 +261,6 @@ const CustomComboBox = ({
         return (
           <TextField
             {...params}
-            className={[
-              styles.customComboTextField,
-              !hasBorder ? styles.noBorder : '',
-              isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' ')}
             inputProps={{
               ...params.inputProps,
               tabIndex: _readOnly ? -1 : 0,
@@ -278,21 +274,31 @@ const CustomComboBox = ({
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
             onFocus={() => setIsFocused(true)}
+            className={[styles.customComboTextField]}
             error={error}
             helperText={helperText}
             onBlur={e => {
               const allowSelect =
                 selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
               onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
+              setIsFocused(false)
             }}
             InputProps={{
               ...params.InputProps,
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
               startAdornment: value?.icon ? (
                 <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
               ) : (
                 props?.startAdornment || params.InputProps.startAdornment
               ),
               endAdornment: mergedEndAdornment
+            }}
+            InputLabelProps={{
+              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
             }}
           />
         )

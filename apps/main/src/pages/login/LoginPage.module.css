@@ -22,7 +22,7 @@
 }
 
 .cardContent {
-  padding: 20px 30px 0 !important;
+  padding: 20px 30px 30px !important;
 }
 
 .formRow {
@@ -51,6 +51,9 @@
   display: flex;
   gap: 1rem;
 }
+.language {
+  color: red !important;
+}
 
 .footer {
   margin-top: auto;
@@ -71,7 +74,7 @@
     padding: 12px;
   }
   .cardContent {
-    padding: 45px 35px 20px !important;
+    padding: 45px 35px 35px !important;
   }
   .linksRow {
     margin-top: 20px;
@@ -84,8 +87,13 @@
     size: medium !important;
   }
 
+  .offered {
+    font-size: 20px !important;
+  }
+
   .language {
     font-size: 20px !important;
+    color: red !important;
   }
   .languageLinks {
     display: flex;
@@ -107,12 +115,15 @@
     padding: 12px;
   }
   .cardContent {
-    padding: 17px 20px 0 !important;
+    padding: 17px 20px 20px !important;
   }
   .linksRow {
     margin-top: 13px;
     margin-bottom: 13px;
     margin-left: 3px;
+  }
+  .language {
+    color: red !important;
   }
   .languageRow {
     margin: 150px 0 200px;
@@ -130,7 +141,7 @@
     padding: 10px;
   }
   .cardContent {
-    padding: 17px 20px 0 !important;
+    padding: 17px 20px 20px !important;
   }
   .linksRow {
     margin-top: 13px;
@@ -141,10 +152,19 @@
   .languageRow {
     margin: 100px 0 150px;
   }
+  .offered {
+    font-size: 10px !important;
+  }
+
+  .language {
+    color: red !important;
+    font-size: 10px !important;
+  }
   .loginButton {
     font-size: 12px !important;
     size: medium !important;
   }
+
   .footer {
     font-size: 12px !important;
   }
@@ -159,6 +179,9 @@
     height: 42px;
     padding: 10px;
   }
+  .cardContent {
+    padding-bottom: 22px !important;
+  }
   .linksRow {
     font-size: 11px !important;
   }
@@ -168,6 +191,7 @@
   .loginButton {
     font-size: 11px !important;
   }
+
   .footer {
     font-size: 11px !important;
   }
@@ -175,7 +199,7 @@
 
 @media (max-width: 1024px) {
   .loginCard {
-    width: 19rem;
+    width: 17rem;
     margin-top: 40px;
   }
   .loginCardHeader {
@@ -183,10 +207,17 @@
     padding: 8px;
   }
   .cardContent {
-    padding: 15px 18px 0 !important;
+    padding: 15px 18px 20px !important;
   }
   .linksRow {
     font-size: 11px !important;
+  }
+  .offered {
+    font-size: 8px !important;
+  }
+
+  .language {
+    font-size: 8px !important;
   }
   .languageRow {
     margin: 80px 0 120px;
@@ -198,10 +229,18 @@
     width: 18rem;
   }
   .cardContent {
-    padding: 14px 16px 0 !important;
+    padding: 14px 16px 16px !important;
   }
   .loginButton {
     font-size: 11px !important;
+  }
+  .offered {
+    font-size: 7px !important;
+  }
+
+  .language {
+    color: red !important;
+    font-size: 7px !important;
   }
   .footer {
     font-size: 11px !important;
@@ -228,8 +267,6 @@
   }
   .languageRow {
     margin: 60px 0 80px;
-    flex-direction: column;
-    align-items: flex-start;
     gap: 0.7rem;
   }
   .loginButton {
@@ -245,7 +282,7 @@
     width: 90%;
   }
   .cardContent {
-    padding: 14px 14px 0 !important;
+    padding: 14px 14px 14px !important;
   }
   .linksRow {
     font-size: 10px !important;
@@ -267,6 +304,9 @@
     height: 35px;
     padding: 6px;
   }
+  .cardContent {
+    padding: 12px 12px 12px !important;
+  }
   .linksRow {
     font-size: 9px !important;
   }
@@ -283,7 +323,7 @@
     width: 96%;
   }
   .cardContent {
-    padding: 12px 12px 0 !important;
+    padding: 12px 12px 12px !important;
   }
   .linksRow {
     font-size: 9px !important;
@@ -302,7 +342,7 @@
     margin-top: 15px;
   }
   .cardContent {
-    padding: 10px 10px 0 !important;
+    padding: 10px 10px 10px !important;
   }
   .linksRow {
     font-size: 8px !important;
@@ -310,6 +350,7 @@
   .loginButton {
     font-size: 8px !important;
   }
+
   .footer {
     font-size: 8px !important;
   }

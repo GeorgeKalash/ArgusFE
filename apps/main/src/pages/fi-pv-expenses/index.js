@@ -41,7 +41,7 @@ const FiPaymentVouchers = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FinancialRepository.PaymentVouchers.snapshot,
+        extension: FinancialRepository.PaymentVouchers.snapshot2,
         parameters: `_filter=${filters.qry}`
       })
     } else {

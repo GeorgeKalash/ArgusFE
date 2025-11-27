@@ -7,6 +7,7 @@
 .gridContainer {
   display: flex;
   justify-content: space-between;
+  align-items: center;   
   width: 100%;
   padding: 0 14px;
 }
@@ -30,8 +31,11 @@
   display: flex;
   justify-content: flex-start;
   margin: 0 !important;
-}
 
+}
+.actionButtonsWrapperNoPadding {
+  padding-left: 0 !important;
+}
 .actionButton {
   margin-right: 6px;
   padding: 6px 12px;
@@ -66,6 +70,12 @@
   .actionButton {
     padding: 5px 10px;
     font-size: 12.5px;
+  }
+  
+  .searchFieldWrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;       
   }
 
   .searchFieldWrapper input {
