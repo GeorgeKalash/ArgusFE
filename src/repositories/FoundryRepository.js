@@ -78,5 +78,8 @@ export const FoundryRepository = {
   },
   TransactionItems: {
     qry: service + 'qryTRI'
+  },
+  AlloyMetals: {
+    qry: service + 'qryALM'
   }
 }
