@@ -145,38 +145,39 @@ const ReportViewer = ({ resourceId }) => {
           onApply={onApply}
           hasSearch={false}
           reportName={report.selectedReport?.parameters}
+          disableActionsPadding
           leftSection={
-            <Grid item xs={2.5}>
-              <Grid container spacing={2}>
-                <Grid item xs={10}>
-                  <ResourceComboBox
-                    store={reportStore}
-                    label='Select a report template'
-                    name='selectedReport'
-                    valueField='layoutName'
-                    displayField='layoutName'
-                    values={report}
-                    required
-                    displayFieldWidth={1.5}
-                    defaultIndex={0}
-                    onChange={(e, newValue) =>
-                      setReport(prevState => ({
-                        ...prevState,
-                        selectedReport: newValue
-                      }))
-                    }
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <CustomButton
-                    onClick={cycleFormat}
-                    image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                    disabled={exportFormats.length === 0 || !report.selectedReport}
-                  />
-                </Grid>
+            <Grid container spacing={2} alignItems='center' wrap='nowrap'>
+              <Grid item xs>
+                <ResourceComboBox
+                  store={reportStore}
+                  label='Select a report template'
+                  name='selectedReport'
+                  valueField='layoutName'
+                  displayField='layoutName'
+                  values={report}
+                  required
+                  defaultIndex={0}
+                  fullWidth
+                  onChange={(e, newValue) =>
+                    setReport(prevState => ({
+                      ...prevState,
+                      selectedReport: newValue
+                    }))
+                  }
+                />
+              </Grid>
+          
+              <Grid item>
+                <CustomButton
+                  onClick={cycleFormat}
+                  image={`${report.selectedFormat?.value || 'PDF'}.png`}
+                  disabled={exportFormats.length === 0 || !report.selectedReport}
+                />
               </Grid>
             </Grid>
           }
+          
         />
       </Fixed>
 
