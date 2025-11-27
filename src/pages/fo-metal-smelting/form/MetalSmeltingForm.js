@@ -33,7 +33,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
   const metalRef = useRef({})
-
+  const alloyMetalItems = useRef({})
   const functionId = SystemFunction.MetalSmelting
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -104,15 +104,22 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .array()
         .of(
           yup.object().shape({
-            metalId: yup.string().test(function (value) {
+            type: yup.number().required(),
+            metalId: yup.number().test(function (value) {
               if (this.parent.type == 1) {
                 return !!value
               }
 
               return true
             }),
-            qty: yup.number().required(),
-            purity: yup.string().test(function (value) {
+            qty: yup.number().test(function (value) {
+              if (this.parent.type == 1) {
+                return !!value && value < 0
+              }
+
+              return true
+            }),
+            purity: yup.number().test(function (value) {
               if (this.parent.type == 1) {
                 return !!value && value > 0
               }
@@ -140,12 +147,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const getPayload = obj => {
     return {
       header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-      items: obj.items?.map(item => ({
+      items: obj.items?.map((item, index) => ({
+        ...item,
         trxId: obj?.recordId || 0,
-        seqNo: item.id,
-        metalId: item.metalId,
-        itemId: item.itemId,
-        qty: item.qty,
+        seqNo: index + 1,
         purity: item.purity / 1000
       }))
     }
@@ -204,13 +209,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
             return metal.metalId === metalId
           })
         : []
-    else {
-      const { list } = await getRequest({
-        extension: FoundryRepository.AlloyMetals.qry,
-        parameters: `_filter=`
-      })
-      filteredItems.current = list || []
-    }
+    else filteredItems.current = alloyMetalItems.current || []
   }
 
   async function getAllMetals() {
@@ -254,7 +253,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     {
       component: 'resourcecombobox',
       label: labels.type,
-      name: 'typeName',
+      name: 'type',
       props: {
         datasetId: DataSets.SMELTING_METAL_TYPE,
         displayField: 'value',
@@ -410,6 +409,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     }
   }
 
+  async function updateItemsMetal(itemId) {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.metalId || null
+  }
+
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
@@ -422,6 +432,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
         metalRef.current = metalRes.record
       }
+
+      const { list } = await getRequest({
+        extension: FoundryRepository.AlloyMetals.qry,
+        parameters: `_filter=`
+      })
+
+      const mappedList = (list || []).map(item => ({
+        ...item,
+        itemName: item.name
+      }))
+      alloyMetalItems.current = mappedList || []
       if (recordId) refetchForm(recordId)
     })()
   }, [])
@@ -567,7 +588,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={(_, newValue) => {
+                    onChange={async (_, newValue) => {
+                      const metal = await updateItemsMetal(newValue?.recordId)
+                      formik.setFieldValue('header.metalId', metal || null)
                       formik.setFieldValue('header.itemName', newValue?.name)
                       formik.setFieldValue('header.sku', newValue?.sku)
                       formik.setFieldValue('header.itemId', newValue?.recordId)
@@ -585,13 +608,13 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     valueField='recordId'
                     displayField='reference'
                     readOnly
-                    values={formik.values}
+                    values={formik.values.header}
                     onChange={(_, newValue) => formik.setFieldValue('header.metalId', newValue.recordId || null)}
                     error={formik.touched.header?.metalId && Boolean(formik.errors.header?.metalId)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                   <CustomNumberField
                     name='header.purity'
                     label={labels.purity}
@@ -602,7 +625,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
+                  <CustomNumberField
+                    name='header.dpMetal'
+                    label={labels.dpMetal}
+                    onChange={formik.handleChange}
+                    value={formik.values.header?.dpMetal}
+                    onClear={() => formik.setFieldValue('header.dpMetal', '')}
+                    error={formik.touched.header?.dpMetal && Boolean(formik.errors.header?.dpMetal)}
+                  />
+                </Grid>
+                <Grid item xs={4}>
                   <CustomNumberField
                     name='header.qty'
                     label={labels.qty}
