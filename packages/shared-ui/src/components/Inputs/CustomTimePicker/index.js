@@ -77,23 +77,23 @@ const CustomTimePicker = ({
               .join(' '),
             InputProps: {
               endAdornment: !(_readOnly || disabled) && (
-                <InputAdornment position='end'>
+                <InputAdornment position='end' className={inputs.inputAdornment}>
                   {value && (
                     <IconButton
                       tabIndex={-1}
-                      edge='start'
+                      // edge='start'
                       onClick={() => onChange(name, null)}
-                      className={styles.clearIconButton}
+                      className={inputs.IconButton}
                     >
-                      <ClearIcon className={styles.dateIcon} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
                   <IconButton
                     tabIndex={-1}
                     onClick={() => setOpenTimePicker(true)}
-                    className={styles.eventIconButton}
+                    className={inputs.IconButton}
                   >
-                    <AccessTimeIcon className={styles.dateIcon} />
+                    <AccessTimeIcon className={inputs.icon}  />
                   </IconButton>
                 </InputAdornment>
               )

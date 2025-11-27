@@ -2,6 +2,7 @@ import React from 'react'
 import { FormControlLabel, Checkbox } from '@mui/material'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomCheckBox.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomCheckBox = ({
   value,
@@ -38,15 +39,15 @@ const CustomCheckBox = ({
           disabled={_disabled}
           inputProps={{ 'aria-label': label }}
           className={[
-            styles.checkbox,
+             styles.checkbox,
             error ? styles.errorCheckbox : '',
             _disabled ? styles.disabledCheckbox : ''
           ].join(' ')}
           {...props}
         />
       }
-      label={label}
-      className={styles.formControl}
+      label={<span className={inputs.inputLabel}>{label}</span>} 
+      className={inputs.outlinedRoot}
       disabled={_disabled}
     />
   )

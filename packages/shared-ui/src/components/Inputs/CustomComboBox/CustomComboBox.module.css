@@ -1,7 +1,7 @@
 .customComboTextField :global(.MuiAutocomplete-clearIndicator) {
   padding: 0 !important;
   margin: 0 !important;
-  visibility: visible !important;
+  visibility: hidden !important;
 }
 
 .comboStartIcon {
@@ -18,15 +18,10 @@
   min-width: 0 !important;
 }
 
-.customComboTextField :global(.MuiAutocomplete-endAdornment) {
-  right: 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 1px !important;
-}
+.customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+  font-size: 35px !important;
+  margin:-5px  !important;
 
-.customComboTextField :global(.MuiSvgIcon-root) {
-  font-size: 18px !important;
 }
 .comboHeaderRow {
   border-bottom: 1px solid #6a6464 !important;
@@ -73,9 +68,40 @@
   align-items: center !important;
 }
 
+@media (min-width: 2048px) and (max-width: 2566px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size:35px !important;
+    margin: 0px  !important;
+  }
+
+  /* .comboOptionRow,
+  .comboHeaderRow {
+    padding: 3px 8px !important;
+    min-height: 22px !important;
+  }
+
+  .comboHeaderCell {
+    font-size: 0.72rem !important;
+    height: 18px !important;
+  }
+
+  .comboOptionCell,
+  .comboOptionSingleText {
+    font-size: 0.84rem !important;
+    height: 19px !important;
+  }
+
+  .comboOptionIcon {
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 6px !important;
+  } */
+}
 @media (min-width: 1025px) and (max-width: 1600px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 16px !important;
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+    margin:-1px  !important;
+
   }
 
   .comboOptionRow,
@@ -101,9 +127,11 @@
   }
 }
 
+
+
 @media (max-width: 1280px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 14px !important;
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
   }
 
   .comboOptionRow,
@@ -131,9 +159,12 @@
 }
 
 @media (max-width: 1024px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 13px !important;
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+    margin: 4px  !important;
+
   }
+
 
   .comboOptionRow,
   .comboHeaderRow {
@@ -160,7 +191,7 @@
 }
 
 @media (max-width: 768px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 12px !important;
   }
 
@@ -189,7 +220,7 @@
 }
 
 @media (max-width: 480px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 11px !important;
   }
 
@@ -217,7 +248,7 @@
 }
 
 @media (max-width: 360px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 10px !important;
   }
 
@@ -281,3 +312,4 @@
     height: 14px !important;
   }
 }
+

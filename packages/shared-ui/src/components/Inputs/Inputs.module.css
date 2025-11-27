@@ -23,6 +23,20 @@
   font-size: 14px !important;
 }
 
+.inputAdornment {
+
+  margin: 0px !important
+}
+
+.iconButton {
+  padding: 0px !important;
+}
+
+.icon {
+  font-size: 17px !important;
+  padding: 3px !important;
+}
+
 .search-icon {
   font-size: 18px !important;
   border: 0 !important;
@@ -54,10 +68,18 @@
   .inputBase::placeholder {
     font-size: 19px !important;
   }
-  /* .icon {
-    font-size: 24px !important;
-    margin-right: -5px !important;
+
+  .iconButton {
+    padding: 0px !important;
+  }
+  /* .iconButton + .iconButton {
+    padding: 2px !important;
   } */
+
+  .icon {
+    font-size: 24px !important;
+    padding: 0px !important;
+  }
 
   .search-icon {
     font-size: 24px !important;
@@ -76,10 +98,6 @@
     padding: 0px !important;
   }
 
-  /* .outlinedFieldset {
-    border-radius: 5px !important;
-  } */
-
   .inputLabel {
     font-size: 12px !important;
     top: -3px;
@@ -96,6 +114,16 @@
 
   .inputBase::placeholder {
     font-size: 12px !important;
+  }
+
+  .inputAdornment {
+    padding: 5px !important
+  }
+  .iconButton {
+    padding: 0px !important;
+  }
+  .icon {
+    font-size: 20px !important;
   }
 
   .search-icon {
@@ -128,17 +156,17 @@
 }
 
 @media (max-width: 1024px) {
-  .outlinedRoot :global(.MuiOutlinedInput-root) {
+  .outlinedRoot  {
     height: 30px !important;
   }
 
-  .outlinedFieldset {
+  /* .outlinedFieldset {
     border-radius: 4px !important;
-  }
+  } */
 
   .inputLabel {
     font-size: 10px !important;
-    top: -4px !important;
+    top: -2px !important;
   }
 
   .inputLabelFocused {
@@ -154,12 +182,17 @@
     font-size: 10px !important;
   }
 
-  .search-icon {
-    font-size: 13px !important;
-  }
+
   .inputAdornment {
-    margin: -10px !important;
+    padding: 0px !important
   }
+  .iconButton {
+    padding: 0px !important;
+  }
+  .icon {
+    font-size: 20px !important;
+  }
+
   .labelRoot {
     font-size: 14px !important;
     background-color: white;
@@ -190,6 +223,9 @@
 
   .inputBase::placeholder {
     font-size: 9px !important;
+  }
+  .iconButton {
+    padding: 0px !important;
   }
 
   .search-icon {
@@ -256,3 +292,4 @@
     font-size: 10px !important;
   }
 }
+

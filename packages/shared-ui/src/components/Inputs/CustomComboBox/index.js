@@ -8,6 +8,7 @@ import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
+import ClearIcon from '@mui/icons-material/Clear'
 
 const CustomComboBox = ({
   type = 'text',
@@ -61,8 +62,6 @@ const CustomComboBox = ({
   const valueHighlightedOption = useRef(null)
   const selectFirstValue = useRef(null)
   const filterOptions = useRef(null)
-
-  // console.log('TextDecoderStream', isFocused, name, value)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -172,6 +171,11 @@ const CustomComboBox = ({
         valueHighlightedOption.current = newValue
       }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
+      componentsProps={{
+        popupIndicator: {
+          className: inputs.iconButton
+        }
+      }}
       renderOption={(propsOption, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           const columnsWithGrid = columnsInDropDown.map(col => ({
@@ -228,15 +232,27 @@ const CustomComboBox = ({
       renderInput={params => {
         const defaultEndAdornment = params.InputProps.endAdornment
 
+        let childrenWithoutClear = null
+
+        if (React.isValidElement(defaultEndAdornment)) {
+          const childrenArray = React.Children.toArray(defaultEndAdornment.props.children)
+
+          const filtered = childrenArray.filter(child => child?.props?.['aria-label'] !== 'Clear')
+
+          childrenWithoutClear = filtered
+        }
+
         const mergedEndAdornment =
           !_readOnly && React.isValidElement(defaultEndAdornment)
             ? React.cloneElement(defaultEndAdornment, {
-                className: `${defaultEndAdornment.props.className || ''} ${styles.endAdornment}`,
+                className: `${inputs.inputAdornment}`,
                 children: (
                   <>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <CircularProgress color='inherit' size={17} />
+                        <IconButton className={inputs.iconButton}>
+                          <CircularProgress color='inherit' size={17} />
+                        </IconButton>
                       ) : (
                         refresh &&
                         !readOnly && (
@@ -244,13 +260,21 @@ const CustomComboBox = ({
                             onClick={fetchData}
                             aria-label='refresh data'
                             tabIndex={-1}
-                            className={styles.refreshIconButton}
+                            className={inputs.iconButton}
                           >
-                            <RefreshIcon fontSize='small' />
+                            <RefreshIcon fontSize='small' className={inputs.icon} />
                           </IconButton>
                         )
                       ))}
-                    {defaultEndAdornment.props.children}
+                 { !_readOnly && value && <IconButton
+                      className={inputs.iconButton}
+                      tabIndex={-1}
+                      onClick={() => onChange(name, '')}
+                      aria-label='clear input'
+                    >
+                      <ClearIcon className={inputs.icon} />
+                    </IconButton>}
+                    {childrenWithoutClear}
                   </>
                 )
               })
@@ -309,3 +333,4 @@ const CustomComboBox = ({
 }
 
 export default CustomComboBox
+

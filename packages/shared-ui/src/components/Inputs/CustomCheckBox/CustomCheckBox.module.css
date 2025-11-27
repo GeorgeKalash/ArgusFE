@@ -14,8 +14,12 @@
   opacity: 0.7 !important;
 }
 
-.formControl :global(.MuiFormControlLabel-label) {
+/* .formControl :global(.MuiFormControlLabel-label) {
   font-size: 15px;
+} */
+
+.fieldLabel {
+  line-height: 0.1rem;
 }
 
 @media (max-width: 1600px) {

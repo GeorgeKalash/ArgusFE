@@ -108,15 +108,15 @@ export default function CustomDatePickerHijri({
                   {Boolean(value) && (
                     <IconButton
                       tabIndex={-1}
-                      edge='start'
+                      // edge='start'
                       onClick={() => onChange(name, null)}
-                      className={inputs['search-icon']}
+                      className={inputs.iconButton}
                     >
-                      <ClearIcon className={inputs['search-icon']} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs['search-icon']}>
-                    <EventIcon className={inputs['search-icon']} />
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs.iconButton}>
+                    <EventIcon className={inputs.icon} />
                   </IconButton>
                 </InputAdornment>
               )
@@ -130,3 +130,4 @@ export default function CustomDatePickerHijri({
     </LocalizationProvider>
   )
 }
+

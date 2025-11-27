@@ -160,6 +160,11 @@ const CustomNumberField = ({
         }
         setIsFocused(false)
       }}
+      sx={{
+        '& .MuiInputBase-input': {
+          textAlign: align
+        }
+      }}
       InputProps={{
         inputProps: {
           min: min,
@@ -167,7 +172,6 @@ const CustomNumberField = ({
           type: arrow ? 'number' : 'text',
           tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress,
-          style: { textAlign: align }
         },
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -177,21 +181,16 @@ const CustomNumberField = ({
           input: inputs.inputBase
         },
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
-          <InputAdornment position='end'>
+          <InputAdornment position='end' className={inputs.inputAdornment}>
             {iconMap[props?.iconKey] && (
-              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={styles['search-icon']}>
+              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={inputs.iconButton}>
                 {iconMap[props?.iconKey]}
               </IconButton>
             )}
+
             {displayButtons && (value || value === 0) && (
-              <IconButton
-                tabIndex={-1}
-                edge='end'
-                onClick={onClear}
-                aria-label='clear input'
-                className={styles['search-icon']}
-              >
-                <ClearIcon className={styles['search-icon']} />
+              <IconButton tabIndex={-1} onClick={onClear} aria-label='clear input' className={inputs.iconButton}>
+                <ClearIcon className={inputs.icon} />
               </IconButton>
             )}
           </InputAdornment>
@@ -209,3 +208,4 @@ const CustomNumberField = ({
 }
 
 export default CustomNumberField
+

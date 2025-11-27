@@ -1,4 +1,4 @@
-import { Box, Grid, Autocomplete, TextField, IconButton, Paper } from '@mui/material'
+import { Box, Grid, Autocomplete, TextField, IconButton, Paper, InputAdornment } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
@@ -246,18 +246,17 @@ const CustomLookup = ({
                   input: inputs.inputBase
                 },
                 endAdornment: !_readOnly && (
-                  <Box className={`${styles.iconAdornment} ${!hasBorder ? styles.iconAdornmentNoBorder : ''}`}>
+                  <InputAdornment position='end' className={inputs.inputAdornment} >
                     {!isLoading ? (
-                      <IconButton className={styles.searchIconButton} tabIndex={-1}>
-                        <SearchIcon className={styles.searchIcon} />
+                      <IconButton className={inputs.iconButton} tabIndex={-1}>
+                        <SearchIcon className={inputs.icon} />
                       </IconButton>
                     ) : (
-                      <CircularProgress size={15} className={styles.loadingSpinner} />
+                      <CircularProgress size={15} className={inputs.icon} />
                     )}
                     <IconButton
-                      className={styles.clearIconButton}
+                      className={inputs.iconButton}
                       tabIndex={-1}
-                      edge='end'
                       onClick={() => {
                         setInputValue('')
                         onChange(name, '')
@@ -266,9 +265,9 @@ const CustomLookup = ({
                       }}
                       aria-label='clear input'
                     >
-                      <ClearIcon className={styles.clearIcon} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
-                  </Box>
+                  </InputAdornment>
                 )
               }}
               InputLabelProps={{
@@ -316,3 +315,4 @@ const CustomLookup = ({
 }
 
 export default CustomLookup
+
