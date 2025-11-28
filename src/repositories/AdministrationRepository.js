@@ -10,6 +10,7 @@ export const AdministrationRepository = {
   },
   AdTemplate:{
     qry: service + 'qryTE',
+    page: service + 'pageTE',
     set: service + 'setTE',
     get: service + 'getTE',
     del: service + 'delTE'

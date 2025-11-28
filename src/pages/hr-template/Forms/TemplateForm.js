@@ -23,7 +23,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
-    endpointId: AdministrationRepository.AdTemplate.qry
+    endpointId: AdministrationRepository.AdTemplate.page
   })
 
   const { formik } = useForm({
@@ -61,7 +61,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    if (recordId) {
+    if (!!recordId) {
       const response = await getRequest({
         extension: AdministrationRepository.TemplateBody.qry,
         parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_teId=${recordId}`
@@ -76,6 +76,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
     invalidate: invalidateBody,
     refetch
   } = useResourceQuery({
+    enabled: !!recordId,
     queryFn: fetchGridData,
     endpointId: AdministrationRepository.TemplateBody.qry,
     datasetId: ResourceIds.Template
@@ -85,7 +86,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
 
   const columns = [
     {
-      field: 'subject',
+      field: 'languageName',
       headerName: labels.language,
       flex: 1
     }

@@ -22,7 +22,7 @@ const Template = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: AdministrationRepository.AdTemplate.qry,
+      extension: AdministrationRepository.AdTemplate.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
@@ -38,7 +38,7 @@ const Template = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AdministrationRepository.AdTemplate.qry,
+    endpointId: AdministrationRepository.AdTemplate.page,
     datasetId: ResourceIds.Template
   })
 
