@@ -82,7 +82,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           seqNo: 1,
           metalValue: null,
           trxId: recordId || 0,
-          onHand: 0,
           type: null,
           currentCost: 0,
           expectedAlloyQty: 0
@@ -113,7 +112,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
               return true
             }),
             qty: yup.number().test(function (value) {
-              if (this.parent.type == 1) {
+              if (this.parent.type == 2) {
                 return !!value && value < 0
               }
 
@@ -220,6 +219,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     setAllMetals(res?.list)
   }
 
+  async function getUnitCost(itemId) {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.currentCost
+  }
+
   async function refetchForm(recordId) {
     const metal = metalRef.current
 
@@ -312,13 +322,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       },
       onChange: async ({ row: { update, newRow } }) => {
         if (!newRow?.itemId) return
-
-        const res = await getRequest({
-          extension: InventoryRepository.Availability.get,
-          parameters: `_siteId=${formik.values?.siteId}&_itemId=${newRow?.itemId}&_seqNo=0`
-        })
+        const currentCost = await getUnitCost(newRow?.itemId)
         update({
-          onhand: res?.record?.onhand || 0
+          currentCost
         })
       },
       flex: 1.5
@@ -349,6 +355,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
         update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.type == 2 }
       }
     },
     {
@@ -358,7 +367,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     },
     {
       component: 'numberfield',
-      name: 'currentCost ',
+      name: 'currentCost',
       label: labels.unitCost,
       props: { readOnly: true }
     }
@@ -664,7 +673,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
                 </Grid>
-                <Grid item xs={12}></Grid>
                 {metalRef.current?.reference && (
                   <Grid item xs={12}>
                     <CustomNumberField
