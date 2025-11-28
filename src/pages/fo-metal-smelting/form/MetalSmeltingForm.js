@@ -621,6 +621,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     ]}
                     values={formik.values.header}
                     required
+                    readOnly={isPosted}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => formik.setFieldValue('header.workCenterId', newValue?.recordId || null)}
                     error={formik.touched.header?.workCenterId && formik.errors.header?.workCenterId}
@@ -649,10 +650,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     onChange={async (_, newValue) => {
                       const metal = await updateItemsMetal(newValue?.recordId)
                       formik.setFieldValue('header.metalId', metal || null)
-                      formik.setFieldValue('header.itemName', newValue?.name)
-                      formik.setFieldValue('header.sku', newValue?.sku)
-                      formik.setFieldValue('header.itemId', newValue?.recordId)
+                      formik.setFieldValue('header.itemName', newValue?.name || '')
+                      formik.setFieldValue('header.sku', newValue?.sku || '')
+                      formik.setFieldValue('header.itemId', newValue?.recordId || null)
                     }}
+                    readOnly={isPosted}
                     displayFieldWidth={2}
                     maxAccess={access}
                     errorCheck={'header.itemId'}
@@ -676,16 +678,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                   <CustomNumberField
                     name='header.purity'
                     label={labels.purity}
+                    readOnly={isPosted}
                     onBlur={e => {
                       let value = Number(e.target.value.replace(/,/g, ''))
-                      formik.setFieldValue('header.purity', value)
                       updatePurityRelatedFields(value)
+                      formik.setFieldValue('header.purity', value)
                     }}
                     value={formik.values.header.purity}
                     required
                     onClear={() => {
-                      formik.setFieldValue('header.purity', '')
                       updatePurityRelatedFields(0)
+                      formik.setFieldValue('header.purity', '')
                     }}
                     error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
                   />
@@ -697,6 +700,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     onChange={formik.handleChange}
                     value={formik.values.header?.qty}
                     required
+                    readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.qty', '')}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
                   />
