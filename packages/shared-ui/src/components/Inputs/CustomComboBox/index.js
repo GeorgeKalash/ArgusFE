@@ -6,6 +6,7 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
+import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
 import ClearIcon from '@mui/icons-material/Clear'
@@ -183,20 +184,20 @@ const CustomComboBox = ({
           return (
             <Box>
               {propsOption.id.endsWith('-0') && (
-                <li className={`${propsOption.className} ${styles.comboHeaderRow}`}>
+                <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                   {columnsWithGrid.map((header, i) => {
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
-                      <Box key={i} className={styles.comboHeaderCell} style={{ width: widthPercent }}>
+                      <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
                         {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
               )}
-              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
-                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
+              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -205,7 +206,7 @@ const CustomComboBox = ({
                   }
 
                   return (
-                    <Box key={i} className={styles.comboOptionCell} style={{ width: widthPercent }}>
+                    <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
                       {displayValue}
                     </Box>
                   )
@@ -216,9 +217,9 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
-                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
-                <Box className={styles.comboOptionSingleText}>{option[displayField]}</Box>
+              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
+                <Box className={dropdownStyles.dropdownOptionSingleText}>{option[displayField]}</Box>
               </li>
             </Box>
           )

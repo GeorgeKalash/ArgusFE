@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomLookup.module.css'
+import dropdownStyles from '../SharedDropdown.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomLookup = ({
@@ -138,19 +139,19 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {columnsWithGrid.map((header, i) => {
                         const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                         return (
-                          <Box key={i} className={styles.dropdownHeaderCell} style={{ width: widthPercent }}>
+                          <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
                             {header.value.toUpperCase()}
                           </Box>
                         )
                       })}
                     </li>
                   )}
-                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
@@ -160,7 +161,7 @@ const CustomLookup = ({
                       const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                       return (
-                        <Box key={i} className={styles.dropdownCell} style={{ width: widthPercent }}>
+                        <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
                           {displayValue}
                         </Box>
                       )
@@ -172,18 +173,18 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
+                        <Box className={dropdownStyles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
                       )}
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
+                        <Box className={dropdownStyles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
                       )}
                     </li>
                   )}
-                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
-                    <Box className={styles.dropdownCellMain}>{option[valueField]}</Box>
-                    {secondDisplayField && <Box className={styles.dropdownCellSecondary}>{option[displayField]}</Box>}
+                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                    <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+                    {secondDisplayField && (<Box className={dropdownStyles.dropdownOptionCellSecondary}>{option[displayField]}</Box>)}
                   </li>
                 </Box>
               )

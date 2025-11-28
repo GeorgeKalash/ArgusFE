@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('path')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,6 +7,7 @@ const nextConfig = {
 
   transpilePackages: [
     '@argus/module-sales',
+    '@argus/module-manufacturing',
     '@argus/repositories',
     '@argus/shared-domain',
     '@argus/shared-hooks',
@@ -27,10 +28,10 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       apexcharts: path.resolve(__dirname, './node_modules/apexcharts-clevision')
-    };
+    }
 
-    return config;
+    return config
   }
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
