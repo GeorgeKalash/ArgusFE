@@ -2,7 +2,7 @@
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  flex: 1 !important;
+  flex: 0 !important;
   overflow: auto;
   padding-top: 5px;
   position: relative;
