@@ -64,11 +64,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         status: 1,
         workCenterId: null,
         itemId: null,
-        qty: 0,
+        qty: '',
         extendedAlloy: 0,
         totalAlloy: 0,
-        purity: 0,
-        dpMetal: 0
+        purity: '',
+        dpMetal: null
       },
       items: [
         {
@@ -461,7 +461,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
-            <Grid item xs={3} sx={{ mt: 2 }}>
+            <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -508,7 +508,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={3} sx={{ mt: 2 }}>
+            <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
@@ -570,9 +570,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <FieldSet title='item'>
-                <Grid item xs={6}>
+            <Grid item xs={4}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={InventoryRepository.Item.snapshot}
                     name='header.itemId'
@@ -590,7 +590,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     ]}
                     onChange={async (_, newValue) => {
                       const metal = await updateItemsMetal(newValue?.recordId)
-                      formik.setFieldValue('header.metalId', metal || null)
+                      formik.setFieldValue('header.dpMetal', metal || null)
                       formik.setFieldValue('header.itemName', newValue?.name)
                       formik.setFieldValue('header.sku', newValue?.sku)
                       formik.setFieldValue('header.itemId', newValue?.recordId)
@@ -600,21 +600,21 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     errorCheck={'header.itemId'}
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Metals.qry}
-                    name='header.metalId'
+                    name='header.dpMetal'
                     label={labels.metal}
                     valueField='recordId'
                     displayField='reference'
                     readOnly
                     values={formik.values.header}
-                    onChange={(_, newValue) => formik.setFieldValue('header.metalId', newValue.recordId || null)}
-                    error={formik.touched.header?.metalId && Boolean(formik.errors.header?.metalId)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.dpMetal', newValue.recordId || null)}
+                    error={formik.touched.header?.dpMetal && Boolean(formik.errors.header?.dpMetal)}
                     maxAccess={maxAccess}
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='header.purity'
                     label={labels.purity}
@@ -625,17 +625,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
                   />
                 </Grid>
-                <Grid item xs={4}>
-                  <CustomNumberField
-                    name='header.dpMetal'
-                    label={labels.dpMetal}
-                    onChange={formik.handleChange}
-                    value={formik.values.header?.dpMetal}
-                    onClear={() => formik.setFieldValue('header.dpMetal', '')}
-                    error={formik.touched.header?.dpMetal && Boolean(formik.errors.header?.dpMetal)}
-                  />
-                </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='header.qty'
                     label={labels.qty}
@@ -646,7 +636,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
                   />
                 </Grid>
-              </FieldSet>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
