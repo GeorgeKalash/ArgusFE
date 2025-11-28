@@ -40,13 +40,13 @@ const CustomCheckBox = ({
           inputProps={{ 'aria-label': label }}
           className={[
              styles.checkbox,
-            error ? styles.errorCheckbox : '',
+             error ? styles.errorCheckbox : '',
             _disabled ? styles.disabledCheckbox : ''
           ].join(' ')}
           {...props}
         />
       }
-      label={<span className={inputs.inputLabel}>{label}</span>} 
+      label={<div className={`${inputs.inputLabel} ${inputs.fieldLabel}`}>{label}</div>} 
       className={inputs.outlinedRoot}
       disabled={_disabled}
     />

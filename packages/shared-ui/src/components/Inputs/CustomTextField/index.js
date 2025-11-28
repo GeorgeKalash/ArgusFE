@@ -3,7 +3,6 @@ import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
 import { useEffect, useRef, useState } from 'react'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomTextField.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomTextField = ({

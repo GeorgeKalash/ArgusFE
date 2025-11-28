@@ -8,7 +8,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomDatePicker.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomDatePicker = ({
@@ -131,8 +130,6 @@ const CustomDatePicker = ({
             error: error,
             helperText: helperText,
             inputRef: inputRef,
-
-            // className: [styles.customDateTextField],
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
@@ -156,9 +153,8 @@ const CustomDatePicker = ({
                       <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1}                     
- onClick={() => setOpenDatePicker(true)} className={inputs.iconButton} >
-                    <EventIcon className={inputs.icon} />
+                  <IconButton tabIndex={-1}  onClick={() => setOpenDatePicker(true)} className={inputs.iconButton} >
+                    <EventIcon  className={inputs.icon}   size={1} />
                   </IconButton>
                 </InputAdornment>
               )

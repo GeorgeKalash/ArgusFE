@@ -171,11 +171,6 @@ const CustomComboBox = ({
         valueHighlightedOption.current = newValue
       }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}
-      componentsProps={{
-        popupIndicator: {
-          className: inputs.iconButton
-        }
-      }}
       renderOption={(propsOption, option) => {
         if (columnsInDropDown && columnsInDropDown.length > 0) {
           const columnsWithGrid = columnsInDropDown.map(col => ({
@@ -250,13 +245,14 @@ const CustomComboBox = ({
                   <>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <IconButton className={inputs.iconButton}>
-                          <CircularProgress color='inherit' size={17} />
+                        <IconButton   edge='end' className={inputs.iconButton}>
+                          <CircularProgress     color='inherit' size={17} />
                         </IconButton>
                       ) : (
                         refresh &&
                         !readOnly && (
                           <IconButton
+                            edge='end'
                             onClick={fetchData}
                             aria-label='refresh data'
                             tabIndex={-1}
@@ -280,7 +276,7 @@ const CustomComboBox = ({
               })
             : _readOnly
             ? null
-            : defaultEndAdornment
+            : null
 
         return (
           <TextField
@@ -322,7 +318,7 @@ const CustomComboBox = ({
               endAdornment: mergedEndAdornment
             }}
             InputLabelProps={{
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+              className: isFocused || value || value =='->' ? inputs.inputLabelFocused : inputs.inputLabel
             }}
           />
         )

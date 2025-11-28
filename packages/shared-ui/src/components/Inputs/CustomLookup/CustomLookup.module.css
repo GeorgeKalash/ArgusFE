@@ -6,20 +6,37 @@
   width: 100% !important;
 }
 
-.firstField :global(.MuiOutlinedInput-root fieldset) {
-  border-color: #959d9e !important;
-  /* border-top-left-radius: 6px !important;
-  border-bottom-left-radius: 6px !important; */
+
+.firstField :global(.MuiOutlinedInput-root) {
+  padding-right: 8px !important;
 }
 
-.firstFieldWithSecond :global(.MuiAutocomplete-inputRoot) {
+.firstField:dir(ltr) :global(.MuiAutocomplete-inputRoot) {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
 }
 
-.secondField :global(.MuiInputBase-root) {
+.firstField:dir(rtl) :global(.MuiAutocomplete-inputRoot) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
+}
+
+.secondField:dir(ltr) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.secondField:dir(rtl) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
 }
 
 .dropdownHeaderCell {
@@ -70,58 +87,23 @@
   min-height: 28px !important;
 }
 
-.iconAdornment {
-  position: absolute !important;
-  top: 42% !important;
-  transform: translateY(-50%) !important;
-  inset-inline-end: 4px !important;
-  display: flex !important;
-}
-
-.iconAdornmentNoBorder {
-  top: 52% !important;
-}
-
-.searchIconButton {
-  margin: 0 !important;
-  padding: 0 !important;
-  pointer-events: none !important;
-}
-
-.searchIcon {
-  cursor: pointer !important;
-  border: 0 !important;
-  font-size: 17px !important;
-}
 
 .loadingSpinner {
   margin-top: 40px !important;
   margin-bottom: 40px !important;
 }
 
-.clearIconButton {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  margin-left: 4px !important;
-  margin-right: 4px !important;
-  padding: 0 !important;
-}
+
+
 .secondField {
   flex: 1 !important;
   display: flex !important;
   width: 100% !important;
 }
 
-.clearIcon {
-  border: 0 !important;
-  font-size: 17px !important;
-}
+
 
 @media (min-width: 1025px) and (max-width: 1600px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 16px !important;
-  }
 
   .dropdownOptionRow {
     padding: 3px 8px !important;
@@ -142,11 +124,8 @@
 }
 
 @media (max-width: 1280px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 14px !important;
-  }
-
+  
+ 
   .dropdownOptionRow {
     padding: 3px 8px !important;
     min-height: 22px !important;
@@ -166,11 +145,6 @@
 }
 
 @media (max-width: 1024px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 13px !important;
-  }
-
   .dropdownOptionRow {
     padding: 2px 6px !important;
     min-height: 20px !important;
@@ -190,11 +164,6 @@
 }
 
 @media (max-width: 768px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 12px !important;
-  }
-
   .dropdownOptionRow {
     padding: 2px 6px !important;
     min-height: 18px !important;
@@ -214,10 +183,6 @@
 }
 
 @media (max-width: 480px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 11px !important;
-  }
 
   .dropdownOptionRow {
     padding: 1px 4px !important;
@@ -238,10 +203,6 @@
 }
 
 @media (max-width: 360px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 10px !important;
-  }
 
   .dropdownOptionRow {
     padding: 0px 4px !important;

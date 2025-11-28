@@ -192,7 +192,7 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
-              className={[secondDisplayField ? styles.firstFieldWithSecond : ''].filter(Boolean).join(' ')}
+             className={ secondDisplayField && styles.firstField }
               onChange={e => {
                 setInputValue(e.target.value)
 
@@ -242,13 +242,13 @@ const CustomLookup = ({
                 ...params.InputProps,
                 classes: {
                   root: inputs.outlinedRoot,
-                  notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                  notchedOutline: hasBorder ? !secondDisplayField && inputs.outlinedFieldset : inputs.outlinedNoBorder,
                   input: inputs.inputBase
                 },
                 endAdornment: !_readOnly && (
                   <InputAdornment position='end' className={inputs.inputAdornment} >
                     {!isLoading ? (
-                      <IconButton className={inputs.iconButton} tabIndex={-1}>
+                      <IconButton  edge="start" className={inputs.iconButton} tabIndex={-1}>
                         <SearchIcon className={inputs.icon} />
                       </IconButton>
                     ) : (
@@ -271,7 +271,7 @@ const CustomLookup = ({
                 )
               }}
               InputLabelProps={{
-                className: isFocused ? inputs.inputLabelFocused : inputs.inputLabel
+                className: isFocused || firstValue ? inputs.inputLabelFocused : inputs.inputLabel
               }}
             />
           )}
@@ -293,10 +293,16 @@ const CustomLookup = ({
                 secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
+            // sx={{
+            //   '& .MuiInputBase-root': {
+            //     borderTopLeftRadius: 0 ,
+            //     borderBottomLeftRadius: 0
+            //   }
+            // }}
             InputProps={{
               classes: {
                 root: inputs.outlinedRoot,
-                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                notchedOutline: hasBorder ? '' : inputs.outlinedNoBorder,
                 input: inputs.inputBase
               },
               inputProps: {
@@ -304,7 +310,7 @@ const CustomLookup = ({
               },
               readOnly: secondField ? !secondField?.editable : _readOnly
             }}
-            className={[styles.secondField].filter(Boolean).join(' ')}
+            className={ secondDisplayField  && styles.secondField}
             error={error}
             helperText={helperText}
           />

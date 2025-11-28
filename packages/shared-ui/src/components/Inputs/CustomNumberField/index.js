@@ -1,13 +1,11 @@
-import PercentIcon from '@mui/icons-material/Percent'
-import PinIcon from '@mui/icons-material/Pin'
-import React, { useEffect, useState, useRef } from 'react'
+
+import React, { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField-helper'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { iconMap } from '@argus/shared-utils/src/utils/iconMap'
-import styles from './CustomNumberField.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomNumberField = ({
