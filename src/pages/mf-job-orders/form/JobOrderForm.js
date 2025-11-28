@@ -831,7 +831,7 @@ export default function JobOrderForm({
                             return
                           }
                           await fillDesignInfo(newValue)
-                          await updateWC(isReleased ? formik.values?.routingId : newValue?.routingId, false)
+                          await updateWC(newValue?.routingId, false)
                         }}
                       />
                     </Grid>
