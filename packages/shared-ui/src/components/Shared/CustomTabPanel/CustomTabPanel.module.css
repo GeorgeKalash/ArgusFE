@@ -1,0 +1,16 @@
+.tabPanel {
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  overflow: auto;
+  padding: 0px !important;
+}
+
+.tabPanel :global(.MuiDialogContent-root) {
+  padding: 10px !important;
+}
+
+.hidden {
+  display: none !important;
+}

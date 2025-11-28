@@ -1,0 +1,98 @@
+.customComboTextField :global(.MuiAutocomplete-clearIndicator) {
+  padding: 0 !important;
+  margin: 0 !important;
+  visibility: hidden !important;
+}
+
+.comboStartIcon {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 4px !important;
+  margin-left: 4px !important;
+  object-fit: contain !important;
+}
+
+.refreshIconButton {
+  padding: 2px !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+  font-size: 35px !important;
+  margin:-5px  !important;
+
+}
+
+
+@media (min-width: 2048px) and (max-width: 2566px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size:35px !important;
+    margin: 0px  !important;
+  }
+
+  /* .comboOptionRow,
+  .comboHeaderRow {
+    padding: 3px 8px !important;
+    min-height: 22px !important;
+  }
+
+  .comboHeaderCell {
+    font-size: 0.72rem !important;
+    height: 18px !important;
+  }
+
+  .comboOptionCell,
+  .comboOptionSingleText {
+    font-size: 0.84rem !important;
+    height: 19px !important;
+  }
+
+  .comboOptionIcon {
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 6px !important;
+  } */
+}
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+    margin:-1px  !important;
+
+  }
+}
+
+
+
+@media (max-width: 1280px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+
+  .customComboTextField :global(.MuiAutocomplete-popupIndicator) {
+    margin-right: 5px  !important;
+    margin-left: 0px  !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 10px !important;
+  }
+}
+

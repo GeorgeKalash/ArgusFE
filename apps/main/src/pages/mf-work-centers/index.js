@@ -1,0 +1,2 @@
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-sales/src/pages/mf-work-centers
+export { default } from '@argus/module-sales/src/pages/mf-work-centers';

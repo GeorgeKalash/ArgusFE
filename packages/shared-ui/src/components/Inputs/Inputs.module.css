@@ -1,0 +1,284 @@
+.outlinedRoot {
+  height: 33px !important;
+  /* flex: 1 !important;
+  display: flex !important;
+  width: 100% !important; */
+}
+
+.fieldLabel {
+  white-space: normal !important;   
+}
+
+.outlinedNoBorder {
+  border: none !important;
+}
+
+.inputLabel {
+  font-size: 14px !important;
+
+}
+
+.inputBase {
+  font-size: 14px !important ;
+}
+
+.inputBase::placeholder {
+  font-size: 14px !important;
+}
+
+.inputAdornment {
+
+  margin: 0px !important
+}
+
+.iconButton {
+  padding: 0px !important;
+}
+
+.icon {
+  font-size: 17px !important;
+  padding: 3px !important;
+}
+
+.search-icon {
+  font-size: 18px !important;
+  border: 0 !important;
+  padding: 0px !important;
+  margin: 1px !important;
+}
+
+.outlinedFieldset {
+  border-radius: 4px !important;
+}
+
+@media (min-width: 2048px) and (max-width: 2566px) {
+  .outlinedRoot {
+    height: 45px !important;
+  }
+
+  .inputLabel {
+    font-size: 20px !important;
+    background-color: white;
+  }
+
+  .inputLabelFocused {
+    font-size: 22px !important;
+    margin-top: -4px !important;
+    background-color: white;
+    padding-right: 10px !important;
+  }
+
+  .inputBase {
+    font-size: 17.5px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 19px !important;
+  }
+
+  .iconButton {
+    padding: 0px !important;
+  }
+
+
+  .icon {
+    font-size: 24px !important;
+    padding: 0px !important;
+  }
+
+  .labelRoot {
+    font-size: 23px !important;
+    margin-top: -4px !important;
+    background-color: white;
+    padding-right: 10px !important;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .outlinedRoot {
+    height: 30px !important;
+    padding: 0px !important;
+  }
+
+  .inputLabel {
+    font-size: 12px !important;
+    top: -3px;
+  }
+
+  .inputLabelFocused {
+    font-size: 14px !important;
+    top: 0px;
+  }
+
+  .inputBase {
+    font-size: 12px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 12px !important;
+  }
+
+  .inputAdornment {
+    padding: 5px !important
+  }
+  .iconButton {
+    padding: 0px !important;
+  }
+  .icon {
+    font-size: 20px !important;
+  }
+
+
+}
+
+@media (max-width: 1280px) {
+
+
+
+  .inputLabel {
+    font-size: 11px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+  
+  }
+
+  .inputBase {
+    font-size: 11px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 11px !important;
+  }
+
+  .outlinedRoot {
+    height: 28px !important;
+  }
+
+
+}
+
+@media (max-width: 1024px) {
+  .outlinedRoot  {
+    height: 26px !important;
+  }
+
+  .inputLabel {
+    line-height: 1rem !important;
+    font-size: 9px !important;
+    top: -2px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 10px !important;
+    margin-top: 4px;
+  }
+
+  .inputBase {
+    font-size: 10px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 10px !important;
+  }
+
+
+  .inputAdornment {
+    padding: 0px !important
+  }
+  .iconButton {
+    padding: 0px !important;
+    margin:-2px !important;
+  }
+  .icon {
+    font-size: 20px !important;
+  }
+
+  .labelRoot {
+    font-size: 14px !important;
+    background-color: white;
+    padding-right: 10px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .outlinedRoot {
+    height: 24px !important;
+  }
+
+  .inputLabel {
+    font-size: 9px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 9px !important;
+  }
+
+  .inputBase {
+    font-size: 9px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 9px !important;
+  }
+  .iconButton {
+    padding: 0px !important;
+  }
+
+
+}
+
+@media (max-width: 480px) {
+  .outlinedRoot {
+    height: 22px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 8px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 8px !important;
+  }
+
+  .inputBase {
+    font-size: 8px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 8px !important;
+  }
+
+
+}
+
+@media (max-width: 360px) {
+  .outlinedRoot {
+    height: 20px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 7px !important;
+  }
+
+  .inputLabelFocused {
+    font-size: 7px !important;
+  }
+
+  .inputBase {
+    font-size: 7px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 7px !important;
+  }
+
+}
+
