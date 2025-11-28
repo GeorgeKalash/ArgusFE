@@ -15,14 +15,13 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { useWindow } from 'src/windows'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
-import { useError } from 'src/error'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { formatDateFromApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
@@ -50,7 +49,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       notes: '',
       status: 1,
       wip: 1,
-      disposalItem: [
+      items: [
         {
           id: 1,
           trxId: null,
@@ -62,7 +61,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           trackby: null
         }
       ],
-      disposalSerial: []
+      serials: []
     },
     maxAccess,
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -70,13 +69,53 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       date: yup.date().required(),
       workCenterId: yup.number().required()
     }),
-    onSubmit: async values => {}
+    onSubmit: async values => {
+      const copy = { ...values }
+      delete copy.items
+      delete copy.serials
+      copy.date = copy.date ? formatDateToApi(copy.date) : null
+
+      const serialsValues = []
+
+      const updatedRows = formik.values.items.map((item, index) => {
+        const { serials, ...rest } = item
+
+        if (serials?.length) {
+          serials.forEach((serial, sIndex) => {
+            serialsValues.push({
+              ...serial,
+              seqNo: index + 1,
+              srlSeqNo: sIndex + 1,
+              trxId: copy.recordId || 0
+            })
+          })
+        }
+
+        return {
+          ...rest,
+          seqNo: index + 1,
+          trxId: copy.recordId || 0
+        }
+      })
+
+      const res = await postRequest({
+        extension: ManufacturingRepository.Disposal.set2,
+        record: JSON.stringify({
+          header: copy,
+          items: updatedRows,
+          serials: serialsValues
+        })
+      })
+
+      toast.success(!copy.recordId ? platformLabels.Added : platformLabels.Edited)
+      refetchForm(res.recordId)
+      invalidate()
+    }
   })
 
   const editMode = !!formik.values.recordId
 
   const onCondition = row => {
-    console.log('check row', row)
     if (row.trackBy === 1) {
       return {
         imgSrc: '/images/TableIcons/imgSerials.png',
@@ -126,7 +165,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       async onChange({ row: { update, newRow } }) {
         if (newRow?.isInactive) {
           update({
-            ...formik.initialValues.disposalItem[0],
+            ...formik.initialValues.items[0],
             id: newRow.id
           })
           stackError({
@@ -173,10 +212,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           stack({
             Component: SerialsForm,
             props: {
-              labels,
               row,
               siteId: formik?.values?.siteId,
-              maxAccess,
               checkForSiteId: true,
               updateRow
             }
@@ -193,9 +230,9 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
   const actions = [
     {
-      key: 'Inventory',
+      key: 'IV',
       condition: true,
-      onClick: () => formik.handleSubmit(),
+      onClick: 'onInventoryTransaction',
       disabled: !editMode
     },
     {
@@ -226,14 +263,14 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
     return res?.list?.length
       ? res.list.map((item, index) => ({ ...item, id: index + 1 }))
-      : formik?.initialValues?.disposalItem
+      : formik?.initialValues?.items
   }
 
   async function refetchForm(recordId) {
     const header = await getDisposal(recordId)
     const items = await getDisposalItem(recordId)
 
-    formik.setValues({ ...header, disposalItem: items })
+    formik.setValues({ ...header, items })
   }
 
   useEffect(() => {
@@ -243,6 +280,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   return (
     <FormShell
       resourceId={ResourceIds.ItemDisposal}
+      functionId={SystemFunction.ItemDisposal}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
@@ -348,10 +386,10 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         <Grow>
           <DataGrid
             name='disposalItem'
-            onChange={value => formik?.setFieldValue('disposalItem', value)}
+            onChange={value => formik?.setFieldValue('items', value)}
             maxAccess={maxAccess}
-            value={formik?.values?.disposalItem}
-            error={formik?.errors?.disposalItem}
+            value={formik?.values?.items}
+            error={formik?.errors?.items}
             columns={columns}
           />
         </Grow>
