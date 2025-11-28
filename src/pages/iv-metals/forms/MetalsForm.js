@@ -93,7 +93,7 @@ export default function MetalsForm({ labels, maxAccess, setStore, store }) {
                 name='reference'
                 label={labels.reference}
                 value={formik.values.reference}
-                maxLength='3'
+                maxLength='10'
                 required
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}

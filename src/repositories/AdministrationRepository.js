@@ -10,6 +10,14 @@ export const AdministrationRepository = {
   },
   AdTemplate:{
     qry: service + 'qryTE',
-
+    set: service + 'setTE',
+    get: service + 'getTE',
+    del: service + 'delTE'
+  },
+  TemplateBody: {
+    qry: service + 'qryTB',
+    set: service + 'setTB',
+    get: service + 'getTB',
+    del: service + 'delTB'
   }
 }
