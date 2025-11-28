@@ -156,26 +156,39 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
-  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
+
+  const calculateTotal = (key, typeFilter = null) =>
+    formik.values.items.reduce((sum, item) => {
+      if (typeFilter && item.type != typeFilter) return sum
+
+      return sum + (parseFloat(item[key]) || 0)
+    }, 0)
+
   const totalQty = calculateTotal('qty')
   const totalMetal = calculateTotal('metalValue')
-  const totalAlloy = calculateTotal('expectedAlloyQty')
+  const totalAlloy = calculateTotal('expectedAlloyQty', 2)
 
-  const totalDesiredPurity = parseFloat(formik.values?.header?.purity)
+  const headerPurity = parseFloat(formik.values?.header?.purity)
+
+  const totalDesiredPurity = headerPurity
     ? formik.values.items.reduce((sum, item) => {
-        const qty = parseFloat(item.qty)
-        const purity = parseFloat(item.purity)
+        if (item.type != 1) return sum
 
-        return sum + (qty * purity) / parseFloat(formik.values?.header?.purity)
+        const qty = parseFloat(item.qty) || 0
+        const purity = parseFloat(item.purity) || 0
+
+        return sum + (qty * purity) / headerPurity
       }, 0)
     : 0
 
-  const expectedAlloy = parseFloat(formik.values?.header?.purity)
+  const expectedAlloy = headerPurity
     ? formik.values.items.reduce((sum, item) => {
-        const qty = parseFloat(item.qty)
-        const purity = parseFloat(item.purity)
+        if (item.type != 1) return sum
 
-        return sum + ((qty * purity) / parseFloat(formik.values?.header?.purity) - qty)
+        const qty = parseFloat(item.qty) || 0
+        const purity = parseFloat(item.purity) || 0
+
+        return sum + ((qty * purity) / headerPurity - qty)
       }, 0)
     : 0
 
