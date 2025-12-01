@@ -16,6 +16,7 @@ import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { useWindow } from 'src/windows'
 import TemplateBodyForm from './TemplateBodyForm'
+import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 
 export default function TemplateForm({ labels, maxAccess, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -131,40 +132,40 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}
-      isCleared={false}
+      isParentWindow={false}
     >
       <VertLayout>
-        <Grow>
-          <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <CustomTextField
-                name='name'
-                label={labels.name}
-                value={formik.values?.name}
-                required
-                maxAccess={maxAccess}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('name', '')}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                maxLength={30}
-              />
-            </Grid>
+        <Grid container spacing={4} sx={{ paddingTop: 2 }}>
+          <Grid item xs={12}>
+            <CustomTextField
+              name='name'
+              label={labels.name}
+              value={formik.values?.name}
+              required
+              maxAccess={maxAccess}
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('name', '')}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              maxLength={30}
+            />
           </Grid>
+        </Grid>
+        <Fixed>
           <GridToolbar onAdd={add} maxAccess={maxAccess} disableAdd={!editMode} />
-          <Table
-            name='templateBodyTable'
-            columns={columns}
-            gridData={data}
-            rowId={['recordId']}
-            onEdit={edit}
-            onDelete={del}
-            pageSize={50}
-            paginationType='client'
-            pagination={false}
-            refetch={refetch}
-            maxAccess={maxAccess}
-          />
-        </Grow>
+        </Fixed>
+        <Table
+          name='templateBodyTable'
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          pageSize={50}
+          paginationType='client'
+          pagination={false}
+          refetch={refetch}
+          maxAccess={maxAccess}
+        />
       </VertLayout>
     </FormShell>
   )
