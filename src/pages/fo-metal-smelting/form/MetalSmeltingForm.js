@@ -64,10 +64,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         status: 1,
         workCenterId: null,
         itemId: null,
-        qty: '',
+        qty: null,
         extendedAlloy: 0,
         totalAlloy: 0,
-        purity: '',
+        purity: null,
         metalId: null
       },
       items: [
