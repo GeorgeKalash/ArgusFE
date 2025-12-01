@@ -63,11 +63,12 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import Installments from 'src/components/Shared/Installments'
 import { PUSerialsForm } from 'src/components/Shared/PUSerialsForm'
+import { SystemChecks } from 'src/resources/SystemChecks'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
@@ -77,6 +78,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const { stack: stackError } = useError()
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -100,6 +102,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   const initialValues = {
     recordId: recordId,
+    disableSKULookup: false,
     header: {
       dtId: null,
       dgId: functionId,
@@ -168,6 +171,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         basePrice: 0,
         baseLaborPrice: 0,
         TotPricePerG: 0,
+        totalWeightPerG: 0,
         mdValue: 0,
         unitPrice: 0,
         unitCost: 0,
@@ -366,6 +370,17 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     filteredMeasurements.current = arrayMU
   }
 
+  async function fillSkuData(update, addRow, newRow) {
+    const phycialProperty = await getItemPhysProp(newRow?.itemId)
+    const itemInfo = await getItem(newRow?.itemId)
+
+    const vendorPrice =
+      newRow?.promotionType === '3' || newRow?.promotionType === '4'
+        ? undefined
+        : await getVendorPrice(newRow?.itemId, formik.values.header)
+    await fillItemObject(update, addRow, newRow, phycialProperty, itemInfo, vendorPrice)
+  }
+
   const columns = [
     {
       component: 'resourcecombobox',
@@ -383,57 +398,82 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
-      component: 'resourcelookup',
+      component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       flex: 2,
+      ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
-        endpointId: InventoryRepository.Item.snapshot,
-        parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
-        displayField: 'sku',
-        valueField: 'sku',
-        mapping: [
-          { from: 'recordId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'name', to: 'itemName' },
-          { from: 'trackBy', to: 'trackBy' },
-          { from: 'msId', to: 'msId' },
-          { from: 'isInactive', to: 'isInactive' }
-        ],
-        columnsInDropDown: [
-          { key: 'sku', value: 'SKU' },
-          { key: 'name', value: 'Item Name' }
-        ],
-        displayFieldWidth: 5,
-        minChars: 2
+        ...(!formik.values.disableSKULookup && {
+          endpointId: InventoryRepository.Item.snapshot,
+          parameters: { _categoryId: 0, _msId: 0, _startAt: 0, _size: 1000 },
+          displayField: 'sku',
+          valueField: 'sku',
+          mapping: [
+            { from: 'recordId', to: 'itemId' },
+            { from: 'sku', to: 'sku' },
+            { from: 'name', to: 'itemName' },
+            { from: 'trackBy', to: 'trackBy' },
+            { from: 'msId', to: 'msId' },
+            { from: 'isInactive', to: 'isInactive' }
+          ],
+          columnsInDropDown: [
+            { key: 'sku', value: 'SKU' },
+            { key: 'name', value: 'Item Name' }
+          ],
+          displayFieldWidth: 5,
+          minChars: 2
+        })
       },
-      async onChange({ row: { update, newRow } }) {
-        if (!newRow?.itemId) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        const resetRow = id =>
           update({
+            ...formik.initialValues.items[0],
+            id,
             enabled: false
           })
 
-          return
+        if (!formik.values.disableSKULookup) {
+          if (!newRow?.itemId) return resetRow(newRow.id)
+
+          if (newRow.isInactive) {
+            resetRow(newRow.id)
+            stackError({ message: labels.inactiveItem })
+
+            return
+          }
+
+          return fillSkuData(update, addRow, newRow)
         }
-        if (newRow.isInactive) {
-          update({
-            ...formik.initialValues.items[0],
-            id: newRow.id
-          })
-          stackError({
-            message: labels.inactiveItem
-          })
+
+        if (!newRow?.sku) return resetRow(newRow.id)
+
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        const record = skuInfo?.record
+
+        if (!record) {
+          resetRow(newRow.id)
+          stackError({ message: labels.invalidSKU })
 
           return
         }
-        const phycialProperty = await getItemPhysProp(newRow.itemId)
-        const itemInfo = await getItem(newRow.itemId)
 
-        const vendorPrice =
-          newRow?.promotionTypeId === '3' || newRow?.promotionTypeId === '4'
-            ? undefined
-            : await getVendorPrice(newRow, formik.values.header)
-        await fillItemObject(update, phycialProperty, itemInfo, vendorPrice)
+        if (record.isInactive) {
+          resetRow(newRow.id)
+          stackError({ message: labels.inactiveItem })
+
+          return
+        }
+
+        return fillSkuData(update, addRow, {
+          ...newRow,
+          itemId: record.recordId
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
@@ -913,52 +953,56 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
+    const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
-    const modifiedList = await Promise.all(
-      puTrxItems?.map(async (item, index) => {
-        const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
-        const taxDetailsResponse = []
+    const modifiedList = puTrxItems.length
+      ? await Promise.all(
+          puTrxItems?.map(async (item, index) => {
+            const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
+            const taxDetailsResponse = []
 
-        const updatedpuTrxTaxes =
-          puTrxTaxes?.map(tax => {
-            const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+            const updatedpuTrxTaxes =
+              puTrxTaxes?.map(tax => {
+                const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
+
+                return {
+                  ...tax,
+                  taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+                }
+              }) || null
 
             return {
-              ...tax,
-              taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
+              ...item,
+              id: index + 1,
+              basePrice: item.basePrice ? item.basePrice : 0,
+              unitPrice: item.unitPrice ? item.unitPrice : 0,
+              vatAmount: item.vatAmount ? item.vatAmount : 0,
+              totalWeight: item.weight * item.qty,
+              extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
+              puTrx: true,
+              serials: puTrxSerials
+                ?.filter(row => row.seqNo == item.seqNo)
+                ?.map((serialDetail, index) => {
+                  return {
+                    ...serialDetail,
+                    id: index
+                  }
+                }),
+              taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
             }
-          }) || null
-
-        return {
-          ...item,
-          id: index + 1,
-          basePrice: item.basePrice ? item.basePrice : 0,
-          unitPrice: item.unitPrice ? item.unitPrice : 0,
-          vatAmount: item.vatAmount ? item.vatAmount : 0,
-          totalWeight: item.weight * item.qty,
-          extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
-          puTrx: true,
-          serials: puTrxSerials
-            ?.filter(row => row.seqNo == item.seqNo)
-            ?.map((serialDetail, index) => {
-              return {
-                ...serialDetail,
-                id: index
-              }
-            }),
-          taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
-        }
-      })
-    )
+          })
+        )
+      : formik.initialValues.items
 
     formik.setValues({
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
+      disableSKULookup: disableLookup || false,
       installments: puTrxInstallments?.map((installment, index) => {
         return {
           ...installment,
@@ -980,7 +1024,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     itemsUpdate.current = modifiedList
   }
-
   async function getPurchaseTransactionPack(transactionId) {
     const res = await getRequest({
       extension: PurchaseRepository.PurchaseInvoiceHeader.get2,
@@ -1075,16 +1118,20 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     return res?.list
   }
-  async function getVendorPrice(object, form) {
+  async function getVendorPrice(itemId, form) {
     const res = await getRequest({
       extension: PurchaseRepository.VendorPrice.get,
-      parameters: `_itemId=${object.itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
+      parameters: `_itemId=${itemId}&_vendorId=${form.vendorId}&_currencyId=${form.currencyId}&_functionId=${functionId}`
     })
 
     return res?.record
   }
 
-  async function fillItemObject(update, itemPhysProp, itemInfo, vendorPrice) {
+  function isValidPrice(value) {
+    return value != null && value != '' && !isNaN(value) && value != 0
+  }
+
+  async function fillItemObject(update, addRow, newRow, itemPhysProp, itemInfo, vendorPrice) {
     const weight = itemPhysProp?.weight || 0
     const metalPurity = itemPhysProp?.metalPurity ?? 0
     const isMetal = itemPhysProp?.isMetal ?? false
@@ -1135,7 +1182,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
     const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
-    update({
+    const updatedRowValues = {
+      id: newRow?.id,
       decimals: measurementSchedule?.decimals,
       sku: itemInfo?.sku || '',
       itemName: itemInfo?.name || '',
@@ -1150,7 +1198,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       TotPricePerG: TotPricePerG,
       unitPrice: unitPrice,
       priceType: itemInfo?.priceType || 1,
-      qty: 0,
+      qty: 1,
       msId: itemInfo?.msId,
       muRef: filteredMeasurements?.[0]?.reference,
       muId: filteredMeasurements?.[0]?.recordId,
@@ -1162,12 +1210,35 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdValue: 0,
       taxId: rowTax,
       taxDetails: rowTaxDetails
-    })
+    }
+    let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
+
+    const dirtyField = isValidPrice(updatedRowValues.baseLaborPrice)
+      ? DIRTYFIELD_BASE_LABOR_PRICE
+      : isValidPrice(updatedRowValues.unitPrice)
+      ? DIRTYFIELD_UNIT_PRICE
+      : null
+
+    if (dirtyField) data = getItemPriceRow(data, dirtyField)
 
     formik.setFieldValue(
       'header.mdAmount',
       formik.values.header.currentDiscount ? formik.values.header.currentDiscount : 0
     )
+
+    if (!jumpToNextLine) {
+      return update(data)
+    }
+
+    if (formik.values.disableSKULookup) {
+      return addRow({
+        fieldName: 'sku',
+        changes: data
+      })
+    }
+
+    update(data)
+    addRow()
   }
 
   async function getTaxDetails(taxId) {
@@ -1396,6 +1467,21 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     fillMetalPrice()
   }
 
+  async function sKULookupInfo(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('disableSKULookup', false)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: PurchaseRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+    formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+
+    return res?.record?.disableSKULookup || false
+  }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
     formik.setFieldValue('header.weight', parseFloat(totalWeight).toFixed(2))
@@ -1464,7 +1550,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }, [defaultsDataState])
 
   useEffect(() => {
-    if (formik.values?.header.dtId && !recordId) onChangeDtId(formik.values?.header.dtId)
+    if (!recordId) {
+      if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
+      sKULookupInfo(formik.values.header.dtId)
+    }
   }, [formik.values?.header.dtId])
 
   async function getDefaultsData() {
@@ -1666,7 +1755,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 endpointId={SystemRepository.DocumentType.qry}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
                 name='header.dtId'
-                readOnly={editMode}
+                readOnly={editMode || formik?.values?.items?.some(item => item.sku)}
                 label={labels.documentType}
                 columnsInDropDown={[
                   { key: 'reference', value: 'Reference' },
