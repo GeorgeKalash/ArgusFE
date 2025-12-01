@@ -1,2 +1,2 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-sales/src/pages/mf-labor-groups
-export { default } from '@argus/module-sales/src/pages/mf-labor-groups';
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-manufacturing/src/pages/mf-labor-groups
+export { default } from '@argus/module-manufacturing/src/pages/mf-labor-groups'

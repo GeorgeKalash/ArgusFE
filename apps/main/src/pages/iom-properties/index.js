@@ -1,2 +1,2 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-sales/src/pages/iom-properties
-export { default } from '@argus/module-sales/src/pages/iom-properties';
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-manufacturing/src/pages/iom-properties
+export { default } from '@argus/module-manufacturing/src/pages/iom-properties'
