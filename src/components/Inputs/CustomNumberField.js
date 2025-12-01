@@ -60,6 +60,9 @@ const CustomNumberField = ({
 
   const parseInputValue = (val, blur) => {
     val = val.replace(/,/g, '')
+
+    if (val == '-' && !blur) return val
+
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }

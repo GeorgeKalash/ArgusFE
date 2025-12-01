@@ -83,6 +83,7 @@ export const FoundryRepository = {
     page: service + 'pageALM',
     set: service + 'setALM',
     get: service + 'getALM',
-    del: service + 'delALM'
+    del: service + 'delALM',
+    qry: service + 'qryALM'
   }
 }
