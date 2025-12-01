@@ -60,7 +60,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-    
+
     if (!recordId) {
       return { list: [], totalCount: 0, _startAt }
     }
@@ -125,8 +125,6 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
     openForm(obj?.teId, obj?.languageId)
   }
 
-  console.log(data)
-
   return (
     <FormShell
       resourceId={ResourceIds.Template}
@@ -154,7 +152,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
           </Grid>
           <GridToolbar onAdd={add} maxAccess={maxAccess} disableAdd={!editMode} />
           <Table
-            name='table'
+            name='templateBodyTable'
             columns={columns}
             gridData={data}
             rowId={['recordId']}
