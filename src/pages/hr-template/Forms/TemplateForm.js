@@ -60,29 +60,30 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
-
-    if (!!recordId) {
-      const response = await getRequest({
-        extension: AdministrationRepository.TemplateBody.qry,
-        parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_teId=${recordId}`
-      })
-
-      return { ...response, _startAt: _startAt }
+    
+    if (!recordId) {
+      return { list: [], totalCount: 0, _startAt }
     }
+
+    const response = await getRequest({
+      extension: AdministrationRepository.TemplateBody.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_teId=${recordId}`
+    })
+
+    return { ...response, _startAt: _startAt }
   }
+
+  const editMode = !!formik.values.recordId
 
   const {
     query: { data },
     invalidate: invalidateBody,
     refetch
   } = useResourceQuery({
-    enabled: !!recordId,
     queryFn: fetchGridData,
     endpointId: AdministrationRepository.TemplateBody.qry,
     datasetId: ResourceIds.Template
   })
-
-  const editMode = !!formik.values.recordId
 
   const columns = [
     {
@@ -124,6 +125,8 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
     openForm(obj?.teId, obj?.languageId)
   }
 
+  console.log(data)
+
   return (
     <FormShell
       resourceId={ResourceIds.Template}
@@ -154,7 +157,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
             name='table'
             columns={columns}
             gridData={data}
-            rowId={['periodId']}
+            rowId={['recordId']}
             onEdit={edit}
             onDelete={del}
             pageSize={50}

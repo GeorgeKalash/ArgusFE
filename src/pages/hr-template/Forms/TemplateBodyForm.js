@@ -10,7 +10,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { AdministrationRepository } from 'src/repositories/AdministrationRepository'
-import { useWindow } from 'src/windows'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import TextEditor from 'src/components/Shared/TextEditor'
@@ -41,7 +40,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
       name: '',
       textBody: '',
       subject: '',
-      languageId: ''
+      languageId: null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -111,7 +110,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
                 displayField='value'
                 values={formik.values}
                 required
-                onChange={(_, newValue) => formik.setFieldValue('languageId', newValue?.key || '')}
+                onChange={(_, newValue) => formik.setFieldValue('languageId', newValue?.key || null)}
                 error={formik.touched.languageId && Boolean(formik.errors.languageId)}
               />
             </Grid>

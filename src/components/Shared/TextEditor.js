@@ -26,9 +26,9 @@ export default function TextEditor({ value = '', onChange }) {
     load()
   }, [value])
 
-  const handleEditorChange = es => {
-    setEditorState(es)
-    if (onChange) onChange(es)
+  const handleEditorChange = data => {
+    setEditorState(data)
+    if (onChange) onChange(data)
   }
 
   const uploadImageCallBack = file => {
