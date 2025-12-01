@@ -246,14 +246,13 @@ const CustomComboBox = ({
                   <>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <IconButton   edge='end' className={inputs.iconButton}>
+                        <IconButton    className={inputs.iconButton}>
                           <CircularProgress     color='inherit' size={17} />
                         </IconButton>
                       ) : (
                         refresh &&
                         !readOnly && (
                           <IconButton
-                            edge='end'
                             onClick={fetchData}
                             aria-label='refresh data'
                             tabIndex={-1}

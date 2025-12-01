@@ -18,9 +18,18 @@
   min-width: 0 !important;
 }
 
-.customComboTextField :global([data-testid='ArrowDropDownIcon']) {
-  font-size: 35px !important;
-  margin:-5px  !important;
+.customComboTextField:dir(rtl) :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 5px  !important;
+  margin-right:0px  !important;
+
+
+}
+
+.customComboTextField:dir(ltr)  :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 0px  !important;
+  margin-right:5px  !important;
 
 }
 

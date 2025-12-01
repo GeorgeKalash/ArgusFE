@@ -1,8 +1,6 @@
 .outlinedRoot {
+  width: 100% !important;
   height: 33px !important;
-  /* flex: 1 !important;
-  display: flex !important;
-  width: 100% !important; */
 }
 
 .fieldLabel {
@@ -18,18 +16,10 @@
 
 }
 
-.inputBase {
-  font-size: 14px !important ;
-}
-
 .inputBase::placeholder {
   font-size: 14px !important;
 }
 
-.inputAdornment {
-
-  margin: 0px !important
-}
 
 .iconButton {
   padding: 0px !important;
@@ -38,13 +28,6 @@
 .icon {
   font-size: 17px !important;
   padding: 3px !important;
-}
-
-.search-icon {
-  font-size: 18px !important;
-  border: 0 !important;
-  padding: 0px !important;
-  margin: 1px !important;
 }
 
 .outlinedFieldset {
@@ -57,29 +40,30 @@
   }
 
   .inputLabel {
-    font-size: 20px !important;
-    background-color: white;
+    font-size: 14px !important;
   }
 
   .inputLabelFocused {
-    font-size: 22px !important;
-    margin-top: -4px !important;
-    background-color: white;
-    padding-right: 10px !important;
+    font-size: 16px !important;
+    /* margin-top: -5px !important; */
+    /* background-color: white; */
+    /* padding: 10px !important;  */
   }
 
   .inputBase {
-    font-size: 17.5px !important ;
+    font-size: 15.5px !important ;
   }
 
   .inputBase::placeholder {
-    font-size: 19px !important;
+    font-size: 14px !important;
   }
 
   .iconButton {
     padding: 0px !important;
   }
-
+  .inputAdornment {
+    padding: 7px !important;
+    }
 
   .icon {
     font-size: 24px !important;
@@ -94,7 +78,7 @@
   }
 }
 
-@media (min-width: 1025px) and (max-width: 1600px) {
+@media (min-width: 1025px) and (max-width: 1920px) {
   .outlinedRoot {
     height: 30px !important;
     padding: 0px !important;
@@ -118,9 +102,7 @@
     font-size: 12px !important;
   }
 
-  .inputAdornment {
-    padding: 5px !important
-  }
+ 
   .iconButton {
     padding: 0px !important;
   }
@@ -174,23 +156,16 @@
   }
 
   .inputBase {
-    font-size: 10px !important;
+    font-size: 8px !important;
   }
 
-  .inputBase::placeholder {
-    font-size: 10px !important;
-  }
-
-
-  .inputAdornment {
-    padding: 0px !important
-  }
   .iconButton {
     padding: 0px !important;
-    margin:-2px !important;
+    margin: 5px  !important;
   }
   .icon {
     font-size: 20px !important;
+
   }
 
   .labelRoot {

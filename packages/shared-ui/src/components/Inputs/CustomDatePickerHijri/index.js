@@ -88,13 +88,6 @@ export default function CustomDatePickerHijri({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
-
-            // className: [
-            //   styles.customHijriDateTextField,
-            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            // ]
-            //   .filter(Boolean)
-            //   .join(' '),
             InputProps: {
               classes: {
                 root: inputs.outlinedRoot,

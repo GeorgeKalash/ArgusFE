@@ -96,6 +96,7 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
+        onClick={() => setIsFocused(true)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         minDate={!!min ? min : disabledRangeDate.date}

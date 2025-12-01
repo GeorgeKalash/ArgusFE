@@ -193,7 +193,7 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
-             className={ secondDisplayField && styles.firstField }
+             className={`${secondDisplayField && styles.firstField} ${styles.root}`}
               onChange={e => {
                 setInputValue(e.target.value)
 

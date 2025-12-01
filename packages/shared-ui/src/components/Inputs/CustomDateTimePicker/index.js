@@ -121,14 +121,6 @@ const CustomDateTimePicker = ({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
-
-            // className: [
-            //   styles.customDateTimeTextField,
-            //   !hasBorder ? styles.noBorder : '',
-            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            // ]
-            //   .filter(Boolean)
-            //   .join(' '),
             InputProps: {
               classes: {
                 root: inputs.outlinedRoot,
