@@ -23,7 +23,7 @@ const AlloyMetals = () => {
 
     const response = await getRequest({
       extension: FoundryRepository.AlloyMetals.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -99,7 +99,6 @@ const AlloyMetals = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           pageSize={50}
           refetch={refetch}
           paginationParameters={paginationParameters}

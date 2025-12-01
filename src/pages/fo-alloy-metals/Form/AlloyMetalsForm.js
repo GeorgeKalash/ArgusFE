@@ -39,7 +39,7 @@ export default function AlloyMetalsForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(platformLabels.Added)
       formik.setFieldValue('recordId', obj.itemId)
 
       invalidate()
@@ -61,7 +61,13 @@ export default function AlloyMetalsForm({ labels, maxAccess, recordId }) {
   }, [])
 
   return (
-    <FormShell resourceId={ResourceIds.AlloyMetals} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell
+      resourceId={ResourceIds.AlloyMetals}
+      form={formik}
+      maxAccess={maxAccess}
+      editMode={editMode}
+      disabledSubmit={editMode}
+    >
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
