@@ -23,7 +23,7 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { createConditionalSchema } from 'src/lib/validation'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
-export default function BatchTransferForm({ labels, access, recordId, window }) {
+export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -31,7 +31,7 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
-    access,
+    access: access,
     enabled: !recordId,
     objectName: 'header'
   })
@@ -108,37 +108,6 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
 
-  const getHeaderData = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: ManufacturingRepository.BatchTransfer.get,
-      parameters: `_recordId=${recordId}`
-    })
-
-    return {
-      ...response?.record,
-      date: formatDateFromApi(response?.record.date)
-    }
-  }
-
-  const getItems = async recordId => {
-    if (!recordId) return
-
-    const response = await getRequest({
-      extension: ManufacturingRepository.BatchTransferJob.qry,
-      parameters: `_btId=${recordId}`
-    })
-
-    return response?.list?.length > 0
-      ? response.list.map((item, index) => {
-          return {
-            ...item,
-            id: index + 1
-          }
-        })
-      : formik.values.items
-  }
 
   const onPost = async () => {
     await postRequest({
@@ -152,8 +121,23 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
   }
 
   async function refetchForm(recordId) {
-    const header = await getHeaderData(recordId)
-    const items = await getItems(recordId)
+    if (!recordId) return
+
+    const headerResponse = await getRequest({
+      extension: ManufacturingRepository.BatchTransfer.get,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const header = {
+      ...headerResponse?.record,
+      date: formatDateFromApi(headerResponse?.record.date)
+    }
+
+    const itemsResponse = await getRequest({
+      extension: ManufacturingRepository.BatchTransferJob.qry,
+      parameters: `_btId=${recordId}`
+    })
+
     formik.setValues({
       ...formik.values,
       recordId: header.recordId,
@@ -161,7 +145,13 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
         ...formik.values.header,
         ...header
       },
-      items
+      items:
+        itemsResponse?.list?.length > 0
+          ? itemsResponse.list.map((item, index) => ({
+              ...item,
+              id: index + 1
+            }))
+          : formik.values.items
     })
   }
 
@@ -303,32 +293,31 @@ export default function BatchTransferForm({ labels, access, recordId, window }) 
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.BatchTransfer}`}
-                    filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
-                    readOnly={editMode}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    readOnly={editMode}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
                     values={formik.values.header}
-                    onChange={async (event, newValue) => {
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
-                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
-                    maxAccess={maxAccess}
+                    error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.reference'
                     label={labels.reference}
-                    value={formik.values.header.reference}
-                    readOnly={editMode || !formik.values.header.dtId}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
+                    readOnly={editMode}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
