@@ -23,6 +23,8 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
+import ImportTransfer from './ImportTransfer'
+import { Refresh } from '@mui/icons-material'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -40,15 +42,18 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   })
 
   const { formik } = useForm({
+    maxAccess,
+    documentType: { key: 'dtId', value: documentType?.dtId },
     initialValues: {
       recordId: null,
       reference: '',
       dtId: null,
       date: new Date(),
-      toSiteId: null,
+      siteId: null,
       notes: '',
       status: 1,
       wip: 1,
+      workCenterId: null,
       items: [
         {
           id: 1,
@@ -63,11 +68,10 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       ],
       serials: []
     },
-    maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
     validationSchema: yup.object({
       date: yup.date().required(),
-      workCenterId: yup.number().required()
+      workCenterId: yup.number().required(),
+      siteId: yup.number().required()
     }),
     onSubmit: async values => {
       const copy = { ...values }
@@ -114,6 +118,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   })
 
   const editMode = !!formik.values.recordId
+  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
+  const totalQty = calculateTotal('qty')
 
   const onCondition = row => {
     if (row.trackBy === 1) {
@@ -238,7 +244,16 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     {
       key: 'Import From Transfer',
       condition: true,
-      onClick: () => formik.handleSubmit()
+      onClick: () => {
+        stack({
+          Component: ImportTransfer,
+          props: { maxAccess, labels },
+          width: 400,
+          height: 150,
+          refresh: false,
+          title: labels.importFromTransfer
+        })
+      }
     }
   ]
 
@@ -357,6 +372,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={1.5}
+                    required
                     onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId || null)}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
@@ -396,7 +412,13 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         <Fixed>
           <Grid container spacing={2} justifyContent='flex-end'>
             <Grid item xs={3}>
-              <CustomNumberField name='totalQty' maxAccess={maxAccess} value='' label={labels.totalQty} readOnly />
+              <CustomNumberField
+                name='totalQty'
+                maxAccess={maxAccess}
+                value={totalQty}
+                label={labels.totalQty}
+                readOnly
+              />
             </Grid>
             <Grid item xs={3}>
               <CustomNumberField name='totalPcs' maxAccess={maxAccess} value='' label={labels.totalPcs} readOnly />
