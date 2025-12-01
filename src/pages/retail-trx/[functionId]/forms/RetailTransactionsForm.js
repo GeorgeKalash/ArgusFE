@@ -1011,7 +1011,7 @@ export default function RetailTransactionsForm({
     const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
-    if (!defaultRateType.value) {
+    if (!defaultRateType?.value) {
       stackError({
         message: labels.RTSANoteDefined
       })
