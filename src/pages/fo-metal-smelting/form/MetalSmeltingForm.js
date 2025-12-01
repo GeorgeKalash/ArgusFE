@@ -184,13 +184,16 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     return Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity))
   }
 
-  const updatePurityRelatedFields = (headerPurity, qty, purity) => {
+  const updatePurityRelatedFields = headerPurity => {
     const updatedList = formik.values?.items?.map(item => {
+      const qtyAtPurity =
+        item?.type == 1 ? qtyAtPurityPerRow(item?.qty || 0, item?.purity || 0, headerPurity || 0) : item?.qtyAtPurity
+
       return {
         ...item,
         expectedAlloyQty:
-          item?.type == 1 ? expectedAlloyQtyPerRow(item?.qtyAtPurity || 0, item?.qty || 0) : item?.expectedAlloyQty,
-        qtyAtPurity: item?.type == 1 ? qtyAtPurityPerRow(qty || 0, purity || 0, headerPurity || 0) : item?.qtyAtPurity
+          item?.type == 1 ? expectedAlloyQtyPerRow(qtyAtPurity || 0, item?.qty || 0) : item?.expectedAlloyQty,
+        qtyAtPurity
       }
     })
     formik.setFieldValue('items', updatedList)
@@ -264,7 +267,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalValue: metal ? ((item.qty * item.purity) / metal?.purity).toFixed(2) : null,
+      metalValue: metal ? ((item?.qty || 0) * (item?.purity || 0)) / 0.875 : null,
       metalId: item.metalId || ''
     }))
 
@@ -362,7 +365,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       name: 'qty',
       label: labels.qty,
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
+        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 0.875
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -384,7 +387,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.purity,
       props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
+        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 0.875
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -451,7 +454,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   ]
 
   if (metalRef.current?.reference) {
-    const qtyIndex = columns.findIndex(col => col.name === 'qty')
+    const qtyIndex = columns.findIndex(col => col.name === 'purity')
     if (qtyIndex !== -1) {
       columns.splice(qtyIndex + 1, 0, {
         component: 'numberfield',
