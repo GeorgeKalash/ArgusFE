@@ -76,6 +76,7 @@ export default function AlloyMetalsForm({ labels, maxAccess, recordId }) {
                 valueShow='sku'
                 secondValueShow='name'
                 form={formik}
+                readOnly={editMode}
                 columnsInDropDown={[
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
