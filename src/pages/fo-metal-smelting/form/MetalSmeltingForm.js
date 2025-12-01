@@ -112,7 +112,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
               return true
             }),
-            qty: yup.number().min(0).required(),
+            qty: yup.number().required(),
             purity: yup.number().test(function (value) {
               if (this.parent.type == 1) {
                 return !!value && value > 0
@@ -267,7 +267,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalValue: metal ? ((item?.qty || 0) * (item?.purity || 0)) / 0.875 : null,
+      metalValue: metal ? ((item?.qty || 0) * (item?.purity || 0)) / 8750 : null,
       metalId: item.metalId || ''
     }))
 
@@ -364,8 +364,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 0.875
+        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 8750
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -387,7 +388,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.purity,
       props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 0.875
+        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 8750
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -688,6 +689,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     value={formik.values.header.purity}
                     required
                     decimalScale={3}
+                    allowNegative={false}
                     onClear={() => {
                       updatePurityRelatedFields(0)
                       formik.setFieldValue('header.purity', '')
@@ -702,6 +704,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     onChange={formik.handleChange}
                     value={formik.values.header?.qty}
                     required
+                    allowNegative={false}
                     readOnly={isPosted}
                     onClear={() => formik.setFieldValue('header.qty', '')}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
