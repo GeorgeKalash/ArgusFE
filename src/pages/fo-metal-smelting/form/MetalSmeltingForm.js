@@ -23,13 +23,14 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import FieldSet from 'src/components/Shared/FieldSet'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
+import { useError } from 'src/error'
 
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
   const metalRef = useRef({})
@@ -68,7 +69,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         extendedAlloy: 0,
         totalAlloy: 0,
         purity: null,
-        metalId: null
+        metalId: null,
+        smeltingMaxAllowedVariation: null
       },
       items: [
         {
@@ -126,6 +128,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .required()
     }),
     onSubmit: async obj => {
+      if (obj.smeltingMaxAllowedVariation && expectedAlloy - totalAlloy > obj.smeltingMaxAllowedVariation) {
+        stackError({
+          message: labels.smeltingMaxAllowedVariation
+        })
+
+        return
+      }
+
       const payload = getPayload(obj)
 
       const response = await postRequest({
@@ -479,6 +489,25 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
     return res?.record?.metalId || null
   }
+
+  async function getMaxAllowVariation(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('smeltingMaxAllowedVariation', null)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: FoundryRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    formik.setFieldValue('smeltingMaxAllowedVariation', res?.record?.smeltingMaxAllowedVariation || null)
+  }
+
+  useEffect(() => {
+    getMaxAllowVariation(formik?.values?.header?.dtId)
+  }, [formik.values?.header?.dtId])
 
   useEffect(() => {
     ;(async function () {

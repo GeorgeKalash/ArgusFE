@@ -81,5 +81,8 @@ export const FoundryRepository = {
   },
   AlloyMetals: {
     qry: service + 'qryALM'
+  },
+  DocumentTypeDefault: {
+    get: service + 'getDTD'
   }
 }
