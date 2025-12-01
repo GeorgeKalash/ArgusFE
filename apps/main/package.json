@@ -27,6 +27,7 @@
     "@argus/module-sales": "file:../../packages/module-sales",
     "@argus/module-manufacturing": "file:../../packages/module-manufacturing",
     "@argus/module-delivery": "file:../../packages/module-delivery",
+    "@argus/module-purchase": "file:../../packages/module-purchase",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
