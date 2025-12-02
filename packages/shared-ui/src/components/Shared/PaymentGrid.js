@@ -4,7 +4,7 @@ import { DataGrid } from './DataGrid'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import * as yup from 'yup'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-// import POSForm from 'src/pages/rt-receipt-vouchers/forms/POSForm'
+import POSForm from '@argus/shared-ui/src/components/Shared/Forms/POSForm'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
 export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
@@ -243,12 +243,12 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
       },
       label: labels.pos,
       onClick: (e, row) => {
-        // stack({
-        //   Component: POSForm,
-        //   props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
-        //   width: 700,
-        //   title: labels?.pos
-        // })
+        stack({
+          Component: POSForm,
+          props: { labels, data: rest.data, amount: row?.amount, maxAccess: access },
+          width: 700,
+          title: labels?.pos
+        })
       }
     }
   ]
