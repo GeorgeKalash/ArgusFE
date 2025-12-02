@@ -80,6 +80,10 @@ export const FoundryRepository = {
     qry: service + 'qryTRI'
   },
   AlloyMetals: {
+    page: service + 'pageALM',
+    set: service + 'setALM',
+    get: service + 'getALM',
+    del: service + 'delALM',
     qry: service + 'qryALM'
   }
 }
