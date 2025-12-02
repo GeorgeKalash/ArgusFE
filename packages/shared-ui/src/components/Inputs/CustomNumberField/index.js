@@ -43,7 +43,6 @@ const CustomNumberField = ({
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
-  const [isFocused, setIsFocused] = useState(false)
 
   const handleKeyPress = e => {
     const regex = /[0-9.-]/
@@ -149,14 +148,12 @@ const CustomNumberField = ({
       onInput={handleInput}
       onFocus={e => {
         autoSelect && e.target.select()
-        setIsFocused(true)
       }}
       onBlur={e => {
         onBlur(e)
         if (e.target.value?.endsWith('.')) {
           handleNumberChangeValue(e, true)
         }
-        setIsFocused(false)
       }}
       sx={{
         '& .MuiInputBase-input': {
@@ -195,7 +192,10 @@ const CustomNumberField = ({
         )
       }}
       InputLabelProps={{
-        className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+        classes: {
+          root: inputs.inputLabel,
+          shrink: inputs.inputLabelShrink, 
+          }      
       }}
       customInput={TextField}
       onChange={e => handleNumberChangeValue(e)}

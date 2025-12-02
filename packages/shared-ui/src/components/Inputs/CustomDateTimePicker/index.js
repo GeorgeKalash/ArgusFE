@@ -146,7 +146,10 @@ const CustomDateTimePicker = ({
               )
             },
             InputLabelProps: {
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+              classes: {
+                root: inputs.inputLabel,
+                shrink: inputs.inputLabelShrink, 
+              }            
             }
           },
           actionBar: {

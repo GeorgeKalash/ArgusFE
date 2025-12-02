@@ -191,7 +191,7 @@ const CustomTextField = ({
         className: InputLabelProps?.shrink
           ? inputs.labelRoot
           : isFocused || value
-          ? inputs.inputLabelFocused
+          ? inputs.inputLabelShrink
           : inputs.inputLabel
       }}
       required={_required}

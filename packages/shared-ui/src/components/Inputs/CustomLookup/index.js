@@ -52,7 +52,6 @@ const CustomLookup = ({
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
-  const [isFocused, setIsFocused] = useState(false)
 
   const valueHighlightedOption = useRef(null)
   const selectFirstValue = useRef(null)
@@ -86,9 +85,8 @@ const CustomLookup = ({
     <Grid container spacing={0} className={styles.lookupContainer}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
+           fullWidth
           ref={autocompleteRef}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           name={name}
           key={firstValue || null}
           value={firstValue}
@@ -193,6 +191,7 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
+              fullWidth
              className={`${secondDisplayField && styles.firstField} ${styles.root}`}
               onChange={e => {
                 setInputValue(e.target.value)
@@ -272,7 +271,10 @@ const CustomLookup = ({
                 )
               }}
               InputLabelProps={{
-                className: isFocused || firstValue ? inputs.inputLabelFocused : inputs.inputLabel
+                classes: {
+                root: inputs.inputLabel,
+                shrink: inputs.inputLabelShrink, 
+                }             
               }}
             />
           )}

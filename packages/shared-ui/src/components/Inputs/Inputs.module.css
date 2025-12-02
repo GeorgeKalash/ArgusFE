@@ -43,7 +43,7 @@
     font-size: 14px !important;
   }
 
-  .inputLabelFocused {
+  .inputLabelShrink {
     font-size: 16px !important;
     /* margin-top: -5px !important; */
     /* background-color: white; */
@@ -89,7 +89,7 @@
     top: -3px;
   }
 
-  .inputLabelFocused {
+  .inputLabelShrink {
     font-size: 14px !important;
     top: 0px;
   }
@@ -150,29 +150,36 @@
     top: -2px !important;
   }
 
-  .inputLabelFocused {
+  .inputBase::placeholder {
+    font-size: 9px !important;
+  }
+  
+   .inputLabelShrink{
     font-size: 10px !important;
-    margin-top: 4px;
+    top: 3px !important;
+   }
+
+  .inputLabelShrink {
+    font-size: 10px !important;
   }
 
   .inputBase {
     font-size: 8px !important;
   }
-
+ 
   .iconButton {
     padding: 0px !important;
-    margin: 5px  !important;
   }
   .icon {
     font-size: 20px !important;
 
   }
 
-  .labelRoot {
+  /* .labelRoot {
     font-size: 14px !important;
     background-color: white;
     padding-right: 10px !important;
-  }
+  } */
 }
 
 @media (max-width: 768px) {
@@ -184,7 +191,7 @@
     font-size: 9px !important;
   }
 
-  .inputLabelFocused {
+  .inputLabelShrink {
     font-size: 9px !important;
   }
 
@@ -215,7 +222,7 @@
     font-size: 8px !important;
   }
 
-  .inputLabelFocused {
+  .inputLabelShrink {
     font-size: 8px !important;
   }
 
@@ -243,7 +250,7 @@
     font-size: 7px !important;
   }
 
-  .inputLabelFocused {
+  .inputLabelShrink {
     font-size: 7px !important;
   }
 

@@ -56,7 +56,6 @@ const CustomComboBox = ({
 
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
-  const [isFocused, setIsFocused] = useState(false)
   const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
@@ -293,7 +292,6 @@ const CustomComboBox = ({
             autoFocus={focus}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            onFocus={() => setIsFocused(true)}
             className={[styles.customComboTextField]}
             error={error}
             helperText={helperText}
@@ -301,7 +299,6 @@ const CustomComboBox = ({
               const allowSelect =
                 selectFirstValue.current !== 'click' && document.querySelector('.MuiAutocomplete-listbox')
               onBlur(e, valueHighlightedOption?.current, filterOptions.current, allowSelect)
-              setIsFocused(false)
             }}
             InputProps={{
               ...params.InputProps,
@@ -318,8 +315,10 @@ const CustomComboBox = ({
               endAdornment: mergedEndAdornment
             }}
             InputLabelProps={{
-              className: isFocused || value || value =='->' ? inputs.inputLabelFocused : inputs.inputLabel
-            }}
+              classes: {
+                root: inputs.inputLabel,
+                shrink: inputs.inputLabelShrink, 
+              }            }}
           />
         )
       }}

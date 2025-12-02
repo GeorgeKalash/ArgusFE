@@ -31,7 +31,6 @@ export default function CustomDatePickerHijri({
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
@@ -72,8 +71,6 @@ export default function CustomDatePickerHijri({
         open={openDatePicker}
         minDate={moment(new Date(1938, 0, 1))}
         maxDate={moment(new Date(2075, 11, 31))}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         shouldDisableDate={disabledDate && shouldDisableDate}
         slots={{
           actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
@@ -114,7 +111,10 @@ export default function CustomDatePickerHijri({
               )
             },
             InputLabelProps: {
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+              classes: {
+                root: inputs.inputLabel,
+                shrink: inputs.inputLabelShrink, 
+              }           
             }
           }
         }}
