@@ -364,6 +364,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
         const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 8750
         if (newRow?.type == 1) {
