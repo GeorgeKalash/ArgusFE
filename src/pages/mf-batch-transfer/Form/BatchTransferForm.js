@@ -108,7 +108,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const editMode = !!formik.values?.recordId
   const isPosted = formik?.values?.header?.status === 3
 
-
   const onPost = async () => {
     await postRequest({
       extension: ManufacturingRepository.BatchTransfer.post,
@@ -196,7 +195,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
           pcs: res.record?.pcs || 0,
-          qty: res.record?.qty || 0
+          qty: res.record?.qty || 0,
+          jobPcs: res.record?.pcs || 0,
+          jobQty: res.record?.qty || 0
         })
       }
     },
@@ -272,7 +273,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [recordId])
-
 
   return (
     <FormShell
