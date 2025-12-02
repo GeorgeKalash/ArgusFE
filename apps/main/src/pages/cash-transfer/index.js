@@ -6,7 +6,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import CashTransferTab from './Tabs/CashTransferTab'
+import CashTransferTab from '@argus/shared-ui/src/components/Shared/Forms/CashTransferTab'
 import toast from 'react-hot-toast'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'

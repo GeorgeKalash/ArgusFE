@@ -20,7 +20,7 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import OpenMultiForm from './forms/OpenMultiForm'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import Icon from '@argus/shared-core/src/@core/components/icon'
-import CashTransferTab from '../cash-transfer/Tabs/CashTransferTab'
+import CashTransferTab from '@argus/shared-ui/src/components/Shared/Forms/CashTransferTab'
 
 const OpenMultiCurrencyCashTransfer = () => {
   const [data, setData] = useState([])

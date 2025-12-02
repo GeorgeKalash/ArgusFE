@@ -13,7 +13,7 @@ import { LoanTrackingRepository } from '@argus/repositories/src/repositories/Loa
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import LoanWindow from './Window/LoanWindow'
+import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 
 const HrLoans = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
