@@ -23,16 +23,14 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import FieldSet from 'src/components/Shared/FieldSet'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
 
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
-  const metalRef = useRef({})
   const alloyMetalItems = useRef({})
   const functionId = SystemFunction.MetalSmelting
 
@@ -80,7 +78,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           purity: 0,
           qty: 0,
           seqNo: 1,
-          metalValue: null,
           trxId: recordId || 0,
           type: null,
           currentCost: 0,
@@ -160,7 +157,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     }, 0)
 
   const totalQty = calculateTotal('qty')
-  const totalMetal = calculateTotal('metalValue')
   const totalAlloy = calculateTotal('qty', 2)
   const expectedAlloy = calculateTotal('expectedAlloyQty')
   const headerPurity = parseFloat(formik.values?.header?.purity)
@@ -251,8 +247,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   async function refetchForm(recordId) {
-    const metal = metalRef.current
-
     const { record } = await getRequest({
       extension: FoundryRepository.MetalSmelting.get,
       parameters: `_recordId=${recordId}`
@@ -267,7 +261,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalValue: metal ? ((item?.qty || 0) * (item?.purity || 0)) / 8750 : null,
       metalId: item.metalId || ''
     }))
 
@@ -337,7 +330,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' }
         ],
-        displayFieldWidth: 2
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'itemName', value: 'Item Name' }
+        ],
+        displayFieldWidth: 3.5
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredItems?.current }
@@ -366,7 +363,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.qty,
       props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 8750
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -376,10 +372,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
           update({ expectedAlloyQty, qtyAtPurity })
         }
-
-        update({
-          metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null
-        })
       }
     },
     {
@@ -388,7 +380,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.purity,
       props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = ((newRow?.qty || 0) * (newRow?.purity || 0)) / 8750
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -398,7 +389,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
           update({ expectedAlloyQty, qtyAtPurity })
         }
-        update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: row.type == 2 }
@@ -454,21 +444,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     }
   ]
 
-  if (metalRef.current?.reference) {
-    const qtyIndex = columns.findIndex(col => col.name === 'purity')
-    if (qtyIndex !== -1) {
-      columns.splice(qtyIndex + 1, 0, {
-        component: 'numberfield',
-        label: metalRef.current?.reference,
-        name: 'metalValue',
-        props: {
-          decimalScale: 2,
-          readOnly: true
-        }
-      })
-    }
-  }
-
   async function updateItemsMetal(itemId) {
     if (!itemId) return
 
@@ -483,15 +458,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
-      const filteredItem = defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')
-      if (parseInt(filteredItem?.value)) {
-        const metalRes = await getRequest({
-          extension: InventoryRepository.Metals.get,
-          parameters: `_recordId=${parseInt(filteredItem?.value)}`
-        })
-
-        metalRef.current = metalRes.record
-      }
 
       const { list } = await getRequest({
         extension: FoundryRepository.AlloyMetals.qry,
@@ -736,16 +702,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={3} readOnly />
                 </Grid>
-                {metalRef.current?.reference && (
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      label={`${labels.total} ${metalRef.current?.reference}`}
-                      value={totalMetal}
-                      decimalScale={2}
-                      readOnly
-                    />
-                  </Grid>
-                )}
               </Grid>
             </Grid>
             <Grid item xs={3}>
