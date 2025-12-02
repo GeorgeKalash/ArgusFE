@@ -6,7 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-financials';
 const MODULE_FOLDER = 'module-financials';
 
 const SALES_PAGES = [
-  'gl_integration_pt'
+  'fi-accounts',
 ];
 
 const ROOT = path.resolve(__dirname, '..');
