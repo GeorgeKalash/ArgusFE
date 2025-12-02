@@ -6,22 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-financials';
 const MODULE_FOLDER = 'module-financials';
 
 const SALES_PAGES = [
-  'ca-rebuild-aba',
-  'ca-adj-dtd',
-  'ca-credit-cards',
-  'cash-dtd',
-  'cb-cash-groups',
-  'ca-checkbook',
-  'fi-cash-accounts',
-  'cb-bank-accounts',
-  'cb-bank-branches',
-  'cb-banks',
-  'ca-cash-inquiry',
-  'ca-opening-balances',
-  'ca-open-tfm',
-  'cash-transfer',
-  'fi-cash-tfr',
-  'ca-adjustment',
+  'gl_integration_pt'
 ];
 
 const ROOT = path.resolve(__dirname, '..');
