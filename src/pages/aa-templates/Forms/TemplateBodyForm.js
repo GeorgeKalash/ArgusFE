@@ -13,7 +13,7 @@ import { AdministrationRepository } from 'src/repositories/AdministrationReposit
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import TextEditor from 'src/components/Shared/TextEditor'
-import { convertToRaw, EditorState } from 'draft-js'
+import { ContentState, convertToRaw, EditorState, convertFromHTML } from 'draft-js'
 import draftToHtml from 'draftjs-to-html'
 import Form from 'src/components/Shared/Form'
 
@@ -90,6 +90,14 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
           ...res.record,
           textBody: decodedHTML
         })
+
+        if (decodedHTML) {
+          const blocksFromHTML = convertFromHTML(decodedHTML)
+          const contentState = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
+          setEditorState(EditorState.createWithContent(contentState))
+        } else {
+          setEditorState(EditorState.createEmpty())
+        }
       }
     })()
   }, [])
