@@ -30,6 +30,7 @@
     "@argus/module-purchase": "file:../../packages/module-purchase",
     "@argus/module-inventory": "file:../../packages/module-inventory",
     "@argus/module-businessPartners": "file:../../packages/module-businessPartners",
+    "@argus/module-financials": "file:../../packages/module-financials",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
