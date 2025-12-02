@@ -85,5 +85,9 @@ export const FoundryRepository = {
     get: service + 'getALM',
     del: service + 'delALM',
     qry: service + 'qryALM'
+  },
+  SmeltingScrapItem: {
+    qry: service + 'qrySMSI',
+    set2: service + 'set2SMSI'
   }
 }
