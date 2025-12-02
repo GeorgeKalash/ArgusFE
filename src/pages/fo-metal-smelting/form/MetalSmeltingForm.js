@@ -126,7 +126,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         .required()
     }),
     onSubmit: async obj => {
-      if (obj.smeltingMaxAllowedVariation && expectedAlloy - totalAlloy > obj.smeltingMaxAllowedVariation) {
+      if (
+        obj.header?.smeltingMaxAllowedVariation &&
+        expectedAlloy - totalAlloy > obj.header?.smeltingMaxAllowedVariation
+      ) {
         stackError({
           message: labels.smeltingMaxAllowedVariation
         })
@@ -267,6 +270,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       extension: FoundryRepository.TransactionItems.qry,
       parameters: `_trxId=${recordId}`
     })
+    const smeltingMaxAllowedVariation = await getMaxAllowVariation(record?.dtId || null)
 
     const modifiedList = list?.map((item, index) => ({
       ...item,
@@ -279,7 +283,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       recordId: record?.recordId,
       header: {
         ...record,
-        date: formatDateFromApi(record.date)
+        date: formatDateFromApi(record.date),
+        smeltingMaxAllowedVariation
       },
       items: modifiedList?.length > 0 ? modifiedList : formik.values.items
     })
@@ -468,7 +473,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   async function getMaxAllowVariation(dtId) {
     if (!dtId) {
-      formik.setFieldValue('smeltingMaxAllowedVariation', null)
+      formik.setFieldValue('header.smeltingMaxAllowedVariation', null)
 
       return
     }
@@ -478,11 +483,12 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       parameters: `_dtId=${dtId}`
     })
 
-    formik.setFieldValue('smeltingMaxAllowedVariation', res?.record?.smeltingMaxAllowedVariation || null)
-  }
+    formik.setFieldValue('header.smeltingMaxAllowedVariation', res?.record?.smeltingMaxAllowedVariation || null)
 
+    return res?.record?.smeltingMaxAllowedVariation || null
+  }
   useEffect(() => {
-    getMaxAllowVariation(formik?.values?.header?.dtId)
+    if (!recordId) getMaxAllowVariation(formik?.values?.header?.dtId)
   }, [formik.values?.header?.dtId])
 
   useEffect(() => {
