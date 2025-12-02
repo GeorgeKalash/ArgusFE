@@ -31,6 +31,7 @@
     "@argus/module-inventory": "file:../../packages/module-inventory",
     "@argus/module-businessPartners": "file:../../packages/module-businessPartners",
     "@argus/module-financials": "file:../../packages/module-financials",
+    "@argus/module-remittance": "file:../../packages/module-remittance",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
