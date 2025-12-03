@@ -604,6 +604,7 @@ export const ResourceIds = {
   DailySchedules: 72201,
   SSLeaveRequest: 80106,
   AlloyMetals: 47103,
+  SmeltingScrapItems: 47106,
   MetalSmeltingDTD: 47104,
 
   // GL
