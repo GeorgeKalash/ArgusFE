@@ -22,10 +22,13 @@ import { ManufacturingRepository } from 'src/repositories/ManufacturingRepositor
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { createConditionalSchema } from 'src/lib/validation'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { useError } from 'src/error'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
 
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
@@ -42,8 +45,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
 
   const conditions = {
     jobId: row => row?.jobId,
-    pcs: row => row?.pcs > 0,
-    qty: row => row?.qty > 0,
+    pcs: row => row?.jobId > 0 && row?.pcs <= row?.jobPcs,
+    qty: row => row?.jobId > 0 && row?.qty <= row?.jobQty,
     sku: row => row?.sku,
     itemName: row => row?.itemName
   }
@@ -90,6 +93,14 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     }),
     onSubmit: async obj => {
       const { items, header } = obj
+
+      if (header.fromWCId === header.toWCId) {
+        stackError({
+          message: labels.errorMessage
+        })
+
+        return
+      }
 
       const response = await postRequest({
         extension: ManufacturingRepository.BatchTransfer.set2,
@@ -187,6 +198,11 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           parameters: `_jobOrderId=${newRow?.jobId}&_toWcId=${formik.values?.header?.toWCId}`
         })
 
+        const res3 = await getRequest({
+          extension: ManufacturingRepository.JobWorkCenter.get,
+          parameters: `_jobId=${newRow?.jobId}&_workCenterId=${formik.values?.header?.fromWCId}`
+        })
+
         update({
           jobId: newRow?.jobId || null,
           jobRef: newRow?.jobRef || '',
@@ -194,10 +210,10 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           itemId: res2.record?.itemId || null,
           sku: res2.record?.sku || '',
           itemGroupName: res2.record?.itemGroupName || '',
-          pcs: res.record?.pcs || 0,
-          qty: res.record?.qty || 0,
-          jobPcs: res.record?.pcs || 0,
-          jobQty: res.record?.qty || 0
+          pcs: res3.record?.pcs || 0,
+          qty: res3.record?.qty || 0,
+          jobPcs: res3.record?.pcs || 0,
+          jobQty: res3.record?.qty || 0
         })
       }
     },
@@ -231,6 +247,18 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      flex: 1
+    },
+    {
+      component: 'numberfield',
+      name: 'pcs',
+      label: labels.pcs,
+      flex: 1
+    },
+    {
+      component: 'numberfield',
+      name: 'jobQty',
+      label: labels.jobQty,
       flex: 1,
       props: {
         readOnly: true
@@ -238,8 +266,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     },
     {
       component: 'numberfield',
-      name: 'pcs',
-      label: labels.pcs,
+      name: 'jobPcs',
+      label: labels.jobPcs,
       flex: 1,
       props: {
         readOnly: true
@@ -273,6 +301,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [recordId])
+
+  const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
+  const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
 
   return (
     <FormShell
@@ -385,6 +416,20 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    maxLength='100'
+                    rows={2}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -402,20 +447,12 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={2}>
-            <Grid item xs={4}>
-              <CustomTextArea
-                name='notes'
-                label={labels.notes}
-                value={formik.values.notes}
-                maxLength='100'
-                rows={2}
-                maxAccess={maxAccess}
-                readOnly={isPosted}
-                onChange={formik.handleChange}
-                onClear={() => formik.setFieldValue('notes', '')}
-                error={formik.touched.notes && Boolean(formik.errors.notes)}
-              />
+          <Grid container spacing={2} direction='row' wrap='nowrap' sx={{ justifyContent: 'flex-end' }}>
+            <Grid item xs={3}>
+              <CustomNumberField name='totalQty' label={labels.totalQty} value={totalQty} readOnly />
+            </Grid>
+            <Grid item xs={3}>
+              <CustomNumberField name='totalPcs' label={labels.totalPcs} value={totalPcs} readOnly />
             </Grid>
           </Grid>
         </Fixed>
