@@ -7,8 +7,9 @@
   z-index: 1;
   top: -4px;
   background: white;
-  padding: 0px 4px;
-  color: #666;
+  color: #666 !important;
+  white-space: normal !important;   
+  transform: scale(0.75);
 
 }
 
@@ -111,9 +112,20 @@
     height: 9px;
   }
 
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
   .phoneLabel {
-    font-size: 12px !important;
-    top: -5px;
+    top: -11px !important;
   }
 
   .phoneClearIcon {
@@ -129,7 +141,7 @@
     box-shadow: none !important;  }
 }
 
-@media (min-width: 1920px) and (max-width: 2048px) {
+/* @media (min-width: 1920px) and (max-width: 2048px) {
  
   .phoneWrapper .react-tel-input .form-control {
     font-size: 10px !important;
@@ -148,6 +160,8 @@
     height: 9px;
   }
 
+  
+
   .phoneLabel {
     font-size: 12px !important;
     top: -5px;
@@ -164,10 +178,10 @@
     width: 100%;
     border: none !important;
     box-shadow: none !important;  }
-}
+} */
 
 
-@media (min-width: 1025px) and (max-width: 1920px) {
+@media (min-width: 1280px)  {
 
   .phoneWrapper .react-tel-input .form-control {
     font-size: 6px !important;
@@ -187,9 +201,20 @@
   }
 
   .phoneLabel {
-    font-size: 8px !important;
-    top: -5px;
+    top: -11px !important;
   }
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
 
   .phoneClearIcon {
     margin-top: 0px  !important;
@@ -197,9 +222,9 @@
   }
   
   .phoneContainer :global(.form-control) {
-    font-size: 14px !important;   /* change me */
-    height: 34px;                 /* control height */
-    padding: 0px 0px 0px 50px !important;      /* 🔁 padding: top/right/bottom/left */
+    font-size: 14px !important;   
+    height: 34px;                
+    padding: 0px 0px 0px 50px !important;      
     width: 100%;
     border: none !important;
     box-shadow: none !important;  }
@@ -232,9 +257,19 @@
   }
 
   .phoneLabel {
-    font-size: 9px !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    top: -8px !important
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
 
   .phoneClearIcon {
@@ -273,11 +308,26 @@
 
   }
 
-  .phoneLabel {
-    font-size: 6px !important;
-    top: -4px;
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
   }
 
+  .phoneLabel {
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -5px !important;
+  }
+
+  
   .phoneClearIcon {
     font-size: 13px !important;
   }

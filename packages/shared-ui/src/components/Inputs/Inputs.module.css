@@ -30,11 +30,18 @@
   padding: 3px !important;
 }
 
+.outlinedRoot:dir(ltr) .inputAdornment {
+  margin-right: 5px !important;
+}
+.outlinedRoot:dir(rtl) .inputAdornment {
+  margin-left: 5px !important;
+}
+
 .outlinedFieldset {
   border-radius: 4px !important;
 }
 
-@media (min-width: 2048px) and (max-width: 2566px) {
+/* @media (min-width: 2048px) and (max-width: 2566px) {
   .outlinedRoot {
     height: 45px !important;
   }
@@ -45,9 +52,7 @@
 
   .inputLabelShrink {
     font-size: 16px !important;
-    /* margin-top: -5px !important; */
-    /* background-color: white; */
-    /* padding: 10px !important;  */
+
   }
 
   .inputBase {
@@ -70,15 +75,10 @@
     padding: 0px !important;
   }
 
-  .labelRoot {
-    font-size: 23px !important;
-    margin-top: -4px !important;
-    background-color: white;
-    padding-right: 10px !important;
-  }
-}
 
-@media (min-width: 1025px) and (max-width: 1920px) {
+} */
+
+@media (min-width: 1280px)  {
   .outlinedRoot {
     height: 30px !important;
     padding: 0px !important;
@@ -101,10 +101,15 @@
   .inputBase::placeholder {
     font-size: 12px !important;
   }
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: 5px !important;
+  }
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: 5px !important;
+  }
 
- 
   .iconButton {
-    padding: 0px !important;
+    margin: 0px !important;
   }
   .icon {
     font-size: 20px !important;
@@ -114,7 +119,6 @@
 }
 
 @media (max-width: 1280px) {
-
 
 
   .inputLabel {
@@ -131,6 +135,12 @@
   .inputBase::placeholder {
     font-size: 11px !important;
   }
+  
+
+  .inputLabelShrink{
+    font-size: 10px !important;
+    top: 3px !important;
+   }
 
   .outlinedRoot {
     height: 28px !important;
@@ -159,27 +169,24 @@
     top: 3px !important;
    }
 
-  .inputLabelShrink {
-    font-size: 10px !important;
-  }
-
   .inputBase {
     font-size: 8px !important;
   }
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: -5px !important;
+  }
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: -5px !important;
+  }
  
   .iconButton {
-    padding: 0px !important;
+    margin: -1px !important;
   }
   .icon {
-    font-size: 20px !important;
+    font-size: 18px !important;
 
   }
 
-  /* .labelRoot {
-    font-size: 14px !important;
-    background-color: white;
-    padding-right: 10px !important;
-  } */
 }
 
 @media (max-width: 768px) {
