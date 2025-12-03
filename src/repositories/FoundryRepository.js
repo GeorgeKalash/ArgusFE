@@ -85,5 +85,11 @@ export const FoundryRepository = {
     get: service + 'getALM',
     del: service + 'delALM',
     qry: service + 'qryALM'
+  },
+  DocumentTypeDefault: {
+    page: service + 'pageDTD',
+    set: service + 'setDTD',
+    get: service + 'getDTD',
+    del: service + 'delDTD'
   }
 }
