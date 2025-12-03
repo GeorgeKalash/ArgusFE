@@ -54,6 +54,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       status: 1,
       wip: 1,
       workCenterId: null,
+      wcSiteId: null,
       items: [
         {
           id: 1,
@@ -118,7 +119,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   })
 
   const editMode = !!formik.values.recordId
-  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
+  const calculateTotal = key => formik?.values?.items?.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
 
   const onCondition = row => {
@@ -393,7 +394,10 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                 displayField='name'
                 displayFieldWidth={1.5}
                 values={formik.values}
-                onChange={(_, newValue) => formik.setFieldValue('workCenterId', newValue?.recordId || null)}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('wcSiteId', newValue?.siteId || null)
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                }}
                 error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
               />
             </Grid>
