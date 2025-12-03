@@ -27,6 +27,7 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { DataSets } from 'src/resources/DataSets'
 import { useError } from 'src/error'
 import { createConditionalSchema } from 'src/lib/validation'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -78,7 +79,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         totalAlloy: 0,
         purity: null,
         metalId: null,
-        smeltingMaxAllowedVariation: null
+        smeltingMaxAllowedVariation: null,
+        notes: ''
       },
       items: [
         {
@@ -100,6 +102,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       scraps: [{ id: 1, itemId: null, sku: '', itemName: '', qty: null }]
     },
     maxAccess,
+    conditionSchema: ['scraps'],
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
@@ -188,7 +191,12 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       return sum + (parseFloat(item[key]) || 0)
     }, 0)
 
-  const totalQty = calculateTotal('qty')
+  const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
+    return sum + (parseFloat(item.qty) || 0)
+  }, 0)
+
+  const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
+  const qtyOut = calculateTotal('qty')
   const totalAlloy = calculateTotal('qty', 2)
   const expectedAlloy = calculateTotal('expectedAlloyQty')
   const headerPurity = parseFloat(formik.values?.header?.purity)
@@ -801,12 +809,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
               const flag = row.type != 2 ? 'metal' : ''
               if (field == 'sku') fillSKUStore(row?.metalId, flag)
             }}
-            height='80vh'
           />
         </Grow>
         <Fixed>
           <Grid container xs={12}>
-            <Grid container xs={8}>
+            <Grid container xs={6}>
               <DataGrid
                 onChange={value => formik.setFieldValue('scraps', value)}
                 value={formik.values?.scraps}
@@ -817,15 +824,27 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 maxAccess={maxAccess}
                 disabled={isPosted}
                 allowDelete={!isPosted}
-                height='20vh'
+                height='26vh'
               />
             </Grid>
-
-            <Grid container xs={4} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3 }}>
-              <Grid container spacing={2} xs={8}>
+            <Grid item xs={4} sx={{ pl: 2, pt: 3 }}>
+              <CustomTextArea
+                name='header.notes'
+                label={labels.notes}
+                value={formik.values.header?.notes}
+                rows={4}
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+                error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+              />
+            </Grid>
+            <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3, height: '25vh' }}>
+              <Grid container>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    label={labels.totalDesiredPurity}
+                    label={labels.totalMetal}
                     value={totalDesiredPurity}
                     decimalScale={3}
                     readOnly
@@ -851,7 +870,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={3} readOnly align='right' />
+                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly align='right' />
                 </Grid>
               </Grid>
             </Grid>
