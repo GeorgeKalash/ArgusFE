@@ -85,7 +85,10 @@ export const FoundryRepository = {
     qry: service + 'qryALM'
   },
   DocumentTypeDefault: {
-    get: service + 'getDTD'
+    page: service + 'pageDTD',
+    set: service + 'setDTD',
+    get: service + 'getDTD',
+    del: service + 'delDTD'
   },
   SmeltingScrapItem: {
     qry: service + 'qrySMSI'
