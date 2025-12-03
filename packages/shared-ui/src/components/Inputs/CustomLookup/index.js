@@ -1,4 +1,4 @@
-import { Box, Grid, Autocomplete, TextField, IconButton, Paper } from '@mui/material'
+import { Box, Grid, Autocomplete, TextField, IconButton, Paper, InputAdornment } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import ClearIcon from '@mui/icons-material/Clear'
 import { useEffect, useRef, useState } from 'react'
@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomLookup.module.css'
+import dropdownStyles from '../SharedDropdown.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomLookup = ({
@@ -138,19 +139,19 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {columnsWithGrid.map((header, i) => {
                         const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                         return (
-                          <Box key={i} className={styles.dropdownHeaderCell} style={{ width: widthPercent }}>
+                          <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
                             {header.value.toUpperCase()}
                           </Box>
                         )
                       })}
                     </li>
                   )}
-                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
 
@@ -160,7 +161,7 @@ const CustomLookup = ({
                       const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                       return (
-                        <Box key={i} className={styles.dropdownCell} style={{ width: widthPercent }}>
+                        <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
                           {displayValue}
                         </Box>
                       )
@@ -172,18 +173,18 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
+                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
+                        <Box className={dropdownStyles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
                       )}
                       {secondDisplayField && (
-                        <Box className={styles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
+                        <Box className={dropdownStyles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
                       )}
                     </li>
                   )}
-                  <li {...propsOption} className={`${propsOption.className} ${styles.dropdownOptionRow}`}>
-                    <Box className={styles.dropdownCellMain}>{option[valueField]}</Box>
-                    {secondDisplayField && <Box className={styles.dropdownCellSecondary}>{option[displayField]}</Box>}
+                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                    <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+                    {secondDisplayField && (<Box className={dropdownStyles.dropdownOptionCellSecondary}>{option[displayField]}</Box>)}
                   </li>
                 </Box>
               )
@@ -192,7 +193,7 @@ const CustomLookup = ({
           renderInput={params => (
             <TextField
               {...params}
-              className={[secondDisplayField ? styles.firstFieldWithSecond : ''].filter(Boolean).join(' ')}
+             className={ secondDisplayField && styles.firstField }
               onChange={e => {
                 setInputValue(e.target.value)
 
@@ -242,22 +243,21 @@ const CustomLookup = ({
                 ...params.InputProps,
                 classes: {
                   root: inputs.outlinedRoot,
-                  notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                  notchedOutline: hasBorder ? !secondDisplayField && inputs.outlinedFieldset : inputs.outlinedNoBorder,
                   input: inputs.inputBase
                 },
                 endAdornment: !_readOnly && (
-                  <Box className={`${styles.iconAdornment} ${!hasBorder ? styles.iconAdornmentNoBorder : ''}`}>
+                  <InputAdornment position='end' className={inputs.inputAdornment} >
                     {!isLoading ? (
-                      <IconButton className={styles.searchIconButton} tabIndex={-1}>
-                        <SearchIcon className={styles.searchIcon} />
+                      <IconButton  edge="start" className={inputs.iconButton} tabIndex={-1}>
+                        <SearchIcon className={inputs.icon} />
                       </IconButton>
                     ) : (
-                      <CircularProgress size={15} className={styles.loadingSpinner} />
+                      <CircularProgress size={15} className={inputs.icon} />
                     )}
                     <IconButton
-                      className={styles.clearIconButton}
+                      className={inputs.iconButton}
                       tabIndex={-1}
-                      edge='end'
                       onClick={() => {
                         setInputValue('')
                         onChange(name, '')
@@ -266,13 +266,13 @@ const CustomLookup = ({
                       }}
                       aria-label='clear input'
                     >
-                      <ClearIcon className={styles.clearIcon} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
-                  </Box>
+                  </InputAdornment>
                 )
               }}
               InputLabelProps={{
-                className: isFocused ? inputs.inputLabelFocused : inputs.inputLabel
+                className: isFocused || firstValue ? inputs.inputLabelFocused : inputs.inputLabel
               }}
             />
           )}
@@ -294,10 +294,16 @@ const CustomLookup = ({
                 secondField?.onChange(secondField?.name, e.target.value)
               }
             }}
+            // sx={{
+            //   '& .MuiInputBase-root': {
+            //     borderTopLeftRadius: 0 ,
+            //     borderBottomLeftRadius: 0
+            //   }
+            // }}
             InputProps={{
               classes: {
                 root: inputs.outlinedRoot,
-                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                notchedOutline: hasBorder ? '' : inputs.outlinedNoBorder,
                 input: inputs.inputBase
               },
               inputProps: {
@@ -305,7 +311,7 @@ const CustomLookup = ({
               },
               readOnly: secondField ? !secondField?.editable : _readOnly
             }}
-            className={[styles.secondField].filter(Boolean).join(' ')}
+            className={ secondDisplayField  && styles.secondField}
             error={error}
             helperText={helperText}
           />
@@ -316,3 +322,4 @@ const CustomLookup = ({
 }
 
 export default CustomLookup
+

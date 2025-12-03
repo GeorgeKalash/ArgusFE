@@ -6,8 +6,10 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomComboBox.module.css'
+import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
+import ClearIcon from '@mui/icons-material/Clear'
 
 const CustomComboBox = ({
   type = 'text',
@@ -61,8 +63,6 @@ const CustomComboBox = ({
   const valueHighlightedOption = useRef(null)
   const selectFirstValue = useRef(null)
   const filterOptions = useRef(null)
-
-  // console.log('TextDecoderStream', isFocused, name, value)
 
   useEffect(() => {
     function handleBlur(event) {
@@ -184,20 +184,20 @@ const CustomComboBox = ({
           return (
             <Box>
               {propsOption.id.endsWith('-0') && (
-                <li className={`${propsOption.className} ${styles.comboHeaderRow}`}>
+                <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                   {columnsWithGrid.map((header, i) => {
                     const widthPercent = `${(header.grid / totalGrid) * 100}%`
 
                     return (
-                      <Box key={i} className={styles.comboHeaderCell} style={{ width: widthPercent }}>
+                      <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
                         {header.value.toUpperCase()}
                       </Box>
                     )
                   })}
                 </li>
               )}
-              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
-                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
+              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -206,7 +206,7 @@ const CustomComboBox = ({
                   }
 
                   return (
-                    <Box key={i} className={styles.comboOptionCell} style={{ width: widthPercent }}>
+                    <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
                       {displayValue}
                     </Box>
                   )
@@ -217,9 +217,9 @@ const CustomComboBox = ({
         } else {
           return (
             <Box>
-              <li {...propsOption} className={`${propsOption.className} ${styles.comboOptionRow}`}>
-                {option.icon && <img src={option.icon} alt={option[displayField]} className={styles.comboOptionIcon} />}
-                <Box className={styles.comboOptionSingleText}>{option[displayField]}</Box>
+              <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
+                <Box className={dropdownStyles.dropdownOptionSingleText}>{option[displayField]}</Box>
               </li>
             </Box>
           )
@@ -228,35 +228,56 @@ const CustomComboBox = ({
       renderInput={params => {
         const defaultEndAdornment = params.InputProps.endAdornment
 
+        let childrenWithoutClear = null
+
+        if (React.isValidElement(defaultEndAdornment)) {
+          const childrenArray = React.Children.toArray(defaultEndAdornment.props.children)
+
+          const filtered = childrenArray.filter(child => child?.props?.['aria-label'] !== 'Clear')
+
+          childrenWithoutClear = filtered
+        }
+
         const mergedEndAdornment =
           !_readOnly && React.isValidElement(defaultEndAdornment)
             ? React.cloneElement(defaultEndAdornment, {
-                className: `${defaultEndAdornment.props.className || ''} ${styles.endAdornment}`,
+                className: `${inputs.inputAdornment}`,
                 children: (
                   <>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <CircularProgress color='inherit' size={17} />
+                        <IconButton   edge='end' className={inputs.iconButton}>
+                          <CircularProgress     color='inherit' size={17} />
+                        </IconButton>
                       ) : (
                         refresh &&
                         !readOnly && (
                           <IconButton
+                            edge='end'
                             onClick={fetchData}
                             aria-label='refresh data'
                             tabIndex={-1}
-                            className={styles.refreshIconButton}
+                            className={inputs.iconButton}
                           >
-                            <RefreshIcon fontSize='small' />
+                            <RefreshIcon fontSize='small' className={inputs.icon} />
                           </IconButton>
                         )
                       ))}
-                    {defaultEndAdornment.props.children}
+                 { !_readOnly && value && <IconButton
+                      className={inputs.iconButton}
+                      tabIndex={-1}
+                      onClick={() => onChange(name, '')}
+                      aria-label='clear input'
+                    >
+                      <ClearIcon className={inputs.icon} />
+                    </IconButton>}
+                    {childrenWithoutClear}
                   </>
                 )
               })
             : _readOnly
             ? null
-            : defaultEndAdornment
+            : null
 
         return (
           <TextField
@@ -298,7 +319,7 @@ const CustomComboBox = ({
               endAdornment: mergedEndAdornment
             }}
             InputLabelProps={{
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+              className: isFocused || value || value =='->' ? inputs.inputLabelFocused : inputs.inputLabel
             }}
           />
         )
@@ -309,3 +330,4 @@ const CustomComboBox = ({
 }
 
 export default CustomComboBox
+

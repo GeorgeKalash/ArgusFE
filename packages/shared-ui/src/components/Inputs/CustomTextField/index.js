@@ -3,7 +3,6 @@ import ClearIcon from '@mui/icons-material/Clear'
 import SearchIcon from '@mui/icons-material/Search'
 import { useEffect, useRef, useState } from 'react'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomTextField.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomTextField = ({
@@ -35,26 +34,26 @@ const CustomTextField = ({
   ...props
 }) => {
   const name = props.name
- 
+
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
- 
+
   const inputRef = useRef(null)
- 
+
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
- 
+
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
       inputRef.current.focus()
     }
   }, [value])
- 
+
   useEffect(() => {
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
- 
+
   const handleInput = e => {
     const inputValue = e.target.value
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
@@ -62,29 +61,29 @@ const CustomTextField = ({
       e.target.value = truncatedValue
       props?.onChange(e)
     }
- 
+
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
       props?.onChange(e)
     }
- 
+
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
       props?.onChange(e)
     }
- 
+
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
       props?.onChange(e)
     }
- 
+
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
     }
   }
- 
+
   useEffect(() => {
     if (autoFocus && inputRef.current && value == '' && !focus) {
       inputRef.current.focus()
@@ -98,7 +97,7 @@ const CustomTextField = ({
         {startIcons.map((iconBtn, index) => (
           <InputAdornment key={index} position='start'>
             {iconBtn && (
-              <IconButton className={styles['search-icon']} tabIndex={-1}>
+              <IconButton className={inputs.iconButton} tabIndex={-1}>
                 {iconBtn}
               </IconButton>
             )}
@@ -144,7 +143,7 @@ const CustomTextField = ({
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
         ...props.InputProps,
- 
+
         classes: {
           root: inputs.outlinedRoot,
           notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
@@ -152,17 +151,17 @@ const CustomTextField = ({
         },
         startAdornment: dynamicStartAdornment,
         endAdornment: (
-          <>
-            {props.InputProps?.endAdornment}
-            <InputAdornment position='end'>
+            <InputAdornment position='end' className={inputs.inputAdornment}>
+              {props.InputProps?.endAdornment}
+
               {!_readOnly && search && (
-                <IconButton className={inputs['search-icon']} tabIndex={-1} onClick={() => onSearch(value)}>
-                  <SearchIcon className={inputs['search-icon']} />
+                <IconButton className={inputs.iconButton} tabIndex={-1} onClick={() => onSearch(value)}>
+                  <SearchIcon className={inputs.icon} />
                 </IconButton>
               )}
               {!_readOnly && !clearable && (value || value === 0) && (
                 <IconButton
-                  className={inputs['search-icon']}
+                  className={inputs.iconButton}
                   tabIndex={-1}
                   id={props.ClearId}
                   onClick={e => {
@@ -170,20 +169,20 @@ const CustomTextField = ({
                     setFocus(true)
                   }}
                 >
-                  <ClearIcon className={inputs['search-icon']} />
+                  <ClearIcon className={inputs.icon} />
                 </IconButton>
               )}
               {endIcons.map((iconBtn, index) => (
                 <>
                   {iconBtn && (
-                    <IconButton className={inputs['search-icon']} tabIndex={-1}>
+                    <IconButton className={inputs.iconButton} tabIndex={-1}>
                       {iconBtn}
                     </IconButton>
                   )}
                 </>
               ))}
             </InputAdornment>
-          </>
+          
         )
       }}
       InputLabelProps={{
@@ -200,5 +199,6 @@ const CustomTextField = ({
     />
   )
 }
- 
+
 export default CustomTextField
+

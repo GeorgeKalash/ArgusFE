@@ -1,7 +1,7 @@
 .customComboTextField :global(.MuiAutocomplete-clearIndicator) {
   padding: 0 !important;
   margin: 0 !important;
-  visibility: visible !important;
+  visibility: hidden !important;
 }
 
 .comboStartIcon {
@@ -18,95 +18,20 @@
   min-width: 0 !important;
 }
 
-.customComboTextField :global(.MuiAutocomplete-endAdornment) {
-  right: 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 1px !important;
+.customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+  font-size: 35px !important;
+  margin:-5px  !important;
+
 }
 
-.customComboTextField :global(.MuiSvgIcon-root) {
-  font-size: 18px !important;
-}
-.comboHeaderRow {
-  border-bottom: 1px solid #6a6464 !important;
-  display: flex !important;
-  align-items: center !important;
-  padding: 4px 8px !important;
-  min-height: 28px !important;
-}
 
-.comboHeaderCell {
-  font-weight: bold !important;
-  font-size: 0.8rem !important;
-  height: 22px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.comboOptionRow {
-  display: flex !important;
-  align-items: center !important;
-  padding: 4px 8px !important;
-  min-height: 28px !important;
-}
-
-.comboOptionIcon {
-  width: 20px !important;
-  height: 20px !important;
-  margin-right: 8px !important;
-  object-fit: contain !important;
-}
-
-.comboOptionCell {
-  font-size: 0.9rem !important;
-  height: 22px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.comboOptionSingleText {
-  flex: 1 !important;
-  font-size: 0.9rem !important;
-  height: 22px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 16px !important;
+@media (min-width: 2048px) and (max-width: 2566px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size:35px !important;
+    margin: 0px  !important;
   }
 
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 3px 8px !important;
-    min-height: 24px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.75rem !important;
-    height: 20px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.86rem !important;
-    height: 20px !important;
-  }
-
-  .comboOptionIcon {
-    width: 19px !important;
-    height: 19px !important;
-  }
-}
-
-@media (max-width: 1280px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 14px !important;
-  }
-
-  .comboOptionRow,
+  /* .comboOptionRow,
   .comboHeaderRow {
     padding: 3px 8px !important;
     min-height: 22px !important;
@@ -127,157 +52,47 @@
     width: 18px !important;
     height: 18px !important;
     margin-right: 6px !important;
+  } */
+}
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+    margin:-1px  !important;
+
+  }
+}
+
+
+
+@media (max-width: 1280px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
   }
 }
 
 @media (max-width: 1024px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
-    font-size: 13px !important;
-  }
 
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 2px 6px !important;
-    min-height: 20px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.7rem !important;
-    height: 17px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.8rem !important;
-    height: 18px !important;
-  }
-
-  .comboOptionIcon {
-    width: 17px !important;
-    height: 17px !important;
-    margin-right: 6px !important;
+  .customComboTextField :global(.MuiAutocomplete-popupIndicator) {
+    margin-right: 5px  !important;
+    margin-left: 0px  !important;
   }
 }
 
 @media (max-width: 768px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 12px !important;
-  }
-
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 2px 6px !important;
-    min-height: 18px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.68rem !important;
-    height: 16px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.76rem !important;
-    height: 17px !important;
-  }
-
-  .comboOptionIcon {
-    width: 16px !important;
-    height: 16px !important;
-    margin-right: 5px !important;
   }
 }
 
 @media (max-width: 480px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 11px !important;
-  }
-
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 1px 4px !important;
-    min-height: 18px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.65rem !important;
-    height: 15px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.72rem !important;
-    height: 16px !important;
-  }
-
-  .comboOptionIcon {
-    width: 15px !important;
-    height: 15px !important;
   }
 }
 
 @media (max-width: 360px) {
-  .customComboTextField :global(.MuiSvgIcon-root) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 10px !important;
   }
-
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 0px 4px !important;
-    min-height: 16px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.6rem !important;
-    height: 14px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.68rem !important;
-    height: 14px !important;
-  }
-
-  .comboOptionIcon {
-    width: 14px !important;
-    height: 14px !important;
-  }
 }
 
-@media (max-height: 800px) {
-  .comboHeaderCell {
-    font-size: 0.72rem !important;
-    height: 16px !important;
-  }
-
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 2px 6px !important;
-    min-height: 20px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.8rem !important;
-    height: 16px !important;
-  }
-}
-
-@media (max-height: 700px) {
-  .comboHeaderCell {
-    font-size: 0.68rem !important;
-    height: 14px !important;
-  }
-
-  .comboOptionRow,
-  .comboHeaderRow {
-    padding: 1px 4px !important;
-    min-height: 18px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.76rem !important;
-    height: 14px !important;
-  }
-}

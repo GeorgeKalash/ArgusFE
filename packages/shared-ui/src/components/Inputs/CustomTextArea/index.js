@@ -6,6 +6,7 @@ import DropDownArrow from '@argus/shared-ui/src/components/images/buttonsIcons/b
 import AddAction from '@argus/shared-ui/src/components/images/buttonsIcons/add.png'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomTextArea.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomTextArea = ({
   type = 'text', //any valid HTML5 input type
@@ -78,43 +79,28 @@ const CustomTextArea = ({
         }
       }}
       autoComplete={autoComplete}
-      InputLabelProps={{
-        className:
-          isFocused || value ? styles.textAreaInputLabelFocused : styles.textAreaInputLabel
-      }}
+   
       InputProps={{
         classes: {
-          root: styles.textAreaOutlinedRoot,
-          notchedOutline: styles.textAreaOutlinedFieldset,
-          input: styles.textAreaInputBase
+          // root: inputs.outlinedRoot,
+          notchedOutline: inputs.outlinedFieldset,
+          input: inputs.inputBase
         },
         endAdornment: (
           <InputAdornment position='end'>
-            <div className={styles.textAreaEndAdornmentContainer}>
+            <div className={inputs.InputAdornment}>
               {!_readOnly && value && (
-                <IconButton tabIndex={-1} edge='end' onClick={onClear} aria-label='clear input'>
-                  <ClearIcon className={styles.textAreaClearIcon} />
+                <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={onClear} aria-label='clear input'>
+                  <ClearIcon className={inputs.icon} />
                 </IconButton>
               )}
               {viewAdd && (
-                <IconButton
-                  tabIndex={-1}
-                  edge='end'
-                  onClick={handleAddAction}
-                  aria-label='Add'
-                  disabled={_disabled}
-                >
+                <IconButton tabIndex={-1} edge='end' className={inputs.iconButton}  onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
                   <Image src={AddAction} alt='Add' width={18} height={18} />
                 </IconButton>
               )}
               {viewDropDown && (
-                <IconButton
-                  tabIndex={-1}
-                  edge='end'
-                  onClick={onDropDown}
-                  aria-label='Drop down'
-                  disabled={_disabled}
-                >
+                <IconButton tabIndex={-1} edge='end' className={inputs.iconButton}  onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
                   <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
                 </IconButton>
               )}
@@ -122,6 +108,9 @@ const CustomTextArea = ({
           </InputAdornment>
         )
       }}
+        InputLabelProps={{
+              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+            }}
       required={_required}
       {...props}
     />
@@ -129,3 +118,4 @@ const CustomTextArea = ({
 }
 
 export default CustomTextArea
+

@@ -1,9 +1,2 @@
-import { ImmediateWindow } from '@argus/shared-providers/src/providers/windows'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import FyOpeningForm from './form/FyOpeningForm'
-
-const FyOpening = () => {
-  return <ImmediateWindow datasetId={ResourceIds.FyOpening} labelKey={'fyo'} Component={FyOpeningForm} height={300} />
-}
-
-export default FyOpening
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-financials/src/pages/gl-fy-opening
+export { default } from '@argus/module-financials/src/pages/gl-fy-opening';

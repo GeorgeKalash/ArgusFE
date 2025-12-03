@@ -8,7 +8,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomDatePicker.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomDatePicker = ({
@@ -131,22 +130,12 @@ const CustomDatePicker = ({
             error: error,
             helperText: helperText,
             inputRef: inputRef,
-
-            // className: [styles.customDateTextField],
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
             onBlur: e => {
               onBlur(e, inputValue?.current || value)
             },
-
-            // className: [
-            //   styles.customDateTextField,
-            //   !hasBorder ? styles.noBorder : '',
-            //   isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            // ]
-            //   .filter(Boolean)
-            //   .join(' '),
             InputProps: {
               classes: {
                 root: inputs.outlinedRoot,
@@ -158,15 +147,14 @@ const CustomDatePicker = ({
                   {value && (
                     <IconButton
                       tabIndex={-1}
-                      edge='start'
                       onClick={typeof onClear === 'function' ? onClear : () => onChange(name, null)}
-                      className={inputs['search-icon']}
+                      className={inputs.iconButton}
                     >
-                      <ClearIcon className={inputs['search-icon']} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs['search-icon']}>
-                    <EventIcon className={inputs['search-icon']} />
+                  <IconButton tabIndex={-1}  onClick={() => setOpenDatePicker(true)} className={inputs.iconButton} >
+                    <EventIcon  className={inputs.icon}   size={1} />
                   </IconButton>
                 </InputAdornment>
               )
@@ -189,3 +177,4 @@ const CustomDatePicker = ({
 }
 
 export default CustomDatePicker
+

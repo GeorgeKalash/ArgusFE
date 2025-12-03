@@ -1,13 +1,11 @@
-import PercentIcon from '@mui/icons-material/Percent'
-import PinIcon from '@mui/icons-material/Pin'
-import React, { useEffect, useState, useRef } from 'react'
+
+import React, { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField-helper'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { iconMap } from '@argus/shared-utils/src/utils/iconMap'
-import styles from './CustomNumberField.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomNumberField = ({
@@ -160,6 +158,11 @@ const CustomNumberField = ({
         }
         setIsFocused(false)
       }}
+      sx={{
+        '& .MuiInputBase-input': {
+          textAlign: align
+        }
+      }}
       InputProps={{
         inputProps: {
           min: min,
@@ -167,7 +170,6 @@ const CustomNumberField = ({
           type: arrow ? 'number' : 'text',
           tabIndex: readOnly ? -1 : 0,
           onKeyPress: handleKeyPress,
-          style: { textAlign: align }
         },
         autoComplete: 'off',
         readOnly: _readOnly,
@@ -177,21 +179,16 @@ const CustomNumberField = ({
           input: inputs.inputBase
         },
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
-          <InputAdornment position='end'>
+          <InputAdornment position='end' className={inputs.inputAdornment}>
             {iconMap[props?.iconKey] && (
-              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={styles['search-icon']}>
+              <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={inputs.iconButton}>
                 {iconMap[props?.iconKey]}
               </IconButton>
             )}
+
             {displayButtons && (value || value === 0) && (
-              <IconButton
-                tabIndex={-1}
-                edge='end'
-                onClick={onClear}
-                aria-label='clear input'
-                className={styles['search-icon']}
-              >
-                <ClearIcon className={styles['search-icon']} />
+              <IconButton tabIndex={-1} onClick={onClear} aria-label='clear input' className={inputs.iconButton}>
+                <ClearIcon className={inputs.icon} />
               </IconButton>
             )}
           </InputAdornment>
@@ -209,3 +206,4 @@ const CustomNumberField = ({
 }
 
 export default CustomNumberField
+

@@ -9,7 +9,6 @@ import { AdapterMomentHijri } from '@mui/x-date-pickers/AdapterMomentHijri'
 import moment from 'moment-hijri'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomDatePickerHijri.module.css'
 import inputs from '../Inputs.module.css'
 
 export default function CustomDatePickerHijri({
@@ -108,15 +107,15 @@ export default function CustomDatePickerHijri({
                   {Boolean(value) && (
                     <IconButton
                       tabIndex={-1}
-                      edge='start'
+                      // edge='start'
                       onClick={() => onChange(name, null)}
-                      className={inputs['search-icon']}
+                      className={inputs.iconButton}
                     >
-                      <ClearIcon className={inputs['search-icon']} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs['search-icon']}>
-                    <EventIcon className={inputs['search-icon']} />
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs.iconButton}>
+                    <EventIcon className={inputs.icon} />
                   </IconButton>
                 </InputAdornment>
               )
@@ -130,3 +129,4 @@ export default function CustomDatePickerHijri({
     </LocalizationProvider>
   )
 }
+

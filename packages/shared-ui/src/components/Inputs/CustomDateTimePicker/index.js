@@ -8,7 +8,6 @@ import { PickersActionBar } from '@mui/x-date-pickers/PickersActionBar'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { DateTimePicker } from '@mui/x-date-pickers'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomDateTimePicker.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomDateTimePicker = ({
@@ -137,19 +136,19 @@ const CustomDateTimePicker = ({
                 input: inputs.inputBase
               },
               endAdornment: !(_readOnly || disabled) && (
-                <InputAdornment position='end'>
+                <InputAdornment position='end' className={inputs.inputAdornment}>
                   {resolvedValue && (
                     <IconButton
                       tabIndex={-1}
                       edge='start'
                       onClick={() => onChange(name, null)}
-                      className={styles.clearIconButton}
+                      className={inputs.iconButton}
                     >
-                      <ClearIcon className={styles.dateIcon} />
+                      <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={styles.eventIconButton}>
-                    <EventIcon className={styles.dateIcon} />
+                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs.iconButton}>
+                    <EventIcon className={inputs.icon} />
                   </IconButton>
                 </InputAdornment>
               )
@@ -172,3 +171,4 @@ const CustomDateTimePicker = ({
 }
 
 export default CustomDateTimePicker
+

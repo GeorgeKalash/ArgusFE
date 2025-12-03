@@ -6,6 +6,12 @@ const nextConfig = {
   reactStrictMode: false,
 
   transpilePackages: [
+    '@argus/module-remittance',
+    '@argus/module-financials',
+    '@argus/module-businessPartners',
+    '@argus/module-inventory',
+    '@argus/module-purchase',
+    '@argus/module-delivery',
     '@argus/module-sales',
     '@argus/module-manufacturing',
     '@argus/repositories',

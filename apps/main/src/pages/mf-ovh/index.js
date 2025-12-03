@@ -1,2 +1,2 @@
-// AUTO-GENERATED WRAPPER – uses code from @argus/module-sales/src/pages/mf-ovh
-export { default } from '@argus/module-sales/src/pages/mf-ovh';
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-manufacturing/src/pages/mf-ovh
+export { default } from '@argus/module-manufacturing/src/pages/mf-ovh'

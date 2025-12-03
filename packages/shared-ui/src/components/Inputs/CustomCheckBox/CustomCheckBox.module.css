@@ -14,29 +14,33 @@
   opacity: 0.7 !important;
 }
 
-.formControl :global(.MuiFormControlLabel-label) {
-  font-size: 15px;
+
+
+
+.fieldLabel {
+  white-space: normal !important;   
+  line-height: 1.2 !important;
 }
 
 @media (max-width: 1600px) {
-  .formControl :global(.MuiSvgIcon-root) {
+  /* .formControl :global(.MuiSvgIcon-root) {
     font-size: 13px;
   }
   .formControl :global(.MuiFormControlLabel-label) {
     font-size: 12px;
-  }
+  } */
 }
 
 @media (max-width: 1280px) {
-  .formControl :global(.MuiSvgIcon-root) {
+  /* .formControl :global(.MuiSvgIcon-root) {
     font-size: 13px;
   }
   .formControl :global(.MuiFormControlLabel-label) {
     font-size: 12px;
-  }
+  } */
 }
 
-@media (max-width: 960px) {
+/* @media (max-width: 960px) {
   .formControl :global(.MuiSvgIcon-root) {
     font-size: 12px;
   }
@@ -61,4 +65,4 @@
   .formControl :global(.MuiFormControlLabel-label) {
     font-size: 9px;
   }
-}
+} */
