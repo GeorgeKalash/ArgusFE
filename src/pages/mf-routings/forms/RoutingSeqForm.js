@@ -58,8 +58,6 @@ const RoutingSeqForm = ({ store, labels, maxAccess }) => {
   })
 
   async function getFilteredOperations(workCenterId) {
-    console.log(operations)
-    console.log(workCenterId)
     const array = operations?.filter(item => item?.workCenterId == workCenterId) || []
     filteredOperations.current = array
   }
