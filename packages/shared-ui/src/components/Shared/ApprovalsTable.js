@@ -29,7 +29,7 @@ import InwardSettlementForm from '@argus/shared-ui/src/components/Shared/Forms/I
 import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
 // import ThreeDDesignForm from '../../pages/pm-3d-design/forms/ThreeDDesignForm'
 // import SalesOrderForm from '../../pages/sales-order/Tabs/SalesOrderForm'
-// import PurchaseRquisitionForm from '../../pages/purchase-requisition/form/PurchaseRquisitionForm'
+import PurchaseRquisitionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseRquisitionForm'
 import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 
@@ -153,9 +153,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.LoanRequest:
         relevantComponent = LoanWindow
         break
-    //   case SystemFunction.PurchaseRequisition:
-    //     relevantComponent = PurchaseRquisitionForm
-    //     break
+      case SystemFunction.PurchaseRequisition:
+        relevantComponent = PurchaseRquisitionForm
+        break
       case SystemFunction.PurchaseOrder:
         relevantComponent = PurchaseOrderForm
       default:
