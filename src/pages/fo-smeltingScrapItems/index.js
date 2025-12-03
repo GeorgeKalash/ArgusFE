@@ -84,6 +84,7 @@ const SmeltingScrapItems = () => {
     <VertLayout>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['metalId']}
