@@ -34,6 +34,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const { platformLabels, userDefaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
+  const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
   const alloyMetalItems = useRef({})
   const functionId = SystemFunction.MetalSmelting
@@ -165,7 +166,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date) },
+      header: { ...obj.header, date: formatDateToApi(obj.header.date), qtyDiff },
       items: obj.items?.map((item, index) => ({
         ...item,
         trxId: obj?.recordId || 0,
@@ -197,6 +198,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
   const qtyOut = calculateTotal('qty')
+
+  const qtyDiff = recalc
+    ? parseFloat(qtyOut || 0) - parseFloat(formik.values?.header?.qty || 0)
+    : formik.values?.header?.qtyDiff || 0
   const totalAlloy = calculateTotal('qty', 2)
   const expectedAlloy = calculateTotal('expectedAlloyQty')
   const headerPurity = parseFloat(formik.values?.header?.purity)
@@ -287,6 +292,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   async function refetchForm(recordId) {
+    setRecalc(false)
+
     const { record } = await getRequest({
       extension: FoundryRepository.MetalSmelting.get2,
       parameters: `_recordId=${recordId}`
@@ -298,7 +305,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       return
     }
 
-    const smeltingMaxAllowedVariation = await getMaxAllowVariation(record?.header?.dtId || null)
+    const smeltingMaxAllowedVariation = await selectedDocTypeInfo(record?.header?.dtId || null)
 
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
@@ -413,6 +420,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.qty,
       props: { allowNegative: false, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
+        setRecalc(true)
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -547,7 +555,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     return res?.record?.metalId || null
   }
 
-  async function getMaxAllowVariation(dtId) {
+  async function selectedDocTypeInfo(dtId) {
     if (!dtId) {
       formik.setFieldValue('header.smeltingMaxAllowedVariation', null)
 
@@ -559,12 +567,15 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       parameters: `_dtId=${dtId}`
     })
 
-    formik.setFieldValue('header.smeltingMaxAllowedVariation', res?.record?.smeltingMaxAllowedVariation || null)
-
-    return res?.record?.smeltingMaxAllowedVariation || null
+    return res?.record || {}
   }
   useEffect(() => {
-    if (!recordId) getMaxAllowVariation(formik?.values?.header?.dtId)
+    if (!recordId) {
+      const dtInfo = selectedDocTypeInfo(formik?.values?.header?.dtId)
+      formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
+      formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
+      formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)
+    }
   }, [formik.values?.header?.dtId])
 
   useEffect(() => {
@@ -780,7 +791,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                   <CustomNumberField
                     name='header.qty'
                     label={labels.qty}
-                    onChange={formik.handleChange}
+                    onBlur={e => {
+                      setRecalc(true)
+                      let value = Number(e.target.value.replace(/,/g, ''))
+                      formik.setFieldValue('header.qty', value)
+                    }}
                     value={formik.values.header?.qty}
                     required
                     allowNegative={false}
@@ -874,6 +889,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly align='right' />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly align='right' />
                 </Grid>
               </Grid>
             </Grid>
