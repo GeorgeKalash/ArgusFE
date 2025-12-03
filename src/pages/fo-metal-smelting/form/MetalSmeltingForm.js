@@ -840,7 +840,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
               />
             </Grid>
-            <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3, height: '25vh' }}>
+            <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3 }}>
               <Grid container>
                 <Grid item xs={12}>
                   <CustomNumberField
