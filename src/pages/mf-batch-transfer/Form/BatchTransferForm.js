@@ -31,7 +31,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
-    access: access,
+    access,
     enabled: !recordId,
     objectName: 'header'
   })
