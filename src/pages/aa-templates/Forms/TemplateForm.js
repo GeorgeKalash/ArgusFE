@@ -59,19 +59,13 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
     })()
   }, [])
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+  async function fetchGridData() {
+    if (!recordId) return { list: [] }
 
-    if (!recordId) {
-      return { list: [], totalCount: 0, _startAt }
-    }
-
-    const response = await getRequest({
+    return await getRequest({
       extension: AdministrationRepository.TemplateBody.qry,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_teId=${recordId}`
+      parameters: `_teId=${recordId}`
     })
-
-    return { ...response, _startAt: _startAt }
   }
 
   const editMode = !!formik.values.recordId
@@ -135,8 +129,8 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
       isParentWindow={false}
     >
       <VertLayout>
-        <Grid container spacing={4} sx={{ paddingTop: 2 }}>
-          <Grid item xs={12}>
+        <Fixed>
+          <Grid item sx={{ paddingTop: 2 }}>
             <CustomTextField
               name='name'
               label={labels.name}
@@ -149,23 +143,23 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
               maxLength={30}
             />
           </Grid>
-        </Grid>
-        <Fixed>
           <GridToolbar onAdd={add} maxAccess={maxAccess} disableAdd={!editMode} />
         </Fixed>
-        <Table
-          name='templateBodyTable'
-          columns={columns}
-          gridData={data}
-          rowId={['recordId']}
-          onEdit={edit}
-          onDelete={del}
-          pageSize={50}
-          paginationType='client'
-          pagination={false}
-          refetch={refetch}
-          maxAccess={maxAccess}
-        />
+        <Grow>
+          <Table
+            name='templateBodyTable'
+            columns={columns}
+            gridData={data}
+            rowId={['recordId']}
+            onEdit={edit}
+            onDelete={del}
+            pageSize={50}
+            paginationType='client'
+            pagination={false}
+            refetch={refetch}
+            maxAccess={maxAccess}
+          />
+        </Grow>
       </VertLayout>
     </FormShell>
   )
