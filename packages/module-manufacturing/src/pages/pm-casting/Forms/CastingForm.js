@@ -23,7 +23,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
-// import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+ import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDPrintForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
@@ -140,12 +140,12 @@ export default function CastingForm({ labels, maxAccess: access, recordId }) {
       key: 'threeDPrinting',
       condition: true,
       onClick: async () => {
-        // stack({
-        //   Component: ThreeDPrintForm,
-        //   props: {
-        //     recordId: formik.values?.threeDPId
-        //   }
-        // })
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId
+          }
+        })
       },
       disabled: !formik.values.threeDPId
     }

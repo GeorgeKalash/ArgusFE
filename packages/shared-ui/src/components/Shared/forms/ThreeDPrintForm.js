@@ -26,7 +26,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 
-// import ThreeDDesignForm from 'src/pages/pm-3d-design/forms/ThreeDDesignForm'
+import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDDesignForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -186,16 +186,16 @@ export default function ThreeDPrintForm({ recordId, window }) {
       onClick: async () => {
         const threeDFormLabels = await getLabels(ResourceIds.ThreeDDesign)
 
-        // stack({
-        //   Component: ThreeDDesignForm,
-        //   props: {
-        //     recordId: formik.values?.threeDDId,
-        //     labels: threeDFormLabels
-        //   },
-        //   width: 1200,
-        //   height: 700,
-        //   title: threeDFormLabels.ThreeDDesign
-        // })
+        stack({
+          Component: ThreeDDesignForm,
+          props: {
+            recordId: formik.values?.threeDDId,
+            labels: threeDFormLabels
+          },
+          width: 1200,
+          height: 700,
+          title: threeDFormLabels.ThreeDDesign
+        })
       },
       disabled: !formik.values.threeDDId
     },

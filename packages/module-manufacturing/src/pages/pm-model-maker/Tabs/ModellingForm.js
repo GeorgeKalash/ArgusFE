@@ -23,7 +23,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
-// import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDPrintForm'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
@@ -194,12 +194,12 @@ export default function ModellingForm({ labels, access, setStore, store }) {
       key: 'threeDPrinting',
       condition: true,
       onClick: async () => {
-        // stack({
-        //   Component: ThreeDPrintForm,
-        //   props: {
-        //     recordId: formik.values?.threeDPId
-        //   }
-        // })
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId
+          }
+        })
       },
       disabled: !formik.values.threeDPId
     }

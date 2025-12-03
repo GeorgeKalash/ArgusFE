@@ -25,7 +25,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
-// import WCConsumpForm from '../work-center-consumption/forms/WCConsumpForm'
+import WCConsumpForm from '@argus/shared-ui/src/components/Shared/forms/WCConsumpForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function IRGenerateConsumption() {
@@ -97,12 +97,12 @@ export default function IRGenerateConsumption() {
       })
       toast.success(platformLabels.Generated)
 
-      // stack({
-      //   Component: WCConsumpForm,
-      //   props: {
-      //     recordId: res.recordId
-      //   }
-      // })
+      stack({
+        Component: WCConsumpForm,
+        props: {
+          recordId: res.recordId
+        }
+      })
       fetchGridData()
     }
   })

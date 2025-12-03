@@ -15,7 +15,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
-// import ProductionOrderForm from '../mf-prod-order/Forms/ProductionOrderForm'
+import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/forms/ProductionOrderForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
@@ -56,12 +56,12 @@ const GeneratePoductionOrder = () => {
         record: JSON.stringify(data)
       })
 
-      // stack({
-      //   Component: ProductionOrderForm,
-      //   props: {
-      //     recordId: res?.recordId
-      //   }
-      // })
+      stack({
+        Component: ProductionOrderForm,
+        props: {
+          recordId: res?.recordId
+        }
+      })
 
       toast.success(platformLabels.Generated)
       await fillSummaryORD(formik?.values?.clientId)

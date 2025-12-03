@@ -24,7 +24,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 
-// import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
+import ThreeDPrintForm from 'src/pages/pm-3d-printing/Forms/ThreeDPrintForm'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 
@@ -177,12 +177,12 @@ export default function RubberForm({ labels, access, recordId }) {
       key: 'threeDPrinting',
       condition: true,
       onClick: () => {
-        // stack({
-        //   Component: ThreeDPrintForm,
-        //   props: {
-        //     recordId: formik.values?.threeDPId
-        //   }
-        // })
+        stack({
+          Component: ThreeDPrintForm,
+          props: {
+            recordId: formik.values?.threeDPId
+          }
+        })
       },
       disabled: !formik.values.threeDPId
     }
