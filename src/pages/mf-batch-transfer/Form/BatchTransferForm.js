@@ -418,16 +418,16 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='notes'
+                    name='header.notes'
                     label={labels.notes}
-                    value={formik.values.notes}
+                    value={formik.values.header.notes}
                     maxLength='100'
                     rows={2}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched?.header?.notes && Boolean(formik.errors?.header?.notes)}
                   />
                 </Grid>
               </Grid>
