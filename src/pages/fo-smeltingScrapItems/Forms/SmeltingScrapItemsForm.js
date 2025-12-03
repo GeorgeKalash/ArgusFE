@@ -24,11 +24,25 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: { recordId, metalRef, items: [] },
+    initialValues: {
+      recordId,
+      metalRef,
+      items: [
+        {
+          id: 1,
+          metalId: recordId,
+          itemId: null,
+          seqNo: 1,
+          itemName: '',
+          sku: ''
+        }
+      ]
+    },
     onSubmit: async values => {
       const payload = {
         metalId: recordId,
         items: values.items
+          .filter(item => item?.itemId)
           .map((row, index) => ({
             ...row,
             metalId: recordId,
@@ -53,16 +67,14 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
           extension: FoundryRepository.SmeltingScrapItem.qry,
           parameters: `_metalId=${recordId}`
         })
-        if (res.list?.length) {
-          formik.setValues({
-            recordId,
-            metalRef,
-            items: res.list.map((obj, index) => ({
-              id: index + 1,
-              ...obj
-            }))
-          })
-        }
+        formik.setValues({
+          recordId,
+          metalRef,
+          items: (res?.list || []).map((obj, index) => ({
+            id: index + 1,
+            ...obj
+          }))
+        })
       }
     })()
   }, [])
@@ -86,8 +98,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 1
+        ]
       }
     },
     {
@@ -110,13 +121,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
     >
       <VertLayout>
         <Grid item xs={12}>
-          <CustomTextField
-            name='metalRef'
-            label={labels.metal}
-            value={formik.values.metalRef}
-            readOnly
-            maxAccess={maxAccess}
-          />
+          <CustomTextField name='metalRef' label={labels.metal} value={formik.values.metalRef} readOnly />
         </Grid>
         <Grow>
           <DataGrid
