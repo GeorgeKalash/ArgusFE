@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useResourceQuery } from 'src/hooks/resource'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import Table from 'src/components/Shared/Table'
@@ -11,19 +11,23 @@ import { useWindow } from 'src/windows'
 
 export default function WorksheetTab({ store, maxAccess, labels }) {
   const { getRequest } = useContext(RequestsContext)
-  const recordId = store?.recordId
   const { stack } = useWindow()
+  const { jobWorksheets, recordId, jobReference } = store || {}
+  const [list, setList] = useState([])
 
-  const {
-    query: { data },
-    invalidate
-  } = useResourceQuery({
+  const { refetch } = useResourceQuery({
     queryFn: fetchGridData,
-    enabled: Boolean(recordId),
+    enabled: false,
     endpointId: ManufacturingRepository.Worksheet.qry2,
     params: { disabledReqParams: true, maxAccess },
     datasetId: ResourceIds.MFJobOrders
   })
+
+  useEffect(() => {
+    ;(async function () {
+      setList(jobWorksheets)
+    })()
+  }, [jobWorksheets])
 
   const columns = [
     {
@@ -62,10 +66,12 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
   async function fetchGridData() {
     if (!recordId) return { list: [] }
 
-    return await getRequest({
+    const response = await getRequest({
       extension: ManufacturingRepository.Worksheet.qry2,
       parameters: `_jobId=${recordId}`
     })
+
+    setList(response?.list)
   }
 
   const edit = obj => {
@@ -77,7 +83,7 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       Component: WorksheetWindow,
       props: {
         recordId,
-        joInvalidate: invalidate,
+        joInvalidate: refetch
       }
     })
   }
@@ -88,7 +94,12 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
         <Table
           name='worksheetTable'
           columns={columns}
-          gridData={data}
+          gridData={{
+            list: (list || [])?.map(item => ({
+              ...item,
+              jobRef: jobReference
+            }))
+          }}
           onEdit={edit}
           rowId={['worksheetId']}
           maxAccess={maxAccess}

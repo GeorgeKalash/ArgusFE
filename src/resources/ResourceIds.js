@@ -604,6 +604,7 @@ export const ResourceIds = {
   DailySchedules: 72201,
   SSLeaveRequest: 80106,
   BatchTransfer: 42348,
+  AlloyMetals: 47103,
 
   // GL
   GLSalesInvoice: 51604,
