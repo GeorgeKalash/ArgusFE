@@ -23,7 +23,7 @@ import CashCountForm from '@argus/shared-ui/src/components/Shared/Forms/CashCoun
 import CashTransferTab from '@argus/shared-ui/src/components/Shared/Forms/CashTransferTab'
 import OutwardsModificationForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsModificationForm'
 import OutwardsReturnForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsReturnForm'
-// import InwardTransferForm from '../../pages/inward-transfer/forms/InwardTransferForm'
+import InwardTransferForm from '@argus/shared-ui/src/components/Shared/Forms/InwardTransferForm'
 import InwardSettlementForm from '@argus/shared-ui/src/components/Shared/Forms/InwardSettlementForm'
 // import OutwardsForm from '../../pages/outwards-order/Tabs/OutwardsForm'
 import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
@@ -135,9 +135,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.OutwardsReturn:
         relevantComponent = OutwardsReturnForm
         break
-    //   case SystemFunction.InwardTransfer:
-    //     relevantComponent = InwardTransferForm
-    //     break
+      case SystemFunction.InwardTransfer:
+        relevantComponent = InwardTransferForm
+        break
       case SystemFunction.InwardSettlement:
         relevantComponent = InwardSettlementForm
         break
@@ -160,25 +160,25 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         relevantComponent = PurchaseOrderForm
       default:
     //     // Handle default case if needed
-    //     break
+        break
     }
 
-    // if (relevantComponent) {
-    //   const userData = window.sessionStorage.getItem('userData')
-    //     ? JSON.parse(window.sessionStorage.getItem('userData'))
-    //     : null
+    if (relevantComponent) {
+      const userData = window.sessionStorage.getItem('userData')
+        ? JSON.parse(window.sessionStorage.getItem('userData'))
+        : null
 
-    //   const plantId = await getPlantId(userData)
+      const plantId = await getPlantId(userData)
 
-    //   stack({
-    //     Component: relevantComponent,
-    //     props: {
-    //       recordId: recordId,
-    //       plantId: plantId,
-    //       userData: userData
-    //     }
-    //   })
-    // }
+      stack({
+        Component: relevantComponent,
+        props: {
+          recordId: recordId,
+          plantId: plantId,
+          userData: userData
+        }
+      })
+    }
   }
 
   const openPopup = async obj => {

@@ -23,7 +23,7 @@ import { RTCLRepository } from '@argus/repositories/src/repositories/RTCLReposit
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import Confirmation from '@argus/shared-ui/src/components/Shared/Confirmation'
 import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
-import BeneficiaryWindow from '../../../../../../apps/main/src/pages/clients-list/Windows/BeneficiaryWindow'
+import BeneficiaryWindow from '@argus/shared-ui/src/components/Shared/Forms/BeneficiaryWindow'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useError } from '@argus/shared-providers/src/providers/error'

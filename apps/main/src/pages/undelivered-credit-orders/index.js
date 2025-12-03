@@ -74,9 +74,7 @@ const UndeliveredCreditOrder = () => {
       Component: CreditOrderForm,
       props: {
         recordId
-      },
-      width: 950,
-      title: labels.creditOrder
+      }
     })
   }
 
