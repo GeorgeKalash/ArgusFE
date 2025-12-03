@@ -24,20 +24,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
 
   const { formik } = useForm({
     maxAccess,
-    initialValues: {
-      recordId,
-      metalRef,
-      items: [
-        {
-          id: 1,
-          metalId: recordId,
-          itemId: null,
-          seqNo: 1,
-          itemName: '',
-          sku: ''
-        }
-      ]
-    },
+    initialValues: { recordId, metalRef, items: [] },
     onSubmit: async values => {
       const payload = {
         metalId: recordId,
@@ -67,14 +54,16 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
           extension: FoundryRepository.SmeltingScrapItem.qry,
           parameters: `_metalId=${recordId}`
         })
-        formik.setValues({
-          recordId,
-          metalRef,
-          items: (res?.list || []).map((obj, index) => ({
-            id: index + 1,
-            ...obj
-          }))
-        })
+        if (res.list?.length) {
+          formik.setValues({
+            recordId,
+            metalRef,
+            items: res.list.map((obj, index) => ({
+              id: index + 1,
+              ...obj
+            }))
+          })
+        }
       }
     })()
   }, [])
