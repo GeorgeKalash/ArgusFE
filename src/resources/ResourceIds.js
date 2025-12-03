@@ -603,6 +603,8 @@ export const ResourceIds = {
   PenaltyType: 75106,
   DailySchedules: 72201,
   SSLeaveRequest: 80106,
+  AlloyMetals: 47103,
+  MetalSmeltingDTD: 47104,
   ItemDisposal: 42349,
 
   // GL
