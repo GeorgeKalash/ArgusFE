@@ -605,6 +605,7 @@ export const ResourceIds = {
   SSLeaveRequest: 80106,
   AlloyMetals: 47103,
   SmeltingScrapItems: 47106,
+  MetalSmeltingDTD: 47104,
 
   // GL
   GLSalesInvoice: 51604,
