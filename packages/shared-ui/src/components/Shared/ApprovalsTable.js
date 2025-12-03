@@ -26,7 +26,7 @@ import CashCountForm from '@argus/shared-ui/src/components/Shared/forms/CashCoun
 // import InwardTransferForm from '../../pages/inward-transfer/forms/InwardTransferForm'
 // import InwardSettlementForm from '../../pages/inward-settlement/forms/InwardSettlementForm'
 // import OutwardsForm from '../../pages/outwards-order/Tabs/OutwardsForm'
-// import SketchForm from '../../pages/pm-sketch/Forms/SketchForm'
+import SketchForm from '@argus/shared-ui/src/components/Shared/forms/SketchForm'
 import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDDesignForm'
 import SalesOrderForm from '@argus/shared-ui/src/components/Shared/forms/SalesOrderForm'
 // import PurchaseRquisitionForm from '../../pages/purchase-requisition/form/PurchaseRquisitionForm'

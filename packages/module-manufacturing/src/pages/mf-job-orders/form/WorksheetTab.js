@@ -7,7 +7,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
-// import WorksheetWindow from 'src/pages/mf-worksheet/window/WorksheetWindow'
+import WorksheetWindow from '../../mf-worksheet/window/WorksheetWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
 export default function WorksheetTab({ store, maxAccess, labels }) {
@@ -80,13 +80,13 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
   }
 
   function openForm(recordId) {
-    // stack({
-    //   Component: WorksheetWindow,
-    //   props: {
-    //     recordId,
-    //     joInvalidate: invalidate,
-    //   }
-    // })
+    stack({
+      Component: WorksheetWindow,
+      props: {
+        recordId,
+        joInvalidate: invalidate,
+      }
+    })
   }
 
   return (

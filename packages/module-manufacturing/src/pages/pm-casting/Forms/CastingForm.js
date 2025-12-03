@@ -23,7 +23,7 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
- import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDPrintForm'
+import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDPrintForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'

@@ -23,7 +23,7 @@ import InvDetailsForm from './forms/InvDetailsForm'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
 
-// import SaleTransactionForm from '../sa-trx/[functionId]/forms/SaleTransactionForm'
+import SaleTransactionForm from '../sa-trx/[functionId]/forms/SaleTransactionForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

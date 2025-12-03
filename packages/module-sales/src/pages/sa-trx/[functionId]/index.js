@@ -12,7 +12,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import SaleTransactionForm from './forms/SaleTransactionForm'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/SaleTransactionForm'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
