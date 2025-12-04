@@ -2,6 +2,7 @@ import React from 'react'
 import { RadioGroup, FormControlLabel, Radio } from '@mui/material'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomRadioButtonGroup.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomRadioButtonGroup = ({
   options = [],
@@ -30,11 +31,16 @@ const CustomRadioButtonGroup = ({
           <FormControlLabel
             key={value}
             value={value}
-            control={<Radio className={styles.radio} />}
+            control={<Radio className={styles.radio} 
+            classes={{
+              root: inputs.outlinedRoot, 
+            }} />}
             label={label}
             disabled={_optionDisabled}
             required={_required}
-            className={styles.formControl}
+            classes={{
+              label: inputs.inputLabel,
+            }}
           />
         )
       })}

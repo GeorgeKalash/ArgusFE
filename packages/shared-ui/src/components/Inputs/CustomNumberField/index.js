@@ -191,11 +191,11 @@ const CustomNumberField = ({
           </InputAdornment>
         )
       }}
-      InputLabelProps={{
+      InputLabelProps= {{
         classes: {
           root: inputs.inputLabel,
           shrink: inputs.inputLabelShrink, 
-          }      
+          },
       }}
       customInput={TextField}
       onChange={e => handleNumberChangeValue(e)}
