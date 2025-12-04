@@ -674,8 +674,8 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
-      wrapText: isReadOnlyTextColumn ? true : column.wrapText,
-      autoHeight: isReadOnlyTextColumn ? true : column.autoHeight,
+      wrapText: true ,
+      autoHeight: true,
       cellClass: mergedCellClass || undefined,
       ...(column?.checkAll?.visible && {
         headerComponent: () => {
