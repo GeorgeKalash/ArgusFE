@@ -51,7 +51,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
-// import ProductionOrderForm from 'src/pages/mf-prod-order/Forms/ProductionOrderForm'
+import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -725,12 +725,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       record: JSON.stringify({ soId: formik.values.recordId })
     })
 
-    // stack({
-    //   Component: ProductionOrderForm,
-    //   props: {
-    //     recordId: res.recordId
-    //   }
-    // })
+    stack({
+      Component: ProductionOrderForm,
+      props: {
+        recordId: res.recordId
+      }
+    })
     toast.success(platformLabels.Generated)
   }
 

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, Checkbox, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from '@argus/shared-providers/src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -49,6 +49,8 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
+  const [rowHeight, setRowHeight] = useState(25)
+
   const skip = allowDelete ? 1 : 0
 
   const gridContainerRef = useRef(null)
@@ -96,6 +98,7 @@ export function DataGrid({
       commit({ changes: { ...params.node.data, changes } })
 
       const focusedCell = params.api.getFocusedCell()
+      if (!focusedCell) return
 
       const colId = focusedCell.column.colId
 
@@ -582,6 +585,7 @@ export function DataGrid({
 
     return (
       <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''}`}>
+       <Box className={`${styles.cellEditorInner} ${centered ? styles.cellEditorInnerCentered : ''}`}>
         <Component
           id={params.node.data.id}
           {...params}
@@ -593,6 +597,7 @@ export function DataGrid({
           updateRow={updateRow}
           update={update}
         />
+        </Box>
       </Box>
     )
   }
@@ -643,12 +648,21 @@ export function DataGrid({
       : 0
 
   const columnDefs = [
-    ...allColumns.map(column => ({
+    ...allColumns.map(column => {
+      const isReadOnlyTextColumn =
+        column.component === 'textfield' && (column?.props?.readOnly || column?.props?.disabled)
+
+      const mergedCellClass = [
+        column.cellClass,
+        isReadOnlyTextColumn ? styles.readOnlyTextCell : null
+      ]
+        .filter(Boolean)
+        .join(' ')
+
+      return {
       ...column,
       ...{ width: column.width + additionalWidth },
       field: column.name,
-
-      // minWidth: 50,
       headerName: column.label || column.name,
       headerTooltip: column.label,
       editable: !_disabled,
@@ -656,8 +670,11 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
+      wrapText: isReadOnlyTextColumn ? true : column.wrapText,
+      autoHeight: isReadOnlyTextColumn ? true : column.autoHeight,
+      cellClass: mergedCellClass || undefined,
       ...(column?.checkAll?.visible && {
-        headerComponent: params => {
+        headerComponent: () => {
           const selectAll = e => {
             if (column?.checkAll?.onChange) {
               column?.checkAll?.onChange({ checked: e.target?.checked })
@@ -685,7 +702,7 @@ export function DataGrid({
 
         return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
-    })),
+    }}),
     allowDelete && !isAccessDenied
       ? {
           field: 'actions',
@@ -853,6 +870,30 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
+  useEffect(() => {
+    const updateRowHeightFromCss = () => {
+      if (!gridContainerRef.current || typeof window === 'undefined') return
+      const computed = window.getComputedStyle(gridContainerRef.current)
+      const cssRowHeight = parseInt(computed.getPropertyValue('--ag-row-height'), 10)
+      if (!Number.isNaN(cssRowHeight) && cssRowHeight > 0) {
+        setRowHeight(cssRowHeight)
+      }
+    }
+
+    updateRowHeightFromCss()
+    window.addEventListener('resize', updateRowHeightFromCss)
+
+    return () => {
+      window.removeEventListener('resize', updateRowHeightFromCss)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (gridApiRef.current) {
+      gridApiRef.current.resetRowHeights()
+    }
+  }, [rowHeight, value])
+
   return (
     <Box className={styles.root} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
@@ -867,6 +908,7 @@ export function DataGrid({
               rowData={value}
               domLayout='autoHeight'
               columnDefs={columnDefs}
+              rowHeight={rowHeight}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
               rowSelection='single'

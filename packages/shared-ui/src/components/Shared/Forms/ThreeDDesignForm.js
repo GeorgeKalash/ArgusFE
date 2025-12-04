@@ -23,13 +23,13 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
+import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
-import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
 
 const ThreeDDesignForm = ({ recordId, window }) => {
   const { platformLabels } = useContext(ControlContext)

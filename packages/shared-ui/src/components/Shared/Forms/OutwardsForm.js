@@ -16,7 +16,7 @@ import TerraPay from './TerraPay'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLRepository'
-import ProductsWindow from '../Windows/ProductsWindow'
+import ProductsWindow from '@argus/shared-ui/src/components/Shared/Forms/ProductsWindow'
 import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
@@ -27,7 +27,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { RTCLRepository } from '@argus/repositories/src/repositories/RTCLRepository'
-import FormGrid from '@argus/shared-hooks/src/hooks/form'
+import FormGrid from '@argus/shared-ui/src/components/form'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -35,10 +35,9 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import BeneficiaryListWindow from '../Windows/BeneficiaryListWindow'
+import BeneficiaryListWindow from '@argus/shared-ui/src/components/Shared/Forms/BeneficiaryListWindow'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
-
-// import ReceiptVoucherForm from 'src/pages/rt-receipt-vouchers/forms/ReceiptVoucherForm'
+import ReceiptVoucherForm from '@argus/shared-ui/src/components/Shared/Forms/ReceiptVoucherForm'
 import CustomSwitch from '@argus/shared-ui/src/components/Inputs/CustomSwitch'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
@@ -782,15 +781,15 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
   async function openRV() {
     window.close()
     const cashAccountId = await getCashAccountId()
-    
-    // stack({
-    //   Component: ReceiptVoucherForm,
-    //   props: {
-    //     recordId: header?.receiptId,
-    //     cashAccountId: cashAccountId,
-    //     form: header?.receiptId ? null : header
-    //   }
-    // })
+   
+    stack({
+      Component: ReceiptVoucherForm,
+      props: {
+        recordId: header?.receiptId,
+        cashAccountId: cashAccountId,
+        form: header?.receiptId ? null : header
+      }
+    })
   }
 
   async function getDefaultCountry() {

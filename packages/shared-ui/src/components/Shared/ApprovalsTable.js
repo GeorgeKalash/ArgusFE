@@ -25,10 +25,10 @@ import OutwardsModificationForm from '@argus/shared-ui/src/components/Shared/For
 import OutwardsReturnForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsReturnForm'
 import InwardTransferForm from '@argus/shared-ui/src/components/Shared/Forms/InwardTransferForm'
 import InwardSettlementForm from '@argus/shared-ui/src/components/Shared/Forms/InwardSettlementForm'
-// import OutwardsForm from '../../pages/outwards-order/Tabs/OutwardsForm'
+import OutwardsForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsForm'
 import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
-// import ThreeDDesignForm from '../../pages/pm-3d-design/forms/ThreeDDesignForm'
-// import SalesOrderForm from '../../pages/sales-order/Tabs/SalesOrderForm'
+import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
+import SalesOrderForm from '@argus/shared-ui/src/components/Shared/Forms/SalesOrderForm'
 import PurchaseRquisitionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseRquisitionForm'
 import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
@@ -96,19 +96,18 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
     let recordId = obj.recordId
 
     switch (obj.functionId) {
-    //   case SystemFunction.CurrencyCreditOrderSale:
+       case SystemFunction.CurrencyCreditOrderSale:
       case SystemFunction.CurrencyCreditOrderPurchase:
         relevantComponent = CreditOrderForm
         break
-
-    //   case SystemFunction.CreditInvoiceSales:
+      case SystemFunction.CreditInvoiceSales:
       case SystemFunction.CreditInvoicePurchase:
         relevantComponent = CreditInvoiceForm
         break
       case SystemFunction.CashCountTransaction:
         relevantComponent = CashCountForm
         break
-    //   case SystemFunction.CurrencyPurchase:
+      case SystemFunction.CurrencyPurchase:
       case SystemFunction.CurrencySale:
         relevantComponent = TransactionForm
         break
@@ -123,9 +122,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
         relevantComponent = ClientTemplateForm
         break
-    //   case SystemFunction.OutwardsOrder:
-    //     relevantComponent = OutwardsForm
-    //     break
+      case SystemFunction.OutwardsOrder:
+        relevantComponent = OutwardsForm
+        break
       case SystemFunction.CashTransfer:
         relevantComponent = CashTransferTab
         break
@@ -144,12 +143,12 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.Sketch:
         relevantComponent = SketchForm
         break
-    //   case SystemFunction.SalesOrder:
-    //     relevantComponent = SalesOrderForm
-    //     break
-    //   case SystemFunction.ThreeDDesign:
-    //     relevantComponent = ThreeDDesignForm
-    //     break
+      case SystemFunction.SalesOrder:
+        relevantComponent = SalesOrderForm
+        break
+      case SystemFunction.ThreeDDesign:
+        relevantComponent = ThreeDDesignForm
+        break
       case SystemFunction.LoanRequest:
         relevantComponent = LoanWindow
         break
@@ -159,7 +158,7 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.PurchaseOrder:
         relevantComponent = PurchaseOrderForm
       default:
-    //     // Handle default case if needed
+         // Handle default case if needed
         break
     }
 
