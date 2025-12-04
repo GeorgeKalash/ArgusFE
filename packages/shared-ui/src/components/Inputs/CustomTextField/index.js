@@ -145,7 +145,7 @@ const CustomTextField = ({
         ...props.InputProps,
 
         classes: {
-          root: inputs.outlinedRoot,
+          root: search ? inputs.searchRoot : inputs.outlinedRoot,
           notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
           input: inputs.inputBase
         },

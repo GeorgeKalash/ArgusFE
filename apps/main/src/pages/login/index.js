@@ -18,6 +18,7 @@ import axios from 'axios'
 import OTPAuthentication from '@argus/shared-ui/src/components/Shared/OTPAuthentication'
 import styles from './LoginPage.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   fontSize: '0.7rem',
@@ -181,6 +182,7 @@ const LoginPage = () => {
                     endIcons={[
                       // eslint-disable-next-line react/jsx-key
                       <Icon
+                        className={inputs.icon} 
                         icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
                         onClick={() => setShowPassword(prev => !prev)}
                         onMouseDown={e => e.preventDefault()}

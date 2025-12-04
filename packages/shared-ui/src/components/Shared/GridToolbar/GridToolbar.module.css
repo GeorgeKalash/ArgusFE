@@ -7,19 +7,22 @@
 .gridContainer {
   display: flex;
   justify-content: space-between;
-  align-items: center;   
+  align-items: center;
   width: 100%;
   padding: 0 14px;
 }
 
+.buttonWrapper,
 .addButtonWrapper {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 }
 
 .searchFieldWrapper {
   display: flex;
   justify-content: flex-start;
+  align-items: center;          
 }
 
 .searchFieldWrapper input {
@@ -30,9 +33,10 @@
 .actionButtonsWrapper {
   display: flex;
   justify-content: flex-start;
+  align-items: center;       
   margin: 0 !important;
-
 }
+
 .actionButtonsWrapperNoPadding {
   padding-left: 0 !important;
 }
@@ -71,11 +75,11 @@
     padding: 5px 10px;
     font-size: 12.5px;
   }
-  
+
   .searchFieldWrapper {
     display: flex;
     justify-content: flex-start;
-    align-items: center;       
+    align-items: center;
   }
 
   .searchFieldWrapper input {
