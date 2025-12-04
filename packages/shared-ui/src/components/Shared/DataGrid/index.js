@@ -50,8 +50,6 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
-  // const [rowHeight, setRowHeight] = useState(35)
-
   const skip = allowDelete ? 1 : 0
 
   const gridContainerRef = useRef(null)
