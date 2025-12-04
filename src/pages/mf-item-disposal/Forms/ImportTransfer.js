@@ -2,8 +2,6 @@ import { useContext } from 'react'
 import * as yup from 'yup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { Grid } from '@mui/material'
-import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
-import { BusinessPartnerRepository } from 'src/repositories/BusinessPartnerRepository'
 import { useForm } from 'src/hooks/form'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -12,14 +10,27 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { useWindow } from 'src/windows'
 
-export default function ImportTransfer({ maxAccess, labels, wcSiteId }) {
+export default function ImportTransfer({ maxAccess, labels, form }) {
   const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      materialTfr: ''
+      materialTfr: '',
+      wcSiteId: parseInt(form.values.wcSiteId) || null,
+      items: [
+        {
+          id: 1,
+          trxId: null,
+          seqNo: null,
+          itemId: null,
+          itemName: '',
+          sku: '',
+          qty: 0,
+          trackby: null
+        }
+      ]
     },
     maxAccess,
     validationSchema: yup.object({
@@ -35,30 +46,36 @@ export default function ImportTransfer({ maxAccess, labels, wcSiteId }) {
       onClick: () => {}
     }
   ]
+
   async function isValidTfr(value) {
     if (!value) return
 
-    const { list } = await getRequest({
-      extension: InventoryRepository.MaterialsTransfer.qry3,
+    const { record } = await getRequest({
+      extension: InventoryRepository.MaterialsTransfer.get2,
       parameters: `_reference=${value}`
     })
 
-    const record = list?.[0]
     if (!record) return
 
     const errors = [
-      { condition: record.status != 3, message: labels.postedError },
-      { condition: !record.siteId, message: labels.mandatorySite },
-      { condition: record.siteId != wcSiteId, message: labels.siteMismatch }
+      { condition: record?.header?.status != 3, message: labels.postedError },
+      { condition: !record?.header?.siteId, message: labels.mandatorySite },
+      { condition: record?.header?.siteId != formik?.values?.wcSiteId, message: labels.siteMismatch }
     ]
 
     for (const err of errors) {
       if (err.condition) {
         stackError({ message: err.message })
+        formik.setFieldValue('items', formik?.initialValues?.items)
 
         return
       }
     }
+
+    const itemsList = record?.items?.length
+      ? record.items.map((item, index) => ({ ...item, id: index + 1 }))
+      : formik?.initialValues?.items
+    formik.setFieldValue('items', itemsList)
   }
 
   return (

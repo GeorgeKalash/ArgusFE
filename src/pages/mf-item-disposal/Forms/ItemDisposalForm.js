@@ -24,7 +24,7 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import ImportTransfer from './ImportTransfer'
-import { Refresh } from '@mui/icons-material'
+import toast from 'react-hot-toast'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -248,13 +248,14 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       onClick: () => {
         stack({
           Component: ImportTransfer,
-          props: { maxAccess, labels },
+          props: { maxAccess, labels, form: formik },
           width: 400,
           height: 150,
           refresh: false,
           title: labels.importFromTransfer
         })
-      }
+      },
+      disabled: formik.values.items.some(item => item.itemId)
     }
   ]
 
@@ -282,11 +283,47 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       : formik?.initialValues?.items
   }
 
+  async function getDisposalSerials(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.DisposalSerial.qry,
+      parameters: `_trxId=${recordId}&_seqNo=0`
+    })
+
+    return res?.list?.length
+      ? res.list.map((serial, index) => ({ ...serial, id: index + 1 }))
+      : formik?.initialValues?.serials
+  }
   async function refetchForm(recordId) {
+    if (!recordId) return
+
     const header = await getDisposal(recordId)
     const items = await getDisposalItem(recordId)
+    const serials = await getDisposalSerials(recordId)
 
-    formik.setValues({ ...header, items })
+    const serialsBySeq = serials.reduce((acc, serial) => {
+      const key = serial.seqNo
+      if (!acc[key]) acc[key] = []
+      acc[key].push(serial)
+
+      return acc
+    }, {})
+
+    const mappedItems = (items || []).map(item => {
+      const list = serialsBySeq[item.seqNo] || []
+
+      return {
+        ...item,
+        serialsList: list,
+        serialCount: list?.length || 0
+      }
+    })
+
+    formik.setValues({
+      ...header,
+      items: mappedItems
+    })
   }
 
   useEffect(() => {
