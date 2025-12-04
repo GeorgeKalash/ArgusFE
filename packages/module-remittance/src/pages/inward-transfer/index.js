@@ -14,7 +14,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import InwardTransferForm from './forms/InwardTransferForm'
+import InwardTransferForm from '@argus/shared-ui/src/components/Shared/Forms/InwardTransferForm'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 

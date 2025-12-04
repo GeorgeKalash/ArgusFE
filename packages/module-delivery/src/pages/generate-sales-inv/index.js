@@ -23,7 +23,7 @@ import InvDetailsForm from './forms/InvDetailsForm'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
 
-// import SaleTransactionForm from '../sa-trx/[functionId]/forms/SaleTransactionForm'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
@@ -92,20 +92,20 @@ const GeneratePurchaseInvoice = () => {
   })
 
   async function openForm(recordId) {
-    // stack({
-    //   Component: SaleTransactionForm,
-    //   props: {
-    //     labels: _labels,
-    //     recordId,
-    //     access: maxAccess,
-    //     functionId: SystemFunction.SalesInvoice,
-    //     getResourceId: () => ResourceIds.SalesInvoice,
-    //     LockRecord
-    //   },
-    //   width: 1330,
-    //   height: 720,
-    //   title: _labels.salesInvoice
-    // })
+    stack({
+      Component: SaleTransactionForm,
+      props: {
+        labels: _labels,
+        recordId,
+        access: maxAccess,
+        functionId: SystemFunction.SalesInvoice,
+        getResourceId: () => ResourceIds.SalesInvoice,
+        LockRecord
+      },
+      width: 1330,
+      height: 720,
+      title: _labels.salesInvoice
+    })
   }
 
   async function openInvDetailsForm() {

@@ -12,7 +12,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import SketchForm from './Forms/SketchForm'
+import SketchForm from '@argus/shared-ui/src/components/Shared/Forms/SketchForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const Sketch = () => {

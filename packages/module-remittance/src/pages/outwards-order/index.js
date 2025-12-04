@@ -5,7 +5,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import OutwardsForm from './Tabs/OutwardsForm'
+import OutwardsForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsForm'
 import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'

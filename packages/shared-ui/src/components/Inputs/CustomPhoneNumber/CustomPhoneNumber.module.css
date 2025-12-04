@@ -1,19 +1,30 @@
 .phoneWrapper {
-  padding-top: 5px;
   position: relative;
   width: 100%;
 }
-
 .phoneLabel {
   position: absolute;
   z-index: 1;
-  top: -8px;
-  left: 12px;
+  top: -4px;
   background: white;
-  padding: 0 4px;
-  font-weight: 500;
-  color: #666;
-  font-size: 14px !important;
+  color: #666 !important;
+  white-space: normal !important;   
+  transform: scale(0.75);
+
+}
+
+.phoneWrapper:dir(ltr)  .phoneLabel {
+  top: -4px;
+  left: 12px; 
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+
+.phoneWrapper:dir(rtl)  .phoneLabel {
+  top: -4px;
+  right: 12px;
+  padding-left: 5px !important;
+  padding-right: 5px !important;
 }
 
 .phoneLabelRequired {
@@ -22,10 +33,10 @@
 
 .phoneContainer {
   border: 1px solid #959d9e;
-  border-radius: 6px;
   display: flex;
   align-items: center;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -65,19 +76,6 @@
   margin-left: 0.25em;
 }
 
-.phoneWrapper .react-tel-input .form-control {
-  width: 100%;
-  border: none;
-  box-shadow: none;
-  outline: none;
-  height: 100% !important;
-  font-size: 14px !important;
-  color: black;
-  padding-left: 48px;
-  padding-right: 30px;
-  box-sizing: border-box;
-}
-
 .phoneWrapper .special-label {
   display: none;
 }
@@ -95,37 +93,145 @@
   border: 0 !important;
 }
 
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .phoneContainer {
-    height: 30px !important;
-    border-radius: 5px !important;
-  }
-
+@media (min-width: 2048px) and (max-width: 2566px) {
+ 
   .phoneWrapper .react-tel-input .form-control {
-    font-size: 12px !important;
+    font-size: 10px !important;
   }
 
   .phoneWrapper .react-tel-input .selected-flag {
-    font-size: 12px;
+    font-size: 6px;
   }
 
   .phoneWrapper .react-tel-input .flag-dropdown {
-    width: 40px;
+    width: 36px;
   }
 
   .phoneWrapper .react-tel-input .selected-flag .flag {
-    width: 16px;
-    height: 11px;
+    width: 14px;
+    height: 9px;
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
   }
 
   .phoneLabel {
-    font-size: 12px !important;
-    top: -3px;
+    top: -11px !important;
   }
 
   .phoneClearIcon {
-    font-size: 16px !important;
+    margin-top: 5px  !important;
+    font-size: 20px !important;
   }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 18px !important;  
+    padding: 0px 0px 0px 50px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+}
+
+/* @media (min-width: 1920px) and (max-width: 2048px) {
+ 
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 10px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 6px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 36px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 14px;
+    height: 9px;
+  }
+
+  
+
+  .phoneLabel {
+    font-size: 12px !important;
+    top: -5px;
+  }
+
+  .phoneClearIcon {
+    margin-top: 5px  !important;
+    font-size: 20px !important;
+  }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 18px !important;  
+    padding: 0px 0px 0px 50px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+} */
+
+
+@media (min-width: 1280px)  {
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 6px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 6px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 36px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 14px;
+    height: 9px;
+  }
+
+  .phoneLabel {
+    top: -11px !important;
+  }
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+
+  .phoneClearIcon {
+    margin-top: 0px  !important;
+    font-size: 13px !important;
+  }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 14px !important;   
+    height: 34px;                
+    padding: 0px 0px 0px 50px !important;      
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+  
+
+  
+
 }
 
 @media (max-width: 1280px) {
@@ -151,53 +257,141 @@
   }
 
   .phoneLabel {
-    font-size: 11px !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    top: -8px !important
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
 
   .phoneClearIcon {
     font-size: 14px !important;
   }
+  .phoneContainer :global(.form-control) {
+    font-size: 12px !important;  
+    height: 34px;                
+    padding: 0px 20px 0px 50px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
 }
 
 @media (max-width: 1024px) {
   .phoneContainer {
     height: 26px !important;
-    border-radius: 4px !important;
   }
 
   .phoneWrapper .react-tel-input .form-control {
-    font-size: 10px !important;
+    font-size: 6px !important;
   }
 
   .phoneWrapper .react-tel-input .selected-flag {
-    font-size: 10px;
+    font-size: 6px;
   }
 
   .phoneWrapper .react-tel-input .flag-dropdown {
     width: 36px;
+
   }
 
   .phoneWrapper .react-tel-input .selected-flag .flag {
     width: 14px;
     height: 9px;
+
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
   }
 
   .phoneLabel {
-    font-size: 10px !important;
-    top: -2px;
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -5px !important;
   }
 
+  
   .phoneClearIcon {
     font-size: 13px !important;
   }
+  
+    .phoneContainer :global(.form-control) {
+    font-size: 10px !important;  
+    padding: 0px 0px 0px 40px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+
+    .phoneContainer:dir(rtl) :global(.form-control) {
+      font-size: 10px !important;  
+      padding: 0px 35px 0px 0px !important;     
+      width: 100%;
+      direction: "rtl";
+      border: none !important;
+      box-shadow: none !important;  }
+  
+
+    .phoneDropdown :global(.country) {
+      font-size: 10px !important; 
+      margin-top: -5px   !important; 
+      line-height: 0.7rem !important;
+
+
+    }
+    
+    .phoneDropdown :global(.country .country-name),
+    .phoneDropdown :global(.country .dial-code) {
+      font-size: 10px !important; 
+     padding-top: -5px   !important; 
+
+
+    }
+  
+    .phoneContainer :global(.selected-flag .flag) {
+      font-size: 10px !important; 
+      transform: scale(0.7);    
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+    
+    .phoneDropdown :global(.flag) {
+      font-size: 10px !important; 
+      margin-top: 0px !important;
+      padding: 10px !important;
+      transform: scale(0.7);       
+
+ 
+    }
+    .phoneDropdown :global(.search-box) {
+      font-size: 0.65rem !important;    
+      height: 20px;           
+      padding: 2px 8px;      
+      box-sizing: border-box;
+    }
+
+  
 }
 
 @media (max-width: 768px) {
   .phoneContainer {
     height: 24px !important;
-    border-radius: 3px !important;
   }
 
   .phoneWrapper .react-tel-input .form-control {
@@ -215,6 +409,7 @@
   .phoneWrapper .react-tel-input .selected-flag .flag {
     width: 13px;
     height: 8px;
+    padding: 0px !important
   }
 
   .phoneLabel {
@@ -229,7 +424,6 @@
 @media (max-width: 480px) {
   .phoneContainer {
     height: 22px !important;
-    border-radius: 2px !important;
   }
 
   .phoneWrapper .react-tel-input .form-control {
@@ -261,7 +455,6 @@
 @media (max-width: 360px) {
   .phoneContainer {
     height: 20px !important;
-    border-radius: 2px !important;
   }
 
   .phoneWrapper .react-tel-input .form-control {

@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import MaterialsTransferForm from './Form/MaterialsTransferForm'
+import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
 const IvMaterialsTransfer = () => {

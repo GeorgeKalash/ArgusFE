@@ -13,7 +13,7 @@ import { ProductModelingRepository } from '@argus/repositories/src/repositories/
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import ThreeDPrintForm from './Forms/ThreeDPrintForm'
+import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
 
 const ThreeDPrinting = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

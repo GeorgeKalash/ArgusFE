@@ -8,7 +8,6 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import { useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
@@ -18,7 +17,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { LOShipmentForm } from '@argus/shared-ui/src/components/Shared/LOShipmentForm'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
-import FormGrid from '@argus/shared-hooks/src/hooks/form'
+import FormGrid from '@argus/shared-ui/src/components/form'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
@@ -39,7 +38,6 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
   const { stack: stackError } = useError()
   const { stack } = useWindow()
   const [isClosed, setIsClosed] = useState(false)
-  const [isPosted, setIsPosted] = useState(true)
 
   const invalidate = useInvalidate({
     endpointId: CashBankRepository.CashTransfer.page
@@ -52,7 +50,16 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
 
   useSetWindow({ title: labels.cashTransfer, window })
 
-  const [initialValues, setInitialData] = useState({
+  const { maxAccess } = useDocumentType({
+    functionId: SystemFunction.CashTransfer,
+    access: access,
+    enabled: !recordId,
+    hasDT: false
+  })
+
+  const { formik } = useForm({
+    maxAccess,
+    initialValues:{
     recordId: recordId || null,
     dtId: parseInt(dtId),
     reference: '',
@@ -84,18 +91,7 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
         balance: 0
       }
     ]
-  })
-
-  const { maxAccess } = useDocumentType({
-    functionId: SystemFunction.CashTransfer,
-    access: access,
-    enabled: !recordId,
-    hasDT: false
-  })
-
-  const { formik } = useForm({
-    maxAccess,
-    initialValues,
+  },
     validateOnChange: true,
     validationSchema: yup.object({
       fromCashAccountId: yup.string().required(),
@@ -202,9 +198,6 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
         extension: CashBankRepository.CashTransfer.get,
         parameters: `_recordId=${formik.values.recordId}`
       })
-      if (res2?.record?.status == 4) {
-        setIsPosted(false)
-      }
     }
   }
 
@@ -229,7 +222,6 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
         window.close()
       }
       setIsClosed(false)
-      setIsPosted(true)
     }
   }
 
@@ -286,7 +278,6 @@ const CashTransferTab = ({ recordId, plantId, cashAccountId, dtId, refetch, wind
         })
         res.record.date = formatDateFromApi(res.record.date)
         setIsClosed(res.record.wip === 2 ? true : false)
-        setIsPosted(res.record.status === 4 ? false : true)
         await fillCurrencyTransfer(recordId, res.record)
       } else {
         getAccView()

@@ -9,7 +9,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import OutwardsReturnForm from '../outwards-return/Forms/OutwardsReturnForm'
+import OutwardsReturnForm from '@argus/shared-ui/src/components/Shared/Forms/OutwardsReturnForm'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 
 const OpenOutwardsReturn = () => {

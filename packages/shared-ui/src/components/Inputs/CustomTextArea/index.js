@@ -43,7 +43,6 @@ const CustomTextArea = ({
   )
 
   const inputRef = useRef(null)
-  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
@@ -65,8 +64,6 @@ const CustomTextArea = ({
       size={size}
       fullWidth={fullWidth}
       autoFocus={autoFocus}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
       inputProps={{
         tabIndex: _readOnly ? -1 : 0,
         readOnly: _readOnly,
@@ -109,8 +106,11 @@ const CustomTextArea = ({
         )
       }}
         InputLabelProps={{
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
-            }}
+          classes: {
+            root: inputs.inputLabel,
+            shrink: inputs.inputLabelShrink, 
+          }            
+        }}
       required={_required}
       {...props}
     />

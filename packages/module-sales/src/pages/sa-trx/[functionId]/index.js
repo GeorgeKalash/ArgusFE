@@ -1,6 +1,5 @@
 import { Grow } from '@mui/material'
-import { useRouter } from 'next/router'
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
@@ -12,7 +11,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import SaleTransactionForm from './forms/SaleTransactionForm'
+import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import toast from 'react-hot-toast'
@@ -48,7 +47,6 @@ const SaTrx = () => {
     query: { data },
     filterBy,
     refetch,
-    clearFilter,
     labels: labels,
     access,
     paginationParameters,

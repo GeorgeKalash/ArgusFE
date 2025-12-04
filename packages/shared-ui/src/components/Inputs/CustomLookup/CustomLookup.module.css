@@ -4,11 +4,18 @@
 
 .firstField {
   width: 100% !important;
+
 }
 
-.firstField :global(.MuiOutlinedInput-root fieldset) {
-  border-color: #959d9e !important;
+.root:dir(ltr) :global(.MuiOutlinedInput-root) {
+  padding-right: 8px !important;
 }
+
+.root:dir(rtl) :global(.MuiOutlinedInput-root) {
+  padding-left: 8px !important;
+  
+}
+
 
 .firstField:dir(ltr) :global(.MuiAutocomplete-inputRoot) {
   border-top-right-radius: 0 !important;
@@ -24,14 +31,19 @@
   border-bottom-left-radius: 0 !important;
 }
 
-
-
-.loadingSpinner {
-  margin-top: 40px !important;
-  margin-bottom: 40px !important;
+.secondField:dir(ltr) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
-
+.secondField:dir(rtl) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
 
 .secondField {
   flex: 1 !important;
@@ -39,46 +51,3 @@
   width: 100% !important;
 }
 
-
-
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 16px !important;
-  }
-}
-
-@media (max-width: 1280px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 14px !important;
-  }
-}
-
-@media (max-width: 1024px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 13px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 12px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 11px !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .searchIcon,
-  .clearIcon {
-    font-size: 10px !important;
-  }
-}

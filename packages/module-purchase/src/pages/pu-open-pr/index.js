@@ -22,7 +22,7 @@ import { ReportPuGeneratorRepository } from '@argus/repositories/src/repositorie
 import { companyStructureRepository } from '@argus/repositories/src/repositories/companyStructureRepository'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import PuQtnForm from '../pu-qtn/forms/PuQtnForm'
-import PurchaseOrderForm from '../pu-ord/forms/PurchaseOrderForm'
+import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 
 const OpenPurchaseRequisition = () => {

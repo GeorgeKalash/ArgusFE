@@ -18,43 +18,30 @@
   min-width: 0 !important;
 }
 
-.customComboTextField :global([data-testid='ArrowDropDownIcon']) {
-  font-size: 35px !important;
-  margin:-5px  !important;
+.customComboTextField:dir(rtl) :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 5px  !important;
+  margin-right:0px  !important;
+
+
+}
+
+.customComboTextField:dir(ltr)  :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 0px  !important;
+  margin-right:5px  !important;
 
 }
 
 
-@media (min-width: 2048px) and (max-width: 2566px) {
+/* @media (min-width: 1920px)  {
   .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size:35px !important;
     margin: 0px  !important;
   }
 
-  /* .comboOptionRow,
-  .comboHeaderRow {
-    padding: 3px 8px !important;
-    min-height: 22px !important;
-  }
-
-  .comboHeaderCell {
-    font-size: 0.72rem !important;
-    height: 18px !important;
-  }
-
-  .comboOptionCell,
-  .comboOptionSingleText {
-    font-size: 0.84rem !important;
-    height: 19px !important;
-  }
-
-  .comboOptionIcon {
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 6px !important;
-  } */
-}
-@media (min-width: 1025px) and (max-width: 1600px) {
+} */
+@media (min-width: 1280px) {
   .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 18px !important;
     margin:-1px  !important;

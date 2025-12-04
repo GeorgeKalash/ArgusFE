@@ -11,7 +11,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import PurchaseOrderForm from './forms/PurchaseOrderForm'
+import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 

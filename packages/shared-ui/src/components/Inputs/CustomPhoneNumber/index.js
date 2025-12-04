@@ -6,6 +6,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ClearIcon from '@mui/icons-material/Clear'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomPhoneNumber.module.css'
+import inputs from '../Inputs.module.css'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {
   const prefix = '+'
@@ -51,17 +52,22 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
   return _hidden ? (
     <></>
   ) : (
-    <div className={styles.phoneWrapper}>
+    <div 
+    className={`${styles.phoneWrapper} ${inputs.outlinedRoot}`}>
       {label && (
-        <label className={styles.phoneLabel}>
+        <label   className={`${styles.phoneLabel} ${inputs.inputLabelShrink}`}>
           {label} {_required && <span className={styles.phoneLabelRequired}>*</span>}
         </label>
       )}
-
+    <div 
+    dir="ltr" 
+    className={`${styles.phoneWrapper} ${inputs.outlinedRoot}`}>
       <PhoneInput
         country={countryRef?.toLowerCase()}
         value={value || ''}
         placeholder=''
+        dir="rtl"
+        language='ars'
         prefix={prefix === '+' ? prefix : ''}
         enableSearch={true}
         disableAreaCodes={true}
@@ -74,8 +80,19 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
           onCopy: props.onCopy,
           readOnly: _readOnly
         }}
-        containerClass={styles.phoneContainer}
+        containerStyle={{
+          border: `1px solid ${error ? 'red' : '#ccc'}`,
+          display: 'flex',
+          alignItems: 'center'
+        }}
+        inputStyle={{
+          width: '100%',
+          border: 'none'
+        }}
+        containerClass={`${styles.phoneContainer} ${inputs.outlinedFieldset}`}
         inputClass={styles.phoneInput}
+        dropdownClass={styles.phoneDropdown}  
+
         specialLabel=''
         {...props}
       />
@@ -83,14 +100,14 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
       {(value || value === 0) && !_readOnly && (
         <IconButton
           tabIndex={-1}
-          edge='end'
           onClick={() => props.onClear(code)}
           aria-label='clear input'
           className={styles.phoneClearButton}
         >
-          <ClearIcon className={styles.phoneClearIcon} />
+          <ClearIcon className={inputs.icon} />
         </IconButton>
       )}
+      </div>
     </div>
   )
 }

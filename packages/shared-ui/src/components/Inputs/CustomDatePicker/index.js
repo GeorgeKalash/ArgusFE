@@ -96,6 +96,7 @@ const CustomDatePicker = ({
         size={size}
         value={value}
         label={label}
+        onClick={() => setIsFocused(true)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         minDate={!!min ? min : disabledRangeDate.date}
@@ -133,6 +134,8 @@ const CustomDatePicker = ({
             inputProps: {
               tabIndex: _readOnly ? -1 : 0
             },
+            className: inputs.inputLabels,
+
             onBlur: e => {
               onBlur(e, inputValue?.current || value)
             },
@@ -140,7 +143,8 @@ const CustomDatePicker = ({
               classes: {
                 root: inputs.outlinedRoot,
                 notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
-                input: inputs.inputBase
+                input: inputs.inputBase,
+                shrink: inputs.inputLabelShrink,
               },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end' className={inputs.inputAdornment}>
@@ -160,7 +164,10 @@ const CustomDatePicker = ({
               )
             },
             InputLabelProps: {
-              className: isFocused || value ? inputs.inputLabelFocused : inputs.inputLabel
+              classes: {
+                root: inputs.inputLabel,
+                shrink: inputs.inputLabelShrink, 
+              },
             }
           },
           actionBar: {

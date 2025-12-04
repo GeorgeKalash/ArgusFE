@@ -1,0 +1,128 @@
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import HrSponsorForm from './forms/HrSponsorForm'
+import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+
+const HrSponsor = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: EmployeeRepository.SponsorFilters.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
+
+    return { ...response, _startAt }
+  }
+
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    refetch,
+    invalidate,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: EmployeeRepository.SponsorFilters.page,
+    datasetId: ResourceIds.SponsorFilter
+  })
+
+  const columns = [
+    {
+      field: 'name',
+      headerName: labels.name,
+      flex: 1
+    },
+    {
+      field: 'address',
+      headerName: labels.address,
+      flex: 1
+    },
+    {
+      field: 'city',
+      headerName: labels.city,
+      flex: 1
+    },
+    {
+      field: 'phone',
+      headerName: labels.phone,
+      flex: 1
+    },
+    {
+      field: 'mobile',
+      headerName: labels.mobile,
+      flex: 1
+    },
+    {
+      field: 'fax',
+      headerName: labels.fax,
+      flex: 1
+    },
+    {
+      field: 'email',
+      headerName: labels.email,
+      flex: 1
+    }
+  ]
+
+  const add = () => openForm()
+  const edit = obj => openForm(obj?.recordId)
+
+  function openForm(recordId) {
+    stack({
+      Component: HrSponsorForm,
+      props: { labels, recordId, maxAccess: access },
+      width: 600,
+      height: 600,
+      title: labels.sponsor
+    })
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: EmployeeRepository.SponsorFilters.del,
+      record: JSON.stringify(obj)
+    })
+    toast.success(platformLabels.Deleted)
+    invalidate()
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <GridToolbar onAdd={add} maxAccess={access} />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
+
+export default HrSponsor

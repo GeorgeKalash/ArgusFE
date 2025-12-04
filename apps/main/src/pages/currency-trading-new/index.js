@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import TransactionForm from '../currency-trading/forms/TransactionForm'
+import TransactionForm from '@argus/shared-ui/src/components/Shared/Forms/TransactionForm'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
