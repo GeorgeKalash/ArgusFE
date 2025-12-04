@@ -4,6 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import Draggable from 'react-draggable'
+import MinimizeIcon from '@mui/icons-material/Minimize'
 import WindowToolbar from '../WindowToolbar'
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
@@ -46,6 +47,7 @@ const Window = React.memo(
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
+    const [minimized, setMinimized] = useState(false)
     const { loading } = useContext(RequestsContext)
     const paperRef = useRef(null)
     const [expanded, setExpanded] = useState(false)
@@ -117,9 +119,27 @@ const Window = React.memo(
       }
     }, [loading])
 
+    useEffect(() => {
+      const body = document.body
+      if (expanded || minimized) {
+        body.style.overflow = 'hidden'
+      } else {
+        body.style.overflow = ''
+      }
+
+      return () => {
+        body.style.overflow = ''
+      }
+    }, [expanded, minimized])
+
     const handleExpandToggle = useCallback(() => {
       setExpanded(prev => !prev)
     }, [])
+
+      const handleMinimizeToggle = useCallback(() => {
+      if (expanded) setExpanded(false)
+      setMinimized(prev => !prev)
+    }, [expanded])
 
     return (
       <CacheDataProvider>
@@ -136,7 +156,7 @@ const Window = React.memo(
             handle='#draggable-dialog-title'
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds='parent'
-            position={expanded ? { x: 0, y: 0 } : undefined}
+            position={expanded || minimized ? { x: 0, y: 0 } : undefined}
             onStart={() => draggable}
           >
             <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
@@ -159,6 +179,15 @@ const Window = React.memo(
                     </Typography>
                   </Box>
                   <Box>
+                          <IconButton
+                      tabIndex={-1}
+                      edge='end'
+                      onClick={handleMinimizeToggle}
+                      aria-label='minimize'
+                        className={styles.iconButton}
+                    >
+                      <MinimizeIcon />
+                    </IconButton>
                     {refresh && (
                       <IconButton
                         tabIndex={-1}
@@ -170,7 +199,7 @@ const Window = React.memo(
                         <RefreshIcon />
                       </IconButton>
                     )}
-                    {expandable && (
+                    {expandable && !minimized && (
                       <IconButton
                         tabIndex={-1}
                         edge='end'
