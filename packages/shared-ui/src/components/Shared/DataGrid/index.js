@@ -103,7 +103,6 @@ export function DataGrid({
       commit({ changes: { ...params.node.data, changes } })
 
       const focusedCell = params.api.getFocusedCell()
-      if (!focusedCell) return
 
       const colId = focusedCell.column.colId
 
@@ -875,29 +874,7 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
-  // useEffect(() => {
-  //   const updateRowHeightFromCss = () => {
-  //     if (!gridContainerRef.current || typeof window === 'undefined') return
-  //     const computed = window.getComputedStyle(gridContainerRef.current)
-  //     const cssRowHeight = parseInt(computed.getPropertyValue('--ag-row-height'), 10)
-  //     if (!Number.isNaN(cssRowHeight) && cssRowHeight > 0) {
-  //       setRowHeight(cssRowHeight)
-  //     }
-  //   }
 
-  //   updateRowHeightFromCss()
-  //   window.addEventListener('resize', updateRowHeightFromCss)
-
-  //   return () => {
-  //     window.removeEventListener('resize', updateRowHeightFromCss)
-  //   }
-  // }, [])
-
-  useEffect(() => {
-    if (gridApiRef.current) {
-      gridApiRef.current.resetRowHeights()
-    }
-  }, [rowHeight, value])
 
   return (
     <Box className={styles.root} sx={{ height: height || 'auto' }}>
