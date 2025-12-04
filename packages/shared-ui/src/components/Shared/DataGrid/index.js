@@ -13,6 +13,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import styles from './DataGrid.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 export function DataGrid({
   name,
@@ -49,7 +50,7 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
-  const [rowHeight, setRowHeight] = useState(25)
+  // const [rowHeight, setRowHeight] = useState(35)
 
   const skip = allowDelete ? 1 : 0
 
@@ -62,6 +63,12 @@ export function DataGrid({
     : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
 
   const _disabled = isAccessDenied || disabled
+
+  const { width } = useWindowDimensions()
+
+  const rowHeight =
+  width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1366 ? 32 : width <= 1600 ? 30 : 30
+
 
   function checkDuplicates(field, data) {
     return value.find(
@@ -870,23 +877,23 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
-  useEffect(() => {
-    const updateRowHeightFromCss = () => {
-      if (!gridContainerRef.current || typeof window === 'undefined') return
-      const computed = window.getComputedStyle(gridContainerRef.current)
-      const cssRowHeight = parseInt(computed.getPropertyValue('--ag-row-height'), 10)
-      if (!Number.isNaN(cssRowHeight) && cssRowHeight > 0) {
-        setRowHeight(cssRowHeight)
-      }
-    }
+  // useEffect(() => {
+  //   const updateRowHeightFromCss = () => {
+  //     if (!gridContainerRef.current || typeof window === 'undefined') return
+  //     const computed = window.getComputedStyle(gridContainerRef.current)
+  //     const cssRowHeight = parseInt(computed.getPropertyValue('--ag-row-height'), 10)
+  //     if (!Number.isNaN(cssRowHeight) && cssRowHeight > 0) {
+  //       setRowHeight(cssRowHeight)
+  //     }
+  //   }
 
-    updateRowHeightFromCss()
-    window.addEventListener('resize', updateRowHeightFromCss)
+  //   updateRowHeightFromCss()
+  //   window.addEventListener('resize', updateRowHeightFromCss)
 
-    return () => {
-      window.removeEventListener('resize', updateRowHeightFromCss)
-    }
-  }, [])
+  //   return () => {
+  //     window.removeEventListener('resize', updateRowHeightFromCss)
+  //   }
+  // }, [])
 
   useEffect(() => {
     if (gridApiRef.current) {
