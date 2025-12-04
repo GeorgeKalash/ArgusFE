@@ -25,11 +25,14 @@ import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import ImportTransfer from './ImportTransfer'
 import toast from 'react-hot-toast'
+import { useError } from 'src/error'
+import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ItemDisposal,
@@ -43,7 +46,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: null,
       reference: '',
@@ -121,6 +124,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
   const editMode = !!formik.values.recordId
   const calculateTotal = key => formik?.values?.items?.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
   const totalQty = calculateTotal('qty')
+  const totalPcs = calculateTotal('serialCount')
 
   const onCondition = row => {
     if (row.trackBy === 1) {
@@ -144,7 +148,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       parameters: `_recordId=${grpId}`
     })
 
-    return res?.record?.reference || ''
+    return res?.record?.name || ''
   }
 
   const columns = [
@@ -181,8 +185,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
           return
         }
-        const itemGroupRef = await getGroupInfo(newRow?.groupId)
-        update({ itemGroupRef })
+        const itemGroupName = await getGroupInfo(newRow?.groupId || null)
+        update({ itemGroupName })
       }
     },
     {
@@ -196,7 +200,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     {
       component: 'textfield',
       label: labels.itemGroup,
-      name: 'itemGroupRef',
+      name: 'itemGroupName',
       props: {
         readOnly: true
       }
@@ -205,7 +209,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       component: 'numberfield',
       label: labels.qty,
       name: 'qty',
-      async onChange({ row: { update, newRow } }) {}
+      props: { maxLength: 12, decimalScale: 2 }
     },
     {
       component: 'button',
@@ -231,7 +235,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     {
       component: 'numberfield',
       label: labels.serialCount,
-      name: 'serialCount'
+      name: 'serialCount',
+      props: { readOnly: true }
     }
   ]
 
@@ -315,7 +320,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
 
       return {
         ...item,
-        serialsList: list,
+        serials: list,
         serialCount: list?.length || 0
       }
     })
@@ -418,25 +423,43 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <ResourceComboBox
-                endpointId={ManufacturingRepository.WorkCenter.qry}
-                name='workCenterId'
-                label={labels.workCenter}
-                required
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                valueField='recordId'
-                displayField='name'
-                displayFieldWidth={1.5}
-                values={formik.values}
-                onChange={(_, newValue) => {
-                  formik.setFieldValue('wcSiteId', newValue?.siteId || null)
-                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
-                }}
-                error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    name='workCenterId'
+                    label={labels.workCenter}
+                    required
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField='name'
+                    displayFieldWidth={1.5}
+                    values={formik.values}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('wcSiteId', newValue?.siteId || null)
+                      formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                    }}
+                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomTextArea
+                    name='notes'
+                    label={labels.notes}
+                    value={formik.values.notes}
+                    maxLength='100'
+                    rows={2}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    onClear={() => formik.setFieldValue('notes', '')}
+                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
@@ -453,16 +476,10 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
         <Fixed>
           <Grid container spacing={2} justifyContent='flex-end'>
             <Grid item xs={3}>
-              <CustomNumberField
-                name='totalQty'
-                maxAccess={maxAccess}
-                value={totalQty}
-                label={labels.totalQty}
-                readOnly
-              />
+              <CustomNumberField name='totalQty' value={totalQty} label={labels.totalQty} readOnly />
             </Grid>
             <Grid item xs={3}>
-              <CustomNumberField name='totalPcs' maxAccess={maxAccess} value='' label={labels.totalPcs} readOnly />
+              <CustomNumberField name='totalPcs' value={totalPcs} label={labels.totalPcs} readOnly />
             </Grid>
           </Grid>
         </Fixed>

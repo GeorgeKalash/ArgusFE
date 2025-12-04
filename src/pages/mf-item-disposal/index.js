@@ -20,17 +20,6 @@ export default function ItemDisposal() {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
-  async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
-
-    const response = await getRequest({
-      extension: ManufacturingRepository.Disposal.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_sortField=&_params=${params}&_sortBy=recordId`
-    })
-
-    return { ...response, _startAt: _startAt }
-  }
-
   const {
     query: { data },
     filterBy,
@@ -47,6 +36,17 @@ export default function ItemDisposal() {
       filterFn: fetchWithFilter
     }
   })
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50 } = options
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.Disposal.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
 
   async function fetchWithFilter({ filters, pagination }) {
     if (filters?.qry) {
@@ -137,22 +137,21 @@ export default function ItemDisposal() {
   return (
     <VertLayout>
       <Fixed>
-        <Fixed>
-          <GridToolbar
-            onAdd={add}
-            maxAccess={access}
-            onSearch={value => {
-              filterBy('qry', value)
-            }}
-            onSearchClear={() => {
-              clearFilter('qry')
-            }}
-            inputSearch={true}
-          />
-        </Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
+          name='itemDisposal'
           columns={columns}
           gridData={data}
           rowId={['recordId']}

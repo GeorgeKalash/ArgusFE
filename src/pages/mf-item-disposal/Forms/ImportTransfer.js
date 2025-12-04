@@ -8,17 +8,17 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import Form from 'src/components/Shared/Form'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
-import { useWindow } from 'src/windows'
+import { useError } from 'src/error'
 
-export default function ImportTransfer({ maxAccess, labels, form }) {
+export default function ImportTransfer({ maxAccess, labels, form, window }) {
   const { getRequest } = useContext(RequestsContext)
-  const { stack } = useWindow()
+  const { stack: stackError } = useError()
 
   const { formik } = useForm({
     initialValues: {
       recordId: null,
-      materialTfr: '',
-      wcSiteId: parseInt(form.values.wcSiteId) || null,
+      materialsTfr: '',
+      wcSiteId: parseInt(form?.values?.wcSiteId) || null,
       items: [
         {
           id: 1,
@@ -34,18 +34,35 @@ export default function ImportTransfer({ maxAccess, labels, form }) {
     },
     maxAccess,
     validationSchema: yup.object({
-      groupId: yup.string().required()
+      materialsTfr: yup.string().required()
     }),
-    onSubmit: async obj => {}
+    onSubmit: async obj => {
+      if (obj?.items?.length) form.setFieldValue('items', obj?.items)
+
+      window.close()
+    }
   })
 
   const actions = [
     {
       key: 'Ok',
       condition: true,
-      onClick: () => {}
+      onClick: () => {
+        formik.handleSubmit()
+      }
     }
   ]
+
+  async function getItemSerials(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.MaterialTransferSerial.qry,
+      parameters: `_transferId=${recordId}&_seqNo=${0}&_componentSeqNo=${0}`
+    })
+
+    return res?.list?.length ? res.list.map((serial, index) => ({ ...serial, id: index + 1 })) : []
+  }
 
   async function isValidTfr(value) {
     if (!value) return
@@ -55,27 +72,50 @@ export default function ImportTransfer({ maxAccess, labels, form }) {
       parameters: `_reference=${value}`
     })
 
-    if (!record) return
+    if (!record || !record?.header) return
 
     const errors = [
       { condition: record?.header?.status != 3, message: labels.postedError },
-      { condition: !record?.header?.siteId, message: labels.mandatorySite },
-      { condition: record?.header?.siteId != formik?.values?.wcSiteId, message: labels.siteMismatch }
+      { condition: !record?.header?.toSiteId, message: labels.mandatorySite },
+      {
+        condition: !formik?.values?.wcSiteId || record?.header?.toSiteId != formik?.values?.wcSiteId,
+        message: labels.siteMismatch
+      }
     ]
 
     for (const err of errors) {
       if (err.condition) {
         stackError({ message: err.message })
-        formik.setFieldValue('items', formik?.initialValues?.items)
+        formik.setValues({ ...formik.values, materialsTfr: '', items: formik?.initialValues?.items })
 
         return
       }
     }
 
-    const itemsList = record?.items?.length
-      ? record.items.map((item, index) => ({ ...item, id: index + 1 }))
+    const items = record?.items || []
+    const serials = await getItemSerials(record?.header?.recordId)
+
+    const serialsBySeq = serials.reduce((acc, serial) => {
+      const key = serial.seqNo
+      if (!acc[key]) acc[key] = []
+      acc[key].push(serial)
+
+      return acc
+    }, {})
+
+    const mappedItems = items?.length
+      ? items?.map((item, index) => {
+          const list = serialsBySeq[item.seqNo] || []
+
+          return {
+            ...item,
+            id: index + 1,
+            serials: list
+          }
+        })
       : formik?.initialValues?.items
-    formik.setFieldValue('items', itemsList)
+
+    formik.setValues({ ...formik.values, materialsTfr: value || '', items: mappedItems })
   }
 
   return (
@@ -85,7 +125,7 @@ export default function ImportTransfer({ maxAccess, labels, form }) {
           <Grid container>
             <Grid item xs={12}>
               <CustomTextField
-                name='materialTfr'
+                name='materialsTfr'
                 label={labels.materialsTfr}
                 value={formik.values.materialsTfr}
                 onBlur={e => isValidTfr(e?.target?.value)}

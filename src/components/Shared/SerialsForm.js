@@ -68,8 +68,12 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
         seqNo: row.id
       }))
 
-      updateRow({ changes: { serials } })
-
+      updateRow({
+        changes: {
+          serials,
+          ...(row?.serialCount && { serialCount: serials?.length || 0 })
+        }
+      })
       window.close()
     }
   })
