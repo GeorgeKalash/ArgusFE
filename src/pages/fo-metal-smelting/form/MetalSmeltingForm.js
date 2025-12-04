@@ -305,7 +305,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       return
     }
 
-    const smeltingMaxAllowedVariation = await selectedDocTypeInfo(record?.header?.dtId || null)
+    const dtInfo = await selectedDocTypeInfo(record?.header?.dtId || null)
 
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
@@ -324,7 +324,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       header: {
         ...(record?.header || {}),
         date: formatDateFromApi(record?.header?.date),
-        smeltingMaxAllowedVariation
+        smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items,
       scraps: scrapsList?.length ? scrapsList : formik.initialValues?.scraps
@@ -418,7 +418,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false, decimalScale: 3 },
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
         if (newRow?.type == 1) {
@@ -436,7 +436,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, decimalScale: 3 },
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
@@ -510,7 +510,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false, decimalScale: 3 }
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 }
     }
   ]
 
@@ -570,12 +570,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     return res?.record || {}
   }
   useEffect(() => {
-    if (!recordId) {
-      const dtInfo = selectedDocTypeInfo(formik?.values?.header?.dtId)
-      formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
-      formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
-      formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)
-    }
+    ;(async function () {
+      if (!recordId) {
+        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
+        formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
+        formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)
+      }
+    })()
   }, [formik.values?.header?.dtId])
 
   useEffect(() => {
@@ -777,6 +779,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     }}
                     value={formik.values.header.purity}
                     required
+                    maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
                     align='right'
@@ -798,6 +801,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     }}
                     value={formik.values.header?.qty}
                     required
+                    maxLength={12}
+                    decimalScale={3}
                     allowNegative={false}
                     align='right'
                     readOnly={isPosted}
@@ -848,6 +853,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 label={labels.notes}
                 value={formik.values.header?.notes}
                 rows={4}
+                maxLength='200'
                 readOnly={isPosted}
                 maxAccess={maxAccess}
                 onChange={e => formik.setFieldValue('header.notes', e.target.value)}
@@ -856,7 +862,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
               />
             </Grid>
             <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3 }}>
-              <Grid container>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.totalMetal}
