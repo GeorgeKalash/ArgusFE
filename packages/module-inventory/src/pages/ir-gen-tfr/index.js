@@ -21,7 +21,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
-import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/forms/MaterialsTransferForm'
+import MaterialsTransferForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialsTransferForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

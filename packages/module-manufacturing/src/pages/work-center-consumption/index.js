@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import WCConsumpForm from '@argus/shared-ui/src/components/Shared/forms/WCConsumpForm'
+import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 
 const WorkCenterConsump = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

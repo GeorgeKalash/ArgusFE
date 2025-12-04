@@ -23,7 +23,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
-import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDPrintForm'
+import ThreeDPrintForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDPrintForm'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'

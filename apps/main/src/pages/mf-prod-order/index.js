@@ -13,7 +13,7 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/forms/ProductionOrderForm'
+import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 
 const ProductionOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

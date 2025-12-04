@@ -51,7 +51,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
-import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/forms/ProductionOrderForm'
+import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
 
 const SalesOrderForm = ({ recordId, currency, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)

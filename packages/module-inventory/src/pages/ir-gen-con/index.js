@@ -25,7 +25,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 
-import WCConsumpForm from '@argus/shared-ui/src/components/Shared/forms/WCConsumpForm'
+import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function IRGenerateConsumption() {

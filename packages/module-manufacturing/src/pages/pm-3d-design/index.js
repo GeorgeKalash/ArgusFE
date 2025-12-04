@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/forms/ThreeDDesignForm'
+import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
 
 const ThreeDDesign = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)

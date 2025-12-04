@@ -26,7 +26,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import { KVSRepository } from '@argus/repositories/src/repositories/KVSRepository'
 
-import ThreeDDesignForm from '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'
+import ThreeDDesignForm from '../Forms/ThreeDDesignForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'

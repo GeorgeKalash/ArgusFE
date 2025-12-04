@@ -25,7 +25,7 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 
-import DamageForm from '@argus/shared-ui/src/components/Shared/forms/DamageForm'
+import DamageForm from '@argus/shared-ui/src/components/Shared/Forms/DamageForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 
