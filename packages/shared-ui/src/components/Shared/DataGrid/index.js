@@ -13,6 +13,7 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import styles from './DataGrid.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 export function DataGrid({
   name,
@@ -49,7 +50,7 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
-  const [rowHeight, setRowHeight] = useState(25)
+  const [columnState, setColumnState] = useState()
 
   const skip = allowDelete ? 1 : 0
 
@@ -62,6 +63,12 @@ export function DataGrid({
     : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
 
   const _disabled = isAccessDenied || disabled
+
+  const { width } = useWindowDimensions()
+
+  const rowHeight =
+  width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1366 ? 32 : width <= 1600 ? 30 : 30
+
 
   function checkDuplicates(field, data) {
     return value.find(
@@ -98,7 +105,6 @@ export function DataGrid({
       commit({ changes: { ...params.node.data, changes } })
 
       const focusedCell = params.api.getFocusedCell()
-      if (!focusedCell) return
 
       const colId = focusedCell.column.colId
 
@@ -514,13 +520,8 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const centered =
-      column.colDef.component === 'checkbox' ||
-      column.colDef.component === 'button' ||
-      column.colDef.component === 'icon'
-
     return (
-      <Box className={`${styles.cellBox} ${centered ? styles.cellBoxCentered : ''}`}>
+      <Box className={`${styles.cellBox}`} >
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -649,15 +650,16 @@ export function DataGrid({
 
   const columnDefs = [
     ...allColumns.map(column => {
-      const isReadOnlyTextColumn =
-        column.component === 'textfield' && (column?.props?.readOnly || column?.props?.disabled)
+ 
+    const mergedCellClass = [
+      column.cellClass,
+      styles.wrapTextCell
+    ]
 
-      const mergedCellClass = [
-        column.cellClass,
-        isReadOnlyTextColumn ? styles.readOnlyTextCell : null
-      ]
-        .filter(Boolean)
-        .join(' ')
+    const centered =
+    (column.component === 'checkbox' ||
+    column.component === 'button' ||
+    column.component === 'icon' ) ?  'cellBoxCentered' : ''
 
       return {
       ...column,
@@ -670,9 +672,9 @@ export function DataGrid({
       sortable: false,
       cellRenderer: CustomCellRenderer,
       cellEditor: CustomCellEditor,
-      wrapText: isReadOnlyTextColumn ? true : column.wrapText,
-      autoHeight: isReadOnlyTextColumn ? true : column.autoHeight,
-      cellClass: mergedCellClass || undefined,
+      wrapText: true ,
+      autoHeight: true,
+      cellClass: `${mergedCellClass  || undefined}  ${centered}`,
       ...(column?.checkAll?.visible && {
         headerComponent: () => {
           const selectAll = e => {
@@ -753,12 +755,9 @@ export function DataGrid({
       const pressedButton = event.target.closest(BUTTON_SELECTOR)
 
       if (
-        (gridContainerRef.current &&
-          !gridContainerRef.current.contains(event.target) &&
+        !event.target.closest('.ag-cell') &&
           !pressedButton?.closest('.MuiPaper-root') &&
-          gridApiRef.current?.getEditingCells()?.length > 0 &&
-          !event.target.classList.contains('MuiAutocomplete-option')) ||
-        event.target.closest('.ag-header-row')
+          gridApiRef.current?.getEditingCells()?.length > 0 
       ) {
         gridApiRef.current?.stopEditing()
       } else {
@@ -870,29 +869,28 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
-  useEffect(() => {
-    const updateRowHeightFromCss = () => {
-      if (!gridContainerRef.current || typeof window === 'undefined') return
-      const computed = window.getComputedStyle(gridContainerRef.current)
-      const cssRowHeight = parseInt(computed.getPropertyValue('--ag-row-height'), 10)
-      if (!Number.isNaN(cssRowHeight) && cssRowHeight > 0) {
-        setRowHeight(cssRowHeight)
-      }
-    }
 
-    updateRowHeightFromCss()
-    window.addEventListener('resize', updateRowHeightFromCss)
 
-    return () => {
-      window.removeEventListener('resize', updateRowHeightFromCss)
-    }
-  }, [])
+  const onColumnResized = params => {
+    if (params?.source === 'uiColumnResized') {
+      const columnState = params.columnApi.getColumnState()
+    setColumnState(columnState)
+  }
+}
 
-  useEffect(() => {
-    if (gridApiRef.current) {
-      gridApiRef.current.resetRowHeights()
-    }
-  }, [rowHeight, value])
+const finalColumns =  columnDefs?.map(def => {
+  const colId = def.field
+  console.log(colId)
+  const state = columnState?.find(s => s.colId === colId)
+
+  if (!state) return def
+
+  return {
+    ...def,
+    flex: undefined,    
+    width: state.width   
+  }
+})
 
   return (
     <Box className={styles.root} sx={{ height: height || 'auto' }}>
@@ -901,13 +899,14 @@ export function DataGrid({
           className={`ag-theme-alpine ${styles.agContainer}`}
           ref={gridContainerRef}
           style={{ '--ag-header-bg': bg }}
+          
         >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
               domLayout='autoHeight'
-              columnDefs={columnDefs}
+              columnDefs={finalColumns}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
@@ -921,6 +920,7 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
+              onColumnResized={onColumnResized}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
