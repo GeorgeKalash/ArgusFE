@@ -41,7 +41,7 @@ const CustomButton = ({
       onMouseLeave={handleButtonMouseLeave}
     >
       <Button
-          ref={buttonRef}
+        ref={buttonRef}
         onClick={onClick}
         variant='contained'
         className={!props.fullWidth ? styles.responsiveButton : styles.responsiveButtonFullWidth}

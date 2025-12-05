@@ -286,7 +286,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const onCondition = row => {
     if (row.itemId && row.taxId) {
       return {
-        imgSrc: '/images/buttonsIcons/tax-icon.png',
+        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
         hidden: false
       }
     } else {

@@ -640,7 +640,12 @@ const Table = ({
     ({ data }) => {
       const imageUrl = data?.[column.field]
 
-      return <img src={imageUrl ?? '/images/emptyPhoto.jpg'} alt='' width={70} />
+      const image =
+        imageUrl
+          ? imageUrl
+          : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
+
+      return <img src={image?.default?.src||image} alt='' width={70} />
     }
 
   const columnDefs = [

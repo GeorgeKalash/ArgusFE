@@ -230,7 +230,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: '/images/TableIcons/imgSerials.png',
+        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
         hidden: false
       }
     } else {

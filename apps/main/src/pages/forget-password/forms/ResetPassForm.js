@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Grid, IconButton, InputAdornment } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -71,7 +71,13 @@ const ResetPassForm = ({ labels, username = '' }) => {
               value={formik.values.code}
               onChange={formik.handleChange}
               error={formik.touched.code && formik.errors.code}
-              startIcons={[<img key='forgot-icon' src='/images/password/forgotPWD1.png' alt='icon' />]}
+              startIcons={[
+                <img
+                  key='forgot-icon'
+                  src={require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}
+                  alt='icon'
+                />
+              ]}
             />
           </Grid>
         </Grid>

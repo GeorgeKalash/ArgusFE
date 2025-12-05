@@ -522,7 +522,7 @@ export default function SaleTransactionForm({
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: '/images/TableIcons/imgSerials.png',
+        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
         hidden: false
       }
     } else {
@@ -850,7 +850,7 @@ export default function SaleTransactionForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
               hidden: false
             }
           } else {
@@ -896,7 +896,7 @@ export default function SaleTransactionForm({
       component: 'button',
       name: 'saTrx',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png',
+        imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
         onCondition: row => {
           return {
             disabled: !row.itemId
@@ -2023,7 +2023,7 @@ export default function SaleTransactionForm({
                 values={formik.values.header}
                 maxAccess={maxAccess}
                 displayFieldWidth={1.5}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.spId', newValue ? newValue.recordId : null)
                 }}
                 error={formik?.touched?.header?.spId && Boolean(formik?.errors?.header?.spId)}
@@ -2085,7 +2085,7 @@ export default function SaleTransactionForm({
                 onClick={() => openMCRForm(formik.values.header)}
                 disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
               >
-                <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                <img src={ require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src} alt={platformLabels.add} />
               </Button>
             </Grid>
             <Grid item xs={2}>
@@ -2168,7 +2168,7 @@ export default function SaleTransactionForm({
                 displayField='name'
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.szId', newValue ? newValue.recordId : null)
                 }}
                 error={formik?.touched?.header?.szId && Boolean(formik?.errors?.header?.szId)}

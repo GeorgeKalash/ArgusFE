@@ -299,7 +299,7 @@ const PhysicalCountSerial = () => {
                 }}
                 variant='contained'
               >
-                <img src='/images/buttonsIcons/clear.png' alt={platformLabels.Clear} />
+                <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/clear.png').default.src} alt={platformLabels.Clear} />
               </Button>
             </Grid>
           </Grid>
