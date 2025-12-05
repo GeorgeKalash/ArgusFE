@@ -9,10 +9,14 @@ const CustomTabPanel = props => {
   const name = `${props.name || 'tab'}.${index}`
 
   const containerRef = useRef(null)
+  const rafRef = useRef(null)
+  const lastHeightRef = useRef(null)
+
   const [heightPx, setHeightPx] = useState(null)
 
   const { accessLevel } =
     (maxAccess?.record?.controls ?? []).find(({ controlId }) => controlId == name) ?? { accessLevel: 0 }
+
   const hidden = accessLevel === HIDDEN
 
   const computeHeight = () => {
@@ -23,33 +27,76 @@ const CustomTabPanel = props => {
     const top = rect.top
 
     const parent = el.parentElement
+    let newHeight = null
+
     if (parent) {
       const parentRect = parent.getBoundingClientRect()
-
-      const heightInsideParent = parentRect.bottom - rect.top 
+      const heightInsideParent = parentRect.bottom - rect.top
 
       if (heightInsideParent > 0) {
-        setHeightPx(heightInsideParent)
-        return
+        newHeight = Math.floor(heightInsideParent)
       }
     }
 
-    const viewportHeight = window.innerHeight - top 
-    setHeightPx(viewportHeight)
+    if (newHeight === null) {
+      newHeight = Math.floor(window.innerHeight - top)
+    }
+
+    if (lastHeightRef.current !== newHeight) {
+      lastHeightRef.current = newHeight
+      setHeightPx(newHeight)
+    }
   }
 
   useLayoutEffect(() => {
     computeHeight()
-
     const t = setTimeout(computeHeight, 50)
     return () => clearTimeout(t)
-  }, [containerRef])
+  }, [])
 
   useEffect(() => {
     const onResize = () => computeHeight()
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [containerRef])
+  }, [])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || !el.parentElement) return
+
+    const parent = el.parentElement
+    const observer = new ResizeObserver(() => {
+      computeHeight()
+    })
+
+    observer.observe(parent)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      computeHeight()
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const loop = () => {
+      computeHeight()
+      rafRef.current = requestAnimationFrame(loop)
+    }
+
+    rafRef.current = requestAnimationFrame(loop)
+
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
 
   if (hidden) return null
 

@@ -51,7 +51,7 @@ const Error404 = () => {
           </Typography>
           <Typography variant='body2'>We couldn&prime;t find the page you are looking for.</Typography>
         </BoxWrapper>
-        <Img height='487' alt='error-illustration' src='/images/pages/404.png' />
+        <Img height='487' alt='error-illustration' src={require('@argus/shared-ui/src/components/images/pages/404.png').default.src} />
         <Button href='/default' component={Link} variant='contained' sx={{ px: 5.5 }}>
           Back to Home
         </Button>

@@ -187,7 +187,10 @@ const ImageUpload = forwardRef(
     return (
       <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
         <img
-          src={image || '/images/emptyPhoto.jpg'}
+          src={
+            image ||
+            require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+          }
           alt=''
           style={{
             width: customWidth || width,
@@ -197,7 +200,7 @@ const ImageUpload = forwardRef(
           }}
           onClick={handleClick}
           onError={e => {
-            e.currentTarget.src = '/images/emptyPhoto.jpg'
+            e.currentTarget.src = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
           }}
         />
         <Box>

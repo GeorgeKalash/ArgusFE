@@ -51,7 +51,7 @@ const Error500 = () => {
           </Typography>
           <Typography variant='body2'>Oops, something went wrong!</Typography>
         </BoxWrapper>
-        <Img height='487' alt='error-illustration' src='/images/pages/500.png' />
+        <Img height='487' alt='error-illustration' src={require('@argus/shared-ui/src/components/images/pages/500.png').default.src} />
         <Button href='/' component={Link} variant='contained' sx={{ px: 5.5 }}>
           Back to Home
         </Button>

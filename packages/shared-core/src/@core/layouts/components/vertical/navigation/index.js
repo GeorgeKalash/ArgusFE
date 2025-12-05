@@ -215,8 +215,8 @@ const Navigation = props => {
     if (!node.iconName) return null
 
     return isRoot
-      ? `/images/folderIcons/${isOpen ? node.iconName + 'Active' : node.iconName}.png`
-      : `/images/folderIcons/${node.iconName}.png`
+      ? `${isOpen ? node.iconName + 'Active' : node.iconName}.png`
+      : `${node.iconName}.png`
   }
 
   const renderArrowIcon = (isOpen, isArabic) => {
@@ -253,8 +253,13 @@ const Navigation = props => {
     const isOpen = openFolders.includes(node.id)
     const isRoot = node.parentId === 0
     const isFolder = Boolean(node.children)
-    const imgName = getNodeIcon(node, isOpen, isRoot)
+    const image = getNodeIcon(node, isOpen, isRoot)
     const truncatedTitle = truncateTitle(node.title, level)
+
+
+    const icon =
+      image &&
+      require(`@argus/shared-ui/src/components/images/folderIcons/${image}`).default.src
 
     return (
       <div key={node.id} style={{ paddingBottom: isRoot ? 5 : undefined }}>
@@ -265,9 +270,9 @@ const Navigation = props => {
           onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
         >
           <div className={styles['node-content']}>
-            {imgName ? (
+            {icon ? (
               <div className={styles['node-icon']}>
-                <Image src={imgName} alt={node.title} width={22} height={22} />
+                <Image src={icon} alt={node.title} width={22} height={22} />
               </div>
             ) : (
               <div style={{ width: 30, height: 22 }} />
@@ -330,7 +335,11 @@ const Navigation = props => {
             ) : (
               <Link href='/' className={styles['link-styled']}>
                 <img
-                  src={!navCollapsed ? '/images/logos/ArgusNewLogo2.png' : '/images/logos/WhiteA.png'}
+                  src={
+                    !navCollapsed
+                      ? require('@argus/shared-ui/src/components/images/logos/ArgusNewLogo2.png').default.src
+                      : require('@argus/shared-ui/src/components/images/logos/WhiteA.png').default.src
+                  }
                   alt='Argus'
                   className={styles['Argus-Icon']}
                 />
@@ -375,9 +384,9 @@ const Navigation = props => {
           )}
         </Box>
         <Box className={styles['menu-scroll-wrapper']} onScroll={scrollMenu}>
-          <List className='nav-items'>
-            <div className={styles.sidebar}>{filteredMenu.map(node => renderNode(node, 0))}</div>
-          </List>
+        <List className='nav-items'>
+          <div className={styles.sidebar}>{filteredMenu.map(node => renderNode(node, 0))}</div>
+        </List>
         </Box>
       </SwipeableDrawer>
       {hidden ? (

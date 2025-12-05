@@ -330,7 +330,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
   const onCondition = row => {
     if (row.trackBy === 1) {
       return {
-        imgSrc: '/images/TableIcons/imgSerials.png',
+        imgSrc: require('@argus/shared-ui/src/components/images/TableIcons/imgSerials.png').default.src,
         hidden: false
       }
     } else {
@@ -417,7 +417,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'button',
       name: 'details',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png'
+        imgSrc:require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src
       },
       label: labels.details,
       onClick: (e, row, update, newRow) => {

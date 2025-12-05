@@ -211,7 +211,7 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
 
       <Box className={styles.buttonsBox}>
         <Button onClick={handleInputFileReset} variant='contained' className={styles.clearButton}>
-          <img src={`/images/buttonsIcons/clear.png`} alt='clear' className={styles.clearIcon} />
+          <img src={require(`@argus/shared-ui/src/components/images/buttonsIcons/clear.png`).default.src} alt='clear' className={styles.clearIcon} />
         </Button>
       </Box>
     </>

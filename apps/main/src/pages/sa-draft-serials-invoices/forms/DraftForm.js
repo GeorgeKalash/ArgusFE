@@ -497,7 +497,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              imgSrc: '@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png',
               hidden: false
             }
           } else {

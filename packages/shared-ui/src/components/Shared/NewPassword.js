@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
-import { Box, Button, DialogActions, Grid, IconButton, InputAdornment, LinearProgress } from '@mui/material'
+import React, { useContext, useState } from 'react'
+import { Box, Button, DialogActions, Grid, IconButton, LinearProgress } from '@mui/material'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const NewPassword = ({ formik, labels, score, setScore }) => {
+    const { platformLabels } = useContext(ControlContext)
   const [color, setColor] = useState('white')
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
@@ -105,7 +107,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           error={formik.touched.newPassword && formik.errors.newPassword}
           startIcons={[
             <div key='lock-icon' style={{ width: '20px', height: '20px' }}>
-              <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+              <img src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} style={{ width: '100%', height: '100%' }} />
             </div>
           ]}
           endIcons={[
@@ -141,7 +143,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           error={formik.touched.confirmPassword && formik.errors.confirmPassword}
           startIcons={[
             <div key='lock-icon-confirm' style={{ width: '20px', height: '20px' }}>
-              <img src='/images/password/forgotPWD3.png' style={{ width: '100%', height: '100%' }} />
+              <img src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} style={{ width: '100%', height: '100%' }} />
             </div>
           ]}
           endIcons={[
@@ -178,7 +180,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
               minWidth: '30px !important'
             }}
           >
-            <img src={'/images/buttonsIcons/save.png'} alt={'platformLabels.Submit'} />
+            <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/save.png').default.src} alt={platformLabels.Submit} />
           </Button>
         </Grid>
       </DialogActions>

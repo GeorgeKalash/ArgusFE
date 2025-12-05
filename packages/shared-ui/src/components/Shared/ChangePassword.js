@@ -8,7 +8,6 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import toast from 'react-hot-toast'
 import * as yup from 'yup'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
-import axios from 'axios'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import NewPassword from './NewPassword'
@@ -131,7 +130,7 @@ const ChangePassword = ({
                 startAdornment: (
                   <InputAdornment position='start'>
                     <IconButton edge='start'>
-                      <img src='/images/password/forgotPWD1.png' />
+                      <img src= {require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}/>
                     </IconButton>
                   </InputAdornment>
                 ),

@@ -429,7 +429,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
       component: 'button',
       name: 'costHistory',
       props: {
-        imgSrc: '/images/buttonsIcons/popup-black.png',
+        imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
         onCondition: row => {
           return {
             disabled: !row.itemId
@@ -463,7 +463,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
               hidden: false
             }
           } else {

@@ -871,7 +871,7 @@ export default function RetailTransactionsForm({
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '/images/buttonsIcons/tax-icon.png',
+              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
               hidden: false
             }
           } else {
@@ -883,7 +883,7 @@ export default function RetailTransactionsForm({
         }
       },
       label: labels.tax,
-      onClick: (e, row) => {
+      onClick: (_, row) => {
         stack({
           Component: TaxDetails,
           props: {

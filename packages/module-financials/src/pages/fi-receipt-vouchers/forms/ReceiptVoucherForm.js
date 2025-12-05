@@ -605,7 +605,10 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     onClick={() => openMCRForm(formik.values)}
                     disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   >
-                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
+                    <img 
+                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
+                      alt={platformLabels.add}
+                    />
                   </Button>
                 </Grid>
               </Grid>
