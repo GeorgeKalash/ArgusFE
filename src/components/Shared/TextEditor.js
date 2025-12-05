@@ -25,29 +25,10 @@ export default function TextEditor({ value = '', onChange }) {
 
     load()
   }, [value])
-  function debugDumpStyles(label, editorState) {
-    const raw = convertToRaw(editorState.getCurrentContent())
-    console.log('RAW DUMP:', label, raw)
-
-    // per-character styles
-    editorState
-      .getCurrentContent()
-      .getBlocksAsArray()
-      .forEach(block => {
-        console.log(`BLOCK ${block.getKey()} text: "${block.getText()}"`)
-        block.getCharacterList().forEach((charMeta, i) => {
-          const styles = Array.from(charMeta.getStyle())
-          if (styles.length) {
-            console.log(` char ${i} styles:`, styles)
-          }
-        })
-      })
-  }
 
   const handleEditorChange = data => {
     setEditorState(data)
     if (onChange) onChange(data)
-    debugDumpStyles('onChange', data)
   }
 
   const uploadImageCallBack = file => {

@@ -69,9 +69,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
       subject: yup.string().required()
     }),
     onSubmit: async obj => {
-      debugDumpStyles('before-submit', editorState)
-      debugDumpImages('before-submit-img', editorState)
-
       const html = draftToHtml(convertToRaw(editorState.getCurrentContent()), {
         entityStyleFn: entity => {
           const type = entity.get('type')
@@ -86,8 +83,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
           }
         }
       })
-
-      console.log(convertToRaw(editorState.getCurrentContent()))
 
       await postRequest({
         extension: AdministrationRepository.TemplateBody.set,
@@ -113,31 +108,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
     }
   }
 
-  function debugDumpImages(label, editorState) {
-    const content = editorState.getCurrentContent()
-    const blocks = content.getBlocksAsArray()
-    const entityMap = content.getEntityMap ? content.getEntityMap() : content._map // fallback for older versions
-
-    console.log(`IMAGE DEBUG: ${label}`)
-
-    blocks.forEach(block => {
-      if (block.getType() === 'atomic') {
-        const entityKey = block.getEntityAt(0)
-
-        if (entityKey !== null) {
-          const entity = content.getEntity(entityKey)
-
-          if (entity.getType() === 'IMAGE') {
-            const data = entity.getData()
-            console.log(`IMAGE FOUND -> blockKey: ${block.getKey()}, src: ${data.src}`)
-          }
-        }
-      }
-    })
-
-    console.log(`END IMAGE DEBUG: ${label}`)
-  }
-
   useEffect(() => {
     ;(async function () {
       if (recordId && languageId) {
@@ -147,9 +117,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
         })
 
         const decodedHTML = res?.record?.textBody ? decodeHtml(res.record.textBody) : ''
-
-        console.log(res?.record?.textBody)
-        console.log(decodedHTML, 'decodedHTML')
 
         setDecodedHtmlForEditor(decodedHTML)
 
@@ -184,8 +151,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
                   data: {}
                 }
               }
-
-              // Handle text alignment for block elements
               if (node.style && node.style.textAlign) {
                 const alignment = node.style.textAlign
 
@@ -212,7 +177,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
               }
 
               if (node.style.fontFamily) {
-                console.log(node.style.fontFamily)
                 const family = node.style.fontFamily.replace(/["']/g, '')
                 currentStyle = currentStyle.add(`fontfamily-${family}`)
               }
@@ -223,18 +187,12 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
 
           const newState = EditorState.createWithContent(contentState)
           setEditorState(newState)
-
-          // debug right after loading HTML
-          debugDumpStyles('after-load-from-html', newState)
-          debugDumpImages('after-load-from-html-img', newState)
         } else {
           setEditorState(EditorState.createEmpty())
         }
       }
     })()
   }, [])
-
-  const editMode = !!formik.values.recordId
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
