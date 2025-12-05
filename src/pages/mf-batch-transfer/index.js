@@ -8,55 +8,63 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
+import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { ControlContext } from 'src/providers/ControlContext'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import MetalSmeltingForm from './form/MetalSmeltingForm'
+import BatchTransferForm from './Form/BatchTransferForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
-export default function MetalSmelting() {
+const BatchTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params = [] } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.MetalSmelting.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
+      extension: ManufacturingRepository.BatchTransfer.page,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: ManufacturingRepository.BatchTransfer.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
-    refetch,
-    labels,
-    filterBy,
+    labels: labels,
+    search,
+    clear,
     paginationParameters,
+    refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.MetalSmelting.page,
-    datasetId: ResourceIds.MetalSmelting,
-    filter: {
-      filterFn: fetchWithSearch
+    endpointId: ManufacturingRepository.BatchTransfer.page,
+    datasetId: ResourceIds.BatchTransfer,
+    search: {
+      searchFn: fetchWithSearch
     }
   })
 
-  async function fetchWithSearch({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: FoundryRepository.MetalSmelting.snapshot,
-        parameters: `_filter=${filters.qry}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.BatchTransfer,
+    action: openForm
+  })
+
+  const add = async () => {
+    await proxyAction()
   }
 
   const columns = [
@@ -66,30 +74,29 @@ export default function MetalSmelting() {
       flex: 1
     },
     {
-      field: 'dtName',
-      headerName: labels.docType,
-      flex: 1
-    },
-    {
       field: 'date',
       headerName: labels.date,
       flex: 1,
       type: 'date'
     },
-
     {
-      field: 'plantName',
-      headerName: labels.plant,
+      field: 'fromWCName',
+      headerName: labels.fromWC,
       flex: 1
     },
     {
-      field: 'siteRef',
-      headerName: labels.siteRef,
+      field: 'toWCName',
+      headerName: labels.toWC,
       flex: 1
     },
     {
-      field: 'siteName',
-      headerName: labels.siteName,
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
+    },
+    {
+      field: 'releaseStatus',
+      headerName: labels.releaseStatus,
       flex: 1
     },
     {
@@ -105,30 +112,21 @@ export default function MetalSmelting() {
 
   function openForm(recordId) {
     stack({
-      Component: MetalSmeltingForm,
+      Component: BatchTransferForm,
       props: {
         labels,
         recordId,
-        access
+        maxAccess: access
       },
-      width: 1100,
-      height: 730,
-      title: labels.metalSmelting
+      width: 1000,
+      height: 750,
+      title: labels.batchTransfer
     })
-  }
-
-  const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.MetalSmelting,
-    action: openForm
-  })
-
-  const add = async () => {
-    await proxyAction()
   }
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.MetalSmelting.del,
+      extension: ManufacturingRepository.BatchTransfer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -138,7 +136,14 @@ export default function MetalSmelting() {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'FOTRX'} filterBy={filterBy} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -148,14 +153,15 @@ export default function MetalSmelting() {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
           pageSize={50}
+          paginationType='api'
           paginationParameters={paginationParameters}
           refetch={refetch}
-          paginationType='api'
           maxAccess={access}
         />
       </Grow>
     </VertLayout>
   )
 }
+
+export default BatchTransfer

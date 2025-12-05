@@ -29,6 +29,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
       const payload = {
         metalId: recordId,
         items: values.items
+          .filter(item => item?.itemId)
           .map((row, index) => ({
             ...row,
             metalId: recordId,
@@ -86,8 +87,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'name', value: 'Name' }
-        ],
-        displayFieldWidth: 1
+        ]
       }
     },
     {
@@ -110,13 +110,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
     >
       <VertLayout>
         <Grid item xs={12}>
-          <CustomTextField
-            name='metalRef'
-            label={labels.metal}
-            value={formik.values.metalRef}
-            readOnly
-            maxAccess={maxAccess}
-          />
+          <CustomTextField name='metalRef' label={labels.metal} value={formik.values.metalRef} readOnly />
         </Grid>
         <Grow>
           <DataGrid
