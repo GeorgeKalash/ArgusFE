@@ -7,6 +7,6 @@ export const iconMap = {
 }
 
 export const iconMapView = {
-  '%': <PercentIcon sx={{ width: '15px', height: '15px', mt: 2.5 }} />,
+  '%': <PercentIcon sx={{ width: '12px', height: '12px' }} />,
   123: ''
 }

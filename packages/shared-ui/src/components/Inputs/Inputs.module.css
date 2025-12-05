@@ -1,10 +1,10 @@
 .outlinedRoot {
   width: 100% !important;
-  height: 26px !important; 
+  height: 33px !important;
 }
 
 .fieldLabel {
-  white-space: normal !important;
+  white-space: normal !important;   
 }
 
 .outlinedNoBorder {
@@ -12,13 +12,14 @@
 }
 
 .inputLabel {
-  font-size: 13px !important;
-  
+  font-size: 14px !important;
+
 }
 
 .inputBase::placeholder {
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
+
 
 .iconButton {
   padding: 0px !important;
@@ -40,16 +41,51 @@
   border-radius: 4px !important;
 }
 
-
-/* ========== ≥ 1280px ========== */
-@media (min-width: 1280px) {
+/* @media (min-width: 2048px) and (max-width: 2566px) {
   .outlinedRoot {
-    height: 24px !important;
+    height: 45px !important;
+  }
+
+  .inputLabel {
+    font-size: 14px !important;
+  }
+
+  .inputLabelShrink {
+    font-size: 16px !important;
+
+  }
+
+  .inputBase {
+    font-size: 15.5px !important ;
+  }
+
+  .inputBase::placeholder {
+    font-size: 14px !important;
+  }
+
+  .iconButton {
+    padding: 0px !important;
+  }
+  .inputAdornment {
+    padding: 7px !important;
+    }
+
+  .icon {
+    font-size: 24px !important;
+    padding: 0px !important;
+  }
+
+
+} */
+
+@media (min-width: 1280px)  {
+  .outlinedRoot {
+    height: 30px !important;
     padding: 0px !important;
   }
 
   .inputLabel {
-    font-size: 11.5px !important;
+    font-size: 12px !important;
     top: -3px;
   }
 
@@ -59,13 +95,12 @@
   }
 
   .inputBase {
-    font-size: 11.5px !important;
+    font-size: 12px !important ;
   }
 
   .inputBase::placeholder {
-    font-size: 11.5px !important;
+    font-size: 12px !important;
   }
-
   .outlinedRoot:dir(ltr) .inputAdornment {
     margin-right: 5px !important;
   }
@@ -76,106 +111,114 @@
   .iconButton {
     margin: 0px !important;
   }
-
   .icon {
-    font-size: 18px !important;
+    font-size: 20px !important;
   }
+
+
 }
 
 @media (max-width: 1280px) {
+
+
   .inputLabel {
-    font-size: 10.5px !important;
+    font-size: 11px !important;
     padding: 0px !important;
     margin: 0px !important;
+  
   }
 
   .inputBase {
-    font-size: 10.5px !important;
+    font-size: 11px !important ;
   }
 
   .inputBase::placeholder {
-    font-size: 10.5px !important;
+    font-size: 11px !important;
   }
+  
 
-  .inputLabelShrink {
-    font-size: 10.5px !important;
+  .inputLabelShrink{
+    font-size: 10px !important;
     top: 3px !important;
-  }
+   }
 
   .outlinedRoot {
-    height: 22px !important;
+    height: 28px !important;
   }
+
+
 }
 
 @media (max-width: 1024px) {
-  .outlinedRoot {
-    height: 20px !important;
+  .outlinedRoot  {
+    height: 26px !important;
   }
 
   .inputLabel {
     line-height: 1rem !important;
-    font-size: 8.5px !important;
+    font-size: 9px !important;
     top: -2px !important;
   }
 
   .inputBase::placeholder {
-    font-size: 8.5px !important;
+    font-size: 9px !important;
   }
-
-  .inputLabelShrink {
-    font-size: 10.5px !important;
+  
+   .inputLabelShrink{
+    font-size: 10px !important;
     top: 3px !important;
-  }
+   }
 
   .inputBase {
-    font-size: 7.5px !important;
+    font-size: 8px !important;
   }
-
   .outlinedRoot:dir(ltr) .inputAdornment {
     margin-right: -5px !important;
   }
   .outlinedRoot:dir(rtl) .inputAdornment {
     margin-left: -5px !important;
   }
-
+ 
   .iconButton {
     margin: -1px !important;
   }
-
   .icon {
-    font-size: 17px !important;
+    font-size: 18px !important;
+
   }
+
 }
 
 @media (max-width: 768px) {
   .outlinedRoot {
-    height: 18px !important;
+    height: 24px !important;
   }
 
   .inputLabel {
-    font-size: 8.5px !important;
+    font-size: 9px !important;
   }
 
   .inputLabelShrink {
-    font-size: 9.5px !important;
+    font-size: 9px !important;
   }
 
   .inputBase {
-    font-size: 8.5px !important;
+    font-size: 9px !important;
   }
 
   .inputBase::placeholder {
-    font-size: 8.5px !important;
+    font-size: 9px !important;
   }
-
   .iconButton {
     padding: 0px !important;
   }
+
+
 }
 
 @media (max-width: 480px) {
   .outlinedRoot {
-    height: 17px !important;
+    height: 22px !important;
   }
 
   .outlinedFieldset {
@@ -183,33 +226,7 @@
   }
 
   .inputLabel {
-    font-size: 7.5px !important;
-  }
-
-  .inputLabelShrink {
-    font-size: 8.5px !important;
-  }
-
-  .inputBase {
-    font-size: 7.5px !important;
-  }
-
-  .inputBase::placeholder {
-    font-size: 7.5px !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .outlinedRoot {
-    height: 15px !important;
-  }
-
-  .outlinedFieldset {
-    border-radius: 2px !important;
-  }
-
-  .inputLabel {
-    font-size: 7px !important;
+    font-size: 8px !important;
   }
 
   .inputLabelShrink {
@@ -217,116 +234,39 @@
   }
 
   .inputBase {
+    font-size: 8px !important;
+  }
+
+  .inputBase::placeholder {
+    font-size: 8px !important;
+  }
+
+
+}
+
+@media (max-width: 360px) {
+  .outlinedRoot {
+    height: 20px !important;
+  }
+
+  .outlinedFieldset {
+    border-radius: 2px !important;
+  }
+
+  .inputLabel {
+    font-size: 7px !important;
+  }
+
+  .inputLabelShrink {
+    font-size: 7px !important;
+  }
+
+  .inputBase {
     font-size: 7px !important;
   }
 
   .inputBase::placeholder {
     font-size: 7px !important;
   }
-}
 
-
-
-
-/*******************/
-/* hon I adjusted the input height la input bs tkon search b grid toolbar  */
-/*******************/
-
-.searchRoot {
-  display: flex !important;
-  align-items: center !important;
-  min-height: 32px !important;     
-}
-
-.searchRoot :global(.MuiOutlinedInput-input) {
-  padding: 6px 10px !important;   
-  font-size: 14px !important;
-}
-
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .searchRoot {
-    min-height: 32px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 6px 8px !important;
-    font-size: 13px !important;
-  }
-}
-
-@media (max-width: 1024px) {
-  .searchRoot {
-    min-height: 30px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 5px 8px !important;
-    font-size: 12.5px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .searchRoot {
-    min-height: 28px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 4px 7px !important;
-    font-size: 12px !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .searchRoot {
-    min-height: 26px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 4px 6px !important;
-    font-size: 11.5px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .searchRoot {
-    min-height: 24px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 3px 5px !important;
-    font-size: 11px !important;
-  }
-}
-
-@media (max-width: 375px) {
-  .searchRoot {
-    min-height: 22px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 3px 4px !important;
-    font-size: 10.5px !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .searchRoot {
-    min-height: 20px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 2px 3px !important;
-    font-size: 10px !important;
-  }
-}
-
-@media (max-width: 320px) {
-  .searchRoot {
-    min-height: 18px !important;
-  }
-
-  .searchRoot :global(.MuiOutlinedInput-input) {
-    padding: 2px 2px !important;
-    font-size: 9.5px !important;
-  }
 }
