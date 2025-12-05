@@ -659,7 +659,7 @@ export function DataGrid({
     const centered =
     (column.component === 'checkbox' ||
     column.component === 'button' ||
-    column.component === 'icon' ) ?  'cellBoxCentered' : ''
+    column.component === 'icon' ) ?  'cellBoxCentered' : 'noCenterCell'
 
       return {
       ...column,

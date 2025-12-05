@@ -7,14 +7,13 @@
 }
 
 .agContainer.ag-theme-alpine {
-  --ag-header-height: 40px;
+  --ag-header-height: 20px !important;
   --ag-font-size: 0.9rem;
 }
 
 .agContainer :global(.ag-header),
 .agContainer :global(.ag-header-cell),
 .agContainer :global(.ag-header-row) {
-  min-height: var(--ag-header-height) !important;
   background: var(--ag-header-bg, #f5f5f5);
 }
 
@@ -38,7 +37,6 @@
 .agContainer :global(.ag-cell-value) {
   display: flex;
   align-items: center;
-  height: 100%;
   overflow: hidden; 
 }
 
@@ -46,7 +44,6 @@
   display: flex;
   align-items: center;
   height: auto;
-  min-height: var(--ag-row-height);
   padding: 0 !important;
 }
 
@@ -58,18 +55,16 @@
 .cellEditorBox {
   width: 100%;
   height: auto;                  
-  min-height: var(--ag-row-height);
   padding: 0px !important;
   display: flex;
   align-items: center;
   
 }
 
-
-.agContainer:dir(ltr) :global(.ag-cell) {
+.agContainer:dir(ltr) :global(.noCenterCell) {
   padding-right: 0 !important;
 }
-.agContainer:dir(rtl) :global(.ag-cell) {
+.agContainer:dir(rtl) :global(.noCenterCell) {
   padding-left: 0 !important;
 }
 
@@ -79,10 +74,12 @@
   margin: 0 !important; 
 }
 
+.cellEditorBoxCentered {
+  justify-content: center;
+}
 .cellEditorInner {
   width: 100%;
   height: auto;
-  min-height: var(--ag-row-height); 
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -121,12 +118,10 @@
   white-space: normal;
   line-height: 1.2;
   height: auto;
-  /* align-items: flex-start; */
 }
 
 .wrapTextCell .cellBox {
   height: auto;
-  /* align-items: flex-start; */
 }
 
 .agContainer :global(.ag-cell-focus),
@@ -152,7 +147,7 @@
 
 @media (min-width: 1920px) {
   .agContainer.ag-theme-alpine {
-    --ag-header-height: 44px;
+    /* --ag-header-height: 44px; */
     --ag-font-size: 1rem;
   }
 
@@ -167,16 +162,16 @@
 }
 
 @media (max-width: 1599px) {
+
   .agContainer.ag-theme-alpine {
-    --ag-header-height: 32px;
+    --ag-header-height: 15px  !important;;
     --ag-font-size: 11px;
   }
 
   .agContainer :global(.ag-header),
   .agContainer :global(.ag-header-cell),
   .agContainer :global(.ag-header-row) {
-    height: 32px !important;
-    min-height: 32px !important;
+    min-height: 15px !important;
   }
 
   .agContainer :global(.ag-header-cell-text),
@@ -194,8 +189,8 @@
   .agContainer :global(.ag-header),
   .agContainer :global(.ag-header-cell),
   .agContainer :global(.ag-header-row) {
-    height: 30px !important;
-    min-height: 30px !important;
+    /* height: 30px !important; */
+    /* min-height: 30px !important; */
   }
 
   .agContainer :global(.ag-header-cell-text),
@@ -213,8 +208,8 @@
   .agContainer :global(.ag-header),
   .agContainer :global(.ag-header-cell),
   .agContainer :global(.ag-header-row) {
-    height: 26px !important;
-    min-height: 26px !important;
+    /* height: 26px !important;
+    min-height: 26px !important; */
   }
 
   .agContainer :global(.ag-header-cell-text),
