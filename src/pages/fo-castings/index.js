@@ -172,7 +172,7 @@ const FoCastings = () => {
         recordId
       },
       width: 1150,
-      height: 700,
+      height: 750,
       title: labels.castings
     })
   }
