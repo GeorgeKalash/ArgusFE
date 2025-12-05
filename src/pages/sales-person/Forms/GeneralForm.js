@@ -117,7 +117,6 @@ export default function GeneralForm({ labels, maxAccess, store, setStore }) {
                 label={labels.name}
                 value={formik.values.name}
                 required
-                maxLength='15'
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('name', '')}
