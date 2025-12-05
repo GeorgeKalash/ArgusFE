@@ -13,8 +13,9 @@ import { AdministrationRepository } from 'src/repositories/AdministrationReposit
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import TextEditor from 'src/components/Shared/TextEditor'
-import { ContentState, convertToRaw, EditorState, convertFromHTML } from 'draft-js'
+import { ContentState, convertToRaw, EditorState, convertFromRaw } from 'draft-js'
 import draftToHtml from 'draftjs-to-html'
+import { convertFromHTML } from 'draft-convert'
 import Form from 'src/components/Shared/Form'
 
 export default function TemplateBodyForm({ labels, maxAccess, recordId, languageId, window }) {
@@ -33,6 +34,26 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
     return encodeURIComponent(protectedHtml)
   }
 
+  // add this helper somewhere in the file
+  function debugDumpStyles(label, editorState) {
+    const raw = convertToRaw(editorState.getCurrentContent())
+    console.log('RAW DUMP:', label, raw)
+
+    // per-character styles
+    editorState
+      .getCurrentContent()
+      .getBlocksAsArray()
+      .forEach(block => {
+        console.log(`BLOCK ${block.getKey()} text: "${block.getText()}"`)
+        block.getCharacterList().forEach((charMeta, i) => {
+          const styles = Array.from(charMeta.getStyle())
+          if (styles.length) {
+            console.log(` char ${i} styles:`, styles)
+          }
+        })
+      })
+  }
+
   const { formik } = useForm({
     initialValues: {
       recordId: null,
@@ -48,7 +69,25 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
       subject: yup.string().required()
     }),
     onSubmit: async obj => {
-      const html = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+      debugDumpStyles('before-submit', editorState)
+      debugDumpImages('before-submit-img', editorState)
+
+      const html = draftToHtml(convertToRaw(editorState.getCurrentContent()), {
+        entityStyleFn: entity => {
+          const type = entity.get('type')
+          const data = entity.getData()
+
+          if (type === 'LINK') {
+            return {
+              element: 'a',
+              attributes: { href: data.url },
+              style: {}
+            }
+          }
+        }
+      })
+
+      console.log(convertToRaw(editorState.getCurrentContent()))
 
       await postRequest({
         extension: AdministrationRepository.TemplateBody.set,
@@ -74,6 +113,31 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
     }
   }
 
+  function debugDumpImages(label, editorState) {
+    const content = editorState.getCurrentContent()
+    const blocks = content.getBlocksAsArray()
+    const entityMap = content.getEntityMap ? content.getEntityMap() : content._map // fallback for older versions
+
+    console.log(`IMAGE DEBUG: ${label}`)
+
+    blocks.forEach(block => {
+      if (block.getType() === 'atomic') {
+        const entityKey = block.getEntityAt(0)
+
+        if (entityKey !== null) {
+          const entity = content.getEntity(entityKey)
+
+          if (entity.getType() === 'IMAGE') {
+            const data = entity.getData()
+            console.log(`IMAGE FOUND -> blockKey: ${block.getKey()}, src: ${data.src}`)
+          }
+        }
+      }
+    })
+
+    console.log(`END IMAGE DEBUG: ${label}`)
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId && languageId) {
@@ -84,6 +148,9 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
 
         const decodedHTML = res?.record?.textBody ? decodeHtml(res.record.textBody) : ''
 
+        console.log(res?.record?.textBody)
+        console.log(decodedHTML, 'decodedHTML')
+
         setDecodedHtmlForEditor(decodedHTML)
 
         formik.setValues({
@@ -92,9 +159,74 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
         })
 
         if (decodedHTML) {
-          const blocksFromHTML = convertFromHTML(decodedHTML)
-          const contentState = ContentState.createFromBlockArray(blocksFromHTML.contentBlocks, blocksFromHTML.entityMap)
-          setEditorState(EditorState.createWithContent(contentState))
+          const contentState = convertFromHTML({
+            htmlToEntity: (nodeName, node, createEntity) => {
+              if (nodeName === 'img') {
+                const img = createEntity('IMAGE', 'IMMUTABLE', {
+                  src: node.getAttribute('src'),
+                  alt: node.getAttribute('alt'),
+                  style: node.getAttribute('style')
+                })
+
+                return img
+              }
+
+              if (nodeName === 'a') {
+                return createEntity('LINK', 'MUTABLE', {
+                  url: node.getAttribute('href')
+                })
+              }
+            },
+            htmlToBlock: (nodeName, node) => {
+              if (nodeName === 'img') {
+                return {
+                  type: 'atomic',
+                  data: {}
+                }
+              }
+
+              // Handle text alignment for block elements
+              if (node.style && node.style.textAlign) {
+                const alignment = node.style.textAlign
+
+                return {
+                  type: nodeName === 'li' ? 'unordered-list-item' : nodeName === 'p' ? 'unstyled' : null,
+                  data: { 'text-align': alignment }
+                }
+              }
+
+              return null
+            },
+            htmlToStyle: (nodeName, node, currentStyle) => {
+              console.log(node.style)
+              if (node.style.color) {
+                currentStyle = currentStyle.add(`color-${node.style.color}`)
+              }
+              if (nodeName === 'ins') {
+                currentStyle = currentStyle.add('UNDERLINE')
+              }
+
+              if (node.style.fontSize) {
+                const size = node.style.fontSize.replace('px', '')
+                currentStyle = currentStyle.add(`fontsize-${size}`)
+              }
+
+              if (node.style.fontFamily) {
+                console.log(node.style.fontFamily)
+                const family = node.style.fontFamily.replace(/["']/g, '')
+                currentStyle = currentStyle.add(`fontfamily-${family}`)
+              }
+
+              return currentStyle
+            }
+          })(decodedHTML)
+
+          const newState = EditorState.createWithContent(contentState)
+          setEditorState(newState)
+
+          // debug right after loading HTML
+          debugDumpStyles('after-load-from-html', newState)
+          debugDumpImages('after-load-from-html-img', newState)
         } else {
           setEditorState(EditorState.createEmpty())
         }
@@ -105,7 +237,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
   const editMode = !!formik.values.recordId
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={editMode}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
