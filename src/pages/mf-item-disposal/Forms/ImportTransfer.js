@@ -16,30 +16,20 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
       materialsTfr: '',
-      wcSiteId: parseInt(form?.values?.wcSiteId) || null,
-      items: [
-        {
-          id: 1,
-          trxId: null,
-          seqNo: null,
-          itemId: null,
-          itemName: '',
-          sku: '',
-          qty: 0,
-          trackby: null
-        }
-      ]
+      wcSiteId: parseInt(form?.values?.wcSiteId) || null
     },
     maxAccess,
     validationSchema: yup.object({
       materialsTfr: yup.string().required()
     }),
     onSubmit: async obj => {
-      if (obj?.items?.length) form.setFieldValue('items', obj?.items)
-
-      window.close()
+      if (!obj.materialsTfr) return
+      const importedItems = await isValidTfr(obj?.materialsTfr)
+      if (importedItems.some(item => item?.itemId)) {
+        form.setFieldValue('items', importedItems)
+        window.close()
+      } else formik.setFieldValue('materialsTfr', '')
     }
   })
 
@@ -86,9 +76,8 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
     for (const err of errors) {
       if (err.condition) {
         stackError({ message: err.message })
-        formik.setValues({ ...formik.values, materialsTfr: '', items: formik?.initialValues?.items })
 
-        return
+        return form?.values?.items || []
       }
     }
 
@@ -110,12 +99,13 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
           return {
             ...item,
             id: index + 1,
-            serials: list
+            serials: list,
+            serialCount: list.length
           }
         })
-      : formik?.initialValues?.items
+      : form?.values?.items || []
 
-    formik.setValues({ ...formik.values, materialsTfr: value || '', items: mappedItems })
+    return mappedItems
   }
 
   return (
@@ -128,7 +118,7 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
                 name='materialsTfr'
                 label={labels.materialsTfr}
                 value={formik.values.materialsTfr}
-                onBlur={e => isValidTfr(e?.target?.value)}
+                onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('materialsTfr', '')}
                 error={formik.touched.materialsTfr && Boolean(formik.errors.materialsTfr)}
                 maxAccess={maxAccess}

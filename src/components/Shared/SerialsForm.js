@@ -71,7 +71,7 @@ export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, di
       updateRow({
         changes: {
           serials,
-          ...(row?.serialCount && { serialCount: serials?.length || 0 })
+          ...(row?.hasOwnProperty('serialCount') && { serialCount: serials?.length || 0 })
         }
       })
       window.close()

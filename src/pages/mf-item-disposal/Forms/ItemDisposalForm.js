@@ -67,7 +67,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           itemName: '',
           sku: '',
           qty: 0,
-          trackby: null
+          trackby: null,
+          serialCount: 0
         }
       ],
       serials: []
@@ -223,7 +224,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
           stack({
             Component: SerialsForm,
             props: {
-              row,
+              row: { ...row, serialCount: row?.serialCount || 0 },
               siteId: formik?.values?.siteId,
               checkForSiteId: true,
               updateRow
