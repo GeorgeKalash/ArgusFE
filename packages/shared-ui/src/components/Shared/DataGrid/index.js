@@ -67,7 +67,7 @@ export function DataGrid({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-  width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1366 ? 32 : width <= 1600 ? 30 : 30
+  width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
 
   function checkDuplicates(field, data) {

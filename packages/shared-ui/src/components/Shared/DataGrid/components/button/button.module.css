@@ -2,7 +2,7 @@
 .gridButton {
     opacity: 1;
     width: 10px ;
-    height: 20px;
+    height: auto;
     object-fit: contain; 
     min-width: 0 !important; 
   }
