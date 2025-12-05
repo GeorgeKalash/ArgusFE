@@ -50,6 +50,8 @@ export function DataGrid({
 
   const [ready, setReady] = useState(false)
 
+  const [columnState, setColumnState] = useState()
+
   const skip = allowDelete ? 1 : 0
 
   const gridContainerRef = useRef(null)
@@ -518,13 +520,8 @@ export function DataGrid({
       process(params, oldRow, setData)
     }
 
-    const centered =
-      column.colDef.component === 'checkbox' ||
-      column.colDef.component === 'button' ||
-      column.colDef.component === 'icon'
-
     return (
-      <Box className={`${styles.cellBox} ${centered ? styles.cellBoxCentered : ''}`}>
+      <Box className={`${styles.cellBox}`} >
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -659,6 +656,10 @@ export function DataGrid({
       styles.wrapTextCell
     ]
 
+    const centered =
+    (column.component === 'checkbox' ||
+    column.component === 'button' ||
+    column.component === 'icon' ) ?  'cellBoxCentered' : ''
 
       return {
       ...column,
@@ -673,7 +674,7 @@ export function DataGrid({
       cellEditor: CustomCellEditor,
       wrapText: true ,
       autoHeight: true,
-      cellClass: mergedCellClass || undefined,
+      cellClass: `${mergedCellClass  || undefined}  ${centered}`,
       ...(column?.checkAll?.visible && {
         headerComponent: () => {
           const selectAll = e => {
@@ -754,12 +755,9 @@ export function DataGrid({
       const pressedButton = event.target.closest(BUTTON_SELECTOR)
 
       if (
-        (gridContainerRef.current &&
-          !gridContainerRef.current.contains(event.target) &&
+        !event.target.closest('.ag-cell') &&
           !pressedButton?.closest('.MuiPaper-root') &&
-          gridApiRef.current?.getEditingCells()?.length > 0 &&
-          !event.target.classList.contains('MuiAutocomplete-option')) ||
-        event.target.closest('.ag-header-row')
+          gridApiRef.current?.getEditingCells()?.length > 0 
       ) {
         gridApiRef.current?.stopEditing()
       } else {
@@ -873,6 +871,27 @@ export function DataGrid({
 
 
 
+  const onColumnResized = params => {
+    if (params?.source === 'uiColumnResized') {
+      const columnState = params.columnApi.getColumnState()
+    setColumnState(columnState)
+  }
+}
+
+const finalColumns =  columnDefs?.map(def => {
+  const colId = def.field
+  console.log(colId)
+  const state = columnState?.find(s => s.colId === colId)
+
+  if (!state) return def
+
+  return {
+    ...def,
+    flex: undefined,    
+    width: state.width   
+  }
+})
+
   return (
     <Box className={styles.root} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
@@ -880,13 +899,14 @@ export function DataGrid({
           className={`ag-theme-alpine ${styles.agContainer}`}
           ref={gridContainerRef}
           style={{ '--ag-header-bg': bg }}
+          
         >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
               domLayout='autoHeight'
-              columnDefs={columnDefs}
+              columnDefs={finalColumns}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
               stopEditingWhenCellsLoseFocus={false}
@@ -900,6 +920,7 @@ export function DataGrid({
               }}
               onCellKeyDown={onCellKeyDown}
               onCellClicked={onCellClicked}
+              onColumnResized={onColumnResized}
               getRowId={params => params?.data?.id}
               tabToNextCell={() => true}
               tabToPreviousCell={() => true}
