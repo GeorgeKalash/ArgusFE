@@ -359,13 +359,16 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotTFR',
     post: service + 'postTFR',
     close: service + 'closeTFR',
-    reopen: service + 'reopenTFR'
+    reopen: service + 'reopenTFR',
+    qry: service + 'qryTFR'
   },
   JobWorkCenter: {
     qry: service + 'qryJWC',
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC',
-    get: service + 'getJWC'
+    get: service + 'getJWC',
+    snapshot: service + 'snapshotJWC',
+    verify: service + 'verifyJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
@@ -421,6 +424,18 @@ export const ManufacturingRepository = {
   },
   ProductionOrderFromSaleOrder: {
     gen: service + 'generatePOFromSO'
+  },
+  BatchTransfer: {
+    page: service + 'pageBTFR',
+    set2: service + 'set2BTFR',
+    del: service + 'delBTFR',
+    snapshot: service + 'snapshotBTFR',
+    get: service + 'getBTFR',
+    post: service + 'postBTFR',
+    unpost: service + 'unpostBTFR'
+  },
+  BatchTransferJob: {
+    qry: service + 'qryBTFJ'
   },
   Disposal: {
     page: service + 'pageDIS',
