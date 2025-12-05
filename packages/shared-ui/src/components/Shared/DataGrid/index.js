@@ -653,16 +653,6 @@ export function DataGrid({
 
   const columnDefs = [
     ...allColumns.map(column => {
-      const isReadOnlyTextColumn =
-        column.component === 'textfield' && (column?.props?.readOnly || column?.props?.disabled)
-
-      const mergedCellClass = [
-        column.cellClass,
-        isReadOnlyTextColumn ? styles.readOnlyTextCell : null
-      ]
-        .filter(Boolean)
-        .join(' ')
-
       return {
       ...column,
       ...{ width: column.width + additionalWidth },
