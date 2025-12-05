@@ -34,26 +34,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
     return encodeURIComponent(protectedHtml)
   }
 
-  // add this helper somewhere in the file
-  function debugDumpStyles(label, editorState) {
-    const raw = convertToRaw(editorState.getCurrentContent())
-    console.log('RAW DUMP:', label, raw)
-
-    // per-character styles
-    editorState
-      .getCurrentContent()
-      .getBlocksAsArray()
-      .forEach(block => {
-        console.log(`BLOCK ${block.getKey()} text: "${block.getText()}"`)
-        block.getCharacterList().forEach((charMeta, i) => {
-          const styles = Array.from(charMeta.getStyle())
-          if (styles.length) {
-            console.log(` char ${i} styles:`, styles)
-          }
-        })
-      })
-  }
-
   const { formik } = useForm({
     initialValues: {
       recordId: null,
