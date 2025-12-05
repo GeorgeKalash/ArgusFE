@@ -1,0 +1,169 @@
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import ProductionSheetForm from './Forms/ProductionSheetForm'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+
+const ProductionSheet = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: ManufacturingRepository.ProductionSheet.qry,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    paginationParameters,
+    refetch,
+    access,
+    invalidate,
+    filterBy
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: ManufacturingRepository.ProductionSheet.qry,
+    datasetId: ResourceIds.ProductionSheet,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'date',
+      headerName: _labels.date,
+      flex: 1,
+      type: 'date'
+    },
+
+    {
+      field: 'siteRef',
+      headerName: _labels.siteRef,
+      flex: 1
+    },
+    {
+      field: 'siteName',
+      headerName: _labels.site,
+      flex: 1
+    },
+    {
+      field: 'plantName',
+      headerName: _labels.plant,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: _labels.status,
+      flex: 1
+    }
+  ]
+
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  const getPlantId = async () => {
+    const userId = getStorageData('userData').userId
+
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.get,
+      parameters: `_userId=${userId}&_key=plantId`
+    })
+
+    return res?.record?.value
+  }
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.ProductionSheet.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
+
+  function OpenProductionSheetForm(plantId, recordId) {
+    stack({
+      Component: ProductionSheetForm,
+      props: {
+        labels: _labels,
+        recordId,
+        plantId,
+        maxAccess: access
+      },
+      width: 1000,
+      height: 680,
+      title: _labels.ProductionSheet
+    })
+  }
+
+  async function openForm(recordId) {
+    const plantId = await getPlantId()
+
+    OpenProductionSheetForm(plantId, recordId)
+  }
+
+  const del = async obj => {
+    await postRequest({
+      extension: ManufacturingRepository.ProductionSheet.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <RPBGridToolbar onAdd={add} labels={_labels} maxAccess={access} reportName={'MFPST'} filterBy={filterBy} />
+      </Fixed>
+      <Grow>
+        <Table
+          name='table'
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          isLoading={false}
+          pageSize={50}
+          paginationType='api'
+          paginationParameters={paginationParameters}
+          refetch={refetch}
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
+
+export default ProductionSheet
