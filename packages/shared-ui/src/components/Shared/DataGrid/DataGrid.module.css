@@ -105,15 +105,15 @@
   margin-left: 50px !important;
 }
 
-.readOnlyTextCell :global(.ag-cell-wrapper),
-.readOnlyTextCell :global(.ag-cell-value) {
+.wrapTextCell :global(.ag-cell-wrapper),
+.wrapTextCell :global(.ag-cell-value) {
   white-space: normal;
   line-height: 1.2;
   height: auto;
   align-items: flex-start;
 }
 
-.readOnlyTextCell .cellBox {
+.wrapTextCell .cellBox {
   height: auto;
   align-items: flex-start;
 }

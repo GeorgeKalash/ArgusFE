@@ -653,6 +653,13 @@ export function DataGrid({
 
   const columnDefs = [
     ...allColumns.map(column => {
+ 
+    const mergedCellClass = [
+      column.cellClass,
+      styles.wrapTextCell
+    ]
+
+
       return {
       ...column,
       ...{ width: column.width + additionalWidth },
