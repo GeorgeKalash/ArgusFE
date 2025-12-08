@@ -14,17 +14,61 @@ import { LoanManagementRepository } from '@argus/repositories/src/repositories/L
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const iconOptions = [
-  { key: 'Aid-kit', value: 'Aid-kit', icon: '/images/icons/project-icons/Aid-Kit.png' },
-  { key: 'Birthday', value: 'Birthday', icon: '/images/icons/project-icons/Birthday.png' },
-  { key: 'Calendar', value: 'Calendar', icon: '/images/icons/project-icons/Calendar.png' },
-  { key: 'Graduation', value: 'Graduation', icon: '/images/icons/project-icons/Graduation.png' },
-  { key: 'Engagement', value: 'Engagement', icon: '/images/icons/project-icons/Engagement.png' },
-  { key: 'Home', value: 'Home', icon: '/images/icons/project-icons/Home.png' },
-  { key: 'Injury', value: 'Injury', icon: '/images/icons/project-icons/Injury.png' },
-  { key: 'Maternity', value: 'Maternity', icon: '/images/icons/project-icons/Maternity.png' },
-  { key: 'Palm-Tree', value: 'Palm-Tree', icon: '/images/icons/project-icons/Palm-Tree.png' },
-  { key: 'Plane', value: 'Plane', icon: '/images/icons/project-icons/Plane.png' },
-  { key: 'Sport', value: 'Sport', icon: '/images/icons/project-icons/Sport.png' }
+  {
+    key: 'Aid-kit',
+    value: 'Aid-kit',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Aid-Kit.png').default.src
+  },
+  {
+    key: 'Birthday',
+    value: 'Birthday',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Birthday.png').default.src
+  },
+  {
+    key: 'Calendar',
+    value: 'Calendar',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Calendar.png').default.src
+  },
+  {
+    key: 'Graduation',
+    value: 'Graduation',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Graduation.png').default.src
+  },
+  {
+    key: 'Engagement',
+    value: 'Engagement',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Engagement.png').default.src
+  },
+  {
+    key: 'Home',
+    value: 'Home',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Home.png').default.src
+  },
+  {
+    key: 'Injury',
+    value: 'Injury',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Injury.png').default.src
+  },
+  {
+    key: 'Maternity',
+    value: 'Maternity',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Maternity.png').default.src
+  },
+  {
+    key: 'Palm-Tree',
+    value: 'Palm-Tree',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Palm-Tree.png').default.src
+  },
+  {
+    key: 'Plane',
+    value: 'Plane',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Plane.png').default.src
+  },
+  {
+    key: 'Sport',
+    value: 'Sport',
+    icon: require('@argus/shared-ui/src/components/images/icons/project-icons/Sport.png').default.src
+  }
 ]
 
 export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }) {

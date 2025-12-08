@@ -1,13 +1,6 @@
-// ** React Import
 import { Children } from 'react'
-
-// ** Next Import
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-
-// ** Emotion Imports
 import createEmotionServer from '@emotion/server/create-instance'
-
-// ** Utils Imports
 import { createEmotionCache } from '@argus/shared-core/src/@core/utils/create-emotion-cache'
 
 class CustomDocument extends Document {
@@ -21,8 +14,8 @@ class CustomDocument extends Document {
             rel='stylesheet'
             href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
           />
-          <link rel='apple-touch-icon' sizes='180x180' href='/images/apple-touch-icon.png' />
-          <link rel='shortcut icon' href='/images/favicon.png' />
+          <link rel='apple-touch-icon' sizes='180x180' href='/apple-touch-icon.png' />
+          <link rel='shortcut icon' href='/favicon.png' />
         </Head>
         <body>
           <Main />

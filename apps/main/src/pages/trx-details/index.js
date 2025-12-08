@@ -17,6 +17,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DataForm from './form/DataForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const TrxDetails = () => {
   const [data, setData] = useState([])
@@ -215,28 +216,15 @@ const TrxDetails = () => {
             />
           </Grid>
           <Grid item xs={2}>
-            <Button
+            <CustomButton
               onClick={() => {
                 if (formik.values.startDate && formik.values.endDate) {
                   fetchData()
                 }
               }}
-              variant='contained'
-              sx={{
-                mr: 1,
-                backgroundColor: '#231f20',
-                '&:hover': {
-                  backgroundColor: '#231f20',
-                  opacity: 0.8
-                },
-                width: '65px !important',
-                height: '40px',
-                objectFit: 'contain',
-                minWidth: '30px !important'
-              }}
-            >
-              <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
-            </Button>
+              image={'preview.png'}
+              tooltipText={platformLabels.Preview}
+            />
           </Grid>
           <Grid item xs={6}></Grid>
         </Grid>

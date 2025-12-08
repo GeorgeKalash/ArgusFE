@@ -127,7 +127,7 @@ const SiteDashboard = () => {
                 onClick={() => formik.handleSubmit()}
               >
                 <Tooltip title={platformLabels.Preview}>
-                  <img src='/images/buttonsIcons/preview.png' alt={platformLabels.Preview} />
+                  <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/preview.png').default.src} alt={platformLabels.Preview} />
                 </Tooltip>
               </Button>
             </Grid>

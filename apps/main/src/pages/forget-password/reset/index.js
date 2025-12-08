@@ -94,7 +94,12 @@ const Reset = () => {
                     placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
                     startIcons={[
-                      <img key='icon' src='/images/password/mail.png' alt='mail icon' class={styles.imageMail} />
+                      <img
+                        key='icon'
+                        src={require('@argus/shared-ui/src/components/images/password/mail.png').default.src}
+                        alt='mail icon'
+                        class={styles.imageMail}
+                      />
                     ]}
                     onClear={() => formik.setFieldValue('username', '')}
                   />

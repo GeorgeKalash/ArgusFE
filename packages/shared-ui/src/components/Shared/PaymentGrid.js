@@ -98,7 +98,7 @@ export default function PaymentGrid({ isPosted, value, amount, ...rest }) {
   const onCondition = row => {
     if (row.type == 3) {
       return {
-        imgSrc: '/images/buttonsIcons/open-external.png',
+        imgSrc:require('@argus/shared-ui/src/components/images/buttonsIcons/open-external.png').default.src,
         hidden: false,
         disabled: !editMode || row.type != 3
       }

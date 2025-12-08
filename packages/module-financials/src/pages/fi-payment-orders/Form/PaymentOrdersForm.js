@@ -404,8 +404,10 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     onClick={() => openMCRForm(formik.values)}
                     disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
                   >
-                    <img src='/images/buttonsIcons/popup.png' alt={platformLabels.add} />
-                  </Button>
+                    <img 
+                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
+                      alt={platformLabels.add}
+                    />                  </Button>
                 </Grid>
               </Grid>
             </Grid>

@@ -408,7 +408,7 @@ export default function PuQtnForm({ recordId, window }) {
       props: {
         onCondition: row => {
           return {
-            imgSrc: row.itemId && row.taxId ? '/images/buttonsIcons/tax-icon.png' : '',
+            imgSrc: row.itemId && row.taxId ? require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src : '',
             hidden: !(row.itemId && row.taxId)
           }
         }
