@@ -22,14 +22,21 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
+  const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
-  const metalRef = useRef({})
-
+  const alloyMetalItems = useRef({})
   const functionId = SystemFunction.MetalSmelting
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -46,6 +53,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
 
+  const scrapsConditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
+
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
@@ -57,7 +72,16 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         plantId,
         reference: '',
         siteId,
-        status: 1
+        status: 1,
+        workCenterId: null,
+        itemId: null,
+        qty: null,
+        extendedAlloy: 0,
+        totalAlloy: 0,
+        purity: null,
+        metalId: null,
+        smeltingMaxAllowedVariation: null,
+        notes: ''
       },
       items: [
         {
@@ -69,33 +93,65 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           purity: 0,
           qty: 0,
           seqNo: 1,
-          metalValue: null,
           trxId: recordId || 0,
-          onHand: 0
+          type: null,
+          currentCost: 0,
+          qtyAtPurity: 0,
+          expectedAlloyQty: 0
         }
-      ]
+      ],
+      scraps: [{ id: 1, itemId: null, sku: '', itemName: '', qty: null }]
     },
     maxAccess,
-    validateOnChange: true,
+    conditionSchema: ['scraps'],
     validationSchema: yup.object({
       header: yup.object({
         date: yup.string().required(),
         siteId: yup.number().required(),
-        plantId: yup.number().required()
+        plantId: yup.number().required(),
+        itemId: yup.number().required(),
+        workCenterId: yup.number().required(),
+        purity: yup.number().required(),
+        qty: yup.number().required()
       }),
       items: yup
         .array()
         .of(
           yup.object().shape({
-            metalId: yup.string().required(),
+            type: yup.number().required(),
+            metalId: yup.number().test(function (value) {
+              if (this.parent.type == 1) {
+                return !!value
+              }
+
+              return true
+            }),
             qty: yup.number().required(),
-            purity: yup.number().required().moreThan(0),
+            purity: yup.number().test(function (value) {
+              if (this.parent.type == 1) {
+                return !!value && value > 0
+              }
+
+              return true
+            }),
             sku: yup.string().required()
           })
         )
-        .required()
+        .required(),
+      scraps: yup.array().of(schema)
     }),
     onSubmit: async obj => {
+      if (
+        obj.header?.smeltingMaxAllowedVariation &&
+        expectedAlloy - totalAlloy > obj.header?.smeltingMaxAllowedVariation
+      ) {
+        stackError({
+          message: labels.smeltingMaxAllowedVariation
+        })
+
+        return
+      }
+
       const payload = getPayload(obj)
 
       const response = await postRequest({
@@ -110,23 +166,79 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date) },
-      items: obj.items?.map(item => ({
+      header: { ...obj.header, date: formatDateToApi(obj.header.date), qtyDiff },
+      items: obj.items?.map((item, index) => ({
+        ...item,
         trxId: obj?.recordId || 0,
-        seqNo: item.id,
-        metalId: item.metalId,
-        itemId: item.itemId,
-        qty: item.qty,
+        seqNo: index + 1,
         purity: item.purity / 1000
-      }))
+      })),
+      scraps: (obj?.scraps || [])
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((item, index) => ({
+          ...item,
+          trxId: obj?.recordId || 0,
+          seqNo: index + 1
+        }))
     }
   }
-
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
-  const calculateTotal = key => formik.values.items.reduce((sum, item) => sum + (parseFloat(item[key]) || 0), 0)
-  const totalQty = calculateTotal('qty')
-  const totalMetal = calculateTotal('metalValue')
+
+  const calculateTotal = (key, typeFilter = null) =>
+    formik.values.items.reduce((sum, item) => {
+      if (typeFilter && item.type != typeFilter) return sum
+
+      return sum + (parseFloat(item[key]) || 0)
+    }, 0)
+
+  const scrapQty = formik?.values?.scraps?.reduce((sum, item) => {
+    return sum + (parseFloat(item.qty) || 0)
+  }, 0)
+
+  const qtyIn = parseFloat(formik.values?.header?.qty || 0) + parseFloat(scrapQty || 0)
+  const qtyOut = calculateTotal('qty')
+
+  const qtyDiff = recalc
+    ? parseFloat(qtyOut || 0) - parseFloat(formik.values?.header?.qty || 0)
+    : formik.values?.header?.qtyDiff || 0
+  const totalAlloy = calculateTotal('qty', 2)
+  const expectedAlloy = calculateTotal('expectedAlloyQty')
+  const headerPurity = parseFloat(formik.values?.header?.purity)
+
+  const totalDesiredPurity = headerPurity
+    ? formik.values.items.reduce((sum, item) => {
+        if (item.type != 1) return sum
+
+        const qty = parseFloat(item.qty) || 0
+        const purity = parseFloat(item.purity) || 0
+
+        return sum + (qty * purity) / headerPurity
+      }, 0)
+    : 0
+
+  const expectedAlloyQtyPerRow = (qtyAtPurity, qty) => {
+    return parseFloat(qtyAtPurity) - parseFloat(qty)
+  }
+
+  const qtyAtPurityPerRow = (qty, purity, headerPurity) => {
+    return Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity))
+  }
+
+  const updatePurityRelatedFields = headerPurity => {
+    const updatedList = formik.values?.items?.map(item => {
+      const qtyAtPurity =
+        item?.type == 1 ? qtyAtPurityPerRow(item?.qty || 0, item?.purity || 0, headerPurity || 0) : item?.qtyAtPurity
+
+      return {
+        ...item,
+        expectedAlloyQty:
+          item?.type == 1 ? expectedAlloyQtyPerRow(qtyAtPurity || 0, item?.qty || 0) : item?.expectedAlloyQty,
+        qtyAtPurity
+      }
+    })
+    formik.setFieldValue('items', updatedList)
+  }
 
   const onPost = async () => {
     await postRequest({
@@ -150,12 +262,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     invalidate()
   }
 
-  function getFilteredMetal(metalId) {
-    filteredItems.current = metalId
-      ? allMetals.filter(metal => {
-          return metal.metalId === metalId
-        })
-      : []
+  async function fillSKUStore(metalId, flag) {
+    if (flag == 'metal')
+      filteredItems.current = metalId
+        ? allMetals.filter(metal => {
+            return metal.metalId === metalId
+          })
+        : []
+    else filteredItems.current = alloyMetalItems.current || []
   }
 
   async function getAllMetals() {
@@ -166,36 +280,76 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     setAllMetals(res?.list)
   }
 
-  async function refetchForm(recordId) {
-    const metal = metalRef.current
+  async function getUnitCost(itemId) {
+    if (!itemId) return
 
+    const res = await getRequest({
+      extension: InventoryRepository.CurrentCost.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.currentCost
+  }
+
+  async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FoundryRepository.MetalSmelting.get,
+      extension: FoundryRepository.MetalSmelting.get2,
       parameters: `_recordId=${recordId}`
     })
 
-    const { list } = await getRequest({
-      extension: FoundryRepository.TransactionItems.qry,
-      parameters: `_trxId=${recordId}`
-    })
+    if (!record) {
+      formik.setValues({ ...formik.initialValues })
 
-    const modifiedList = list?.map((item, index) => ({
+      return
+    }
+
+    const dtInfo = await selectedDocTypeInfo(record?.header?.dtId || null)
+
+    const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalValue: metal ? ((item.qty * item.purity) / metal?.purity).toFixed(2) : null
+      metalId: item.metalId || ''
     }))
+
+    const scrapsList = (record?.scraps || []).map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+
     formik.setValues({
-      recordId: record?.recordId,
+      recordId: record?.header?.recordId,
       header: {
-        ...record,
-        date: formatDateFromApi(record.date)
+        ...(record?.header || {}),
+        date: formatDateFromApi(record?.header?.date),
+        smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null
       },
-      items: modifiedList?.length > 0 ? modifiedList : formik.values.items
+      items: itemsList?.length ? itemsList : formik.initialValues.items,
+      scraps: scrapsList?.length ? scrapsList : formik.initialValues?.scraps
     })
+    setRecalc(false)
   }
 
   const columns = [
+    {
+      component: 'resourcecombobox',
+      label: labels.type,
+      name: 'type',
+      props: {
+        datasetId: DataSets.SMELTING_METAL_TYPE,
+        displayField: 'value',
+        valueField: 'key',
+        displayFieldWidth: 2,
+        mapping: [
+          { from: 'key', to: 'type' },
+          { from: 'value', to: 'typeName' }
+        ]
+      },
+      onChange: async ({ row: { update, newRow } }) => {
+        if (newRow?.type == 2) fillSKUStore()
+        update({ itemId: null, sku: '', itemName: '', metalId: '', metalRef: '', purity: 0 })
+      }
+    },
     {
       component: 'resourcecombobox',
       label: labels.metal,
@@ -212,10 +366,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         ]
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: !!row.itemId }
+        return { ...props, readOnly: !!row.itemId || row.type == 2 }
       },
       onChange: async ({ row: { update, newRow } }) => {
-        getFilteredMetal(newRow?.metalId)
+        fillSKUStore(newRow?.metalId, 'metal')
         if (newRow.purity) update({ purity: newRow.purity * 1000 })
       }
     },
@@ -232,20 +386,20 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' }
         ],
-        displayFieldWidth: 2
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'itemName', value: 'Item Name' }
+        ],
+        displayFieldWidth: 3.5
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredItems?.current }
       },
       onChange: async ({ row: { update, newRow } }) => {
         if (!newRow?.itemId) return
-
-        const res = await getRequest({
-          extension: InventoryRepository.Availability.get,
-          parameters: `_siteId=${formik.values?.siteId}&_itemId=${newRow?.itemId}&_seqNo=0`
-        })
+        const currentCost = await getUnitCost(newRow?.itemId)
         update({
-          onhand: res?.record?.onhand || 0
+          currentCost
         })
       },
       flex: 1.5
@@ -257,33 +411,105 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       props: {
         readOnly: true
       },
-      flex: 3.5
-    },
-
-    {
-      component: 'numberfield',
-      name: 'purity',
-      label: labels.purity,
-      props: { allowNegative: false },
-      onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
-        update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
-      }
+      flex: 2
     },
     {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 },
       onChange: ({ row: { update, newRow } }) => {
-        const baseSalesMetalValue = (newRow.qty * newRow.purity) / (metalRef.current?.purity * 1000)
-        update({ metalValue: metalRef.current ? baseSalesMetalValue?.toFixed(2) : null })
+        setRecalc(true)
+        if (newRow?.type == 1) {
+          const qtyAtPurity = qtyAtPurityPerRow(
+            newRow?.qty || 0,
+            newRow?.purity || 0,
+            formik.values?.header?.purity || 0
+          )
+          const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
+          update({ expectedAlloyQty, qtyAtPurity })
+        }
       }
     },
     {
       component: 'numberfield',
-      name: 'onhand',
-      label: labels.onHand,
+      name: 'purity',
+      label: labels.purity,
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 },
+      onChange: ({ row: { update, newRow } }) => {
+        if (newRow?.type == 1) {
+          const qtyAtPurity = qtyAtPurityPerRow(
+            newRow?.qty || 0,
+            newRow?.purity || 0,
+            formik.values?.header?.purity || 0
+          )
+          const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
+          update({ expectedAlloyQty, qtyAtPurity })
+        }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.type == 2 }
+      }
+    },
+    {
+      component: 'numberfield',
+      name: 'qtyAtPurity',
+      label: labels.purityQty,
+      props: { readOnly: true, decimalScale: 3 }
+    },
+    {
+      component: 'numberfield',
+      name: 'expectedAlloyQty',
+      label: labels.expectedAlloyQty,
+      props: { readOnly: true, decimalScale: 3 }
+    },
+    {
+      component: 'numberfield',
+      name: 'currentCost',
+      label: labels.unitCost,
       props: { readOnly: true }
+    }
+  ]
+
+  const scrapItemsColumns = [
+    {
+      component: 'resourcecombobox',
+      label: labels.sku,
+      name: 'sku',
+      props: {
+        endpointId: FoundryRepository.SmeltingScrapItem.qry,
+        parameters: `_metalId=${formik.values?.header?.metalId}`,
+        valueField: 'itemId',
+        displayField: 'sku',
+        displayFieldWidth: 3,
+        mapping: [
+          { from: 'itemName', to: 'itemName' },
+          { from: 'itemId', to: 'itemId' },
+          { from: 'sku', to: 'sku' }
+        ],
+        columnsInDropDown: [
+          { key: 'sku', value: 'SKU' },
+          { key: 'itemName', value: 'Item Name' }
+        ]
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !formik.values?.header?.metalId }
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.itemName,
+      name: 'itemName',
+      props: {
+        readOnly: true
+      },
+      flex: 2
+    },
+    {
+      component: 'numberfield',
+      name: 'qty',
+      label: labels.qty,
+      props: { allowNegative: false, maxLength: 12, decimalScale: 3 }
     }
   ]
 
@@ -317,33 +543,56 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     }
   ]
 
-  if (metalRef.current?.reference) {
-    const qtyIndex = columns.findIndex(col => col.name === 'qty')
-    if (qtyIndex !== -1) {
-      columns.splice(qtyIndex + 1, 0, {
-        component: 'numberfield',
-        label: metalRef.current?.reference,
-        name: 'metalValue',
-        props: {
-          decimalScale: 2,
-          readOnly: true
-        }
-      })
-    }
+  async function updateItemsMetal(itemId) {
+    if (!itemId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res?.record?.metalId || null
   }
+
+  async function selectedDocTypeInfo(dtId) {
+    if (!dtId) {
+      formik.setFieldValue('header.smeltingMaxAllowedVariation', null)
+
+      return
+    }
+
+    const res = await getRequest({
+      extension: FoundryRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    return res?.record || {}
+  }
+  useEffect(() => {
+    ;(async function () {
+      if (!recordId) {
+        const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
+        formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
+        formik.setFieldValue('header.workCenterId', dtInfo?.workCenterId || null)
+        formik.setFieldValue('header.smeltingMaxAllowedVariation', dtInfo?.smeltingMaxAllowedVariation || null)
+      }
+    })()
+  }, [formik.values?.header?.dtId])
 
   useEffect(() => {
     ;(async function () {
       await getAllMetals()
-      const filteredItem = defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')
-      if (parseInt(filteredItem?.value)) {
-        const metalRes = await getRequest({
-          extension: InventoryRepository.Metals.get,
-          parameters: `_recordId=${parseInt(filteredItem?.value)}`
-        })
 
-        metalRef.current = metalRes.record
-      }
+      const { list } = await getRequest({
+        extension: FoundryRepository.AlloyMetals.qry,
+        parameters: `_filter=`
+      })
+
+      const mappedList = (list || []).map(item => ({
+        ...item,
+        itemName: item.name
+      }))
+      alloyMetalItems.current = mappedList || []
       if (recordId) refetchForm(recordId)
     })()
   }, [])
@@ -395,6 +644,18 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
                   />
                 </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='header.date'
+                    required
+                    readOnly={isPosted}
+                    label={labels.date}
+                    value={formik.values.header.date}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
@@ -421,39 +682,134 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomDatePicker
-                    name='header.date'
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Site.qry}
+                    name='header.siteId'
+                    label={labels.site}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    onChange={(_, newValue) => formik.setFieldValue('header.siteId', newValue?.recordId || null)}
+                    required
+                    error={formik.touched.header?.siteId && Boolean(formik.errors.header?.siteId)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    name='header.workCenterId'
+                    label={labels.workCenter}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
                     required
                     readOnly={isPosted}
-                    label={labels.date}
-                    value={formik.values.header.date}
-                    onChange={formik.setFieldValue}
-                    onClear={() => formik.setFieldValue('header.date', null)}
-                    error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
+                    maxAccess={maxAccess}
+                    onChange={(_, newValue) => formik.setFieldValue('header.workCenterId', newValue?.recordId || null)}
+                    error={formik.touched.header?.workCenterId && formik.errors.header?.workCenterId}
                   />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
-                name='header.siteId'
-                label={labels.site}
-                columnsInDropDown={[
-                  { key: 'reference', value: 'Reference' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                valueField='recordId'
-                displayField={['reference', 'name']}
-                values={formik.values.header}
-                maxAccess={maxAccess}
-                readOnly={isPosted}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('header.siteId', newValue?.recordId || null)
-                }}
-                required
-                error={formik.touched.header?.siteId && Boolean(formik.errors.header?.siteId)}
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name='header.itemId'
+                    label={labels.sku}
+                    valueField='recordId'
+                    displayField='name'
+                    valueShow='sku'
+                    secondValueShow='itemName'
+                    form={formik}
+                    formObject={formik.values.header}
+                    required
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={async (_, newValue) => {
+                      const metal = await updateItemsMetal(newValue?.recordId)
+                      formik.setFieldValue('header.metalId', metal || null)
+                      formik.setFieldValue('header.itemName', newValue?.name || '')
+                      formik.setFieldValue('header.sku', newValue?.sku || '')
+                      formik.setFieldValue('header.itemId', newValue?.recordId || null)
+                    }}
+                    readOnly={isPosted}
+                    displayFieldWidth={2}
+                    maxAccess={access}
+                    errorCheck={'header.itemId'}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Metals.qry}
+                    name='header.metalId'
+                    label={labels.metal}
+                    valueField='recordId'
+                    displayField='reference'
+                    readOnly
+                    values={formik.values.header}
+                    onChange={(_, newValue) => formik.setFieldValue('header.metalId', newValue.recordId || null)}
+                    error={formik.touched.header?.metalId && Boolean(formik.errors.header?.metalId)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='header.purity'
+                    label={labels.purity}
+                    readOnly={isPosted}
+                    onBlur={e => {
+                      let value = Number(e.target.value.replace(/,/g, ''))
+                      updatePurityRelatedFields(value)
+                      formik.setFieldValue('header.purity', value)
+                    }}
+                    value={formik.values.header.purity}
+                    required
+                    maxLength={12}
+                    decimalScale={3}
+                    allowNegative={false}
+                    align='right'
+                    onClear={() => {
+                      updatePurityRelatedFields(0)
+                      formik.setFieldValue('header.purity', '')
+                    }}
+                    error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='header.qty'
+                    label={labels.qty}
+                    onBlur={e => {
+                      setRecalc(true)
+                      let value = Number(e.target.value.replace(/,/g, ''))
+                      formik.setFieldValue('header.qty', value)
+                    }}
+                    value={formik.values.header?.qty}
+                    required
+                    maxLength={12}
+                    decimalScale={3}
+                    allowNegative={false}
+                    align='right'
+                    readOnly={isPosted}
+                    onClear={() => formik.setFieldValue('header.qty', '')}
+                    error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
@@ -469,29 +825,79 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
             disabled={isPosted}
             allowDelete={!isPosted}
             onSelectionChange={(row, _, field) => {
-              if (field == 'sku') getFilteredMetal(row?.metalId)
+              const flag = row.type != 2 ? 'metal' : ''
+              if (field == 'sku') fillSKUStore(row?.metalId, flag)
             }}
           />
         </Grow>
         <Fixed>
-          <Grid container>
-            <Grid item xs={9}></Grid>
-            <Grid item xs={3}>
+          <Grid container xs={12}>
+            <Grid container xs={6}>
+              <DataGrid
+                onChange={value => formik.setFieldValue('scraps', value)}
+                value={formik.values?.scraps}
+                error={formik.errors?.scraps}
+                name='ScrapItems'
+                columns={scrapItemsColumns}
+                initialValues={formik?.initialValues?.scraps}
+                maxAccess={maxAccess}
+                disabled={isPosted}
+                allowDelete={!isPosted}
+                height='26vh'
+              />
+            </Grid>
+            <Grid item xs={4} sx={{ pl: 2, pt: 3 }}>
+              <CustomTextArea
+                name='header.notes'
+                label={labels.notes}
+                value={formik.values.header?.notes}
+                rows={4}
+                maxLength='200'
+                readOnly={isPosted}
+                maxAccess={maxAccess}
+                onChange={e => formik.setFieldValue('header.notes', e.target.value)}
+                onClear={() => formik.setFieldValue('header.notes', '')}
+                error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
+              />
+            </Grid>
+            <Grid container xs={2} justifyContent={'flex-end'} sx={{ pl: 2, pt: 3 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField label={labels.totalQty} value={totalQty} decimalScale={2} readOnly />
+                  <CustomNumberField
+                    label={labels.totalMetal}
+                    value={totalDesiredPurity}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
                 </Grid>
-                <Grid item xs={12}></Grid>
-                {metalRef.current?.reference && (
-                  <Grid item xs={12}>
-                    <CustomNumberField
-                      label={`${labels.total} ${metalRef.current?.reference}`}
-                      value={totalMetal}
-                      decimalScale={2}
-                      readOnly
-                    />
-                  </Grid>
-                )}
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalAlloy}
+                    value={totalAlloy}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.expectedAlloy}
+                    value={expectedAlloy}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.qtyIn} value={qtyIn} decimalScale={3} readOnly align='right' />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.qtyOut} value={qtyOut} decimalScale={3} readOnly align='right' />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly align='right' />
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

@@ -823,8 +823,15 @@ export default function JobOrderForm({
                         displayFieldWidth={2}
                         readOnly={isCancelled || isPosted}
                         onChange={async (_, newValue) => {
+                          if (isReleased) {
+                            formik.setFieldValue('designRef', newValue?.reference || '')
+                            formik.setFieldValue('designName', newValue?.name || '')
+                            formik.setFieldValue('designId', newValue?.recordId || null)
+
+                            return
+                          }
                           await fillDesignInfo(newValue)
-                          await updateWC(isReleased ? formik.values?.routingId : newValue?.routingId, false)
+                          await updateWC(newValue?.routingId, false)
                         }}
                       />
                     </Grid>

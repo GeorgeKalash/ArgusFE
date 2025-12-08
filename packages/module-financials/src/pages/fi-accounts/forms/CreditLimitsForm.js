@@ -23,14 +23,14 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   })
 
   const postCurrencies = async obj => {
-    const filteredObj = obj.filter(({ limit }) => limit > 0)
+    const filteredObj = obj.filter(({ limit }) => limit >= 0)
 
     const saveCurrency = filteredObj.map(currency => {
       const data = {
         accountId: currency.accountId,
         currencyName: currency.currencyName,
         currencyId: currency.currencyId,
-        limit: currency.limit
+        limit: currency.limit || 0
       }
 
       return postRequest({

@@ -69,6 +69,7 @@ export const FoundryRepository = {
   },
   MetalSmelting: {
     get: service + 'getTRX',
+    get2: service + 'get2TRX',
     del: service + 'delTRX',
     set2: service + 'set2TRX',
     page: service + 'pageTRX',
@@ -76,7 +77,21 @@ export const FoundryRepository = {
     post: service + 'postTRX',
     unpost: service + 'unpostTRX'
   },
-  TransactionItems: {
-    qry: service + 'qryTRI'
+  AlloyMetals: {
+    page: service + 'pageALM',
+    set: service + 'setALM',
+    get: service + 'getALM',
+    del: service + 'delALM',
+    qry: service + 'qryALM'
+  },
+  SmeltingScrapItem: {
+    qry: service + 'qrySMSI',
+    set2: service + 'set2SMSI'
+  },
+  DocumentTypeDefault: {
+    page: service + 'pageDTD',
+    set: service + 'setDTD',
+    get: service + 'getDTD',
+    del: service + 'delDTD'
   }
 }
