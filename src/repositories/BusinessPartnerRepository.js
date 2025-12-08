@@ -90,5 +90,9 @@ export const BusinessPartnerRepository = {
     del: service + 'delMRO',
     get: service + 'getMRO',
     set: service + 'setMRO'
+  },
+  MasterSales: {
+    get: service + 'getSAL',
+    set: service + 'setSAL'
   }
 }
