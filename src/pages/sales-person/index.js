@@ -9,9 +9,9 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import SalesPersonWindow from './Windows/SalesPersonWindow'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const SalesPerson = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -19,40 +19,39 @@ const SalesPerson = () => {
   const { platformLabels } = useContext(ControlContext)
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
       extension: SaleRepository.SalesPerson.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}&_filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: SaleRepository.SalesPerson.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: SaleRepository.SalesPerson.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const {
     query: { data },
-    search,
-    clear,
-    refetch,
     labels,
-    access,
+    refetch,
+    filterBy,
+    invalidate,
     paginationParameters,
-    invalidate
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SaleRepository.SalesPerson.page,
     datasetId: ResourceIds.SalesPerson,
-    search: {
-      searchFn: fetchWithSearch
+    filter: {
+      filterFn: fetchWithFilter
     }
   })
 
@@ -113,14 +112,7 @@ const SalesPerson = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
-          previewReport={ResourceIds.SalesPerson}
-          inputSearch={true}
-        />
+        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'SASP'} filterBy={filterBy} />
       </Fixed>
       <Grow>
         <Table
