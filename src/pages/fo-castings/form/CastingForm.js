@@ -697,7 +697,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.lossVariation}
                       value={lossVariationPct}
                       required
-                      maxLength={3}
+                      maxLength={5}
                       readOnly
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}
