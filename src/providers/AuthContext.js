@@ -61,9 +61,9 @@ const AuthProvider = ({ children }) => {
     try {
       if (accountName) {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-        setCompanyName(response.data.record.accountName)
-        setGetAC(response)
-        window.localStorage.setItem('apiUrl', response.data.record.api)
+        setCompanyName(response?.data?.record?.accountName || '')
+        setGetAC(response || null)
+        window.localStorage.setItem('apiUrl', response?.data?.record?.api || '')
       } else setCompanyName('')
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -224,7 +224,7 @@ const AuthProvider = ({ children }) => {
     encryptePWD,
     EnableLogin,
     getAC,
-    apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
+    apiUrl: getAC?.data?.record?.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

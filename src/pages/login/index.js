@@ -178,6 +178,7 @@ const LoginPage = () => {
                   }
                   onClear={() => {
                     validation.setFieldValue('companyName', '')
+                    auth.fetchData('')
                   }}
                 />
               </Grid>
