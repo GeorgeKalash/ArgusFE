@@ -292,8 +292,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   async function refetchForm(recordId) {
-    setRecalc(false)
-
     const { record } = await getRequest({
       extension: FoundryRepository.MetalSmelting.get2,
       parameters: `_recordId=${recordId}`
@@ -329,6 +327,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       items: itemsList?.length ? itemsList : formik.initialValues.items,
       scraps: scrapsList?.length ? scrapsList : formik.initialValues?.scraps
     })
+    setRecalc(false)
   }
 
   const columns = [
