@@ -57,14 +57,14 @@ const AuthProvider = ({ children }) => {
     const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
     const accountName = isDeploy ? companyName : matchHostname?.[1]
     setDeployHost(isDeploy)
-    setCompanyName('')
+
     try {
       if (accountName) {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
         setCompanyName(response.data.record.accountName)
         setGetAC(response)
         window.localStorage.setItem('apiUrl', response.data.record.api)
-      }
+      } else setCompanyName('')
     } catch (error) {
       console.error('Error fetching data:', error)
     }

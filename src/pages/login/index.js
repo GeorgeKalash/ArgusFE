@@ -167,14 +167,18 @@ const LoginPage = () => {
                   fullWidth
                   readOnly={!deployHost}
                   label={platformLabels?.CompanyName}
-                  onBlur={e => {
-                    console.log('e', e?.target?.value)
-                    const value = e?.target?.value || ''
-                    if (!value) return
-                    validation.setFieldValue('companyName', value)
-                    auth.fetchData(value)
+                  onChange={validation.handleChange}
+                  onBlur={
+                    deployHost
+                      ? e => {
+                          const value = e?.target?.value || ''
+                          auth.fetchData(value)
+                        }
+                      : undefined
+                  }
+                  onClear={() => {
+                    validation.setFieldValue('companyName', '')
                   }}
-                  onClear={() => validation.setFieldValue('companyName', '')}
                 />
               </Grid>
 
