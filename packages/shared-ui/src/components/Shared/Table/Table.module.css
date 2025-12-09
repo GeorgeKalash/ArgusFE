@@ -1,0 +1,662 @@
+.agGridContainer {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  --ag-font-size: 11px;
+}
+
+.agGridFlex {
+  flex: 1 1 auto;
+}
+
+.hoverReset {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
+  border-radius: 4px;
+  background: #fff;
+}
+
+.paginationWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.paginationBar {
+  flex: 1 1 auto;
+  min-width: 0;
+  background-color: #fff;
+  font-size: 0.8rem;
+  padding: 1px 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  line-height: 1;
+}
+
+.pageTextField {
+  padding: 0;
+  width: 70px;
+}
+
+.pageTextField :global(.MuiOutlinedInput-root),
+.pageTextField :global(.MuiInputBase-root) {
+  height: 22px;
+  min-height: 22px;
+  font-size: 0.78rem;
+}
+
+.pageTextField :global(.MuiOutlinedInput-input),
+.pageTextField :global(.MuiInputBase-input) {
+  padding: 1px 5px;
+}
+
+.actionsBox {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 4px;
+}
+
+.actionIconButton {
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  min-width: 0;
+}
+
+.actionIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.fullSizeCheckbox {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agGridContainer :global(.MuiCheckbox-root) {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+  font-size: 20px !important;
+}
+
+.pointerNone {
+  pointer-events: none;
+}
+
+.fieldWrapper {
+  user-select: text;
+  cursor: pointer;
+  height: 50%;
+  width: 100%;
+  outline: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldWrapper::selection {
+  background: none !important;
+  color: inherit;
+}
+
+.copiedTooltip {
+  z-index: 1000;
+  position: fixed;
+  top: -40px;
+  background-color: #000;
+  color: #fff;
+  padding: 1px 3px;
+  border-radius: 5px;
+}
+
+.colorComboWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.agGridContainer :global(.ag-header),
+.agGridContainer :global(.ag-header-cell) {
+  height: 32px !important;
+  min-height: 32px !important;
+}
+
+.agGridContainer :global(.ag-row) {
+  height: 28px !important;
+}
+
+.hasImageRows :global(.ag-row) {
+  height: 52px !important;
+}
+
+.agGridContainer :global(.ag-header-cell-text),
+.agGridContainer :global(.ag-cell) {
+  font-size: var(--ag-font-size);
+}
+
+.agGridContainer :global(.ag-cell) {
+  border-right: 1px solid #d0d0d0 !important;
+}
+
+.agGridContainer :global(.ag-cell .MuiBox-root) {
+  padding: 0 !important;
+}
+
+.paginationBar :global(.MuiIconButton-root) {
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  min-width: 0;
+}
+
+.paginationBar :global(.MuiSvgIcon-root) {
+  font-size: 20px;
+  line-height: 1;
+}
+
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .agGridContainer {
+    --ag-font-size: 10.5px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 26px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 48px !important;
+  }
+
+  .paginationBar {
+    height: 28px;
+    padding: 1px 4px;
+    font-size: 0.78rem;
+    gap: 3px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 18px;
+  }
+
+  .pageTextField {
+    width: 66px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 20px;
+    min-height: 20px;
+    font-size: 0.76rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 1px 4px;
+  }
+
+  .actionIconButton {
+    width: 20px;
+    height: 20px;
+  }
+
+  .actionIcon {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 1366px) {
+  .agGridContainer {
+    --ag-font-size: 10px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 24px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 46px !important;
+  }
+
+  .paginationWrapper {
+    gap: 5px;
+  }
+
+  .paginationBar {
+    height: 26px;
+    padding: 1px 4px;
+    font-size: 0.76rem;
+    gap: 3px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 17px;
+  }
+
+  .pageTextField {
+    width: 64px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 19px;
+    min-height: 19px;
+    font-size: 0.74rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 1px 4px;
+  }
+
+  .actionIconButton {
+    width: 19px;
+    height: 19px;
+  }
+
+  .actionIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 18px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .agGridContainer {
+    --ag-font-size: 9.6px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 22px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 42px !important;
+  }
+
+  .paginationWrapper {
+    gap: 5px;
+  }
+
+  .paginationBar {
+    height: 24px;
+    padding: 1px 3px;
+    font-size: 0.72rem;
+    gap: 3px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 16px;
+  }
+
+  .pageTextField {
+    width: 60px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 18px;
+    min-height: 18px;
+    font-size: 0.7rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 1px 3px;
+  }
+
+  .actionIconButton {
+    width: 18px;
+    height: 18px;
+  }
+
+  .actionIcon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 17px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .agGridContainer {
+    --ag-font-size: 9.2px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 24px !important;
+    min-height: 24px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 20px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 40px !important;
+  }
+
+  .paginationWrapper {
+    gap: 4px;
+  }
+
+  .paginationBar {
+    height: 22px;
+    padding: 1px 2px;
+    font-size: 0.7rem;
+    gap: 2px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 15px;
+    height: 15px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 15px;
+  }
+
+  .pageTextField {
+    width: 56px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 17px;
+    min-height: 17px;
+    font-size: 0.66rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 0 3px;
+  }
+
+  .actionIconButton {
+    width: 16px;
+    height: 16px;
+  }
+
+  .actionIcon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .agGridContainer {
+    --ag-font-size: 8.9px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 22px !important;
+    min-height: 22px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 19px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 38px !important;
+  }
+
+  .paginationWrapper {
+    gap: 3px;
+  }
+
+  .paginationBar {
+    height: 21px;
+    padding: 0 2px;
+    font-size: 0.66rem;
+    gap: 2px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 14px;
+    height: 14px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 14px;
+  }
+
+  .pageTextField {
+    width: 52px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 16px;
+    min-height: 16px;
+    font-size: 0.62rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 0 2px;
+  }
+
+  .actionIconButton {
+    width: 15px;
+    height: 15px;
+  }
+
+  .actionIcon {
+    width: 11px;
+    height: 11px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .agGridContainer {
+    --ag-font-size: 8.6px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 21px !important;
+    min-height: 21px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 18px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 36px !important;
+  }
+
+  .paginationWrapper {
+    gap: 3px;
+  }
+
+  .paginationBar {
+    height: 20px;
+    padding: 0 2px;
+    font-size: 0.62rem;
+    gap: 2px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 13px;
+    height: 13px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 13px;
+  }
+
+  .pageTextField {
+    width: 48px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 15px;
+    min-height: 15px;
+    font-size: 0.6rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 0 2px;
+  }
+
+  .actionIconButton {
+    width: 14px;
+    height: 14px;
+  }
+
+  .actionIcon {
+    width: 10px;
+    height: 10px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .agGridContainer {
+    --ag-font-size: 8.3px;
+  }
+
+  .agGridContainer :global(.ag-header),
+  .agGridContainer :global(.ag-header-cell) {
+    height: 19px !important;
+    min-height: 19px !important;
+  }
+
+  .agGridContainer :global(.ag-row) {
+    height: 17px !important;
+  }
+
+  .hasImageRows :global(.ag-row) {
+    height: 34px !important;
+  }
+
+  .paginationWrapper {
+    gap: 2px;
+  }
+
+  .paginationBar {
+    height: 19px;
+    padding: 0 2px;
+    font-size: 0.58rem;
+    gap: 2px;
+  }
+
+  .paginationBar :global(.MuiIconButton-root) {
+    width: 12px;
+    height: 12px;
+  }
+
+  .paginationBar :global(.MuiSvgIcon-root) {
+    font-size: 12px;
+  }
+
+  .pageTextField {
+    width: 44px;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-root),
+  .pageTextField :global(.MuiInputBase-root) {
+    height: 14px;
+    min-height: 14px;
+    font-size: 0.56rem;
+  }
+
+  .pageTextField :global(.MuiOutlinedInput-input),
+  .pageTextField :global(.MuiInputBase-input) {
+    padding: 0 2px;
+  }
+
+  .actionIconButton {
+    width: 12px;
+    height: 12px;
+  }
+
+  .actionIcon {
+    width: 9px;
+    height: 9px;
+  }
+
+  .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+    font-size: 13px !important;
+  }
+}
