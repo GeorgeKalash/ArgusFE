@@ -6,29 +6,15 @@ const MODULE_PACKAGE_NAME = '@argus/module-system';
 const MODULE_FOLDER = 'module-system';
 
 const SALES_PAGES = [
-  'document-types',
-  'sy-batches',
-  'number-range',
-  'system-functions',
-  'document-type-maps',
-  'sy-business-rules',
-  'settings-resources',
-  'plant-groups',
-  'countries',
-  'states',
-  'cities',
-  'geographic-regions',
-  'city-districts',
-  'mc-rate-types',
-  'mc-defaults',
-  'plants',
-  'fiscal-years',
-  'fy-period-titles',
-  'sy-reverse-rsn',
-  'system-checks',
-  'company-info',
-  'sy-alerts',
-  'address-book',
+  'sy-resource-performance',
+  'batchpost',
+  'currencies',
+  'exchange-rates',
+  'exchange-tables',
+  'forget-password',
+  'mc-currency-mapping',
+  'personal-settings',
+  'sites',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

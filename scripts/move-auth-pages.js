@@ -6,26 +6,8 @@ const MODULE_PACKAGE_NAME = '@argus/module-auth';
 const MODULE_FOLDER = 'module-auth';
 
 const SALES_PAGES = [
-  'users',
-  'security-groups',
-  'au-not-group',
-  'au-not-labels',
-  'global-authorization',
-  'module-deactivation',
-  'au-locked-records',
-  'plant-supervisors',
-  'au-res-downtime',
-  'characteristics',
-  'release-indicators',
-  'release-codes',
-  'classes',
-  'dr-groups',
-  'strategies',
-  'sms-templates',
-  'sms-function-templates',
-  'sms-request-logs',
-  'documents-on-hold',
-  'au-defaults',
+  'trx-details',
+  'user-otp-qrcode',
 ];
 
 const ROOT = path.resolve(__dirname, '..');
