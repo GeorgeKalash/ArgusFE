@@ -25,7 +25,7 @@ export default function MetalSmelting() {
 
     const response = await getRequest({
       extension: FoundryRepository.MetalSmelting.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
     })
 
     return { ...response, _startAt: _startAt }
