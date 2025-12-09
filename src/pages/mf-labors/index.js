@@ -1,27 +1,27 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import LaborsForm from './forms/LaborsForm'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Labor = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50, params } = options
+    const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.Labor.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
     })
 
     return { ...response, _startAt: _startAt }
@@ -29,53 +29,44 @@ const Labor = () => {
 
   const {
     query: { data },
-    labels,
-    filterBy,
-    refetch,
-    access,
+    labels: _labels,
     paginationParameters,
-    invalidate
+    refetch,
+    access
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Labor.page,
-    datasetId: ResourceIds.Labor,
-    filter: {
-      filterFn: fetchWithFilter
-    }
+    datasetId: ResourceIds.Labor
   })
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters.qry)
-      return await getRequest({
-        extension: ManufacturingRepository.Labor.snapshot,
-        parameters: `_filter=${filters.qry}&_workCenterId=0`
-      })
-    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-  }
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.Labor.page
+  })
 
   const columns = [
     {
       field: 'reference',
-      headerName: labels.reference,
+      headerName: _labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: labels.name,
+      headerName: _labels.name,
       flex: 1
     },
     {
       field: 'workCenterName',
-      headerName: labels.workCenter,
+      headerName: _labels.workCenter,
       flex: 1
     },
     {
       field: 'operationName',
-      headerName: labels.operation,
+      headerName: _labels.operation,
       flex: 1
     },
     {
       field: 'userName',
-      headerName: labels.user,
+      headerName: _labels.user,
       flex: 1
     }
   ]
@@ -92,12 +83,13 @@ const Labor = () => {
     stack({
       Component: LaborsForm,
       props: {
-        labels,
-        recordId,
+        labels: _labels,
+        recordId: recordId,
         maxAccess: access
       },
       height: 500,
-      title: labels.labor
+
+      title: _labels.labor
     })
   }
 
@@ -107,28 +99,22 @@ const Labor = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success(platformLabels.Deleted)
+    toast.success('Record Deleted Successfully')
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar
-          onAdd={add}
-          maxAccess={access}
-          reportName={'MFLBR'}
-          filterBy={filterBy}
-          previewReport={ResourceIds.Labor}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} previewReport={ResourceIds.Labor} />
       </Fixed>
       <Grow>
         <Table
-          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
+          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}
