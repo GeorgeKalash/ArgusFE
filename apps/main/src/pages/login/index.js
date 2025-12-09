@@ -182,7 +182,7 @@ const LoginPage = () => {
                     endIcons={[
                       // eslint-disable-next-line react/jsx-key
                       <Icon
-                        className={inputs.icon} 
+                        className={inputs.icon}
                         icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
                         onClick={() => setShowPassword(prev => !prev)}
                         onMouseDown={e => e.preventDefault()}

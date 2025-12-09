@@ -5,6 +5,8 @@ body {
   --zoom: 1;
   --vh: calc(1vh / var(--zoom));
   --vw: calc(1vw / var(--zoom));
+  line-height: 1 !important
+
 }
 
 /* Largest screens */

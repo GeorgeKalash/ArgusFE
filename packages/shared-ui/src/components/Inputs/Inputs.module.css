@@ -1,6 +1,8 @@
 .outlinedRoot {
   width: 100% !important;
   height: 33px !important;
+  line-height: 1px !important
+
 }
 
 .fieldLabel {
@@ -33,6 +35,7 @@
 .outlinedRoot:dir(ltr) .inputAdornment {
   margin-right: 5px !important;
 }
+
 .outlinedRoot:dir(rtl) .inputAdornment {
   margin-left: 5px !important;
 }
@@ -40,6 +43,14 @@
 .outlinedFieldset {
   border-radius: 4px !important;
 }
+
+.iconImage {
+  height: 16px !important;
+  width: 16px !important;
+  margin-left: 8px;
+  margin-right: 8px
+}
+
 
 /* @media (min-width: 2048px) and (max-width: 2566px) {
   .outlinedRoot {
@@ -78,10 +89,11 @@
 
 } */
 
-@media (min-width: 1280px)  {
+@media (min-width: 1281px)  {
   .outlinedRoot {
     height: 30px !important;
     padding: 0px !important;
+
   }
 
   .inputLabel {
@@ -104,6 +116,7 @@
   .outlinedRoot:dir(ltr) .inputAdornment {
     margin-right: 5px !important;
   }
+  
   .outlinedRoot:dir(rtl) .inputAdornment {
     margin-left: 5px !important;
   }
@@ -113,6 +126,13 @@
   }
   .icon {
     font-size: 20px !important;
+  }
+  .iconImage {
+    height: 20px !important;
+    width: 20px !important;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-top: 5px;
   }
 
 
@@ -135,7 +155,16 @@
   .inputBase::placeholder {
     font-size: 11px !important;
   }
+  .iconButton {
+    margin: 0px !important;
+  }
   
+  .iconImage {
+    height: 16px !important;
+    width: 16px !important;
+    margin-left: 8px;
+    margin-right: 8px
+  }
 
   .inputLabelShrink{
     font-size: 10px !important;
@@ -146,6 +175,14 @@
     height: 28px !important;
   }
 
+  .outlinedRoot:dir(ltr) .inputAdornment {
+    margin-right: 0px !important;
+  }
+  
+  .outlinedRoot:dir(rtl) .inputAdornment {
+    margin-left: 0px !important;
+  }
+
 
 }
 
@@ -153,7 +190,7 @@
   .outlinedRoot  {
     height: 26px !important;
   }
-
+  
   .inputLabel {
     line-height: 1rem !important;
     font-size: 9px !important;
@@ -185,6 +222,12 @@
   .icon {
     font-size: 18px !important;
 
+  }
+  .iconImage {
+    height: 15px !important;
+    width: 15px !important;
+    margin-left: 0px;
+    margin-right: 0px
   }
 
 }

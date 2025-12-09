@@ -3,6 +3,7 @@ import { Box, Button, DialogActions, Grid, IconButton, LinearProgress } from '@m
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import inputs from '../Inputs/Inputs.module.css'
 
 const NewPassword = ({ formik, labels, score, setScore }) => {
     const { platformLabels } = useContext(ControlContext)
@@ -106,17 +107,17 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           onChange={onPasswordChange}
           error={formik.touched.newPassword && formik.errors.newPassword}
           startIcons={[
-            <div key='lock-icon' style={{ width: '20px', height: '20px' }}>
-              <img src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} style={{ width: '100%', height: '100%' }} />
+            <div key='lock-icon'  >
+              <img   className={inputs.iconImage}  src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} style={{ width: '100%', height: '100%' }} />
             </div>
           ]}
           endIcons={[
-            <IconButton
+            <IconButton className={inputs.iconButton} 
               key='toggle-new-password'
               onClick={() => setShowNewPassword(!showNewPassword)}
               onMouseDown={e => e.preventDefault()}
             >
-              <Icon icon={showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+              <Icon className={inputs.icon} icon={showNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
             </IconButton>
           ]}
         />
@@ -142,17 +143,17 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           onChange={onConfirmPasswordChange}
           error={formik.touched.confirmPassword && formik.errors.confirmPassword}
           startIcons={[
-            <div key='lock-icon-confirm' style={{ width: '20px', height: '20px' }}>
-              <img src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} style={{ width: '100%', height: '100%' }} />
+            <div  key='lock-icon-confirm' >
+              <img  className={inputs.iconImage}  src={require('@argus/shared-ui/src/components/images/password/forgotPWD3.png').default.src} />
             </div>
           ]}
           endIcons={[
-            <IconButton
+            <IconButton className={inputs.iconButton} 
               key='toggle-confirm-password'
               onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
               onMouseDown={e => e.preventDefault()}
             >
-              <Icon icon={showConfirmNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+              <Icon  className={inputs.icon}  icon={showConfirmNewPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
             </IconButton>
           ]}
         />

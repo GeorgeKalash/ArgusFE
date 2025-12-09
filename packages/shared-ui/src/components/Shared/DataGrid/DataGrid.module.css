@@ -24,15 +24,20 @@
   font-size: 0.9rem;
 }
 
+
+.agContainer :global(.cellBox) {
+  overflow: hidden; 
+}
+
+
 .agContainer :global(.ag-cell) {
   border-right: 1px solid #d0d0d0 !important;
   font-size: 0.8rem !important;
   line-height: 1.1;
-  overflow: hidden;
-
   display: flex;
   align-items: center;        
   justify-content: flex-start; 
+  
 
 }
 
@@ -40,7 +45,8 @@
 .agContainer :global(.ag-cell-value) {
   display: flex;
   align-items: center;
-  overflow: hidden; 
+  overflow: hidden;
+
 }
 
 .agContainer :global(.ag-cell .MuiBox-root) {
@@ -56,11 +62,11 @@
 
 .cellBox,
 .cellEditorBox {
-  width: 100%;
+  width: 100% !important;
   height: auto;                  
   padding: 0px !important;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   
 }
 
