@@ -47,7 +47,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   })
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.MetalSmelting.page
+    endpointId: FoundryRepository.FoundaryTransaction.page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
@@ -136,7 +136,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
               return true
             }),
-            sku: yup.string().required()
+            sku: yup.string().required(),
+            itemName: yup.string().required()
           })
         )
         .required(),
@@ -157,7 +158,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FoundryRepository.MetalSmelting.set2,
+        extension: FoundryRepository.FoundaryTransaction.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -242,7 +243,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const onPost = async () => {
     await postRequest({
-      extension: FoundryRepository.MetalSmelting.post,
+      extension: FoundryRepository.FoundaryTransaction.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -253,7 +254,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: FoundryRepository.MetalSmelting.unpost,
+      extension: FoundryRepository.FoundaryTransaction.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -293,7 +294,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FoundryRepository.MetalSmelting.get2,
+      extension: FoundryRepository.FoundaryTransaction.get2,
       parameters: `_recordId=${recordId}`
     })
 
