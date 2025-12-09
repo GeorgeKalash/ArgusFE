@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 
-const MODULE_PACKAGE_NAME = '@argus/module-financials';
-const MODULE_FOLDER = 'module-financials';
+const MODULE_PACKAGE_NAME = '@argus/module-auth';
+const MODULE_FOLDER = 'module-auth';
 
 const SALES_PAGES = [
-  'fi-trial-balance-grid',
+  'insp-template',
 ];
 
 const ROOT = path.resolve(__dirname, '..');
