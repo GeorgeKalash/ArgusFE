@@ -33,6 +33,7 @@
     "@argus/module-financials": "file:../../packages/module-financials",
     "@argus/module-remittance": "file:../../packages/module-remittance",
     "@argus/module-hr": "file:../../packages/module-hr",
+    "@argus/module-system": "file:../../packages/module-system",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
