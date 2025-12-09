@@ -35,6 +35,7 @@
     "@argus/module-hr": "file:../../packages/module-hr",
     "@argus/module-system": "file:../../packages/module-system",
     "@argus/module-auth": "file:../../packages/module-auth",
+    "@argus/module-ct": "file:../../packages/module-ct",
     "@babel/core": "7.21.8",
     "@babel/eslint-parser": "7.21.8",
     "@casl/ability": "6.5.0",
