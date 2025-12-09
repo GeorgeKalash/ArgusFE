@@ -113,7 +113,7 @@ export default function PurityAdjustment() {
       },
       width: 1100,
       height: 730,
-      title: labels.PurityAdjustment
+      title: labels.purityAdjustment
     })
   }
 

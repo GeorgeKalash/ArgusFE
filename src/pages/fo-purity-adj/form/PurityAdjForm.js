@@ -235,13 +235,19 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' }
+          { from: 'sku', to: 'sku' },
+          { from: 'stdPurity', to: 'stdPurity' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
           { key: 'itemName', value: 'Item Name' }
         ],
         displayFieldWidth: 3.5
+      },
+      onChange: async ({ row: { update, newRow } }) => {
+        update({
+          stdPurity: newRow?.stdPurity || 0
+        })
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredItems?.current }
@@ -272,7 +278,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     {
       component: 'numberfield',
       name: 'stdPurity',
-      label: labels.purityQty,
+      label: labels.stdPurity,
       props: { readOnly: true, decimalScale: 2 }
     }
   ]
