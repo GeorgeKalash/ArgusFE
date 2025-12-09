@@ -92,12 +92,11 @@ const CustomTextField = ({
     <></>
   ) : (
     <TextField
-      key={(value?.length < 1 || readOnly || value === null) && value}
       inputRef={inputRef}
       type={type}
       variant={variant}
       defaultValue={value}
-      value={value ? value : null}
+      value={value ?? ''}
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
