@@ -1,9 +1,2 @@
-import { ImmediateWindow } from '@argus/shared-providers/src/providers/windows'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import PlantSupervisorsForm from './Forms/PlantSupervisorsForm'
-
-const PlantSupervisors = () => {
-  return <ImmediateWindow datasetId={ResourceIds.PlantSupervisors} labelKey={'plantSupervisors'} Component={PlantSupervisorsForm} />
-}
-
-export default PlantSupervisors
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-auth/src/pages/plant-supervisors
+export { default } from '@argus/module-auth/src/pages/plant-supervisors';
