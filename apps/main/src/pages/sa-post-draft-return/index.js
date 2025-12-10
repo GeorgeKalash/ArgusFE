@@ -14,7 +14,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { IconButton, Box } from '@mui/material'
 import Image from 'next/image'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
-import DraftReturnForm from '../sa-draft-serials-returns/forms/DraftReturnForm'
+import DraftReturnForm from '@argus/shared-ui/src/components/Shared/Forms/DraftReturnForm'
 
 const PostDraftReturn = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
