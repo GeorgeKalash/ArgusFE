@@ -95,7 +95,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
       outputWgt: yup.number().required(),
       loss: yup.number().min(0).required(),
       lossVariationPct: yup.number().required(),
-      lossPct: yup.number().required(),
+      lossPct: yup.number().max(100).required(),
       lossCasting: yup.number().required(),
       lossDisassembly: yup.number().required()
     }),
