@@ -12,18 +12,18 @@
   }
   
   .gridButtonImage {
-    height: 10px; 
+    height: 17px; 
   }
 
   @media (max-width: 1280px) {
     .gridButton {
       height: 20px;
+      width: 10px;
+    }
+    .gridButtonImage {
+      height: 15px; 
     }
   }
 
-  @media (max-width: 960px) {
-    .gridButton {
-      height: 20px;
-    }
-  }
+
   
