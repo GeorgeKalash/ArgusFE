@@ -28,7 +28,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName, deployHost } = useContext(AuthContext)
+  const { companyName, deployHost, setCompanyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
@@ -171,6 +171,7 @@ const LoginPage = () => {
                   onBlur={
                     deployHost
                       ? e => {
+                          setCompanyName('')
                           const value = e?.target?.value || ''
                           auth.fetchData(value)
                         }

@@ -280,6 +280,7 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     companyName,
+    setCompanyName,
     deployHost,
     languageId,
     setUser,
