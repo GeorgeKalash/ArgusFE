@@ -65,7 +65,7 @@
 }
 @media (min-width: 2048px) and (max-width: 2560px) {
   .loginCard {
-    width: 34rem;
+    width: 30rem;
     margin-bottom: 7px;
     margin-top: 300px;
   }
@@ -80,7 +80,7 @@
     margin-top: 20px;
     margin-bottom: 20px;
     margin-left: 3px;
-    font-size: 18px !important;
+    font-size: 14px !important;
   }
   .loginButton {
     font-size: 24px !important;
@@ -108,7 +108,7 @@
   .loginCard {
     width: 24rem;
     margin-bottom: 7px;
-    margin-top: 80px;
+    margin-top: 180px;
   }
   .loginCardHeader {
     height: 50px;
@@ -130,11 +130,11 @@
   }
 }
 
-@media (max-width: 1366px) {
+@media (max-width: 1281px) {
   .loginCard {
     width: 22rem;
     margin-bottom: 7px;
-    margin-top: 60px;
+    margin-top: 160px;
   }
   .loginCardHeader {
     height: 45px;
@@ -210,7 +210,7 @@
     padding: 15px 18px 20px !important;
   }
   .linksRow {
-    font-size: 11px !important;
+    font-size: 9px !important;
   }
   .offered {
     font-size: 8px !important;
