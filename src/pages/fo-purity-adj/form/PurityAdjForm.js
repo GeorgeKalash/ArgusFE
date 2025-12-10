@@ -120,6 +120,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((item, index) => ({
           ...item,
+          type: 1,
           trxId: obj?.recordId || 0,
           seqNo: index + 1,
           purity: item.purity / 1000
