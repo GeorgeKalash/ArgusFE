@@ -1,26 +1,16 @@
-import { useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import useMediaQuery from '@mui/material/useMediaQuery'
-
-// ** Layout Imports
-// !Do not remove this Layout import
 import Layout from 'src/@core/layouts/Layout'
-
-// ** Navigation Imports
-import VerticalNavItems from 'src/navigation'
 
 // ** Component Import
 // Uncomment the below line (according to the layout type) when using server-side menu
 // import ServerSideVerticalNavItems from './components/vertical/ServerSideNavItems'
 // import ServerSideHorizontalNavItems from './components/horizontal/ServerSideNavItems'
 
-import VerticalAppBarContent from './components/vertical/AppBarContent'
-
-// ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
 import { MenuContext } from 'src/providers/MenuContext'
 
 const UserLayout = ({ children, contentHeightFixed }) => {
-  // ** Hooks
   const { settings, saveSettings } = useSettings()
   const { menu } = useContext(MenuContext)
 
@@ -36,7 +26,6 @@ const UserLayout = ({ children, contentHeightFixed }) => {
    *  ! Do not change this value unless you know what you are doing. It can break the template.
    */
 
-  //changes when sidemenu is completely hidden
   const hidden = useMediaQuery(theme => theme.breakpoints.down('sx'))
   if (hidden && settings.layout === 'horizontal') {
     settings.layout = 'vertical'
@@ -51,21 +40,7 @@ const UserLayout = ({ children, contentHeightFixed }) => {
       verticalLayoutProps={{
         navMenu: {
           navItems: menu
-
-          // Uncomment the below line when using server-side menu in vertical layout and comment the above line
-          // navItems: verticalMenuItems
         }
-
-        // appBar: {
-        //   content: props => (
-        //     <VerticalAppBarContent
-        //       hidden={hidden}
-        //       settings={settings}
-        //       saveSettings={saveSettings}
-        //       toggleNavVisibility={props.toggleNavVisibility}
-        //     />
-        //   )
-        // }
       }}
     >
       {children}

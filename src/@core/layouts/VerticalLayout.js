@@ -1,22 +1,12 @@
-// ** React Imports
 import { useState } from 'react'
-
-// ** MUI Imports
 import Fab from '@mui/material/Fab'
 import { styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
-
-// ** Icon Imports
 import Icon from 'src/@core/components/icon'
-
-// ** Theme Config Import
 import themeConfig from 'src/configs/themeConfig'
-
-// ** Components
 import AppBar from './components/vertical/appBar'
 import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/vertical/navigation'
-import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
 
 const VerticalLayoutWrapper = styled('div')({
@@ -37,24 +27,18 @@ const ContentWrapper = styled('main')(({ theme }) => ({
   width: '100%',
   height: 'calc(100 * var(--vh))',
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column'
 }))
 
 const VerticalLayout = props => {
-  // ** Props
-  const { hidden, settings, children, scrollToTop, footerProps, contentHeightFixed, verticalLayoutProps } = props
-
-  // ** Vars
+  const { hidden, settings, children, scrollToTop, contentHeightFixed, verticalLayoutProps } = props
   const { skin, navHidden, contentWidth } = settings
   const { navigationSize, disableCustomizer, collapsedNavigationSize } = themeConfig
   const navWidth = navigationSize
   const navigationBorderWidth = skin === 'bordered' ? 1 : 0
   const collapsedNavWidth = collapsedNavigationSize
-
-  // ** States
   const [navVisible, setNavVisible] = useState(false)
 
-  // ** Toggle Functions
   const toggleNavVisibility = () => setNavVisible(!navVisible)
 
   return (
@@ -62,7 +46,6 @@ const VerticalLayout = props => {
       <VerticalLayoutWrapper className='layout-wrapper'>
         {/* Navigation Menu */}
         {navHidden && !(navHidden && settings.lastLayout === 'horizontal') ? null : (
-
           <Navigation
             navWidth={navWidth}
             navVisible={navVisible}
@@ -81,10 +64,7 @@ const VerticalLayout = props => {
             {...props}
           />
         )}
-        <MainContentWrapper
-          className='layout-content-wrapper'
-          sx={{ ...(contentHeightFixed)}}
-        >
+        <MainContentWrapper className='layout-content-wrapper' sx={{ ...contentHeightFixed }}>
           {/* AppBar Component */}
           <AppBar
             toggleNavVisibility={toggleNavVisibility}
@@ -109,9 +89,6 @@ const VerticalLayout = props => {
           >
             {children}
           </ContentWrapper>
-
-          {/* Footer Component */}
-          {/* <Footer footerStyles={footerProps?.sx} footerContent={footerProps?.content} {...props} /> */}
         </MainContentWrapper>
       </VerticalLayoutWrapper>
 

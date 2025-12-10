@@ -1,15 +1,10 @@
-// ** MUI Imports
 import { styled } from '@mui/material/styles'
 import Box from '@mui/material/Box'
-
-// ** AppBar Imports
 import AppBar from 'src/@core/layouts/components/blank-layout-with-appBar'
 
-// Styled component for Blank Layout with AppBar component
 const BlankLayoutWithAppBarWrapper = styled(Box)(({ theme }) => ({
   height: '100vh',
 
-  // For V1 Blank layout pages
   '& .content-center': {
     display: 'flex',
     alignItems: 'center',
@@ -18,7 +13,6 @@ const BlankLayoutWithAppBarWrapper = styled(Box)(({ theme }) => ({
     minHeight: `calc(100vh - ${theme.spacing(theme.mixins.toolbar.minHeight / 4)})`
   },
 
-  // For V2 Blank layout pages
   '& .content-right': {
     display: 'flex',
     overflowX: 'hidden',
@@ -28,7 +22,6 @@ const BlankLayoutWithAppBarWrapper = styled(Box)(({ theme }) => ({
 }))
 
 const BlankLayoutWithAppBar = props => {
-  // ** Props
   const { children } = props
 
   return (

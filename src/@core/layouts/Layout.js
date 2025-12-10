@@ -1,15 +1,10 @@
-// ** React Import
 import { useEffect, useRef } from 'react'
-
-// ** Layout Components
 import VerticalLayout from './VerticalLayout'
 import HorizontalLayout from './HorizontalLayout'
 
 const Layout = props => {
-  // ** Props
   const { hidden, children, settings, saveSettings } = props
 
-  // ** Ref
   const isCollapsed = useRef(settings.navCollapsed)
   useEffect(() => {
     if (hidden) {
