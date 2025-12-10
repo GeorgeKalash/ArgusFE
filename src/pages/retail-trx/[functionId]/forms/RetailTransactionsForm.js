@@ -504,10 +504,10 @@ export default function RetailTransactionsForm({
   ]
 
   async function fillForm(retailTrxPack) {
-    const retailTrxHeader = retailTrxPack?.header
-    const retailTrxItems = retailTrxPack?.items
-    const retailTrxCash = retailTrxPack?.cash
-    const addressObj = await getAddress(retailTrxHeader?.addressId)
+    const retailTrxHeader = retailTrxPack?.header || {}
+    const retailTrxItems = retailTrxPack?.items || []
+    const retailTrxCash = retailTrxPack?.cash || []
+    const addressObj = await getAddress(retailTrxHeader?.addressId || null)
 
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.map(async (item, index) => {
@@ -578,9 +578,10 @@ export default function RetailTransactionsForm({
       extension: PointofSaleRepository.RetailInvoice.get2,
       parameters: `_recordId=${transactionId}`
     })
-    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
 
-    return res.record
+    if (res?.record?.header) res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+
+    return res?.record || {}
   }
 
   async function getAddress(addressId) {
