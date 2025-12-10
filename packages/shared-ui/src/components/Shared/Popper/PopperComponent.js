@@ -47,16 +47,10 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     }
   }, [anchorEl, open, updateRect])
 
-  const zoomValue =
-    typeof window !== 'undefined'
-      ? parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom'))
-      : 1
-  const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1
-
-  const anchorTop = rect ? rect.top / zoom : 0
-  const anchorBottom = rect ? rect.bottom / zoom : 0
-  const anchorWidth = rect ? rect.width / zoom : undefined
-  const left = rect ? rect.left / zoom : 0
+  const anchorTop = rect ? rect.top  : 0
+  const anchorBottom = rect ? rect.bottom  : 0
+  const anchorWidth = rect ? rect.width  : undefined
+  const left = rect ? rect.left  : 0
 
   useEffect(() => {
     if (!open || !popperRef.current) return
@@ -83,7 +77,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   }, [open, rect, measuredHeight])
 
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
-  const defaultEstimate = isPicker ? 320 / zoom : viewportHeight * 0.43
+  const defaultEstimate = isPicker ? 320  : viewportHeight * 0.43
   const popperHeightForFlip = measuredHeight ?? defaultEstimate
 
   const openAbove = rect

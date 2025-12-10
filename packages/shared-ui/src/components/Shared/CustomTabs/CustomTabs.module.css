@@ -17,8 +17,9 @@
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  height: 40px;
-  overflow: auto;
+  min-height: 32px;
+  height: auto;
+  overflow: visible;
 }
 
 .tabsWrapper {

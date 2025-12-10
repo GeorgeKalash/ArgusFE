@@ -1,10 +1,24 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef, useContext } from 'react'
-import { DialogTitle, DialogContent, Paper, Tabs, Tab, Box, Typography, IconButton } from '@mui/material'
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useContext
+} from 'react'
+import {
+  DialogTitle,
+  Paper,
+  Tabs,
+  Tab,
+  Box,
+  Typography,
+  IconButton
+} from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import Draggable from 'react-draggable'
 import MinimizeIcon from '@mui/icons-material/Minimize'
+import Draggable from 'react-draggable'
 import WindowToolbar from '../WindowToolbar'
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
 import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
@@ -14,7 +28,7 @@ import styles from './Window.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 function LoadingOverlay() {
-  return <div className={styles.loadingOverlay}></div>
+  return <div className={styles.loadingOverlay} />
 }
 
 const Window = React.memo(
@@ -47,13 +61,22 @@ const Window = React.memo(
   }) => {
     const { settings } = useSettings()
     const { navCollapsed } = settings
-    const [minimized, setMinimized] = useState(false)
     const { loading } = useContext(RequestsContext)
+
     const paperRef = useRef(null)
+    const [dragPos, setDragPos] = useState({ x: 0, y: 0 })
+    const [restoreState, setRestoreState] = useState({
+      width,
+      height,
+      expanded: false,
+      position: { x: 0, y: 0 }
+    })
+
+    const [minimized, setMinimized] = useState(false)
     const [expanded, setExpanded] = useState(false)
     const [showOverlay, setShowOverlay] = useState(false)
-    const maxAccess = props.maxAccess?.record.maxAccess
 
+    const maxAccess = props.maxAccess?.record.maxAccess
     const windowToolbarVisible = useMemo(
       () => (editMode ? maxAccess >= TrxType.EDIT : maxAccess >= TrxType.ADD),
       [editMode, maxAccess]
@@ -62,50 +85,30 @@ const Window = React.memo(
     const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
     const menuWidth =
-      screenWidth <= 768 ? 180 : screenWidth <= 1024 ? 200 : screenWidth <= 1366 ? 220 : screenWidth <= 1600 ? 240 : 300
-
-    const tabsHeight =
-      screenWidth <= 768 ? 25 : screenWidth <= 1024 ? 20 : screenWidth <= 1366 ? 28 : screenWidth <= 1600 ? 30 : 40
+      screenWidth <= 768 ? 180 :
+      screenWidth <= 1024 ? 200 :
+      screenWidth <= 1366 ? 220 :
+      screenWidth <= 1600 ? 240 : 300
 
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
-    const containerHeight = `calc(100vh - ${tabsHeight}px)`
-    const containerHeightPanel = screenHeight - 180
-    const heightPanel = height - 120
+    const containerHeight = `calc(100vh - 40px)`
 
-    const scaleFactor = useMemo(() => {
-      if (screenWidth > 1600) return 1
-      if (screenWidth > 1400) return 0.8
-      if (screenWidth > 1366) return 0.83
-      if (screenWidth > 768) return 0.6
-      if (screenWidth > 600) return 0.75
-      if (screenWidth > 480) return 0.5
-      if (screenWidth > 375) return 0.65
+    const scaleFactor = (() => {
+      if (screenWidth >= 1680) return 1;
+      if (screenWidth >= 1600) return 0.90;
 
-      return 0.6
-    }, [screenWidth])
+      const minW = 1024;
+      const maxW = 1600;
+      const minScale = 0.70;
+      const maxScale = 0.92;
 
-    const heightScaleFactor = useMemo(() => {
-      if (screenWidth > 1600) return 1
-      if (screenWidth > 1359) return 0.85
-      if (screenWidth > 1024) return 0.95
-      if (screenWidth > 768) return 0.7
-      if (screenWidth > 600) return 0.85
-      if (screenWidth > 480) return 0.6
-      if (screenWidth > 375) return 0.75
-
-      return 0.75
-    }, [screenWidth])
+      if (screenWidth <= minW) return minScale;
+      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale);
+    })();
 
     const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
-    const scaledHeight = expanded ? containerHeight : Math.max(200, height * heightScaleFactor)
-
-    useEffect(() => {
-      const transactionLogInfo = document.querySelector('[data-unique-id]')
-      if (transactionLogInfo) {
-        transactionLogInfo.style.height = expanded ? '30vh' : '18vh'
-      }
-    }, [expanded])
+    const scaledHeight = expanded ? containerHeight : Math.max(200, height * scaleFactor)
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()
@@ -114,147 +117,171 @@ const Window = React.memo(
     useEffect(() => {
       if (!loading) {
         const timer = setTimeout(() => setShowOverlay(true), 50)
-
         return () => clearTimeout(timer)
       }
     }, [loading])
 
     useEffect(() => {
-      const body = document.body
-      if (expanded || minimized) {
-        body.style.overflow = 'hidden'
-      } else {
-        body.style.overflow = ''
-      }
+      document.body.style.overflow = minimized || expanded ? 'hidden' : ''
+      return () => (document.body.style.overflow = '')
+    }, [minimized, expanded])
 
-      return () => {
-        body.style.overflow = ''
-      }
-    }, [expanded, minimized])
+    const handleExpandToggle = () => {
+      if (minimized) {
+        setMinimized(false)
+        setExpanded(restoreState.expanded)
 
-    const handleExpandToggle = useCallback(() => {
+        setTimeout(() => setDragPos(restoreState.position), 10)
+        return
+      }
       setExpanded(prev => !prev)
-    }, [])
+    }
 
-      const handleMinimizeToggle = useCallback(() => {
-      if (expanded) setExpanded(false)
-      setMinimized(prev => !prev)
-    }, [expanded])
+    const handleMinimizeToggle = () => {
+      if (!minimized) {
+        setRestoreState({
+          width: scaledWidth,
+          height: scaledHeight,
+          expanded,
+          position: dragPos
+        })
+
+        if (expanded) setExpanded(false)
+        setMinimized(true)
+        return
+      }
+
+      setMinimized(false)
+      setExpanded(restoreState.expanded)
+
+      setTimeout(() => {
+        setDragPos(restoreState.position)
+      }, 10)
+    }
 
     return (
       <CacheDataProvider>
         <Box
-          id='parent'
           className={styles.parentBox}
           style={{
             width: spacing ? containerWidth : '100vw',
-            height: spacing ? containerHeight : '100vh'
+            height: spacing ? containerHeight : '100vh',
+            alignItems: minimized ? 'flex-end' : 'center'
           }}
           onKeyDown={e => e.key === 'Escape' && closable && onClose()}
         >
           <Draggable
-            handle='#draggable-dialog-title'
+            handle="#draggable-dialog-title"
             cancel={'[class*="MuiDialogContent-root"]'}
-            bounds='parent'
-            position={expanded || minimized ? { x: 0, y: 0 } : undefined}
-            onStart={() => draggable}
+            bounds="parent"
+            position={minimized ? { x: 0, y: 0 } : dragPos}
+            disabled={minimized}
+            onDrag={(_, data) => setDragPos({ x: data.x, y: data.y })}
           >
-            <Box sx={{ position: 'relative', pointerEvents: 'all' }}>
+            <Box
+              sx={{
+                position: 'relative',
+                pointerEvents: 'all',
+                mb: minimized ? '5px' : 0
+              }}
+            >
               <Paper
                 ref={paperRef}
                 tabIndex={-1}
                 className={styles.paper}
-                data-expanded={expanded}
+                data-minimized={minimized}
                 style={{
                   width: scaledWidth,
-                  height: scaledHeight,
-                  display: controlled ? 'flex' : 'block',
-                  flexDirection: controlled ? 'column' : 'unset'
+                  height: minimized ? 40 : scaledHeight,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
                 }}
               >
-                <DialogTitle id='draggable-dialog-title' className={styles.dialogTitle}>
+                <DialogTitle id="draggable-dialog-title" className={styles.dialogTitle}>
+                  <Typography className={styles.dialogTitleText}>
+                    {nextToTitle ? `${Title} ${nextToTitle}` : Title}
+                  </Typography>
+
                   <Box>
-                    <Typography className={styles.dialogTitleText}>
-                      {nextToTitle ? Title + ' ' + nextToTitle : Title}
-                    </Typography>
-                  </Box>
-                  <Box>
-                          <IconButton
-                      tabIndex={-1}
-                      edge='end'
-                      onClick={handleMinimizeToggle}
-                      aria-label='minimize'
-                        className={styles.iconButton}
-                    >
+                    <IconButton onClick={handleMinimizeToggle} className={styles.iconButton}>
                       <MinimizeIcon />
                     </IconButton>
-                    {refresh && (
-                      <IconButton
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={props?.onRefresh}
-                        aria-label='refresh'
-                        className={styles.iconButton}
-                      >
+
+                    {refresh && !minimized && (
+                      <IconButton onClick={props?.onRefresh} className={styles.iconButton}>
                         <RefreshIcon />
                       </IconButton>
                     )}
-                    {expandable && !minimized && (
-                      <IconButton
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={handleExpandToggle}
-                        data-is-expanded={expanded}
-                        aria-label='expand'
-                        className={styles.iconButton}
-                      >
+
+                    {expandable && (
+                      <IconButton onClick={handleExpandToggle} className={styles.iconButton}>
                         <OpenInFullIcon />
                       </IconButton>
                     )}
+
                     {closable && (
-                      <IconButton
-                        tabIndex={-1}
-                        edge='end'
-                        onClick={onClose}
-                        aria-label='clear input'
-                        className={styles.iconButton}
-                      >
+                      <IconButton onClick={onClose} className={styles.iconButton}>
                         <ClearIcon />
                       </IconButton>
                     )}
                   </Box>
                 </DialogTitle>
-                {tabs && (
-                  <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-                    {tabs.map((tab, i) => (
-                      <Tab key={i} label={tab.label} disabled={tab?.disabled} />
-                    ))}
-                  </Tabs>
-                )}
-                {!showOverlay && isLoading && <LoadingOverlay />}
-                {!controlled ? (
-                  <>
-                    <DialogContent sx={{ p: 2 }}>{children}</DialogContent>
-                    {windowToolbarVisible && (
-                      <WindowToolbar
-                        onSave={onSave}
-                        onClear={onClear}
-                        onInfo={onInfo}
-                        onApply={onApply}
-                        disabledSubmit={disabledSubmit}
-                        disabledInfo={disabledInfo}
-                        disabledApply={disabledApply}
-                      />
-                    )}
-                  </>
-                ) : (
-                  React.Children.map(children, child =>
-                    React.cloneElement(child, {
-                      expanded,
-                      height: expanded ? containerHeightPanel : heightPanel
-                    })
-                  )
-                )}
+
+                <Box
+                  sx={{
+                    flex: 1,
+                    overflow: 'hidden',     
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: 0
+                  }}
+                >
+                  {tabs && (
+                    <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
+                      {tabs.map((tab, i) => (
+                        <Tab key={i} label={tab.label} disabled={tab?.disabled} />
+                      ))}
+                    </Tabs>
+                  )}
+
+                  {!showOverlay && isLoading && <LoadingOverlay />}
+
+                  {!controlled ? (
+                    <>
+                      <Box
+                        sx={{
+                          flex: 1,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          minHeight: 0,
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {children}
+                      </Box>
+
+                      {windowToolbarVisible && (
+                        <WindowToolbar
+                          onSave={onSave}
+                          onClear={onClear}
+                          onInfo={onInfo}
+                          onApply={onApply}
+                          disabledSubmit={disabledSubmit}
+                          disabledInfo={disabledInfo}
+                          disabledApply={disabledApply}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    React.Children.map(children, child =>
+                      React.cloneElement(child, {
+                        fill: true,
+                        expanded
+                      })
+                    )
+                  )}
+                </Box>
               </Paper>
             </Box>
           </Draggable>
