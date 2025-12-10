@@ -396,6 +396,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                     label={labels.date}
                     value={formik.values.header.date}
                     onChange={formik.setFieldValue}
+                    maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.date', null)}
                     error={formik.touched.header?.date && Boolean(formik.errors.header?.date)}
                   />
