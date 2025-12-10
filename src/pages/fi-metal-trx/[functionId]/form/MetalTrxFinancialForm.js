@@ -277,23 +277,40 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       parameters: `_trxId=${recordId}&_functionId=${functionId}`
     })
 
-    const modifiedList = itemsRes?.list?.map((item, index) => ({
-      ...item,
-      purity: item.purity * 1000,
-      stdPurity: item.stdPurity * 1000,
-      metalValue:
-        metalInfo?.purity || metal.purity
-          ? ((item.qty * item.purity) / (metalInfo?.purity || metal.purity)).toFixed(2)
-          : null,
-      totalCredit: item?.totalCredit || 0,
-      creditAmount: item?.creditAmount || 0,
-      id: index + 1,
-      seqNo: index + 1
-    }))
+    const modifiedList = await Promise.all(
+      itemsRes?.list?.map(async (item, index) => {
+        const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+
+        return {
+          ...item,
+          purity: item.purity * 1000,
+          stdPurity: item.stdPurity * 1000,
+          metalValue:
+            metalInfo?.purity || metal.purity
+              ? ((item.qty * item.purity) / (metalInfo?.purity || metal.purity)).toFixed(2)
+              : null,
+          totalCredit: item?.totalCredit || 0,
+          creditAmount: item?.creditAmount || 0,
+          id: index + 1,
+          seqNo: index + 1,
+          isOpenMetalPurity
+        }
+      })
+    )
+
     formik.setValues({
       ...headerRes,
       items: modifiedList?.length > 0 ? modifiedList : formik.values.items
     })
+  }
+
+  const getOpenMetalPurity = async itemId => {
+    const res3 = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+
+    return res3?.record?.isOpenMetalPurity
   }
 
   const columns = [
@@ -343,6 +360,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
       },
       onChange: async ({ row: { update, newRow } }) => {
         const purityValue = newRow.purity || newRow.stdPurity
+        const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
 
         if (!newRow?.itemId) return
 
@@ -363,7 +381,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           totalCredit,
           trackBy: res.record.trackBy,
           purityFromItem: true,
-          qtyOnHand: res2?.record?.onhand || 0
+          qtyOnHand: res2?.record?.onhand || 0,
+          isOpenMetalPurity
         })
       },
       flex: 1.5
@@ -402,7 +421,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: row.trackBy != 2 }
+        return { ...props, readOnly: !row.isOpenMetalPurity }
       }
     },
     {

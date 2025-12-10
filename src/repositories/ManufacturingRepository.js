@@ -436,5 +436,18 @@ export const ManufacturingRepository = {
   },
   BatchTransferJob: {
     qry: service + 'qryBTFJ'
+  },
+  Disposal: {
+    page: service + 'pageDIS',
+    snapshot: service + 'snapshotDIS',
+    get: service + 'getDIS',
+    set2: service + 'set2DIS',
+    del: service + 'delDIS'
+  },
+  DisposalItem: {
+    qry: service + 'qryDII'
+  },
+  DisposalSerial: {
+    qry: service + 'qryDISRL'
   }
 }

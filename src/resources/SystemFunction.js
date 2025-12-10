@@ -128,8 +128,9 @@ export const SystemFunction = {
   EarnedLeaves: Module.LeaveReq * 100 + 3,
   Samples: Module.ProductModeling * 100 + 7,
   MetalSmelting: Module.Foundry * 100 + 5,
+  BatchTransfer: Module.Manufacturing * 100 + 16,
   PurityAdjustment: Module.Foundry * 100 + 6,
-  BatchTransfer: Module.Manufacturing * 100 + 16
+  ItemDisposal: Module.Manufacturing * 100 + 17
 }
 
 export const getSystemFunctionModule = functionId => {
