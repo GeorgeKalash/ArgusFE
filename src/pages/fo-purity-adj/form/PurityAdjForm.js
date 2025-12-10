@@ -60,6 +60,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         siteId,
         status: 1,
         workCenterId: null,
+        qty: 0,
         notes: ''
       },
       items: [
@@ -113,7 +114,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date) },
+      header: { ...obj.header, date: formatDateToApi(obj.header.date), qty: totalMetal },
       items: obj.items?.map((item, index) => ({
         ...item,
         trxId: obj?.recordId || 0,
