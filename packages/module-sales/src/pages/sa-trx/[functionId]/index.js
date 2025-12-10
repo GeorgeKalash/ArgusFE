@@ -224,8 +224,7 @@ const SaTrx = () => {
         getResourceId,
         getGLResource
       },
-      width: 1330,
-      height: 720,
+     
       title: getCorrectLabel(parseInt(functionId))
     })
   }

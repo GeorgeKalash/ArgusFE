@@ -251,3 +251,5 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
     </FormShell>
   )
 }
+BarcodesForm.width= 750,
+BarcodesForm.height=500
