@@ -179,7 +179,7 @@ const CustomNumberField = ({
           input: inputs.inputBase
         },
         endAdornment: (!_readOnly || allowClear) && !unClearable && !props.disabled && (
-          <InputAdornment position='end' className={inputs.inputAdornment}>
+          <div position='end' className={inputs.inputAdornment}>
             {iconMap[props?.iconKey] && (
               <IconButton tabIndex={iconMapIndex} onClick={handleButtonClick} className={inputs.iconButton}>
                 {iconMap[props?.iconKey]}
@@ -191,7 +191,7 @@ const CustomNumberField = ({
                 <ClearIcon className={inputs.icon} />
               </IconButton>
             )}
-          </InputAdornment>
+          </div>
         )
       }}
       InputLabelProps= {{

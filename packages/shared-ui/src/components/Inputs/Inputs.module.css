@@ -17,6 +17,9 @@
   font-size: 14px !important;
 
 }
+.inputAdornment {
+  display: flex
+}
 
 .inputBase::placeholder {
   font-size: 14px !important;
@@ -101,6 +104,11 @@
     top: -3px;
   }
 
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 0px !important;   
+    font-size: 14px !important;  
+  }
+
   .inputLabelShrink {
     font-size: 14px !important;
     top: 0px;
@@ -121,31 +129,35 @@
     margin-left: 5px !important;
   }
 
-  .iconButton {
-    margin: 0px !important;
-  }
   .icon {
-    font-size: 20px !important;
+    font-size: 18px !important;
+    padding: 1px !important; 
   }
+
   .iconImage {
-    height: 20px !important;
-    width: 20px !important;
+    height: 18px !important;
+    width: 18px !important;
     margin-left: 8px;
     margin-right: 8px;
     margin-top: 5px;
   }
 
 
+
 }
 
 @media (max-width: 1280px) {
-
 
   .inputLabel {
     font-size: 11px !important;
     padding: 0px !important;
     margin: 0px !important;
   
+  }
+
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 3px !important;   
+    font-size: 10px !important;  
   }
 
   .inputBase {
@@ -155,8 +167,10 @@
   .inputBase::placeholder {
     font-size: 11px !important;
   }
-  .iconButton {
-    margin: 0px !important;
+
+  .icon {
+   font-size: 15px !important;
+   padding: 1px !important; 
   }
   
   .iconImage {
@@ -176,13 +190,12 @@
   }
 
   .outlinedRoot:dir(ltr) .inputAdornment {
-    margin-right: 0px !important;
+    margin-right: -5px !important;
   }
   
   .outlinedRoot:dir(rtl) .inputAdornment {
-    margin-left: 0px !important;
+    margin-left: -5px !important;
   }
-
 
 }
 
@@ -197,6 +210,11 @@
     top: -2px !important;
   }
 
+  .inputLabel:global(.MuiInputLabel-shrink.MuiInputLabel-outlined) {
+    top: 2px !important;   
+    font-size: 10px !important;  
+  }
+  
   .inputBase::placeholder {
     font-size: 9px !important;
   }
@@ -206,9 +224,21 @@
     top: 3px !important;
    }
 
-  .inputBase {
-    font-size: 8px !important;
+   .inputBase {
+    font-size: 10px !important;
+
   }
+
+  .inputBase:dir(ltr) {
+    padding-left: 7px !important;
+    padding-right: 0px !important;
+  }
+
+  .inputBase:dir(rtl) {
+    padding-left: 0px !important;
+    padding-right: 7px !important;
+  }
+  
   .outlinedRoot:dir(ltr) .inputAdornment {
     margin-right: -5px !important;
   }
@@ -216,12 +246,10 @@
     margin-left: -5px !important;
   }
  
-  .iconButton {
-    margin: -1px !important;
-  }
-  .icon {
-    font-size: 18px !important;
 
+  .icon {
+    font-size: 15px !important;
+   padding: 1px !important; 
   }
   .iconImage {
     height: 15px !important;

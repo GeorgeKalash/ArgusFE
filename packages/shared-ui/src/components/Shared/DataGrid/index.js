@@ -880,7 +880,6 @@ export function DataGrid({
 
 const finalColumns =  columnDefs?.map(def => {
   const colId = def.field
-  console.log(colId)
   const state = columnState?.find(s => s.colId === colId)
 
   if (!state) return def

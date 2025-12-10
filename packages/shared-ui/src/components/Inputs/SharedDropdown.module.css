@@ -132,6 +132,11 @@
     font-size: 0.62rem !important;
     height: 16px !important;
   }
+
+  .dropdownHeaderRow :global(.MuiAutocomplete-noOptions) {
+    font-size: 0.2rem !important;
+  
+  }
 }
 
 @media (min-width: 800px) and (max-width: 959px) {
