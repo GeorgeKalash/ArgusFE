@@ -17,7 +17,7 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
   const { formik } = useForm({
     initialValues: {
       materialsTfr: '',
-      wcSiteId: parseInt(form?.values?.wcSiteId) || null
+      wcSiteId: parseInt(form?.values?.header?.wcSiteId) || null
     },
     maxAccess,
     validationSchema: yup.object({
@@ -118,6 +118,7 @@ export default function ImportTransfer({ maxAccess, labels, form, window }) {
                 name='materialsTfr'
                 label={labels.materialsTfr}
                 value={formik.values.materialsTfr}
+                required
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('materialsTfr', '')}
                 error={formik.touched.materialsTfr && Boolean(formik.errors.materialsTfr)}

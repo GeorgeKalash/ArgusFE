@@ -22,7 +22,8 @@ export default function ItemDisposal() {
 
   const {
     query: { data },
-    filterBy,
+    search,
+    clear,
     refetch,
     labels,
     access,
@@ -32,8 +33,8 @@ export default function ItemDisposal() {
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Disposal.page,
     datasetId: ResourceIds.ItemDisposal,
-    filter: {
-      filterFn: fetchWithFilter
+    search: {
+      searchFn: fetchWithSearch
     }
   })
 
@@ -48,15 +49,11 @@ export default function ItemDisposal() {
     return { ...response, _startAt: _startAt }
   }
 
-  async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry) {
-      return await getRequest({
-        extension: ManufacturingRepository.Disposal.snapshot,
-        parameters: `_filter=${filters.qry}&_startAt=${pagination._startAt || 0}&_size=${pagination._size || 50}`
-      })
-    } else {
-      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
-    }
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: ManufacturingRepository.Disposal.snapshot,
+      parameters: `_filter=${qry}`
+    })
   }
 
   const columns = [
@@ -99,7 +96,7 @@ export default function ItemDisposal() {
   ]
 
   const add = async () => {
-    proxyAction()
+    await proxyAction()
   }
 
   const { proxyAction } = useDocumentTypeProxy({
@@ -137,17 +134,7 @@ export default function ItemDisposal() {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar
-          onAdd={add}
-          maxAccess={access}
-          onSearch={value => {
-            filterBy('qry', value)
-          }}
-          onSearchClear={() => {
-            clearFilter('qry')
-          }}
-          inputSearch={true}
-        />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

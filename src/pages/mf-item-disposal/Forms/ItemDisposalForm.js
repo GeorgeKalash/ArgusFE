@@ -49,15 +49,18 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: null,
-      reference: '',
-      dtId: null,
-      date: new Date(),
-      siteId: null,
-      notes: '',
-      status: 1,
-      wip: 1,
-      workCenterId: null,
-      wcSiteId: null,
+      header: {
+        recordId: null,
+        reference: '',
+        dtId: null,
+        date: new Date(),
+        siteId: null,
+        notes: '',
+        status: 1,
+        wip: 1,
+        workCenterId: null,
+        wcSiteId: null
+      },
       items: [
         {
           id: 1,
@@ -74,43 +77,43 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       serials: []
     },
     validationSchema: yup.object({
-      date: yup.date().required(),
-      workCenterId: yup.number().required(),
-      siteId: yup.number().required()
+      header: yup.object({
+        date: yup.date().required(),
+        workCenterId: yup.number().required(),
+        siteId: yup.number().required()
+      })
     }),
     onSubmit: async values => {
-      const copy = { ...values }
-      delete copy.items
-      delete copy.serials
-      copy.date = copy.date ? formatDateToApi(copy.date) : null
-
+      const copy = values?.header || {}
       const serialsValues = []
 
-      const updatedRows = formik.values.items.map((item, index) => {
-        const { serials, ...rest } = item
-
-        if (serials?.length) {
-          serials.forEach((serial, sIndex) => {
-            serialsValues.push({
-              ...serial,
-              seqNo: index + 1,
-              srlSeqNo: sIndex + 1,
-              trxId: copy.recordId || 0
+      const updatedRows = (values?.items || [])
+        .filter(item => item.itemId)
+        .map((item, index) => {
+          const { serials, ...rest } = item
+          if (serials?.length) {
+            serials.forEach((serial, sIndex) => {
+              serialsValues.push({
+                ...serial,
+                seqNo: index + 1,
+                srlSeqNo: sIndex + 1,
+                trxId: copy.recordId || 0
+              })
             })
-          })
-        }
+          }
 
-        return {
-          ...rest,
-          seqNo: index + 1,
-          trxId: copy.recordId || 0
-        }
-      })
+          return {
+            ...rest,
+            seqNo: index + 1,
+            qty: rest?.qty || 0,
+            trxId: copy.recordId || 0
+          }
+        })
 
       const res = await postRequest({
         extension: ManufacturingRepository.Disposal.set2,
         record: JSON.stringify({
-          header: copy,
+          header: { ...copy, date: copy.date ? formatDateToApi(copy.date) : null },
           items: updatedRows,
           serials: serialsValues
         })
@@ -225,7 +228,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
             Component: SerialsForm,
             props: {
               row: { ...row, serialCount: row?.serialCount || 0 },
-              siteId: formik?.values?.siteId,
+              siteId: formik?.values?.header?.siteId,
               checkForSiteId: true,
               updateRow
             }
@@ -249,7 +252,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
       disabled: !editMode
     },
     {
-      key: 'Import From Transfer',
+      key: 'ImportFromTransfer',
       condition: true,
       onClick: () => {
         stack({
@@ -327,7 +330,8 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
     })
 
     formik.setValues({
-      ...header,
+      header,
+      recordId: header.recordId || null,
       items: mappedItems
     })
   }
@@ -355,7 +359,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     endpointId={SystemRepository.DocumentType.qry}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.ItemDisposal}`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
-                    name='dtId'
+                    name='header.dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -364,25 +368,25 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     readOnly={editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
-                    values={formik.values}
+                    values={formik.values?.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
                       await changeDT(newValue)
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
+                      formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.dtId && Boolean(formik.errors.dtId)}
+                    error={formik.touched?.header?.dtId && Boolean(formik.errors?.header?.dtId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField
-                    name='reference'
+                    name='header.reference'
                     label={labels.reference}
-                    value={formik?.values?.reference}
+                    value={formik?.values?.header?.reference}
                     maxAccess={!editMode && maxAccess}
                     readOnly={editMode}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('reference', null)}
-                    error={formik.touched.reference && Boolean(formik.errors.reference)}
+                    onClear={() => formik.setFieldValue('header.reference', null)}
+                    error={formik.touched?.header?.reference && Boolean(formik.errors?.header?.reference)}
                   />
                 </Grid>
               </Grid>
@@ -391,34 +395,33 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomDatePicker
-                    name='date'
+                    name='header.date'
                     required
                     label={labels.date}
-                    value={formik?.values?.date}
+                    value={formik?.values?.header?.date}
                     onChange={formik.setFieldValue}
-                    editMode={editMode}
                     maxAccess={maxAccess}
-                    onClear={() => formik.setFieldValue('date', null)}
-                    error={formik.touched.date && Boolean(formik.errors.date)}
+                    onClear={() => formik.setFieldValue('header.date', null)}
+                    error={formik.touched?.header?.date && Boolean(formik.errors?.header?.date)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
+                    name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    values={formik.values}
+                    values={formik.values?.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={1.5}
                     required
-                    onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId || null)}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.siteId', newValue?.recordId || null)}
+                    error={formik.touched?.header?.siteId && Boolean(formik.errors?.header?.siteId)}
                   />
                 </Grid>
               </Grid>
@@ -428,7 +431,7 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.WorkCenter.qry}
-                    name='workCenterId'
+                    name='header.workCenterId'
                     label={labels.workCenter}
                     required
                     columnsInDropDown={[
@@ -438,26 +441,26 @@ export default function ItemDisposalForm({ recordId, access, labels }) {
                     valueField='recordId'
                     displayField='name'
                     displayFieldWidth={1.5}
-                    values={formik.values}
+                    values={formik.values?.header}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('wcSiteId', newValue?.siteId || null)
-                      formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                      formik.setFieldValue('header.wcSiteId', newValue?.siteId || null)
+                      formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
                     }}
-                    error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+                    error={formik.touched?.header?.workCenterId && Boolean(formik.errors?.header?.workCenterId)}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
-                    name='notes'
+                    name='header.notes'
                     label={labels.notes}
-                    value={formik.values.notes}
+                    value={formik.values?.header?.notes}
                     maxLength='100'
                     rows={2}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('notes', '')}
-                    error={formik.touched.notes && Boolean(formik.errors.notes)}
+                    onClear={() => formik.setFieldValue('header.notes', '')}
+                    error={formik.touched?.header?.notes && Boolean(formik.errors?.header?.notes)}
                   />
                 </Grid>
               </Grid>
