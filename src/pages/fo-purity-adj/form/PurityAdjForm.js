@@ -24,6 +24,7 @@ import { DataGrid } from 'src/components/Shared/DataGrid'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
+import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -45,6 +46,16 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
+
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    qty: row => row?.qty,
+    purity: row => row?.purity,
+    metalId: row => row?.metalId
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
@@ -86,19 +97,9 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         plantId: yup.number().required(),
         workCenterId: yup.number().required()
       }),
-      items: yup
-        .array()
-        .of(
-          yup.object().shape({
-            metalId: yup.number().required(),
-            qty: yup.number().required(),
-            purity: yup.number().required(),
-            sku: yup.string().required(),
-            itemName: yup.string().required()
-          })
-        )
-        .required()
+      items: yup.array().of(schema)
     }),
+    conditionSchema: ['items'],
     onSubmit: async obj => {
       const payload = getPayload(obj)
 
@@ -115,12 +116,14 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const getPayload = obj => {
     return {
       header: { ...obj.header, date: formatDateToApi(obj.header.date), qty: totalMetal },
-      items: obj.items?.map((item, index) => ({
-        ...item,
-        trxId: obj?.recordId || 0,
-        seqNo: index + 1,
-        purity: item.purity / 1000
-      })),
+      items: (obj?.items || [])
+        .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
+        .map((item, index) => ({
+          ...item,
+          trxId: obj?.recordId || 0,
+          seqNo: index + 1,
+          purity: item.purity / 1000
+        })),
       scraps: []
     }
   }

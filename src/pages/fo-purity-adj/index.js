@@ -111,8 +111,8 @@ export default function PurityAdjustment() {
         recordId,
         access
       },
-      width: 1100,
-      height: 730,
+      width: 1050,
+      height: 700,
       title: labels.purityAdjustment
     })
   }
