@@ -6,7 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-inventory';
 const MODULE_FOLDER = 'module-inventory';
 
 const SALES_PAGES = [
-  'iv-parts',
+  'iv-pl-inquiry',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

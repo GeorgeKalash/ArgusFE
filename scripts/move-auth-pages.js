@@ -6,8 +6,11 @@ const MODULE_PACKAGE_NAME = '@argus/module-auth';
 const MODULE_FOLDER = 'module-auth';
 
 const SALES_PAGES = [
-  'trx-details',
-  'user-otp-qrcode',
+  'deliveryDashboard',
+  'dynamicDashboard',
+  'login',
+  'salesPersonDashboard',
+  'user-dashboard',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

@@ -6,15 +6,11 @@ const MODULE_PACKAGE_NAME = '@argus/module-system';
 const MODULE_FOLDER = 'module-system';
 
 const SALES_PAGES = [
-  'sy-resource-performance',
-  'batchpost',
-  'currencies',
-  'exchange-rates',
-  'exchange-tables',
-  'forget-password',
-  'mc-currency-mapping',
-  'personal-settings',
-  'sites',
+  'batchImports',
+  'change-password',
+  'default',
+  'reports',
+  'system-defaults',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

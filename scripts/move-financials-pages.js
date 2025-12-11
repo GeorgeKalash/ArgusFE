@@ -6,7 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-financials';
 const MODULE_FOLDER = 'module-financials';
 
 const SALES_PAGES = [
-  'fi-trial-balance-grid',
+  'fi-aging',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

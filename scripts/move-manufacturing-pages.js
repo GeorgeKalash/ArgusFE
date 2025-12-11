@@ -6,8 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-manufacturing';
 const MODULE_FOLDER = 'module-manufacturing';
 
 const SALES_PAGES = [
-  'mf-ws-dtd',
-  'pm-task',
+  'mf-prod-order'
 ];
 
 const ROOT = path.resolve(__dirname, '..');

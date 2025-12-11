@@ -6,9 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-hr';
 const MODULE_FOLDER = 'module-hr';
 
 const SALES_PAGES = [
-  'ss-leave-request',
-  'hr-bgcheck-types',
-  'job-position',
+  'hr-org-chart',
   
 ];
 
