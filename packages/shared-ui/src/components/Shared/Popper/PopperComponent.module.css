@@ -46,10 +46,9 @@
 
 .popperRoot :global(.MuiPickersActionBar-root .MuiButton-root),
 .popperRoot :global(.MuiDialogActions-root .MuiButton-root) {
-  padding: 2px 8px;
   min-width: 0;
-  font-size: 0.75rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1;
 }
 
 .popperRoot :global(.MuiPickersActionBar-actions) {
@@ -60,7 +59,7 @@
 
 .popperRoot :global(.MuiPickersLayout-toolbar),
 .popperRoot :global(.MuiPickersCalendarHeader-root) {
-  padding: 2px 8px;
+  padding: 2px 8px ;
   min-height: 25px;
   box-sizing: border-box;
 }
@@ -71,7 +70,7 @@
 }
 
 .popperRoot :global(.MuiPickersCalendarHeader-root .MuiIconButton-root) {
-  padding: 1px;
+  padding: -1px;
 }
 
 .popperRoot :global(.MuiPickersLayout-toolbar .MuiButton-root) {
@@ -79,44 +78,118 @@
   font-size: 0.75rem;
 }
 
-@media (max-width: 1600px) {
+@media (min-width: 1281px) {
   .popperRoot :global(.MuiDateCalendar-root),
   .popperRoot :global(.MuiMultiSectionDigitalClock-root),
   .popperRoot :global(.MuiTimeClock-root),
   .popperRoot :global(.MuiClock-root) {
-    width: 300px;
-    height: 310px;
+    width: 285px !important;
+    height: 300px !important;
+    margin-top: -35px !important;
+    padding: 0px !important;
+    margin-inline: -15px !important;
+
   }
+
+  .popperRoot :global(.MuiButtonBase-root) {
+    height: 35px !important;
+  }
+
+  .popperRoot :global(.MuiPickersLayout-root) {
+    transform: scale(0.80);
+    padding: 0px !important;
+  }
+  .popperRoot :global(.MuiPickersYear-root) {
+    margin-inline: -5px !important;
+
+  }
+
+  .popperRoot :global(.MuiPickersLayout-actionBar){
+    margin-bottom: -15px;
+  }
+
 }
 
-@media (max-width: 1440px) {
+/* @media (max-width: 1440px) {
   .popperRoot :global(.MuiDateCalendar-root),
   .popperRoot :global(.MuiMultiSectionDigitalClock-root),
   .popperRoot :global(.MuiTimeClock-root),
   .popperRoot :global(.MuiClock-root) {
-    width: 300px;
-    height: 310px;
+    width: 300px  !important;
+    height: 310px  !important;
   }
-}
 
-@media (max-width: 1366px) {
-  .popperRoot :global(.MuiDateCalendar-root),
+  .popperRoot :global(.MuiPickersLayout-root) {
+    transform: scale(0.85);
+  }
+
+} */
+
+/* @media (max-width: 1366px) {
+   .popperRoot :global(.MuiDateCalendar-root),
   .popperRoot :global(.MuiMultiSectionDigitalClock-root),
   .popperRoot :global(.MuiTimeClock-root),
   .popperRoot :global(.MuiClock-root) {
-    width: 250px;
-    height: 310px;
+    width: 260px  !important;
+    height: 270px  !important;
+    margin-top: -45px !important;
+    padding-bottom: 0px !important;
+    margin-inline: -15px !important;
   }
-}
+
+  .popperRoot :global(.MuiPickersLayout-root) {
+    transform: scale(0.75);
+    height: 250px  !important;
+  
+  } */
+
+  /* .popperRoot :global(.MuiPickersLayout-actionBar){
+    margin-bottom: -25px;
+    margin-inline: -25px !important;
+    height: 20px  !important;
+  }
+
+} */
 
 @media (max-width: 1280px) {
   .popperRoot :global(.MuiDateCalendar-root),
   .popperRoot :global(.MuiMultiSectionDigitalClock-root),
   .popperRoot :global(.MuiTimeClock-root),
   .popperRoot :global(.MuiClock-root) {
-    width: 290px;
-    height: 309px;
+    width: 260px  !important;
+    height: 295px  !important;
+    margin-top: -45px !important;
+    padding-bottom: 0px !important;
+    margin-inline: -15px !important;
   }
+
+  .popperRoot :global(.MuiButtonBase-root) {
+    height: 32px !important;
+    /* padding-inline: 0px */
+  }
+
+  .popperRoot :global(.MuiPickersLayout-root) {
+    transform: scale(0.75);
+    height: 270px  !important;
+  
+  }
+  .popperRoot :global(.MuiPickersYear-root) {
+       margin-inline: -5px !important;
+        padding: -5px !important;
+
+
+  }
+  .popperRoot :global(.MuiPickersYear-yearButton) {
+      padding: 0px !important;
+      font-size: 15px !important;
+  }
+
+  .popperRoot :global(.MuiPickersLayout-actionBar){
+    margin-bottom: -25px;
+    margin-inline: -25px !important;
+    height: 20px  !important;
+  }
+
 }
 
 @media (max-width: 1024px) {
@@ -124,9 +197,28 @@
   .popperRoot :global(.MuiMultiSectionDigitalClock-root),
   .popperRoot :global(.MuiTimeClock-root),
   .popperRoot :global(.MuiClock-root) {
-    width: 280px;
-    height: 309px;
+    width: 280px  !important;
+    height: 250px  !important;
+    margin-top: -55px !important;
+    margin-inline: -25px !important;
+
   }
+
+  .popperRoot :global(.MuiButtonBase-root) {
+    height: 30px !important;
+  }
+ 
+  .popperRoot :global(.MuiPickersLayout-root) {
+    transform: scale(0.72);
+  }
+  .popperRoot :global(.MuiPickersLayout-actionBar){
+    margin-bottom: -25px;
+    margin-inline: -25px !important;
+    height: 20px  !important;
+  }
+
+
+
 }
 
 @media (max-width: 768px) {
