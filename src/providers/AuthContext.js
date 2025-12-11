@@ -96,6 +96,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [companyName, setCompanyName] = useState('')
+  const [validCompanyName, setValidCompanyName] = useState(false)
   const [deployHost, setDeployHost] = useState('')
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
@@ -117,21 +118,23 @@ const AuthProvider = ({ children }) => {
     }
   }
 
-  const fetchData = async companyName => {
+  const fetchData = async () => {
     setErrorMsg(null)
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
     const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
     const accountName = isDeploy ? companyName : matchHostname?.[1]
     setDeployHost(isDeploy)
-
     try {
       if (accountName) {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
         if (!response?.data?.record) setErrorMsg(`Invalid account name: ${accountName}`)
-        setCompanyName(response?.data?.record?.accountName || '')
+        if (response?.data?.record) setCompanyName(response?.data?.record?.accountName || '')
+        setValidCompanyName(response?.data?.record?.accountName || '')
         setGetAC(response || null)
         window.localStorage.setItem('apiUrl', response?.data?.record?.api || '')
-      } else setCompanyName('')
+      } else {
+        setValidCompanyName(false)
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -140,12 +143,18 @@ const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
+    fetchData()
+  }, [companyName])
+
+  useEffect(() => {
     initAuth()
     fetchData()
   }, [])
 
   const handleLogin = async (params, errorCallback) => {
     try {
+      if (!validCompanyName) return
+
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
@@ -281,13 +290,13 @@ const AuthProvider = ({ children }) => {
     loading,
     companyName,
     setCompanyName,
+    validCompanyName,
     deployHost,
     languageId,
     setUser,
     setLoading,
     login: handleLogin,
     logout: handleLogout,
-    fetchData,
     getAccessToken,
     encryptePWD,
     EnableLogin,

@@ -28,7 +28,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName, deployHost, setCompanyName } = useContext(AuthContext)
+  const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
@@ -37,8 +37,7 @@ const LoginPage = () => {
       username: '',
       password: '',
       rememberMe: false,
-      accountId: '',
-      companyName: deployHost ? '' : companyName
+      accountId: ''
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -162,29 +161,32 @@ const LoginPage = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='companyName'
-                  value={validation.values.companyName}
+                  value={companyName || ''}
                   size='small'
                   fullWidth
-                  readOnly={!deployHost}
+                  readOnly={!deployHost ? true : validCompanyName}
+                  forceClear={true}
                   label={platformLabels?.CompanyName}
                   onChange={validation.handleChange}
+                  loseFocusOnEnter={true}
                   onBlur={
                     deployHost
                       ? e => {
-                          setCompanyName('')
                           const value = e?.target?.value || ''
-                          auth.fetchData(value)
+                          setCompanyName(value)
                         }
                       : undefined
                   }
                   onClear={() => {
-                    validation.setFieldValue('companyName', '')
-                    auth.fetchData('')
+                    setCompanyName('')
+                  }}
+                  ClearProps={{
+                    onMouseDown: e => e.preventDefault()
                   }}
                 />
               </Grid>
 
-              {companyName && validation?.values?.companyName && (
+              {validCompanyName && (
                 <>
                   <Grid item xs={12}>
                     <CustomTextField
@@ -241,18 +243,16 @@ const LoginPage = () => {
                 justifyContent: 'space-between'
               }}
             >
-              {companyName && validation?.values?.companyName && (
-                <LinkStyled href='/forget-password/reset'>{platformLabels?.ForgotPass}</LinkStyled>
-              )}
+              {validCompanyName && <LinkStyled href='/forget-password/reset'>{platformLabels?.ForgotPass}</LinkStyled>}
             </Box>
-            {companyName && validation?.values?.companyName && (
+            {validCompanyName && (
               <Button
                 fullWidth
                 size='large'
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
-                disabled={!companyName && !validation.values.companyName}
+                disabled={!validCompanyName}
                 onClick={validation.handleSubmit}
               >
                 {platformLabels?.Login}

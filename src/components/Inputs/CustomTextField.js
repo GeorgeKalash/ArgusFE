@@ -11,6 +11,7 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  forceClear = false,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -25,6 +26,7 @@ const CustomTextField = ({
   hidden = false,
   phone = false,
   search = false,
+  loseFocusOnEnter = false,
   language = '',
   hasBorder = true,
   forceUpperCase = false,
@@ -82,6 +84,12 @@ const CustomTextField = ({
     }
   }
 
+  function applyLosingFocus() {
+    inputRef?.current && inputRef.current.blur()
+    setIsFocused(false)
+    setFocus(false)
+  }
+
   useEffect(() => {
     if (autoFocus && inputRef.current && value == '' && !focus) {
       inputRef.current.focus()
@@ -122,20 +130,30 @@ const CustomTextField = ({
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
-      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
+      onKeyDown={e =>
+        e.key === 'Enter'
+          ? search
+            ? onSearch(e.target.value)
+            : loseFocusOnEnter
+            ? applyLosingFocus()
+            : ''
+          : setFocus(true)
+      }
       InputProps={{
-        endAdornment: !_readOnly && (
+        endAdornment: (forceClear || !_readOnly) && (
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
                 <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
-            {!clearable && !readOnly && (value || value === 0) && (
+
+            {(forceClear || (!clearable && !readOnly && (value || value === 0))) && (
               <IconButton
                 tabIndex={-1}
                 id={props.ClearId}
                 edge='end'
+                onMouseDown={e => e.preventDefault()}
                 onClick={e => {
                   onClear(e)
                   setFocus(true)
