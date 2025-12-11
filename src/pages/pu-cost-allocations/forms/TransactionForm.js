@@ -184,7 +184,8 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
                     reference: newValue?.reference || '',
                     currencyId: newValue?.currencyId || null,
                     baseAmount: newValue?.baseAmount || null,
-                    amount: newValue?.amount || null
+                    amount: newValue?.amount || null,
+                    recordId: newValue?.recordId || null
                   })
                 }}
                 error={formik.touched.reference && Boolean(formik.errors.reference)}
