@@ -117,10 +117,19 @@ export default function TextEditor({ value = '', onChange }) {
 
   return (
     <>
-      {' '}
       <style>
-        {' '}
-        {`.rdw-image-modal, .rdw-link-modal, .rdw-colorpicker-modal, .rdw-emoji-modal { position: fixed !important; z-index: 99999999 !important; transform: translateY(0) !important; } /* Maintain the natural coordinates  .rdw-editor-wrapper .rdw-image-modal, .rdw-editor-wrapper .rdw-link-modal, .rdw-editor-wrapper .rdw-colorpicker-modal, .rdw-editor-wrapper .rdw-emoji-modal { top: auto !important; left: auto !important; } } `}
+        {`.rdw-colorpicker-modal 
+          { 
+            position: fixed !important; 
+            z-index: 2000 !important; 
+            transform: translateY(0) !important; 
+          }  
+          .rdw-colorpicker-modal 
+          { 
+            top: auto !important;
+            left: auto !important;
+          } 
+        } `}
       </style>
       <div
         style={{
