@@ -52,7 +52,7 @@ export default function MetalSmelting() {
     if (filters?.qry) {
       return await getRequest({
         extension: FoundryRepository.FoundaryTransaction.snapshot,
-        parameters: `_filter=${filters.qry}`
+        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.MetalSmelting}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
