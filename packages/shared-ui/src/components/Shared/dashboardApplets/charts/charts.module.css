@@ -52,7 +52,7 @@
   --chart-tooltip-body-color: #231F20;
 }
 .charthight {
-  min-height: 300px;  
+  min-height: 100px;  
   height: 100%;}
 
 .chartCanvasDark {
@@ -83,9 +83,14 @@
   }
 }
 
-@media (min-width: 1025px) and (max-width: 1599px) {
+@media (min-width: 1281px) and (max-width: 1599px) {
   .chartCanvas {
-    height: clamp(230px, 28vw, 460px);
+    height: clamp(130px, 28vw, 250px);
+  }
+}
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .chartCanvas {
+    height: clamp(130px, 28vw, 200px);
   }
 }
 
