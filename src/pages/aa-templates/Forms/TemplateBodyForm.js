@@ -13,7 +13,7 @@ import { AdministrationRepository } from 'src/repositories/AdministrationReposit
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 import TextEditor from 'src/components/Shared/TextEditor'
-import { ContentState, convertToRaw, EditorState, convertFromRaw } from 'draft-js'
+import { convertToRaw, EditorState } from 'draft-js'
 import draftToHtml from 'draftjs-to-html'
 import { convertFromHTML } from 'draft-convert'
 import Form from 'src/components/Shared/Form'
@@ -143,7 +143,6 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
               return null
             },
             htmlToStyle: (nodeName, node, currentStyle) => {
-              console.log(node.style)
               if (node.style.color) {
                 currentStyle = currentStyle.add(`color-${node.style.color}`)
               }
@@ -159,6 +158,11 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
               if (node.style.fontFamily) {
                 const family = node.style.fontFamily.replace(/["']/g, '')
                 currentStyle = currentStyle.add(`fontfamily-${family}`)
+              }
+
+              if (node.style.backgroundColor) {
+                const bg = node.style.backgroundColor.replace(/\s+/g, '').replace(/;/g, '')
+                currentStyle = currentStyle.add(`bgcolor-${bg}`)
               }
 
               return currentStyle
@@ -187,6 +191,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
                 valueField='key'
                 displayField='value'
                 values={formik.values}
+                maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => formik.setFieldValue('languageId', newValue?.key || null)}
                 error={formik.touched.languageId && Boolean(formik.errors.languageId)}

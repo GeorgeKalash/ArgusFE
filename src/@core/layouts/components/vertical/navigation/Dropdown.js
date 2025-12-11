@@ -7,7 +7,7 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useRouter } from 'next/router'
 
-function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed }) {
+function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed, isEditor = false, insertTag }) {
   const router = useRouter()
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -31,7 +31,7 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed 
             flexDirection: 'row',
             justifyContent: 'left',
             alignItems: 'left',
-            backgroundColor: '#231f20',
+            backgroundColor: isEditor ? '#fff' : ' #231f20',
             borderRadius: '4px',
             marginLeft: '10px',
             padding: '0px'
@@ -60,7 +60,7 @@ function Dropdown({ Image, TooltipTitle, onClickAction, name, map, navCollapsed 
       >
         {map &&
           map.map((element, index) => (
-            <MenuItem key={index} onClick={() => onClickAction(element)}>
+            <MenuItem key={index} onClick={isEditor ? () => insertTag(element) : () => onClickAction(element)}>
               <div style={{ display: navCollapsed ? 'none' : 'flex' }}>{element.name}</div>
             </MenuItem>
           ))}
