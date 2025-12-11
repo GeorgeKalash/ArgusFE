@@ -95,17 +95,17 @@ const Window = React.memo(
     const containerHeight = `calc(100vh - 40px)`
 
     const scaleFactor = (() => {
-      if (screenWidth >= 1680) return 1;
-      if (screenWidth >= 1600) return 0.90;
+      if (screenWidth >= 1680) return 1
+      if (screenWidth >= 1600) return 0.9
 
-      const minW = 1024;
-      const maxW = 1600;
-      const minScale = 0.70;
-      const maxScale = 0.92;
+      const minW = 1024
+      const maxW = 1600
+      const minScale = 0.7
+      const maxScale = 0.92
 
-      if (screenWidth <= minW) return minScale;
-      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale);
-    })();
+      if (screenWidth <= minW) return minScale
+      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+    })()
 
     const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
     const scaledHeight = expanded ? containerHeight : Math.max(200, height * scaleFactor)
@@ -127,14 +127,21 @@ const Window = React.memo(
     }, [minimized, expanded])
 
     const handleExpandToggle = () => {
-      if (minimized) {
-        setMinimized(false)
-        setExpanded(restoreState.expanded)
+      if (!expanded) {
+        setRestoreState({
+          width: scaledWidth,
+          height: scaledHeight,
+          expanded,
+          position: dragPos
+        })
 
-        setTimeout(() => setDragPos(restoreState.position), 10)
-        return
+        setExpanded(true)
+        setDragPos({ x: 0, y: 0 })
+
+      } else {
+        setExpanded(false)
+        setDragPos(restoreState.position)
       }
-      setExpanded(prev => !prev)
     }
 
     const handleMinimizeToggle = () => {
@@ -146,17 +153,15 @@ const Window = React.memo(
           position: dragPos
         })
 
-        if (expanded) setExpanded(false)
+        setExpanded(false)
         setMinimized(true)
-        return
-      }
+        setDragPos({ x: 0, y: 0 })
 
-      setMinimized(false)
-      setExpanded(restoreState.expanded)
-
-      setTimeout(() => {
+      } else {
+        setMinimized(false)
+        setExpanded(restoreState.expanded)
         setDragPos(restoreState.position)
-      }, 10)
+      }
     }
 
     return (
@@ -174,9 +179,13 @@ const Window = React.memo(
             handle="#draggable-dialog-title"
             cancel={'[class*="MuiDialogContent-root"]'}
             bounds="parent"
-            position={minimized ? { x: 0, y: 0 } : dragPos}
-            disabled={minimized}
-            onDrag={(_, data) => setDragPos({ x: data.x, y: data.y })}
+            position={minimized || expanded ? { x: 0, y: 0 } : dragPos}
+            disabled={minimized || expanded}
+            onStop={(_, data) => {
+              if (!expanded && !minimized) {
+                setDragPos({ x: data.x, y: data.y })
+              }
+            }}
           >
             <Box
               sx={{
@@ -214,7 +223,7 @@ const Window = React.memo(
                       </IconButton>
                     )}
 
-                    {expandable && (
+                    {expandable && !minimized && (
                       <IconButton onClick={handleExpandToggle} className={styles.iconButton}>
                         <OpenInFullIcon />
                       </IconButton>
@@ -231,7 +240,7 @@ const Window = React.memo(
                 <Box
                   sx={{
                     flex: 1,
-                    overflow: 'hidden',     
+                    overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
                     minHeight: 0

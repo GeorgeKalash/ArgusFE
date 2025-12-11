@@ -14,6 +14,7 @@
   box-shadow: none;
 }
 
+/* Title Bar */
 .dialogTitle {
   cursor: move;
   padding-left: 15px !important;
@@ -37,6 +38,7 @@
   line-height: 1rem;
 }
 
+/* Buttons */
 .iconButton {
   padding: 0px !important;
   padding-right: 3px !important;
@@ -47,6 +49,7 @@
   font-size: 1.2rem;
 }
 
+/* Loading Overlay */
 .loadingOverlay {
   position: absolute;
   top: 40px;
@@ -60,9 +63,12 @@
   z-index: 9999;
 }
 
+/* Minimized Window Title */
 .paper[data-minimized='true'] .dialogTitle {
   cursor: pointer;
 }
+
+/* ---------- RESPONSIVE BREAKPOINTS ---------- */
 
 @media (max-width: 1600px) {
   .dialogTitle {
@@ -143,4 +149,18 @@
   .iconButton svg {
     font-size: 0.85rem !important;
   }
+}
+
+/* ------------------------------------------------------ */
+/* 🚀 PERFORMANCE BOOST — MAKES DRAGGING SMOOTHER */
+/* ------------------------------------------------------ */
+
+.paper {
+  will-change: transform;      /* browser prepares transform = smoother drag */
+  transform: translateZ(0);    /* forces GPU acceleration */
+  backface-visibility: hidden; 
+}
+
+.parentBox {
+  will-change: transform;
 }
