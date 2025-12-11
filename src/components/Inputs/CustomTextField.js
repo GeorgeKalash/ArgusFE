@@ -130,7 +130,7 @@ const CustomTextField = ({
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
-        setIsFocused(false), setFocus(false)
+        setIsFocused(false), setFocus(false), setHasValue(Boolean(value && value.length > 0))
       }}
       inputProps={{
         autoComplete: 'off',
@@ -148,7 +148,7 @@ const CustomTextField = ({
         'data-search': search ? 'true' : 'false'
       }}
       InputLabelProps={{
-        shrink: hasValue || undefined
+        shrink: hasValue || isFocused || undefined
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
