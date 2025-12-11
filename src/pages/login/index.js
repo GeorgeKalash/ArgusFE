@@ -165,7 +165,7 @@ const LoginPage = () => {
                   size='small'
                   fullWidth
                   readOnly={!deployHost ? true : validCompanyName}
-                  forceClear={true}
+                  forceClear={deployHost}
                   label={platformLabels?.CompanyName}
                   onChange={validation.handleChange}
                   loseFocusOnEnter={true}

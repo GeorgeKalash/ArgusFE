@@ -125,20 +125,27 @@ const AuthProvider = ({ children }) => {
     const accountName = isDeploy ? companyName : matchHostname?.[1]
     setDeployHost(isDeploy)
     try {
-      if (accountName) {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
-        if (!response?.data?.record) setErrorMsg(`Invalid account name: ${accountName}`)
-        if (response?.data?.record) setCompanyName(response?.data?.record?.accountName || '')
-        setValidCompanyName(response?.data?.record?.accountName || '')
-        setGetAC(response || null)
-        window.localStorage.setItem('apiUrl', response?.data?.record?.api || '')
-      } else {
+      if (!accountName) {
         setValidCompanyName(false)
+        setLoading(false)
+
+        return
+      }
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+      const record = response?.data?.record
+      setGetAC(response || null)
+      if (!record) {
+        setErrorMsg(`Invalid account name: ${accountName}`)
+        setValidCompanyName(false)
+      } else {
+        setCompanyName(record.accountName || '')
+        setValidCompanyName(record.accountName || '')
+        window.localStorage.setItem('apiUrl', record.api || '')
       }
     } catch (error) {
       console.error('Error fetching data:', error)
     }
-
     setLoading(false)
   }
 
