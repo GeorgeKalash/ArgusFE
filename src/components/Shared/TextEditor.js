@@ -118,18 +118,15 @@ export default function TextEditor({ value = '', onChange }) {
   return (
     <>
       <style>
-        {`.rdw-colorpicker-modal 
-          { 
-            position: fixed !important; 
-            z-index: 2000 !important; 
-            transform: translateY(0) !important; 
-          }  
-          .rdw-colorpicker-modal 
-          { 
-            top: auto !important;
-            left: auto !important;
-          } 
-        } `}
+        {`
+          .rdw-colorpicker-modal {
+            position: absolute !important; 
+            z-index: 2 !important;
+            margin-top: 1px !important;    
+            transform: none !important;    
+            left: 0 !important;             
+          }
+        `}
       </style>
       <div
         style={{
