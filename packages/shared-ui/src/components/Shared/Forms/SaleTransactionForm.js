@@ -2539,3 +2539,6 @@ export default function SaleTransactionForm({
     </FormShell>
   )
 }
+SaleTransactionForm.width = 1330
+SaleTransactionForm.height = 720
+

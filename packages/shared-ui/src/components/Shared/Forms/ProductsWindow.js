@@ -195,5 +195,7 @@ const ProductsWindow = ({
     </Form>
   )
 }
-
+ProductsWindow.width = 1200,
+ProductsWindow.height = 500.
 export default ProductsWindow
+
