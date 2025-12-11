@@ -107,7 +107,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     conditionSchema: ['scraps'],
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
         itemId: yup.number().required(),
@@ -640,7 +640,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -648,8 +648,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     name='header.reference'
                     label={labels.reference}
                     value={formik.values.header.reference}
-                    readOnly={editMode || !formik.values.header.dtId}
+                    readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
@@ -769,8 +770,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       { key: 'name', value: 'Name' }
                     ]}
                     onChange={async (_, newValue) => {
+                      formik.setFieldValue('header.sku', null)
                       const metal = await getItemMetal(newValue?.recordId)
-                      if (metal != formik.values.header.metalId) {
+                      if (newValue?.recordId && metal != formik.values.header.metalId) {
                         stackError({
                           message: labels.metalMismatch
                         })

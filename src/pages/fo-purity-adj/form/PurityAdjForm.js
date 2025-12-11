@@ -92,7 +92,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     maxAccess,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
         workCenterId: yup.number().required()
@@ -191,8 +191,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
-      purity: item.purity * 1000,
-      metalId: item.metalId || ''
+      purity: item.purity * 1000
     }))
 
     formik.setValues({
@@ -300,7 +299,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.header.qtyDiff != 0
+      disabled: !editMode
     },
     {
       key: 'IV',
@@ -378,7 +377,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -388,6 +387,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                     value={formik.values.header.reference}
                     readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
@@ -425,7 +425,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                     ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
