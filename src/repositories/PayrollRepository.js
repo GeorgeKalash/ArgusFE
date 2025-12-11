@@ -2,7 +2,8 @@ const service = 'PY.asmx/'
 
 export const PayrollRepository = {
   PayrollFilters: {
-    qry: service + 'qryHE'
+    qry: service + 'qryHE',
+    snapshot: service + 'snapshotHE',
   },
   BankTransferFilters: {
     qry: service + 'qrySB',
@@ -75,5 +76,8 @@ export const PayrollRepository = {
   PenaltyDetail: {
     qry: service + 'qryPD',
     set2: service + 'set2PD'
+  },
+  GeneratePayroll: {
+    gen: service + 'genEM'
   }
 }
