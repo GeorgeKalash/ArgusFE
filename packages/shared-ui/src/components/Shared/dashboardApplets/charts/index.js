@@ -3,6 +3,13 @@ import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import styles from './charts.module.css'
 
+const width = window.innerWidth
+
+const size =  width > 1281 ? 12 : 10
+const tooltipBodySize = 8
+const tooltipFontSize = 8
+const ticksSize =  width > 1281 ? 9 : 8
+
 const getCssVar = (el, name, fallback) => {
   if (!el) return fallback
   const value = getComputedStyle(el).getPropertyValue(name)
@@ -202,7 +209,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
             offset: 0,
             rotation: rotation || 0,
             font: {
-              size: 14
+              size: size
             },
             formatter: (value, context) => {
               const datasetIndex = context.datasetIndex
@@ -221,8 +228,18 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
           }
         },
         scales: {
+          x: {
+            ticks: {
+              font: {
+                size: ticksSize, 
+              },
+            },
+          },
           y: {
             ticks: {
+              font: {
+                size: ticksSize,
+              },
               callback: function (value) {
                 if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`
                 if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`
@@ -232,6 +249,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
             }
           }
         }
+   
       },
       plugins: [ChartDataLabels]
     })
@@ -399,6 +417,14 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
         aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: tooltipBodySize,
+            },
+            titleFont: {
+              size: tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart
@@ -439,17 +465,36 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
             offset: 0,
             rotation: -90,
             font: {
-              size: 14
+              size: size
             },
             formatter: value => value.toLocaleString()
           },
           legend: {
             display: false
           }
-        }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: ticksSize, 
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: ticksSize,
+              },
+            },
+          },
+        },
+    
       },
       plugins: [ChartDataLabels]
     })
+
+
 
     return () => {
       chart.destroy()
