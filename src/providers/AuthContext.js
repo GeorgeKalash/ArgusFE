@@ -63,7 +63,7 @@ const AuthProvider = ({ children }) => {
       setGetAC(response)
       window.localStorage.setItem('apiUrl', response.data.record.api)
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error('Error Fetching Data: ', error)
     }
 
     setLoading(false)
