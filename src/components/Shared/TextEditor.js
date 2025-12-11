@@ -116,96 +116,103 @@ export default function TextEditor({ value = '', onChange }) {
   }
 
   return (
-    <div
-      style={{
-        border: '1px solid #ccc',
-        borderRadius: 8,
-        width: '100%',
-        marginTop: 10,
-        padding: 10,
-        boxSizing: 'border-box'
-      }}
-    >
-      <Editor
-        editorState={editorState}
-        onEditorStateChange={handleEditorChange}
-        toolbarClassName='toolbarClassName'
-        wrapperClassName='wrapperClassName'
-        editorClassName='editorClassName'
-        toolbar={{
-          colorPicker: {
-            enableBackground: true
-          },
-          options: [
-            'inline',
-            'blockType',
-            'fontSize',
-            'fontFamily',
-            'list',
-            'textAlign',
-            'colorPicker',
-            'link',
-            'emoji',
-            'image',
-            'history'
-          ],
-          image: {
-            uploadEnabled: true,
-            urlEnabled: true,
-            previewImage: true,
-            uploadCallback: uploadImageCallBack
-          },
-          link: {
-            inDropdown: false,
-            showOpenOptionOnHover: true
-          },
-          inline: { options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace'] },
-          fontSize: { options: [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 48, 60, 72, 96] },
-          fontFamily: {
+    <>
+      {' '}
+      <style>
+        {' '}
+        {`.rdw-image-modal, .rdw-link-modal, .rdw-colorpicker-modal, .rdw-emoji-modal { position: fixed !important; z-index: 99999999 !important; transform: translateY(0) !important; } /* Maintain the natural coordinates  .rdw-editor-wrapper .rdw-image-modal, .rdw-editor-wrapper .rdw-link-modal, .rdw-editor-wrapper .rdw-colorpicker-modal, .rdw-editor-wrapper .rdw-emoji-modal { top: auto !important; left: auto !important; } } `}
+      </style>
+      <div
+        style={{
+          border: '1px solid #ccc',
+          borderRadius: 8,
+          width: '100%',
+          marginTop: 10,
+          padding: 10,
+          boxSizing: 'border-box'
+        }}
+      >
+        <Editor
+          editorState={editorState}
+          onEditorStateChange={handleEditorChange}
+          toolbarClassName='toolbarClassName'
+          wrapperClassName='wrapperClassName'
+          editorClassName='editorClassName'
+          toolbar={{
+            colorPicker: {
+              enableBackground: true
+            },
             options: [
-              'Arial',
-              'Arial Black',
-              'Comic Sans MS',
-              'Courier New',
-              'Georgia',
-              'Helvetica',
-              'Impact',
-              'Lucida Sans Unicode',
-              'Tahoma',
-              'Times New Roman',
-              'Trebuchet MS',
-              'Verdana'
-            ]
-          }
-        }}
-        editorStyle={{
-          minHeight: '400px',
-          fontSize: '16px',
-          padding: '10px',
-          backgroundColor: '#fff'
-        }}
-        toolbarCustomButtons={tagGroups.map(group => (
-          
-          // <Dropdown
-          //   key={group.type}
-          //   Image={<group.icon sx={{ color: 'black', fontSize: 20 }} />}
-          //   TooltipTitle={group.type}
-          //   isEditor
-          //   insertTag={insertTag}
-          //   map={group.tags.map(t => ({ name: t }))}
-          //   navCollapsed={false}
-          // />
+              'inline',
+              'blockType',
+              'fontSize',
+              'fontFamily',
+              'list',
+              'textAlign',
+              'colorPicker',
+              'link',
+              'emoji',
+              'image',
+              'history'
+            ],
+            image: {
+              uploadEnabled: true,
+              urlEnabled: true,
+              previewImage: true,
+              uploadCallback: uploadImageCallBack
+            },
+            link: {
+              inDropdown: false,
+              showOpenOptionOnHover: true
+            },
+            inline: { options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace'] },
+            fontSize: { options: [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 48, 60, 72, 96] },
+            fontFamily: {
+              options: [
+                'Arial',
+                'Arial Black',
+                'Comic Sans MS',
+                'Courier New',
+                'Georgia',
+                'Helvetica',
+                'Impact',
+                'Lucida Sans Unicode',
+                'Tahoma',
+                'Times New Roman',
+                'Trebuchet MS',
+                'Verdana'
+              ]
+            }
+          }}
+          editorStyle={{
+            minHeight: '400px',
+            fontSize: '16px',
+            padding: '10px',
+            backgroundColor: '#fff'
+          }}
+          toolbarCustomButtons={tagGroups.map(group => (
+            
+            // <Dropdown
+            //   key={group.type}
+            //   Image={<group.icon sx={{ color: 'black', fontSize: 20 }} />}
+            //   TooltipTitle={group.type}
+            //   isEditor
+            //   insertTag={insertTag}
+            //   map={group.tags.map(t => ({ name: t }))}
+            //   navCollapsed={false}
+            // />
 
-          <TagsDropdownButton
-            key={group.type}
-            group={group}
-            editorState={editorState}
-            onChange={handleEditorChange}
-            openDropdown={openDropdown}
-            setOpenDropdown={setOpenDropdown}
-          />
-        ))}
-      />
-    </div>
+            <TagsDropdownButton
+              key={group.type}
+              group={group}
+              editorState={editorState}
+              onChange={handleEditorChange}
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
+            />
+          ))}
+        />
+      </div>
+    </>
   )
 }
