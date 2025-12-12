@@ -102,8 +102,7 @@ const GeneratePurchaseInvoice = () => {
         getResourceId: () => ResourceIds.SalesInvoice,
         LockRecord
       },
-      width: 1330,
-      height: 720,
+
       title: _labels.salesInvoice
     })
   }

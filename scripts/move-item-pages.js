@@ -6,23 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-inventory';
 const MODULE_FOLDER = 'module-inventory';
 
 const SALES_PAGES = [
-  'draft-serials-transfer',
-  'iv-trx-inquiry',
-  'iv-materials-tfr',
-  'iv-adj-item-cost',
-  'materials-adjustment',
-  'iv-opening-cost',
-  'iv-opening-qty',
-  'iv-barcodes',
-  'site-dashboard',
-  'iv-serials',
-  'iv-item-parts',
-  'print-labels',
-  'iv-catalogue',
-  'iv-current-cost',
-  'iv-site-management',
-  'iv-item-replacement',
-  'iv-items',
+  'iv-pl-inquiry',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

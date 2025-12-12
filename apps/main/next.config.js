@@ -6,6 +6,12 @@ const nextConfig = {
   reactStrictMode: false,
 
   transpilePackages: [
+    '@argus/module-lo',
+    '@argus/module-fa',
+    '@argus/module-rs',
+    '@argus/module-ct',
+    '@argus/module-auth',
+    '@argus/module-system',
     '@argus/module-hr',
     '@argus/module-remittance',
     '@argus/module-financials',

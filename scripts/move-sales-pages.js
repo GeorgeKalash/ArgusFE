@@ -6,11 +6,10 @@ const MODULE_PACKAGE_NAME = '@argus/module-sales';
 const MODULE_FOLDER = 'module-sales';
 
 const SALES_PAGES = [
-  'pos-defaults',
-  'pos-users',
-  'pos-pointOfSales',
-  'ps-trx-dtd',
-  'retail-trx',
+  'retail-comp-figures',
+  'sa-post-draft-invoice',
+  'sa-post-draft-return',
+  'yearly-comparative-sales',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

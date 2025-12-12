@@ -6,38 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-manufacturing';
 const MODULE_FOLDER = 'module-manufacturing';
 
 const SALES_PAGES = [
-  'pm-designer',
-  'pm-samples',
-  'pm-rubber',
-  'pm-model-maker',
-  'pm-casting',
-  'pm-3d-printing',
-  'pm-3d-design',
-  'pm-sketch',
-  'fo-metal-smelting',
-  'fo-castings',
-  'fo-wax',
-  'fo-job-wax-inquiry',
-  'fo-work-centers',
-  'fo-metal-setting',
-  'fo-moulds',
-  'fo-general-settings',
-  'mf-batch-worksheet',
-  'damage-return',
-  'mf-post-wc-job',
-  'mf-jo-wizard',
-  'mf-worksheet',
-  'work-center-consumption',
-  'damages',
-  'mf-job-in-process',
-  'job-transfer-checkout',
-  'mf-job-orders',
-  'mf-gen-prod-order',
-  'mf-prod-sheet',
-  'gate-keeper',
-  'production-request-log',
-  'mf-assemblies',
-  'mf-bom',
+  'mf-prod-order'
 ];
 
 const ROOT = path.resolve(__dirname, '..');

@@ -6,27 +6,7 @@ const MODULE_PACKAGE_NAME = '@argus/module-purchase';
 const MODULE_FOLDER = 'module-purchase';
 
 const SALES_PAGES = [
-  'pu-sync-trx',
-  'pu-payment-terms',
-  'pu-order-status',
-  'pu-dlv-methods',
-  'pu-settings',
-  'pu-financial-integrator',
-  'pu-vendor-groups',
-  'pu-trx-dtd',
-  'ca-cost-types',
-  'pu-cost-allocations',
-  'pu-open-po',
-  'pu-open-pr',
-  'po-tracking',
-  'generate-purch-inv',
-  'shipments',
-  'pu-trx',
-  'pu-ord',
-  'pu-qtn',
-  'purchase-requisition',
-  'pu-draft-serials-returns',
-  'pu-vendors',
+  'pu-req-dtd',
 ];
 
 const ROOT = path.resolve(__dirname, '..');

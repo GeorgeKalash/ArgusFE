@@ -1,7 +1,2 @@
-import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
-
-const DocumentsOnHold = () => {
-  return <ApprovalsTable />
-}
-
-export default DocumentsOnHold
+// AUTO-GENERATED WRAPPER – uses code from @argus/module-auth/src/pages/documents-on-hold
+export { default } from '@argus/module-auth/src/pages/documents-on-hold';

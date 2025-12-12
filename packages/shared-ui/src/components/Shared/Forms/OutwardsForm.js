@@ -726,8 +726,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
             employerStatus: remitter?.employerStatus
           }
         },
-        width: 740,
-        height: 345,
+        
         title: labels.instantCash
       })
     } else if (interfaceId === 2) {
