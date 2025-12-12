@@ -1,5 +1,4 @@
 .buttonContainer {
-  position: relative;
   font-size: 22px !important;
 }
 
@@ -35,6 +34,7 @@
   transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 9999;
 }
+
 @media (min-width: 2049px) and (max-width: 2566px) {
   .buttonImage {
     height: 18px !important;

@@ -140,7 +140,7 @@ const LoginPage = () => {
             >
               <CardMedia
                 component='img'
-                image='@argus/shared-ui/src/components/images/logos/ArgusLogo.png'
+                image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
                 alt='ArgusERP'
                 sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
               />
@@ -182,7 +182,7 @@ const LoginPage = () => {
                     endIcons={[
                       // eslint-disable-next-line react/jsx-key
                       <Icon
-                        className={inputs.icon} 
+                        className={inputs.icon}
                         icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
                         onClick={() => setShowPassword(prev => !prev)}
                         onMouseDown={e => e.preventDefault()}

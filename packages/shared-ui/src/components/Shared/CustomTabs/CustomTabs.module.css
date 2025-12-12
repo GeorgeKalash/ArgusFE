@@ -17,8 +17,9 @@
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  height: 40px;
-  overflow: auto;
+  min-height: 32px;
+  height: auto;
+  overflow: visible;
 }
 
 .tabsWrapper {
@@ -70,6 +71,18 @@
   background-color: white !important;
 }
 
+.refreshButton {
+  padding: 0 !important;
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refreshIcon {
+  font-size: 18px !important;
+}
+
 @media (min-width: 1025px) and (max-width: 1600px) {
   .tabs {
     min-height: 25px !important;
@@ -87,6 +100,12 @@
 }
 
 @media (max-width: 1024px) {
+    .refreshIcon {
+    font-size: 14px !important;
+  }
+  .refreshButton {
+    margin-left: 4px;
+  }
   .tabs {
     min-height: 27px !important;
   }
@@ -100,6 +119,12 @@
 }
 
 @media (max-width: 768px) {
+  .refreshIcon {
+    font-size: 12px !important;
+  }
+  .refreshButton {
+    margin-left: 3px;
+  }
   .tabs {
     min-height: 20px !important;
   }
@@ -113,6 +138,12 @@
 }
 
 @media (max-width: 600px) {
+    .refreshIcon {
+    font-size: 10px !important;
+  }
+  .refreshButton {
+    margin-left: 2px;
+  }
   .tabs {
     min-height: 18px !important;
   }
@@ -126,6 +157,12 @@
 }
 
 @media (max-width: 480px) {
+  .refreshIcon {
+    font-size: 9px !important;
+  }
+  .refreshButton {
+    margin-left: 2px;
+  }
   .tabs {
     min-height: 16px !important;
   }
@@ -139,6 +176,12 @@
 }
 
 @media (max-width: 375px) {
+  .refreshIcon {
+    font-size: 8px !important;
+  }
+  .refreshButton {
+    margin-left: 1px;
+  }     
   .tabs {
     min-height: 14px !important;
   }

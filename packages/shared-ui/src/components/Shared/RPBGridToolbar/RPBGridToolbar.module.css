@@ -1,5 +1,9 @@
 .leftSectionGridItem {
   width: 33.3333%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: end;   
+  
 }
 
 .bottomSectionContainer {
@@ -15,6 +19,9 @@
 @media (max-width: 1600px) {
   .leftSectionGridItem {
     width: 40%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: end;   
   }
 
   .bottomSectionContainer {
@@ -25,6 +32,9 @@
 @media (max-width: 1280px) {
   .leftSectionGridItem {
     width: 50%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: end;   
   }
 
   .bottomSectionContainer {
@@ -34,7 +44,10 @@
 
 @media (max-width: 1024px) {
   .leftSectionGridItem {
-    width: 60%;
+    width: 60%; 
+    display: flex;
+    justify-content: flex-start;
+    align-items: end;   
   }
 
   .bottomSectionContainer {

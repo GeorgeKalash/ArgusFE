@@ -53,13 +53,13 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
                   {tab.id === activeTab && tab?.onRefetch && (
                     <IconButton
                       size='small'
-                      className={styles.svgIcon}
+                      className={styles.refreshButton}
                       onClick={e => {
                         e.stopPropagation()
                         tab.onRefetch()
                       }}
                     >
-                      <RefreshIcon className={styles.svgIcon} />
+                      <RefreshIcon className={styles.refreshIcon} />
                     </IconButton>
                   )}
                 </Box>

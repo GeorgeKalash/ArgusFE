@@ -24,23 +24,29 @@
   font-size: 0.9rem;
 }
 
+
+.agContainer :global(.cellBox) {
+  overflow: hidden; 
+}
+
+
 .agContainer :global(.ag-cell) {
   border-right: 1px solid #d0d0d0 !important;
   font-size: 0.8rem !important;
   line-height: 1.1;
-  overflow: hidden;
-
   display: flex;
   align-items: center;        
   justify-content: flex-start; 
-
 }
 
 .agContainer :global(.ag-cell-wrapper),
 .agContainer :global(.ag-cell-value) {
   display: flex;
   align-items: center;
-  overflow: hidden; 
+  overflow: hidden;
+  padding: 0px  !important;
+
+
 }
 
 .agContainer :global(.ag-cell .MuiBox-root) {
@@ -56,12 +62,10 @@
 
 .cellBox,
 .cellEditorBox {
-  width: 100%;
+  width: 100% !important;
   height: auto;                  
   padding: 0px !important;
   display: flex;
-  align-items: center;
-  
 }
 
 .agContainer:dir(ltr) :global(.noCenterCell) {
@@ -133,19 +137,14 @@
 .agContainer :global(.ag-cell.ag-cell-inline-editing.ag-cell-focus) {
   box-shadow: none !important;
   outline: none !important;
-  /* border-color: transparent !important; */
+  border-color: transparent !important;
+  border-radius: 0px !important;
 }
 
 .agContainer :global(.ag-cell),
 .agContainer :global(.ag-cell-focus),
 .agContainer :global(.ag-cell.ag-cell-inline-editing) {
   border-right: 1px solid #d0d0d0 !important;
-}
-
-.agContainer :global(.ag-cell-inline-editing) .cellEditorInner {
-  border: 1px solid #7ea9ff;
-  border-radius: 4px;
-  box-sizing: border-box;
 }
 
 @media (max-width: 1599px) {
@@ -172,6 +171,22 @@
     --ag-header-height: 26px;
     --ag-font-size: 10px;
   }
+  
+  .agContainer :global(.ag-header-cell) {
+    padding-inline: 5px !important;
+   
+  }
+
+
+.agContainer:dir(ltr) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+  padding-left: 5px !important;  
+}
+
+.agContainer:dir(rtl)  :global(.noCenterCell:not(.ag-cell-inline-editing) ) {
+  padding-right: 5px !important;  
+}
+
+
 
   .agContainer :global(.ag-header),
   .agContainer :global(.ag-header-cell) {
@@ -198,8 +213,9 @@
 
   .agContainer :global(.ag-header-cell-text),
   .agContainer :global(.ag-cell) {
-    font-size: 10px !important;
+    font-size: 9px !important;
   }
+
 }
 
 @media (max-width: 834px) {

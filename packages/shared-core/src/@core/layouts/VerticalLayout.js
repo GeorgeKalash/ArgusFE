@@ -18,14 +18,14 @@ const MainContentWrapper = styled(Box)({
   flexGrow: 1,
   minWidth: 0,
   display: 'flex',
-  minHeight: 'calc(100 * var(--vh))',
+  minHeight: '100vh',
   flexDirection: 'column'
 })
 
 const ContentWrapper = styled('main')(({ theme }) => ({
   flexGrow: 1,
   width: '100%',
-  height: 'calc(100 * var(--vh))',
+  height: '100vh',
   display: 'flex',
   flexDirection: 'column'
 }))

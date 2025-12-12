@@ -14,6 +14,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import ResetPassForm from '../forms/ResetPassForm'
 import styles from './Reset.module.css'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
 
 const Reset = () => {
   const { platformLabels } = useContext(ControlContext)
@@ -94,12 +95,14 @@ const Reset = () => {
                     placeholder={platformLabels.enterUserName}
                     InputLabelProps={{ shrink: true }}
                     startIcons={[
-                      <img
-                        key='icon'
-                        src={require('@argus/shared-ui/src/components/images/password/mail.png').default.src}
-                        alt='mail icon'
-                        class={styles.imageMail}
-                      />
+                      <div key='email-icon'>
+                        <img
+                          key='icon'
+                          src={require('@argus/shared-ui/src/components/images/password/mail.png').default.src}
+                          alt='mail icon'
+                          class={inputs.iconImage}
+                        />
+                      </div>
                     ]}
                     onClear={() => formik.setFieldValue('username', '')}
                   />

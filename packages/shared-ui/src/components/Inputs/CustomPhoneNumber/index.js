@@ -55,9 +55,9 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     <div 
     className={`${styles.phoneWrapper} ${inputs.outlinedRoot}`}>
       {label && (
-        <label   className={`${styles.phoneLabel} ${inputs.inputLabelShrink}`}>
-          {label} {_required && <span className={styles.phoneLabelRequired}>*</span>}
-        </label>
+        <div className={`${styles.phoneLabel} ${inputs.inputLabelShrink} ${error && styles.errorLabel}`  }>
+          {label} {_required && <span >*</span>}
+        </div>
       )}
     <div 
     dir="ltr" 

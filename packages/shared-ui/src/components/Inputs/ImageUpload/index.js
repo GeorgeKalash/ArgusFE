@@ -1,10 +1,19 @@
 import { Box } from '@mui/material'
-import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef
+} from 'react'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import CustomButton from './CustomButton'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import styles from './ImageUpload.module.css'
+import CustomButton from '../CustomButton'
 
 const ImageUpload = forwardRef(
   (
@@ -34,16 +43,36 @@ const ImageUpload = forwardRef(
     const parentRecordId = parentImage?.recordId
     const parentResourceId = parentImage?.resourceId
     const { formik } = useForm({ initialValues: {} })
+
+    const { width: screenWidth } = useWindowDimensions()
+
+    const scaleFactor = (() => {
+      if (screenWidth >= 1680) return 1
+      if (screenWidth >= 1600) return 0.9
+
+      const minW = 1024
+      const maxW = 1600
+      const minScale = 0.7
+      const maxScale = 0.92
+
+      if (screenWidth <= minW) return minScale
+      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+    })()
+
+    const scaledWidth = (customWidth || width) * scaleFactor
+    const scaledHeight = (customHeight || height) * scaleFactor
+
     useImperativeHandle(ref, () => ({ submit }))
 
     const submit = () => {
       if (disabled) return
       const currentRecordId = ref?.current?.value || recordId
+
       if (isAbsolutePath) {
-        if (formik?.values?.file?.name || formik.values.url) {
+        if (formik.values?.file?.name || formik.values.url) {
           const payload = {
             ...formik.values,
-            fileName: formik?.values?.file?.name || formik.values.url,
+            fileName: formik.values.file?.name || formik.values.url,
             resourceId,
             recordId: currentRecordId
           }
@@ -52,35 +81,27 @@ const ImageUpload = forwardRef(
             extension: SystemRepository.Attachment.set2,
             record: JSON.stringify(payload),
             file: formik.values?.file
-          }).then(() => {
-            getData(currentRecordId)
-          })
+          }).then(() => getData(currentRecordId))
         }
 
         if (!image && SavedImageInfo.current?.fileName && !formik.values?.fileName) {
           return postRequest({
             extension: SystemRepository.Attachment.del,
             record: JSON.stringify(SavedImageInfo.current)
-          }).then(() => {
-            getData(currentRecordId)
-          })
+          }).then(() => getData(currentRecordId))
         }
 
         return
       }
+
       if (formik.values?.file) {
-        const payload = {
-          ...formik.values,
-          recordId: currentRecordId
-        }
+        const payload = { ...formik.values, recordId: currentRecordId }
 
         return postRequest({
           extension: SystemRepository.Attachment.set,
           record: JSON.stringify(payload),
           file: formik.values?.file
-        }).then(() => {
-          getData(currentRecordId)
-        })
+        }).then(() => getData(currentRecordId))
       }
 
       if (!image && SavedImageInfo.current?.url && !formik.values?.url) {
@@ -88,9 +109,7 @@ const ImageUpload = forwardRef(
           extension: SystemRepository.Attachment.del,
           record: JSON.stringify(SavedImageInfo.current),
           file: SavedImageInfo.current?.url
-        }).then(() => {
-          getData(currentRecordId)
-        })
+        }).then(() => getData(currentRecordId))
       }
     }
 
@@ -104,14 +123,8 @@ const ImageUpload = forwardRef(
 
       const fileSizeInKB = Math.round(file.size / 1024)
       if (fileSizeInKB > 500) {
-        alert('Allowed PNG or JPEG. Max size of 500KB.')
-
+        alert(platformLabels.MaxFileSize)
         return
-      }
-
-      if (readerRef.current) {
-        readerRef.current.onloadend = null
-        readerRef.current.abort?.()
       }
 
       const lastModified = new Date(file.lastModifiedDate)
@@ -132,20 +145,19 @@ const ImageUpload = forwardRef(
       const reader = new FileReader()
       readerRef.current = reader
 
-      reader.onloadend = e => {
-        setImage(e.target.result)
-      }
+      reader.onloadend = e => setImage(e.target.result)
       reader.readAsDataURL(file)
     }
 
     const handleInputImageReset = () => {
-      formik.setValues({})
       setImage('')
+      formik.setValues({})
     }
 
     const getData = async currentRecordId => {
       const updatedRecordId = currentRecordId || recordId
       if (!resourceId) return
+
       if (isAbsolutePath && updatedRecordId) {
         const result = await getRequest({
           extension: SystemRepository.Attachment.get2,
@@ -157,26 +169,23 @@ const ImageUpload = forwardRef(
         SavedImageInfo.current = { ...record, resourceId }
 
         setImage(record?.fileName ? `${record.fileName}?t=${Date.now()}` : '')
-
         return
-      } else {
-        if (!parentRecordId && !updatedRecordId) return
-
-        const effectiveResourceId = parentResourceId || resourceId
-
-        const result = await getRequest({
-          extension: SystemRepository.Attachment.get,
-          parameters: `_resourceId=${effectiveResourceId}&_seqNo=${seqNo}&_recordId=${
-            parentRecordId || updatedRecordId
-          }`
-        })
-
-        const record = result?.record || {}
-        formik.setValues({ ...record, resourceId: effectiveResourceId })
-        SavedImageInfo.current = { ...record, resourceId: effectiveResourceId }
-
-        setImage(record?.url ? `${record?.url}?t=${Date.now()}` : '')
       }
+
+      const effectiveResId = parentResourceId || resourceId
+      const effectiveRecId = parentRecordId || updatedRecordId
+      if (!effectiveRecId) return
+
+      const result = await getRequest({
+        extension: SystemRepository.Attachment.get,
+        parameters: `_resourceId=${effectiveResId}&_seqNo=${seqNo}&_recordId=${effectiveRecId}`
+      })
+
+      const record = result?.record || {}
+      formik.setValues({ ...record, resourceId: effectiveResId })
+      SavedImageInfo.current = { ...record, resourceId: effectiveResId }
+
+      setImage(record?.url ? `${record.url}?t=${Date.now()}` : '')
     }
 
     useEffect(() => {
@@ -185,38 +194,48 @@ const ImageUpload = forwardRef(
     }, [parentRecordId, recordId])
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-        <img
-          src={
-            image ||
-            require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
-          }
-          alt=''
+      <Box className={styles.container}>
+        <Box
+          className={styles.previewBox}
           style={{
-            width: customWidth || width,
-            height: customHeight || height,
-            objectFit: 'contain',
-            border: error && '2px solid #F44336'
+            maxWidth: scaledWidth,
+            maxHeight: scaledHeight
           }}
           onClick={handleClick}
-          onError={e => {
-            e.currentTarget.src = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
-          }}
-        />
-        <Box>
+        >
+          <img
+            src={
+              image ||
+              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+            }
+            alt=""
+            className={styles.previewImage}
+            style={{
+              border: error ? '2px solid #F44336' : 'none'
+            }}
+            onError={e => {
+              e.currentTarget.src =
+                require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+            }}
+          />
+        </Box>
+
+        <Box className={styles.bottomSection}>
           <input
             hidden
-            type='file'
+            type="file"
+            accept="image/png, image/jpeg, image/jpg"
             ref={hiddenInputRef}
             onChange={handleInputImageChange}
-            accept='image/png, image/jpeg, image/jpg'
             disabled={disabled}
           />
+
           <CustomButton
             onClick={handleInputImageReset}
-            label={platformLabels.Clear}
-            color='#F44336'
-            image='clear.png'
+            image="clear.png"
+            tooltipText={platformLabels.Clear}
+            color="#F44336"
+            border="none"
             disabled={disabled}
           />
         </Box>

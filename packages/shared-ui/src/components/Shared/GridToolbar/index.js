@@ -1,6 +1,6 @@
 import { Grid, DialogActions } from '@mui/material'
 import CustomTextField from '../../Inputs/CustomTextField'
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { getButtons } from '../Buttons'
@@ -33,19 +33,6 @@ const GridToolbar = ({
   const [searchValue, setSearchValue] = useState('')
   const { platformLabels } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
-  const [zoomSpacing, setZoomSpacing] = useState(2)
-
-  useEffect(() => {
-    const updateZoomSpacing = () => {
-      const zoom = parseFloat(getComputedStyle(document.body).getPropertyValue('--zoom')) || 1
-      setZoomSpacing(zoom === 1 ? 2 : 5)
-    }
-
-    updateZoomSpacing()
-    window.addEventListener('resize', updateZoomSpacing)
-
-    return () => window.removeEventListener('resize', updateZoomSpacing)
-  }, [])
 
   const clear = () => {
     setSearchValue('')
@@ -95,7 +82,7 @@ const GridToolbar = ({
     <DialogActions className={styles.dialogActions}>
       <Grid container spacing={2} className={styles.gridContainer}>
         <Grid item xs={previewReport ? 6 : 9}>
-          <Grid container spacing={zoomSpacing}>
+          <Grid container spacing={2}>
             {onAdd && addBtnVisible && (
               <Grid item className={styles.buttonWrapper}>
                 <CustomButton

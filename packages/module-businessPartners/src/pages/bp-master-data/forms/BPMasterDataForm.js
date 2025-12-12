@@ -181,9 +181,9 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     datasetId={DataSets.BP_CATEGORY}
@@ -285,7 +285,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomTextField
                     name='keywords'
