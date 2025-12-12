@@ -56,7 +56,11 @@ export const TimeAttendanceRepository = {
     reopen: service + 'reopenLQ'
   },
   FlatSchedule: {
-    qry: service + 'qryFS'
+    qry: service + 'qryFS',
+    qry2: service + 'qryFS2',
+    copyRange: service + 'copyRangeFS',
+    range: service + 'rangeFS',
+    del: service + 'delRangeFS'
   },
   DSLReason: {
     qry: service + 'qryLR'

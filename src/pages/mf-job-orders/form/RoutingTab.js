@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
@@ -13,15 +13,18 @@ import { Grid } from '@mui/material'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Form from 'src/components/Shared/Form'
 
-export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting }) {
+export default function RoutingTab({ labels, maxAccess, store, refetchRouting, setRefetchRouting, setRefetchJob }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const operationStore = useRef([])
-  const [allWorkCenters, setWorkCenters] = useState([])
-  const { recordId, jobReference } = store
+  const { recordId, jobReference, jobRoutings } = store || {}
   const editMode = !!recordId
 
+  const status = {
+    Unreached: { key: 5, value: 'Unreached' }
+  }
+
   const { formik } = useForm({
+    maxAccess,
     initialValues: {
       jobId: recordId,
       jobReference,
@@ -33,7 +36,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           name: '',
           workCenterId: '',
           operationId: '',
-          status: 5,
+          status: status.Unreached.key,
           qty: '',
           qtyIn: '',
           pcs: '',
@@ -56,7 +59,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       const modifiedRoutings = obj.routings.map(routing => ({
         ...routing,
         seqNo: parseInt(routing.seqNo),
-        status: routing.status || 5,
+        status: routing.status || status.Unreached.key,
         jobId: recordId
       }))
       await postRequest({
@@ -64,6 +67,7 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
         record: JSON.stringify({ jobId: recordId, data: modifiedRoutings })
       })
       toast.success(platformLabels.Edited)
+      setRefetchJob(true)
     }
   })
 
@@ -127,7 +131,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           workCenterRef: newRow?.workCenterRef,
           workCenterName: newRow?.workCenterName
         })
-        await fillOperation(newRow?.workCenterId)
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: [1, 2, 3, 4].includes(row.status) }
@@ -147,8 +150,9 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
       label: labels.operation,
       name: 'operationName',
       flex: 2,
+      variableParameters: [{ key: 'workCenterId', value: 'workCenterId' }],
       props: {
-        store: operationStore?.current,
+        endpointId: ManufacturingRepository.Operation.qry,
         displayField: 'reference',
         valueField: 'recordId',
         mapping: [
@@ -160,13 +164,12 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
           { key: 'reference', value: 'Reference' },
           { key: 'name', value: 'Name' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 2.5
       },
       propsReducer({ row, props }) {
         return {
           ...props,
-          store: operationStore.current,
-          readOnly: [1, 2, 3, 4].includes(row.status)
+          readOnly: [1, 2, 3, 4].includes(row.status) || !row.workCenterId
         }
       }
     },
@@ -217,59 +220,93 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
     }
   ]
 
-  async function fetchGridData() {
+  const actions = [
+    {
+      key: 'Sync',
+      condition: true,
+      onClick: syncRoutings,
+      disabled: store?.status != 1
+    }
+  ]
+
+  async function syncRoutings() {
+    if (!store?.routingId) return
+
     const res = await getRequest({
-      extension: ManufacturingRepository.JobRouting.qry,
-      parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
+      extension: ManufacturingRepository.RoutingSequence.qry,
+      parameters: `_routingId=${store?.routingId}`
     })
 
-    const updateRoutingList =
-      res?.list?.length != 0
-        ? await Promise.all(
-            res?.list?.map(async (item, index) => {
-              return {
-                ...item,
-                id: index + 1
-              }
-            })
-          )
-        : [{ id: 1 }]
+    const list = (res?.list || []).map((item, index) => ({
+      ...item,
+      id: index + 1,
+      status: status.Unreached.key,
+      statusName: status.Unreached.value,
+      qtyIn: 0,
+      pcsIn: 0,
+      qty: 0,
+      pcs: 0
+    }))
 
-    formik.setValues({
-      jobId: recordId,
-      jobReference,
-      routings: updateRoutingList
-    })
-  }
-
-  async function fillOperation(wcId) {
-    operationStore.current = []
-    const currentWc = allWorkCenters?.find(wc => parseInt(wc.workCenterId) === wcId)
-    if (currentWc) operationStore.current = [currentWc]
-  }
-
-  async function fetchAllWorkCenters() {
-    const res = await getRequest({
-      extension: ManufacturingRepository.Operation.qry,
-      parameters: `_workCenterId=${0}&_startAt=0&_pageSize=1000&`
-    })
-    setWorkCenters(res?.list)
+    formik.setFieldValue('routings', list)
   }
 
   useEffect(() => {
     ;(async function () {
       if (!refetchRouting || !recordId) return
-      await fetchGridData()
-      await fetchAllWorkCenters()
+
+      const res = await getRequest({
+        extension: ManufacturingRepository.JobRouting.qry,
+        parameters: `_jobId=${recordId}&_workcenterId=0&_status=0`
+      })
+
+      const updateRoutingList =
+        res?.list?.length != 0
+          ? await Promise.all(
+              res?.list?.map(async (item, index) => {
+                return {
+                  ...item,
+                  id: index + 1
+                }
+              })
+            )
+          : [{ id: 1 }]
+
+      formik.setValues({
+        jobId: recordId,
+        jobReference,
+        routings: updateRoutingList
+      })
       setRefetchRouting(false)
     })()
-  }, [recordId, refetchRouting])
+  }, [refetchRouting])
+
+  useEffect(() => {
+    ;(async function () {
+      formik.setValues({
+        jobId: recordId,
+        jobReference,
+        routings:
+          jobRoutings?.length > 0
+            ? await Promise.all(
+                jobRoutings?.map(async (item, index) => {
+                  return {
+                    ...item,
+                    id: index + 1
+                  }
+                })
+              )
+            : [{ id: 1 }]
+      })
+    })()
+  }, [jobRoutings])
 
   return (
     <Form
       onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       editMode={editMode}
+      actions={actions}
       disabledSubmit={store?.isCancelled || store?.isPosted}
     >
       <VertLayout>
@@ -293,9 +330,6 @@ export default function RoutingTab({ labels, maxAccess, store, refetchRouting, s
             maxAccess={maxAccess}
             allowDelete={!store?.isPosted && !store?.isCancelled}
             deleteHideCondition={{ status: [1, 2, 3, 4] }}
-            onSelectionChange={(row, update, field) => {
-              if (field == 'operationName') fillOperation(row?.workCenterId)
-            }}
           />
         </Grow>
       </VertLayout>

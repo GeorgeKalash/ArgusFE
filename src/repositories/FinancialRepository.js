@@ -157,7 +157,8 @@ export const FinancialRepository = {
     cancel: service + 'cancelPV',
     snapshot: service + 'snapshotPV',
     unpost: service + 'unpostPV',
-    verify: service + 'verifyPV'
+    verify: service + 'verifyPV',
+    snapshot2: service + 'snapshotPV2'
   },
   AgingProfile: {
     qry: service + 'qryAGP',

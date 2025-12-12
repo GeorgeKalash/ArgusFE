@@ -116,13 +116,7 @@ export default function BatchPostForm({ access }) {
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  if (newValue?.recordId) {
-                    formik.setFieldValue('plantId', newValue?.recordId)
-                  } else {
-                    delete formik?.values?.plantId
-                  }
-                }}
+                onChange={(_, newValue) => formik.setFieldValue('plantId', newValue?.recordId || null)}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
                 maxAccess={access}
               />

@@ -112,7 +112,7 @@ export default function MetalSmelting() {
         access
       },
       width: 1100,
-      height: 670,
+      height: 730,
       title: labels.metalSmelting
     })
   }
