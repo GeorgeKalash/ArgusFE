@@ -37,7 +37,8 @@ const LoginPage = () => {
       username: '',
       password: '',
       rememberMe: false,
-      accountId: ''
+      accountId: '',
+      companyName
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -161,7 +162,7 @@ const LoginPage = () => {
               <Grid item xs={12}>
                 <CustomTextField
                   name='companyName'
-                  value={companyName || ''}
+                  value={validation.values.companyName}
                   size='small'
                   fullWidth
                   readOnly={!deployHost ? true : validCompanyName}
@@ -179,9 +180,7 @@ const LoginPage = () => {
                   }
                   onClear={() => {
                     setCompanyName('')
-                  }}
-                  ClearProps={{
-                    onMouseDown: e => e.preventDefault()
+                    validation.setFieldValue('companyName', '')
                   }}
                 />
               </Grid>
