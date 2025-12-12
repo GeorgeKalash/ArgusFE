@@ -16,7 +16,7 @@ import Form from 'src/components/Shared/Form'
 import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { DataSets } from 'src/resources/DataSets'
 
-export default function PurchaseTab({ store, labels, maxAccess }) {
+export default function PurchaseForm({ store, labels, maxAccess }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)

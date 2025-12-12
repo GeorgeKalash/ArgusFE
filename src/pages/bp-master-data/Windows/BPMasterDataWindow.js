@@ -8,7 +8,8 @@ import RelationList from 'src/pages/bp-master-data/forms/RelationList'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import RolesTab from '../forms/RolesTab'
 import SalesForm from '../forms/SalesForm'
-import PurchaseTab from '../forms/PurchaseTab'
+import PurchaseForm from '../forms/PurchaseForm'
+import BankTab from '../forms/BankTab'
 
 const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -27,7 +28,8 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
     { label: labels.address, disabled: !editMode },
     { label: labels.role, disabled: !editMode },
     { label: labels.sales, disabled: !editMode },
-    { label: labels.purchase, disabled: !editMode }
+    { label: labels.purchase, disabled: !editMode },
+    { label: labels.bank, disabled: !editMode }
   ]
 
   return (
@@ -58,7 +60,10 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
         <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
       <CustomTabPanel index={6} height={height} value={activeTab} maxAccess={maxAccess}>
-        <PurchaseTab store={store} labels={labels} maxAccess={maxAccess} />
+        <PurchaseForm store={store} labels={labels} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel index={7} height={height} value={activeTab} maxAccess={maxAccess}>
+        <BankTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </VertLayout>
   )

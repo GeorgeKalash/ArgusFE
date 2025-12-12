@@ -98,5 +98,11 @@ export const BusinessPartnerRepository = {
   MasterPurchase: {
     get: service + 'getPUR',
     set: service + 'setPUR'
+  },
+  Bank: {
+    qry: service + 'qryBNK',
+    get: service + 'getBNK',
+    set: service + 'setBNK',
+    del: service + 'delBNK'
   }
 }
