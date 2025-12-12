@@ -77,22 +77,17 @@
   --chart-datalabel-outside-color: #222222;
 }
 
-@media (min-width: 1600px) {
-  .chartCanvas {
-    height: clamp(260px, 24vw, 520px);
-  }
-}
 
-@media (min-width: 1281px) and (max-width: 1599px) {
+@media (min-width: 1281px) {
   .chartCanvas {
-    height: 180px;
-    min-height: 180px;
+    height: 280px;
+    min-height: 280px;
   }
 }
 @media (min-width: 1025px) and (max-width: 1280px) {
   .chartCanvas {
-    height: 200px;
-    min-height: 200px;
+    height: 230px;
+    min-height: 230px;
   }
 }
 
