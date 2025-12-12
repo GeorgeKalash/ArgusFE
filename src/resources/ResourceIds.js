@@ -608,6 +608,7 @@ export const ResourceIds = {
   SmeltingScrapItems: 47106,
   MetalSmeltingDTD: 47104,
   ItemDisposal: 42349,
+  PayrollHeader: 75301,
 
   // GL
   GLSalesInvoice: 51604,
@@ -652,6 +653,7 @@ export const ResourceIds = {
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
   GLWorkOrder: 45600,
+  GLPayrollList: 75600,
 
   //MCR
   MCRSalesInvoice: 51607,

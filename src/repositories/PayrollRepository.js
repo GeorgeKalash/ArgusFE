@@ -2,7 +2,15 @@ const service = 'PY.asmx/'
 
 export const PayrollRepository = {
   PayrollFilters: {
-    qry: service + 'qryHE'
+    qry: service + 'qryHE',
+    page: service + 'pageHE',
+    get: service + 'getHE',
+    set: service + 'setHE',
+    del: service + 'delHE',
+    close: service + 'closeHE',
+    reopen: service + 'reopenHE',
+    post: service + 'postHE',
+    snapshot: service + 'snapshotHE'
   },
   BankTransferFilters: {
     qry: service + 'qrySB',
