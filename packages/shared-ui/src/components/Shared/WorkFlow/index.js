@@ -5,7 +5,7 @@ import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import styles from './Workflow.module.css'
+import styles from '@argus/shared-ui/src/components/Shared/WorkFlow.module.css'
 
 
 const WorkFlow = ({ functionId, recordId, window }) => {
