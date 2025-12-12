@@ -191,7 +191,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
-      purity: item.purity * 1000
+      purity: item.purity * 1000,
+      diffPurity: (item?.purity || 0) * 1000 - (item?.stdPurity || 0)
     }))
 
     formik.setValues({
@@ -205,6 +206,13 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   }
 
   const columns = [
+    {
+      component: 'numberfield',
+      name: 'id',
+      label: '',
+      flex: 0.5,
+      props: { readOnly: true }
+    },
     {
       component: 'resourcecombobox',
       label: labels.metal,
@@ -225,7 +233,10 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       },
       onChange: async ({ row: { update, newRow } }) => {
         fillSKUStore(newRow?.metalId)
-        if (newRow?.purity) update({ purity: newRow.purity * 1000 })
+        update({
+          purity: newRow?.purity * 1000 || 0,
+          diffPurity: (newRow?.purity || 0) * 1000 - (newRow?.stdPurity || 0)
+        })
       }
     },
     {
@@ -250,7 +261,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       },
       onChange: async ({ row: { update, newRow } }) => {
         update({
-          stdPurity: newRow?.stdPurity || 0
+          stdPurity: newRow?.stdPurity || 0,
+          diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0)
         })
       },
       propsReducer({ row, props }) {
@@ -277,12 +289,21 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 }
+      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      async onChange({ row: { update, newRow } }) {
+        update({ diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0) })
+      }
     },
     {
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.stdPurity,
+      props: { readOnly: true, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      name: 'diffPurity',
+      label: labels.diffPurity,
       props: { readOnly: true, decimalScale: 2 }
     }
   ]
