@@ -54,9 +54,6 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
       })
 
       toast.success(platformLabels.Added)
-      formik.setValues(obj)
-
-      invalidate()
     }
   })
 
@@ -64,8 +61,7 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
     {
       key: 'generate',
       condition: true,
-      onClick: () => formik.handleSubmit(),
-      disabled: false
+      onClick: () => formik.handleSubmit()
     }
   ]
 
@@ -83,7 +79,6 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
                 firstValue={formik.values.payRef}
                 name='payId'
                 required
-                displayFieldWidth={2}
                 label={_labels.payroll}
                 form={formik}
                 maxAccess={access}
