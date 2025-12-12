@@ -116,28 +116,42 @@ const GridToolbar = ({
               </Grid>
             )}
             {middleSection}
-            <Grid item sx={{ display: 'flex', justifyContent: 'flex-start', m: '0px !important' }}>
-              {buttons
-                .filter(button => actions.some(action => action.key === button.key))
-                .map((button, index) => {
-                  const correspondingAction = actions.find(action => action.key === button.key)
-                  const isVisible = correspondingAction.condition
-                  const isDisabled = correspondingAction.disabled
-                  const handleClick = correspondingAction.onClick
+            <Grid
+              item
+              xs={12}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                width: '100%'
+              }}
+            >
+              <Grid item sx={{ display: 'flex', gap: 1 }}>
+                {buttons
+                  .filter(button => actions.some(action => action.key === button.key))
+                  .map((button, index) => {
+                    const correspondingAction = actions.find(action => action.key === button.key)
+                    const isVisible = correspondingAction.condition
+                    const isDisabled = correspondingAction.disabled
+                    const handleClick = correspondingAction.onClick
 
-                  return (
-                    isVisible && (
-                      <CustomButton
-                        key={button.key || index}
-                        onClick={handleClick}
-                        image={button.image}
-                        tooltip={button.label}
-                        label={button.label}
-                        disabled={isDisabled}
-                      />
+                    return (
+                      isVisible && (
+                        <CustomButton
+                          key={button.key || index}
+                          onClick={handleClick}
+                          image={button.image}
+                          tooltip={button.label}
+                          label={button.label}
+                          disabled={isDisabled}
+                        />
+                      )
                     )
-                  )
-                })}
+                  })}
+              </Grid>
+              <Grid item sx={{ flexGrow: 1 }}>
+                {props?.sideSection}
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
