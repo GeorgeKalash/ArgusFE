@@ -72,11 +72,10 @@ export default function SalesForm({ store, labels, maxAccess }) {
           extension: BusinessPartnerRepository.MasterSales.get,
           parameters: `_bpId=${recordId}`
         })
-
-        const record = res?.record || {}
-        const hasFields = Object.keys(record).length > 0
+        if (!res?.record) return
+        const hasFields = Object.keys(res?.record || {}).length > 0
         formik.setValues({
-          ...record,
+          ...(res?.record || {}),
           disableGeneration: hasFields
         })
       }
@@ -104,7 +103,11 @@ export default function SalesForm({ store, labels, maxAccess }) {
                     required
                     label={labels.clientGrp}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     onChange={(_, newValue) => formik.setFieldValue('cgId', newValue?.recordId || '')}
                     error={formik.touched.cgId && Boolean(formik.errors.cgId)}
@@ -113,7 +116,7 @@ export default function SalesForm({ store, labels, maxAccess }) {
                 <Grid item xs={12}>
                   <CustomCheckBox
                     name='isSubjectToVAT'
-                    value={formik.values.isSubjectToVAT}
+                    value={formik.values?.isSubjectToVAT}
                     onChange={event => formik.setFieldValue('isSubjectToVAT', event.target.checked)}
                     label={labels.taxable}
                     maxAccess={maxAccess}
@@ -122,7 +125,7 @@ export default function SalesForm({ store, labels, maxAccess }) {
                 <Grid item xs={12}>
                   <CustomCheckBox
                     name='generateClient'
-                    value={formik.values.generateClient}
+                    value={formik.values?.generateClient}
                     onChange={event => formik.setFieldValue('generateClient', event.target.checked)}
                     label={labels.generateClient}
                     maxAccess={maxAccess}
@@ -166,7 +169,11 @@ export default function SalesForm({ store, labels, maxAccess }) {
                     name='szId'
                     label={labels.salesZone}
                     valueField='recordId'
-                    displayField='name'
+                    displayField={['szRef', 'name']}
+                    columnsInDropDown={[
+                      { key: 'szRef', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(_, newValue) => formik.setFieldValue('szId', newValue ? newValue.recordId : null)}

@@ -94,5 +94,9 @@ export const BusinessPartnerRepository = {
   MasterSales: {
     get: service + 'getSAL',
     set: service + 'setSAL'
+  },
+  MasterPurchase: {
+    get: service + 'getPUR',
+    set: service + 'setPUR'
   }
 }
