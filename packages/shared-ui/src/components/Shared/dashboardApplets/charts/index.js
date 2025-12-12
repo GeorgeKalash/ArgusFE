@@ -4,13 +4,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import styles from './charts.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
-// const width = window?.innerWidth
-
-// const size =  width > 1281 ? 12 : 10
-// const tooltipBodySize = 8
-// const tooltipFontSize = 8
-// const ticksSize =  width > 1281 ? 9 : 8
-
 const sizes = {
 1024 : {
  size : 10,

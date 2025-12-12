@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from 'react'
-import styled from 'styled-components'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {

@@ -79,26 +79,26 @@ const CustomTextArea = ({
    
       InputProps={{
         classes: {
-          // root: inputs.outlinedRoot,
+          root: styles.root,
           notchedOutline: inputs.outlinedFieldset,
           input: inputs.inputBase
         },
         endAdornment: (
-          <InputAdornment position='end'>
-            <div className={inputs.InputAdornment}>
+          <InputAdornment position='end'  className={inputs.inputAdornment}>
+            <div className={styles.textAreaEndAdornmentContainer}>
               {!_readOnly && value && (
                 <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={onClear} aria-label='clear input'>
                   <ClearIcon className={inputs.icon} />
                 </IconButton>
               )}
               {viewAdd && (
-                <IconButton tabIndex={-1} edge='end' className={inputs.iconButton}  onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
+                <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={handleAddAction} aria-label='Add' disabled={_disabled}>
                   <Image src={AddAction} alt='Add' width={18} height={18} />
                 </IconButton>
               )}
               {viewDropDown && (
-                <IconButton tabIndex={-1} edge='end' className={inputs.iconButton}  onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
-                  <Image src={DropDownArrow} alt='Drop Down' width={18} height={18} />
+                <IconButton tabIndex={-1}  className={inputs.iconButton}  onClick={onDropDown} aria-label='Drop down' disabled={_disabled}>
+                  <Image  className={inputs.icon}  src={DropDownArrow} alt='Drop Down' width={18} height={18} />
                 </IconButton>
               )}
             </div>

@@ -1,10 +1,12 @@
 import React, { useContext, useEffect } from 'react'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { Box } from '@mui/material'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import styles from './Workflow.module.css'
+
 
 const WorkFlow = ({ functionId, recordId, window }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -14,6 +16,15 @@ const WorkFlow = ({ functionId, recordId, window }) => {
   const id = recordId + '-' + functionId
 
   useSetWindow({ title: platformLabels.WorkFlow, window })
+
+    const { width } = useWindowDimensions()
+
+    const isSmall = width <= 1024
+    const isMedium = width > 1024 && width <= 1280
+
+    const fontSize = isSmall ? 10 : isMedium ? 12 : 14
+    const nodeW = isSmall ? 75 : isMedium ? 85 : 95
+    const nodeH = isSmall ? 15 : isMedium ? 20 : 25
 
   const getWorkFlowData = async () => {
     var parameters = `_functionId=${functionId}&_recordId=${recordId}`
@@ -88,13 +99,16 @@ const WorkFlow = ({ functionId, recordId, window }) => {
                 chart.dataFields.value = 'value'
                 chart.paddingRight = languageId === 2 ? 0 : 40
                 chart.paddingLeft = languageId === 2 ? 40 : 0
+                chart.tooltip.label.fontSize = fontSize
 
                 const nodeTemplate = chart.nodes.template
                 nodeTemplate.draggable = false
                 nodeTemplate.inert = true
                 nodeTemplate.clickable = false
-                nodeTemplate.width = 110
-                nodeTemplate.height = 30
+             
+                nodeTemplate.width = nodeW
+                nodeTemplate.height = nodeH
+                nodeTemplate.nameLabel.label.fontSize = fontSize
 
                 nodeTemplate.nameLabel.locationX = languageId === 2 ? 0.85 : 0
                 nodeTemplate.nameLabel.height = undefined
@@ -120,14 +134,8 @@ const WorkFlow = ({ functionId, recordId, window }) => {
   }, [])
 
   return (
-    <Box
-      sx={{
-        pt: 5,
-        pl: 8
-      }}
-    >
-      <div id={id} style={{ width: '100%', height: '500px' }} />
-    </Box>
+   <div id={id}  className={styles.root}  />
+
   )
 }
 
