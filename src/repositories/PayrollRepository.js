@@ -10,6 +10,7 @@ export const PayrollRepository = {
     close: service + 'closeHE',
     reopen: service + 'reopenHE',
     post: service + 'postHE',
+    unpost: service + 'unpostHE',
     snapshot: service + 'snapshotHE'
   },
   BankTransferFilters: {
