@@ -11,7 +11,7 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
-  forceClear = false,
+  allowClear = false,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -140,7 +140,7 @@ const CustomTextField = ({
           : setFocus(true)
       }
       InputProps={{
-        endAdornment: (forceClear || !_readOnly) && (
+        endAdornment: (allowClear || !_readOnly) && (
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
@@ -148,7 +148,7 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {(forceClear || (!clearable && !readOnly && (value || value === 0))) && (
+            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && (
               <IconButton
                 tabIndex={-1}
                 id={props.ClearId}
