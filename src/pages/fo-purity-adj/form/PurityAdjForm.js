@@ -92,7 +92,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     maxAccess,
     validationSchema: yup.object({
       header: yup.object({
-        date: yup.string().required(),
+        date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
         workCenterId: yup.number().required()
@@ -192,7 +192,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       ...item,
       id: index + 1,
       purity: item.purity * 1000,
-      metalId: item.metalId || ''
+      diffPurity: (item?.purity || 0) * 1000 - (item?.stdPurity || 0)
     }))
 
     formik.setValues({
@@ -206,6 +206,13 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   }
 
   const columns = [
+    {
+      component: 'numberfield',
+      name: 'id',
+      label: '',
+      flex: 0.5,
+      props: { readOnly: true }
+    },
     {
       component: 'resourcecombobox',
       label: labels.metal,
@@ -226,7 +233,10 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       },
       onChange: async ({ row: { update, newRow } }) => {
         fillSKUStore(newRow?.metalId)
-        if (newRow?.purity) update({ purity: newRow.purity * 1000 })
+        update({
+          purity: newRow?.purity * 1000 || 0,
+          diffPurity: (newRow?.purity || 0) * 1000 - (newRow?.stdPurity || 0)
+        })
       }
     },
     {
@@ -251,7 +261,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       },
       onChange: async ({ row: { update, newRow } }) => {
         update({
-          stdPurity: newRow?.stdPurity || 0
+          stdPurity: newRow?.stdPurity || 0,
+          diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0)
         })
       },
       propsReducer({ row, props }) {
@@ -278,12 +289,21 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 }
+      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      async onChange({ row: { update, newRow } }) {
+        update({ diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0) })
+      }
     },
     {
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.stdPurity,
+      props: { readOnly: true, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      name: 'diffPurity',
+      label: labels.diffPurity,
       props: { readOnly: true, decimalScale: 2 }
     }
   ]
@@ -300,7 +320,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || formik.values.header.qtyDiff != 0
+      disabled: !editMode
     },
     {
       key: 'IV',
@@ -378,7 +398,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
-                    maxAccess={!editMode && maxAccess}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -388,6 +408,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                     value={formik.values.header.reference}
                     readOnly={editMode}
                     maxAccess={!editMode && maxAccess}
+                    maxLength='15'
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.reference', '')}
                     error={formik.touched.header?.reference && Boolean(formik.errors.header?.reference)}
@@ -425,7 +446,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                     ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
                     error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
