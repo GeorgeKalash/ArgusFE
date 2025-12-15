@@ -42,7 +42,7 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
 
   const fetchData = async () => {
     const response = await getRequest({
-      extension: SystemRepository.ReportLayout,
+      extension: SystemRepository.ReportLayout.qry,
       parameters: `_resourceId=${row.resourceId}`
     })
 

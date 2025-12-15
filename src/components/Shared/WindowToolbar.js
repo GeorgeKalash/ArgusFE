@@ -40,22 +40,13 @@ const WindowToolbar = ({
   const [reportStore, setReportStore] = useState([])
 
   const getReportLayout = async () => {
-    const reportLayoutRes = await getRequest({
-      extension: SystemRepository.ReportLayout,
+    const reportPack = await getRequest({
+      extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${resourceId}`
     })
+    const pack = reportPack?.record || {}
 
-    const reportTemplateRes = await getRequest({
-      extension: SystemRepository.ReportTemplate.qry,
-      parameters: `_resourceId=${resourceId}`
-    })
-
-    const reportLayoutFilteringObject = await getRequest({
-      extension: SystemRepository.ReportLayoutObject.qry,
-      parameters: `_resourceId=${resourceId}`
-    })
-
-    const firstStore = reportLayoutRes?.list?.map(item => ({
+    const firstStore = (pack?.layouts || []).map(item => ({
       id: item.id,
       api_url: item.api,
       reportClass: item.instanceName,
@@ -64,7 +55,7 @@ const WindowToolbar = ({
       assembly: 'ArgusRPT.dll'
     }))
 
-    const secondStore = reportTemplateRes?.list?.map(item => ({
+    const secondStore = (pack?.reportTemplates || []).map(item => ({
       id: item.id,
       api_url: item.wsName,
       reportClass: item.reportName,
@@ -73,7 +64,7 @@ const WindowToolbar = ({
       assembly: item.assembly
     }))
 
-    const filteringItems = reportLayoutFilteringObject?.list
+    const filteringItems = pack?.reportLayoutOverrides || []
 
     const firstStore2 =
       firstStore?.filter(
@@ -118,11 +109,7 @@ const WindowToolbar = ({
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         {!!onPrint ? (
           <Grid item xs={3} sx={{ display: 'flex', mr: 2 }}>
-            <CustomButton
-              onClick={onPrint}
-              image={'print.png'}
-              disabled={!editMode}
-            />
+            <CustomButton onClick={onPrint} image={'print.png'} disabled={!editMode} />
           </Grid>
         ) : (
           <></>
