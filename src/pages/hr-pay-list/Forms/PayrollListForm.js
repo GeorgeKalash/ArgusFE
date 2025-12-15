@@ -63,8 +63,6 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
       date: yup.date().required(),
       periodId: yup.number().required(),
       payDate: yup.date().required(),
-      taStartDate: yup.date().required(),
-      taEndDate: yup.date().required(),
       fiscalYear: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -419,12 +417,11 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='taStartDate'
-                required
                 label={labels.taStartDate}
                 value={formik?.values?.taStartDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                readOnly={isClosed || isPosted}
+                readOnly
                 onClear={() => formik.setFieldValue('taStartDate', null)}
                 error={formik.touched.taStartDate && Boolean(formik.errors.taStartDate)}
               />
@@ -432,12 +429,11 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
             <Grid item xs={12}>
               <CustomDatePicker
                 name='taEndDate'
-                required
                 label={labels.taEndDate}
                 value={formik?.values?.taEndDate}
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
-                readOnly={isClosed || isPosted}
+                readOnly
                 onClear={() => formik.setFieldValue('taEndDate', null)}
                 error={formik.touched.taEndDate && Boolean(formik.errors.taEndDate)}
               />
