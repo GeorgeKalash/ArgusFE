@@ -255,72 +255,77 @@ const TabsProvider = ({ children }) => {
     removeLockedScreen(resourceId)
   }
 
+  const unlockIfLocked = tab => {
+    if (!tab?.resourceId) return
+    const locked = lockedScreens.some(screen => screen.resourceId === tab.resourceId)
+    if (locked) unlockRecord(tab.resourceId)
+  }
+
   return (
     <>
-      <Box className={styles.tabsProviderContainer}>
-        <Box className={styles.tabsWrapper}>
-          <Tabs
-            value={currentTabIndex}
-            onChange={handleChange}
-            variant='scrollable'
-            scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
-            aria-label='scrollable auto tabs example'
-            classes={{ indicator: styles.tabsIndicator }}
-            className={styles.tabs}
-          >
-            {openTabs.length > 0 &&
-              openTabs.map((activeTab, i) => (
-                <Tab
-                  key={activeTab?.id}
-                  className={styles.tabName}
-                  label={
-                    <Box display='flex' alignItems='center'>
-                      <span>{activeTab.label}</span>
-                      {i === currentTabIndex && (
-                        <IconButton
-                          size='small'
-                          className={styles.svgIcon}
-                          onClick={e => {
-                            e.stopPropagation()
-                            setOpenTabs(tabs =>
-                              tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
-                            )
-                            setReloadOpenedPage([])
-                          }}
-                        >
-                          <RefreshIcon className={styles.svgIcon} />
-                        </IconButton>
-                      )}
-                      {activeTab.route !== '/default/' && (
-                        <IconButton
-                          size='small'
-                          className={styles.svgIcon}
-                          onClick={event => {
-                            event.stopPropagation()
-                            closeTab(activeTab.route)
-                          }}
-                        >
-                          <CloseIcon className={styles.svgIcon} />
-                        </IconButton>
-                      )}
-                    </Box>
-                  }
-                  onContextMenu={event => OpenItems(event, i)}
-                  classes={{
-                    root: styles.tabRoot,
-                    selected: styles.selectedTab
-                  }}
-                />
-              ))}
-          </Tabs>
-        </Box>
-        {openTabs.length > 0 &&
-          openTabs.map((activeTab, i) => (
-            <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-              {activeTab.page}
-            </CustomTabPanel>
-          ))}
+      <Box className={styles.tabsWrapper}>
+        <Tabs
+          value={currentTabIndex}
+          onChange={handleChange}
+          variant='scrollable'
+          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+          aria-label='scrollable auto tabs example'
+          classes={{ indicator: styles.tabsIndicator }}
+          className={styles.tabs}
+        >
+          {openTabs.length > 0 &&
+            openTabs.map((activeTab, i) => (
+              <Tab
+                key={activeTab?.id}
+                className={styles.tabName}
+                label={
+                  <Box display='flex' alignItems='center'>
+                    <span>{activeTab.label}</span>
+                    {i === currentTabIndex && (
+                      <IconButton
+                        size='small'
+                        className={styles.svgIcon}
+                        onClick={e => {
+                          e.stopPropagation()
+                          setOpenTabs(tabs =>
+                            tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
+                          )
+                          setReloadOpenedPage([])
+                        }}
+                      >
+                        <RefreshIcon className={styles.svgIcon} />
+                      </IconButton>
+                    )}
+                    {activeTab.route !== '/default/' && (
+                      <IconButton
+                        size='small'
+                        className={styles.svgIcon}
+                        onClick={event => {
+                          event.stopPropagation()
+                          if (activeTab) unlockIfLocked(activeTab)
+                          closeTab(activeTab.route)
+                        }}
+                      >
+                        <CloseIcon className={styles.svgIcon} />
+                      </IconButton>
+                    )}
+                  </Box>
+                }
+                onContextMenu={event => OpenItems(event, i)}
+                classes={{
+                  root: styles.tabRoot,
+                  selected: styles.selectedTab
+                }}
+              />
+            ))}
+        </Tabs>
       </Box>
+      {openTabs.length > 0 &&
+        openTabs.map((activeTab, i) => (
+          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+            {activeTab.page}
+          </CustomTabPanel>
+        ))}
       <Menu
         anchorEl={anchorEl}
         id='account-menu'

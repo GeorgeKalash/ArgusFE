@@ -147,7 +147,7 @@ const ReportViewer = ({ resourceId }) => {
           reportName={report.selectedReport?.parameters}
           disableActionsPadding
           leftSection={
-            <Grid container spacing={2} alignItems='center' wrap='nowrap'>
+            <Grid container spacing={2} alignItems='end' wrap='nowrap'>
               <Grid item xs>
                 <ResourceComboBox
                   store={reportStore}

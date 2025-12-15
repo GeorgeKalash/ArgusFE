@@ -6,15 +6,18 @@
   justify-content: center;
   align-items: center;
   z-index: 2;
+  will-change: transform;
 }
 
 .paper {
   transition: width 0.3s, height 0.3s;
   outline: none;
   box-shadow: none;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-/* Title Bar */
 .dialogTitle {
   cursor: move;
   padding-left: 15px !important;
@@ -29,6 +32,7 @@
   border-top-right-radius: 5px;
   height: 40px;
   line-height: 1rem;
+  touch-action: none;
 }
 
 .dialogTitleText {
@@ -38,7 +42,6 @@
   line-height: 1rem;
 }
 
-/* Buttons */
 .iconButton {
   padding: 0px !important;
   padding-right: 3px !important;
@@ -49,26 +52,21 @@
   font-size: 1.2rem;
 }
 
-/* Loading Overlay */
 .loadingOverlay {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  left: 0;
-  bottom: 50px;
   background-color: rgba(250, 250, 250, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
 }
 
-/* Minimized Window Title */
 .paper[data-minimized='true'] .dialogTitle {
   cursor: pointer;
 }
 
-/* ---------- RESPONSIVE BREAKPOINTS ---------- */
+.no-drag {
+  touch-action: manipulation;
+  pointer-events: auto;
+}
 
 @media (max-width: 1600px) {
   .dialogTitle {
@@ -149,18 +147,4 @@
   .iconButton svg {
     font-size: 0.85rem !important;
   }
-}
-
-/* ------------------------------------------------------ */
-/* 🚀 PERFORMANCE BOOST — MAKES DRAGGING SMOOTHER */
-/* ------------------------------------------------------ */
-
-.paper {
-  will-change: transform;      /* browser prepares transform = smoother drag */
-  transform: translateZ(0);    /* forces GPU acceleration */
-  backface-visibility: hidden; 
-}
-
-.parentBox {
-  will-change: transform;
 }

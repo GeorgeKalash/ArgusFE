@@ -215,13 +215,23 @@
 }
 
 .box {
-  flex-direction: row;
-  justify-content: left;
-  align-items: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   background-color: #231f20;
   border-radius: 4px;
   margin-left: 5px;
-  padding: 0px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.box svg {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  line-height: 18px !important;
 }
 
 .image {
@@ -442,6 +452,10 @@
 }
 
 @media (max-width: 1024px) {
+  .layout-vertical-nav{
+    z-index: 1200;
+    
+  }
   .menu-search-box svg,
   .box svg,
   .collapse-button svg,

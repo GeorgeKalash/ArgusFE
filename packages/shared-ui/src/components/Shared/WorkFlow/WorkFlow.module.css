@@ -1,0 +1,49 @@
+    .root {
+     width: 100%;
+     height: 100%;
+    }
+
+    .root:dir(ltr) {
+        padding-left: 30px !important;  
+        padding-top: 15px !important;   
+        padding-bottom: 15px !important;         
+
+    }
+    .root:dir(rtl) {
+        padding-right: 30px !important; 
+        padding-top: 15px !important;   
+        padding-bottom: 15px !important;          
+
+    }
+
+
+    @media (max-width: 1280px) {
+        .root:dir(ltr) {
+            padding-left: 25px !important;  
+            padding-top: 15px !important;   
+            padding-bottom: 15px !important;        
+    
+        }
+        .root:dir(rtl) {
+            padding-right: 25px !important; 
+            padding-top: 15px !important;   
+            padding-bottom: 15px !important;         
+    
+        }
+     }
+    
+      @media (max-width: 1024px) {
+        .root:dir(ltr) {
+            padding-left: 20px !important;  
+            padding-top: 15px !important;   
+            padding-bottom: 15px !important;        
+    
+        }
+        .root:dir(rtl) {
+            padding-right: 20px !important;   
+            padding-top: 15px !important;   
+            padding-bottom: 15px !important;       
+    
+        }
+      }
+      

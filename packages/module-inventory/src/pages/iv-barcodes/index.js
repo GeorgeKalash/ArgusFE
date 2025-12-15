@@ -127,8 +127,7 @@ const IvBarcodes = () => {
         msId: obj?.msId,
         maxAccess: access
       },
-      width: 750,
-      height: 500,
+     
       title: _labels.Barcodes
     })
   }
