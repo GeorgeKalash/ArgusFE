@@ -557,6 +557,7 @@ export const ResourceIds = {
   EmployeeChart: 71201,
   Catalogue: 41218,
   MetalSmelting: 47314,
+  PurityAdjustment: 47315,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
   AttendanceSettings: 72108,
@@ -609,6 +610,7 @@ export const ResourceIds = {
   MetalSmeltingDTD: 47104,
   ItemDisposal: 42349,
   PayrollHeader: 75301,
+  GeneratePayroll: 75501,
 
   // GL
   GLSalesInvoice: 51604,

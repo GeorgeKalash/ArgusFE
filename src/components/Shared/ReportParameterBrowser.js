@@ -363,7 +363,7 @@ const GetTextField = ({ field, formik }) => {
   )
 }
 
-const GetNumberField = ({ field, formik }) => {
+const GetNumberField = ({ field, formik, decimalScale }) => {
   return (
     <Grid item xs={12} key={field.id}>
       <CustomNumberField
@@ -371,7 +371,7 @@ const GetNumberField = ({ field, formik }) => {
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
-        decimalScale={2}
+        decimalScale={decimalScale}
         onChange={e => {
           e.target.value != ''
             ? formik.setFieldValue(`parameters[${field.id}]`, {
@@ -527,7 +527,9 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
           } else if (item.controlType === 1) {
             return <GetTextField key={item.fieldId} formik={formik} field={item} apiDetails={item.apiDetails} />
           } else if (item.controlType === 2) {
-            return <GetNumberField key={item.fieldId} formik={formik} field={item} />
+            return <GetNumberField key={item.fieldId} formik={formik} field={item} decimalScale={2} />
+          } else if (item.controlType === 3) {
+            return <GetNumberField key={item.fieldId} formik={formik} field={item} decimalScale={0} />
           } else if (item.controlType === 7) {
             return <GetDateTimePicker key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           }

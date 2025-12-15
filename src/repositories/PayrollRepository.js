@@ -84,5 +84,8 @@ export const PayrollRepository = {
   PenaltyDetail: {
     qry: service + 'qryPD',
     set2: service + 'set2PD'
+  },
+  GeneratePayroll: {
+    gen: service + 'genEM'
   }
 }

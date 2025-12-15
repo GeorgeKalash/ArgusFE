@@ -130,7 +130,8 @@ export const SystemFunction = {
   MetalSmelting: Module.Foundry * 100 + 5,
   BatchTransfer: Module.Manufacturing * 100 + 16,
   ItemDisposal: Module.Manufacturing * 100 + 17,
-  PayrollList: Module.Payroll * 100 + 1
+  PayrollList: Module.Payroll * 100 + 1,
+  PurityAdjustment: Module.Foundry * 100 + 6
 }
 
 export const getSystemFunctionModule = functionId => {
