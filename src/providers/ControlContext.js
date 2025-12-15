@@ -10,6 +10,7 @@ import { useError } from 'src/error'
 import { debounce } from 'lodash'
 import { commonResourceIds } from 'src/resources/commonResourceIds'
 import { useLabelsAccessContext } from './LabelsAccessContext'
+import { DataSets } from 'src/resources/DataSets'
 
 const ControlContext = createContext()
 
@@ -20,6 +21,7 @@ const ControlProvider = ({ children }) => {
   const [defaultsData, setDefaultsData] = useState([])
   const [userDefaultsData, setUserDefaultsData] = useState([])
   const [systemChecks, setSystemChecks] = useState([])
+  const [exportFormat, setExportFormat] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
   const { labels, setLabels, access, setAccess, apiPlatformLabels, setApiPlatformLabels } = useLabelsAccessContext()
@@ -47,6 +49,7 @@ const ControlProvider = ({ children }) => {
       getDefaults(setDefaultsData)
       getUserDefaults(setUserDefaultsData)
       getSystemChecks(setSystemChecks)
+      getExportFormat()
     }
   }, [userData, user?.userId])
 
@@ -91,6 +94,15 @@ const ControlProvider = ({ children }) => {
     })
   }
 
+  const getExportFormat = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: `_dataset=${DataSets.EXPORT_FORMAT}&_language=${languageId}`,
+      disableLoading: true
+    })
+    if (res?.list?.length) setExportFormat(res?.list || [])
+  }
+
   const updateDefaults = data => {
     const updatedDefaultsData = [...defaultsData.list, ...data].reduce((acc, obj) => {
       const existing = acc.find(item => item.key === obj.key)
@@ -116,7 +128,11 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
+    ;(async function () {
+      await getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
+
+      // await getExportFormat()
+    })()
   }, [user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
@@ -127,7 +143,7 @@ const ControlProvider = ({ children }) => {
     ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
     : {}
 
-  const getPlatformLabels = (resourceId, callback) => {
+  const getPlatformLabels = async (resourceId, callback) => {
     const disableLoading = false
     !disableLoading && !loading && setLoading(true)
 
@@ -207,7 +223,8 @@ const ControlProvider = ({ children }) => {
     updateDefaults,
     userDefaultsData,
     setUserDefaultsData,
-    systemChecks
+    systemChecks,
+    exportFormat
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

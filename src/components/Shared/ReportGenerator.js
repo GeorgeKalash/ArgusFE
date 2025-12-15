@@ -5,9 +5,7 @@ import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useWindow } from 'src/windows'
 import PreviewReport from './PreviewReport'
-import { DataSets } from 'src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
-import { CommonContext } from 'src/providers/CommonContext'
 import CustomButton from '../Inputs/CustomButton'
 
 const ReportGenerator = ({
@@ -22,28 +20,18 @@ const ReportGenerator = ({
   reportSize = 3
 }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels, exportFormat } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
 
   const getExportFormats = async () => {
-    await getAllKvsByDataset({
-      _dataset: DataSets.EXPORT_FORMAT,
-      callback: res => {
-        if (res.length > 0) {
-          setExportFormats(res)
-          setFormatIndex(0)
-          setReport(prev => ({
-            ...prev,
-            selectedFormat: res[0]
-          }))
-        }
-      }
-    })
+    if (!exportFormat.length) return
+    setFormatIndex(0)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormat[0]
+    }))
   }
 
   useEffect(() => {
@@ -67,11 +55,11 @@ const ReportGenerator = ({
   }, [reportStore])
 
   const cycleFormat = () => {
-    const nextIndex = (formatIndex + 1) % exportFormats.length
+    const nextIndex = (formatIndex + 1) % exportFormat.length
     setFormatIndex(nextIndex)
     setReport(prev => ({
       ...prev,
-      selectedFormat: exportFormats[nextIndex]
+      selectedFormat: exportFormat[nextIndex]
     }))
   }
 
@@ -125,7 +113,7 @@ const ReportGenerator = ({
       <CustomButton
         onClick={cycleFormat}
         image={`${report.selectedFormat?.value || 'PDF'}.png`}
-        disabled={exportFormats.length === 0 || !report.selectedReport}
+        disabled={exportFormat.length == 0 || !report.selectedReport}
         style={{ marginLeft: '6px' }}
       />
       <CustomButton

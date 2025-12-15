@@ -6,34 +6,25 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import ResourceComboBox from './ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
-import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { exportFormat } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)
-  const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
 
   const getExportFormats = async () => {
-    await getAllKvsByDataset({
-      _dataset: DataSets.EXPORT_FORMAT,
-      callback: res => {
-        if (res.length > 0) {
-          setExportFormats(res)
-          setFormatIndex(0)
-          setReport(prev => ({
-            ...prev,
-            selectedFormat: res[0]
-          }))
-        }
-      }
-    })
+    if (!exportFormat.length) return
+    setFormatIndex(0)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormat[0]
+    }))
   }
 
   const getReportLayout = () => {
@@ -125,11 +116,11 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const cycleFormat = () => {
-    const nextIndex = (formatIndex + 1) % exportFormats.length
+    const nextIndex = (formatIndex + 1) % exportFormat.length
     setFormatIndex(nextIndex)
     setReport(prev => ({
       ...prev,
-      selectedFormat: exportFormats[nextIndex]
+      selectedFormat: exportFormat[nextIndex]
     }))
   }
 
@@ -166,7 +157,7 @@ const ReportViewer = ({ resourceId }) => {
                   <CustomButton
                     onClick={cycleFormat}
                     image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                    disabled={exportFormats.length === 0 || !report.selectedReport}
+                    disabled={exportFormat.length == 0 || !report.selectedReport}
                   />
                 </Grid>
               </Grid>
