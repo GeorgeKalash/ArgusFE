@@ -1322,7 +1322,7 @@ export default function RetailTransactionsForm({
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
                     name='header.dtId'
-                    readOnly={formik?.values?.items?.some(item => item.sku)}
+                    readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1400,7 +1400,7 @@ export default function RetailTransactionsForm({
                     value={formik.values.header.KGmetalPrice}
                     onChange={formik.handleChange}
                     readOnly={!formik.values.baseMetalCuId || isPosted}
-                    hidden={(!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.header.dtId)}
+                    hidden={(!editMode && !formik.values.baseMetalCuId) || (editMode && !formik.values.header.dtId)}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />
