@@ -12,7 +12,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import PayrollListForm from './Forms/PayrollListForm'
 
@@ -151,7 +150,7 @@ const PayList = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.Casting.del,
+      extension: PayrollRepository.PayrollFilters.del,
       record: JSON.stringify(obj)
     })
     invalidate()
