@@ -386,7 +386,14 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
                   formik.setFieldValue('payDate', value)
                 }}
-                onClear={() => formik.setFieldValue('payDate', null)}
+                onClear={() => {
+                  formik.setFieldValue('payDate', null)
+                  formik.setFieldValue('calendarDays', '')
+                  formik.setFieldValue('startDate', null)
+                  formik.setFieldValue('endDate', null)
+                  formik.setFieldValue('taStartDate', null)
+                  formik.setFieldValue('taEndDate', null)
+                }}
                 error={formik.touched.payDate && Boolean(formik.errors.payDate)}
               />
             </Grid>
