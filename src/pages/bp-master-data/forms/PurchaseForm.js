@@ -24,7 +24,7 @@ export default function PurchaseForm({ store, labels, maxAccess }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      bpId: recordId || null,
+      bpId: null,
       vgId: null,
       currencyId: null,
       paymentMethod: null,
@@ -37,7 +37,7 @@ export default function PurchaseForm({ store, labels, maxAccess }) {
     onSubmit: async obj => {
       await postRequest({
         extension: BusinessPartnerRepository.MasterPurchase.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({ ...obj, bpId: recordId || null })
       })
       toast.success(platformLabels.Edited)
       refetchForm()

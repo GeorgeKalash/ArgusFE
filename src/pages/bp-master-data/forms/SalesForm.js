@@ -25,12 +25,12 @@ export default function SalesForm({ store, labels, maxAccess }) {
   const { formik } = useForm({
     maxAccess,
     initialValues: {
-      bpId: recordId || null,
+      bpId: null,
       cgId: null,
       clientId: null,
       clientRef: '',
       clientName: '',
-      generateClient: false,
+      generateClient: true,
       isSubjectToVAT: false,
       maxDiscount: null,
       discount: null,
@@ -59,7 +59,7 @@ export default function SalesForm({ store, labels, maxAccess }) {
     onSubmit: async obj => {
       await postRequest({
         extension: BusinessPartnerRepository.MasterSales.set,
-        record: JSON.stringify(obj)
+        record: JSON.stringify({ ...obj, bpId: recordId || null })
       })
       toast.success(platformLabels.Edited)
     }
@@ -176,7 +176,7 @@ export default function SalesForm({ store, labels, maxAccess }) {
                     ]}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(_, newValue) => formik.setFieldValue('szId', newValue ? newValue.recordId : null)}
+                    onChange={(_, newValue) => formik.setFieldValue('szId', newValue?.recordId || null)}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
                   />
                 </Grid>
