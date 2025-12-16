@@ -705,7 +705,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       maxLength={12}
                       decimalScale={3}
-                      readOnly={isPosted || isCancelled}
+                      readOnly
                       onChange={e => {
                         setRecal(true)
                         setLastEdited('lossCasting')
@@ -723,7 +723,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       maxLength={12}
                       decimalScale={3}
-                      readOnly={isPosted || isCancelled}
+                      readOnly
                       onChange={e => {
                         setRecal(true)
                         setLastEdited('lossDisassembly')
