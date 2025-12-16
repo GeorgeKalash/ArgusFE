@@ -151,8 +151,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
     switch (lastEdited) {
       case 'outputWgt': {
-        totalLoss = Math.max(netInput - output, 0)
-        casting = Math.max(totalLoss - disassembly, 0)
+        totalLoss = netInput - output
+        casting = totalLoss - disassembly
 
         formik.setFieldValue('lossCasting', casting)
         formik.setFieldValue('loss', totalLoss)
