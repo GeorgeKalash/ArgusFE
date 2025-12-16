@@ -19,40 +19,28 @@ const ReportLayoutsForm = ({ labels, maxAccess, row, window: w }) => {
 
   const [data, setData] = useState([])
 
-  const processResponses = (response, response2) => {
-    const responseList = response?.list || []
-    const response2List = response2?.list || []
+  const fetchData = async () => {
+    const reportPack = await getRequest({
+      extension: SystemRepository.ReportLayout.get,
+      parameters: `_resourceId=${row.resourceId}`
+    })
+    const pack = reportPack?.record || {}
 
-    const response2Map = new Map(response2List.map(item => [item.id, item.isInactive]))
+    const response2Map = new Map((pack?.reportLayoutOverrides || []).map(item => [item.id, item.isInactive]))
 
-    const updatedList = responseList.map(item => {
+    const updatedList = (pack?.layouts || []).map(item => {
       return {
         ...item,
         isInactive: response2Map.has(item.id) ? response2Map.get(item.id) : false
       }
     })
 
-    return {
-      count: updatedList.length,
-      list: updatedList,
+    setData({
+      count: updatedList.length || 0,
+      list: updatedList || [],
       statusId: 1,
       message: ''
-    }
-  }
-
-  const fetchData = async () => {
-    const response = await getRequest({
-      extension: SystemRepository.ReportLayout.qry,
-      parameters: `_resourceId=${row.resourceId}`
     })
-
-    const response2 = await getRequest({
-      extension: SystemRepository.ReportLayoutObject.qry,
-      parameters: `_resourceId=${row.resourceId}`
-    })
-
-    const processedData = processResponses(response, response2)
-    setData(processedData || [])
   }
 
   const { formik } = useForm({

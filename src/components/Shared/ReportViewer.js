@@ -27,25 +27,25 @@ const ReportViewer = ({ resourceId }) => {
     }))
   }
 
-  const getReportLayout = () => {
-    getRequest({
-      extension: SystemRepository.ReportLayout.qry,
+  const getReportLayout = async () => {
+    const reportPack = await getRequest({
+      extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${resourceId}`
-    }).then(async res => {
-      const inactiveReports = await getRequest({
-        extension: SystemRepository.ReportLayoutObject.qry,
-        parameters: `_resourceId=${resourceId}`
-      })
-      let newList = res.list || []
-      if (inactiveReports?.list?.length > 0) {
-        const inactiveIds = new Set(inactiveReports.list.map(item => item.id))
-        newList = newList.filter(item => !inactiveIds.has(item.id))
-      }
-      setReportStore(prevReportStore => {
-        const existingIds = new Set(prevReportStore.map(report => report.id))
-        const filteredNewItems = newList.filter(item => !existingIds.has(item.id))
+    })
+    const pack = reportPack?.record || {}
 
-        const newMappedItems = filteredNewItems.map(item => ({
+    let layouts = pack?.layouts || []
+    if (pack?.reportLayoutOverrides?.length) {
+      const inactiveIds = new Set((pack?.reportLayoutOverrides || []).map(item => item.id))
+      layouts = layouts.filter(item => !inactiveIds.has(item.id))
+    }
+
+    setReportStore(prev => {
+      const existingIds = new Set(prev.map(r => r.id))
+
+      const layoutsPack = layouts
+        ?.filter(item => !existingIds.has(item.id))
+        .map(item => ({
           id: item.id,
           api_url: item.api,
           reportClass: item.instanceName,
@@ -54,37 +54,27 @@ const ReportViewer = ({ resourceId }) => {
           assembly: 'ArgusRPT.dll'
         }))
 
-        return [...prevReportStore, ...newMappedItems]
-      })
-    })
-  }
+      const templatesPack = (pack?.reportTemplates || [])
+        .filter(item => !item.isInactive)
+        .map(item => ({
+          api_url: item.wsName,
+          reportClass: item.reportName,
+          parameters: item.parameters,
+          layoutName: item.caption,
+          assembly: item.assembly
+        }))
 
-  const getReportTemplate = () => {
-    const parameters = `_resourceId=${resourceId}`
-    getRequest({
-      extension: SystemRepository.ReportTemplate.qry,
-      parameters
-    }).then(res => {
-      setReportStore(prevReportStore => [
-        ...prevReportStore,
-        ...res.list
-          ?.filter(item => !item.isInactive)
-          ?.map(item => ({
-            api_url: item.wsName,
-            reportClass: item.reportName,
-            parameters: item.parameters,
-            layoutName: item.caption,
-            assembly: item.assembly
-          }))
-      ])
+      return [...prev, ...layoutsPack, ...templatesPack]
     })
   }
 
   useEffect(() => {
     getReportLayout()
-    getReportTemplate()
-    getExportFormats()
   }, [])
+
+  useEffect(() => {
+    getExportFormats()
+  }, [exportFormat])
 
   useEffect(() => {
     if (reportStore.length > 0 && !report.selectedReport)

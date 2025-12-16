@@ -35,9 +35,12 @@ const ReportGenerator = ({
   }
 
   useEffect(() => {
+    getExportFormats()
+  }, [exportFormat])
+
+  useEffect(() => {
     const fetchReportLayout = async () => {
       if (previewReport) {
-        await getExportFormats()
         await getReportLayout(setReport)
       }
     }

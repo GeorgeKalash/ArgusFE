@@ -14,7 +14,6 @@ export const SystemRepository = {
     set2: service + 'set2UDB'
   },
   ReportLayoutObject: {
-    qry: service + 'qryRLO',
     set2: service + 'set2RLO'
   },
   ReportTemplate: {
