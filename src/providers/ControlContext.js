@@ -128,11 +128,7 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    ;(async function () {
-      await getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
-
-      // await getExportFormat()
-    })()
+    getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
   }, [user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
@@ -143,7 +139,7 @@ const ControlProvider = ({ children }) => {
     ? Object.fromEntries(apiPlatformLabels.map(({ key, value }) => [key, value]))
     : {}
 
-  const getPlatformLabels = async (resourceId, callback) => {
+  const getPlatformLabels = (resourceId, callback) => {
     const disableLoading = false
     !disableLoading && !loading && setLoading(true)
 
