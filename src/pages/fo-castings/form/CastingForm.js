@@ -705,6 +705,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       required
                       maxLength={12}
                       decimalScale={3}
+                      maxAccess={maxAccess}
                       readOnly
                       onChange={e => {
                         setRecal(true)
@@ -724,6 +725,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={12}
                       decimalScale={3}
                       readOnly
+                      maxAccess={maxAccess}
                       onChange={e => {
                         setRecal(true)
                         setLastEdited('lossDisassembly')
