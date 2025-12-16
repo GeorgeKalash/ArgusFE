@@ -233,6 +233,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
     return res?.record
   }
 
+  useEffect(() => {
+    if (!recal) return
+
+    const netInput = (Number(formik.values.inputWgt) || 0) + (Number(formik.values.rmWgt) || 0)
+
+    formik.setFieldValue('netInputWgt', Number(netInput.toFixed(3)))
+  }, [formik.values.inputWgt, formik.values.rmWgt])
+
   async function getWaxInfo(waxId) {
     if (!waxId) return
 
