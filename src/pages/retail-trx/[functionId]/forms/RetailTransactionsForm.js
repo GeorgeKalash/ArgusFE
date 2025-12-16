@@ -547,7 +547,8 @@ export default function RetailTransactionsForm({
         street1: addressObj?.record?.street1,
         street2: addressObj?.record?.street2,
         phone: addressObj?.record?.phone,
-        cityId: addressObj?.record?.cityId
+        cityId: addressObj?.record?.cityId,
+        KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0
       },
       items: modifiedItemsList,
       cash: modifiedCashList
