@@ -6,12 +6,16 @@
   justify-content: center;
   align-items: center;
   z-index: 2;
+  will-change: transform;
 }
 
 .paper {
   transition: width 0.3s, height 0.3s;
   outline: none;
   box-shadow: none;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .dialogTitle {
@@ -27,15 +31,20 @@
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   height: 40px;
+  line-height: 1rem;
+  touch-action: none;
 }
 
 .dialogTitleText {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
   color: white !important;
+  line-height: 1rem;
 }
 
 .iconButton {
+  padding: 0px !important;
+  padding-right: 3px !important;
   color: white !important;
 }
 
@@ -44,32 +53,57 @@
 }
 
 .loadingOverlay {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  left: 0;
-  bottom: 50px;
   background-color: rgba(250, 250, 250, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+}
+
+.paper[data-minimized='true'] .dialogTitle {
+  cursor: pointer;
+}
+
+.no-drag {
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 @media (max-width: 1600px) {
   .dialogTitle {
-    font-size: 1rem !important;
     height: 35px !important;
   }
+  .dialogTitleText {
+    font-size: 0.95rem !important;
+    line-height: 0.95rem !important;
+  }
   .iconButton svg {
-    font-size: 1.3rem !important;
+    font-size: 1.15rem !important;
   }
 }
 
 @media (max-width: 1300px) {
   .dialogTitle {
+    height: 32px !important;
+  }
+  .dialogTitleText {
     font-size: 0.9rem !important;
-    height: 30px !important;
+    line-height: 0.9rem !important;
+  }
+  .iconButton {
+    padding-right: 2px !important;
+  }
+  .iconButton svg {
+    font-size: 1.1rem !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .dialogTitle {
+    height: 28px !important;
+  }
+  .dialogTitleText {
+    font-size: 0.85rem !important;
+    line-height: 0.85rem !important;
   }
   .iconButton svg {
     font-size: 1rem !important;
@@ -78,27 +112,39 @@
 
 @media (max-width: 1024px) {
   .dialogTitle {
-    font-size: 0.5rem;
+    height: 26px !important;
+  }
+  .dialogTitleText {
+    font-size: 0.8rem !important;
+    line-height: 0.8rem !important;
   }
   .iconButton svg {
-    font-size: 1rem;
+    font-size: 0.9rem !important;
   }
 }
 
 @media (max-width: 768px) {
   .dialogTitle {
-    font-size: 0.8rem;
+    height: 24px !important;
+  }
+  .dialogTitleText {
+    font-size: 0.75rem !important;
+    line-height: 0.75rem !important;
   }
   .iconButton svg {
-    font-size: 1.1rem;
+    font-size: 0.9rem !important;
   }
 }
 
 @media (max-width: 480px) {
   .dialogTitle {
-    font-size: 0.7rem;
+    height: 22px !important;
+  }
+  .dialogTitleText {
+    font-size: 0.7rem !important;
+    line-height: 0.7rem !important;
   }
   .iconButton svg {
-    font-size: 1rem;
+    font-size: 0.85rem !important;
   }
 }

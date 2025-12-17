@@ -1,7 +1,6 @@
 
 .chartCanvas {
   box-sizing: border-box;
-
   max-width: 100%;
   display: block;
   position: relative;
@@ -52,7 +51,7 @@
   --chart-tooltip-body-color: #231F20;
 }
 .charthight {
-  min-height: 300px;  
+  min-height: 0px;  
   height: 100%;}
 
 .chartCanvasDark {
@@ -77,22 +76,24 @@
   --chart-datalabel-outside-color: #222222;
 }
 
-@media (min-width: 1600px) {
+
+@media (min-width: 1281px) {
   .chartCanvas {
-    height: clamp(260px, 24vw, 520px);
+    height: 280px;
+    min-height: 280px;
   }
 }
-
-@media (min-width: 1025px) and (max-width: 1599px) {
+@media (min-width: 1025px) and (max-width: 1280px) {
   .chartCanvas {
-    height: clamp(230px, 28vw, 460px);
+    height: 230px;
+    min-height: 230px;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .chartCanvas {
-    height: clamp(220px, 40vw, 380px);
-  }
+    height: 200px !important;
+    min-height: 200 !important; }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {

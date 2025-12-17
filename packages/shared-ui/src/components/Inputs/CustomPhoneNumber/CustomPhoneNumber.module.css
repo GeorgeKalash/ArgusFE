@@ -6,12 +6,18 @@
   position: absolute;
   z-index: 1;
   top: -4px;
-  background: white;
+  background: white !important;
   color: #666 !important;
   white-space: normal !important;   
   transform: scale(0.75);
 
 }
+.errorLabel {
+  color: red !important;
+  background: white !important;
+
+}
+
 
 .phoneWrapper:dir(ltr)  .phoneLabel {
   top: -4px;
@@ -201,8 +207,12 @@
   }
 
   .phoneLabel {
-    top: -11px !important;
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -8px !important;
   }
+
   .phoneWrapper:dir(ltr)  .phoneLabel {
     left: 0.5px; 
     padding-left: 3px !important;
@@ -257,8 +267,12 @@
   }
 
   .phoneLabel {
-    top: -8px !important
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -5px !important;
   }
+
 
   .phoneWrapper:dir(ltr)  .phoneLabel {
     left: 5px; 
@@ -322,7 +336,7 @@
 
   .phoneLabel {
     white-space: normal !important;   
-    transform: scale(0.75);
+    transform: scale(0.7);
     line-height: 1 !important;
     top: -5px !important;
   }

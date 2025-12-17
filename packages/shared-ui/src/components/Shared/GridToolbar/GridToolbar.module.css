@@ -22,7 +22,7 @@
 .searchFieldWrapper {
   display: flex;
   justify-content: flex-start;
-  align-items: center;          
+  align-items: end;          
 }
 
 .searchFieldWrapper input {
@@ -46,7 +46,7 @@
   font-size: 14px;
 }
 
-@media (min-width: 1025px) and (max-width: 1600px) {
+@media (min-width: 1025px) {
   .gridContainer {
     padding: 0 12px;
   }
@@ -74,12 +74,6 @@
   .actionButton {
     padding: 5px 10px;
     font-size: 12.5px;
-  }
-
-  .searchFieldWrapper {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
   }
 
   .searchFieldWrapper input {

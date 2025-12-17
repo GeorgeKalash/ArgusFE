@@ -105,7 +105,7 @@ const ReportGenerator = ({
   }
 
   return (
-    <Grid item xs={reportSize} sx={{ display: 'flex', mr: 2 }}>
+    <Grid item xs={reportSize} sx={{ display: 'flex', mr: 2, alignItems: 'end'}}>
       <CustomComboBox
         label={platformLabels.SelectReport}
         valueField='uniqueId'

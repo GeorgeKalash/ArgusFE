@@ -1012,17 +1012,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                         />
                       </Grid>
                       <Grid item xs={2}>
-                        <Button
-                          variant='contained'
-                          sx={{
-                            '&:hover': {
-                              opacity: 0.8
-                            },
-                            width: 'auto',
-                            height: '33px',
-                            objectFit: 'contain',
-                            minWidth: 'auto'
-                          }}
+                        <CustomButton
                           onClick={() =>
                             stack({
                               Component: Confirmation,
@@ -1034,6 +1024,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               }
                             })
                           }
+                          label={labels.fetch}
                           disabled={
                             !formik?.values?.idtId ||
                             !formik?.values?.birthDate ||
@@ -1043,9 +1034,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
                               ? true
                               : false
                           }
-                        >
-                          {labels.fetch}
-                        </Button>
+                       />
                       </Grid>
                       <Grid item xs={4}>
                         <CustomDatePicker

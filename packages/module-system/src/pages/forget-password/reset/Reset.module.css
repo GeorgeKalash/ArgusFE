@@ -38,62 +38,20 @@
   margin-bottom: 100px;
 }
 
-@media (min-width: 2048px) and (max-width: 2566px) {
+@media (min-width: 1281px) {
   .card {
-    width: 36rem;
-    margin-top: 500px;
+    width: 25rem;
+    margin-top: 300px;
   }
   .cardHeader {
-    height: 50px;
+    height: 40px;
     padding: 8px;
-    font-size: 22px !important;
+  }
+  .cardContent {
+    padding: 15px 20px 20px !important;
   }
   .imageMail {
-    width: 30px;
-  }
-}
-
-@media (max-width: 2048px) {
-  .card {
-    width: 32rem;
-    margin-top: 500px;
-  }
-  .cardHeader {
-    height: 50px;
     padding: 8px;
-    font-size: 22px !important;
-  }
-}
-
-@media (max-width: 1710px) {
-  .card {
-    width: 27rem;
-    margin-top: 200px;
-  }
-  .cardHeader {
-    height: 40px;
-    padding: 8px;
-    font-size: 16px !important;
-  }
-  .cardContent {
-    padding: 15px 20px 20px !important;
-  }
-  .footer {
-    margin-bottom: 100px;
-  }
-}
-
-@media (max-width: 1470px) {
-  .card {
-    width: 24rem;
-    margin-top: 200px;
-  }
-  .cardHeader {
-    height: 40px;
-    padding: 8px;
-  }
-  .cardContent {
-    padding: 15px 20px 20px !important;
   }
   .footer {
     margin-bottom: 200px;
@@ -104,7 +62,7 @@
 @media (max-width: 1280px) {
   .card {
     width: 21rem;
-    margin-top: 150px;
+    margin-top: 250px;
   }
   .cardHeader {
     height: 35px;

@@ -2,6 +2,30 @@ import { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import styles from './charts.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+
+const sizes = {
+1024 : {
+ size : 10,
+ tooltipBodySize :8,
+ tooltipFontSize : 8,
+ ticksSize :   8
+},
+1280 : {
+ size :  10,
+ tooltipBodySize :8,
+ tooltipFontSize : 8,
+ ticksSize :  9.1
+},
+1281 : {
+  size :  12,
+  tooltipBodySize :8,
+  tooltipFontSize : 8,
+  ticksSize :  9.8
+ }
+}
+
+
 
 const getCssVar = (el, name, fallback) => {
   if (!el) return fallback
@@ -125,6 +149,9 @@ const getChartOptions = (label, type, canvas) => {
 export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend}) => {
   const canvasRef = useRef(null)
 
+  const { width } = useWindowDimensions()
+  const chartSize = width >= 1280 ? sizes[1280] :  sizes[1024]
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -162,6 +189,14 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
         aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: chartSize.tooltipBodySize,
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart
@@ -202,7 +237,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
             offset: 0,
             rotation: rotation || 0,
             font: {
-              size: 14
+              size: chartSize.size
             },
             formatter: (value, context) => {
               const datasetIndex = context.datasetIndex
@@ -221,8 +256,18 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
           }
         },
         scales: {
+          x: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize, 
+              },
+            },
+          },
           y: {
             ticks: {
+              font: {
+                size: chartSize.ticksSize,
+              },
               callback: function (value) {
                 if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`
                 if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`
@@ -232,6 +277,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
             }
           }
         }
+   
       },
       plugins: [ChartDataLabels]
     })
@@ -256,6 +302,8 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
+  const { width } = useWindowDimensions()
+  const chartSize = width >= 1280 ? sizes[1280] :  sizes[1024]
 
   useEffect(() => {
     if (chartInstanceRef.current) {
@@ -296,6 +344,14 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
           }
         },
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: chartSize.tooltipBodySize,
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart
@@ -332,9 +388,9 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
             },
             offset: 0,
             font: {
-              size: 14
+              size: chartSize.size
             },
-            formatter: (value, context) => {
+            formatter: (value, _) => {
               const roundedValue = Math.ceil(value)
 
               return `${roundedValue.toLocaleString()}`
@@ -343,8 +399,26 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
           legend: {
             display: false
           }
-        }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize, 
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize,
+              },
+            },
+          },
+        },
+        
       },
+      
       plugins: [ChartDataLabels]
     })
 
@@ -368,6 +442,8 @@ return (
 
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   const canvasRef = useRef(null)
+  const { width } = useWindowDimensions()
+  const chartSize = width > 1280 ?  sizes[1281]  : width > 1024  ?  sizes[1280] :  sizes[1024]
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -399,6 +475,14 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
         aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: chartSize.tooltipBodySize,
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart
@@ -439,17 +523,36 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
             offset: 0,
             rotation: -90,
             font: {
-              size: 14
+              size: chartSize.size
             },
             formatter: value => value.toLocaleString()
           },
           legend: {
             display: false
           }
-        }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize, 
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize,
+              },
+            },
+          },
+        },
+    
       },
       plugins: [ChartDataLabels]
     })
+
+
 
     return () => {
       chart.destroy()
@@ -470,6 +573,8 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
 
 export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) => {
   const canvasRef = useRef(null)
+  const { width } = useWindowDimensions()
+  const chartSize = width > 1280 ?  sizes[1281]  : width > 1024  ?  sizes[1280] :  sizes[1024]
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -499,6 +604,14 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
         aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: chartSize.tooltipBodySize,
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart
@@ -537,7 +650,7 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
             },
             offset: 0,
             font: {
-              size: 14
+              size: chartSize.size, 
             },
             formatter: (value, context) => {
               const roundedValue = Math.ceil(value)
@@ -548,7 +661,23 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
           legend: {
             display: false
           }
-        }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize, 
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize,
+              },
+            },
+          },
+        },
       },
       plugins: [ChartDataLabels]
     })
@@ -606,6 +735,8 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
 export const LineChart = ({ id, labels, data, label }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
+  const { width } = useWindowDimensions()
+  const chartSize = width > 1280 ?  sizes[1281]  : width > 1024  ?  sizes[1280] :  sizes[1024]
 
   useEffect(() => {
     if (chartInstanceRef.current) {
@@ -645,10 +776,30 @@ export const LineChart = ({ id, labels, data, label }) => {
         maintainAspectRatio: false,
         scales: {
           x: {
-            max: Math.max(...data) * 1.1
-          }
+            max: Math.max(...data) * 1.1,
+            ticks: {
+              font: {
+                size: chartSize.ticksSize, 
+              },
+            },
+          },
+          y: {
+            ticks: {
+              font: {
+                size: chartSize.ticksSize,
+              },
+            },
+          },
         },
         plugins: {
+          tooltip: {
+            bodyFont: {
+              size: chartSize.tooltipBodySize,
+            },
+            titleFont: {
+              size: chartSize.tooltipFontSize, 
+            },
+          },
           datalabels: {
             anchor: context => {
               const chart = context.chart

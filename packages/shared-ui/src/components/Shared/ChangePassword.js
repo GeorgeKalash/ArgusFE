@@ -17,6 +17,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { AccountRepository } from '@argus/repositories/src/repositories/AccountRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
+import inputs from '../Inputs/Inputs.module.css'
 
 const ChangePassword = ({
   _labels,
@@ -119,33 +120,23 @@ const ChangePassword = ({
           <Grid item xs={12}>
             <CustomTextField
               name='password'
-              size='small'
               fullWidth
               label={_labels.password}
               type={showPassword ? 'text' : 'password'}
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && formik.errors.password}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <IconButton edge='start'>
-                      <img src= {require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}/>
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={() => setShowPassword(!showPassword)}
-                      onMouseDown={e => e.preventDefault()}
-                    >
-                      <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
+              startIcons={ [ <div  className={inputs.iconButton}   >
+              <img  className={inputs.iconImage} src= {require('@argus/shared-ui/src/components/images/password/forgotPWD1.png').default.src}/>
+              </div>]}
+              endIcons={ [ 
+                <IconButton className={inputs.iconButton} 
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={e => e.preventDefault()}
+              >
+                <Icon  className={inputs.icon}  icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+              </IconButton>
+              ]}  
             />
           </Grid>
         </Grid>

@@ -1,4 +1,4 @@
-import { Autocomplete, IconButton, CircularProgress, Paper, TextField } from '@mui/material'
+import { Autocomplete, IconButton, CircularProgress, Paper, TextField, InputAdornment } from '@mui/material'
 import { Box } from '@mui/material'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import React, { useContext, useEffect, useRef, useState } from 'react'
@@ -240,9 +240,8 @@ const CustomComboBox = ({
         const mergedEndAdornment =
           !_readOnly && React.isValidElement(defaultEndAdornment)
             ? React.cloneElement(defaultEndAdornment, {
-                className: `${inputs.inputAdornment}`,
                 children: (
-                  <>
+                  <InputAdornment position='end' className={inputs.inputAdornment}>
                     {hover &&
                       (_disabled ? null : isLoading ? (
                         <IconButton    className={inputs.iconButton}>
@@ -270,7 +269,7 @@ const CustomComboBox = ({
                       <ClearIcon className={inputs.icon} />
                     </IconButton>}
                     {childrenWithoutClear}
-                  </>
+                  </InputAdornment>
                 )
               })
             : _readOnly

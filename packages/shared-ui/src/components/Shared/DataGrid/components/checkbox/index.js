@@ -1,4 +1,5 @@
 import { Checkbox } from '@mui/material'
+import styles from './checkbox.module.css'
 
 function CheckBoxComponent({ value, column: { field, props }, updateRow, isEditMode, data }) {
   const handleCheckboxChange = event => {
@@ -11,6 +12,7 @@ function CheckBoxComponent({ value, column: { field, props }, updateRow, isEditM
 
   return (
     <Checkbox
+      className={styles.checkbox}
       variant='rounded'
       name={field}
       autoFocus={isEditMode}

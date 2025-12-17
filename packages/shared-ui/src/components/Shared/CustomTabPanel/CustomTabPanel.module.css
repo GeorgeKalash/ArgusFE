@@ -2,13 +2,13 @@
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  position: relative;
-  overflow: auto;
-  padding: 0px !important;
+  min-height: 0 !important;
 }
 
-.tabPanel :global(.MuiDialogContent-root) {
-  padding: 10px !important;
+.active {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 .hidden {

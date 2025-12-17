@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
 import { CircularData } from '@argus/shared-ui/src/components/Shared/dashboardApplets/circularData'
@@ -8,196 +7,14 @@ import ProgressBarComponent from '@argus/shared-ui/src/components/Shared/dashboa
 import HorizontalTimeline from '@argus/shared-ui/src/components/Shared/dashboardApplets/HorizontalTimeline'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-
-const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css?family=Open+Sans:700,600,300');
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  body,
-  html {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(to bottom left, #231F20, #383838);
-    background-size: 125% 125%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-`
-
-const Frame = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-`
-
-const Card = styled.div`
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  background: #383838;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-`
-
-const FooterCard = styled.div`
-  flex: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px;
-`
-
-const BodyCard = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-  overflow: hidden;
-`
-
-const Profile = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 0 0 400px;
-  padding: 20px;
-  background: #231f20;
-  border-radius: 15px;
-`
-
-const Avatar = styled.div`
-  position: relative;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  cursor: pointer;
-  background: #444;
-  margin-bottom: 30px;
-  .circle {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid;
-    transition: all 1.5s ease-in-out;
-  }
-  .circle:first-child {
-    left: -8px;
-    top: -8px;
-    width: 316px;
-    height: 316px;
-    border-color: #93c6e0 #93c6e0 #93c6e0 transparent;
-  }
-  .circle:nth-child(2) {
-    left: -12px;
-    top: -12px;
-    width: 328px;
-    height: 328px;
-    border-color: #93c6e0 transparent #93c6e0 #93c6e0;
-  }
-  &:hover .circle:first-child {
-    transform: rotate(360deg);
-  }
-  &:hover .circle:nth-child(2) {
-    transform: rotate(-360deg);
-  }
-  .pic {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-    background-size: cover;
-    background-position: center;
-  }
-  .pic:after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-    background: radial-gradient(transparent, 90%, #1e3a5f);
-  }
-`
-
-const Span = styled.span`
-  display: block;
-  text-transform: capitalize;
-  text-align: center;
-  color: #f0f0f0;
-  &.big {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 5px;
-  }
-  &.small {
-    font-size: 18px;
-    font-weight: 300;
-  }
-`
-
-const SideData = styled.div`
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px 10px;
-  background: #231f20;
-  border-radius: 15px;
-  margin: 0 10px;
-  overflow-y: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`
-
-const DataHalf = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0px 5px;
-  background: #444;
-  border-radius: 15px;
-  border-top: 2px solid #93c6e0;
-  flex: 0;
-  margin: 5px;
-`
-
-const CompositeBarContainer = styled.div`
-  flex: 1;
-  display: flex;
-  padding: 10px;
-  canvas {
-    width: 100% !important;
-    height: 250px !important;
-  }
-`
-
-const ProgressBarsWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  justify-content: space-between !important;
-  align-items: center;
-`
+import styles from './SalesPersonDashboardStyles.module.css'
 
 const ProfileAvatar = ({ imageUrl }) => (
-  <Avatar>
-    <div className='circle'></div>
-    <div className='circle'></div>
-    <div className='pic' style={{ backgroundImage: `url(${imageUrl})` }}></div>
-  </Avatar>
+  <div className={styles.avatar}>
+    <div className={styles.circle}></div>
+    <div className={styles.circle}></div>
+    <div className={styles.pic} style={{ backgroundImage: `url(${imageUrl})` }} />
+  </div>
 )
 
 const SalesPersonDashboard = () => {
@@ -222,7 +39,11 @@ const SalesPersonDashboard = () => {
     teamRace: [],
     aging: []
   })
-  const [progress, setProgress] = useState({ pctToTarget: 0, teamPctToTarget: 0 })
+
+  const [progress, setProgress] = useState({
+    pctToTarget: 0,
+    teamPctToTarget: 0
+  })
 
   useEffect(() => {
     getDataResult()
@@ -230,7 +51,10 @@ const SalesPersonDashboard = () => {
 
   useEffect(() => {
     if (data.pctToTarget > 0 || data.teamPctToTarget > 0) {
-      setProgress({ pctToTarget: data.pctToTarget, teamPctToTarget: data.teamPctToTarget })
+      setProgress({
+        pctToTarget: data.pctToTarget,
+        teamPctToTarget: data.teamPctToTarget
+      })
     }
   }, [data.pctToTarget, data.teamPctToTarget])
 
@@ -250,7 +74,7 @@ const SalesPersonDashboard = () => {
         distanceToNextCommissionLeg: res.record?.distanceToNextCommissionLeg || 0,
         commissionAcquired: res.record?.commissionAcquired || 0,
         receivables: res.record?.receivables || 0,
-        name: res.record?.salesPerson.name || '',
+        name: res.record?.salesPerson?.name || '',
         teamRace: res.record?.teamRace || [],
         aging: res.record?.aging || []
       })
@@ -269,71 +93,74 @@ const SalesPersonDashboard = () => {
   ]
 
   return (
-    <>
-      <GlobalStyle />
-      <Frame>
-        <Card>
-          <BodyCard>
-            <SideData>
-              <DataHalf>
-                <CircularData data={data} list={list1} />
-              </DataHalf>
-              <DataHalf>
-                <CompositeBarContainer>
-                  <CompositeBarChart
-                    labels={Object.keys(data.aging)}
-                    data={Object.values(data.aging)}
-                    label={labels.aging}
-                  />
-                </CompositeBarContainer>
-              </DataHalf>
-            </SideData>
-            <SideData>
-              <Profile>
-                <ProfileAvatar imageUrl={data.imageUrl} />
-                <Span className='big'>{data.name}</Span>
-              </Profile>
-              <DataHalf>
-                <CircularData data={data} list={list2} />
-              </DataHalf>
-            </SideData>
-            <SideData>
-              <DataHalf>
-                <CompositeBarContainer>
-                  <CompositeBarChart
-                    labels={data.myYearlyGrowthInUnitsSoldList.map(item => item.year)}
-                    data={data.myYearlyGrowthInUnitsSoldList.map(item => item.qty)}
-                    label={labels.unitsSold}
-                  />
-                </CompositeBarContainer>
-              </DataHalf>
-              <DataHalf>
-                <CompositeBarContainer>
-                  <CompositeBarChart
-                    labels={data.myYearlyGrowthInClientsAcquiredList.map(item => item.year)}
-                    data={data.myYearlyGrowthInClientsAcquiredList.map(item => item.qty)}
-                    label={labels.clientsAcquired}
-                  />
-                </CompositeBarContainer>
-              </DataHalf>
-              <DataHalf>
-                <ProgressBarsWrapper>
-                  <ProgressBarComponent label={labels.percentageToTarget} percentage={progress.pctToTarget} />
-                  <ProgressBarComponent label={labels.teamPercentageToTarget} percentage={progress.teamPctToTarget} />
-                </ProgressBarsWrapper>
-              </DataHalf>
-            </SideData>
-          </BodyCard>
-          <FooterCard>
-            <SideData>
-              <DataHalf>
-                <HorizontalTimeline data={data.teamRace} label={labels.teamRace} />
-              </DataHalf>
-            </SideData>
-          </FooterCard>
-        </Card>
-      </Frame>
-    </>
+    <div className={styles.frame}>
+      <div className={styles.card}>
+        <div className={styles.bodyCard}>
+          <div className={styles.sideData}>
+            <div className={styles.dataHalf}>
+              <CircularData data={data} list={list1} />
+            </div>
+            <div className={styles.dataHalf}>
+              <div className={styles.compositeBarContainer}>
+                <CompositeBarChart
+                  labels={Object.keys(data.aging)}
+                  data={Object.values(data.aging)}
+                  label={labels.aging}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.sideData}>
+            <div className={styles.profile}>
+              <ProfileAvatar imageUrl={data.imageUrl} />
+              <span className={`${styles.span} ${styles.big}`}>{data.name}</span>
+            </div>
+
+            <div className={styles.dataHalf}>
+              <CircularData data={data} list={list2} />
+            </div>
+          </div>
+
+          <div className={styles.sideData}>
+            <div className={styles.dataHalf}>
+              <div className={styles.compositeBarContainer}>
+                <CompositeBarChart
+                  labels={data.myYearlyGrowthInUnitsSoldList.map(i => i.year)}
+                  data={data.myYearlyGrowthInUnitsSoldList.map(i => i.qty)}
+                  label={labels.unitsSold}
+                />
+              </div>
+            </div>
+
+            <div className={styles.dataHalf}>
+              <div className={styles.compositeBarContainer}>
+                <CompositeBarChart
+                  labels={data.myYearlyGrowthInClientsAcquiredList.map(i => i.year)}
+                  data={data.myYearlyGrowthInClientsAcquiredList.map(i => i.qty)}
+                  label={labels.clientsAcquired}
+                />
+              </div>
+            </div>
+
+            <div className={styles.dataHalf}>
+              <div className={styles.progressBarsWrapper}>
+                <ProgressBarComponent label={labels.percentageToTarget} percentage={progress.pctToTarget} />
+                <ProgressBarComponent label={labels.teamPercentageToTarget} percentage={progress.teamPctToTarget} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.footerCard}>
+          <div className={styles.sideData}>
+            <div className={styles.dataHalf}>
+              <HorizontalTimeline data={data.teamRace} label={labels.teamRace} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
