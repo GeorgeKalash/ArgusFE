@@ -1,0 +1,70 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: var(--dialog-height, 120px);
+  z-index: 2;
+  background-color: #fff;
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+  padding: 24px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.actions {
+  flex-shrink: 0;
+  padding: 8px 24px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dialog {
+  z-index: 2;
+}
+
+.dialogText {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 1600px) {
+  .content {
+    padding: 14px;
+    font-size: 0.8rem;
+  }
+
+  .actions {
+    padding: 8px 8px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .content {
+    padding: 12px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    height: auto;
+    min-height: 100px;
+  }
+
+  .content {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .actions {
+    padding: 8px 12px;
+  }
+
+  .dialogText {
+    font-size: 0.85rem;
+  }
+}
