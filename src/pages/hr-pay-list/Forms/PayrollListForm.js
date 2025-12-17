@@ -345,8 +345,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 parameters={
                   formik.values.fiscalYear &&
                   formik.values.salaryType &&
-                  formik.values.status &&
-                  `_year=${formik.values.fiscalYear}&_salaryType=${formik.values.salaryType}&_status=${formik.values.status}`
+                  `_year=${formik.values.fiscalYear}&_salaryType=${formik.values.salaryType}&_status=0`
                 }
                 name='periodId'
                 label={labels.period}
