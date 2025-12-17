@@ -89,6 +89,23 @@ const Navigation = props => {
     return () => window.removeEventListener('resize', handleResize)
   }, [navCollapsed])
 
+  useEffect(() => {
+  const handleAutoCollapse = () => {
+    const width = window.innerWidth
+    if (width <= 1024) {
+      if (!settings.navCollapsed) {
+        saveSettings({ ...settings, navCollapsed: true })
+      }
+    }
+  }
+
+  handleAutoCollapse()
+  window.addEventListener('resize', handleAutoCollapse)
+
+  return () => window.removeEventListener('resize', handleAutoCollapse)
+}, [])
+
+
   const MobileDrawerProps = {
     open: navVisible,
     onOpen: () => setNavVisible(true),
@@ -362,8 +379,8 @@ const Navigation = props => {
             }}
           />
           <Tooltip title={platformLabels.collapse}>
-            <Box onClick={onCollapse} className={styles.box} sx={{ display: navCollapsed ? 'none' : 'flex' }}>
-              <Remove sx={{ fontSize: 20 }} />
+            <Box onClick={onCollapse} className={styles.box}>
+              <Remove />
             </Box>
           </Tooltip>
           <Dropdown

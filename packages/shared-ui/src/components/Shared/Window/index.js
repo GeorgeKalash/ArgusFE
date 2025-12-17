@@ -28,7 +28,17 @@ import styles from './Window.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 function LoadingOverlay() {
-  return <div className={styles.loadingOverlay} />
+  // ✅ Inline inset overrides any leftover top/bottom in CSS
+  return (
+    <Box
+      className={styles.loadingOverlay}
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 9999
+      }}
+    />
+  )
 }
 
 const Window = React.memo(
@@ -82,7 +92,7 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+    const { width: screenWidth } = useWindowDimensions()
 
     const menuWidth =
       screenWidth <= 768 ? 180 :
@@ -134,10 +144,8 @@ const Window = React.memo(
           expanded,
           position: dragPos
         })
-
         setExpanded(true)
         setDragPos({ x: 0, y: 0 })
-
       } else {
         setExpanded(false)
         setDragPos(restoreState.position)
@@ -152,11 +160,9 @@ const Window = React.memo(
           expanded,
           position: dragPos
         })
-
         setExpanded(false)
         setMinimized(true)
         setDragPos({ x: 0, y: 0 })
-
       } else {
         setMinimized(false)
         setExpanded(restoreState.expanded)
@@ -177,23 +183,15 @@ const Window = React.memo(
         >
           <Draggable
             handle="#draggable-dialog-title"
-            cancel={'[class*="MuiDialogContent-root"]'}
+            cancel=".no-drag"
             bounds="parent"
             position={minimized || expanded ? { x: 0, y: 0 } : dragPos}
-            disabled={minimized || expanded}
+            disabled={minimized || expanded || !draggable}
             onStop={(_, data) => {
-              if (!expanded && !minimized) {
-                setDragPos({ x: data.x, y: data.y })
-              }
+              if (!expanded && !minimized) setDragPos({ x: data.x, y: data.y })
             }}
           >
-            <Box
-              sx={{
-                position: 'relative',
-                pointerEvents: 'all',
-                mb: minimized ? '5px' : 0
-              }}
-            >
+            <Box sx={{ position: 'relative', pointerEvents: 'all', mb: minimized ? '5px' : 0 }}>
               <Paper
                 ref={paperRef}
                 tabIndex={-1}
@@ -213,39 +211,31 @@ const Window = React.memo(
                   </Typography>
 
                   <Box>
-                    <IconButton onClick={handleMinimizeToggle} className={styles.iconButton}>
+                    <IconButton className={`${styles.iconButton} no-drag`} onClick={handleMinimizeToggle}>
                       <MinimizeIcon />
                     </IconButton>
 
                     {refresh && !minimized && (
-                      <IconButton onClick={props?.onRefresh} className={styles.iconButton}>
+                      <IconButton className={`${styles.iconButton} no-drag`} onClick={props?.onRefresh}>
                         <RefreshIcon />
                       </IconButton>
                     )}
 
                     {expandable && !minimized && (
-                      <IconButton onClick={handleExpandToggle} className={styles.iconButton}>
+                      <IconButton className={`${styles.iconButton} no-drag`} onClick={handleExpandToggle}>
                         <OpenInFullIcon />
                       </IconButton>
                     )}
 
                     {closable && (
-                      <IconButton onClick={onClose} className={styles.iconButton}>
+                      <IconButton className={`${styles.iconButton} no-drag`} onClick={onClose}>
                         <ClearIcon />
                       </IconButton>
                     )}
                   </Box>
                 </DialogTitle>
 
-                <Box
-                  sx={{
-                    flex: 1,
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 0
-                  }}
-                >
+                <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   {tabs && (
                     <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
                       {tabs.map((tab, i) => (
@@ -254,41 +244,50 @@ const Window = React.memo(
                     </Tabs>
                   )}
 
-                  {!showOverlay && isLoading && <LoadingOverlay />}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minHeight: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    {!showOverlay && isLoading && <LoadingOverlay />}
 
-                  {!controlled ? (
-                    <>
+                    {!controlled ? (
                       <Box
                         sx={{
                           flex: 1,
+                          minHeight: 0,
                           display: 'flex',
                           flexDirection: 'column',
-                          minHeight: 0,
                           overflow: 'hidden'
                         }}
                       >
                         {children}
                       </Box>
+                    ) : (
+                      React.Children.map(children, child =>
+                        React.cloneElement(child, {
+                          fill: true,
+                          expanded
+                        })
+                      )
+                    )}
+                  </Box>
 
-                      {windowToolbarVisible && (
-                        <WindowToolbar
-                          onSave={onSave}
-                          onClear={onClear}
-                          onInfo={onInfo}
-                          onApply={onApply}
-                          disabledSubmit={disabledSubmit}
-                          disabledInfo={disabledInfo}
-                          disabledApply={disabledApply}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    React.Children.map(children, child =>
-                      React.cloneElement(child, {
-                        fill: true,
-                        expanded
-                      })
-                    )
+                  {windowToolbarVisible && !controlled && (
+                    <WindowToolbar
+                      onSave={onSave}
+                      onClear={onClear}
+                      onInfo={onInfo}
+                      onApply={onApply}
+                      disabledSubmit={disabledSubmit}
+                      disabledInfo={disabledInfo}
+                      disabledApply={disabledApply}
+                    />
                   )}
                 </Box>
               </Paper>

@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -15,7 +15,6 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
@@ -26,6 +25,7 @@ import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/Mu
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -419,17 +419,15 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
+                  <CustomButton
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === getDefaultsData()?.currencyId}
-                  >
-                    <img 
-                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                      alt={platformLabels.add}
-                    />
-                  </Button>
+                    disabled={
+                      !formik.values.currencyId ||
+                      formik.values.currencyId === getDefaultsData()?.currencyId
+                    }
+                    tooltipText={platformLabels.add}
+                    image={'popup.png'}
+                  />
                 </Grid>
               </Grid>
             </Grid>

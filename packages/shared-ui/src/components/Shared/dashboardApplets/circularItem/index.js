@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './CircularItem.module.css'
 
 export const CircularItem = ({ number, name, isPercentage = false }) => (
@@ -9,6 +8,7 @@ export const CircularItem = ({ number, name, isPercentage = false }) => (
         {isPercentage ? '%' : ''}
       </div>
     </div>
+
     <span className={styles.span}>{name}</span>
   </div>
 )

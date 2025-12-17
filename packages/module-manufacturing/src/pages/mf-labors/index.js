@@ -1,27 +1,27 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import LaborsForm from './forms/LaborsForm'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 
 const Labor = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const { stack } = useWindow()
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
       extension: ManufacturingRepository.Labor.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=&_params=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -29,44 +29,53 @@ const Labor = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    paginationParameters,
+    labels,
+    filterBy,
     refetch,
-    access
+    access,
+    paginationParameters,
+    invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.Labor.page,
-    datasetId: ResourceIds.Labor
+    datasetId: ResourceIds.Labor,
+    filter: {
+      filterFn: fetchWithFilter
+    }
   })
-
-  const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.Labor.page
-  })
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters.qry)
+      return await getRequest({
+        extension: ManufacturingRepository.Labor.snapshot,
+        parameters: `_filter=${filters.qry}&_workCenterId=0`
+      })
+    else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+  }
 
   const columns = [
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'workCenterName',
-      headerName: _labels.workCenter,
+      headerName: labels.workCenter,
       flex: 1
     },
     {
       field: 'operationName',
-      headerName: _labels.operation,
+      headerName: labels.operation,
       flex: 1
     },
     {
       field: 'userName',
-      headerName: _labels.user,
+      headerName: labels.user,
       flex: 1
     }
   ]
@@ -83,13 +92,12 @@ const Labor = () => {
     stack({
       Component: LaborsForm,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       height: 500,
-
-      title: _labels.labor
+      title: labels.labor
     })
   }
 
@@ -99,22 +107,28 @@ const Labor = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} previewReport={ResourceIds.Labor} />
+        <RPBGridToolbar
+          onAdd={add}
+          maxAccess={access}
+          reportName={'MFLBR'}
+          filterBy={filterBy}
+          previewReport={ResourceIds.Labor}
+        />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

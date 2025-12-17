@@ -18,6 +18,24 @@ const Drivers = () => {
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
+  const {
+    query: { data },
+    labels,
+    paginationParameters,
+    refetch,
+    access,
+    invalidate,
+    search,
+    clear
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: DeliveryRepository.Driver.page,
+    datasetId: ResourceIds.Drivers,
+    search: {
+      searchFn: fetchWithSearch
+    }
+  })
+
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
@@ -29,28 +47,24 @@ const Drivers = () => {
     return { ...response, _startAt: _startAt }
   }
 
-  const {
-    query: { data },
-    labels: _labels,
-    paginationParameters,
-    refetch,
-    access,
-    invalidate
-  } = useResourceQuery({
-    queryFn: fetchGridData,
-    endpointId: DeliveryRepository.Driver.page,
-    datasetId: ResourceIds.Drivers
-  })
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: DeliveryRepository.Driver.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'cellPhone',
-      headerName: _labels.cellPhone,
+      headerName: labels.cellPhone,
       flex: 1
     }
   ]
@@ -67,13 +81,13 @@ const Drivers = () => {
     stack({
       Component: DriversForm,
       props: {
-        labels: _labels,
+        labels: labels,
         recordId,
         maxAccess: access
       },
       width: 600,
       height: 350,
-      title: _labels.drivers
+      title: labels.drivers
     })
   }
 
@@ -89,16 +103,23 @@ const Drivers = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
+          name='driverTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

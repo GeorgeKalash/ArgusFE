@@ -390,7 +390,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
             font: {
               size: chartSize.size
             },
-            formatter: (value, context) => {
+            formatter: (value, _) => {
               const roundedValue = Math.ceil(value)
 
               return `${roundedValue.toLocaleString()}`
