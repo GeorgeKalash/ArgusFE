@@ -141,11 +141,11 @@ export default function CastingForm({ store, setStore, access, labels }) {
   useEffect(() => {
     if (!recal || !lastEdited) return
 
-    const netInput = Number(formik.values.inputWgt || 0) + Number(formik.values.rmWgt || 0)
+    const netInput = Number(formik?.values?.inputWgt || 0) + Number(formik?.values?.rmWgt || 0)
 
-    const output = Number(formik.values.outputWgt || 0)
-    const disassembly = Number(formik.values.lossDisassembly || 0)
-    let casting = Number(formik.values.lossCasting || 0)
+    const output = Number(formik?.values?.outputWgt || 0)
+    const disassembly = Number(formik?.values?.lossDisassembly || 0)
+    let casting = Number(formik?.values?.lossCasting || 0)
 
     let totalLoss = 0
 
