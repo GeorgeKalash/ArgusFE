@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useForm } from 'src/hooks/form'
+import * as yup from 'yup'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { DataGrid } from 'src/components/Shared/DataGrid'
@@ -14,6 +15,7 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { DataSets } from 'src/resources/DataSets'
+import { createConditionalSchema } from 'src/lib/validation'
 
 const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -23,14 +25,26 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
     endpointId: FoundryRepository.MetalSettings.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    puritySource: row => row?.puritySource
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     initialValues: { recordId, metalRef, items: [] },
+    validationSchema: yup.object({
+      items: yup.array().of(schema)
+    }),
+    conditionSchema: ['items'],
     onSubmit: async values => {
       const payload = {
         metalId: recordId,
         items: values.items
           .filter(item => item?.itemId)
+          .filter(row => Object.values(requiredFields).every(fn => fn(row)))
           .map((row, index) => ({
             ...row,
             metalId: recordId,
