@@ -3,17 +3,18 @@ import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
+import { useWindow } from 'src/windows'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
-import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import DesignerForm from './Forms/DesignerForm'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import MetalSmeltingDTDForm from './Forms/MetalSmeltingDTDForm'
 
-const Designer = () => {
+const MetalSmeltingDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +23,8 @@ const Designer = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Designer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      extension: FoundryRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -32,40 +33,27 @@ const Designer = () => {
   const {
     query: { data },
     labels,
-    paginationParameters,
-    search,
-    clear,
+    invalidate,
     refetch,
     access,
-    invalidate
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Designer.page,
-    datasetId: ResourceIds.Designer,
-    search: {
-      searchFn: fetchWithSearch
-    }
+    endpointId: FoundryRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.MetalSmeltingDTD
   })
-
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: ProductModelingRepository.Designer.snapshot,
-      parameters: `_filter=${qry}`
-    })
-
-    return response
-  }
 
   const columns = [
     {
-      field: 'reference',
-      headerName: labels.reference,
+      field: 'dtName',
+      headerName: labels.documentType,
       flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
-      flex: 1
+      field: 'smeltingMaxAllowedVariation',
+      headerName: labels.smeltingMaxAllowedVariation,
+      flex: 1,
+      type: 'number'
     }
   ]
 
@@ -73,50 +61,50 @@ const Designer = () => {
     openForm()
   }
 
-  const edit = obj => {
-    openForm(obj?.recordId)
-  }
-
-  function openForm(recordId) {
-    stack({
-      Component: DesignerForm,
-      props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 300,
-      title: labels.designer
-    })
-  }
-
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Designer.del,
+      extension: FoundryRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
     toast.success(platformLabels.Deleted)
   }
 
+  function openForm(record) {
+    stack({
+      Component: MetalSmeltingDTDForm,
+      props: {
+        labels,
+        recordId: record?.dtId,
+        maxAccess: access
+      },
+      width: 600,
+      height: 300,
+      title: labels.MetalSmeltingDTD
+    })
+  }
+
+  const edit = obj => {
+    openForm(obj)
+  }
+
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <GridToolbar onAdd={add} maxAccess={access} />
       </Fixed>
       <Grow>
         <Table
           name='table'
           columns={columns}
           gridData={data}
-          rowId={['recordId']}
+          rowId={['dtId']}
           onEdit={edit}
           onDelete={del}
           pageSize={50}
+          refetch={refetch}
           paginationType='api'
           paginationParameters={paginationParameters}
-          refetch={refetch}
           maxAccess={access}
         />
       </Grow>
@@ -124,4 +112,4 @@ const Designer = () => {
   )
 }
 
-export default Designer
+export default MetalSmeltingDTD

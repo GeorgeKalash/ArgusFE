@@ -1,7 +1,6 @@
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from 'src/components/Shared/Table'
-import GridToolbar from 'src/components/Shared/GridToolbar'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
@@ -10,50 +9,62 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useWindow } from 'src/windows'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ProductModelingRepository } from 'src/repositories/ProductModelingRepository'
-import DesignerForm from './Forms/DesignerForm'
+import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
+import { SystemFunction } from 'src/resources/SystemFunction'
+import BatchTransferForm from './Form/BatchTransferForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import GridToolbar from 'src/components/Shared/GridToolbar'
 
-const Designer = () => {
+const BatchTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
-    const { _startAt = 0, _pageSize = 50 } = options
+    const { _startAt = 0, _pageSize = 50, params } = options
 
     const response = await getRequest({
-      extension: ProductModelingRepository.Designer.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
+      extension: ManufacturingRepository.BatchTransfer.page,
+      parameters: `_filter=&_size=30&_startAt=${_startAt}&_sortBy=recordId desc&_pageSize=${_pageSize}&_params=${
+        params || ''
+      }`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: ManufacturingRepository.BatchTransfer.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
-    labels,
-    paginationParameters,
+    labels: labels,
     search,
     clear,
+    paginationParameters,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ProductModelingRepository.Designer.page,
-    datasetId: ResourceIds.Designer,
+    endpointId: ManufacturingRepository.BatchTransfer.page,
+    datasetId: ResourceIds.BatchTransfer,
     search: {
       searchFn: fetchWithSearch
     }
   })
 
-  async function fetchWithSearch({ qry }) {
-    const response = await getRequest({
-      extension: ProductModelingRepository.Designer.snapshot,
-      parameters: `_filter=${qry}`
-    })
+  const { proxyAction } = useDocumentTypeProxy({
+    functionId: SystemFunction.BatchTransfer,
+    action: openForm
+  })
 
-    return response
+  const add = async () => {
+    await proxyAction()
   }
 
   const columns = [
@@ -63,15 +74,37 @@ const Designer = () => {
       flex: 1
     },
     {
-      field: 'name',
-      headerName: labels.name,
+      field: 'date',
+      headerName: labels.date,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'fromWCName',
+      headerName: labels.fromWC,
+      flex: 1
+    },
+    {
+      field: 'toWCName',
+      headerName: labels.toWC,
+      flex: 1
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
+      flex: 1
+    },
+    {
+      field: 'releaseStatus',
+      headerName: labels.releaseStatus,
+      flex: 1
+    },
+    {
+      field: 'statusName',
+      headerName: labels.status,
       flex: 1
     }
   ]
-
-  const add = () => {
-    openForm()
-  }
 
   const edit = obj => {
     openForm(obj?.recordId)
@@ -79,21 +112,21 @@ const Designer = () => {
 
   function openForm(recordId) {
     stack({
-      Component: DesignerForm,
+      Component: BatchTransferForm,
       props: {
         labels,
         recordId,
         maxAccess: access
       },
-      width: 600,
-      height: 300,
-      title: labels.designer
+      width: 1000,
+      height: 750,
+      title: labels.batchTransfer
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ProductModelingRepository.Designer.del,
+      extension: ManufacturingRepository.BatchTransfer.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -103,7 +136,14 @@ const Designer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={search}
+          onSearchClear={clear}
+          labels={labels}
+          inputSearch={true}
+        />
       </Fixed>
       <Grow>
         <Table
@@ -124,4 +164,4 @@ const Designer = () => {
   )
 }
 
-export default Designer
+export default BatchTransfer
