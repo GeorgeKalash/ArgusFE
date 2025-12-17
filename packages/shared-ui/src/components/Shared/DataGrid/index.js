@@ -547,11 +547,15 @@ export function DataGrid({
     async function update({ field, value }) {
       const oldRow = params.data
 
-      const changes = {
-        [field]: value ?? column.colDef?.defaultValue ?? ''
-      }
+      const newValue =
+      value?.toString()?.endsWith('.') && params.colDef.component === 'numberfield'
+        ? Number(value?.toString().split('.')[0])
+        : value
 
-      setCurrentValue(changes)
+       const changes = {[field]: newValue ?? column.colDef?.defaultValue ?? ''}
+      
+      
+       setCurrentValue(changes)
 
       setData(changes, params)
 
