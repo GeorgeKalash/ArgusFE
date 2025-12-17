@@ -898,13 +898,11 @@ const finalColumns =  columnDefs?.map(def => {
           className={`ag-theme-alpine ${styles.agContainer}`}
           ref={gridContainerRef}
           style={{ '--ag-header-bg': bg }}
-          
         >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
-              domLayout='autoHeight'
               columnDefs={finalColumns}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
