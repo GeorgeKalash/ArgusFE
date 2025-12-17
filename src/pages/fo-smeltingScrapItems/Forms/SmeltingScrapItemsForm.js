@@ -13,6 +13,7 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import FormShell from 'src/components/Shared/FormShell'
 import { ResourceIds } from 'src/resources/ResourceIds'
+import { DataSets } from 'src/resources/DataSets'
 
 const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -96,6 +97,20 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
       name: 'itemName',
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.puritySource,
+      name: 'puritySource',
+      props: {
+        datasetId: DataSets.PURITY_SOURCE,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'puritySource' },
+          { from: 'value', to: 'puritySourceName' }
+        ]
       }
     }
   ]
