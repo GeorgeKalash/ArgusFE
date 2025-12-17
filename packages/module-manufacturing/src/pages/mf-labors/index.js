@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import LaborsForm from './forms/LaborsForm'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const Labor = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)

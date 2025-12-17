@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import SalesPersonWindow from './Windows/SalesPersonWindow'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 
 const SalesPerson = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
