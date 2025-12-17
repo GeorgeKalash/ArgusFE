@@ -79,7 +79,7 @@ const MetalSmeltingDTD = () => {
         maxAccess: access
       },
       width: 600,
-      height: 300,
+      height: 350,
       title: labels.MetalSmeltingDTD
     })
   }
