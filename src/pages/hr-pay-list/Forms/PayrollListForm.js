@@ -30,7 +30,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
   const pytvEndDate = parseInt(defaultsData?.list?.find(({ key }) => key === 'pytvEndDate')?.value) || null
 
   const invalidate = useInvalidate({
-    endpointId: PayrollRepository.PayrollFilters.page
+    endpointId: PayrollRepository.Payroll.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -41,7 +41,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
   const { formik } = useForm({
     maxAccess,
-    documentType: { key: 'dtId', value: documentType?.dtId },
+    documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },
     initialValues: {
       recordId: null,
       dtId: null,
@@ -60,17 +60,17 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
       status: 1
     },
     validationSchema: yup.object({
-      date: yup.date().required(),
       periodId: yup.number().required(),
+      date: yup.date().required(),
       payDate: yup.date().required(),
+      startDate: yup.date().required(),
+      endDate: yup.date().required(),
       fiscalYear: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: PayrollRepository.PayrollFilters.set,
-        record: JSON.stringify({
-          ...obj
-        })
+        extension: PayrollRepository.Payroll.set,
+        record: JSON.stringify(obj)
       })
 
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
@@ -87,7 +87,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
   const refetchForm = async recordId => {
     if (recordId) {
       const res = await getRequest({
-        extension: PayrollRepository.PayrollFilters.get,
+        extension: PayrollRepository.Payroll.get,
         parameters: `_recordId=${recordId}`
       })
 
@@ -109,7 +109,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
   const onClose = async () => {
     const res = await postRequest({
-      extension: PayrollRepository.PayrollFilters.close,
+      extension: PayrollRepository.Payroll.close,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
@@ -128,7 +128,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
   const onPost = async () => {
     await postRequest({
-      extension: PayrollRepository.PayrollFilters.post,
+      extension: PayrollRepository.Payroll.post,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
@@ -147,7 +147,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: PayrollRepository.PayrollFilters.unpost,
+      extension: PayrollRepository.Payroll.unpost,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
@@ -166,7 +166,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
 
   const onReopen = async () => {
     const res = await postRequest({
-      extension: PayrollRepository.PayrollFilters.reopen,
+      extension: PayrollRepository.Payroll.reopen,
       record: JSON.stringify({
         ...formik.values,
         date: formatDateToApi(formik.values.date),
@@ -195,19 +195,19 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
       key: 'Approval',
       condition: true,
       onClick: 'onApproval',
-      disabled: !isClosed || isPosted
+      disabled: !isClosed
     },
     {
       key: 'Close',
       condition: !isClosed,
       onClick: onClose,
-      disabled: isPosted || isClosed || !editMode
+      disabled: isClosed || !editMode
     },
     {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed || isPosted
+      disabled: !isClosed
     },
     {
       key: 'Unlocked',
@@ -256,7 +256,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
       editMode={editMode}
       actions={actions}
       functionId={SystemFunction.PayrollList}
-      disabledSubmit={isClosed || isPosted}
+      disabledSubmit={isClosed}
     >
       <VertLayout>
         <Grow>
@@ -302,7 +302,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 label={labels.date}
                 value={formik?.values?.date}
                 maxAccess={maxAccess}
-                readOnly={isClosed || isPosted}
+                readOnly={isClosed}
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('date', null)}
                 error={formik.touched.date && Boolean(formik.errors.date)}
@@ -310,13 +310,13 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SystemRepository.FiscalYears.qry}
+                endpointId={PayrollRepository.FiscalYear.qry}
                 name='fiscalYear'
                 label={labels.fiscalYear}
                 valueField='fiscalYear'
                 displayField='fiscalYear'
                 values={formik.values}
-                readOnly={isClosed || isPosted}
+                readOnly={isClosed}
                 required
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => {
@@ -341,14 +341,20 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SystemRepository.FiscalPeriod.qry}
+                endpointId={PayrollRepository.Period.qry}
+                parameters={
+                  formik.values.fiscalYear &&
+                  formik.values.salaryType &&
+                  formik.values.status &&
+                  `_year=${formik.values.fiscalYear}&_salaryType=${formik.values.salaryType}&_status=${formik.values.status}`
+                }
                 name='periodId'
                 label={labels.period}
                 valueField='periodId'
-                displayField='name'
-                values={formik.values}
-                readOnly={isClosed || isPosted}
                 required
+                displayField='periodName'
+                values={formik.values}
+                readOnly={isClosed}
                 maxAccess={maxAccess}
                 onChange={(_, newValue) => formik.setFieldValue('periodId', newValue?.periodId || null)}
                 error={formik.touched.periodId && Boolean(formik.errors.periodId)}
@@ -361,7 +367,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 label={labels.payDate}
                 value={formik?.values?.payDate}
                 maxAccess={maxAccess}
-                readOnly={isClosed || isPosted}
+                readOnly={isClosed}
                 onChange={(name, value) => {
                   if (value && formik.values.salaryType === 5) {
                     const date = new Date(value)
@@ -375,6 +381,8 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                     formik.setFieldValue('calendarDays', diffDays)
                     formik.setFieldValue('startDate', start)
                     formik.setFieldValue('endDate', end)
+                    formik.setFieldTouched('startDate', false, false)
+                    formik.setFieldTouched('endDate', false, false)
 
                     if (pytvStartDate && pytvEndDate) {
                       const { taStartDate, taEndDate } = calculateTADates(start, end, pytvStartDate, pytvEndDate)
@@ -404,6 +412,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 value={formik?.values?.startDate}
                 maxAccess={maxAccess}
                 readOnly
+                required
                 onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('startDate', null)}
                 error={formik.touched.startDate && Boolean(formik.errors.startDate)}
@@ -417,6 +426,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 onChange={formik.setFieldValue}
                 maxAccess={maxAccess}
                 readOnly
+                required
                 onClear={() => formik.setFieldValue('endDate', null)}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               />
@@ -453,6 +463,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('calendarDays', '')}
                 readOnly
+                maxAccess={maxAccess}
                 error={formik.touched.calendarDays && Boolean(formik.errors.calendarDays)}
               />
             </Grid>
@@ -462,8 +473,9 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
                 label={labels.notes}
                 value={formik.values.notes}
                 maxAccess={maxAccess}
-                readOnly={isClosed || isPosted}
+                readOnly={isClosed}
                 rows={3}
+                maxLength='128'
                 onChange={e => formik.setFieldValue('notes', e.target.value)}
                 onClear={() => formik.setFieldValue('notes', '')}
                 error={formik.touched.notes && Boolean(formik.errors.notes)}

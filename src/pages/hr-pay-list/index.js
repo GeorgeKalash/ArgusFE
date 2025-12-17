@@ -30,7 +30,7 @@ const PayList = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: PayrollRepository.PayrollFilters.page,
+    endpointId: PayrollRepository.Payroll.page,
     datasetId: ResourceIds.PayrollHeader,
     filter: {
       filterFn: fetchWithFilter
@@ -105,7 +105,7 @@ const PayList = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: PayrollRepository.PayrollFilters.page,
+      extension: PayrollRepository.Payroll.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
@@ -115,7 +115,7 @@ const PayList = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: PayrollRepository.PayrollFilters.snapshot,
+        extension: PayrollRepository.Payroll.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -126,8 +126,8 @@ const PayList = () => {
     action: openForm
   })
 
-  const add = () => {
-    proxyAction()
+  const add = async () => {
+    await proxyAction()
   }
 
   const edit = obj => {
@@ -150,7 +150,7 @@ const PayList = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: PayrollRepository.PayrollFilters.del,
+      extension: PayrollRepository.Payroll.del,
       record: JSON.stringify(obj)
     })
     invalidate()

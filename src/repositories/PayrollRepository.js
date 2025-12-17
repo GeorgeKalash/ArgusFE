@@ -1,7 +1,7 @@
 const service = 'PY.asmx/'
 
 export const PayrollRepository = {
-  PayrollFilters: {
+  Payroll: {
     qry: service + 'qryHE',
     page: service + 'pageHE',
     get: service + 'getHE',
@@ -87,5 +87,11 @@ export const PayrollRepository = {
   },
   GeneratePayroll: {
     gen: service + 'genEM'
+  },
+  FiscalYear: {
+    qry: service + 'qryYE'
+  },
+  Period: {
+    qry: service + 'qryPE'
   }
 }
