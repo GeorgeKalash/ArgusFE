@@ -1224,5 +1224,26 @@ export const apiMappings = {
       { key: 'periodId', value: 'PeriodId' },
       { key: 'name', value: 'Name' }
     ]
+  },
+  [ResourceIds.LaborGroups]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.LaborGroup.qry,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
+  },
+  [ResourceIds.Operations]: {
+    type: COMBOBOX,
+    endpoint: ManufacturingRepository.Operation.qry,
+    parameters: `_startAt=0&_pageSize=1000&_workCenterId=0`,
+    valueField: 'recordId',
+    displayField: ['reference', 'name'],
+    columnsInDropDown: [
+      { key: 'reference', value: 'Reference' },
+      { key: 'name', value: 'Name' }
+    ]
   }
 }

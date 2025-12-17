@@ -1,21 +1,21 @@
+import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import Table from '@argus/shared-ui/src/components/Shared/Table'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import PurityAdjForm from './form/PurityAdjForm'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
-import MetalSmeltingForm from './form/MetalSmeltingForm'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 
-export default function MetalSmelting() {
+export default function PurityAdjustment() {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -25,7 +25,7 @@ export default function MetalSmelting() {
 
     const response = await getRequest({
       extension: FoundryRepository.FoundaryTransaction.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.PurityAdjustment}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -42,7 +42,7 @@ export default function MetalSmelting() {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FoundryRepository.FoundaryTransaction.page,
-    datasetId: ResourceIds.MetalSmelting,
+    datasetId: ResourceIds.PurityAdjustment,
     filter: {
       filterFn: fetchWithSearch
     }
@@ -52,7 +52,7 @@ export default function MetalSmelting() {
     if (filters?.qry) {
       return await getRequest({
         extension: FoundryRepository.FoundaryTransaction.snapshot,
-        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.MetalSmelting}`
+        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.PurityAdjustment}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -105,20 +105,20 @@ export default function MetalSmelting() {
 
   function openForm(recordId) {
     stack({
-      Component: MetalSmeltingForm,
+      Component: PurityAdjForm,
       props: {
         labels,
         recordId,
         access
       },
-      width: 1100,
-      height: 730,
-      title: labels.metalSmelting
+      width: 1050,
+      height: 700,
+      title: labels.purityAdjustment
     })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.MetalSmelting,
+    functionId: SystemFunction.PurityAdjustment,
     action: openForm
   })
 

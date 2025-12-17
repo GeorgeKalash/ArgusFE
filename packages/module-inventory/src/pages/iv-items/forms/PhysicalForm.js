@@ -39,7 +39,8 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       volume: 0,
       weight: 0,
       density: 0,
-      metalPurity: ''
+      metalPurity: '',
+      isOpenMetalPurity: false
     },
     enableReinitialize: true,
     validationSchema: yup.object({
@@ -308,6 +309,15 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
               maxAccess={maxAccess}
               onChange={formik.handleChange}
               onClear={() => formik.setFieldValue('metalPurity', '')}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <CustomCheckBox
+              name='isOpenMetalPurity'
+              value={formik.values?.isOpenMetalPurity}
+              onChange={event => formik.setFieldValue('isOpenMetalPurity', event.target.checked)}
+              label={labels.isOpenMetalPurity}
+              maxAccess={maxAccess}
             />
           </Grid>
         </Grid>
