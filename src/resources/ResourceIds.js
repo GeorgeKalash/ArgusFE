@@ -609,6 +609,7 @@ export const ResourceIds = {
   MetalSmeltingDTD: 47104,
   ItemDisposal: 42349,
   GeneratePayroll: 75501,
+  PayrollDetail: 75302,
 
   // GL
   GLSalesInvoice: 51604,

@@ -78,6 +78,15 @@ export const PayrollRepository = {
     set2: service + 'set2PD'
   },
   GeneratePayroll: {
-    gen: service + 'genEM'
+    gen: service + 'genEM',
+    page: service + 'pageEM'
+  },
+  PayrollDetails: {
+    qry: service + 'qryED',
+    set2: service + 'set2ED',
+    get: service + 'getED'
+  },
+  SocialSecurity: {
+    qry: service + 'qryES',
   }
 }
