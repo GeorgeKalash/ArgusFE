@@ -557,6 +557,7 @@ export const ResourceIds = {
   EmployeeChart: 71201,
   Catalogue: 41218,
   MetalSmelting: 47314,
+  PurityAdjustment: 47315,
   MasterDataDTD: 35120,
   AUDefaults: 23104,
   AttendanceSettings: 72108,
@@ -608,6 +609,7 @@ export const ResourceIds = {
   SmeltingScrapItems: 47106,
   MetalSmeltingDTD: 47104,
   ItemDisposal: 42349,
+  PayrollHeader: 75301,
   GeneratePayroll: 75501,
   PayrollDetail: 75302,
 
@@ -654,6 +656,7 @@ export const ResourceIds = {
   GLMaterialAdjustment: 41606,
   GLTransactionItem: 47600,
   GLWorkOrder: 45600,
+  GLPayrollList: 75600,
 
   //MCR
   MCRSalesInvoice: 51607,

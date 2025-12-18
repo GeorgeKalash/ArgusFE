@@ -72,7 +72,7 @@ export default function HRGeneratePayrollForm({ _labels, access }) {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
-                endpointId={PayrollRepository.PayrollFilters.snapshot}
+                endpointId={PayrollRepository.Payroll.snapshot}
                 valueField='reference'
                 displayField='reference'
                 secondDisplayField={false}
