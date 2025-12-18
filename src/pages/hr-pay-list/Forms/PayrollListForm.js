@@ -207,7 +207,7 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
       key: 'Reopen',
       condition: isClosed,
       onClick: onReopen,
-      disabled: !isClosed
+      disabled: !isClosed || isPosted
     },
     {
       key: 'Unlocked',
