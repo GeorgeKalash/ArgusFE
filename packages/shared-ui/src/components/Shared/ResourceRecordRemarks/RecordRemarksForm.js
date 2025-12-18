@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import CustomTextArea from '../../Inputs/CustomTextArea'
-import { Box, Button } from '@mui/material'
+import { Box } from '@mui/material'
 import toast from 'react-hot-toast'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import * as yup from 'yup'
 import { formatDateDefault, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -55,7 +55,7 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
           sx={{
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'left', // Align children vertically to the start
+            alignItems: 'left', 
             fontSize: 14
           }}
           fontSize={14}
@@ -77,9 +77,14 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
           onChange={e => formik.setFieldValue('notes', e.target.value)}
           onClear={() => formik.setFieldValue('notes', '')}
         />
-        <Button disabled={disabled} variant='contained' sx={{ mt: -10 }} onClick={() => formik.handleSubmit()}>
-          {data?.seqNo ? 'Edit' : 'Add'}
-        </Button>
+        <CustomButton
+          label={data?.seqNo ? 'Edit' : 'Add'}
+          disabled={disabled}
+          onClick={() => formik.handleSubmit()}
+          style={{
+            marginTop: -10
+          }}
+        />
       </Box>
     </Box>
   )

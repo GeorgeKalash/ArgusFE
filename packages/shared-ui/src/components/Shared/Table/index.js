@@ -479,6 +479,7 @@ const Table = ({
       refresh: false
     })
   }
+  
   function openDeleteConfirmation(obj) {
     stack({
       Component: StrictConfirmation,

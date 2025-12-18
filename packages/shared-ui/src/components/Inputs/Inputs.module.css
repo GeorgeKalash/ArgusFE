@@ -2,7 +2,6 @@
   width: 100% !important;
   height: 33px !important;
   line-height: 1px !important
-
 }
 
 .fieldLabel {
@@ -15,8 +14,8 @@
 
 .inputLabel {
   font-size: 14px !important;
-
 }
+
 .inputAdornment {
   display: flex
 }
@@ -24,7 +23,6 @@
 .inputBase::placeholder {
   font-size: 14px !important;
 }
-
 
 .iconButton {
   padding: 0px !important;
@@ -54,49 +52,15 @@
   margin-right: 8px
 }
 
-
-/* @media (min-width: 2048px) and (max-width: 2566px) {
-  .outlinedRoot {
-    height: 45px !important;
-  }
-
-  .inputLabel {
-    font-size: 14px !important;
-  }
-
-  .inputLabelShrink {
-    font-size: 16px !important;
-
-  }
-
-  .inputBase {
-    font-size: 15.5px !important ;
-  }
-
-  .inputBase::placeholder {
-    font-size: 14px !important;
-  }
-
-  .iconButton {
-    padding: 0px !important;
-  }
-  .inputAdornment {
-    padding: 7px !important;
-    }
-
-  .icon {
-    font-size: 24px !important;
-    padding: 0px !important;
-  }
-
-
-} */
+.searchRoot .inputBase {
+  padding: 6px 10px !important;
+  font-size: 14px !important;
+}
 
 @media (min-width: 1281px)  {
   .outlinedRoot {
     height: 30px !important;
     padding: 0px !important;
-
   }
 
   .inputLabel {
@@ -141,8 +105,6 @@
     margin-right: 8px;
     margin-top: 5px;
   }
-
-
 
 }
 
@@ -200,6 +162,12 @@
 }
 
 @media (max-width: 1024px) {
+
+ .searchRoot .inputBase {
+    font-size: 12.5px !important;
+    padding: 5px 8px !important;
+  }
+
   .outlinedRoot  {
     height: 26px !important;
   }
@@ -246,7 +214,6 @@
     margin-left: -5px !important;
   }
  
-
   .icon {
     font-size: 15px !important;
    padding: 1px !important; 
@@ -261,6 +228,12 @@
 }
 
 @media (max-width: 768px) {
+
+  .searchRoot .inputBase {
+    font-size: 12px !important;
+    padding: 4px 7px !important;
+  }
+
   .outlinedRoot {
     height: 24px !important;
   }
@@ -283,11 +256,14 @@
   .iconButton {
     padding: 0px !important;
   }
-
-
 }
 
 @media (max-width: 480px) {
+  .searchRoot .inputBase {
+    font-size: 11px !important;
+    padding: 3px 5px !important;
+  }
+
   .outlinedRoot {
     height: 22px !important;
   }
@@ -316,6 +292,11 @@
 }
 
 @media (max-width: 360px) {
+  .searchRoot .inputBase {
+    font-size: 10px !important;
+    padding: 2px 3px !important;
+  }
+
   .outlinedRoot {
     height: 20px !important;
   }
@@ -340,4 +321,32 @@
     font-size: 7px !important;
   }
 
+}
+
+@media (min-width: 1025px) {
+  .searchRoot .inputBase {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .searchRoot .inputBase {
+    font-size: 11.5px !important;
+    padding: 4px 6px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .searchRoot .inputBase {
+    font-size: 10.5px !important;
+    padding: 3px 4px !important;
+  }
+}
+
+@media (max-width: 320px) {
+  .searchRoot .inputBase {
+    font-size: 9.5px !important;
+    padding: 2px 2px !important;
+  }
 }

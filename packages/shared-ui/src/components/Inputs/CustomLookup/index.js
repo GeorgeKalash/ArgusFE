@@ -48,7 +48,13 @@ const CustomLookup = ({
   onFocus = () => {},
   ...props
 }) => {
-  const { _readOnly, _required, _hidden } = checkAccess(fullName, props.maxAccess, required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(
+    fullName,
+    props.maxAccess,
+    required,
+    readOnly,
+    hidden
+  )
 
   const [freeSolo, setFreeSolo] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
@@ -67,62 +73,58 @@ const CustomLookup = ({
     }
 
     document.addEventListener('mousedown', handleBlur)
-
-    return () => {
-      document.removeEventListener('mousedown', handleBlur)
-    }
+    return () => document.removeEventListener('mousedown', handleBlur)
   }, [])
 
   useEffect(() => {
-    if (!firstValue) {
-      setInputValue('')
-    }
+    if (!firstValue) setInputValue('')
   }, [firstValue])
 
-  return _hidden ? (
-    <></>
-  ) : (
+  if (_hidden) return <></>
+
+  return (
     <Grid container spacing={0} className={styles.lookupContainer}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
-           fullWidth
+          fullWidth
           ref={autocompleteRef}
           name={name}
           key={firstValue || null}
           value={firstValue}
-          {...(!firstValue && { inputValue: inputValue })}
+          {...(!firstValue && { inputValue })}
           size={size}
           options={store}
-          filterOptions={options => {
-            if (displayField) {
-              return options.filter(option => option)
-            }
-          }}
-          getOptionLabel={option => {
-            if (typeof valueField == 'object') {
-              const text = valueField
-                .map(header => option[header] && option[header]?.toString())
-                ?.filter(item => item)
-                ?.join(' ')
+          PopperComponent={PopperComponent}
 
+          /* 🔑 THIS IS THE IMPORTANT PART */
+          slotProps={{
+            popper: { className: dropdownStyles.dropdownPopper }
+          }}
+
+          filterOptions={options => (displayField ? options.filter(option => option) : options)}
+          getOptionLabel={option => {
+            if (typeof valueField === 'object') {
+              const text = valueField
+                .map(header => option[header]?.toString())
+                .filter(Boolean)
+                .join(' ')
               return text || firstValue
             }
-
-            return typeof option === 'object' ? `${option[valueField] ? option[valueField] : ''}` : option
+            return typeof option === 'object' ? `${option[valueField] ?? ''}` : option
           }}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             setInputValue(newValue ? newValue[valueField] : '')
-
             onChange(name, newValue)
             setAutoFocus(true)
           }}
-          onHighlightChange={(event, newValue) => {
+          onHighlightChange={(_, newValue) => {
             valueHighlightedOption.current = newValue
           }}
-          PopperComponent={PopperComponent}
           PaperComponent={({ children }) =>
             props.renderOption && (
-              <Paper style={{ minWidth: `${displayFieldWidth * 100}%`, width: 'max-content' }}>{children}</Paper>
+              <Paper style={{ minWidth: `${displayFieldWidth * 100}%`, width: 'max-content' }}>
+                {children}
+              </Paper>
             )
           }
           renderOption={(propsOption, option) => {
@@ -131,35 +133,36 @@ const CustomLookup = ({
                 ...col,
                 grid: col.grid ?? 2
               }))
-
               const totalGrid = columnsWithGrid.reduce((sum, col) => sum + col.grid, 0)
 
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
                     <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
-                      {columnsWithGrid.map((header, i) => {
-                        const widthPercent = `${(header.grid / totalGrid) * 100}%`
-
-                        return (
-                          <Box key={i} className={dropdownStyles.dropdownHeaderCell} style={{ width: widthPercent }}>
-                            {header.value.toUpperCase()}
-                          </Box>
-                        )
-                      })}
+                      {columnsWithGrid.map((header, i) => (
+                        <Box
+                          key={i}
+                          className={dropdownStyles.dropdownHeaderCell}
+                          style={{ width: `${(header.grid / totalGrid) * 100}%` }}
+                        >
+                          {header.value.toUpperCase()}
+                        </Box>
+                      ))}
                     </li>
                   )}
+
                   <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
-
-                      if (header?.type && header?.type === 'date' && displayValue) {
+                      if (header?.type === 'date' && displayValue) {
                         displayValue = formatDateDefault(displayValue)
                       }
-                      const widthPercent = `${(header.grid / totalGrid) * 100}%`
-
                       return (
-                        <Box key={i} className={dropdownStyles.dropdownOptionCell} style={{ width: widthPercent }}>
+                        <Box
+                          key={i}
+                          className={dropdownStyles.dropdownOptionCell}
+                          style={{ width: `${(header.grid / totalGrid) * 100}%` }}
+                        >
                           {displayValue}
                         </Box>
                       )
@@ -167,35 +170,43 @@ const CustomLookup = ({
                   </li>
                 </Box>
               )
-            } else {
-              return (
-                <Box>
-                  {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
-                      {secondDisplayField && (
-                        <Box className={dropdownStyles.dropdownHeaderCellMain}>{valueField.toUpperCase()}</Box>
-                      )}
-                      {secondDisplayField && (
-                        <Box className={dropdownStyles.dropdownHeaderCellSecondary}>{displayField.toUpperCase()}</Box>
-                      )}
-                    </li>
-                  )}
-                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
-                    <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
-                    {secondDisplayField && (<Box className={dropdownStyles.dropdownOptionCellSecondary}>{option[displayField]}</Box>)}
-                  </li>
-                </Box>
-              )
             }
+
+            return (
+              <Box>
+                {propsOption.id.endsWith('-0') && (
+                  <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+                    {secondDisplayField && (
+                      <Box className={dropdownStyles.dropdownHeaderCellMain}>
+                        {valueField.toUpperCase()}
+                      </Box>
+                    )}
+                    {secondDisplayField && (
+                      <Box className={dropdownStyles.dropdownHeaderCellSecondary}>
+                        {displayField.toUpperCase()}
+                      </Box>
+                    )}
+                  </li>
+                )}
+
+                <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                  <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+                  {secondDisplayField && (
+                    <Box className={dropdownStyles.dropdownOptionCellSecondary}>
+                      {option[displayField]}
+                    </Box>
+                  )}
+                </li>
+              </Box>
+            )
           }}
           renderInput={params => (
             <TextField
               {...params}
               fullWidth
-             className={`${secondDisplayField && styles.firstField} ${styles.root}`}
+              className={`${secondDisplayField && styles.firstField} ${styles.root}`}
               onChange={e => {
                 setInputValue(e.target.value)
-
                 if (e.target.value) {
                   onLookup(e.target.value)
                   setFreeSolo(true)
@@ -208,17 +219,16 @@ const CustomLookup = ({
               onBlur={e => {
                 if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
                   setInputValue('')
-
                   setFreeSolo(true)
                 }
-
                 if (selectFirstValue.current !== 'click') {
-                  onBlur(e, valueHighlightedOption?.current)
+                  onBlur(e, valueHighlightedOption.current)
                 }
-                valueHighlightedOption.current = ''
+                valueHighlightedOption.current = null
               }}
               onFocus={e => {
-                setStore([]), setFreeSolo(true)
+                setStore([])
+                setFreeSolo(true)
                 selectFirstValue.current = ''
                 onFocus(e)
               }}
@@ -227,8 +237,7 @@ const CustomLookup = ({
               label={label}
               required={_required}
               onKeyUp={e => {
-                onKeyUp(e, valueHighlightedOption?.current)
-
+                onKeyUp(e, valueHighlightedOption.current)
                 if (e.key !== 'Enter') setFreeSolo(false)
               }}
               inputProps={{
@@ -242,13 +251,15 @@ const CustomLookup = ({
                 ...params.InputProps,
                 classes: {
                   root: inputs.outlinedRoot,
-                  notchedOutline: hasBorder ? !secondDisplayField && inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                  notchedOutline: hasBorder
+                    ? !secondDisplayField && inputs.outlinedFieldset
+                    : inputs.outlinedNoBorder,
                   input: inputs.inputBase
                 },
                 endAdornment: !_readOnly && (
-                  <InputAdornment position='end' className={inputs.inputAdornment} >
+                  <InputAdornment position="end" className={inputs.inputAdornment}>
                     {!isLoading ? (
-                      <IconButton  edge="start" className={inputs.iconButton} tabIndex={-1}>
+                      <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
                         <SearchIcon className={inputs.icon} />
                       </IconButton>
                     ) : (
@@ -263,7 +274,7 @@ const CustomLookup = ({
                         setStore([])
                         setFreeSolo(true)
                       }}
-                      aria-label='clear input'
+                      aria-label="clear input"
                     >
                       <ClearIcon className={inputs.icon} />
                     </IconButton>
@@ -272,9 +283,9 @@ const CustomLookup = ({
               }}
               InputLabelProps={{
                 classes: {
-                root: inputs.inputLabel,
-                shrink: inputs.inputLabelShrink, 
-                }             
+                  root: inputs.inputLabel,
+                  shrink: inputs.inputLabelShrink
+                }
               }}
             />
           )}
@@ -283,25 +294,24 @@ const CustomLookup = ({
           disabled={disabled}
         />
       </Grid>
+
       {secondDisplayField && (
         <Grid item xs={12 - firstFieldWidth}>
           <TextField
             size={size}
             variant={variant}
-            placeholder={secondFieldLabel == '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()}
-            value={secondValue ? secondValue : ''}
+            placeholder={
+              secondFieldLabel === ''
+                ? displayField.toUpperCase()
+                : secondFieldLabel.toUpperCase()
+            }
+            value={secondValue || ''}
             required={_required}
             onChange={e => {
               if (secondField?.onChange && secondField?.name) {
-                secondField?.onChange(secondField?.name, e.target.value)
+                secondField.onChange(secondField.name, e.target.value)
               }
             }}
-            // sx={{
-            //   '& .MuiInputBase-root': {
-            //     borderTopLeftRadius: 0 ,
-            //     borderBottomLeftRadius: 0
-            //   }
-            // }}
             InputProps={{
               classes: {
                 root: inputs.outlinedRoot,
@@ -311,9 +321,9 @@ const CustomLookup = ({
               inputProps: {
                 tabIndex: _readOnly || secondField?.editable === '' ? -1 : 0
               },
-              readOnly: secondField ? !secondField?.editable : _readOnly
+              readOnly: secondField ? !secondField.editable : _readOnly
             }}
-            className={ secondDisplayField  && styles.secondField}
+            className={secondDisplayField && styles.secondField}
             error={error}
             helperText={helperText}
           />
@@ -324,4 +334,3 @@ const CustomLookup = ({
 }
 
 export default CustomLookup
-

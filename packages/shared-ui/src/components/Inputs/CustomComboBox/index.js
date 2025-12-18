@@ -155,7 +155,7 @@ const CustomComboBox = ({
         return results
       }}
       isOptionEqualToValue={(option, value) => option[valueField] === value[valueField]}
-      onChange={(event, newValue) => {
+      onChange={(_, newValue) => {
         onChange(name, newValue)
         setAutoFocus(true)
       }}
@@ -167,7 +167,7 @@ const CustomComboBox = ({
       onFocus={e => {
         selectFirstValue.current = ''
       }}
-      onHighlightChange={(event, newValue) => {
+      onHighlightChange={(_, newValue) => {
         valueHighlightedOption.current = newValue
       }}
       sx={{ ...sx, display: _hidden ? 'none' : 'unset' }}

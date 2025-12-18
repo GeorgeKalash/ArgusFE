@@ -21,7 +21,6 @@
 
 @media (max-width: 1280px) {
   .root{
-    line-height: 1.5 !important; 
     padding-block: 5px;
   }
 
@@ -37,7 +36,6 @@
 
 @media (max-width: 1024px) {
   .root{
-    line-height: 1.5 !important; 
     padding-block: 5px;
   }
 

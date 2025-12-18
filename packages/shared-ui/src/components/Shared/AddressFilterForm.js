@@ -14,6 +14,7 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function AddressFilterForm({
   labels,
@@ -214,13 +215,11 @@ export default function AddressFilterForm({
             </Grid>
 
             <Grid item xs={2}>
-              <Button
-                variant='contained'
+              <CustomButton
+                label={labels.apply}
                 onClick={LoadShipAddresses}
                 disabled={!(formik.values.countryId && formik.values.cityId)}
-              >
-                {labels.apply}
-              </Button>
+              />
             </Grid>
           </Grid>
         </Fixed>

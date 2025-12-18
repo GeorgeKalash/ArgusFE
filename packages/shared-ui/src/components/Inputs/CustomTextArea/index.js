@@ -1,6 +1,6 @@
-import { TextField, InputAdornment, IconButton, Box } from '@mui/material'
+import { TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import DropDownArrow from '@argus/shared-ui/src/components/images/buttonsIcons/bottom-arrow.png'
 import AddAction from '@argus/shared-ui/src/components/images/buttonsIcons/add.png'
@@ -9,8 +9,8 @@ import styles from './CustomTextArea.module.css'
 import inputs from '../Inputs.module.css'
 
 const CustomTextArea = ({
-  type = 'text', //any valid HTML5 input type
-  variant = 'outlined', //outlined, standard, filled
+  type = 'text', 
+  variant = 'outlined', 
   paddingRight = 0,
   value,
   name,
@@ -19,7 +19,7 @@ const CustomTextArea = ({
   viewDropDown = false,
   handleAddAction,
   viewAdd = false,
-  size = 'small', //small, medium
+  size = 'small', 
   fullWidth = true,
   autoFocus = false,
   readOnly = false,

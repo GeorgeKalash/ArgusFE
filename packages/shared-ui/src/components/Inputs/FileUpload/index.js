@@ -1,4 +1,4 @@
-import { Box, Typography, IconButton, Button, Grid } from '@mui/material'
+import { Box, Typography, IconButton, Grid } from '@mui/material'
 import React, { useContext, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -8,6 +8,7 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import styles from './FileUpload.module.css'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
   const hiddenInputRef = useRef()
@@ -210,9 +211,13 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
       </Box>
 
       <Box className={styles.buttonsBox}>
-        <Button onClick={handleInputFileReset} variant='contained' className={styles.clearButton}>
-          <img src={require(`@argus/shared-ui/src/components/images/buttonsIcons/clear.png`).default.src} alt='clear' className={styles.clearIcon} />
-        </Button>
+       <CustomButton
+        image='clear.png'
+        tooltipText='clear'
+        onClick={handleInputFileReset}
+        className={styles.clearButton}
+        style={{ padding: 0 }}
+      />
       </Box>
     </>
   )

@@ -25,11 +25,6 @@
   align-items: end;          
 }
 
-.searchFieldWrapper input {
-  padding: 6px 10px;
-  font-size: 14px;
-}
-
 .actionButtonsWrapper {
   display: flex;
   justify-content: flex-start;
@@ -56,11 +51,6 @@
     padding: 6px 12px;
     font-size: 13px;
   }
-
-  .searchFieldWrapper input {
-    font-size: 13px;
-    padding: 6px 8px;
-  }
 }
 
 @media (max-width: 1024px) {
@@ -75,11 +65,6 @@
     padding: 5px 10px;
     font-size: 12.5px;
   }
-
-  .searchFieldWrapper input {
-    font-size: 12.5px;
-    padding: 5px 8px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -91,11 +76,6 @@
   .actionButton {
     padding: 4px 9px;
     font-size: 12px;
-  }
-
-  .searchFieldWrapper input {
-    font-size: 12px;
-    padding: 4px 7px;
   }
 }
 
@@ -109,11 +89,6 @@
     padding: 4px 8px;
     font-size: 11.5px;
   }
-
-  .searchFieldWrapper input {
-    font-size: 11.5px;
-    padding: 4px 6px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -125,11 +100,6 @@
   .actionButton {
     padding: 3px 7px;
     font-size: 11px;
-  }
-
-  .searchFieldWrapper input {
-    font-size: 11px;
-    padding: 3px 5px;
   }
 }
 
@@ -143,11 +113,6 @@
     padding: 3px 5px;
     font-size: 10.5px;
   }
-
-  .searchFieldWrapper input {
-    font-size: 10.5px;
-    padding: 3px 4px;
-  }
 }
 
 @media (max-width: 360px) {
@@ -160,11 +125,6 @@
     padding: 2px 4px;
     font-size: 10px;
   }
-
-  .searchFieldWrapper input {
-    font-size: 10px;
-    padding: 2px 3px;
-  }
 }
 
 @media (max-width: 320px) {
@@ -176,10 +136,5 @@
   .actionButton {
     padding: 2px 3px;
     font-size: 9.5px;
-  }
-
-  .searchFieldWrapper input {
-    font-size: 9.5px;
-    padding: 2px 2px;
   }
 }

@@ -38,6 +38,8 @@ const CustomButton = ({
     image &&
     require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`)
 
+  const isLabelOnly = !image && !icon && label
+
   return (
     <>
       <div
@@ -49,11 +51,12 @@ const CustomButton = ({
           ref={buttonRef}
           onClick={onClick}
           variant='contained'
-          className={
+          className={[
             !props.fullWidth
               ? styles.responsiveButton
-              : styles.responsiveButtonFullWidth
-          }
+              : styles.responsiveButtonFullWidth,
+            isLabelOnly ? styles.labelOnly : ''
+          ].join(' ')}
           fullWidth={props.fullWidth}
           sx={{
             mr: 1,
@@ -88,6 +91,7 @@ const CustomButton = ({
       </div>
 
       {tooltipText &&
+        image &&
         tooltip &&
         typeof document !== 'undefined' &&
         createPortal(

@@ -1,0 +1,57 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ================= TEXT ================= */
+
+.title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.message {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* ================= INPUT ================= */
+
+.input {
+  width: 100%;
+}
+
+/* ================= BREAKPOINTS ================= */
+
+@media (max-width: 1600px) {
+  .title {
+    font-size: 0.8rem;
+  }
+
+  .message {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .title {
+    font-size: 0.7rem;
+  }
+
+  .message {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .title {
+    font-size: 0.6rem;
+  }
+
+  .message {
+    font-size: 0.55rem;
+  }
+}

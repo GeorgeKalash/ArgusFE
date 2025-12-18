@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState, useContext } from 'react'
+import React, { createContext, useEffect, useState, useContext, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -69,10 +69,29 @@ const TabsProvider = ({ children }) => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
+
+  const tabsWrapperRef = useRef(null)
+
   const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
+
+  useEffect(() => {
+    if (!tabsWrapperRef.current) return
+
+    const updateHeight = () => {
+      const h = tabsWrapperRef.current.offsetHeight
+      document.documentElement.style.setProperty('--tabs-height', `${h}px`)
+    }
+
+    updateHeight()
+
+    const ro = new ResizeObserver(updateHeight)
+    ro.observe(tabsWrapperRef.current)
+
+    return () => ro.disconnect()
+  }, [])
 
   const OpenItems = (event, i) => {
     setTabsIndex(i)
@@ -241,10 +260,10 @@ const TabsProvider = ({ children }) => {
 
   function unlockRecord(resourceId) {
     const body = {
-      resourceId: resourceId,
+      resourceId,
       recordId: 0,
       reference: '',
-      userId: userId,
+      userId,
       clockStamp: new Date()
     }
     postRequest({
@@ -263,7 +282,7 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box className={styles.tabsWrapper}>
+      <Box ref={tabsWrapperRef} className={styles.tabsWrapper}>
         <Tabs
           value={currentTabIndex}
           onChange={handleChange}
@@ -275,57 +294,57 @@ const TabsProvider = ({ children }) => {
         >
           {openTabs.length > 0 &&
             openTabs.map((activeTab, i) => (
-              <Tab
-                key={activeTab?.id}
-                className={styles.tabName}
-                label={
-                  <Box display='flex' alignItems='center'>
-                    <span>{activeTab.label}</span>
-                    {i === currentTabIndex && (
-                      <IconButton
-                        size='small'
-                        className={styles.svgIcon}
-                        onClick={e => {
-                          e.stopPropagation()
-                          setOpenTabs(tabs =>
+            <Tab
+              key={activeTab?.id}
+              className={styles.tabName}
+              label={
+                <Box display='flex' alignItems='center'>
+                  <span>{activeTab.label}</span>
+                  {i === currentTabIndex && (
+                    <IconButton
+                      size='small'
+                      className={styles.svgIcon}
+                      onClick={e => {
+                        e.stopPropagation()
+                        setOpenTabs(tabs =>
                             tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
-                          )
-                          setReloadOpenedPage([])
-                        }}
-                      >
-                        <RefreshIcon className={styles.svgIcon} />
-                      </IconButton>
-                    )}
-                    {activeTab.route !== '/default/' && (
-                      <IconButton
-                        size='small'
-                        className={styles.svgIcon}
+                        )
+                        setReloadOpenedPage([])
+                      }}
+                    >
+                      <RefreshIcon className={styles.svgIcon} />
+                    </IconButton>
+                  )}
+                  {activeTab.route !== '/default/' && (
+                    <IconButton
+                      size='small'
+                      className={styles.svgIcon}
                         onClick={event => {
                           event.stopPropagation()
                           if (activeTab) unlockIfLocked(activeTab)
-                          closeTab(activeTab.route)
-                        }}
-                      >
-                        <CloseIcon className={styles.svgIcon} />
-                      </IconButton>
-                    )}
-                  </Box>
-                }
+                        closeTab(activeTab.route)
+                      }}
+                    >
+                      <CloseIcon className={styles.svgIcon} />
+                    </IconButton>
+                  )}
+                </Box>
+              }
                 onContextMenu={event => OpenItems(event, i)}
                 classes={{
                   root: styles.tabRoot,
                   selected: styles.selectedTab
                 }}
-              />
-            ))}
+            />
+          ))}
         </Tabs>
       </Box>
       {openTabs.length > 0 &&
         openTabs.map((activeTab, i) => (
-          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-            {activeTab.page}
-          </CustomTabPanel>
-        ))}
+        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+          {activeTab.page}
+        </CustomTabPanel>
+      ))}
       <Menu
         anchorEl={anchorEl}
         id='account-menu'

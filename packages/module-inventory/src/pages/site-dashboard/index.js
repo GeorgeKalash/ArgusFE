@@ -6,7 +6,7 @@ import ActivitiesTab from './Tabs/ActivitiesTab'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import { Button, Grid, Tooltip } from '@mui/material'
+import { Grid } from '@mui/material'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
@@ -15,6 +15,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const SiteDashboard = () => {
   const [activeTab, setActiveTab] = useState(0)
@@ -116,20 +117,21 @@ const SiteDashboard = () => {
                 ]}
                 values={formik.values}
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
               />
-              <Button
-                sx={{ minWidth: '50px !important', ml: 2, height: 35 }}
-                variant='contained'
-                size='small'
+              <CustomButton
+                image='preview.png'
+                tooltipText={platformLabels.Preview}
                 onClick={() => formik.handleSubmit()}
-              >
-                <Tooltip title={platformLabels.Preview}>
-                  <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/preview.png').default.src} alt={platformLabels.Preview} />
-                </Tooltip>
-              </Button>
+                style={{
+                  minWidth: 50,
+                  marginLeft: 8,
+                  height: 35,
+                  padding: 0
+                }}
+              />
             </Grid>
           }
         />

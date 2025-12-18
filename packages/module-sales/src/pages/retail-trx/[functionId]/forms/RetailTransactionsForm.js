@@ -1682,18 +1682,10 @@ export default function RetailTransactionsForm({
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Button
-                    sx={{
-                      backgroundColor: '#000000',
-                      color: '#FFFFFF',
-                      '&:hover': {
-                        backgroundColor: '#333333'
-                      }
-                    }}
+                  <CustomButton
+                    label={labels.addressDetails}
                     onClick={() => openAddressForm()}
-                  >
-                    {labels.addressDetails}
-                  </Button>
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomTextField

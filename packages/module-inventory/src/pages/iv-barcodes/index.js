@@ -1,38 +1,44 @@
 import { useContext, useState } from 'react'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
+import { Grid, Box } from '@mui/material'
+
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import * as yup from 'yup'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
+
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
-import BarcodesForm from '@argus/shared-ui/src/components/Shared/Forms/BarcodesForm'
-import { Button, Grid } from '@mui/material'
-import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
+
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+
+import BarcodesForm from '@argus/shared-ui/src/components/Shared/Forms/BarcodesForm'
+import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const IvBarcodes = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [skuValue, setSku] = useState('')
-
   const { stack } = useWindow()
 
+  const [skuValue, setSku] = useState(null)
+
   const { formik } = useForm({
-    initialValues: {
-      itemId: null
-    },
+    initialValues: { itemId: null },
     validateOnChange: true,
     validationSchema: yup.object({
       itemId: yup.string().required()
     })
   })
+
+  /* ===================== DATA ===================== */
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
@@ -42,7 +48,16 @@ const IvBarcodes = () => {
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=&filter=&_itemId=${skuValue || 0}`
     })
 
-    return { ...response, _startAt: _startAt }
+    return { ...response, _startAt }
+  }
+
+  async function fetchWithSearch({ options = {}, qry }) {
+    const { _startAt = 0, _size = 50 } = options
+
+    return getRequest({
+      extension: InventoryRepository.Barcodes.snapshot,
+      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
+    })
   }
 
   const {
@@ -64,60 +79,21 @@ const IvBarcodes = () => {
     }
   })
 
-  async function fetchWithSearch({ options = {}, qry }) {
-    const { _startAt = 0, _size = 50 } = options
-
-    const response = await getRequest({
-      extension: InventoryRepository.Barcodes.snapshot,
-      parameters: `_filter=${qry}&_startAt=${_startAt}&_size=${_size}`
-    })
-
-    return response
-  }
+  /* ===================== GRID ===================== */
 
   const columns = [
-    {
-      field: 'barcode',
-      headerName: _labels.barcode,
-      flex: 1
-    },
-    {
-      field: 'sku',
-      headerName: _labels.sku,
-      flex: 1
-    },
-    {
-      field: 'itemName',
-      headerName: _labels.itemName,
-      flex: 1
-    },
-    {
-      field: 'muName',
-      headerName: _labels.msUnit,
-      flex: 1
-    },
-    {
-      field: 'defaultQty',
-      headerName: _labels.defaultQty,
-      flex: 1
-    },
-    {
-      field: 'scaleDescription',
-      headerName: _labels.scaleDescription,
-      flex: 1
-    },
-    {
-      field: 'posDescription',
-      headerName: _labels.posDescription,
-      flex: 1
-    }
+    { field: 'barcode', headerName: _labels.barcode, flex: 1 },
+    { field: 'sku', headerName: _labels.sku, flex: 1 },
+    { field: 'itemName', headerName: _labels.itemName, flex: 1 },
+    { field: 'muName', headerName: _labels.msUnit, flex: 1 },
+    { field: 'defaultQty', headerName: _labels.defaultQty, flex: 1 },
+    { field: 'scaleDescription', headerName: _labels.scaleDescription, flex: 1 },
+    { field: 'posDescription', headerName: _labels.posDescription, flex: 1 }
   ]
 
-  const edit = obj => {
-    openForm(obj)
-  }
+  /* ===================== ACTIONS ===================== */
 
-  function openForm(obj) {
+  const openForm = obj => {
     stack({
       Component: BarcodesForm,
       props: {
@@ -127,14 +103,13 @@ const IvBarcodes = () => {
         msId: obj?.msId,
         maxAccess: access
       },
-     
       title: _labels.Barcodes
     })
   }
 
-  const add = () => {
-    openForm()
-  }
+  const add = () => openForm()
+
+  const edit = obj => openForm(obj)
 
   const del = async obj => {
     await postRequest({
@@ -154,45 +129,52 @@ const IvBarcodes = () => {
           onSearch={search}
           onSearchClear={clear}
           labels={_labels}
-          inputSearch={true}
+          inputSearch
           refetch={refetch}
           middleSection={
             <Grid item sx={{ display: 'flex', mr: 2 }}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='itemId'
-                label={_labels?.sku}
-                valueField='recordId'
-                displayField='sku'
-                valueShow='itemRef'
-                secondValueShow='itemName'
-                form={formik}
-                columnsInDropDown={[
-                  { key: 'sku', value: 'SKU' },
-                  { key: 'name', value: 'Name' }
-                ]}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('itemId', newValue?.recordId)
-                  formik.setFieldValue('itemName', newValue?.name)
-                  formik.setFieldValue('sku', newValue?.sku)
-                  formik.setFieldValue('itemRef', newValue?.sku)
-                  setSku(newValue?.recordId)
-                }}
-                displayFieldWidth={2}
-                maxAccess={access}
-              />
-              <Button
-                sx={{ minWidth: '90px !important', pr: 2, ml: 2, height: 35 }}
-                variant='contained'
-                size='small'
-                onClick={refetch}
+              <Grid
+                container
+                alignItems="center"
+                spacing={2}
+                wrap="nowrap"
+                sx={{ mr: 2 }}
               >
-                {platformLabels.Apply}
-              </Button>
+                <Grid item sx={{ minWidth: 280 }}>
+                  <ResourceLookup
+                    endpointId={InventoryRepository.Item.snapshot}
+                    name="itemId"
+                    label={_labels?.sku}
+                    valueField="recordId"
+                    displayField="sku"
+                    valueShow="itemRef"
+                    secondValueShow="itemName"
+                    form={formik}
+                    columnsInDropDown={[
+                      { key: 'sku', value: 'SKU' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('itemId', newValue?.recordId)
+                      setSku(newValue?.recordId)
+                    }}
+                    displayFieldWidth={2}
+                    maxAccess={access}
+                  />
+                </Grid>
+
+                <Grid item>
+                  <CustomButton
+                    label={platformLabels.Apply}
+                    onClick={refetch}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           }
         />
       </Fixed>
+
       <Grow>
         <Table
           columns={columns}
@@ -200,10 +182,10 @@ const IvBarcodes = () => {
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          deleteConfirmationType={'strict'}
+          deleteConfirmationType="strict"
           isLoading={false}
           pageSize={50}
-          paginationType='api'
+          paginationType="api"
           paginationParameters={paginationParameters}
           refetch={refetch}
           maxAccess={access}

@@ -17,7 +17,6 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import toast from 'react-hot-toast'
-import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'

@@ -2,13 +2,13 @@ import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useContext, useEffect, useState } from 'react'
-import { Button } from '@mui/material'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import SelectAgent from '@argus/shared-ui/src/components/Shared/Forms/SelectAgent'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { RemittanceBankInterface } from '@argus/repositories/src/repositories/RemittanceBankInterface'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import CustomButton from '../../Inputs/CustomButton'
 
 const ProductsWindow = ({
   labels,
@@ -88,11 +88,9 @@ const ProductsWindow = ({
       cellRenderer: params => {
         if (params.data.interfaceId === 1)
           return (
-            <Button
-              variant='contained'
-              size='small'
+            <CustomButton
+              label={labels.select}
               disabled={!!recordId}
-              style={{ height: 25, width: 40 }}
               onClick={() =>
                 stack({
                   Component: SelectAgent,
@@ -117,9 +115,7 @@ const ProductsWindow = ({
                   title: params.data?.productName
                 })
               }
-            >
-              {labels.select}
-            </Button>
+            />
           )
       }
     },

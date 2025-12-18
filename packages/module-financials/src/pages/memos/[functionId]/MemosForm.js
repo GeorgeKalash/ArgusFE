@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -29,6 +29,7 @@ import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { ApplyManual } from '@argus/shared-ui/src/components/Shared/ApplyManual'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function MemosForm({ labels, access, recordId, functionId, getEndpoint, getGLResourceId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -535,17 +536,15 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                       />
                     </Grid>
                     <Grid item xs={4}>
-                      <Button
-                        variant='contained'
-                        size='small'
+                     <CustomButton
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                      >
-                        <img 
-                          src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                          alt={platformLabels.add}
-                        />
-                      </Button>
+                        image='popup.png'
+                        tooltipText={platformLabels.add}
+                        disabled={
+                          !formik.values.currencyId ||
+                          formik.values.currencyId === currencyId
+                        }
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
