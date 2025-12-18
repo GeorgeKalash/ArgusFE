@@ -31,6 +31,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
   const { stack } = useWindow()
   const recordId = store?.recordId
   const [recal, setRecal] = useState(false)
+  const [lastEdited, setLastEdited] = useState(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Casting,
@@ -64,6 +65,8 @@ export default function CastingForm({ store, setStore, access, labels }) {
       outputWgt: 0,
       loss: 0,
       lossPct: 0,
+      lossDisassembly: 0,
+      lossCasting: 0,
       allowedLossPct: 0,
       lossVariationPct: 0,
       laborId: null,
@@ -95,7 +98,9 @@ export default function CastingForm({ store, setStore, access, labels }) {
       outputWgt: yup.number().required(),
       loss: yup.number().min(0).required(),
       lossVariationPct: yup.number().required(),
-      lossPct: yup.number().required()
+      lossPct: yup.number().max(100).required(),
+      lossCasting: yup.number().required(),
+      lossDisassembly: yup.number().required()
     }),
     onSubmit: async obj => {
       const res = await postRequest({
@@ -123,13 +128,62 @@ export default function CastingForm({ store, setStore, access, labels }) {
       : Number(formik?.values?.netInputWgt) || 0
   ).toFixed(2)
 
-  const loss = recal ? netInputWgt - (Number(formik?.values?.outputWgt) || 0) : Number(formik?.values?.loss) || 0
+  const loss = recal
+    ? Number(formik?.values?.lossDisassembly) + Number(formik?.values?.lossCasting)
+    : Number(formik?.values?.loss)
 
   const lossPct = recal ? (100 * loss) / (netInputWgt || 1) : Number(formik?.values?.lossPct) || 0
 
   const lossVariationPct = recal
     ? lossPct - (Number(formik?.values?.stdLossRate) || 0)
     : formik?.values?.lossVariationPct
+
+  useEffect(() => {
+    if (!recal || !lastEdited) return
+
+    const netInput = Number(formik?.values?.inputWgt || 0) + Number(formik?.values?.rmWgt || 0)
+
+    const output = Number(formik?.values?.outputWgt || 0)
+    const disassembly = Number(formik?.values?.lossDisassembly || 0)
+    let casting = Number(formik?.values?.lossCasting || 0)
+
+    let totalLoss = 0
+
+    switch (lastEdited) {
+      case 'outputWgt': {
+        totalLoss = netInput - output
+        casting = totalLoss - disassembly
+
+        formik.setFieldValue('lossCasting', casting)
+        formik.setFieldValue('loss', totalLoss)
+        break
+      }
+
+      case 'lossCasting': {
+        totalLoss = casting + disassembly
+        formik.setFieldValue('outputWgt', netInput - totalLoss)
+        formik.setFieldValue('loss', totalLoss)
+        break
+      }
+
+      case 'lossDisassembly': {
+        totalLoss = casting + disassembly
+        formik.setFieldValue('outputWgt', netInput - totalLoss)
+        formik.setFieldValue('loss', totalLoss)
+        break
+      }
+
+      default:
+        break
+    }
+  }, [
+    lastEdited,
+    formik.values.outputWgt,
+    formik.values.lossCasting,
+    formik.values.lossDisassembly,
+    formik.values.inputWgt,
+    formik.values.rmWgt
+  ])
 
   const actions = [
     {
@@ -178,6 +232,14 @@ export default function CastingForm({ store, setStore, access, labels }) {
 
     return res?.record
   }
+
+  useEffect(() => {
+    if (!recal) return
+
+    const netInput = (Number(formik.values.inputWgt) || 0) + (Number(formik.values.rmWgt) || 0)
+
+    formik.setFieldValue('netInputWgt', Number(netInput.toFixed(3)))
+  }, [formik.values.inputWgt, formik.values.rmWgt])
 
   async function getWaxInfo(waxId) {
     if (!waxId) return
@@ -368,6 +430,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                         formik.setFieldValue('lineId', newValue?.lineId || null)
                         formik.setFieldValue('waxRef', newValue?.reference || null)
                         formik.setFieldValue('waxId', newValue?.recordId || null)
+                        formik.setFieldValue('netInputWgt', waxInfo?.rmWgt || 0)
                       }}
                       errorCheck={'waxId'}
                       maxAccess={maxAccess}
@@ -619,6 +682,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       readOnly={isPosted || isCancelled}
                       onChange={e => {
                         setRecal(true)
+                        setLastEdited('outputWgt')
                         let value = Number(e.target.value) > 32767 ? 0 : Number(e.target.value)
                         formik.setFieldValue('outputWgt', value)
                         setStore(prevStore => ({
@@ -635,6 +699,44 @@ export default function CastingForm({ store, setStore, access, labels }) {
                   </Grid>
                   <Grid item>
                     <CustomNumberField
+                      name='lossCasting'
+                      label={labels.lossCasting}
+                      value={formik.values.lossCasting}
+                      required
+                      maxLength={12}
+                      decimalScale={3}
+                      maxAccess={maxAccess}
+                      readOnly
+                      onChange={e => {
+                        setRecal(true)
+                        setLastEdited('lossCasting')
+                        formik.setFieldValue('lossCasting', e.target.value)
+                      }}
+                      onClear={() => formik.setFieldValue('lossCasting', null)}
+                      error={formik.touched.lossCasting && Boolean(formik.errors.lossCasting)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <CustomNumberField
+                      name='lossDisassembly'
+                      label={labels.lossDisassembly}
+                      value={formik.values.lossDisassembly}
+                      required
+                      maxLength={12}
+                      decimalScale={3}
+                      readOnly
+                      maxAccess={maxAccess}
+                      onChange={e => {
+                        setRecal(true)
+                        setLastEdited('lossDisassembly')
+                        formik.setFieldValue('lossDisassembly', e.target.value)
+                      }}
+                      onClear={() => formik.setFieldValue('lossDisassembly', null)}
+                      error={formik.touched.lossDisassembly && Boolean(formik.errors.lossDisassembly)}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <CustomNumberField
                       name='loss'
                       label={labels.loss}
                       value={loss}
@@ -642,9 +744,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       maxLength={11}
                       decimalScale={3}
                       readOnly
-                      onChange={e => {
-                        formik.setFieldValue('loss', e.target.value)
-                      }}
+                      onChange={e => formik.setFieldValue('loss', e.target.value)}
                       onClear={() => formik.setFieldValue('loss', 0)}
                       error={formik.touched.loss && Boolean(formik.errors.loss)}
                     />
@@ -671,7 +771,7 @@ export default function CastingForm({ store, setStore, access, labels }) {
                       label={labels.lossVariation}
                       value={lossVariationPct}
                       required
-                      maxLength={3}
+                      maxLength={5}
                       readOnly
                       decimalScale={3}
                       onChange={e => formik.setFieldValue('lossVariationPct', e.target.value)}

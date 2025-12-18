@@ -67,7 +67,7 @@ export const FoundryRepository = {
     qry: service + 'qryCAJ',
     set2: service + 'set2CAJ'
   },
-  MetalSmelting: {
+  FoundaryTransaction: {
     get: service + 'getTRX',
     get2: service + 'get2TRX',
     del: service + 'delTRX',

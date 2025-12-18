@@ -12,10 +12,10 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import FOCastingWindow from './window/FOCastingWindow'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import PayrollListForm from './Forms/PayrollListForm'
 
-const FoCastings = () => {
+const PayList = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const FoCastings = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.Casting.page,
-    datasetId: ResourceIds.FoCastings,
+    endpointId: PayrollRepository.Payroll.page,
+    datasetId: ResourceIds.PayrollHeader,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -50,78 +50,49 @@ const FoCastings = () => {
       type: 'date'
     },
     {
-      field: 'waxRef',
-      headerName: labels.waxRef,
+      field: 'fiscalYear',
+      headerName: labels.fiscalYear,
       flex: 1
     },
     {
-      field: 'mouldRef',
-      headerName: labels.mould,
+      field: 'payDate',
+      headerName: labels.payDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'payDescription',
+      headerName: labels.payDescription,
       flex: 1
     },
     {
-      field: 'metalRef',
-      headerName: labels.metal,
+      field: 'startDate',
+      headerName: labels.startDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'endDate',
+      headerName: labels.endDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'taStartDate',
+      headerName: labels.taStartDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'taEndDate',
+      headerName: labels.taEndDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
       flex: 1
-    },
-    {
-      field: 'metalColorRef',
-      headerName: labels.metalColor,
-      flex: 1
-    },
-    {
-      field: 'grossWgt',
-      headerName: labels.grossWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'rmWgt',
-      headerName: labels.rmWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'mouldWgt',
-      headerName: labels.mouldWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'netWgt',
-      headerName: labels.netWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'suggestedWgt',
-      headerName: labels.suggestedWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'inputWgt',
-      headerName: labels.inputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'netInputWgt',
-      headerName: labels.netInputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'outputWgt',
-      headerName: labels.outputWgt,
-      flex: 1,
-      type: 'number'
-    },
-    {
-      field: 'loss',
-      headerName: labels.loss,
-      flex: 1,
-      type: 'number'
     },
     {
       field: 'statusName',
@@ -134,7 +105,7 @@ const FoCastings = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.Casting.page,
+      extension: PayrollRepository.Payroll.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
@@ -144,42 +115,42 @@ const FoCastings = () => {
   async function fetchWithFilter({ filters, pagination }) {
     if (filters.qry)
       return await getRequest({
-        extension: FoundryRepository.Casting.snapshot,
+        extension: PayrollRepository.Payroll.snapshot,
         parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Casting,
+    functionId: SystemFunction.PayrollList,
     action: openForm
   })
 
-  const add = () => {
-    proxyAction()
+  const add = async () => {
+    await proxyAction()
   }
 
-  const editCAS = obj => {
+  const edit = obj => {
     openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: FOCastingWindow,
+      Component: PayrollListForm,
       props: {
         labels,
         access,
         recordId
       },
-      width: 1150,
-      height: 750,
-      title: labels.castings
+      width: 850,
+      height: 700,
+      title: labels.payrollList
     })
   }
 
-  const delCAS = async obj => {
+  const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.Casting.del,
+      extension: PayrollRepository.Payroll.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -189,19 +160,18 @@ const FoCastings = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'FOCAS'} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'PYHE'} />
       </Fixed>
       <Grow>
         <Table
-          name='casting'
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
-          onEdit={editCAS}
+          onEdit={edit}
           refetch={refetch}
-          onDelete={delCAS}
+          onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
@@ -212,4 +182,4 @@ const FoCastings = () => {
   )
 }
 
-export default FoCastings
+export default PayList
