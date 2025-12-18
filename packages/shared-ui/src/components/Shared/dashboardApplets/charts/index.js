@@ -698,14 +698,16 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
   )
 }
 
-export const CompositeBarChart = ({ id, labels, data, label }) => {
-  useEffect(() => {
-    const canvas = document.getElementById(id)
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
+export const CompositeBarChart = ({ labels, data, label }) => {
+  const canvasRef = useRef(null)
 
-    const barBg = getCssVar(canvas, '--chart-primary-bar-bg')
-    const barBorder = getCssVar(canvas, '--chart-primary-bar-border')
+  useEffect(() => {
+    if (!canvasRef.current) return
+
+    const ctx = canvasRef.current.getContext('2d')
+
+    const barBg = getCssVar(canvasRef.current, '--chart-primary-bar-bg')
+    const barBorder = getCssVar(canvasRef.current, '--chart-primary-bar-border')
 
     const chart = new Chart(ctx, {
       type: 'bar',
@@ -721,15 +723,24 @@ export const CompositeBarChart = ({ id, labels, data, label }) => {
           }
         ]
       },
-      options: getChartOptions(label, 'bar', canvas)
+      options: {
+        ...getChartOptions(label, 'bar', canvasRef.current),
+        responsive: true,
+        maintainAspectRatio: false
+      }
     })
 
     return () => {
       chart.destroy()
     }
-  }, [id, labels, data, label])
+  }, [labels, data, label])
 
-  return <canvas id={id} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}></canvas>
+  return (
+    <canvas
+      ref={canvasRef}
+      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+    />
+  )
 }
 
 export const LineChart = ({ id, labels, data, label }) => {

@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -16,6 +16,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import * as yup from 'yup'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const PhysicalCountItem = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -194,7 +195,7 @@ const PhysicalCountItem = () => {
                 required
                 readOnly={formik.values.siteId}
                 maxAccess={access}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
                   formik.setFieldValue('siteId', '')
 
@@ -229,20 +230,14 @@ const PhysicalCountItem = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <Button
+              <CustomButton
+                image='clear.png'
+                tooltipText={platformLabels.Clear}
                 onClick={openClear}
-                sx={{
-                  backgroundColor: '#f44336',
-                  '&:hover': {
-                    backgroundColor: '#f44336',
-                    opacity: 0.8
-                  },
-                  ml: 2
+                style={{
+                  backgroundColor: '#f44336'
                 }}
-                variant='contained'
-              >
-                <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/clear.png').default.src} alt={platformLabels.Clear} />
-              </Button>
+              />
             </Grid>
           </Grid>
         </Fixed>

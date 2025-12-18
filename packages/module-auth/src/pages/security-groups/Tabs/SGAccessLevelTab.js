@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton } from '@mui/material'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import { useContext, useMemo } from 'react'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -19,6 +19,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import ResourceGlobalForm from '@argus/shared-ui/src/components/Shared/ResourceGlobalForm'
 import FieldGlobalForm from '@argus/shared-ui/src/components/Shared/FieldGlobalForm'
 import AccessLevelForm from '@argus/shared-ui/src/components/Shared/AccessLevelForm'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -155,91 +156,104 @@ const SGAccessLevelTab = ({ labels, maxAccess, storeRecordId }) => {
     filters.moduleId = 10
   }, [])
 
-  return (
-    <VertLayout>
-      <Fixed>
-        <Grid container xs={12}>
-          <Grid item xs={5} sx={{ pl: 2, pt: 2 }}>
+ return (
+  <VertLayout>
+    <Fixed>
+      <Box sx={{ px: 2, py: 1 }}>
+        <Grid
+          container
+          alignItems="center"
+          spacing={2}
+        >
+          <Grid item xs={5}>
             <ResourceComboBox
               datasetId={DataSets.MODULE}
-              name='moduleId'
-              values={{
-                moduleId: filters.moduleId
-              }}
-              valueField='key'
-              displayField='value'
-              onChange={(event, newValue) => {
+              name="moduleId"
+              values={{ moduleId: filters.moduleId }}
+              valueField="key"
+              displayField="value"
+              onChange={(_, newValue) => {
                 onChange(newValue?.key)
               }}
             />
           </Grid>
-          <Grid xs={1} item sx={{ pt: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <Button variant='contained' onClick={() => openApplyModuleLevel()} disabled={!filters.moduleId}>
-              <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-            </Button>
+          <Grid
+            item
+            xs={1}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <CustomButton
+              onClick={openApplyModuleLevel}
+              icon={<Icon icon="mdi:arrow-expand-right" width={18} height={18} />}
+              tooltipText={labels.controlAccess}
+            />
           </Grid>
-          <Grid xs={5} item sx={{ pt: 2, pr: 2 }}>
+          <Grid item xs={5}>
             <CustomTextField
-              name='search'
+              name="search"
               value={formik.values.search}
               label={labels.search}
-              onClear={() => {
-                formik.setFieldValue('search', '')
-              }}
+              onClear={() => formik.setFieldValue('search', '')}
               onChange={handleSearchChange}
+              fullWidth
             />
           </Grid>
         </Grid>
-      </Fixed>
-      <Grow>
-        <Table
-          name='accessLevel'
-          columns={[
-            {
-              field: 'resourceId',
-              headerName: labels.classId,
-              flex: 1
-            },
-            {
-              field: 'resourceName',
-              headerName: labels.className,
-              flex: 2
-            },
-            {
-              field: 'resourceGlobal',
-              headerName: labels.resourceGlobal,
-              flex: 1,
-              cellRenderer: row => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openResourceGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
-                  </IconButton>
-                </Box>
-              )
-            },
-            {
-              field: 'Control Access',
-              headerName: labels.controlAccess,
-              flex: 1,
-              cellRenderer: row => (
-                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
-                  <IconButton size='small' onClick={() => openFieldGlobal(row)}>
-                    <Icon icon='mdi:application-edit-outline' width={18} height={18} />
-                  </IconButton>
-                </Box>
-              )
-            }
-          ]}
-          gridData={filteredData}
-          rowId={['sgId', 'moduleId', 'resourceId']}
-          isLoading={false}
-          maxAccess={maxAccess}
-          refetch={refetch}
-          pagination={false}
-        />
-      </Grow>
-    </VertLayout>
-  )
+      </Box>
+    </Fixed>
+    <Grow>
+      <Table
+        name="accessLevel"
+        columns={[
+          {
+            field: 'resourceId',
+            headerName: labels.classId,
+            flex: 1
+          },
+          {
+            field: 'resourceName',
+            headerName: labels.className,
+            flex: 2
+          },
+          {
+            field: 'resourceGlobal',
+            headerName: labels.resourceGlobal,
+            flex: 1,
+            cellRenderer: row => (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <IconButton size="small" onClick={() => openResourceGlobal(row)}>
+                  <Icon icon="mdi:application-edit-outline" width={18} height={18} />
+                </IconButton>
+              </Box>
+            )
+          },
+          {
+            field: 'Control Access',
+            headerName: labels.controlAccess,
+            flex: 1,
+            cellRenderer: row => (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <IconButton size="small" onClick={() => openFieldGlobal(row)}>
+                  <Icon icon="mdi:application-edit-outline" width={18} height={18} />
+                </IconButton>
+              </Box>
+            )
+          }
+        ]}
+        gridData={filteredData}
+        rowId={['sgId', 'moduleId', 'resourceId']}
+        isLoading={false}
+        maxAccess={maxAccess}
+        refetch={refetch}
+        pagination={false}
+      />
+    </Grow>
+  </VertLayout>
+)
 }
 
 export default SGAccessLevelTab

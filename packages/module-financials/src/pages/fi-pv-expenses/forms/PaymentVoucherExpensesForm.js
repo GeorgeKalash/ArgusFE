@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -32,6 +32,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -659,7 +660,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                     }}
@@ -686,7 +687,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     label={labels.date}
                     value={formik.values?.date}
                     required
-                    onChange={async (e, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('date', newValue)
                       await getMultiCurrencyFormData(formik.values.currencyId, newValue, RateDivision.FINANCIALS)
                     }}
@@ -709,7 +710,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -737,7 +738,6 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     error={formik.touched.cashAccountId && Boolean(formik.errors.cashAccountId)}
                   />
                 </Grid>
-
                 <Grid item xs={6}>
                   <Grid container spacing={1} alignItems='center'>
                     <Grid item xs={8}>
@@ -755,7 +755,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                         ]}
                         readOnly={isPosted || isCancelled}
                         values={formik.values}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await getMultiCurrencyFormData(
                             newValue?.recordId,
                             formik.values.date,
@@ -768,17 +768,15 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                       />
                     </Grid>
                     <Grid item xs={4}>
-                      <Button
-                        variant='contained'
-                        size='small'
+                      <CustomButton
                         onClick={() => openMCRForm(formik.values)}
-                        disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                      >
-                        <img 
-                          src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                          alt={platformLabels.add}
-                        />
-                      </Button>
+                        image='popup.png'
+                        tooltipText={platformLabels.add}
+                        disabled={
+                          !formik.values.currencyId ||
+                          formik.values.currencyId === currencyId
+                        }
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -791,11 +789,10 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       let notes = formik.values.notes
                       notes += newValue?.name && formik.values.notes && '\n'
                       notes += newValue?.name
-
                       notes && formik.setFieldValue('notes', notes)
                       newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
                     }}
@@ -818,7 +815,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     required
                     readOnly={isPosted || isCancelled}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('paymentMethod', newValue ? newValue.key : null)
                     }}
                     error={formik.touched.paymentMethod && Boolean(formik.errors.paymentMethod)}
@@ -869,7 +866,7 @@ export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window
                     valueField='recordId'
                     displayField={'firstCheckNo'}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
                     }}
                     error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}

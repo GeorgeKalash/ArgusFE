@@ -644,14 +644,14 @@ export default function JobOrderForm({
                   displayField={['reference', 'name']}
                   values={formik.values}
                   maxAccess={maxAccess}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('dtId', newValue?.recordId)
                     changeDT(newValue)
                   }}
                   error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                 />
               </Grid>
-              <Grid container item xs={12} spacing={4}>
+              <Grid container item xs={12} spacing={2}>
                 <Grid item xs={6}>
                   <Grid container direction='column' spacing={2}>
                     <Grid item>
@@ -725,7 +725,7 @@ export default function JobOrderForm({
                         ]}
                         values={formik.values}
                         readOnly={isCancelled || isPosted}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('plantId', newValue?.recordId || null)
                         }}
                         error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -747,7 +747,7 @@ export default function JobOrderForm({
                         ]}
                         form={formik}
                         displayFieldWidth={2}
-                        onChange={async (event, newValue) => {
+                        onChange={async (_, newValue) => {
                           await fillItemInfo(newValue)
                         }}
                         errorCheck={'itemId'}
@@ -769,7 +769,7 @@ export default function JobOrderForm({
                         valueField='recordId'
                         displayField={['reference', 'name']}
                         maxAccess={maxAccess}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('sizeId', newValue?.recordId)
                         }}
                         error={formik.touched.sizeId && Boolean(formik.errors.sizeId)}
@@ -852,7 +852,7 @@ export default function JobOrderForm({
                         name='description'
                         label={labels.description}
                         value={formik.values.description}
-                        rows={2.5}
+                        rows={2.8}
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isPosted}
                         onChange={formik.handleChange}
@@ -895,7 +895,7 @@ export default function JobOrderForm({
                         displayField='name'
                         maxAccess={maxAccess}
                         readOnly={!formik?.values?.itemId || isCancelled || isPosted}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
                           formik.setFieldValue('routingId', null)
                           formik.setFieldValue('routingRef', '')
@@ -999,7 +999,7 @@ export default function JobOrderForm({
                         displayField='name'
                         maxAccess={maxAccess}
                         readOnly={isCancelled || isReleased || isPosted}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('classId', newValue?.recordId)
                         }}
                         error={formik.touched.classId && Boolean(formik.errors.classId)}
@@ -1016,7 +1016,7 @@ export default function JobOrderForm({
                         displayField='reference'
                         readOnly={isCancelled || isReleased || isPosted}
                         maxAccess={maxAccess}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                           formik.setFieldValue('standardId', newValue?.recordId)
                         }}
                         error={formik.touched.standardId && Boolean(formik.errors.standardId)}
@@ -1026,7 +1026,7 @@ export default function JobOrderForm({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid container spacing={2} xs={4} sx={{ pl: 3 }}>
+            <Grid container spacing={2} xs={4} sx={{ pl: 2 }}>
               <Grid item>
                 <ImageUpload
                   ref={imageUploadRef}
@@ -1040,7 +1040,6 @@ export default function JobOrderForm({
                   parentImage={parentImage}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <ResourceComboBox
                   endpointId={ManufacturingRepository.MFJobOrder.pack}
@@ -1056,7 +1055,7 @@ export default function JobOrderForm({
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('categoryId', newValue?.recordId)
                   }}
                   error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
@@ -1088,7 +1087,7 @@ export default function JobOrderForm({
                   valueShow='threeDDRef'
                   maxAccess={maxAccess}
                   readOnly={isCancelled || isReleased || isPosted}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('threeDDId', newValue?.recordId || null)
                     formik.setFieldValue('threeDDRef', newValue?.reference || '')
                     formik.setFieldValue('fileReference', newValue?.fileReference || '')
@@ -1108,7 +1107,7 @@ export default function JobOrderForm({
                   valueShow='rubberRef'
                   maxAccess={maxAccess}
                   readOnly={isCancelled || isReleased || isPosted}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('rubberId', newValue?.recordId || null)
                     formik.setFieldValue('rubberRef', newValue?.reference || '')
                   }}
@@ -1130,7 +1129,7 @@ export default function JobOrderForm({
                   displayField='name'
                   readOnly={isCancelled || isReleased || isPosted}
                   values={formik.values}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     formik.setFieldValue('spId', newValue?.recordId)
                   }}
                   error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -1150,7 +1149,7 @@ export default function JobOrderForm({
                     { key: 'reference', value: 'Reference' },
                     { key: 'name', value: 'Name' }
                   ]}
-                  onChange={async (event, newValue) => {
+                  onChange={async (_, newValue) => {
                     await fillBillingInfo(newValue)
                     formik.setFieldValue('clientName', newValue?.name || '')
                     formik.setFieldValue('clientRef', newValue?.reference || '')

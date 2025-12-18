@@ -32,6 +32,7 @@ import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -614,17 +615,15 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
-                    onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                  >
-                     <img 
-                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                      alt={platformLabels.add}
-                    />
-                  </Button>
+                 <CustomButton
+                  onClick={() => openMCRForm(formik.values)}
+                  image='popup.png'
+                  tooltipText={platformLabels.add}
+                  disabled={
+                    !formik.values.currencyId ||
+                    formik.values.currencyId === currencyId
+                  }
+                />
                 </Grid>
               </Grid>
             </Grid>

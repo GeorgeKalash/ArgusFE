@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton } from '@mui/material'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import { useContext } from 'react'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
@@ -16,6 +16,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import ResourceGlobalForm from '@argus/shared-ui/src/components/Shared/ResourceGlobalForm'
 import FieldGlobalForm from '@argus/shared-ui/src/components/Shared/FieldGlobalForm'
 import AccessLevelForm from '@argus/shared-ui/src/components/Shared/AccessLevelForm'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const GlobalAuthorization = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -116,40 +117,26 @@ const GlobalAuthorization = () => {
           inputSearch={true}
           leftSection={
             <Grid item xs={3}>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} alignItems="center">
                 <Grid item xs={9}>
                   <ResourceComboBox
                     datasetId={DataSets.MODULE}
                     name='moduleId'
-                    values={{
-                      moduleId: filters.moduleId
-                    }}
+                    values={{ moduleId: filters.moduleId }}
                     valueField='key'
                     displayField='value'
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       onChange(newValue?.key)
                     }}
                   />
                 </Grid>
-                <Grid item xs={3}>
-                  <Button
-                    variant='contained'
-                    sx={{
-                      ml: 2,
-                      backgroundColor: '#231F20',
-                      '&:hover': {
-                        backgroundColor: '#231F20',
-                        opacity: 0.8
-                      },
-                      width: 'auto',
-                      height: '35px',
-                      objectFit: 'contain'
-                    }}
-                    onClick={() => openApplyModuleLevel()}
+                <Grid item xs={3} sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CustomButton
+                    onClick={openApplyModuleLevel}
                     disabled={!filters.moduleId}
-                  >
-                    <Icon icon='mdi:arrow-expand-right' fontSize={20} />
-                  </Button>
+                    icon={<Icon icon='mdi:arrow-expand-right' fontSize={20} />}
+                    tooltipText={labels.applyModuleLevel}
+                  />
                 </Grid>
               </Grid>
             </Grid>

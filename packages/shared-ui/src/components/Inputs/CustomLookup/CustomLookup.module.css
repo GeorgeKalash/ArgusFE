@@ -16,7 +16,6 @@
   
 }
 
-
 .firstField:dir(ltr) :global(.MuiAutocomplete-inputRoot) {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;

@@ -197,10 +197,7 @@ const ImageUpload = forwardRef(
       <Box className={styles.container}>
         <Box
           className={styles.previewBox}
-          style={{
-            maxWidth: scaledWidth,
-            maxHeight: scaledHeight
-          }}
+          style={{ maxWidth: scaledWidth, maxHeight: scaledHeight }}
           onClick={handleClick}
         >
           <img
@@ -210,9 +207,7 @@ const ImageUpload = forwardRef(
             }
             alt=""
             className={styles.previewImage}
-            style={{
-              border: error ? '2px solid #F44336' : 'none'
-            }}
+            style={{ border: error ? '2px solid #F44336' : 'none' }}
             onError={e => {
               e.currentTarget.src =
                 require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src

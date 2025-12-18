@@ -32,6 +32,7 @@ import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -389,7 +390,7 @@ export default function PaymentOrdersForm({ recordId, window }) {
                     required
                     readOnly={isClosed || isCancelled}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       getMultiCurrencyFormData(newValue?.recordId, formik.values.date)
                       formik.setFieldValue('currencyId', newValue?.recordId || null)
                       formik.setFieldValue('currencyName', newValue?.name || '')
@@ -398,16 +399,12 @@ export default function PaymentOrdersForm({ recordId, window }) {
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
+                  <CustomButton
                     onClick={() => openMCRForm(formik.values)}
+                    image='popup.png'
+                    tooltipText={platformLabels.MultiCurrencyRate}
                     disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                  >
-                    <img 
-                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                      alt={platformLabels.add}
-                    />                  </Button>
+                  />
                 </Grid>
               </Grid>
             </Grid>

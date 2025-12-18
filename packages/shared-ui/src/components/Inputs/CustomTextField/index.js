@@ -35,7 +35,13 @@ const CustomTextField = ({
 }) => {
   const name = props.name
 
-  const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
+  const { _readOnly, _required, _hidden } = checkAccess(
+    name,
+    props.maxAccess,
+    props.required,
+    readOnly,
+    hidden
+  )
 
   const inputRef = useRef(null)
 
@@ -56,6 +62,7 @@ const CustomTextField = ({
 
   const handleInput = e => {
     const inputValue = e.target.value
+
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
@@ -143,7 +150,6 @@ const CustomTextField = ({
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
         ...props.InputProps,
-
         classes: {
           root: search ? inputs.searchRoot : inputs.outlinedRoot,
           notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
@@ -151,46 +157,47 @@ const CustomTextField = ({
         },
         startAdornment: dynamicStartAdornment,
         endAdornment: (
-            <InputAdornment position='end' className={inputs.inputAdornment}>
-              {props.InputProps?.endAdornment}
+          <InputAdornment position='end' className={inputs.inputAdornment}>
+            {props.InputProps?.endAdornment}
 
-              {!_readOnly && search && (
-                <IconButton className={inputs.iconButton} tabIndex={-1} onClick={() => onSearch(value)}>
-                  <SearchIcon className={inputs.icon} />
-                </IconButton>
-              )}
-              {!_readOnly && !clearable && (value || value === 0) && (
-                <IconButton
-                  className={inputs.iconButton}
-                  tabIndex={-1}
-                  id={props.ClearId}
-                  onClick={e => {
-                    onClear(e)
-                    setFocus(true)
-                  }}
-                >
-                  <ClearIcon className={inputs.icon} />
-                </IconButton>
-              )}
-              {endIcons.map((iconBtn, index) => (
-                <>
-                  {iconBtn && (
-                    <IconButton className={inputs.iconButton} tabIndex={-1}>
-                      {iconBtn}
-                    </IconButton>
-                  )}
-                </>
-              ))}
-            </InputAdornment>
-          
+            {!_readOnly && search && (
+              <IconButton className={inputs.iconButton} tabIndex={-1} onClick={() => onSearch(value)}>
+                <SearchIcon className={inputs.icon} />
+              </IconButton>
+            )}
+
+            {!_readOnly && !clearable && (value || value === 0) && (
+              <IconButton
+                className={inputs.iconButton}
+                tabIndex={-1}
+                id={props.ClearId}
+                onClick={e => {
+                  onClear(e)
+                  setFocus(true)
+                }}
+              >
+                <ClearIcon className={inputs.icon} />
+              </IconButton>
+            )}
+
+            {endIcons.map((iconBtn, _) => (
+              <>
+                {iconBtn && (
+                  <IconButton className={inputs.iconButton} tabIndex={-1}>
+                    {iconBtn}
+                  </IconButton>
+                )}
+              </>
+            ))}
+          </InputAdornment>
         )
       }}
       InputLabelProps={{
         ...InputLabelProps,
         className:
-        isFocused || value || InputLabelProps?.shrink
-          ? inputs.inputLabelShrink
-          : inputs.inputLabel
+          isFocused || value || InputLabelProps?.shrink
+            ? inputs.inputLabelShrink
+            : inputs.inputLabel
       }}
       required={_required}
       {...props}
@@ -199,4 +206,3 @@ const CustomTextField = ({
 }
 
 export default CustomTextField
-

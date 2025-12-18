@@ -1,7 +1,6 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: var(--dialog-height, 120px);
   z-index: 2;
   background-color: #fff;
 }
@@ -26,45 +25,43 @@
   z-index: 2;
 }
 
-.dialogText {
+.dialog :global(.MuiDialogContentText-root) {
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
 @media (max-width: 1600px) {
   .content {
-    padding: 14px;
+    padding: 16px;
     font-size: 0.8rem;
   }
 
-  .actions {
-    padding: 8px 8px;
+  .dialog :global(.MuiDialogContentText-root) {
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 1400px) {
   .content {
-    padding: 12px;
+    font-size: 0.7rem;
+  }
+
+  .dialog :global(.MuiDialogContentText-root) {
     font-size: 0.7rem;
   }
 }
 
-@media (max-width: 600px) {
-  .container {
-    height: auto;
-    min-height: 100px;
-  }
-
+@media (max-width: 1024px) {
   .content {
     padding: 12px;
-    font-size: 0.85rem;
+    font-size: 0.68rem;
   }
 
   .actions {
     padding: 8px 12px;
   }
 
-  .dialogText {
-    font-size: 0.85rem;
+  .dialog :global(.MuiDialogContentText-root) {
+    font-size: 0.6rem;
   }
 }

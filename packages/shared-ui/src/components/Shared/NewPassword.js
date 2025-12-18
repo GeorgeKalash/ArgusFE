@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react'
-import { Box, Button, DialogActions, Grid, IconButton, LinearProgress } from '@mui/material'
+import { Box, DialogActions, Grid, IconButton, LinearProgress } from '@mui/material'
 import Icon from '@argus/shared-core/src/@core/components/icon'
 import CustomTextField from '../Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs/Inputs.module.css'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const NewPassword = ({ formik, labels, score, setScore }) => {
     const { platformLabels } = useContext(ControlContext)
@@ -168,21 +169,19 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
           position='fixed'
           sx={{ padding: '8px !important' }}
         >
-          <Button
+          <CustomButton
+            image='save.png'
+            tooltipText={platformLabels.Submit}
             onClick={formik.handleSubmit}
-            variant='contained'
-            sx={{
-              mr: 1,
+            style={{
+              marginRight: 8,
               backgroundColor: '#4eb558',
-              '&:hover': { backgroundColor: '#4eb558', opacity: 0.8 },
-              width: '50px !important',
-              height: '35px',
-              objectFit: 'contain',
-              minWidth: '30px !important'
+              width: 50,
+              height: 35,
+              minWidth: 30,
+              padding: 0
             }}
-          >
-            <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/save.png').default.src} alt={platformLabels.Submit} />
-          </Button>
+          />
         </Grid>
       </DialogActions>
     </Grid>

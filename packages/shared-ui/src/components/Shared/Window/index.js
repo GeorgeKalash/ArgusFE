@@ -28,7 +28,6 @@ import styles from './Window.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 function LoadingOverlay() {
-  // ✅ Inline inset overrides any leftover top/bottom in CSS
   return (
     <Box
       className={styles.loadingOverlay}
@@ -98,11 +97,11 @@ const Window = React.memo(
       screenWidth <= 768 ? 180 :
       screenWidth <= 1024 ? 200 :
       screenWidth <= 1366 ? 220 :
-      screenWidth <= 1600 ? 240 : 300
+      screenWidth <= 1600 ? 240 : 240
 
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
-    const containerHeight = `calc(100vh - 40px)`
+    const containerHeight = `calc(100vh - var(--tabs-height, 40px))`
 
     const scaleFactor = (() => {
       if (screenWidth >= 1680) return 1
@@ -118,7 +117,7 @@ const Window = React.memo(
     })()
 
     const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
-    const scaledHeight = expanded ? containerHeight : Math.max(200, height * scaleFactor)
+    const scaledHeight = expanded ? containerHeight : Math.max(120, height * scaleFactor)
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()

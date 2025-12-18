@@ -14,6 +14,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import Form from './Form'
+import CustomButton from '../Inputs/CustomButton'
 
 const formatDateForImport = dateString => {
   const [day, month, year] = dateString.split('/').map(part => parseInt(part, 10))
@@ -260,15 +261,14 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                   readOnly
                   disabled={!!file?.name}
                 />
-                <Button
-                  sx={{ ml: 6, minWidth: '90px !important' }}
-                  variant='contained'
-                  size='small'
+                <CustomButton
+                  label={`${platformLabels?.Browse}...`}
                   disabled={!!file?.name}
                   onClick={() => imageInputRef.current.click()}
-                >
-                  {platformLabels?.Browse}...
-                </Button>
+                  style={{
+                    marginLeft: 8,
+                  }}
+                />
                 <input
                   type='file'
                   accept='.csv'
@@ -276,17 +276,16 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
                   style={{ display: 'none' }}
                   onChange={handleFileChange}
                 />
-                <Button
+                <CustomButton
+                  image='clear.png'
+                  tooltipText={platformLabels?.Clear}
                   onClick={clearFile}
-                  sx={{
+                  style={{
+                    marginLeft: 8,
                     backgroundColor: '#f44336',
-                    '&:hover': { backgroundColor: '#f44336', opacity: 0.8 },
-                    ml: 2
+                    padding: 0
                   }}
-                  variant='contained'
-                >
-                  <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/clear.png').default.src} alt={platformLabels?.Clear} />
-                </Button>
+                />
               </Grid>
             }
           />
