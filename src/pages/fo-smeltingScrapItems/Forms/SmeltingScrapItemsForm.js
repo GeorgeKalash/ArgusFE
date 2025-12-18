@@ -27,6 +27,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
 
   const conditions = {
     sku: row => row?.sku,
+    itemName: row => row?.itemName,
     puritySource: row => row?.puritySource
   }
 
@@ -43,7 +44,6 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
       const payload = {
         metalId: recordId,
         items: values.items
-          .filter(item => item?.itemId)
           .filter(row => Object.values(requiredFields).every(fn => fn(row)))
           .map((row, index) => ({
             ...row,
@@ -94,6 +94,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'recordId',
         displayField: 'sku',
+        displayFieldWidth: 1.5,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
