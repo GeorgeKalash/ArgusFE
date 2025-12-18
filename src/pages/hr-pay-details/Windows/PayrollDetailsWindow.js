@@ -12,9 +12,7 @@ const PayrollDetailsWindow = ({ seqNo, recordId, labels, maxAccess }) => {
     seqNo
   })
 
-  const editMode = !!store.recordId
-
-  const tabs = [{ label: labels.PayrollDetails }, { label: labels.SocialSecurity, disabled: !editMode }]
+  const tabs = [{ label: labels.PayrollDetails }, { label: labels.SocialSecurity, disabled: !store.recordId }]
 
   return (
     <>

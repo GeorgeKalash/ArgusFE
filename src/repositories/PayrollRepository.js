@@ -83,8 +83,7 @@ export const PayrollRepository = {
   },
   PayrollDetails: {
     qry: service + 'qryED',
-    set2: service + 'set2ED',
-    get: service + 'getED'
+    set2: service + 'set2ED'
   },
   SocialSecurity: {
     qry: service + 'qryES',

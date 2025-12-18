@@ -62,7 +62,8 @@ const SocialSecurity = ({ labels, maxAccess, store }) => {
     enabled: editMode,
     queryFn: fetchGridData,
     endpointId: PayrollRepository.SocialSecurity.qry,
-    datasetId: ResourceIds.PayrollDetail
+    datasetId: ResourceIds.PayrollDetail,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   return (

@@ -122,23 +122,23 @@ export default function PayrollDetailsForm({ labels, maxAccess, store, setStore 
     }
   ]
 
-  const getGridData = async () => {
-    const res = await getRequest({
-      extension: PayrollRepository.PayrollDetails.qry,
-      parameters: `_payId=${recordId}&_seqNo=${seqNo}`
-    })
-
-    formik.setValues({
-      items: res?.list?.map((obj, index) => ({
-        id: index + 1,
-        ...obj
-      })),
-      recordId
-    })
-  }
-
   useEffect(() => {
-    if (recordId) getGridData()
+    ;(async function () {
+      if (recordId) {
+        const res = await getRequest({
+          extension: PayrollRepository.PayrollDetails.qry,
+          parameters: `_payId=${recordId}&_seqNo=${seqNo}`
+        })
+
+        formik.setValues({
+          items: res?.list?.map((obj, index) => ({
+            id: index + 1,
+            ...obj
+          })),
+          recordId
+        })
+      }
+    })()
   }, [])
 
   return (
