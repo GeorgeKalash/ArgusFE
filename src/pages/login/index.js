@@ -169,7 +169,9 @@ const LoginPage = () => {
                   allowClear={deployHost}
                   label={platformLabels?.CompanyName}
                   onChange={validation.handleChange}
-                  loseFocusOnEnter={true}
+                  onKeyDown={e => {
+                    if (e.key == 'Enter') e.target.blur()
+                  }}
                   onBlur={
                     deployHost
                       ? e => {

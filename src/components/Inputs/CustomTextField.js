@@ -26,7 +26,6 @@ const CustomTextField = ({
   hidden = false,
   phone = false,
   search = false,
-  loseFocusOnEnter = false,
   language = '',
   hasBorder = true,
   forceUpperCase = false,
@@ -112,12 +111,6 @@ const CustomTextField = ({
     setHasValue(inputValue.length > 0)
   }
 
-  function applyLosingFocus() {
-    inputRef?.current && inputRef.current.blur()
-    setIsFocused(false)
-    setFocus(false)
-  }
-
   useEffect(() => {
     if (autoFocus && inputRef.current && value == '' && !focus) {
       inputRef.current.focus()
@@ -160,15 +153,7 @@ const CustomTextField = ({
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
-      onKeyDown={e =>
-        e.key === 'Enter'
-          ? search
-            ? onSearch(e.target.value)
-            : loseFocusOnEnter
-            ? applyLosingFocus()
-            : ''
-          : setFocus(true)
-      }
+      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
         endAdornment: (allowClear || !_readOnly) && (
           <InputAdornment position='end'>

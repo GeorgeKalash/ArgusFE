@@ -131,6 +131,11 @@ const AuthProvider = ({ children }) => {
 
         return
       }
+      if (validCompanyName) {
+        setLoading(false)
+
+        return
+      }
 
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
       const record = response?.data?.record
@@ -140,7 +145,7 @@ const AuthProvider = ({ children }) => {
         setValidCompanyName(false)
       } else {
         setCompanyName(record.accountName || '')
-        setValidCompanyName(record.accountName || '')
+        setValidCompanyName(!!record.accountName)
         window.localStorage.setItem('apiUrl', record.api || '')
       }
     } catch (error) {
