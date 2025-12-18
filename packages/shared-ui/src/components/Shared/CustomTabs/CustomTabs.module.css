@@ -137,6 +137,42 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 1024px) {
+
+  .tabs {
+    min-height: 26px !important;
+    height: 26px !important;
+  }
+
+  .tabs :global(.MuiTabs-flexContainer) {
+    height: 26px !important;
+  }
+
+  .tabRoot {
+    min-height: 26px !important;
+    height: 26px !important;
+    padding: 0 6px !important;
+  }
+
+  .tabs :global(.MuiTab-root) {
+    min-height: 26px !important;
+    height: 26px !important;
+  }
+
+  .tabs :global(.MuiTab-root span),
+  .tabs :global(.MuiTab-root .MuiTab-wrapper) {
+    line-height: 1 !important;
+  }
+
+  .tabName {
+    font-size: 10px !important;
+  }
+
+  .refreshIcon {
+    font-size: 14px !important;
+  }
+}
+
 @media (max-width: 600px) {
     .refreshIcon {
     font-size: 10px !important;
