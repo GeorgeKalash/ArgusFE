@@ -28,7 +28,7 @@ import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
   const functionId = SystemFunction.PurityAdjustment
@@ -41,11 +41,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.FoundaryTransaction.page
+    endpointId: FoundryRepository.PurityAdjustment.page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const baseSalesMetalId = parseInt(defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
 
   const conditions = {
     sku: row => row?.sku,
@@ -72,6 +73,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         status: 1,
         workCenterId: null,
         qty: 0,
+        baseSalesMetalPurity: 0,
         notes: ''
       },
       items: [
@@ -104,7 +106,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FoundryRepository.FoundaryTransaction.set2,
+        extension: FoundryRepository.PurityAdjustment.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -124,8 +126,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           trxId: obj?.recordId || 0,
           seqNo: index + 1,
           purity: item.purity / 1000
-        })),
-      scraps: []
+        }))
     }
   }
   const editMode = !!formik.values?.header.recordId
@@ -137,10 +138,16 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     }, 0)
 
   const totalMetal = calculateTotal('qty')
+  const totalRmQty = calculateTotal('rmQty')
+  const totalRmNewQty = calculateTotal('newRmQty')
+  const totalDiffQty = calculateTotal('deltaRMQty')
+  const avgPurity = ((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+  const avgStdPurity = ((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+  const totalDiffPurity = (avgStdPurity || 0) - (avgPurity || 0)
 
   const onPost = async () => {
     await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.post,
+      extension: FoundryRepository.PurityAdjustment.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -151,7 +158,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.unpost,
+      extension: FoundryRepository.PurityAdjustment.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -178,7 +185,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FoundryRepository.FoundaryTransaction.get2,
+      extension: FoundryRepository.PurityAdjustment.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -191,15 +198,17 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
-      purity: item.purity * 1000,
-      diffPurity: (item?.purity || 0) * 1000 - (item?.stdPurity || 0)
+      purity: item.purity * 1000
     }))
+
+    const baseSalesMetalPurity = await getBaseSalesMetalPurity()
 
     formik.setValues({
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
-        date: formatDateFromApi(record?.header?.date)
+        date: formatDateFromApi(record?.header?.date),
+        baseSalesMetalPurity
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items
     })
@@ -240,7 +249,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         fillSKUStore(newRow?.metalId)
         update({
           purity: newRow?.purity * 1000 || 0,
-          diffPurity: (newRow?.purity || 0) * 1000 - (newRow?.stdPurity || 0)
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0) * 1000).toFixed(2)
         })
       }
     },
@@ -265,9 +274,14 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         displayFieldWidth: 3.5
       },
       onChange: async ({ row: { update, newRow } }) => {
+        const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
         update({
           stdPurity: newRow?.stdPurity || 0,
-          diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0)
+          deltaPurity: (newRow?.stdPurity || 0) - (newRow?.purity || 0),
+          newRmQty,
+          deltaRMQty: newRmQty - (newRow?.rmQty || 0)
         })
       },
       propsReducer({ row, props }) {
@@ -288,7 +302,22 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 }
+      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      async onChange({ row: { update, newRow } }) {
+        const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+        const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+        update({
+          rmQty,
+          newRmQty,
+          deltaRMQty: newRmQty - rmQty
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -296,14 +325,21 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       label: labels.purity,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
-        update({ diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0) })
+        const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+        update({
+          deltaPurity: (newRow?.stdPurity || 0) - (newRow?.purity || 0),
+          rmQty,
+          deltaRMQty: (newRow?.newRmQty || 0) - rmQty
+        })
       }
     },
     {
       component: 'numberfield',
       name: 'rmQty',
       label: labels.rmQty,
-      props: { maxLength: 12, decimalScale: 2 }
+      props: { decimalScale: 2, readOnly: true }
     },
     {
       component: 'numberfield',
@@ -315,13 +351,13 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'newRmQty',
       label: labels.newRmQty,
-      props: { maxLength: 12, decimalScale: 2 }
+      props: { decimalScale: 2, readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'deltaRMQty',
       label: labels.diffQty,
-      props: { maxLength: 12, decimalScale: 2 }
+      props: { decimalScale: 2, readOnly: true }
     },
     {
       component: 'numberfield',
@@ -372,6 +408,17 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     return res?.record || {}
   }
 
+  async function getBaseSalesMetalPurity() {
+    if (!baseSalesMetalId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${baseSalesMetalId}`
+    })
+
+    return res?.record?.purity * 1000 || 0
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -381,6 +428,15 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       }
     })()
   }, [formik.values?.header?.dtId])
+
+  useEffect(() => {
+    ;(async function () {
+      if (baseSalesMetalId && !recordId) {
+        const baseSalesMetalPurity = await getBaseSalesMetalPurity()
+        formik.setFieldValue('header.baseSalesMetalPurity', baseSalesMetalPurity)
+      }
+    })()
+  }, [baseSalesMetalId])
 
   useEffect(() => {
     ;(async function () {
@@ -555,7 +611,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                   <CustomNumberField
                     label={labels.totalMetal}
                     value={totalMetal}
-                    decimalScale={3}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -563,8 +619,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.totalRmQty}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={totalRmQty}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -572,8 +628,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.totalNewRmQty}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={totalRmNewQty}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -581,8 +637,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.totalDiffQty}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={totalDiffQty}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -592,8 +648,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.avgPurity}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={avgPurity}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -601,8 +657,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.avgStdPurity}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={avgStdPurity}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
@@ -610,8 +666,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     label={labels.totalDiffPurity}
-                    value={totalMetal}
-                    decimalScale={3}
+                    value={totalDiffPurity}
+                    decimalScale={2}
                     readOnly
                     align='right'
                   />
