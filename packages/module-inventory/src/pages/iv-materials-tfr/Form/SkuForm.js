@@ -44,7 +44,7 @@ export default function SkuForm({ labels, maxAccess, plId, itemId }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={4} p={2}>
+        <Grid container spacing={2} p={2}>
           <Grid item xs={12}>
             <CustomTextField name='sku' value={formik?.values?.sku} label={labels.sku} readOnly />
           </Grid>

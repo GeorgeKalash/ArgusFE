@@ -1147,7 +1147,6 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
         },
         options: {
           responsive: true,
-          aspectRatio: ratio,
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
