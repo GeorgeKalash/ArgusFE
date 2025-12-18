@@ -4,12 +4,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Button,
   Box
 } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useContext } from 'react'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import styles from './ConfirmationDialog.module.css'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 
 const ConfirmationDialog = ({
   openCondition,
@@ -18,33 +21,38 @@ const ConfirmationDialog = ({
   okButtonAction,
   fullScreen = true,
   window,
-  height = '120px',
   ...props
 }) => {
   const { platformLabels } = useContext(ControlContext)
 
-  return !fullScreen ? (
-    <Box
-      className={styles.container}
-      style={{ '--dialog-height': height }}
-    >
-      <Box className={styles.content}>
-        {DialogText}
-      </Box>
+ const actions = [
+    {
+    key: 'Ok',
+      condition: true,
+      onClick: () => {
+        okButtonAction(window)
+        if (props?.close) window.close()
+      },
+      disabled: false
+    }
+  ]
 
-      <Box className={styles.actions}>
-        <Button
-          autoFocus
-          onClick={() => {
-            okButtonAction(window)
-            if (props?.close) window.close()
-          }}
-          color="primary"
-        >
-          {platformLabels.OK}
-        </Button>
-      </Box>
-    </Box>
+  return !fullScreen ? (
+    <FormShell
+      isSaved={false}
+      isInfo = {false}
+      isCleared={false}
+      actions={actions}
+    >
+      <VertLayout>
+        <Grow>
+          <Box className={styles.content}>
+            {DialogText}
+          </Box>
+        </Grow>
+      </VertLayout>
+    </FormShell>
+   
   ) : (
     <Dialog
       className={styles.dialog}
@@ -62,9 +70,7 @@ const ConfirmationDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={okButtonAction} color="primary">
-          {platformLabels.OK}
-        </Button>
+        <CustomButton onClick={okButtonAction} label={platformLabels.OK} />
       </DialogActions>
     </Dialog>
   )

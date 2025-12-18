@@ -315,6 +315,9 @@
   .agGridContainer {
     --ag-font-size: 9.6px;
   }
+  .actionsBox {
+    gap: 10px;
+  }
 
   .agGridContainer :global(.ag-header),
   .agGridContainer :global(.ag-header-cell) {

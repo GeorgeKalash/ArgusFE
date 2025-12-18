@@ -888,7 +888,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   await onChangeDtId(newValue?.recordId)
                   changeDT(newValue)
@@ -911,7 +911,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (!newValue?.isInactive) {
                     formik.setFieldValue('siteId', newValue?.recordId)
                   } else {
@@ -940,7 +940,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 readOnly={isClosed}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('currencyId', newValue?.recordId || null)
                 }}
                 error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
@@ -985,7 +985,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -1006,7 +1006,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('contactId', newValue?.recordId || null)
                 }}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
@@ -1040,7 +1040,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('spId', newValue?.recordId || null)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -1060,7 +1060,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                 readOnly
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('taxId', newValue?.recordId || null)
                 }}
                 error={formik.touched.taxId && Boolean(formik.errors.taxId)}
@@ -1092,7 +1092,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                     { key: 'keywords', value: 'Keywords' },
                     { key: 'cgName', value: 'Client Group' }
                   ]}
-                  onChange={async (event, newValue) => {
+                  onChange={async (_, newValue) => {
                     formik.setFieldValue('clientName', newValue?.name)
                     formik.setFieldValue('clientRef', newValue?.reference)
                     formik.setFieldValue('accountId', newValue?.accountId)

@@ -19,7 +19,7 @@ const PageError = ({ onClose, message, height = '', spacing }) => {
       Title='Error'
       width={450}
       spacing={spacing}
-      height={height}
+      height={height || 200}
       onClose={onClose}
       expandable={false}
       controlled={true}

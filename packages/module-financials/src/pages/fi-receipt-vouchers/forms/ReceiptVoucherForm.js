@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -31,6 +31,7 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -375,7 +376,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                   changeDT(newValue)
                 }}
@@ -426,7 +427,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -452,7 +453,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 ]}
                 displayFieldWidth={4}
                 filter={{ isInactive: val => val !== true }}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('accountId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('accountRef', newValue?.reference || '')
                   formik.setFieldValue('accountName', newValue?.name || '')
@@ -485,7 +486,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('spId', newValue?.recordId)
                 }}
                 error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -503,7 +504,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 displayField='value'
                 required
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('cashAccountId', null)
                   formik.setFieldValue('cashAccountRef', null)
                   formik.setFieldValue('cashAccountName', null)
@@ -566,7 +567,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 ]}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('contactId', newValue?.recordId || null)
                 }}
                 error={formik.touched.contactId && Boolean(formik.errors.contactId)}
@@ -590,7 +591,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                     ]}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       await getMultiCurrencyFormData(newValue?.recordId, formik.values.date, RateDivision.FINANCIALS)
                       formik.setFieldValue('currencyId', newValue?.recordId)
                       formik.setFieldValue('currencyName', newValue?.name)
@@ -599,17 +600,15 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <Button
-                    variant='contained'
-                    size='small'
+                  <CustomButton
                     onClick={() => openMCRForm(formik.values)}
-                    disabled={!formik.values.currencyId || formik.values.currencyId === currencyId}
-                  >
-                    <img 
-                      src={require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src}
-                      alt={platformLabels.add}
-                    />
-                  </Button>
+                    image='popup.png'
+                    tooltipText={platformLabels.add}
+                    disabled={
+                      !formik.values.currencyId ||
+                      formik.values.currencyId === currencyId
+                    }
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -639,7 +638,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                   { key: 'name', value: 'Name' }
                 ]}
                 values={formik.values}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('collectorId', newValue?.recordId || '')
                 }}
                 error={formik.touched.collectorId && Boolean(formik.errors.collectorId)}
@@ -685,7 +684,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={isCancelled || isPosted}
                 valueField='recordId'
                 displayField='name'
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   let notes = formik.values.notes
 
                   if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')

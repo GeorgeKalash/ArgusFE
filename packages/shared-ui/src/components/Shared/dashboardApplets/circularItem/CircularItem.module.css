@@ -70,10 +70,10 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 1600px) {
+@media (max-width: 480px) {
   .circleIcon {
-    width: px;
-    font-size: 10px;
+    width: 44px;
+    font-size: 11px;
   }
 
   .span.big {
@@ -85,24 +85,29 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .circleIcon {
-    width: 44px;
-    font-size: 12px;
+    width: clamp(48px, 10vw, 72px);
   }
 
   .span.big {
-    font-size: 12px;
+    font-size: clamp(12px, 2.2vw, 14px);
   }
 
   .span.small {
-    font-size: 11px;
+    font-size: clamp(11px, 2vw, 13px);
   }
 }
 
 @media (max-width: 1024px) {
   .circleIcon {
     width: clamp(52px, 9vw, 88px);
+  }
+}
+
+@media (max-width: 1440px) {
+  .circleIcon {
+    width: clamp(60px, 7vw, 92px);
   }
 }
 
@@ -114,5 +119,20 @@
 
   .span.big {
     font-size: 18px;
+  }
+
+  .span.small {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .circleIcon {
+    width: 110px;
+  }
+
+  .circleItemContainer {
+    margin: 8px;
+    padding: 6px;
   }
 }

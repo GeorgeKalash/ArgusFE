@@ -3,9 +3,10 @@ import { Grid } from '@mui/material'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
-import Form from './Form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import styles from './StrictConfirmation.module.css'
+import Form from '../Form'
 
 const StrictConfirmation = ({ window, action, type = '' }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -69,8 +70,11 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
 
   useSetWindow({ title: confirmation.title, window })
 
-  const handleChange = event => setConfirmation(prev => ({ ...prev, text: event.target.value }))
-  const handleClear = () => setConfirmation(prev => ({ ...prev, text: '' }))
+  const handleChange = event =>
+    setConfirmation(prev => ({ ...prev, text: event.target.value }))
+
+  const handleClear = () =>
+    setConfirmation(prev => ({ ...prev, text: '' }))
 
   const handleSubmit = () => {
     action()
@@ -96,15 +100,19 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} className={styles.container}>
             <Grid item xs={12}>
-              <p style={{ fontWeight: 'bold' }}>
+              <p className={styles.title}>
                 {platformLabels.areYouSure}
                 <br />
                 {confirmation.actionMsg}
               </p>
-              <p>{confirmation.typeText}</p>
+
+              <p className={styles.message}>
+                {confirmation.typeText}
+              </p>
             </Grid>
+
             <Grid item xs={12}>
               <CustomTextField
                 name='confirmation'
@@ -113,6 +121,7 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
                 onClear={handleClear}
                 placeholder={confirmation.placeHolder}
                 autoFocus
+                className={styles.input}
               />
             </Grid>
           </Grid>

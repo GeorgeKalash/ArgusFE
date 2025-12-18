@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import React, { useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -41,6 +41,7 @@ import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/Custo
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import FixedGrid from '@argus/shared-ui/src/components/Shared/FixedGrid'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -1011,17 +1012,8 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                         />
                       </Grid>
                       <Grid item xs={6}>
-                        <Button
-                          variant='contained'
-                          sx={{
-                            '&:hover': {
-                              opacity: 0.8
-                            },
-                            width: 'auto',
-                            height: '33px',
-                            objectFit: 'contain',
-                            minWidth: 'auto'
-                          }}
+                        <CustomButton
+                          label={labels.fetch}
                           onClick={() =>
                             stack({
                               Component: Confirmation,
@@ -1036,13 +1028,12 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                             !formik?.values?.id_type ||
                             !formik?.values?.birthDate ||
                             !formik.values.idNo ||
-                            (formik.values?.expiryDate && new Date(formik.values?.expiryDate) >= new Date())
+                            (formik.values?.expiryDate &&
+                              new Date(formik.values?.expiryDate) >= new Date())
                               ? true
                               : false
                           }
-                        >
-                          {labels.fetch}
-                        </Button>
+                        />
                       </Grid>
                       <Grid item xs={6}>
                         <CustomDatePicker

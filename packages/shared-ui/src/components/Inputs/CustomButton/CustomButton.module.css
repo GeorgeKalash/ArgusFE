@@ -16,9 +16,14 @@
   padding: 4px 7px !important;
 }
 
+.labelOnly span {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
 .buttonImage {
   height: 20px !important;
-  width: 20px !important; 
+  width: 20px !important;
   object-fit: contain;
 }
 
@@ -36,7 +41,7 @@
 }
 
 @media (min-width: 2049px) and (max-width: 2566px) {
-  .buttonImage {
+   .buttonImage {
     height: 18px !important;
     width: 18px !important; 
   }
@@ -53,25 +58,14 @@
   .toast {
     font-size: 16px;
   }
-}
-@media (min-width: 1601px) and (max-width: 2048px) {
-  .buttonImage {
-    height: 18px !important;
-    width: 18px !important; 
-  }
-  .responsiveButton,
-  .responsiveButtonFullWidth {
-    width: auto !important;
-    height: auto !important;
-    border-radius: 7px !important;
+  .labelOnly span {
     font-size: 16px !important;
-    padding: 6px 9px !important;
   }
-  .responsiveButtonFullWidth {
-    width: 100% !important;
-  }
-  .toast {
-    font-size: 16px;
+}
+
+@media (min-width: 1601px) and (max-width: 2048px) {
+  .labelOnly span {
+    font-size: 14px !important;
   }
 }
 
@@ -89,9 +83,15 @@
   .toast {
     font-size: 14px;
   }
+  .labelOnly span {
+    font-size: 12px !important;
+  }
 }
 
 @media (max-width: 1366px) {
+  .labelOnly span {
+    font-size: 11px !important;
+  }
   .buttonImage {
     height: 17px !important;
     width: 17px !important; 
@@ -113,6 +113,9 @@
 }
 
 @media (max-width: 1024px) {
+  .labelOnly span {
+    font-size: 10px !important;
+  }
   .buttonImage {
     height: 15px !important;
     width: 15px !important; 
@@ -134,6 +137,9 @@
 }
 
 @media (max-width: 768px) {
+  .labelOnly span {
+    font-size: 9px !important;
+  }
   .buttonImage {
     height: 14px !important;
     width: 14px !important; 
@@ -149,6 +155,9 @@
 }
 
 @media (max-width: 480px) {
+  .labelOnly span {
+    font-size: 8px !important;
+  }
   .buttonImage {
     height: 12px !important;
     width: 12px !important; 
@@ -164,6 +173,9 @@
 }
 
 @media (max-width: 360px) {
+  .labelOnly span {
+    font-size: 7px !important;
+  }
   .buttonImage {
     height: 11px !important;
     width: 11px !important; 

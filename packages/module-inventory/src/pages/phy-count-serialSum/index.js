@@ -5,7 +5,7 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
@@ -18,6 +18,7 @@ import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearGridConfirmation'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
 const PhysicalCountSerial = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -216,7 +217,7 @@ const PhysicalCountSerial = () => {
                 required
                 readOnly={formik.values.siteId}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('stockCountId', newValue?.recordId)
                   formik.setFieldValue('reference', newValue?.reference)
                   formik.setFieldValue('date', formatDateFromApi(newValue?.date))
@@ -267,7 +268,7 @@ const PhysicalCountSerial = () => {
                 values={formik.values}
                 required
                 readOnly={formik.values.siteId}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('siteId', newValue?.siteId)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
@@ -288,19 +289,14 @@ const PhysicalCountSerial = () => {
               />
             </Grid>
             <Grid item xs={2}>
-              <Button
-                onClick={openClear}
-                sx={{
-                  backgroundColor: '#f44336',
-                  '&:hover': {
-                    backgroundColor: '#f44336',
-                    opacity: 0.8
-                  }
-                }}
-                variant='contained'
-              >
-                <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/clear.png').default.src} alt={platformLabels.Clear} />
-              </Button>
+            <CustomButton
+              image='clear.png'
+              tooltipText={platformLabels.Clear}
+              onClick={openClear}
+              style={{
+                backgroundColor: '#f44336',
+              }}
+            />
             </Grid>
           </Grid>
         </Fixed>

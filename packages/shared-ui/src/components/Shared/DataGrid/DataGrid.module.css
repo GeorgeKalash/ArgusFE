@@ -4,6 +4,8 @@
 
 .agContainer {
   width: 100%;
+  height: 100%;
+  flex: 1;
 }
 
 .agContainer.ag-theme-alpine {
@@ -131,10 +133,13 @@
   height: auto;
 }
 
-.agContainer :global(.ag-cell-focus),
-.agContainer :global(.ag-cell.ag-cell-focus),
-.agContainer :global(.ag-cell.ag-cell-inline-editing),
-.agContainer :global(.ag-cell.ag-cell-inline-editing.ag-cell-focus) {
+.agContainer :global(.ag-cell.cell-error) {
+  border: 1px solid #ff0000 !important;
+}
+
+.agContainer :global(.ag-cell.ag-cell-focus:not(.cell-error)),
+.agContainer :global(.ag-cell.ag-cell-inline-editing:not(.cell-error)),
+.agContainer :global(.ag-cell.ag-cell-inline-editing.ag-cell-focus:not(.cell-error)) {
   box-shadow: none !important;
   outline: none !important;
   border-color: transparent !important;

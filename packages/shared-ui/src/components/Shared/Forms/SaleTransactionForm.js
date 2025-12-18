@@ -1,6 +1,6 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi, formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -64,7 +64,6 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 
 export default function SaleTransactionForm({
   labels,
@@ -2079,14 +2078,14 @@ export default function SaleTransactionForm({
               />
             </Grid>
             <Grid item xs={1}>
-              <Button
-                variant='contained'
-                size='small'
+              <CustomButton
+                image='popup.png'
+                tooltipText={platformLabels.add}
                 onClick={() => openMCRForm(formik.values.header)}
-                disabled={formik.values.header.currencyId === defaultsDataState?.currencyId}
-              >
-                <img src={ require('@argus/shared-ui/src/components/images/buttonsIcons/popup.png').default.src} alt={platformLabels.add} />
-              </Button>
+                disabled={
+                  formik.values.header.currencyId === defaultsDataState?.currencyId
+                }
+              />
             </Grid>
             <Grid item xs={2}>
               <CustomTextField

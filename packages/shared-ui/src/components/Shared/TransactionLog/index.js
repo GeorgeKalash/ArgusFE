@@ -3,16 +3,17 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import Table from './Table'
+import Table from '../Table'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { formatDateDefault, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
-import ResourceComboBox from './ResourceComboBox'
+import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import ResourceComboBox from '../ResourceComboBox'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import styles from './TransactionLog.module.css'
 
 const TransactionLog = props => {
   const { recordId, resourceId, window } = props
@@ -160,7 +161,7 @@ const TransactionLog = props => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container xs={12} sx={{ paddingBottom: '25px', m: 2 }}>
+        <Grid container xs={12} className={styles.container}>
           <Grid item xs={5}>
             <ResourceComboBox
               datasetId={DataSets.TRX_TYPE}
@@ -180,8 +181,8 @@ const TransactionLog = props => {
             />
           </Grid>
           <Grid container xs={0.7}></Grid>
-          <Grid container xs={4} spacing={4}>
-            <Grid container xs={12}>
+          <Grid container xs={4} spacing={4} className={styles.label}>
+            <Grid container xs={12} >
               <Grid item xs={6}>
                 {_labels.recordId}
               </Grid>
@@ -213,7 +214,7 @@ const TransactionLog = props => {
       </Grow>
       <Fixed>
         <Fixed>
-          <Grid data-unique-id item xs={4} sx={{ paddingBottom: '15px', height: '18vh', overflow: 'auto', m: 2 }}>
+          <Grid data-unique-id item xs={4}  className={styles.info}  >
             {renderObject(info)}
           </Grid>
         </Fixed>
