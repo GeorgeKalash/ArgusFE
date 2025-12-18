@@ -196,46 +196,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
     },
     {
       component: 'numberfield',
-      label: labels.damagePcs,
-      name: 'damagedPcs',
-      width: 130,
-      props: {
-        decimalScale: 0,
-        readOnly: true
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({
-          damagedPcs: newRow?.damagedPcs || 0,
-          outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2)
-        })
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.damageWgt,
-      name: 'damagedQty',
-      width: 130,
-      props: {
-        decimalScale: 0,
-        readOnly: true
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({
-          damagedQty: parseFloat(newRow?.damagedQty || 0).toFixed(2),
-          netWgt: parseFloat(
-            (
-              parseFloat(newRow?.currentWgt || 0) +
-              (parseFloat(newRow?.issuedWgt || 0) -
-                parseFloat(newRow?.returnedWgt || 0) -
-                parseFloat(newRow?.loss || 0) -
-                parseFloat(newRow?.damagedQty || 0))
-            ).toFixed(2)
-          )
-        })
-      }
-    },
-    {
-      component: 'numberfield',
       label: labels.outputPcs,
       name: 'outputPcs',
       width: 130,
