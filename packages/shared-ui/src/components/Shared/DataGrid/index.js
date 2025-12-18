@@ -603,12 +603,8 @@ export function DataGrid({
     )
   }
 
-  const getCellStyle = params => {
-    const hasError = error && error[params.node.rowIndex]?.[params.colDef.field]
-
-    return {
-      border: hasError ? '1px solid #ff0000' : '1px solid transparent'
-    }
+  const cellClassRules = {
+    'cell-error': params => !!error?.[params.node.rowIndex]?.[params.colDef.field]
   }
 
   const ActionCellRenderer = params => {
@@ -698,7 +694,7 @@ export function DataGrid({
         }
       }),
       cellEditorParams: { maxAccess },
-      cellStyle: getCellStyle,
+      cellClassRules: cellClassRules,
       suppressKeyboardEvent: params => {
         const { event } = params
 
@@ -898,13 +894,11 @@ const finalColumns =  columnDefs?.map(def => {
           className={`ag-theme-alpine ${styles.agContainer}`}
           ref={gridContainerRef}
           style={{ '--ag-header-bg': bg }}
-          
         >
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
               rowData={value}
-              domLayout='autoHeight'
               columnDefs={finalColumns}
               rowHeight={rowHeight}
               suppressRowClickSelection={false}
