@@ -241,5 +241,6 @@ export const DataSets = {
   ED_CALC_TYPE: 1037,
   APPLY_TO_SALARY: 1086,
   CHECK_IN_OUT: 1034,
+  PURITY_SOURCE: 208,
   PURITY: 209
 }
