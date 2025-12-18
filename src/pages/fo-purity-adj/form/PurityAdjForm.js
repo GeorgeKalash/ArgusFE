@@ -214,6 +214,11 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       props: { readOnly: true }
     },
     {
+      component: 'textfield',
+      label: labels.batchRef,
+      name: 'batchRef'
+    },
+    {
       component: 'resourcecombobox',
       label: labels.metal,
       name: 'metalId',
@@ -296,13 +301,31 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     },
     {
       component: 'numberfield',
+      name: 'rmQty',
+      label: labels.rmQty,
+      props: { maxLength: 12, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
       name: 'stdPurity',
       label: labels.stdPurity,
       props: { readOnly: true, decimalScale: 2 }
     },
     {
       component: 'numberfield',
-      name: 'diffPurity',
+      name: 'newRmQty',
+      label: labels.newRmQty,
+      props: { maxLength: 12, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      name: 'deltaRMQty',
+      label: labels.diffQty,
+      props: { maxLength: 12, decimalScale: 2 }
+    },
+    {
+      component: 'numberfield',
+      name: 'deltaPurity',
       label: labels.diffPurity,
       props: { readOnly: true, decimalScale: 2 }
     }
@@ -511,7 +534,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           />
         </Grow>
         <Fixed>
-          <Grid container>
+          <Grid container xs={12}>
             <Grid item xs={6}>
               <CustomTextArea
                 name='header.notes'
@@ -526,9 +549,74 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
               />
             </Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs={2}>
-              <CustomNumberField label={labels.totalMetal} value={totalMetal} decimalScale={3} readOnly align='right' />
+            <Grid container xs={6} justifyContent={'flex-end'}>
+              <Grid container xs={4} spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalMetal}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalRmQty}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalNewRmQty}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalDiffQty}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+              </Grid>
+              <Grid container xs={4} spacing={2} sx={{ pl: 1, height: '70%' }}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.avgPurity}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.avgStdPurity}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalDiffPurity}
+                    value={totalMetal}
+                    decimalScale={3}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>
