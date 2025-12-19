@@ -15,7 +15,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function MetalSettingsForm({ labels, maxAccess, recordId, metalColorId }) {
+export default function MetalSettingsForm({ labels, maxAccess, metalId, metalColorId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -54,15 +54,15 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
 
   useEffect(() => {
     ;(async function () {
-      if (recordId && metalColorId) {
+      if (metalId && metalColorId) {
         const res = await getRequest({
           extension: ManufacturingRepository.MetalSetting.get,
-          parameters: `_metalId=${recordId}&_metalColorId=${metalColorId}`
+          parameters: `_metalId=${metalId}&_metalColorId=${metalColorId}`
         })
 
         formik.setValues({
           ...res.record,
-          recordId: String(res.record.metalId * 10) + String(res.record.metalColorId)
+          recordId: String(res?.record?.metalId * 10) + String(res?.record?.metalColorId)
         })
       }
     })()
@@ -89,20 +89,18 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Items.pack}
-                values={formik.values}
-                reducer={response => {
-                  return response?.record?.metalColors
-                }}
+                endpointId={InventoryRepository.MetalColor.qry}
                 name='metalColorId'
+                required
                 label={labels.metalColor}
-                readOnly={editMode}
                 valueField='recordId'
-                displayField='reference'
-                displayFieldWidth={1}
+                displayField={'reference'}
+                values={formik.values}
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('metalColorId', newValue?.recordId || null)}
-                error={formik.touched.metalColorId && formik.errors.metalColorId}
+                onChange={async (_, newValue) => {
+                  formik.setFieldValue('metalColorId', newValue?.recordId || null)
+                }}
+                error={formik.touched?.metalColorId && Boolean(formik.errors?.metalColorId)}
               />
             </Grid>
             <Grid item xs={12}>

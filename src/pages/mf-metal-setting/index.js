@@ -80,7 +80,7 @@ const MetalSetting = () => {
       props: {
         labels,
         metalColorId: obj?.metalColorId,
-        recordId: obj?.metalColorId && obj.metalId ? String(obj.metalId * 10) + String(obj.metalColorId) : null,
+        metalId: obj?.metalId,
         maxAccess: access
       },
       width: 800,
