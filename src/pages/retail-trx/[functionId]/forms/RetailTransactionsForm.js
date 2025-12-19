@@ -504,10 +504,10 @@ export default function RetailTransactionsForm({
   ]
 
   async function fillForm(retailTrxPack) {
-    const retailTrxHeader = retailTrxPack?.header
-    const retailTrxItems = retailTrxPack?.items
-    const retailTrxCash = retailTrxPack?.cash
-    const addressObj = await getAddress(retailTrxHeader?.addressId)
+    const retailTrxHeader = retailTrxPack?.header || {}
+    const retailTrxItems = retailTrxPack?.items || []
+    const retailTrxCash = retailTrxPack?.cash || []
+    const addressObj = await getAddress(retailTrxHeader?.addressId || null)
 
     const modifiedItemsList = await Promise.all(
       retailTrxItems?.map(async (item, index) => {
@@ -547,7 +547,8 @@ export default function RetailTransactionsForm({
         street1: addressObj?.record?.street1,
         street2: addressObj?.record?.street2,
         phone: addressObj?.record?.phone,
-        cityId: addressObj?.record?.cityId
+        cityId: addressObj?.record?.cityId,
+        KGmetalPrice: retailTrxHeader?.metalPrice ? retailTrxHeader?.metalPrice * 1000 : 0
       },
       items: modifiedItemsList,
       cash: modifiedCashList
@@ -578,9 +579,10 @@ export default function RetailTransactionsForm({
       extension: PointofSaleRepository.RetailInvoice.get2,
       parameters: `_recordId=${transactionId}`
     })
-    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
 
-    return res.record
+    if (res?.record?.header) res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+
+    return res?.record || {}
   }
 
   async function getAddress(addressId) {
@@ -1011,7 +1013,7 @@ export default function RetailTransactionsForm({
     const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
-    if (!defaultRateType.value) {
+    if (!defaultRateType?.value) {
       stackError({
         message: labels.RTSANoteDefined
       })
@@ -1321,7 +1323,7 @@ export default function RetailTransactionsForm({
                     }}
                     parameters={`_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`}
                     name='header.dtId'
-                    readOnly={formik?.values?.items?.some(item => item.sku)}
+                    readOnly={isPosted || formik?.values?.items?.some(item => item.sku)}
                     label={labels.documentType}
                     columnsInDropDown={[
                       { key: 'reference', value: 'Reference' },
@@ -1399,7 +1401,7 @@ export default function RetailTransactionsForm({
                     value={formik.values.header.KGmetalPrice}
                     onChange={formik.handleChange}
                     readOnly={!formik.values.baseMetalCuId || isPosted}
-                    hidden={(!editMode && !formik.values.baseMetalCuId) || (!editMode && formik.values.header.dtId)}
+                    hidden={(!editMode && !formik.values.baseMetalCuId) || (editMode && !formik.values.header.dtId)}
                     onClear={() => formik.setFieldValue('header.KGmetalPrice', '')}
                     error={formik.touched?.header?.KGmetalPrice && Boolean(formik.errors?.header?.KGmetalPrice)}
                   />

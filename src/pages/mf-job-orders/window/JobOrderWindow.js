@@ -14,6 +14,7 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, jobReference, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
+  const [refetchJob, setRefetchJob] = useState(false)
 
   const tabs = [
     { label: labels.jobOrder },
@@ -44,6 +45,8 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
           setRefetchRouting={setRefetchRouting}
           invalidate={invalidate}
           lockRecord={lockRecord}
+          refetchJob={refetchJob}
+          setRefetchJob={setRefetchJob}
           window={window}
         />
       </CustomTabPanel>
@@ -54,6 +57,7 @@ const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lo
           maxAccess={access}
           refetchRouting={refetchRouting}
           setRefetchRouting={setRefetchRouting}
+          setRefetchJob={setRefetchJob}
         />
       </CustomTabPanel>
       <CustomTabPanel index={2} value={activeTab} maxAccess={access}>

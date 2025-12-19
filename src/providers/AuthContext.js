@@ -1,5 +1,8 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import axios from 'axios'
+import SHA1 from 'crypto-js/sha1'
+import jwt from 'jwt-decode'
 
 const defaultProvider = {
   user: null,
@@ -9,10 +12,71 @@ const defaultProvider = {
   login: () => Promise.resolve(),
   logout: () => Promise.resolve()
 }
+
+const overlayStyle = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 9999
+}
+
+const modalStyle = {
+  background: '#fff',
+  borderRadius: 8,
+  width: 400,
+  maxWidth: '90%',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden'
+}
+
+const headerStyle = {
+  background: '#1f1f1f',
+  color: '#fff',
+  padding: '12px 16px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  fontWeight: 'bold'
+}
+
+const closeButtonStyle = {
+  background: 'transparent',
+  border: 'none',
+  color: '#fff',
+  fontSize: 16,
+  cursor: 'pointer'
+}
+
+const messageStyle = {
+  padding: 20,
+  fontSize: 14,
+  color: '#333'
+}
+
+const footerStyle = {
+  padding: '12px 16px',
+  display: 'flex',
+  justifyContent: 'flex-end'
+}
+
+const okButtonStyle = {
+  background: '#1f1f1f',
+  color: '#fff',
+  border: 'none',
+  borderRadius: 4,
+  padding: '8px 16px',
+  cursor: 'pointer'
+}
+
 const AuthContext = createContext(defaultProvider)
-import axios from 'axios'
-import SHA1 from 'crypto-js/sha1'
-import jwt from 'jwt-decode'
 
 const encryptePWD = pwd => {
   var encryptedPWD = SHA1(pwd).toString()
@@ -32,8 +96,11 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [companyName, setCompanyName] = useState('')
+  const [validCompanyName, setValidCompanyName] = useState(false)
+  const [deployHost, setDeployHost] = useState('')
   const [getAC, setGetAC] = useState({})
   const [languageId, setLanguageId] = useState(1)
+  const [errorMsg, setErrorMsg] = useState(null)
   const router = useRouter()
 
   const initAuth = async () => {
@@ -52,22 +119,44 @@ const AuthProvider = ({ children }) => {
   }
 
   const fetchData = async () => {
+    setErrorMsg(null)
     const matchHostname = window.location.hostname.match(/^(.+)\.softmachine\.co$/)
-
-    const accountName = matchHostname ? matchHostname[1] : 'neg-deploy'
-
+    const isDeploy = !matchHostname || matchHostname?.[1]?.toLowerCase() == 'deploy'
+    const accountName = isDeploy ? companyName : matchHostname?.[1]
+    setDeployHost(isDeploy)
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+      if (!accountName) {
+        setValidCompanyName(false)
+        setLoading(false)
 
-      setCompanyName(response.data.record.companyName)
-      setGetAC(response)
-      window.localStorage.setItem('apiUrl', response.data.record.api)
+        return
+      }
+      if (validCompanyName) {
+        setLoading(false)
+
+        return
+      }
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
+      const record = response?.data?.record
+      setGetAC(response || null)
+      if (!record) {
+        setErrorMsg(`Invalid account name: ${accountName}`)
+        setValidCompanyName(false)
+      } else {
+        setCompanyName(record.accountName || '')
+        setValidCompanyName(!!record.accountName)
+        window.localStorage.setItem('apiUrl', record.api || '')
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     }
-
     setLoading(false)
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [companyName])
 
   useEffect(() => {
     initAuth()
@@ -76,6 +165,8 @@ const AuthProvider = ({ children }) => {
 
   const handleLogin = async (params, errorCallback) => {
     try {
+      if (!validCompanyName) return
+
       const getUS2 = await axios.get(`${getAC.data.record.api}/SY.asmx/getUS2?_email=${params.username}`, {
         headers: {
           accountId: JSON.parse(getAC.data.record.accountId),
@@ -210,6 +301,9 @@ const AuthProvider = ({ children }) => {
     user,
     loading,
     companyName,
+    setCompanyName,
+    validCompanyName,
+    deployHost,
     languageId,
     setUser,
     setLoading,
@@ -219,10 +313,32 @@ const AuthProvider = ({ children }) => {
     encryptePWD,
     EnableLogin,
     getAC,
-    apiUrl: getAC?.data?.record.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
+    apiUrl: getAC?.data?.record?.api || (typeof window !== 'undefined' ? window.localStorage.getItem('apiUrl') : '')
   }
 
-  return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={values}>
+      {children}
+      {errorMsg && (
+        <div style={overlayStyle}>
+          <div style={modalStyle}>
+            <div style={headerStyle}>
+              <span>Error</span>
+              <button style={closeButtonStyle} onClick={() => setErrorMsg(null)}>
+                ×
+              </button>
+            </div>
+            <div style={messageStyle}>{errorMsg}</div>
+            <div style={footerStyle}>
+              <button style={okButtonStyle} onClick={() => setErrorMsg(null)}>
+                Ok
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AuthContext.Provider>
+  )
 }
 
 export { AuthContext, AuthProvider }

@@ -8,7 +8,7 @@ import useSetWindow from 'src/hooks/useSetWindow'
 const AddressForm = ({
   recordId,
   editMode,
-  onSubmit,
+  onSubmit = () => {},
   window,
   actions = [],
   address: propAddress,

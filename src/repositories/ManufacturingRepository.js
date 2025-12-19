@@ -135,10 +135,12 @@ export const ManufacturingRepository = {
     page: service + 'pageDES'
   },
   MFJobOrder: {
+    pack: service + 'packJOB',
     qry: service + 'qryJOB',
     qry2: service + 'qryJOB2',
     set: service + 'setJOB',
     get: service + 'getJOB',
+    get2: service + 'get2JOB',
     del: service + 'delJOB',
     snapshot: service + 'snapshotJOB',
     snapshot2: service + 'snapshotJOB2',
@@ -357,13 +359,16 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotTFR',
     post: service + 'postTFR',
     close: service + 'closeTFR',
-    reopen: service + 'reopenTFR'
+    reopen: service + 'reopenTFR',
+    qry: service + 'qryTFR'
   },
   JobWorkCenter: {
     qry: service + 'qryJWC',
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC',
-    get: service + 'getJWC'
+    get: service + 'getJWC',
+    snapshot: service + 'snapshotJWC',
+    verify: service + 'verifyJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
@@ -419,5 +424,30 @@ export const ManufacturingRepository = {
   },
   ProductionOrderFromSaleOrder: {
     gen: service + 'generatePOFromSO'
+  },
+  BatchTransfer: {
+    page: service + 'pageBTFR',
+    set2: service + 'set2BTFR',
+    del: service + 'delBTFR',
+    snapshot: service + 'snapshotBTFR',
+    get: service + 'getBTFR',
+    post: service + 'postBTFR',
+    unpost: service + 'unpostBTFR'
+  },
+  BatchTransferJob: {
+    qry: service + 'qryBTFJ'
+  },
+  Disposal: {
+    page: service + 'pageDIS',
+    snapshot: service + 'snapshotDIS',
+    get: service + 'getDIS',
+    set2: service + 'set2DIS',
+    del: service + 'delDIS'
+  },
+  DisposalItem: {
+    qry: service + 'qryDII'
+  },
+  DisposalSerial: {
+    qry: service + 'qryDISRL'
   }
 }

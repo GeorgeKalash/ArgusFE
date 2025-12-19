@@ -2,6 +2,7 @@ const service = 'DE.asmx/'
 
 export const DeliveryRepository = {
   Driver: {
+    snapshot: service + 'snapshotDRV',
     page: service + 'pageDRV',
     set: service + 'setDRV',
     get: service + 'getDRV',

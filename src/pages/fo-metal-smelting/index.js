@@ -24,8 +24,8 @@ export default function MetalSmelting() {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.MetalSmelting.page,
-      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}`
+      extension: FoundryRepository.FoundaryTransaction.page,
+      parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -41,7 +41,7 @@ export default function MetalSmelting() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.MetalSmelting.page,
+    endpointId: FoundryRepository.FoundaryTransaction.page,
     datasetId: ResourceIds.MetalSmelting,
     filter: {
       filterFn: fetchWithSearch
@@ -51,8 +51,8 @@ export default function MetalSmelting() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FoundryRepository.MetalSmelting.snapshot,
-        parameters: `_filter=${filters.qry}`
+        extension: FoundryRepository.FoundaryTransaction.snapshot,
+        parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.MetalSmelting}`
       })
     } else {
       return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
@@ -112,7 +112,7 @@ export default function MetalSmelting() {
         access
       },
       width: 1100,
-      height: 670,
+      height: 730,
       title: labels.metalSmelting
     })
   }
@@ -128,7 +128,7 @@ export default function MetalSmelting() {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.MetalSmelting.del,
+      extension: FoundryRepository.FoundaryTransaction.del,
       record: JSON.stringify(obj)
     })
     invalidate()
