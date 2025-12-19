@@ -30,6 +30,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const [allMetals, setAllMetals] = useState([])
+  const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
   const functionId = SystemFunction.PurityAdjustment
 
@@ -117,7 +118,17 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date), qty: totalMetal },
+      header: {
+        ...obj.header,
+        date: formatDateToApi(obj.header.date),
+        sumQty: totalMetal,
+        sumDeltaPurity: totalDiffPurity,
+        sumDeltaRMQty: totalDiffQty,
+        sumNewRMQty: totalRmNewQty,
+        sumRMQty: totalRmQty,
+        avgPurity,
+        avgNewPuirty: avgStdPurity
+      },
       items: (obj?.items || [])
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((item, index) => ({
@@ -137,13 +148,19 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       return sum + (parseFloat(item[key]) || 0)
     }, 0)
 
-  const totalMetal = calculateTotal('qty')
-  const totalRmQty = calculateTotal('rmQty')
-  const totalRmNewQty = calculateTotal('newRmQty')
-  const totalDiffQty = calculateTotal('deltaRMQty')
-  const avgPurity = ((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
-  const avgStdPurity = ((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
-  const totalDiffPurity = (avgStdPurity || 0) - (avgPurity || 0)
+  const totalMetal = recalc ? calculateTotal('qty') : formik.values?.header?.sumQty
+  const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
+  const totalRmNewQty = recalc ? calculateTotal('newRmQty') : formik.values?.header?.sumNewRMQty
+  const totalDiffQty = recalc ? calculateTotal('deltaRMQty') : formik.values?.header?.sumDeltaRMQty
+
+  const avgPurity = recalc
+    ? ((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+    : formik.values?.header?.avgPurity
+
+  const avgStdPurity = recalc
+    ? ((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+    : formik.values?.header?.avgNewPuirty
+  const totalDiffPurity = recalc ? (avgStdPurity || 0) - (avgPurity || 0) : formik.values?.header?.sumDeltaPurity
 
   const onPost = async () => {
     await postRequest({
@@ -212,6 +229,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items
     })
+    setRecalc(false)
   }
 
   const columns = [
@@ -225,7 +243,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     {
       component: 'textfield',
       label: labels.batchRef,
-      name: 'batchRef'
+      name: 'batchRef',
+      props: { maxLength: 10 }
     },
     {
       component: 'resourcecombobox',
@@ -246,6 +265,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         return { ...props, readOnly: !!row.itemId }
       },
       onChange: async ({ row: { update, newRow } }) => {
+        setRecalc(true)
         fillSKUStore(newRow?.metalId)
         update({
           purity: newRow?.purity * 1000 || 0,
@@ -274,6 +294,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         displayFieldWidth: 3.5
       },
       onChange: async ({ row: { update, newRow } }) => {
+        setRecalc(true)
+
         const newRmQty = formik.values?.header?.baseSalesMetalPurity
           ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
@@ -304,6 +326,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       label: labels.qty,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
+        setRecalc(true)
+
         const rmQty = formik.values?.header?.baseSalesMetalPurity
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
@@ -325,6 +349,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       label: labels.purity,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
+        setRecalc(true)
+
         const rmQty = formik.values?.header?.baseSalesMetalPurity
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
