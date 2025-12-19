@@ -611,6 +611,7 @@ export const ResourceIds = {
   ItemDisposal: 42349,
   PayrollHeader: 75301,
   GeneratePayroll: 75501,
+  MetalSetting: 42135,
 
   // GL
   GLSalesInvoice: 51604,
