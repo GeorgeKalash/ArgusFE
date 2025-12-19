@@ -863,7 +863,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                 <Grid item xs={6}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_dgId=${SystemFunction.MaterialTransfer}&_startAt=${0}&_pageSize=${50}`}
+                    parameters={`_dgId=${SystemFunction.MaterialTransfer}&_startAt=0&_pageSize=1000`}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='dtId'
                     label={labels.documentType}
@@ -871,7 +871,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
                     valueField='recordId'
                     displayField='name'
                     values={formik?.values}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       onChangeDT(newValue?.recordId)
                       formik.setFieldValue('dtId', newValue?.recordId || '')
                       changeDT(newValue)
