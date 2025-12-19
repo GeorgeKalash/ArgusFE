@@ -11,6 +11,7 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  allowClear = false,
   size = 'small', //small, medium
   fullWidth = true,
   autoFocus = false,
@@ -154,18 +155,20 @@ const CustomTextField = ({
       onInput={handleInput}
       onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
       InputProps={{
-        endAdornment: !_readOnly && (
+        endAdornment: (allowClear || !_readOnly) && (
           <InputAdornment position='end'>
             {search && (
               <IconButton tabIndex={-1} edge='start' onClick={() => onSearch(value)} aria-label='search input'>
                 <SearchIcon sx={{ border: '0px', fontSize: 17 }} />
               </IconButton>
             )}
-            {!clearable && !readOnly && (value || value === 0) && (
+
+            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && (
               <IconButton
                 tabIndex={-1}
                 id={props.ClearId}
                 edge='end'
+                onMouseDown={e => e.preventDefault()}
                 onClick={e => {
                   onClear(e)
                   setFocus(true)
