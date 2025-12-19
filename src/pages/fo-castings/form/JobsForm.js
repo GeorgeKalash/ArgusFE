@@ -236,9 +236,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
       const returnedWgt = calculateByPct(jobPct, store?.castingInfo?.scrapWgt || 0)
       const loss = calculateByPct(jobPct, store?.castingInfo?.loss || 0, 2)
 
-      const netWgt = parseFloat(
-        (parseFloat(item?.currentWgt || 0) + issuedWgt - returnedWgt - loss - (item?.damagedQty || 0)).toFixed(2)
-      )
+      const netWgt = parseFloat(parseFloat(item?.currentWgt || 0) + issuedWgt - returnedWgt - loss)
 
       return {
         ...item,
@@ -278,10 +276,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
               outputPcs: parseFloat(item?.outputPcs || 0).toFixed(2),
               netWgt: (
                 parseFloat(item?.currentWgt || 0) +
-                (parseFloat(item?.issuedWgt || 0) -
-                  parseFloat(item?.returnedWgt || 0) -
-                  parseFloat(item?.loss || 0) -
-                  parseFloat(item?.damagedQty || 0))
+                (parseFloat(item?.issuedWgt || 0) - parseFloat(item?.returnedWgt || 0) - parseFloat(item?.loss || 0))
               ).toFixed(2)
             }
           })
