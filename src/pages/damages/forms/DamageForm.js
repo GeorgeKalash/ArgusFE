@@ -262,9 +262,6 @@ export default function DamageForm({ recordId, jobId }) {
     const nonMetalQty = list.filter(i => !i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
 
     return { metalQty, nonMetalQty }
-
-    formik.setFieldValue('header.metalQty', metalQty)
-    formik.setFieldValue('header.nonMetalQty', nonMetalQty)
   }
 
   console.log(formik)
