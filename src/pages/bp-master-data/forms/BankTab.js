@@ -27,7 +27,8 @@ export default function BankTab({ store, labels, maxAccess }) {
     queryFn: fetchGridData,
     enabled: Boolean(recordId),
     endpointId: BusinessPartnerRepository.Bank.qry,
-    datasetId: ResourceIds.BPMasterData
+    datasetId: ResourceIds.BPMasterData,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   async function fetchGridData() {
