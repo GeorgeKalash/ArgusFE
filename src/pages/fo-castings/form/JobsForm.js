@@ -258,7 +258,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
     })
 
     const updateItemsList =
-      res?.list?.length != 0
+      res?.list?.length
         ? res?.list?.map((item, index) => {
             return {
               ...item,
