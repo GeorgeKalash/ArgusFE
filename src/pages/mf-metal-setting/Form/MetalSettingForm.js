@@ -137,7 +137,7 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('damageNonMetalItemId', newValue?.recordId || '')
+                  formik.setFieldValue('damageNonMetalItemId', newValue?.recordId || null)
                 }}
                 error={formik.touched.damageNonMetalItemId && Boolean(formik.errors.damageNonMetalItemId)}
               />
