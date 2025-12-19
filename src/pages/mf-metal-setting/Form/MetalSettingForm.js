@@ -13,7 +13,6 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
 export default function MetalSettingsForm({ labels, maxAccess, recordId, metalColorId }) {
@@ -21,7 +20,7 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.MetalSettings.page
+    endpointId: ManufacturingRepository.MetalSetting.page
   })
 
   const { formik } = useForm({
@@ -29,12 +28,12 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
       recordId: null,
       metalId: null,
       metalColorId: null,
-      damageNonMetalItemId: null,
+      damageNonMetalId: null,
       damageItemId: null
     },
     maxAccess,
     validationSchema: yup.object({
-      damageNonMetalItemId: yup.number().required(),
+      damageNonMetalId: yup.number().required(),
       damageItemId: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -44,7 +43,7 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
       })
 
       if (!obj.recordId) {
-        formik.setFieldValue('recordId', obj.metalId)
+        formik.setFieldValue('recordId', String(obj.metalId * 10) + String(obj.metalColorId))
       }
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
@@ -63,7 +62,7 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
 
         formik.setValues({
           ...res.record,
-          recordId: res.record.metalId
+          recordId: String(res.record.metalId * 10) + String(res.record.metalColorId)
         })
       }
     })()
@@ -118,9 +117,10 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
                 form={formik}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('damageItemId', newValue?.recordId || null)
                   formik.setFieldValue('damageItemSku', newValue?.sku || '')
                   formik.setFieldValue('damageItemName', newValue?.name || '')
+
+                  formik.setFieldValue('damageItemId', newValue?.recordId || null)
                 }}
                 error={formik.touched.damageItemId && Boolean(formik.errors.damageItemId)}
                 maxAccess={maxAccess}
@@ -129,7 +129,7 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Metals.qry}
-                name='damageNonMetalItemId'
+                name='damageNonMetalId'
                 label={labels.damageNonMetalItem}
                 valueField='recordId'
                 displayField='reference'
@@ -137,9 +137,9 @@ export default function MetalSettingsForm({ labels, maxAccess, recordId, metalCo
                 maxAccess={maxAccess}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('damageNonMetalItemId', newValue?.recordId || null)
+                  formik.setFieldValue('damageNonMetalId', newValue?.recordId || null)
                 }}
-                error={formik.touched.damageNonMetalItemId && Boolean(formik.errors.damageNonMetalItemId)}
+                error={formik.touched.damageNonMetalId && Boolean(formik.errors.damageNonMetalId)}
               />
             </Grid>
           </Grid>

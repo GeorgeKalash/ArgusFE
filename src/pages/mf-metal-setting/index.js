@@ -40,7 +40,7 @@ const MetalSetting = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.MetalSetting.page,
-    datasetId: ResourceIds.MetalSetting,
+    datasetId: ResourceIds.MetalSetting
   })
 
   const columns = [
@@ -55,16 +55,14 @@ const MetalSetting = () => {
       flex: 1
     },
     {
-      field: 'damageItem',
+      field: 'damageItemName',
       headerName: labels.damageItem,
-      flex: 1,
-      type: 'number'
+      flex: 1
     },
     {
-      field: 'damageNonMetalItem',
+      field: 'damageNonMetalRef',
       headerName: labels.damageNonMetalItem,
-      flex: 1,
-      type: 'number'
+      flex: 1
     }
   ]
 
@@ -82,12 +80,12 @@ const MetalSetting = () => {
       props: {
         labels,
         metalColorId: obj?.metalColorId,
-        recordId: obj?.metalId,
+        recordId: obj?.metalColorId && obj.metalId ? String(obj.metalId * 10) + String(obj.metalColorId) : null,
         maxAccess: access
       },
       width: 800,
       height: 500,
-      title: labels.MetalSettings
+      title: labels.metalSettings
     })
   }
 
