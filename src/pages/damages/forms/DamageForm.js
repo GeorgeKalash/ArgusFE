@@ -83,14 +83,20 @@ export default function DamageForm({ recordId, jobId }) {
         date: yup.string().required(),
         laborId: yup.number().required(),
         damageRate: yup.number().required(),
-        pcs: yup.lazy((_, { parent }) =>
+        jobQty: yup.number().required(),
+        jobPcs: yup.number().required(),
+        netJobQty: yup.number().required(),
+        netJobPcs: yup.number().required(),
+        metalQty: yup.number().required(),
+        nonMetalQty: yup.number().required(),
+        damagedPcs: yup.lazy((_, { parent }) =>
           yup
             .number()
             .min(1)
             .max(parent.maxPcs, ({ max }) => `Must be less than or equal to ${max}`)
             .nullable(true)
         ),
-        qty: yup
+        damagedQty: yup
           .number()
           .required()
           .test('max-jobQty', 'Qty cannot be greater than Job Qty', function (value) {
@@ -135,6 +141,7 @@ export default function DamageForm({ recordId, jobId }) {
   }
 
   async function refetchFormJob(jobId, res) {
+    const res2 = await getMetalAndNonMetalQty(jobId)
     await getRequest({
       extension: ManufacturingRepository.MFJobOrder.get,
       parameters: `_recordId=${jobId}`
@@ -153,7 +160,9 @@ export default function DamageForm({ recordId, jobId }) {
           workCenterName: jobRes?.record?.wcName,
           workCenterRef: jobRes?.record?.wcRef,
           workCenterId: jobRes?.record?.workCenterId,
-          maxPcs: jobRes?.record?.pcs
+          maxPcs: jobRes?.record?.pcs,
+          metalQty: res2?.metalQty || 0,
+          nonMetalQty: res2?.nonMetalQty || 0
         },
         items: res?.items || []
       })
@@ -233,6 +242,33 @@ export default function DamageForm({ recordId, jobId }) {
     formik.setFieldValue('items', items?.list || [])
   }
 
+  const { jobQty = 0, damagedQty = 0, jobPcs = 0, damagedPcs = 0 } = formik.values.header
+
+  const netQty = jobQty - damagedQty
+  const netPcs = jobPcs - damagedPcs
+
+  async function getMetalAndNonMetalQty(jobId) {
+    if (!jobId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.JobMaterial.qry,
+      parameters: `_jobId=${jobId}&_seqNo=0`
+    })
+
+    const list = res?.list || []
+
+    const metalQty = list.filter(i => !!i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+
+    const nonMetalQty = list.filter(i => !i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+
+    return { metalQty, nonMetalQty }
+
+    formik.setFieldValue('header.metalQty', metalQty)
+    formik.setFieldValue('header.nonMetalQty', nonMetalQty)
+  }
+
+  console.log(formik)
+
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -268,8 +304,8 @@ export default function DamageForm({ recordId, jobId }) {
                     displayFieldWidth={2}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      changeDT(newValue)
+                    onChange={async (event, newValue) => {
+                      await changeDT(newValue)
 
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
@@ -315,12 +351,13 @@ export default function DamageForm({ recordId, jobId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
+                    displayFieldWidth={1.5}
                     values={formik.values.header}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('header.plantId', newValue?.recordId)
+                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.plantId && Boolean(formik?.errors?.header?.plantId)}
                   />
@@ -360,13 +397,17 @@ export default function DamageForm({ recordId, jobId }) {
                       { key: 'itemName', value: 'Item Name' },
                       { key: 'description', value: 'Description' }
                     ]}
-                    onChange={(_, newValue) => {
+                    onChange={async (_, newValue) => {
+                      const res = await getMetalAndNonMetalQty(newValue?.recordId)
+
+                      console.log(res)
                       formik.setValues({
                         header: {
                           ...formik.values.header,
                           jobId: newValue?.recordId || null,
                           jobRef: newValue?.reference || '',
                           jobQty: newValue?.qty || 0,
+                          jobPcs: newValue?.pcs || 0,
                           sku: newValue?.sku || '',
                           designRef: newValue?.designRef || '',
                           designName: newValue?.designName || '',
@@ -376,7 +417,9 @@ export default function DamageForm({ recordId, jobId }) {
                           plantId: newValue?.plantId || null,
                           maxPcs: newValue?.pcs || 0,
                           damageRate: (formik.values.qty / newValue?.qty) * 100 || 0,
-                          routingName: newValue?.routingName || ''
+                          routingName: newValue?.routingName || '',
+                          metalQty: res?.metalQty || 0,
+                          nonMetalQty: res?.nonMetalQty || 0
                         }
                       })
                     }}
@@ -437,12 +480,12 @@ export default function DamageForm({ recordId, jobId }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.jobQty'
-                    readOnly={editMode}
                     label={labels.jobQty}
                     value={formik.values?.header?.jobQty}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.jobQty', 0)}
                     required
+                    readOnly
                     maxAccess={maxAccess}
                     error={formik?.touched?.header?.jobQty && Boolean(formik?.errors?.header?.jobQty)}
                   />
@@ -451,7 +494,7 @@ export default function DamageForm({ recordId, jobId }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.jobPcs'
-                    readOnly={editMode}
+                    readOnly
                     label={labels.jobPcs}
                     value={formik.values?.header?.jobPcs}
                     onChange={formik.handleChange}
@@ -490,7 +533,7 @@ export default function DamageForm({ recordId, jobId }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.damagedPcs'
-                    readOnly={editMode}
+                    readOnly={isPosted}
                     label={labels.damagedPcs}
                     value={formik.values?.header?.damagedPcs}
                     onChange={formik.handleChange}
@@ -514,6 +557,7 @@ export default function DamageForm({ recordId, jobId }) {
                     ]}
                     displayFieldWidth={2}
                     required
+                    readOnly={isPosted}
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.laborId', newValue?.recordId || null)
@@ -534,7 +578,7 @@ export default function DamageForm({ recordId, jobId }) {
                     onClear={() => formik.setFieldValue('header.metalQty', null)}
                     maxAccess={maxAccess}
                     required
-                    readOnly={isPosted}
+                    readOnly
                     error={formik?.touched?.header?.metalQty && Boolean(formik?.errors?.header?.metalQty)}
                   />
                 </Grid>
@@ -544,7 +588,7 @@ export default function DamageForm({ recordId, jobId }) {
                     label={labels.nonMetalQty}
                     value={formik.values?.header?.nonMetalQty}
                     onChange={formik.handleChange}
-                    readOnly={isPosted}
+                    readOnly
                     onClear={() => formik.setFieldValue('header.nonMetalQty', null)}
                     maxAccess={maxAccess}
                     required
@@ -555,11 +599,11 @@ export default function DamageForm({ recordId, jobId }) {
                   <CustomNumberField
                     name='header.netJobQty'
                     label={labels.netJobQty}
-                    value={formik.values?.header?.netJobQty}
+                    value={netQty}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.netJobQty', null)}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly
                     required
                     error={formik?.touched?.header?.netJobQty && Boolean(formik?.errors?.header?.netJobQty)}
                   />
@@ -568,11 +612,11 @@ export default function DamageForm({ recordId, jobId }) {
                   <CustomNumberField
                     name='header.netJobPcs'
                     label={labels.netJobPcs}
-                    value={formik.values?.header?.netJobPcs}
+                    value={netPcs}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.netJobPcs', null)}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly
                     required
                     error={formik?.touched?.header?.netJobPcs && Boolean(formik?.errors?.header?.netJobPcs)}
                   />
