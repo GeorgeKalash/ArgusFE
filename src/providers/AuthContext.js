@@ -140,8 +140,8 @@ const AuthProvider = ({ children }) => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
       const record = response?.data?.record
       setGetAC(response || null)
-      if (!record) {
-        setErrorMsg(`Invalid account name: ${accountName}`)
+      if (!record || !record.trial) {
+        setErrorMsg(`Invalid deploy account: ${accountName}`)
         setValidCompanyName(false)
       } else {
         setCompanyName(record.accountName || '')
