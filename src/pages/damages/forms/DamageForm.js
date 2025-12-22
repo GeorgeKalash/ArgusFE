@@ -124,8 +124,22 @@ export default function DamageForm({ recordId, jobId }) {
         extension: ManufacturingRepository.Damage.set2,
         record: JSON.stringify(payload)
       }).then(async res => {
+        const res2 = await getRequest({
+          extension: ManufacturingRepository.Damage.get2,
+          parameters: `_recordId=${res.recordId}`
+        })
+
+        formik.setValues({
+          ...formik.values,
+          recordId: res2?.record.header.recordId || null,
+          header: {
+            ...formik.values.header,
+            ...res2?.record.header,
+            maxPcs: formik.values.header?.jobPcs
+          }
+        })
+
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-        await refetchForm(res.recordId)
         invalidate()
       })
     }
@@ -155,11 +169,8 @@ export default function DamageForm({ recordId, jobId }) {
           itemName: jobRes?.record?.itemName,
           designName: jobRes?.record?.designName,
           designRef: jobRes?.record?.designRef,
-          jobRef: jobRes?.record?.reference,
-          jobId: jobRes?.record?.recordId,
           workCenterName: jobRes?.record?.wcName,
           workCenterRef: jobRes?.record?.wcRef,
-          workCenterId: jobRes?.record?.workCenterId,
           maxPcs: jobRes?.record?.pcs,
           metalQty: res2?.metalQty || 0,
           nonMetalQty: res2?.nonMetalQty || 0
@@ -263,8 +274,6 @@ export default function DamageForm({ recordId, jobId }) {
 
     return { metalQty, nonMetalQty }
   }
-
-  console.log(formik)
 
   return (
     <FormShell
@@ -397,7 +406,6 @@ export default function DamageForm({ recordId, jobId }) {
                     onChange={async (_, newValue) => {
                       const res = await getMetalAndNonMetalQty(newValue?.recordId)
 
-                      console.log(res)
                       formik.setValues({
                         header: {
                           ...formik.values.header,
@@ -415,6 +423,7 @@ export default function DamageForm({ recordId, jobId }) {
                           maxPcs: newValue?.pcs || 0,
                           damageRate: (formik.values.qty / newValue?.qty) * 100 || 0,
                           routingName: newValue?.routingName || '',
+                          routingId: newValue?.routingId || null,
                           metalQty: res?.metalQty || 0,
                           nonMetalQty: res?.nonMetalQty || 0
                         }
