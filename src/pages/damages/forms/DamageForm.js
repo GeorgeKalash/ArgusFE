@@ -124,21 +124,7 @@ export default function DamageForm({ recordId, jobId }) {
         extension: ManufacturingRepository.Damage.set2,
         record: JSON.stringify(payload)
       }).then(async res => {
-        const res2 = await getRequest({
-          extension: ManufacturingRepository.Damage.get2,
-          parameters: `_recordId=${res.recordId}`
-        })
-
-        formik.setValues({
-          ...formik.values,
-          recordId: res2?.record.header.recordId || null,
-          header: {
-            ...formik.values.header,
-            ...res2?.record.header,
-            maxPcs: formik.values.header?.jobPcs,
-            date: formatDateFromApi(res2?.record?.header?.date)
-          }
-        })
+        await refetchForm(res.recordId)
 
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
         invalidate()
@@ -151,30 +137,14 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.get2,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
-      await refetchFormJob(res?.record?.header?.jobId, res.record)
-    })
-  }
-
-  async function refetchFormJob(jobId, res) {
-    const res2 = await getMetalAndNonMetalQty(jobId)
-    await getRequest({
-      extension: ManufacturingRepository.MFJobOrder.get,
-      parameters: `_recordId=${jobId}`
-    }).then(jobRes => {
       formik.setValues({
-        recordId: res?.header.recordId || null,
+        recordId: res?.record?.header?.recordId || null,
         header: {
-          ...res?.header,
-          date: formatDateFromApi(res?.header.date),
-          sku: jobRes?.record?.sku,
-          itemName: jobRes?.record?.itemName,
-          designName: jobRes?.record?.designName,
-          designRef: jobRes?.record?.designRef,
-          workCenterName: jobRes?.record?.wcName,
-          workCenterRef: jobRes?.record?.wcRef,
-          maxPcs: jobRes?.record?.pcs,
-          metalQty: res2?.metalQty || 0,
-          nonMetalQty: res2?.nonMetalQty || 0
+          ...res?.record?.header,
+          date: formatDateFromApi(res?.record?.header?.date),
+          maxPcs: res?.record?.header?.jobPcs,
+          workCenterName: res?.record?.header?.wcName,
+          workCenterRef: res?.record?.header?.wcRef
         },
         items: res?.items || []
       })
@@ -213,8 +183,6 @@ export default function DamageForm({ recordId, jobId }) {
   useEffect(() => {
     if (recordId) {
       refetchForm(recordId)
-    } else if (jobId) {
-      refetchFormJob(jobId)
     }
   }, [])
 
