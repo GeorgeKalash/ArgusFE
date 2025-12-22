@@ -25,7 +25,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
-import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
+import { getFromDB, saveToDB, deleteFromDB } from 'src/lib/indexDB'
 import StrictConfirmation from './StrictConfirmation'
 
 const Table = ({
@@ -883,7 +883,7 @@ const Table = ({
   }
 
   const onReset = async () => {
-    await deleteRowDB(storeName, tableName)
+    await deleteFromDB(storeName, tableName)
     invalidate()
   }
 

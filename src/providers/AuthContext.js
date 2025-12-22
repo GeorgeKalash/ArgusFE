@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import axios from 'axios'
 import SHA1 from 'crypto-js/sha1'
 import jwt from 'jwt-decode'
+import { getFromDB, saveToDB } from 'src/lib/indexDB'
 
 const defaultProvider = {
   user: null,
@@ -106,6 +107,8 @@ const AuthProvider = ({ children }) => {
   const initAuth = async () => {
     const userData = window.localStorage.getItem('userData') || window.sessionStorage.getItem('userData')
     const savedLanguageId = window.localStorage.getItem('languageId')
+    const storedCompany = await getFromDB('authSettings', 'companyName')
+    if (storedCompany) setCompanyName(storedCompany)
     if (userData) {
       setUser(JSON.parse(userData))
       if (savedLanguageId) {
@@ -147,6 +150,7 @@ const AuthProvider = ({ children }) => {
         setCompanyName(record.accountName || '')
         setValidCompanyName(!!record.accountName)
         window.localStorage.setItem('apiUrl', record.api || '')
+        await saveToDB('authSettings', 'companyName', record.accountName)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
