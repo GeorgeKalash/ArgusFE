@@ -135,7 +135,8 @@ export default function DamageForm({ recordId, jobId }) {
           header: {
             ...formik.values.header,
             ...res2?.record.header,
-            maxPcs: formik.values.header?.jobPcs
+            maxPcs: formik.values.header?.jobPcs,
+            date: formatDateFromApi(res2?.record?.header?.date)
           }
         })
 
