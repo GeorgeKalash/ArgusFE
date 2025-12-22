@@ -55,12 +55,12 @@ const MetalSetting = () => {
       flex: 1
     },
     {
-      field: 'damageItemName',
+      field: 'damageMetalItemName',
       headerName: labels.damageItem,
       flex: 1
     },
     {
-      field: 'damageNonMetalRef',
+      field: 'damageNonMetalItemRef',
       headerName: labels.damageNonMetalItem,
       flex: 1
     }

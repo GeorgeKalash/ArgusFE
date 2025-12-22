@@ -28,13 +28,15 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
       recordId: null,
       metalId: null,
       metalColorId: null,
-      damageNonMetalId: null,
-      damageItemId: null
+      damageNonMetalItemId: null,
+      damageMetalItemId: null
     },
     maxAccess,
     validationSchema: yup.object({
-      damageNonMetalId: yup.number().required(),
-      damageItemId: yup.number().required()
+      damageNonMetalItemId: yup.number().required(),
+      damageMetalItemId: yup.number().required(),
+      metalId: yup.number().required(),
+      metalColorId: yup.number().required()
     }),
     onSubmit: async obj => {
       await postRequest({
@@ -82,6 +84,7 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
                 displayField={'reference'}
                 readOnly={editMode}
                 values={formik.values}
+                required
                 onChange={(_, newValue) => formik.setFieldValue('metalId', newValue?.recordId || null)}
                 error={formik.touched.metalId && Boolean(formik.errors.metalId)}
                 maxAccess={maxAccess}
@@ -97,6 +100,7 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
                 displayField={'reference'}
                 values={formik.values}
                 maxAccess={maxAccess}
+                readOnly={editMode}
                 onChange={async (_, newValue) => {
                   formik.setFieldValue('metalColorId', newValue?.recordId || null)
                 }}
@@ -106,38 +110,43 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={InventoryRepository.Item.snapshot}
-                name='damageItemId'
+                name='damageMetalItemId'
                 label={labels.damageItem}
                 valueField='sku'
                 displayField='name'
-                valueShow='damageItemSku'
-                secondValueShow='damageItemName'
+                valueShow='damageMetalItemSku'
+                secondValueShow='damageMetalItemName'
                 form={formik}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('damageItemSku', newValue?.sku || '')
-                  formik.setFieldValue('damageItemName', newValue?.name || '')
+                  formik.setFieldValue('damageMetalItemSku', newValue?.sku || '')
+                  formik.setFieldValue('damageMetalItemName', newValue?.name || '')
 
-                  formik.setFieldValue('damageItemId', newValue?.recordId || null)
+                  formik.setFieldValue('damageMetalItemId', newValue?.recordId || null)
                 }}
-                error={formik.touched.damageItemId && Boolean(formik.errors.damageItemId)}
+                error={formik.touched.damageMetalItemId && Boolean(formik.errors.damageMetalItemId)}
                 maxAccess={maxAccess}
               />
             </Grid>
             <Grid item xs={12}>
-              <ResourceComboBox
-                endpointId={InventoryRepository.Metals.qry}
-                name='damageNonMetalId'
+              <ResourceLookup
+                endpointId={InventoryRepository.Item.snapshot}
+                name='damageNonMetalItemId'
                 label={labels.damageNonMetalItem}
-                valueField='recordId'
-                displayField='reference'
-                values={formik.values}
-                maxAccess={maxAccess}
+                valueField='sku'
+                displayField='name'
+                valueShow='damageNonMetalItemSku'
+                secondValueShow='damageNonMetalItemName'
+                form={formik}
                 required
                 onChange={(_, newValue) => {
-                  formik.setFieldValue('damageNonMetalId', newValue?.recordId || null)
+                  formik.setFieldValue('damageNonMetalItemSku', newValue?.sku || '')
+                  formik.setFieldValue('damageNonMetalItemName', newValue?.name || '')
+
+                  formik.setFieldValue('damageNonMetalItemId', newValue?.recordId || null)
                 }}
-                error={formik.touched.damageNonMetalId && Boolean(formik.errors.damageNonMetalId)}
+                error={formik.touched.damageNonMetalItemId && Boolean(formik.errors.damageNonMetalItemId)}
+                maxAccess={maxAccess}
               />
             </Grid>
           </Grid>
