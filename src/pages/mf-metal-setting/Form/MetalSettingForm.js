@@ -15,7 +15,7 @@ import { ResourceIds } from 'src/resources/ResourceIds'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 
-export default function MetalSettingsForm({ labels, maxAccess, metalId, metalColorId }) {
+export default function MetalSettingsForm({ labels, maxAccess, record, recordId }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -25,7 +25,7 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
 
   const { formik } = useForm({
     initialValues: {
-      recordId: null,
+      recordId,
       metalId: null,
       metalColorId: null,
       damageNonMetalItemId: null,
@@ -56,10 +56,10 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
 
   useEffect(() => {
     ;(async function () {
-      if (metalId && metalColorId) {
+      if (record && record.metalId && record.metalColorId && recordId) {
         const res = await getRequest({
           extension: ManufacturingRepository.MetalSetting.get,
-          parameters: `_metalId=${metalId}&_metalColorId=${metalColorId}`
+          parameters: `_metalId=${record.metalId}&_metalColorId=${record.metalColorId}`
         })
 
         formik.setValues({
@@ -116,7 +116,12 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
                 displayField='name'
                 valueShow='damageMetalItemSku'
                 secondValueShow='damageMetalItemName'
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Item Name', grid: 3 }
+                ]}
                 form={formik}
+                displayFieldWidth={2}
                 required
                 onChange={(_, newValue) => {
                   formik.setFieldValue('damageMetalItemSku', newValue?.sku || '')
@@ -138,6 +143,11 @@ export default function MetalSettingsForm({ labels, maxAccess, metalId, metalCol
                 valueShow='damageNonMetalItemSku'
                 secondValueShow='damageNonMetalItemName'
                 form={formik}
+                displayFieldWidth={2}
+                columnsInDropDown={[
+                  { key: 'sku', value: 'SKU' },
+                  { key: 'name', value: 'Item Name', grid: 3 }
+                ]}
                 required
                 onChange={(_, newValue) => {
                   formik.setFieldValue('damageNonMetalItemSku', newValue?.sku || '')

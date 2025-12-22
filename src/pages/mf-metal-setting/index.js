@@ -73,13 +73,13 @@ const MetalSetting = () => {
     openForm(obj)
   }
 
-  async function openForm(obj) {
+  async function openForm(record) {
     stack({
       Component: MetalSettingsForm,
       props: {
         labels,
-        metalColorId: obj?.metalColorId,
-        metalId: obj?.metalId,
+        record,
+        recordId: record ? String(record.metalId * 10) + String(record.metalColorId) : null,
         maxAccess: access
       },
       width: 800,
