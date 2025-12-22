@@ -1,19 +1,20 @@
+import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import MetalSmeltingDTDForm from './Forms/MetalSmeltingDTDForm'
-import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import { FoundryRepository } from '@argus/repositories/src/repositories/FoundryRepository'
-import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { Fixed } from "@argus/shared-ui/src/components/Layouts/Fixed"
-import { VertLayout } from "@argus/shared-ui/src/components/Layouts/VertLayout"
-import { Grow } from "@argus/shared-ui/src/components/Layouts/Grow"
-import Table from "@argus/shared-ui/src/components/Shared/Table"
+import DamageDocDefaultTypeForm from './Forms/DamageDocDefaultTypeForm'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-const MetalSmeltingDTD = () => {
+const DamageDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -22,8 +23,8 @@ const MetalSmeltingDTD = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
+      extension: ManufacturingRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.Damage}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -38,21 +39,22 @@ const MetalSmeltingDTD = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.MetalSmeltingDTD
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.MFDamageDtd
   })
 
   const columns = [
     {
       field: 'dtName',
-      headerName: labels.documentType,
+      headerName: labels.docType,
       flex: 1
     },
+
     {
-      field: 'smeltingMaxAllowedVariation',
-      headerName: labels.smeltingMaxAllowedVariation,
+      field: 'genJobFromDamage',
+      headerName: labels.genJobFromDamage,
       flex: 1,
-      type: 'number'
+      type: 'checkbox'
     }
   ]
 
@@ -62,7 +64,7 @@ const MetalSmeltingDTD = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.DocumentTypeDefault.del,
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -71,15 +73,15 @@ const MetalSmeltingDTD = () => {
 
   function openForm(record) {
     stack({
-      Component: MetalSmeltingDTDForm,
+      Component: DamageDocDefaultTypeForm,
       props: {
         labels,
         recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
-      height: 350,
-      title: labels.MetalSmeltingDTD
+      height: 250,
+      title: labels.damageDTD
     })
   }
 
@@ -111,4 +113,4 @@ const MetalSmeltingDTD = () => {
   )
 }
 
-export default MetalSmeltingDTD
+export default DamageDtd

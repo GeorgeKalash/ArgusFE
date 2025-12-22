@@ -17,6 +17,7 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -34,11 +35,13 @@ export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, wind
       dtId: null,
       smeltingMaxAllowedVariation: null,
       workCenterId: null,
-      siteId: null
+      siteId: null,
+      puritySource: null
     },
     maxAccess,
     validationSchema: yup.object({
       dtId: yup.string().required(),
+      puritySource: yup.number().required(),
       smeltingMaxAllowedVariation: yup.number().required()
     }),
     onSubmit: async obj => {
@@ -144,6 +147,20 @@ export default function MetalSmeltingDTDForm({ labels, maxAccess, recordId, wind
                   formik.setFieldValue('siteId', newValue?.recordId || null)
                 }}
                 error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.PURITY}
+                name='puritySource'
+                label={labels.purity}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                maxAccess={maxAccess}
+                required
+                onChange={(_, newValue) => formik.setFieldValue('puritySource', newValue?.key || null)}
+                error={formik.touched.puritySource && Boolean(formik.errors.puritySource)}
               />
             </Grid>
           </Grid>

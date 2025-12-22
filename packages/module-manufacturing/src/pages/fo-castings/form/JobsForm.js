@@ -42,8 +42,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
           returnedWgt: 0,
           loss: 0,
           inputPcs: 0,
-          damagedQty: 0,
-          damagedPcs: 0,
           outputPcs: 0,
           netWgt: 0
         }
@@ -196,46 +194,6 @@ export default function JobsForm({ labels, maxAccess, store }) {
     },
     {
       component: 'numberfield',
-      label: labels.damagePcs,
-      name: 'damagedPcs',
-      width: 130,
-      props: {
-        decimalScale: 0,
-        readOnly: true
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({
-          damagedPcs: newRow?.damagedPcs || 0,
-          outputPcs: (parseFloat(newRow?.inputPcs || 0) - parseFloat(newRow?.damagedPcs || 0)).toFixed(2)
-        })
-      }
-    },
-    {
-      component: 'numberfield',
-      label: labels.damageWgt,
-      name: 'damagedQty',
-      width: 130,
-      props: {
-        decimalScale: 0,
-        readOnly: true
-      },
-      async onChange({ row: { update, newRow } }) {
-        update({
-          damagedQty: parseFloat(newRow?.damagedQty || 0).toFixed(2),
-          netWgt: parseFloat(
-            (
-              parseFloat(newRow?.currentWgt || 0) +
-              (parseFloat(newRow?.issuedWgt || 0) -
-                parseFloat(newRow?.returnedWgt || 0) -
-                parseFloat(newRow?.loss || 0) -
-                parseFloat(newRow?.damagedQty || 0))
-            ).toFixed(2)
-          )
-        })
-      }
-    },
-    {
-      component: 'numberfield',
       label: labels.outputPcs,
       name: 'outputPcs',
       width: 130,
@@ -278,9 +236,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
       const returnedWgt = calculateByPct(jobPct, store?.castingInfo?.scrapWgt || 0)
       const loss = calculateByPct(jobPct, store?.castingInfo?.loss || 0, 2)
 
-      const netWgt = parseFloat(
-        (parseFloat(item?.currentWgt || 0) + issuedWgt - returnedWgt - loss - (item?.damagedQty || 0)).toFixed(2)
-      )
+      const netWgt = parseFloat(parseFloat(item?.currentWgt || 0) + issuedWgt - returnedWgt - loss)
 
       return {
         ...item,
@@ -302,13 +258,11 @@ export default function JobsForm({ labels, maxAccess, store }) {
     })
 
     const updateItemsList =
-      res?.list?.length != 0
+      res?.list?.length
         ? res?.list?.map((item, index) => {
             return {
               ...item,
               id: index + 1,
-              damagedPcs: item?.damagedPcs || 0,
-              damagedQty: parseFloat(item?.damagedQty || 0).toFixed(2),
               currentWgt: parseFloat(item?.currentWgt || 0).toFixed(3),
               metalWgt: parseFloat(item?.metalWgt || 0).toFixed(3),
               jobPct:
@@ -322,10 +276,7 @@ export default function JobsForm({ labels, maxAccess, store }) {
               outputPcs: parseFloat(item?.outputPcs || 0).toFixed(2),
               netWgt: (
                 parseFloat(item?.currentWgt || 0) +
-                (parseFloat(item?.issuedWgt || 0) -
-                  parseFloat(item?.returnedWgt || 0) -
-                  parseFloat(item?.loss || 0) -
-                  parseFloat(item?.damagedQty || 0))
+                (parseFloat(item?.issuedWgt || 0) - parseFloat(item?.returnedWgt || 0) - parseFloat(item?.loss || 0))
               ).toFixed(2)
             }
           })

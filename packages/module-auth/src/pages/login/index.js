@@ -31,7 +31,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName } = useContext(AuthContext)
+  const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
@@ -39,11 +39,13 @@ const LoginPage = () => {
     initialValues: {
       username: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+      accountId: '',
+      companyName
     },
     validationSchema: yup.object({
       username: yup.string().required(),
-      password: yup.string().min(5, platformLabels.PassConf).required(),
+      password: yup.string().min(5, platformLabels?.PassConf).required(),
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
@@ -128,7 +130,6 @@ const LoginPage = () => {
   }
 
   return (
-    Boolean(Object.keys(platformLabels)?.length) && (
       <>
         <Box className={styles.contentCenter}>
           <Box className={styles.loginCenter}>
@@ -150,68 +151,95 @@ const LoginPage = () => {
                 <Grid container spacing={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}>
                   <Grid item xs={12}>
                     <CustomTextField
-                      readOnly
                       name='companyName'
-                      value={companyName}
+                      value={validation.values.companyName}
                       size='small'
                       fullWidth
-                      label={platformLabels.CompanyName}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <CustomTextField
-                      name='username'
-                      size='small'
-                      fullWidth
-                      label={platformLabels.Username}
-                      value={validation.values.username}
-                      type='text'
+                      readOnly={!deployHost ? true : validCompanyName}
+                      allowClear={deployHost}
+                      label={platformLabels?.CompanyName}
                       onChange={validation.handleChange}
-                      onClear={() => validation.setFieldValue('username', '')}
-                      error={validation.touched.username && Boolean(validation.errors.username)}
-                      helperText={validation.touched.username && validation.errors.username}
+                      onKeyDown={e => {
+                        if (e.key == 'Enter') e.target.blur()
+                      }}
+                      onBlur={
+                        deployHost
+                          ? e => {
+                              const value = e?.target?.value || ''
+                              setCompanyName(value)
+                            }
+                          : undefined
+                      }
+                      onClear={() => {
+                        setCompanyName('')
+                        validation.setFieldValue('companyName', '')
+                      }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <CustomTextField
-                      name='password'
-                      size='small'
-                      label={platformLabels.password}
-                      type={showPassword ? 'text' : 'password'}
-                      value={validation.values.password}
-                      onChange={validation.handleChange}
-                      endIcons={[
-                        // eslint-disable-next-line react/jsx-key
-                        <Icon
-                          className={inputs.icon}
-                          icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
-                          onClick={() => setShowPassword(prev => !prev)}
-                          onMouseDown={e => e.preventDefault()}
-                        />
-                      ]}
-                      error={validation.touched.password && validation.errors.password}
-                      helperText={validation.touched.password && validation.errors.password}
-                    />
-                  </Grid>
+                   {validCompanyName && (
+                      <>
+                        <Grid item xs={12}>
+                          <CustomTextField
+                            name='username'
+                            size='small'
+                            fullWidth
+                            label={platformLabels?.Username}
+                            value={validation.values.username}
+                            type='text'
+                            onChange={validation.handleChange}
+                            onClear={() => validation.setFieldValue('username', '')}
+                            error={validation.touched.username && Boolean(validation.errors.username)}
+                            helperText={validation.touched.username && validation.errors.username}
+                          />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <CustomTextField
+                            name='password'
+                            size='small'
+                            fullWidth
+                            label={platformLabels?.password}
+                            type={showPassword ? 'text' : 'password'}
+                            value={validation.values.password}
+                            onChange={validation.handleChange}
+                            error={validation.touched.password && validation.errors.password}
+                            helperText={validation.touched.password && validation.errors.password}
+                            endIcons={[
+                              // eslint-disable-next-line react/jsx-key
+                              <Icon
+                                className={inputs.icon}
+                                icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
+                                onClick={() => setShowPassword(prev => !prev)}
+                                onMouseDown={e => e.preventDefault()}
+                              />
+                            ]}
+                          />
+                        </Grid>
+                      </>
+                    )}
                 </Grid>
                 <Box>
-                  <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
-                    {platformLabels.ForgotPass}
-                  </LinkStyled>
-                </Box>
+                  {validCompanyName &&
+                    <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                      {platformLabels?.ForgotPass}
+                    </LinkStyled>
+                  }
+              </Box>
+              {validCompanyName && (
                 <CustomButton
                   fullWidth
                   type='submit'
                   variant='contained'
                   onClick={validation.handleSubmit}
-                  label={platformLabels.Login}
+                  disabled={!validCompanyName}
+                  label={platformLabels?.Login}
                 />
+              )}
               </CardContent>
               </Card>
             </Box>
           <Box className={styles.languageRow}>
             <Typography variant='body2' className={styles.offered}>
-              {platformLabels.ArgusOfferedIn}
+              {platformLabels?.ArgusOfferedIn}
             </Typography>
             <Box className={styles.languageLinks}>
               <LinkStyled href='/pages/auth/login-en' className={styles.language}>
@@ -232,7 +260,6 @@ const LoginPage = () => {
 
         <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
       </>
-    )
   )
 }
 

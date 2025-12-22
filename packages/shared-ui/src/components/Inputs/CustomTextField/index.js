@@ -11,6 +11,7 @@ const CustomTextField = ({
   value,
   onClear,
   onSearch,
+  allowClear = false,
   size = 'small',
   fullWidth = true,
   autoFocus = false,
@@ -47,6 +48,11 @@ const CustomTextField = ({
 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
+  const [hasValue, setHasValue] = useState(Boolean(value))
+
+  useEffect(() => {
+    setHasValue(Boolean(value && value.length > 0))
+  }, [value])
 
   useEffect(() => {
     if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
@@ -59,6 +65,28 @@ const CustomTextField = ({
       inputRef.current.setSelectionRange(position, position)
     }
   }, [position])
+
+  useEffect(() => {
+    const input = inputRef.current
+    if (!input) return
+
+    const detectAutofill = () => {
+      if (input.matches(':-webkit-autofill') || (input.value && input.value.length > 0)) {
+        if (!hasValue) {
+          setHasValue(true)
+        }
+      }
+    }
+
+    input.addEventListener('animationstart', detectAutofill)
+    detectAutofill()
+    const timeout = setTimeout(detectAutofill, 50)
+
+    return () => {
+      input.removeEventListener('animationstart', detectAutofill)
+      clearTimeout(timeout)
+    }
+  }, [hasValue])
 
   const handleInput = e => {
     const inputValue = e.target.value
@@ -89,6 +117,7 @@ const CustomTextField = ({
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
     }
+    setHasValue(inputValue.length > 0)
   }
 
   useEffect(() => {
@@ -117,18 +146,17 @@ const CustomTextField = ({
     <></>
   ) : (
     <TextField
-      key={(value?.length < 1 || readOnly || value === null) && value}
       inputRef={inputRef}
       type={type}
       variant={variant}
       defaultValue={value}
-      value={value ? value : null}
+      value={value ?? ''}
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
-        setIsFocused(false), setFocus(false)
+        setIsFocused(false), setFocus(false), setHasValue(Boolean(value && value.length > 0))
       }}
       inputProps={{
         autoComplete: 'off',
@@ -166,11 +194,12 @@ const CustomTextField = ({
               </IconButton>
             )}
 
-            {!_readOnly && !clearable && (value || value === 0) && (
+            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && (
               <IconButton
                 className={inputs.iconButton}
                 tabIndex={-1}
                 id={props.ClearId}
+                onMouseDown={e => e.preventDefault()}
                 onClick={e => {
                   onClear(e)
                   setFocus(true)
