@@ -992,7 +992,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
             <Grid item xs={2}></Grid>
             <Grid item xs={4.5}>
               <FieldSet title='Transaction Details'>
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <ResourceComboBox
                       endpointId={RemittanceOutwardsRepository.Country.qry}
@@ -1321,7 +1321,7 @@ const OutwardsForm = ({ recordId, plantId, userId, dtId, window }) => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <FieldSet title='Client Details'>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12}>
                         <ResourceLookup
                           endpointId={CTCLRepository.ClientCorporate.snapshot}

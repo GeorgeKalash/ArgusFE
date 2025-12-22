@@ -150,7 +150,7 @@ const ExchangeMapForm = ({ maxAccess, editMode, currency, store, labels }) => {
       maxAccess={maxAccess}
       editMode={editMode}
     >
-      <Grid container spacing={4} sx={{ pt: 2 }}>
+      <Grid container spacing={2} sx={{ pt: 2 }}>
         <Grid item xs={6}>
           <CustomTextField
             name='currency'

@@ -416,9 +416,9 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4} justifyContent='space-between'>
+          <Grid container spacing={2} justifyContent='space-between'>
             <Grid item xs={6}>
-              <Grid container spacing={4}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={SystemRepository.DocumentType.qry}
@@ -552,7 +552,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
             </Grid>
 
             <Grid item xs={6}>
-              <Grid container spacing={4}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subtotal'

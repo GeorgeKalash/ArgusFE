@@ -63,7 +63,7 @@ export default function PurposeOfExchangeGroupForm({ labels, recordId, maxAccess
     <FormShell resourceId={ResourceIds.PurposeExchangeGroup} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

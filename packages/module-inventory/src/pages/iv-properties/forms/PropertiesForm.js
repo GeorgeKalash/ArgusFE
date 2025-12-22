@@ -57,7 +57,7 @@ export default function PropertiesForm({ labels, maxAccess, dimNum, id, window, 
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomNumberField
                 name='id'

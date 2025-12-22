@@ -61,7 +61,7 @@ export default function OperationsTab({ store, labels, access }) {
         <Grid container spacing={1} sx={{ pt: 2 }}>
           <Grid item xs={6.8}></Grid>
           <Grid item xs={5}>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid item xs={3}>
                 <CustomNumberField name='totalIssued' value={totalIssued} label={labels.totalIssued} readOnly />
               </Grid>

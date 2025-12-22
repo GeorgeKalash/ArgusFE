@@ -1666,7 +1666,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField name='totalQTY' label={labels.totQty} value={totalQty} readOnly />
                 </Grid>
@@ -1691,7 +1691,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subTotal'

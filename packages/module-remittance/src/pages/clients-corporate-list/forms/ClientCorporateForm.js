@@ -207,7 +207,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
         <Grow>
           <Grid container xs={12} spacing={2}>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextFieldReference
                     name='reference'
@@ -242,7 +242,7 @@ const ClientCorporateForm = ({ recordId, _labels, maxAccess, setErrorMessage }) 
                 <Grid item xs={12}>
                   <Grid container xs={12}>
                     <FieldSet title={_labels.title}>
-                      <Grid container xs={12} spacing={3}>
+                      <Grid container xs={12} spacing={2}>
                         <Grid item xs={12}>
                           <CustomTextField
                             name='cellPhone'

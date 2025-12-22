@@ -77,7 +77,7 @@ const CompanyInfo = () => {
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <CustomTextField
               name='accountId'

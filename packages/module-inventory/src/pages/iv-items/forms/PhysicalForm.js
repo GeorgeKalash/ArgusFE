@@ -133,7 +133,7 @@ const PhysicalForm = ({ labels, editMode, maxAccess, store }) => {
       isCleared={false}
     >
       <VertLayout>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <ResourceComboBox
               endpointId={InventoryRepository.Items.pack}

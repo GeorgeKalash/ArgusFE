@@ -109,7 +109,7 @@ const CorrespondentForm = ({ labels, editMode, maxAccess, setEditMode, setStore,
     <FormShell form={formik} resourceId={ResourceIds.Correspondent} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

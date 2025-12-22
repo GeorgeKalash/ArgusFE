@@ -1,360 +1,73 @@
 .contentCenter {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  align-items: center;
+}
+
+.loginCenter {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 .loginCard {
-  width: 28rem;
-  margin-bottom: 10px;
-  margin-top: 200px;
-  z-index: 0;
+  width: clamp(17rem, 28vw, 28rem);
 }
 
 .loginCardHeader {
-  height: 60px;
-  padding: 16px;
+  height: clamp(35px, 6vh, 60px);
+  padding: clamp(6px, 1.5vh, 16px);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .cardContent {
-  padding: 20px 30px 30px !important;
-}
-
-.formRow {
-  margin-bottom: 16px;
+  padding: clamp(12px, 3vh, 30px) clamp(14px, 3vw, 30px) !important;
 }
 
 .linksRow {
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin: clamp(10px, 2vh, 18px) 0;
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   justify-content: space-between;
-  margin-left: 4px;
+  font-size: clamp(9px, 1vw, 13px);
+  flex-wrap: wrap;
 }
 
 .languageRow {
-  margin: 150px 0 220px;
+  padding-bottom: clamp(300px, 3vh, 30px);
   display: flex;
-  gap: 1rem;
-  justify-content: flex-start;
   align-items: center;
+  gap: clamp(0.4rem, 1vw, 1rem);
 }
 
 .languageLinks {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.4rem, 1vw, 1rem);
 }
+
 .language {
+  font-size: clamp(9px, 1vw, 14px);
   color: red !important;
 }
 
+.offered {
+  font-size: clamp(9px, 1vw, 14px);
+}
+
 .footer {
-  margin-top: auto;
   text-align: center;
-}
-
-.loginButton {
-  size: large !important;
-}
-@media (min-width: 2048px) and (max-width: 2560px) {
-  .loginCard {
-    width: 30rem;
-    margin-bottom: 7px;
-    margin-top: 300px;
-  }
-  .loginCardHeader {
-    height: 59px;
-    padding: 12px;
-  }
-  .cardContent {
-    padding: 45px 35px 35px !important;
-  }
-  .linksRow {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    margin-left: 3px;
-    font-size: 14px !important;
-  }
-  .loginButton {
-    font-size: 24px !important;
-    size: medium !important;
-  }
-
-  .offered {
-    font-size: 20px !important;
-  }
-
-  .language {
-    font-size: 20px !important;
-    color: red !important;
-  }
-  .languageLinks {
-    display: flex;
-    gap: 1rem;
-  }
-  .footer {
-    font-size: 20px !important;
-  }
-}
-
-@media (min-width: 1025px) and (max-width: 1600px) {
-  .loginCard {
-    width: 24rem;
-    margin-bottom: 7px;
-    margin-top: 180px;
-  }
-  .loginCardHeader {
-    height: 50px;
-    padding: 12px;
-  }
-  .cardContent {
-    padding: 17px 20px 20px !important;
-  }
-  .linksRow {
-    margin-top: 13px;
-    margin-bottom: 13px;
-    margin-left: 3px;
-  }
-  .language {
-    color: red !important;
-  }
-  .languageRow {
-    margin: 150px 0 200px;
-  }
-}
-
-@media (max-width: 1281px) {
-  .loginCard {
-    width: 22rem;
-    margin-bottom: 7px;
-    margin-top: 160px;
-  }
-  .loginCardHeader {
-    height: 45px;
-    padding: 10px;
-  }
-  .cardContent {
-    padding: 17px 20px 20px !important;
-  }
-  .linksRow {
-    margin-top: 13px;
-    margin-bottom: 13px;
-    margin-left: 3px;
-    font-size: 12px !important;
-  }
-  .languageRow {
-    margin: 100px 0 150px;
-  }
-  .offered {
-    font-size: 10px !important;
-  }
-
-  .language {
-    color: red !important;
-    font-size: 10px !important;
-  }
-  .loginButton {
-    font-size: 12px !important;
-    size: medium !important;
-  }
-
-  .footer {
-    font-size: 12px !important;
-  }
-}
-
-@media (max-width: 1280px) {
-  .loginCard {
-    width: 20rem;
-    margin-top: 110px;
-  }
-  .loginCardHeader {
-    height: 42px;
-    padding: 10px;
-  }
-  .cardContent {
-    padding-bottom: 22px !important;
-  }
-  .linksRow {
-    font-size: 11px !important;
-  }
-  .languageRow {
-    margin: 90px 0 120px;
-  }
-  .loginButton {
-    font-size: 11px !important;
-  }
-
-  .footer {
-    font-size: 11px !important;
-  }
-}
-
-@media (max-width: 1024px) {
-  .loginCard {
-    width: 17rem;
-    margin-top: 40px;
-  }
-  .loginCardHeader {
-    height: 40px;
-    padding: 8px;
-  }
-  .cardContent {
-    padding: 15px 18px 20px !important;
-  }
-  .linksRow {
-    font-size: 9px !important;
-  }
-  .offered {
-    font-size: 8px !important;
-  }
-
-  .language {
-    font-size: 8px !important;
-  }
-  .languageRow {
-    margin: 80px 0 120px;
-  }
-}
-
-@media (max-width: 900px) {
-  .loginCard {
-    width: 18rem;
-  }
-  .cardContent {
-    padding: 14px 16px 16px !important;
-  }
-  .loginButton {
-    font-size: 11px !important;
-  }
-  .offered {
-    font-size: 7px !important;
-  }
-
-  .language {
-    color: red !important;
-    font-size: 7px !important;
-  }
-  .footer {
-    font-size: 11px !important;
-  }
-  .languageRow {
-    margin: 70px 0 110px;
-  }
+  font-size: clamp(9px, 1vw, 12px);
+  padding-bottom: clamp(8px, 2vh, 20px);
 }
 
 @media (max-width: 768px) {
-  .loginCard {
-    width: 17rem;
-    margin-top: 30px;
-  }
-  .loginCardHeader {
-    height: 38px;
-    padding: 8px;
-  }
   .linksRow {
-    font-size: 10px !important;
     flex-direction: column;
-    gap: 5px;
     align-items: flex-start;
-  }
-  .languageRow {
-    margin: 60px 0 80px;
-    gap: 0.7rem;
-  }
-  .loginButton {
-    font-size: 10px !important;
-  }
-  .footer {
-    font-size: 10px !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .loginCard {
-    width: 90%;
-  }
-  .cardContent {
-    padding: 14px 14px 14px !important;
-  }
-  .linksRow {
-    font-size: 10px !important;
-  }
-  .languageRow {
-    margin: 50px 0 60px;
-  }
-  .loginButton {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .loginCard {
-    width: 95%;
-    margin-top: 20px;
-  }
-  .loginCardHeader {
-    height: 35px;
-    padding: 6px;
-  }
-  .cardContent {
-    padding: 12px 12px 12px !important;
-  }
-  .linksRow {
-    font-size: 9px !important;
-  }
-  .languageRow {
-    margin: 40px 0 50px;
-  }
-  .footer {
-    font-size: 9px !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .loginCard {
-    width: 96%;
-  }
-  .cardContent {
-    padding: 12px 12px 12px !important;
-  }
-  .linksRow {
-    font-size: 9px !important;
-  }
-  .loginButton {
-    font-size: 9px !important;
-  }
-  .footer {
-    font-size: 9px !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .loginCard {
-    width: 98%;
-    margin-top: 15px;
-  }
-  .cardContent {
-    padding: 10px 10px 10px !important;
-  }
-  .linksRow {
-    font-size: 8px !important;
-  }
-  .loginButton {
-    font-size: 8px !important;
-  }
-
-  .footer {
-    font-size: 8px !important;
-  }
-  .languageRow {
-    gap: 0.5rem;
+    gap: 6px;
   }
 }

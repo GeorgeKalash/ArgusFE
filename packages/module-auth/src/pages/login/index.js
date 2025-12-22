@@ -131,82 +131,84 @@ const LoginPage = () => {
     Boolean(Object.keys(platformLabels)?.length) && (
       <>
         <Box className={styles.contentCenter}>
-          <Card className={styles.loginCard}>
-            <Box
-              className={styles.loginCardHeader}
-              sx={{
-                backgroundColor: theme.palette.primary.main
-              }}
-            >
-              <CardMedia
-                component='img'
-                image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
-                alt='ArgusERP'
-                sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
-              />
-            </Box>
-            <CardContent className={styles.cardContent} onKeyDown={handleKeyDown}>
-              <Grid container spacing={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    readOnly
-                    name='companyName'
-                    value={companyName}
-                    size='small'
-                    fullWidth
-                    label={platformLabels.CompanyName}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='username'
-                    size='small'
-                    fullWidth
-                    label={platformLabels.Username}
-                    value={validation.values.username}
-                    type='text'
-                    onChange={validation.handleChange}
-                    onClear={() => validation.setFieldValue('username', '')}
-                    error={validation.touched.username && Boolean(validation.errors.username)}
-                    helperText={validation.touched.username && validation.errors.username}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='password'
-                    size='small'
-                    label={platformLabels.password}
-                    type={showPassword ? 'text' : 'password'}
-                    value={validation.values.password}
-                    onChange={validation.handleChange}
-                    endIcons={[
-                      // eslint-disable-next-line react/jsx-key
-                      <Icon
-                        className={inputs.icon}
-                        icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
-                        onClick={() => setShowPassword(prev => !prev)}
-                        onMouseDown={e => e.preventDefault()}
-                      />
-                    ]}
-                    error={validation.touched.password && validation.errors.password}
-                    helperText={validation.touched.password && validation.errors.password}
-                  />
-                </Grid>
-              </Grid>
-              <Box>
-                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
-                  {platformLabels.ForgotPass}
-                </LinkStyled>
+          <Box className={styles.loginCenter}>
+            <Card className={styles.loginCard}>
+              <Box
+                className={styles.loginCardHeader}
+                sx={{
+                  backgroundColor: theme.palette.primary.main
+                }}
+              >
+                <CardMedia
+                  component='img'
+                  image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
+                  alt='ArgusERP'
+                  sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                />
               </Box>
-              <CustomButton
-                fullWidth
-                type='submit'
-                variant='contained'
-                onClick={validation.handleSubmit}
-                label={platformLabels.Login}
-              />
-            </CardContent>
-          </Card>
+              <CardContent className={styles.cardContent} onKeyDown={handleKeyDown}>
+                <Grid container spacing={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      readOnly
+                      name='companyName'
+                      value={companyName}
+                      size='small'
+                      fullWidth
+                      label={platformLabels.CompanyName}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='username'
+                      size='small'
+                      fullWidth
+                      label={platformLabels.Username}
+                      value={validation.values.username}
+                      type='text'
+                      onChange={validation.handleChange}
+                      onClear={() => validation.setFieldValue('username', '')}
+                      error={validation.touched.username && Boolean(validation.errors.username)}
+                      helperText={validation.touched.username && validation.errors.username}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='password'
+                      size='small'
+                      label={platformLabels.password}
+                      type={showPassword ? 'text' : 'password'}
+                      value={validation.values.password}
+                      onChange={validation.handleChange}
+                      endIcons={[
+                        // eslint-disable-next-line react/jsx-key
+                        <Icon
+                          className={inputs.icon}
+                          icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
+                          onClick={() => setShowPassword(prev => !prev)}
+                          onMouseDown={e => e.preventDefault()}
+                        />
+                      ]}
+                      error={validation.touched.password && validation.errors.password}
+                      helperText={validation.touched.password && validation.errors.password}
+                    />
+                  </Grid>
+                </Grid>
+                <Box>
+                  <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                    {platformLabels.ForgotPass}
+                  </LinkStyled>
+                </Box>
+                <CustomButton
+                  fullWidth
+                  type='submit'
+                  variant='contained'
+                  onClick={validation.handleSubmit}
+                  label={platformLabels.Login}
+                />
+              </CardContent>
+              </Card>
+            </Box>
           <Box className={styles.languageRow}>
             <Typography variant='body2' className={styles.offered}>
               {platformLabels.ArgusOfferedIn}

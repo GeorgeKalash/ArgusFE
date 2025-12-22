@@ -91,7 +91,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
     <FormShell resourceId={ResourceIds.DocumentTypeMaps} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4} sx={{ px: 4, pt: 2 }}>
+          <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.SYSTEM_FUNCTION}

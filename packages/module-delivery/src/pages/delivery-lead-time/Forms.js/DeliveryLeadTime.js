@@ -75,7 +75,7 @@ export default function DeliveryLeadTimeForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.DeliveryLeadTimes} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SaleRepository.SalesZone.qry}

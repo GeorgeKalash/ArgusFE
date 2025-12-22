@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid, Box } from '@mui/material'
 import { useState, useContext, useEffect } from 'react'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomComboBox from '../Inputs/CustomComboBox'
@@ -28,7 +28,10 @@ const ReportGenerator = ({
 
   const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
-  const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
+  const [report, setReport] = useState({
+    selectedFormat: '',
+    selectedReport: ''
+  })
 
   const getExportFormats = async () => {
     await getAllKvsByDataset({
@@ -80,7 +83,7 @@ const ReportGenerator = ({
 
     const result = await generateReport({
       postRequest,
-      resourceId: resourceId,
+      resourceId,
       selectedReport: report.selectedReport,
       selectedFormat: report.selectedFormat.key,
       functionId: form?.values?.functionId || null,
@@ -88,7 +91,7 @@ const ReportGenerator = ({
       siteId: form?.values?.siteId || null,
       controllerId: form?.values?.controllerId || null,
       recordId: recordId || null,
-      previewBtnClicked: previewBtnClicked
+      previewBtnClicked
     })
 
     switch (parseInt(report.selectedFormat.key)) {
@@ -105,35 +108,47 @@ const ReportGenerator = ({
   }
 
   return (
-    <Grid item xs={reportSize} sx={{ display: 'flex', mr: 2, alignItems: 'end'}}>
-      <CustomComboBox
-        label={platformLabels.SelectReport}
-        valueField='uniqueId'
-        displayField='layoutName'
-        store={reportStore}
-        value={report.selectedReport}
-        onChange={(e, newValue) =>
-          setReport(prev => ({
-            ...prev,
-            selectedReport: newValue
-          }))
-        }
-        refresh={false}
-        sx={{ width: 250 }}
-        disableClearable
-      />
-      <CustomButton
-        onClick={cycleFormat}
-        image={`${report.selectedFormat?.value || 'PDF'}.png`}
-        disabled={exportFormats.length === 0 || !report.selectedReport}
-        style={{ marginLeft: '6px' }}
-      />
-      <CustomButton
-        onClick={handlePreviewClick}
-        label={platformLabels.Preview}
-        image='preview.png'
-        disabled={!report.selectedReport}
-      />
+    <Grid
+      item
+      xs={reportSize}
+      sx={{
+        p: 0,                    
+        m: 0,
+        display: 'flex',
+        alignItems: 'center'      
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <CustomComboBox
+          label={platformLabels.SelectReport}
+          valueField="uniqueId"
+          displayField="layoutName"
+          store={reportStore}
+          value={report.selectedReport}
+          onChange={(e, newValue) =>
+            setReport(prev => ({
+              ...prev,
+              selectedReport: newValue
+            }))
+          }
+          refresh={false}
+          sx={{ width: 250 }}
+          disableClearable
+        />
+
+        <CustomButton
+          onClick={cycleFormat}
+          image={`${report.selectedFormat?.value || 'PDF'}.png`}
+          disabled={exportFormats.length === 0 || !report.selectedReport}
+        />
+
+        <CustomButton
+          onClick={handlePreviewClick}
+          label={platformLabels.Preview}
+          image="preview.png"
+          disabled={!report.selectedReport}
+        />
+      </Box>
     </Grid>
   )
 }

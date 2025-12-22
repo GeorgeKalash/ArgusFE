@@ -150,7 +150,7 @@ export default function LineItemCapacityForm({ labels, access: maxAccess, obj })
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <Grid item xs={8}>
                 <ResourceLookup

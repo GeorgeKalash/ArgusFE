@@ -112,7 +112,7 @@ const DefaultsTab = ({ labels, maxAccess, storeRecordId }) => {
     <Form maxAccess={maxAccess} editMode={editMode} onSave={formik.handleSubmit}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 name='siteId'

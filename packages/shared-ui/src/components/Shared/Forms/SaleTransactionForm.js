@@ -2387,7 +2387,7 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}></Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.qty'
@@ -2427,7 +2427,7 @@ export default function SaleTransactionForm({
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.subTotal'

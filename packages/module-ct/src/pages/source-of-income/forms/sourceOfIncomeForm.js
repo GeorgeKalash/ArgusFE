@@ -75,7 +75,7 @@ export default function SourceOfIncomeForm({ labels, maxAccess, recordId, setSto
 
   return (
     <FormShell resourceId={ResourceIds.SourceOfIncome} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='name'

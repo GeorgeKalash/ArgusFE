@@ -86,7 +86,7 @@ export default function TransactionForm({ labels, maxAccess, recordId, seqNo, ca
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={CostAllocationRepository.CACostTypes.qry}

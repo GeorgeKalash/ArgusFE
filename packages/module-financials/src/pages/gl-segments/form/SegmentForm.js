@@ -75,7 +75,7 @@ export default function SegmentForm({ labels, obj, maxAccess, formikSegmentId, f
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

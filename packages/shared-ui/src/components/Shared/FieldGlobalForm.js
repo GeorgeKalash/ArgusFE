@@ -195,7 +195,7 @@ export default function FieldGlobalForm({ labels, maxAccess, row, invalidate, wi
     <Form onSave={formik.handleSubmit} editMode={true} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='resourceId'

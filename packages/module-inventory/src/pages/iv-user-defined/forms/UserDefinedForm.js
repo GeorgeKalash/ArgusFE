@@ -114,7 +114,7 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={3} xs={6}>
+          <Grid container spacing={2} xs={6}>
             <Grid item xs={12}>
               <CustomNumberField
                 name='ivtDimCount'

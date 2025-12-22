@@ -868,6 +868,7 @@ const Table = ({
   }
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+  const resolvedHeight = props?.height || props?.maxHeight || '100%'
 
   return (
     <VertLayout>
@@ -876,12 +877,16 @@ const Table = ({
           ref={gridRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={[
+         className={[
             'ag-theme-alpine',
             styles.agGridContainer,
-            hasImageColumn ? styles.hasImageRows : '',
-            !props.maxHeight && !props.height ? styles.agGridFlex : ''
+            !height && !props?.maxHeight ? styles.agGridFlex : ''
           ].join(' ')}
+          sx={{
+            height: resolvedHeight,
+            minHeight: 0
+          }}
+        
         >
           {hoveredTable && !pagination && (
             <Box className={styles.hoverReset}>

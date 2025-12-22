@@ -65,7 +65,7 @@ export default function PreventiveMaintenanceTaskForm({ labels, maxAccess, recor
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

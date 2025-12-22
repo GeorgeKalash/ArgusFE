@@ -64,7 +64,7 @@ const AccessLevelForm = ({ labels, maxAccess, data, invalidate, moduleId, resour
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid item xs={6}>
             <CustomCheckBox
               name='accessFlags.get'

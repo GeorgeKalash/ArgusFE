@@ -50,7 +50,7 @@ const LoDefault = ({ _labels, access }) => {
     <Form onSave={formik.handleSubmit} maxAccess={access} isParentWindow={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4} sx={{ p: 2 }}>
+          <Grid container spacing={2} sx={{ p: 2 }}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}

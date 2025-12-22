@@ -190,7 +190,7 @@ const OpenMultiCurrencyCashTransfer = () => {
     <VertLayout>
       <Fixed>
         <GridToolbar maxAccess={access} />
-        <Grid container spacing={3} sx={{ pl: 5, mb: 2 }}>
+        <Grid container spacing={2} sx={{ pl: 5, mb: 2 }}>
           <Grid item xs={4}>
             <ResourceComboBox
               endpointId={SystemRepository.Plant.qry}

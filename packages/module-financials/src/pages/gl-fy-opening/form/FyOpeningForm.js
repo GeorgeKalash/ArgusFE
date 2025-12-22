@@ -44,7 +44,7 @@ export default function FyOpeningForm({ _labels, access }) {
     <FormShell resourceId={ResourceIds.FyOpening} form={formik} maxAccess={access} editMode={true} isCleared={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.FiscalYears.qry}

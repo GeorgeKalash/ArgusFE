@@ -112,7 +112,7 @@ const IdTypesForm = ({ labels, editMode, maxAccess, setEditMode, setStore, store
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.IdTypes} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='name'

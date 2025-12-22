@@ -70,7 +70,7 @@ const MCDefault = ({ _labels, access }) => {
     <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             {rateTypeFields.map(({ name, label }) => (
               <Grid item xs={12} key={name}>
                 <ResourceComboBox

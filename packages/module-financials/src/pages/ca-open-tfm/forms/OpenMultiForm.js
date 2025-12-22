@@ -48,7 +48,7 @@ export default function OpenMultiForm({ labels, maxAccess, recordId, plId, windo
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}

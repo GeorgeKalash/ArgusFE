@@ -1,5 +1,7 @@
 .buttonContainer {
   font-size: 22px !important;
+  display: flex;
+  align-items: center;
 }
 
 .responsiveButton {

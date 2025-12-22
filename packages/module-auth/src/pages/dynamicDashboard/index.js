@@ -367,7 +367,7 @@ const DashboardLayout = () => {
               )}
               {containsApplet(ResourceIds.NewCustomers) && (
                 <div className={styles.summaryItem} style={{ gridColumn: '1 / 3' }}>
-                  <div>
+                  <div className={styles.redCenter}>
                     {labels.newCostumers}:{' '}
                     {(
                       data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)

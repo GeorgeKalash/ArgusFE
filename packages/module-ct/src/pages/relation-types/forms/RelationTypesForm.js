@@ -71,7 +71,7 @@ export default function RelationTypesForm({ labels, maxAccess, recordId, setStor
 
   return (
     <FormShell resourceId={ResourceIds.RelationType} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'

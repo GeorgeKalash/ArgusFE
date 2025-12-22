@@ -82,7 +82,7 @@ export default function SyncJobOrdersForm({ _labels, access }) {
     <Form onSave={formik.handleSubmit} actions={actions} maxAccess={access} isSaved={false} editMode={true}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'

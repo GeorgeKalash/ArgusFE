@@ -82,7 +82,7 @@ export default function MaterialAdjustmentDTDForm({ labels, maxAccess, recordId,
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}

@@ -90,7 +90,7 @@ export default function ChangeClient({ formValues, onSubmit, window }) {
   return (
     <FormShell resourceId={ResourceIds.ChangeClient} form={formik} isInfo={false} isCleared={false} maxAccess={access}>
       <VertLayout>
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <CustomTextField name='reference' label={labels.reference} value={formValues?.reference} readOnly />
           </Grid>

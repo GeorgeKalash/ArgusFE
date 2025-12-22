@@ -79,7 +79,7 @@ export default function BatchPostForm({ access }) {
     <Form onSave={formik.handleSubmit} actions={actions} isSaved={false} editMode={true} maxAccess={access}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomDatePicker
                 name='startDate'

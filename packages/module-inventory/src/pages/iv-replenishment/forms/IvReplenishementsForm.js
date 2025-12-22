@@ -155,7 +155,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}

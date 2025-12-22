@@ -90,7 +90,7 @@ const BankBranchesForm = ({ labels, maxAccess, recordId }) => {
       <VertLayout>
         <Grid container gap={2}>
           <Grow>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid item xs={12}>
                 <CustomTextField
                   name='name'

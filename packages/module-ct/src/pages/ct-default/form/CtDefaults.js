@@ -129,7 +129,7 @@ const CtDefaults = ({ _labels, access }) => {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceLookup
                     endpointId={SystemRepository.NumberRange.snapshot}
@@ -218,7 +218,7 @@ const CtDefaults = ({ _labels, access }) => {
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='ct_minOtp_CIVAmount'

@@ -470,7 +470,7 @@ export default function FoWaxesForm({ labels, access, recordId, window }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={3} xs={12}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

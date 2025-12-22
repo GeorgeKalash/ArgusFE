@@ -86,7 +86,7 @@ export default function OpeningBalanceForm({ labels, maxAccess, recordId, record
     <FormShell resourceId={ResourceIds.OpeningBalance} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.FiscalYears.qry}

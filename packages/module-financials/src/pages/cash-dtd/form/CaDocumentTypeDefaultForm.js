@@ -81,7 +81,7 @@ export default function CaDocumentTypeDefaultForm({ labels, maxAccess, recordId 
     <FormShell resourceId={ResourceIds.CaDtd} form={formik} maxAccess={maxAccess} editMode={editMode} isCleared={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}

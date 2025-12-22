@@ -68,7 +68,7 @@ export default function RoutingForm({ labels, maxAccess, setStore, store }) {
 
   return (
     <FormShell resourceId={ResourceIds.Routings} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'

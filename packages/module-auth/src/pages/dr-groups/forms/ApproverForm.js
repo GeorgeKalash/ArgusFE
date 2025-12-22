@@ -66,7 +66,7 @@ const ApproverForm = ({ labels, editMode, maxAccess, recordId, store }) => {
     <FormShell form={formik} isInfo={false} resourceId={ResourceIds.DRGroups} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.ReleaseCode.qry}

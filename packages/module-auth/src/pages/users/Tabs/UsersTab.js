@@ -234,7 +234,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
         <Grow>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <FormGrid item hideonempty xs={12}>
                   <CustomTextField
                     name='fullName'
@@ -436,7 +436,7 @@ const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
               </Grid>
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <FormGrid item hideonempty xs={12}>
                   <ResourceComboBox
                     endpointId={AccessControlRepository.NotificationGroup.qry}

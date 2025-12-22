@@ -96,7 +96,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
   }
 
   return (
-    <Grid container spacing={3} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
+    <Grid container spacing={2} sx={{ pl: '10px', pt: '10px', pr: '10px' }}>
       <Grid item xs={12}>
         <CustomTextField
           name='newPassword'

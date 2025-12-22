@@ -53,7 +53,7 @@ export default function TransactionLogPerformance({ recordId }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={4} p={4}>
+        <Grid container spacing={2} p={4}>
           <Grid item xs={12}>
             <CustomTextField
               name='userName'

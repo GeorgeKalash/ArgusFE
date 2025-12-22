@@ -109,7 +109,7 @@ export default function SalesSettingsForm({ _labels, access }) {
     <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={11.5}>
               <FieldSet title={_labels.salesDefaultValues}>
                 <Grid item xs={12}>

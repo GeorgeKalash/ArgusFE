@@ -1794,14 +1794,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField name='totalQTY' label={labels.totalQty} value={totalQty} readOnly />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subTotal'

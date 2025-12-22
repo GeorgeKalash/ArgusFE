@@ -1605,7 +1605,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomDatePicker
                     name='deliveryDate'
@@ -1643,7 +1643,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
               </Grid>
             </Grid>
             <Grid item xs={3}>
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='subTotal'
