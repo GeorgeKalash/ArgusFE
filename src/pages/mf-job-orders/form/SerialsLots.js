@@ -11,7 +11,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 
-export default function SerialsLots({ labels, maxAccess, recordId, api, parameters, window }) {
+export default function SerialsLots({ labels, maxAccess, api, parameters, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -47,32 +47,13 @@ export default function SerialsLots({ labels, maxAccess, recordId, api, paramete
   })
 
   async function fetchGridData() {
-    const res = await getRequest({
+    return await getRequest({
       extension: api,
       parameters
     })
-
-    res.list = res?.list?.length
-      ? await Promise.all(
-          res?.list?.map(async (item, index) => {
-            return {
-              ...item,
-              id: index + 1,
-              srlSeqNo: index + 1,
-              weight: item?.weight || 0
-            }
-          })
-        )
-      : []
-
-    return res
   }
 
-  const totWeight = data?.list?.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row?.weight?.toString().replace(/,/g, '')) || 0
-
-    return weightSum + weightValue
-  }, 0)
+  const totWeight = data?.list?.reduce((acc, curr) => acc + curr.weight, 0)
 
   return (
     <VertLayout>
