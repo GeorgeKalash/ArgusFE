@@ -9,7 +9,6 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
 import GridToolbar from 'src/components/Shared/GridToolbar'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import MetalSettingsForm from './Form/MetalSettingForm'
@@ -60,7 +59,7 @@ const MetalSetting = () => {
       flex: 1
     },
     {
-      field: 'damageNonMetalItemRef',
+      field: 'damageNonMetalItemName',
       headerName: labels.damageNonMetalItem,
       flex: 1
     }
@@ -91,7 +90,7 @@ const MetalSetting = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.MetalSettings.del,
+      extension: ManufacturingRepository.MetalSetting.del,
       record: JSON.stringify(obj)
     })
     invalidate()
