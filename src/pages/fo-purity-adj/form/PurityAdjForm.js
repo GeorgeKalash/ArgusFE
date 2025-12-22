@@ -75,6 +75,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         workCenterId: null,
         qty: 0,
         baseSalesMetalPurity: 0,
+        baseSalesMetalRef: '',
         notes: ''
       },
       items: [
@@ -218,14 +219,15 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       purity: item.purity * 1000
     }))
 
-    const baseSalesMetalPurity = await getBaseSalesMetalPurity()
+    const metalInfo = await getBaseSalesMetalPurity()
 
     formik.setValues({
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
         date: formatDateFromApi(record?.header?.date),
-        baseSalesMetalPurity
+        baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
+        baseSalesMetalRef: metalInfo?.reference || 0
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items
     })
@@ -235,7 +237,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const columns = [
     {
       component: 'numberfield',
-      name: 'id',
+      name: labels.count,
       label: '',
       flex: 0.5,
       props: { readOnly: true }
@@ -281,6 +283,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
+        refresh: false,
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
@@ -364,19 +367,19 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     {
       component: 'numberfield',
       name: 'rmQty',
-      label: labels.rmQty,
+      label: `${labels.qty} ${formik.values?.header?.baseSalesMetalRef || ''}`,
       props: { decimalScale: 2, readOnly: true }
     },
     {
       component: 'numberfield',
       name: 'stdPurity',
-      label: labels.stdPurity,
+      label: labels.newPurity,
       props: { readOnly: true, decimalScale: 2 }
     },
     {
       component: 'numberfield',
       name: 'newRmQty',
-      label: labels.newRmQty,
+      label: `${labels.newRmQty} ${formik.values?.header?.baseSalesMetalRef || ''}`,
       props: { decimalScale: 2, readOnly: true }
     },
     {
@@ -442,7 +445,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       parameters: `_recordId=${baseSalesMetalId}`
     })
 
-    return res?.record?.purity * 1000 || 0
+    return res?.record || {}
   }
 
   useEffect(() => {
@@ -458,8 +461,9 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   useEffect(() => {
     ;(async function () {
       if (baseSalesMetalId && !recordId) {
-        const baseSalesMetalPurity = await getBaseSalesMetalPurity()
-        formik.setFieldValue('header.baseSalesMetalPurity', baseSalesMetalPurity)
+        const res = await getBaseSalesMetalPurity()
+        formik.setFieldValue('header.baseSalesMetalPurity', res?.purity * 1000 || 0)
+        formik.setFieldValue('header.baseSalesMetalRef', res?.reference || '')
       }
     })()
   }, [baseSalesMetalId])
@@ -635,7 +639,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
               <Grid container xs={4} spacing={2}>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    label={labels.totalMetal}
+                    label={labels.totalQty}
                     value={totalMetal}
                     decimalScale={2}
                     readOnly
@@ -644,7 +648,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    label={labels.totalRmQty}
+                    label={`${labels.totalQty} ${formik.values?.header?.baseSalesMetalRef || ''}`}
                     value={totalRmQty}
                     decimalScale={2}
                     readOnly
@@ -653,7 +657,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
-                    label={labels.totalNewRmQty}
+                    label={`${labels.totalNewRmQty} ${formik.values?.header?.baseSalesMetalRef || ''}`}
                     value={totalRmNewQty}
                     decimalScale={2}
                     readOnly
