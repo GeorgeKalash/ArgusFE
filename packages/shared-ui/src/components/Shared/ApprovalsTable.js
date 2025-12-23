@@ -39,6 +39,7 @@ import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveR
 import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
 import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/TimeVariatrionForm'
 import TaDslForm from '@argus/shared-ui/src/components/Shared/Forms/TaDslForm'
+import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -185,6 +186,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.DuringShiftLeave:
         relevantComponent = TaDslForm
+        break
+      case SystemFunction.JobInfo:
+        relevantComponent = JobInfoForm
       default:
          // Handle default case if needed
         break
