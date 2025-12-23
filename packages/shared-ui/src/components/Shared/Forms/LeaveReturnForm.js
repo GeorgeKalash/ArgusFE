@@ -21,14 +21,24 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function LeaveReturnForm({ labels, access, recordId }) {
+export default function LeaveReturnForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: LoanManagementRepository.LeaveReturn.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.LeaveReturn,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.title, window })
+
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.ReturnFromLeave,
@@ -348,3 +358,6 @@ export default function LeaveReturnForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+LeaveReturnForm.width = 800
+LeaveReturnForm.height = 500

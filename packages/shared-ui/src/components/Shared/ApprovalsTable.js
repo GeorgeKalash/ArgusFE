@@ -35,6 +35,7 @@ import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/Purc
 import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
 import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
 import MatPlaningForm from '@argus/shared-ui/src/components/Shared/Forms/matPlaningForm'
+import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveReturnForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -169,6 +170,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.MRP:
         relevantComponent = MatPlaningForm
+        break
+      case SystemFunction.ReturnFromLeave:
+        relevantComponent = LeaveReturnForm
       default:
          // Handle default case if needed
         break
