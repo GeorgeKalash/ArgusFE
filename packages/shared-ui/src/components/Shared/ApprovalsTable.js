@@ -33,6 +33,7 @@ import PurchaseRquisitionForm from '@argus/shared-ui/src/components/Shared/Forms
 import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
+import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -161,6 +162,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.MaterialRequest:
         relevantComponent = MaterialRequestForm
+        break
+      case SystemFunction.CostAllocation:
+        relevantComponent = PuCostAllocationWindow
       default:
          // Handle default case if needed
         break
