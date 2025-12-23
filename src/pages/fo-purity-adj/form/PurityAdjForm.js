@@ -10,7 +10,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
@@ -22,7 +21,6 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { createConditionalSchema } from 'src/lib/validation'
 
@@ -253,7 +251,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       label: labels.metal,
       name: 'metalId',
       props: {
-        endpointId: InventoryRepository.Metals.qry,
+        endpointId: FoundryRepository.PurityAdjustment.combos,
+        reducer: response => response?.record?.metals,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 1.5,
@@ -493,8 +492,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -542,7 +541,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.plants}
                     name='header.plantId'
                     readOnly={editMode}
                     required
@@ -563,7 +563,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.sites}
                     name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
@@ -582,7 +583,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.workCenters}
                     name='header.workCenterId'
                     label={labels.workCenter}
                     valueField='recordId'

@@ -95,6 +95,7 @@ export const FoundryRepository = {
     del: service + 'delDTD'
   },
   PurityAdjustment: {
+    combos: service + 'getPackPADJ',
     get2: service + 'get2PADJ',
     del: service + 'delPADJ',
     set2: service + 'set2PADJ',
