@@ -41,6 +41,7 @@ import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/Tim
 import TaDslForm from '@argus/shared-ui/src/components/Shared/Forms/TaDslForm'
 import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoForm'
 import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersForm'
+import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -193,6 +194,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.PaymentOrder:
         relevantComponent = PaymentOrdersForm
+        break
+      case SystemFunction.WorkCenterConsumption:
+        relevantComponent = WCConsumpForm
       default:
          // Handle default case if needed
         break
