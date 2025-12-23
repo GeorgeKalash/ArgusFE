@@ -23,18 +23,28 @@ import { IVReplenishementRepository } from '@argus/repositories/src/repositories
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function MatPlaningForm({ labels, access, recordId }) {
+export default function MatPlaningForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.MaterialReqPlannings,
+    editMode: !!recordId
+  })
+  
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MRP,
     access,
     enabled: !recordId,
     objectName: 'header'
   })
+
+
+  useSetWindow({ title: labels.materialRequestPlaning, window })
 
   const invalidate = useInvalidate({
     endpointId: IVReplenishementRepository.MatPlanning.page
@@ -475,3 +485,6 @@ export default function MatPlaningForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+MatPlaningForm.width = 1300
+MatPlaningForm.height = 600
