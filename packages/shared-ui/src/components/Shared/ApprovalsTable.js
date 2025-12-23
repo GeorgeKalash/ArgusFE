@@ -37,6 +37,7 @@ import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms
 import MatPlaningForm from '@argus/shared-ui/src/components/Shared/Forms/matPlaningForm'
 import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveReturnForm'
 import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
+import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/TimeVariatrionForm'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -177,6 +178,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.Penalty:
         relevantComponent = EmpPenaltyForm
+        break
+      case SystemFunction.TimeVariation:
+        relevantComponent = TimeVariatrionForm
       default:
          // Handle default case if needed
         break
