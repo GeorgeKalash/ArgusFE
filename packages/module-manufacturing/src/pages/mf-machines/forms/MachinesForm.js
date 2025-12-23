@@ -111,7 +111,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
             name='minLoadQty'
             label={labels.minLoadQty}
             value={formik.values.minLoadQty}
-            onChange={formik.handleChange}
+            onChange={formik.setFieldValue}
             maxLength='3'
             decimalScale={0}
             onClear={() => formik.setFieldValue('minLoadQty', 0)}
@@ -136,7 +136,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
             name='maxLoadQty'
             label={labels.maxLoadQty}
             value={formik.values.maxLoadQty}
-            onChange={formik.handleChange}
+            onChange={formik.setFieldValue}    
             maxLength='3'
             decimalScale={0}
             onClear={() => formik.setFieldValue('maxLoadQty', 0)}
@@ -189,7 +189,7 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
             maxLength='3'
             decimalScale={0}
             value={formik.values.defaultLoadQty}
-            onChange={formik.handleChange}
+            onChange={formik.setFieldValue}
             onClear={() => formik.setFieldValue('defaultLoadQty', 0)}
             error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
           />

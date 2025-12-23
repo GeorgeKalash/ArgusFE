@@ -132,7 +132,7 @@ export default function PriceForm({ labels, maxAccess, obj, recordId, window, fe
                 required
                 maxAccess={maxAccess}
                 allowNegative={false}
-                onChange={formik.handleChange}
+                onChange={formik.setFieldValue}
                 onClear={() => formik.setFieldValue('value', '')}
                 error={formik.touched.value && Boolean(formik.errors.value)}
               />

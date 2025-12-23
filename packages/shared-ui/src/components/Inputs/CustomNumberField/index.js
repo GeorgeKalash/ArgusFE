@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, TextField } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
 import { getNumberWithoutCommas } from '@argus/shared-domain/src/lib/numberField-helper'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
@@ -41,6 +41,9 @@ const CustomNumberField = ({
   ...props
 }) => {
   const isEmptyFunction = onMouseLeave.toString() === '()=>{}'
+  const isEmptyBlurFunction = onBlur.toString() === '()=>{}'
+  const valueShow = useRef(null)
+
   const name = props.name
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, props.required, readOnly, hidden)
 
@@ -59,37 +62,68 @@ const CustomNumberField = ({
   }
 
   const parseInputValue = (val, blur) => {
-    val = val.replace(/,/g, '')
+    if (val === null || val === undefined) {
+      valueShow.current = null
 
-    if (val == '-' && !blur) return val
+      return null
+    }
+
+    val = val?.replace(/,/g, '')
 
     if (!val.startsWith('.') && val.endsWith('.') && !/\.\d+$/.test(val) && blur) {
       val = val.slice(0, -1)
     }
-
-    if (val?.indexOf('.') > -1 && val.toString().split('.')[1] == 0 && !blur) return val.toString()
+    valueShow.current = val
 
     if (val?.endsWith('.') && !blur) {
       return val
     }
-    if (isDotFollowedByOnlyZeros(val) && !blur) {
-      return val.startsWith('.') ? ('0' + val).toString() : val.toString()
+
+    if ((isDotFollowedByOnlyZeros(val) || val.startsWith('.') || val.startsWith('-.')) && !blur) {
+      const newVal = val.startsWith('.')
+        ? ('0' + val).toString()
+        : val.startsWith('-.')
+        ? ('-0.' + val?.toString().split('.')[1]).toString()
+        : val.toString()
+
+      valueShow.current = newVal
+
+      return Number(newVal)
     }
 
     if (val == '.' && blur) {
       return null
     }
 
-    const num = val != '' ? val : null
+    if (typeof val === 'number') {
+      return Number.isNaN(val) ? null : val
+    }
 
-    return isNaN(num) ? null : num
+    if (typeof val === 'string') {
+      const trimmed = val?.trim()
+      if (!trimmed) return null
+      const num = Number(trimmed)
+
+      return Number.isNaN(num) ? null : num
+    }
+
+    valueShow.current = null
+
+    return null
   }
 
   const handleNumberChangeValue = (e, blur) => {
     const value = formatNumber(e)
     if (value) e.target.value = value
 
-    onChange(e, parseInputValue(value, blur))
+    onChange(name, parseInputValue(value, blur))
+  }
+
+  const handleNumberBlurValue = (e, blur) => {
+    const value = formatNumber(e)
+    if (value) e.target.value = value
+
+    onBlur(name, parseInputValue(value, blur))
   }
 
   const handleNumberMouseLeave = e => {
@@ -141,7 +175,7 @@ const CustomNumberField = ({
       thousandSeparator={thousandSeparator}
       decimalSeparator='.'
       decimalScale={decimalScale}
-      value={value ?? ''}
+      value={valueShow?.current || (value ?? '')} 
       variant={variant}
       size={size}
       fullWidth
@@ -153,8 +187,9 @@ const CustomNumberField = ({
         autoSelect && e.target.select()
       }}
       onBlur={e => {
-        onBlur(e)
-        if (e.target.value?.endsWith('.')) {
+        if (!isEmptyBlurFunction) {
+          handleNumberBlurValue(e, true)
+        } else if (e.target.value?.endsWith('.')) {
           handleNumberChangeValue(e, true)
         }
       }}
@@ -187,7 +222,12 @@ const CustomNumberField = ({
             )}
 
             {displayButtons && (value || value === 0) && (
-              <IconButton tabIndex={-1} onClick={onClear} aria-label='clear input' className={inputs.iconButton}>
+              <IconButton tabIndex={-1}  
+               onClick={e => {
+                onClear(e)
+                valueShow.current = null
+              }}
+               aria-label='clear input' className={inputs.iconButton}>
                 <ClearIcon className={inputs.icon} />
               </IconButton>
             )}

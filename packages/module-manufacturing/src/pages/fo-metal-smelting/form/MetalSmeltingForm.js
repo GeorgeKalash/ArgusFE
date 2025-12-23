@@ -796,8 +796,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     name='header.purity'
                     label={labels.purity}
                     readOnly={isPosted}
-                    onBlur={e => {
-                      let value = Number(e.target.value.replace(/,/g, ''))
+                    onBlur={(_, value) => {
                       updatePurityRelatedFields(value)
                       formik.setFieldValue('header.purity', value)
                     }}
@@ -809,7 +808,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     align='right'
                     onClear={() => {
                       updatePurityRelatedFields(0)
-                      formik.setFieldValue('header.purity', '')
+                      formik.setFieldValue('header.purity', null)
                     }}
                     error={formik.touched.header?.purity && Boolean(formik.errors.header?.purity)}
                   />
@@ -818,9 +817,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                   <CustomNumberField
                     name='header.qty'
                     label={labels.qty}
-                    onBlur={e => {
+                    onBlur={(_, value) => {
                       setRecalc(true)
-                      let value = Number(e.target.value.replace(/,/g, ''))
                       formik.setFieldValue('header.qty', value)
                     }}
                     value={formik.values.header?.qty}
@@ -830,7 +828,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     allowNegative={false}
                     align='right'
                     readOnly={isPosted}
-                    onClear={() => formik.setFieldValue('header.qty', '')}
+                    onClear={() => formik.setFieldValue('header.qty', null)}
                     error={formik.touched.header?.qty && Boolean(formik.errors.header?.qty)}
                   />
                 </Grid>
