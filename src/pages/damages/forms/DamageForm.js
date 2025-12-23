@@ -146,7 +146,7 @@ export default function DamageForm({ recordId, jobId }) {
           workCenterName: res?.record?.header?.wcName,
           workCenterRef: res?.record?.header?.wcRef
         },
-        items: res?.items || []
+        items: res?.record?.items || []
       })
     })
   }
