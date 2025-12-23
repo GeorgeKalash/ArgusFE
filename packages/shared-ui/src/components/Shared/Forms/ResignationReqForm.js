@@ -22,12 +22,22 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import { DocumentReleaseRepository } from '@argus/repositories/src/repositories/DocumentReleaseRepository'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function ResignationReqForm({ recordId, labels, maxAccess }) {
+export default function ResignationReqForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack: stackError } = useError()
 
+
+    const { labels, access: maxAccess } = useResourceParams({
+      datasetId: ResourceIds.ResignationRequest,
+      editMode: !!recordId
+    })
+
+   useSetWindow({ title: labels.ResignationReq, window })
+    
   const invalidate = useInvalidate({
     endpointId: EmployeeRepository.ResignationRequest.page
   })
@@ -390,3 +400,5 @@ export default function ResignationReqForm({ recordId, labels, maxAccess }) {
     </FormShell>
   )
 }
+ResignationReqForm.width= 850
+ResignationReqForm.height = 630

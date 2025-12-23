@@ -13,7 +13,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import SamplesForm from './Forms/SamplesForm'
+import SamplesForm from '@argus/shared-ui/src/components/Shared/Forms/SamplesForm'
 
 const PMSamples = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -153,13 +153,8 @@ const PMSamples = () => {
     stack({
       Component: SamplesForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1200,
-      height: 680,
-      title: labels.samples
+      }
     })
   }
 

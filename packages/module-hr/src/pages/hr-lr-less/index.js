@@ -8,7 +8,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
-import LeaveRequestForm from './forms/LeaveRequestForm'
+import LeaveRequestForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveRequestForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -137,13 +137,8 @@ const LeaveRequest = () => {
     stack({
       Component: LeaveRequestForm,
       props: {
-        labels,
         recordId,
-        access
-      },
-      width: 800,
-      height: 500,
-      title: labels.title
+      }
     })
   }
 

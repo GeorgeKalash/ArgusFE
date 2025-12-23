@@ -10,7 +10,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
-import ResignationReqForm from './forms/ResignationReqForm'
+import ResignationReqForm from '@argus/shared-ui/src/components/Shared/Forms/ResignationReqForm'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -100,13 +100,8 @@ const ResignationRequest = () => {
     stack({
       Component: ResignationReqForm,
       props: {
-        recordId,
-        labels,
-        maxAccess: access
-      },
-      width: 850,
-      height: 630,
-      title: labels.ResignationReq
+        recordId,  
+      }
     })
   }
 
