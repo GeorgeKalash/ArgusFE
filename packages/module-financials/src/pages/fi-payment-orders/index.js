@@ -13,7 +13,7 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import PaymentOrdersForm from './Form/PaymentOrdersForm'
+import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersForm'
 
 const PaymentOrders = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
