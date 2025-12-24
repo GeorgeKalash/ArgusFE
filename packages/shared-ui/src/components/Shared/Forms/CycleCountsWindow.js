@@ -1,11 +1,14 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import { useState } from 'react'
-import CycleCountsForm from '../Forms/CycleCountsForm'
-import Sites from '../Forms/Sites'
-import Controller from '../Forms/Controller'
+import CycleCountsForm from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsForm'
+import Sites from '@argus/shared-ui/src/components/Shared/Forms/Sites'
+import Controller from '@argus/shared-ui/src/components/Shared/Forms/Controller'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
+const CycleCountsWindow = ({ recordId, plantId, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -13,6 +16,13 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
     isPosted: false,
     isClosed: false
   })
+
+  const { labels, access: maxAccess } = useResourceParams({
+    datasetId: ResourceIds.StockCounts,
+    editMode: !!recordId
+  })
+  
+  useSetWindow({ title: labels.cycleCounts, window })
 
   const [refreshController, setRefreshController] = useState(false)
   const editMode = !!store.recordId
@@ -45,5 +55,8 @@ const CycleCountsWindow = ({ recordId, labels, maxAccess, plantId }) => {
     </>
   )
 }
+
+CycleCountsWindow.width = 650
+CycleCountsWindow.height = 750
 
 export default CycleCountsWindow

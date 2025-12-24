@@ -43,6 +43,7 @@ import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoFor
 import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersForm'
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
+import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -201,6 +202,9 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.ProductionOrder:
         relevantComponent = ProductionOrderForm
+        break
+      case SystemFunction.StockCount:
+        relevantComponent = CycleCountsWindow
       default:
          // Handle default case if needed
         break
