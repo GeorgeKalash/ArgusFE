@@ -100,7 +100,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
   const popupComponent = async obj => {
     let relevantComponent
     let recordId = obj.recordId
-    let functionId = obj?.functionId
 
     switch (obj.functionId) {
        case SystemFunction.CurrencyCreditOrderSale:
@@ -198,7 +197,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         props: {
           recordId: recordId,
           plantId: plantId,
-          functionId: functionId,
           userData: userData
         }
       })

@@ -65,7 +65,7 @@ import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 
-export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {  
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
