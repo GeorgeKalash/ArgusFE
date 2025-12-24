@@ -92,9 +92,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     objectName: 'header'
   })
 
-
- 
-
   const conditions = {
     sku: row => row?.sku,
     itemName: row => row?.itemName,
