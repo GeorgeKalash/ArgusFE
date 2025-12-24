@@ -201,7 +201,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => formik.setFieldValue('type', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('type', newValue?.key || null)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -213,7 +213,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 valueField='key'
                 displayField='value'
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => formik.setFieldValue('moduleId', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('moduleId', newValue?.key || null)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -226,7 +226,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 valueField='key'
                 displayField='value'
-                onChange={(event, newValue) => formik.setFieldValue('resourceId', newValue?.key || null)}
+                onChange={(_, newValue) => formik.setFieldValue('resourceId', newValue?.key || null)}
               />
             </Grid>
             <Grid item xs={12}>
@@ -239,7 +239,7 @@ export default function ResourceDowntimeForm({ labels, maxAccess, recordId }) {
                 maxAccess={maxAccess}
                 valueField='recordId'
                 displayField='name'
-                onChange={(event, newValue) => formik.setFieldValue('sgId', newValue?.recordId || null)}
+                onChange={(_, newValue) => formik.setFieldValue('sgId', newValue?.recordId || null)}
               />
             </Grid>
             <Grid item xs={12}>

@@ -3,7 +3,7 @@
   width: 100%;
   height: auto;
   max-height: none;
-  --ag-font-size: 10.5px; /* was 11px */
+  --ag-font-size: 10.5px;
 }
 
 .agGridFlex {

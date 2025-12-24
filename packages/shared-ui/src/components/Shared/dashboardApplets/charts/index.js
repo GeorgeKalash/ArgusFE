@@ -875,97 +875,40 @@ export const LineChart = ({ id, labels, data, label }) => {
   )
 }
 
-export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
+  const ref = useRef(null)
+  const inst = useRef(null)
+
   useEffect(() => {
-    const canvas = document.getElementById(id)
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!ref.current || !labels.length || !datasets.length) return
+    if (inst.current) inst.current.destroy()
 
-    const datasetConfig = datasets
-      .map((data, index) => {
-        const color = getColorForIndex(index, canvas)
+    inst.current = new Chart(ref.current, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: datasets
+      .map((d, i) => {
+        if (!Array.isArray(d) || !d.some(v => v !== 0)) return null
 
-        if (data.some(value => value !== 0)) {
-          return {
-            label: datasetLabels[index],
-            data,
-            borderColor: color,
-            backgroundColor: color,
-            borderWidth: 2,
-            tension: 0.3,
-            pointRadius: 3,
-            spanGaps: true
-          }
+        return {
+          label: datasetLabels?.[i] ?? `Year ${i + 1}`,
+          data: d,
+          borderColor: `hsl(${i * 60},70%,55%)`,
+          tension: 0.3,
+          pointRadius: 3
         }
-
-        return null
       })
-      .filter(dataset => dataset !== null)
+      .filter(Boolean)
+  },
+  options: { responsive: true, maintainAspectRatio: false }
+})
 
-    if (datasetConfig.length === 0) {
-      return
-    }
 
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: datasetConfig
-      },
-      options: {
-        responsive: true,
-        aspectRatio: ratio,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: datasetConfig.length > 0,
-            position: 'left',
-            labels: {
-              usePointStyle: true,
-              padding: 10
-            }
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return value.toLocaleString()
-              }
-            }
-          }
-        }
-      }
-    })
+    return () => inst.current?.destroy()
+  }, [labels, datasets, datasetLabels])
 
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, datasets, datasetLabels])
-
-  return (
-    <div className={styles.charthight}>
-    <canvas
-      id={id}
-      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
-      
-    ></canvas>
-    </div>
-  )
+  return <canvas ref={ref} className={styles.chartCanvas} />
 }
 
 const getColorForIndex = (index, canvas) => {

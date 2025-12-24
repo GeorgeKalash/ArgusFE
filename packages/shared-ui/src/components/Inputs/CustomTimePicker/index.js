@@ -9,6 +9,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import styles from './CustomTimePicker.module.css'
+import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
 
 const CustomTimePicker = ({
   name,
