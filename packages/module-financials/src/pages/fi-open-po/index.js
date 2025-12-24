@@ -14,7 +14,7 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import PaymentOrdersForm from '../fi-payment-orders/Form/PaymentOrdersForm'
 import PaymentOrdersExpensesForm from '../fi-po-expenses/Form/PaymentOrdersExpensesForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
-import FiPaymentVouchersForm from '@argus/shared-ui/src/components/Shared/Forms/FiPaymentVouchersForm'
+import FiPaymentVouchersForm from '../fi-payment-vouchers/forms/FiPaymentVouchersForm'
 import FiPaymentVoucherExpensesForm from '../fi-pv-expenses/forms/PaymentVoucherExpensesForm'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 

@@ -12,7 +12,7 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
-import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseTransactionForm'
+import PurchaseTransactionForm from '../pu-trx/[functionId]/PurchaseTransactionForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
@@ -96,9 +96,14 @@ const GeneratePurchaseInvoice = () => {
     stack({
       Component: PurchaseTransactionForm,
       props: {
+        labels: _labels,
         recordId,
+        maxAccess,
         functionId: SystemFunction.PurchaseInvoice
-      }
+      },
+      width: 1330,
+      height: 720,
+      title: _labels.purchaseInvoice
     })
   }
 

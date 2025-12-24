@@ -34,8 +34,6 @@ import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
 import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
-import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseTransactionForm'
-import FiPaymentVouchersForm from '@argus/shared-ui/src/components/Shared/Forms/FiPaymentVouchersForm'
 import ResignationReqForm from '@argus/shared-ui/src/components/Shared/Forms/ResignationReqForm'
 import LeaveRequestForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveRequestForm'
 import SamplesForm from '@argus/shared-ui/src/components/Shared/Forms/SamplesForm'
@@ -131,9 +129,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
         relevantComponent = ClientTemplateForm
         break
-      case SystemFunction.PaymentVoucher:
-        relevantComponent = FiPaymentVouchersForm
-        break
       case SystemFunction.ResignationRequest:
         relevantComponent = ResignationReqForm
         break
@@ -181,10 +176,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.PurchaseOrder:
         relevantComponent = PurchaseOrderForm
-        break
-        case SystemFunction.PurchaseInvoice:
-        case SystemFunction.PurchaseReturn:
-            relevantComponent = PurchaseTransactionForm
         break
       case SystemFunction.MaterialRequest:
         relevantComponent = MaterialRequestForm

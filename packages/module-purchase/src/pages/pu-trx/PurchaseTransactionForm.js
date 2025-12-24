@@ -64,10 +64,8 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
-import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function PurchaseTransactionForm({ recordId, functionId, window }) {
+export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {  
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
@@ -81,33 +79,7 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
   const [reCal, setReCal] = useState(false)
   const { stack: stackError } = useError()
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
-  
-  const getResourceId = functionId => {
-    switch (functionId) {
-      case SystemFunction.PurchaseInvoice:
-        return ResourceIds.PurchaseInvoice
-      case SystemFunction.PurchaseReturn:
-        return ResourceIds.PurchaseReturn
-      default:
-        return null
-    }
-  }
-  
-  
-  const { labels, access } = useResourceParams({
-    datasetId: getResourceId(parseInt(functionId)) ,
-    editMode: !!recordId
-  })
 
-    const getCorrectLabel = functionId => {
-      if (parseFloat(functionId) === SystemFunction.PurchaseInvoice) {
-        return labels.purchaseInvoice
-      } else if (parseFloat(functionId) === SystemFunction.PurchaseReturn) {
-        return labels.purchaseReturn
-      }
-    }
-
-  useSetWindow({ title: getCorrectLabel(functionId), window })
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
@@ -1757,16 +1729,16 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     })
   }
 
-  // const getResourceId = functionId => {
-  //   switch (functionId) {
-  //     case SystemFunction.PurchaseInvoice:
-  //       return ResourceIds.PurchaseInvoice
-  //     case SystemFunction.PurchaseReturn:
-  //       return ResourceIds.PurchaseReturn
-  //     default:
-  //       return null
-  //   }
-  // }
+  const getResourceId = functionId => {
+    switch (functionId) {
+      case SystemFunction.PurchaseInvoice:
+        return ResourceIds.PurchaseInvoice
+      case SystemFunction.PurchaseReturn:
+        return ResourceIds.PurchaseReturn
+      default:
+        return null
+    }
+  }
 
   return (
     <FormShell
@@ -2193,6 +2165,3 @@ export default function PurchaseTransactionForm({ recordId, functionId, window }
     </FormShell>
   )
 }
-
-PurchaseTransactionForm.width = 1330
-PurchaseTransactionForm.height = 720

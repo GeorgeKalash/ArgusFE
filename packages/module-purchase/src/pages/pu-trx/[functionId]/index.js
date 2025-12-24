@@ -13,7 +13,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
-import PurchaseTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseTransactionForm'
+import PurchaseTransactionForm from './PurchaseTransactionForm'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import toast from 'react-hot-toast'
 
@@ -192,13 +192,26 @@ const PuTrx = () => {
     openForm(obj?.recordId)
   }
 
+  const getCorrectLabel = functionId => {
+    if (parseFloat(functionId) === SystemFunction.PurchaseInvoice) {
+      return labels.purchaseInvoice
+    } else if (parseFloat(functionId) === SystemFunction.PurchaseReturn) {
+      return labels.purchaseReturn
+    }
+  }
+
   async function openForm(recordId) {
     stack({
       Component: PurchaseTransactionForm,
       props: {
+        labels,
         recordId,
+        access,
         functionId
-      }
+      },
+      width: 1330,
+      height: 720,
+      title: getCorrectLabel(parseInt(functionId))
     })
   }
 

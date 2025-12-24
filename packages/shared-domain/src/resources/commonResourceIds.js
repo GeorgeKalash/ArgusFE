@@ -34,8 +34,6 @@ export const commonResourceIds = [
   ResourceIds.ProductionOrder,
   ResourceIds.LeaveRequestODOM,
   ResourceIds.TimeVariation,
-  ResourceIds.PurchaseInvoice,
-  ResourceIds.PurchaseReturn,
   ResourceIds.ResignationRequest,
   ResourceIds.LeaveRequest,
   ResourceIds.Samples,
