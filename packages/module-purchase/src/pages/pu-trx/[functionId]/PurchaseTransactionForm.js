@@ -80,7 +80,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const { stack: stackError } = useError()
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
 
-
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',
     value: 2
