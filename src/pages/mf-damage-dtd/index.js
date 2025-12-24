@@ -11,10 +11,10 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { SystemFunction } from 'src/resources/SystemFunction'
-import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import MetalSmeltingDTDForm from './Forms/MetalSmeltingDTDForm'
+import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import DamageDocDefaultTypeForm from './Forms/DamageDocDefaultTypeForm'
 
-const MetalSmeltingDTD = () => {
+const DamageDtd = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -23,8 +23,8 @@ const MetalSmeltingDTD = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.DocumentTypeDefault.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.MetalSmelting}`
+      extension: ManufacturingRepository.DocumentTypeDefault.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_filter=&_functionId=${SystemFunction.Damage}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -39,21 +39,22 @@ const MetalSmeltingDTD = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.DocumentTypeDefault.page,
-    datasetId: ResourceIds.MetalSmeltingDTD
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page,
+    datasetId: ResourceIds.MFDamageDtd
   })
 
   const columns = [
     {
       field: 'dtName',
-      headerName: labels.documentType,
+      headerName: labels.docType,
       flex: 1
     },
+
     {
-      field: 'smeltingMaxAllowedVariation',
-      headerName: labels.smeltingMaxAllowedVariation,
+      field: 'genJobFromDamage',
+      headerName: labels.genJobFromDamage,
       flex: 1,
-      type: 'number'
+      type: 'checkbox'
     }
   ]
 
@@ -63,7 +64,7 @@ const MetalSmeltingDTD = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.DocumentTypeDefault.del,
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -72,15 +73,15 @@ const MetalSmeltingDTD = () => {
 
   function openForm(record) {
     stack({
-      Component: MetalSmeltingDTDForm,
+      Component: DamageDocDefaultTypeForm,
       props: {
         labels,
         recordId: record?.dtId,
         maxAccess: access
       },
       width: 600,
-      height: 350,
-      title: labels.MetalSmeltingDTD
+      height: 250,
+      title: labels.damageDTD
     })
   }
 
@@ -112,4 +113,4 @@ const MetalSmeltingDTD = () => {
   )
 }
 
-export default MetalSmeltingDTD
+export default DamageDtd

@@ -164,7 +164,6 @@ export default function ItemTab({ labels, maxAccess, store }) {
           props: {
             labels,
             maxAccess,
-            recordId,
             api: ManufacturingRepository.MFSerial.qry2,
             parameters: `_jobId=${recordId}&_seqNo=${row.seqNo}`
           }

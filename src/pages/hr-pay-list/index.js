@@ -9,13 +9,13 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
-import DamageForm from './forms/DamageForm'
-import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { PayrollRepository } from 'src/repositories/PayrollRepository'
+import PayrollListForm from './Forms/PayrollListForm'
 
-const Damages = () => {
+const PayList = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -30,8 +30,8 @@ const Damages = () => {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.Damage.page,
-    datasetId: ResourceIds.Damages,
+    endpointId: PayrollRepository.Payroll.page,
+    datasetId: ResourceIds.PayrollHeader,
     filter: {
       filterFn: fetchWithFilter
     }
@@ -50,18 +50,53 @@ const Damages = () => {
       type: 'date'
     },
     {
-      field: 'jobRef',
-      headerName: labels.jobRef,
+      field: 'fiscalYear',
+      headerName: labels.fiscalYear,
+      flex: 1
+    },
+    {
+      field: 'payDate',
+      headerName: labels.payDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'payDescription',
+      headerName: labels.payDescription,
+      flex: 1
+    },
+    {
+      field: 'startDate',
+      headerName: labels.startDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'endDate',
+      headerName: labels.endDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'taStartDate',
+      headerName: labels.taStartDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'taEndDate',
+      headerName: labels.taEndDate,
+      flex: 1,
+      type: 'date'
+    },
+    {
+      field: 'notes',
+      headerName: labels.notes,
       flex: 1
     },
     {
       field: 'statusName',
       headerName: labels.status,
-      flex: 1
-    },
-    {
-      field: 'notes',
-      headerName: labels.remarks,
       flex: 1
     }
   ]
@@ -70,24 +105,24 @@ const Damages = () => {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.Damage.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&_jobId=0&filter=`
+      extension: PayrollRepository.Payroll.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params}&filter=`
     })
 
     return { ...response, _startAt: _startAt }
   }
 
   async function fetchWithFilter({ filters, pagination }) {
-    if (filters?.qry)
+    if (filters.qry)
       return await getRequest({
-        extension: ManufacturingRepository.Damage.snapshot,
-        parameters: `_filter=${filters.qry}&_jobId=0`
+        extension: PayrollRepository.Payroll.snapshot,
+        parameters: `_filter=${filters.qry}`
       })
     else return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
   }
 
   const { proxyAction } = useDocumentTypeProxy({
-    functionId: SystemFunction.Damage,
+    functionId: SystemFunction.PayrollList,
     action: openForm
   })
 
@@ -96,24 +131,26 @@ const Damages = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId)
   }
 
   async function openForm(recordId) {
     stack({
-      Component: DamageForm,
+      Component: PayrollListForm,
       props: {
+        labels,
+        access,
         recordId
       },
-      width: 1150,
-      height: 580,
-      title: labels.damage
+      width: 850,
+      height: 700,
+      title: labels.payrollList
     })
   }
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.Damage.del,
+      extension: PayrollRepository.Payroll.del,
       record: JSON.stringify(obj)
     })
     invalidate()
@@ -123,7 +160,7 @@ const Damages = () => {
   return (
     <VertLayout>
       <Fixed>
-        <RPBGridToolbar onAdd={add} maxAccess={access} reportName={'MFDMG'} filterBy={filterBy} />
+        <RPBGridToolbar onAdd={add} maxAccess={access} filterBy={filterBy} reportName={'PYHE'} />
       </Fixed>
       <Grow>
         <Table
@@ -135,7 +172,6 @@ const Damages = () => {
           refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
           paginationParameters={paginationParameters}
@@ -146,4 +182,4 @@ const Damages = () => {
   )
 }
 
-export default Damages
+export default PayList
