@@ -6,55 +6,46 @@ import { VertLayout } from './Layouts/VertLayout'
 import { Fixed } from './Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
 import ResourceComboBox from './ResourceComboBox'
-import { DataSets } from 'src/resources/DataSets'
 import { generateReport } from 'src/utils/ReportUtils'
 import CustomButton from '../Inputs/CustomButton'
-import { CommonContext } from 'src/providers/CommonContext'
+import { ControlContext } from 'src/providers/ControlContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { exportFormat } = useContext(ControlContext)
   const [reportStore, setReportStore] = useState([])
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)
-  const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
 
   const getExportFormats = async () => {
-    await getAllKvsByDataset({
-      _dataset: DataSets.EXPORT_FORMAT,
-      callback: res => {
-        if (res.length > 0) {
-          setExportFormats(res)
-          setFormatIndex(0)
-          setReport(prev => ({
-            ...prev,
-            selectedFormat: res[0]
-          }))
-        }
-      }
-    })
+    if (!exportFormat.length) return
+    setFormatIndex(0)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormat[0]
+    }))
   }
 
-  const getReportLayout = () => {
-    getRequest({
-      extension: SystemRepository.ReportLayout,
+  const getReportLayout = async () => {
+    const reportPack = await getRequest({
+      extension: SystemRepository.ReportLayout.get,
       parameters: `_resourceId=${resourceId}`
-    }).then(async res => {
-      const inactiveReports = await getRequest({
-        extension: SystemRepository.ReportLayoutObject.qry,
-        parameters: `_resourceId=${resourceId}`
-      })
-      let newList = res.list || []
-      if (inactiveReports?.list?.length > 0) {
-        const inactiveIds = new Set(inactiveReports.list.map(item => item.id))
-        newList = newList.filter(item => !inactiveIds.has(item.id))
-      }
-      setReportStore(prevReportStore => {
-        const existingIds = new Set(prevReportStore.map(report => report.id))
-        const filteredNewItems = newList.filter(item => !existingIds.has(item.id))
+    })
+    const pack = reportPack?.record || {}
 
-        const newMappedItems = filteredNewItems.map(item => ({
+    let layouts = pack?.layouts || []
+    if (pack?.reportLayoutOverrides?.length) {
+      const inactiveIds = new Set((pack?.reportLayoutOverrides || []).map(item => item.id))
+      layouts = layouts.filter(item => !inactiveIds.has(item.id))
+    }
+
+    setReportStore(prev => {
+      const existingIds = new Set(prev.map(r => r.id))
+
+      const layoutsPack = layouts
+        ?.filter(item => !existingIds.has(item.id))
+        .map(item => ({
           id: item.id,
           api_url: item.api,
           reportClass: item.instanceName,
@@ -63,37 +54,27 @@ const ReportViewer = ({ resourceId }) => {
           assembly: 'ArgusRPT.dll'
         }))
 
-        return [...prevReportStore, ...newMappedItems]
-      })
-    })
-  }
+      const templatesPack = (pack?.reportTemplates || [])
+        .filter(item => !item.isInactive)
+        .map(item => ({
+          api_url: item.wsName,
+          reportClass: item.reportName,
+          parameters: item.parameters,
+          layoutName: item.caption,
+          assembly: item.assembly
+        }))
 
-  const getReportTemplate = () => {
-    const parameters = `_resourceId=${resourceId}`
-    getRequest({
-      extension: SystemRepository.ReportTemplate.qry,
-      parameters
-    }).then(res => {
-      setReportStore(prevReportStore => [
-        ...prevReportStore,
-        ...res.list
-          ?.filter(item => !item.isInactive)
-          ?.map(item => ({
-            api_url: item.wsName,
-            reportClass: item.reportName,
-            parameters: item.parameters,
-            layoutName: item.caption,
-            assembly: item.assembly
-          }))
-      ])
+      return [...prev, ...layoutsPack, ...templatesPack]
     })
   }
 
   useEffect(() => {
     getReportLayout()
-    getReportTemplate()
-    getExportFormats()
   }, [])
+
+  useEffect(() => {
+    getExportFormats()
+  }, [exportFormat])
 
   useEffect(() => {
     if (reportStore.length > 0 && !report.selectedReport)
@@ -125,11 +106,11 @@ const ReportViewer = ({ resourceId }) => {
   }
 
   const cycleFormat = () => {
-    const nextIndex = (formatIndex + 1) % exportFormats.length
+    const nextIndex = (formatIndex + 1) % exportFormat.length
     setFormatIndex(nextIndex)
     setReport(prev => ({
       ...prev,
-      selectedFormat: exportFormats[nextIndex]
+      selectedFormat: exportFormat[nextIndex]
     }))
   }
 
@@ -166,7 +147,7 @@ const ReportViewer = ({ resourceId }) => {
                   <CustomButton
                     onClick={cycleFormat}
                     image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                    disabled={exportFormats.length === 0 || !report.selectedReport}
+                    disabled={exportFormat.length == 0 || !report.selectedReport}
                   />
                 </Grid>
               </Grid>
