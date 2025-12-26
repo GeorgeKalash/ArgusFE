@@ -21,10 +21,19 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function TaDslForm({ labels, access, recordId }) {
+export default function TaDslForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.ShiftLeave,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.duringShiftLeave, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.DuringShiftLeave,
@@ -575,3 +584,7 @@ export default function TaDslForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+
+TaDslForm.width = 1000
+TaDslForm.height = 500

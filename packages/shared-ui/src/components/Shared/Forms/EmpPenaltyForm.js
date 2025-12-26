@@ -21,10 +21,19 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { PayrollRepository } from '@argus/repositories/src/repositories/PayrollRepository'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function EmpPenaltyForm({ labels, access, recordId }) {
+export default function EmpPenaltyForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.EmployeePenalties,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.empPenalty, window })
 
   const { maxAccess } = useDocumentType({
     functionId: SystemFunction.Penalty,
@@ -271,3 +280,6 @@ export default function EmpPenaltyForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+EmpPenaltyForm.width = 600
+EmpPenaltyForm.height = 470

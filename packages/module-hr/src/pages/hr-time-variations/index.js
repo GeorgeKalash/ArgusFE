@@ -9,12 +9,12 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import TimeVariatrionForm from './forms/TimeVariatrionForm'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
 import editTime from '@argus/shared-ui/src/components/images/TableIcons/editTime.png'
-import OverrideForm from './forms/OverrideForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import OverrideForm from '@argus/shared-ui/src/components/Shared/Forms/OverrideForm'
+import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/TimeVariatrionForm'
 
 export default function TimeVariation() {
   const { getRequest } = useContext(RequestsContext)

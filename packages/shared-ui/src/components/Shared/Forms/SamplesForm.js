@@ -27,12 +27,21 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
 import ImageUpload from '@argus/shared-ui/src/components/Inputs/ImageUpload'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function SamplesForm({ labels, access, recordId, window }) {
+export default function SamplesForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const imageUploadRef = useRef(null)
+  
+  const { labels, access } = useResourceParams({
+      datasetId: ResourceIds.Samples,
+      editMode: !!recordId
+    })
 
+    useSetWindow({ title: labels.samples, window })
+    
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.Samples,
     access,
@@ -665,3 +674,6 @@ export default function SamplesForm({ labels, access, recordId, window }) {
     </FormShell>
   )
 }
+
+SamplesForm.width = 1200
+SamplesForm.height = 680

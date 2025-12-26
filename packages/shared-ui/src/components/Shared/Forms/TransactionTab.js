@@ -10,10 +10,10 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import TransactionForm from './TransactionForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import TransactionForm from '@argus/shared-ui/src/components/Shared/Forms/PuTransactionForm'
 
 const TransactionTab = ({ store, labels, access, setStore }) => {
   const { platformLabels } = useContext(ControlContext)

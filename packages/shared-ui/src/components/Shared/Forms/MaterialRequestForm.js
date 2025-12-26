@@ -29,8 +29,10 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 
-export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
+export default function MaterialRequestForm({ recordId, window: titleWindow }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { stack } = useWindow()
@@ -38,6 +40,13 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
 
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.MaterialReplenishment,
+    editMode: !!recordId
+  })
+
+  useSetWindow({ title: labels.MaterialRequest, window: titleWindow })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.MaterialRequest,
@@ -477,15 +486,17 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
       parameters: `_requestId=${recordId}&_functionId=${SystemFunction.MaterialRequest}&_params=&_startAt=0`
     })
 
-    const updatedRequests = await Promise.all(
-      dataGrid.list.map(async item => {
-        return {
-          ...item,
-          id: item.seqNo,
-          onHandSite: item.onhandSite
-        }
-      })
-    )
+    const updatedRequests = dataGrid?.list?.length ? 
+      await Promise.all(
+        dataGrid?.list?.map(async item => {
+          return {
+            ...item,
+            id: item.seqNo,
+            onHandSite: item.onhandSite
+          }
+        }) 
+      ) 
+    : []
 
     return updatedRequests
   }
@@ -694,3 +705,6 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     </FormShell>
   )
 }
+
+MaterialRequestForm.width = 1000
+MaterialRequestForm.height = 680
