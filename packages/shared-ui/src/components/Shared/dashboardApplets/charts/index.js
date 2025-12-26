@@ -883,27 +883,45 @@ export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
     if (!ref.current || !labels.length || !datasets.length) return
     if (inst.current) inst.current.destroy()
 
-    inst.current = new Chart(ref.current, {
-  type: 'line',
-  data: {
-    labels,
-    datasets: datasets
-      .map((d, i) => {
-        if (!Array.isArray(d) || !d.some(v => v !== 0)) return null
+    const canvas = ref.current
 
-        return {
-          label: datasetLabels?.[i] ?? `Year ${i + 1}`,
-          data: d,
-          borderColor: `hsl(${i * 60},70%,55%)`,
-          tension: 0.3,
-          pointRadius: 3
+    inst.current = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: datasets
+          .map((d, i) => {
+            if (!Array.isArray(d) || !d.some(v => v !== 0)) return null
+
+            const color = getColorForIndex(i, canvas)
+
+            return {
+              label: datasetLabels?.[i] ?? `Year ${i + 1}`,
+              data: d,
+              borderColor: color,
+              backgroundColor: color,
+              tension: 0.3,
+              pointRadius: 5,
+              spanGaps: true
+            }
+          })
+          .filter(Boolean)
+      },
+      options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'left',
+          align: 'center',
+          labels: {
+            boxHeight: 14,
+            padding: 12
+          }
         }
-      })
-      .filter(Boolean)
-  },
-  options: { responsive: true, maintainAspectRatio: false }
-})
-
+      }
+    }
+    })
 
     return () => inst.current?.destroy()
   }, [labels, datasets, datasetLabels])

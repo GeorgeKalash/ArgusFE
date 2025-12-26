@@ -868,7 +868,7 @@ const Table = ({
   }
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
-  const resolvedHeight = props?.height || props?.maxHeight || '100%'
+  const resolvedHeight = props?.height|| height || '100%'
 
   return (
     <VertLayout>
@@ -884,6 +884,7 @@ const Table = ({
           ].join(' ')}
           sx={{
             height: resolvedHeight,
+            maxHeight: props?.maxHeight || 'none',
             minHeight: 0
           }}
         

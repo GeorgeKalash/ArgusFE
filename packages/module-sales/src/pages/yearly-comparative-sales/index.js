@@ -332,7 +332,7 @@ const YearlyComparativeSales = () => {
                 labels={chartInfo.labels}
                 datasets={chartInfo.datasets}
                 datasetLabels={chartInfo.datasetLabels}
-              />
+                />
             )}
           </Grid>
         </Grid>

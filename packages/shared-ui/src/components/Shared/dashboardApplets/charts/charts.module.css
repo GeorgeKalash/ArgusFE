@@ -76,7 +76,6 @@
   --chart-datalabel-outside-color: #222222;
 }
 
-
 @media (min-width: 1281px) {
   .chartCanvas {
     height: 280px;
