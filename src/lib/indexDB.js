@@ -21,9 +21,7 @@ async function openDB(STORE_NAME = 'tableSettings') {
   if (indexedDB.databases) {
     const databases = await indexedDB.databases()
     const dbInfo = databases.find(db => db.name === DB_NAME)
-    if (dbInfo) {
-      version = dbInfo.version
-    }
+    if (dbInfo) version = dbInfo.version
   }
 
   return new Promise((resolve, reject) => {
@@ -53,7 +51,7 @@ async function saveToDB(STORE_NAME, key, value) {
   return transaction.complete
 }
 
-async function deleteRowDB(STORE_NAME, key) {
+async function deleteFromDB(STORE_NAME, key) {
   const db = await openDB(STORE_NAME)
   const transaction = db.transaction(STORE_NAME, 'readwrite')
   const store = transaction.objectStore(STORE_NAME)
@@ -68,7 +66,8 @@ async function deleteRowDB(STORE_NAME, key) {
 }
 
 async function getFromDB(STORE_NAME, key) {
-  const db = await openDB()
+  const db = await openDB(STORE_NAME)
+  if (!db.objectStoreNames.contains(STORE_NAME)) return null
 
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readonly')
@@ -80,4 +79,4 @@ async function getFromDB(STORE_NAME, key) {
   })
 }
 
-export { getFromDB, saveToDB, deleteRowDB }
+export { saveToDB, getFromDB, deleteFromDB }
