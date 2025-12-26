@@ -35,7 +35,8 @@ const RolesTab = ({ store, maxAccess, labels }) => {
     enabled: !!recordId,
     queryFn: fetchGridData,
     datasetId: ResourceIds.BPMasterData,
-    endpointId: BusinessPartnerRepository.MasterDataRole.qry
+    endpointId: BusinessPartnerRepository.MasterDataRole.qry,
+    params: { disabledReqParams: true, maxAccess }
   })
 
   const columns = [{ field: 'roleName', headerName: labels.name, flex: 1 }]

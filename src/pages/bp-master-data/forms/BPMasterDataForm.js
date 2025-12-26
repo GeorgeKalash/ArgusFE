@@ -76,7 +76,6 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       if (!recordId) {
         toast.success(platformLabels.Added)
         setEditMode(true)
-        formik.setFieldValue('recordId', res.recordId)
         if (obj.defaultId) {
           const data = {
             bpId: res.recordId,
@@ -88,16 +87,11 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
             record: JSON.stringify(data)
           })
         }
+      } else toast.success(platformLabels.Edited)
 
-        setStore(prevStore => ({
-          ...prevStore,
-          recordId: res.recordId
-        }))
-      } else {
-        toast.success(platformLabels.Edited)
-      }
       setEditMode(true)
       invalidate()
+      refetchForm(res.recordId)
     }
   })
 
@@ -143,17 +137,34 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       disabled: !editMode
     }
   ]
+
+  async function refetchForm(recordId) {
+    if (!recordId) return
+
+    const res = await getRequest({
+      extension: BusinessPartnerRepository.MasterData.get,
+      parameters: `_recordId=${recordId}`
+    })
+    const record = res?.record || {}
+
+    formik.setValues({
+      ...record,
+      birthDate: record?.birthDate ? formatDateFromApi(record?.birthDate) : null
+    })
+    setStore(prevStore => ({
+      ...prevStore,
+      recordId: record?.recordId,
+      bp: { ref: record?.reference || '', name: record?.name || '' }
+    }))
+
+    return record
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) {
-        const res = await getRequest({
-          extension: BusinessPartnerRepository.MasterData.get,
-          parameters: `_recordId=${recordId}`
-        })
-
-        res.record.birthDate = formatDateFromApi(res.record.birthDate)
-        formik.setValues(res.record)
-        await getDefaultId(res.record.defaultInc)
+        const res = await refetchForm(recordId)
+        await getDefaultId(res?.defaultInc)
       }
     })()
   }, [recordId])
