@@ -288,7 +288,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
   }, [labels, data1, data2, label1, label2, rotation, hasLegend, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -428,7 +428,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   }, [id, labels, data, label, color, hoverColor])
 
 return (
-  <div  className={ styles.charthight}>
+  <div  className={ styles.chartHeight}>
 
 
     <canvas
@@ -560,7 +560,7 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
   }, [labels, data, label, color, hoverColor, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -688,7 +688,7 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
   }, [labels, data, label, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -865,7 +865,7 @@ export const LineChart = ({ id, labels, data, label }) => {
   }, [id, labels, data, label])
 
   return (
-    <div  className={ styles.charthight}>
+    <div  className={ styles.chartHeight}>
     <canvas
       id={id}
       ref={chartRef}
@@ -908,25 +908,32 @@ export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
           .filter(Boolean)
       },
       options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'left',
-          align: 'center',
-          labels: {
-            boxHeight: 14,
-            padding: 12
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'left',
+            align: 'center',
+            labels: {
+              boxHeight: 14,
+              padding: 12
+            }
           }
         }
       }
-    }
     })
 
     return () => inst.current?.destroy()
   }, [labels, datasets, datasetLabels])
 
-  return <canvas ref={ref} className={styles.chartCanvas} />
+  return (
+    <div className={styles.chartHeight}>
+      <canvas
+        ref={ref}
+        className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      />
+    </div>
+  )
 }
 
 const getColorForIndex = (index, canvas) => {
@@ -1170,7 +1177,7 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   }, [labels, datasets, collapsed])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
