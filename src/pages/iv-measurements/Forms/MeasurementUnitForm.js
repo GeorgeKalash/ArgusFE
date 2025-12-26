@@ -38,7 +38,7 @@ export default function MeasurementUnitForm({
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
-      qty: yup.number().required()
+      qty: yup.number().required().min(0.00001)
     }),
     onSubmit: async obj => {
       const data = {
@@ -117,11 +117,12 @@ export default function MeasurementUnitForm({
                 required
                 label={labels.qty}
                 value={formik?.values?.qty}
+                allowNegative={false}
                 maxAccess={maxAccess}
                 onChange={formik.handleChange}
                 onClear={() => formik.setFieldValue('qty', '')}
                 error={formik.touched.qty && Boolean(formik.errors.qty)}
-                decimalScale={3}
+                decimalScale={store.decimals}
               />
             </Grid>
           </Grid>
