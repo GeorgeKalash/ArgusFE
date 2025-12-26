@@ -22,7 +22,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
-export default function BPMasterDataForm({ labels, maxAccess: access, setEditMode, store, setStore }) {
+export default function BPMasterDataForm({ labels, maxAccess: access, setEditMode, store, setStore, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -91,7 +91,10 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
 
       setEditMode(true)
       invalidate()
-      refetchForm(res.recordId)
+      const record = await refetchForm(res.recordId)
+      if (window.setTitle && !editMode) {
+        window.setTitle(record?.reference ? `${labels.masterData} ${record?.reference}` : labels.masterData)
+      }
     }
   })
 
