@@ -174,7 +174,7 @@ const NewPassword = ({ formik, labels, score, setScore }) => {
             tooltipText={platformLabels.Submit}
             onClick={formik.handleSubmit}
             style={{
-              marginRight: 8,
+              marginRight: 1,
               backgroundColor: '#4eb558',
               width: 50,
               height: 35,

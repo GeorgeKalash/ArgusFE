@@ -90,14 +90,14 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .chartCanvas {
-    height: 200px !important;
-    min-height: 200 !important; }
+    height: 210px !important;
+    min-height: 210px !important; }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
   .chartCanvas {
-    height: clamp(200px, 50vw, 340px);
-  }
+    height: 240px !important;
+    min-height: 240px !important; }
 }
 
 @media (max-width: 480px) {
