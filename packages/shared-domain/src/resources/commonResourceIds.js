@@ -41,5 +41,9 @@ export const commonResourceIds = [
   ResourceIds.EmployeePenalties,
   ResourceIds.ShiftLeave,
   ResourceIds.JobInfos,
-  ResourceIds.StockCounts
+  ResourceIds.StockCounts,
+  ResourceIds.ResignationRequest,
+  ResourceIds.LeaveRequest,
+  ResourceIds.Samples,
+  ResourceIds.PayrollHeader
 ]

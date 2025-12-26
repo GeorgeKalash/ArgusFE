@@ -34,6 +34,10 @@ import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
 import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
 import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
+import ResignationReqForm from '@argus/shared-ui/src/components/Shared/Forms/ResignationReqForm'
+import LeaveRequestForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveRequestForm'
+import SamplesForm from '@argus/shared-ui/src/components/Shared/Forms/SamplesForm'
+import PayrollListForm from '@argus/shared-ui/src/components/Shared/Forms/PayrollListForm'
 import MatPlaningForm from '@argus/shared-ui/src/components/Shared/Forms/matPlaningForm'
 import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveReturnForm'
 import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
@@ -134,6 +138,18 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
         relevantComponent = ClientTemplateForm
         break
+      case SystemFunction.ResignationRequest:
+        relevantComponent = ResignationReqForm
+        break
+      case SystemFunction.LeaveRequest:
+        relevantComponent = LeaveRequestForm
+      break
+      case SystemFunction.Samples:
+        relevantComponent = SamplesForm
+      break
+      case SystemFunction.PayrollList:
+        relevantComponent = PayrollListForm
+      break
       case SystemFunction.OutwardsOrder:
         relevantComponent = OutwardsForm
         break
@@ -206,7 +222,6 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
       case SystemFunction.StockCount:
         relevantComponent = CycleCountsWindow
       default:
-         // Handle default case if needed
         break
     }
 

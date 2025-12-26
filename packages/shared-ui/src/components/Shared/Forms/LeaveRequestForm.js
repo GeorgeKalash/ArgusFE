@@ -21,10 +21,20 @@ import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function LeaveRequestForm({ labels, access, recordId }) {
+export default function LeaveRequestForm({ recordId , window}) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+
+    const { labels, access } = useResourceParams({
+      datasetId: ResourceIds.LeaveRequest,
+      editMode: !!recordId
+    })
+
+    useSetWindow({ title: labels.title, window })
+    
 
   const invalidate = useInvalidate({
     endpointId: LoanManagementRepository.LeaveRequest.page
@@ -314,3 +324,6 @@ export default function LeaveRequestForm({ labels, access, recordId }) {
     </FormShell>
   )
 }
+
+LeaveRequestForm.width = 800
+LeaveRequestForm.height = 500

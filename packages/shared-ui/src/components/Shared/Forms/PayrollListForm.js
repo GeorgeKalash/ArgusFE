@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
+import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
@@ -21,8 +21,10 @@ import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDateP
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
-export default function PayrollListForm({ labels, access, recordId, window }) {
+export default function PayrollListForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels, defaultsData } = useContext(ControlContext)
 
@@ -32,6 +34,14 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Payroll.page
   })
+
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.PayrollHeader,
+    editMode: !!recordId
+  })
+  
+  useSetWindow({ title: labels.payrollList, window })
+      
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PayrollList,
@@ -486,3 +496,6 @@ export default function PayrollListForm({ labels, access, recordId, window }) {
     </FormShell>
   )
 }
+
+PayrollListForm.width = 850
+PayrollListForm.height = 700

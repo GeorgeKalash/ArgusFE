@@ -8,7 +8,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useContext } from 'react'
 import toast from 'react-hot-toast'
-import PayrollListForm from './Forms/PayrollListForm'
+import PayrollListForm from '@argus/shared-ui/src/components/Shared/Forms/PayrollListForm'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
@@ -138,13 +138,8 @@ const PayList = () => {
     stack({
       Component: PayrollListForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 850,
-      height: 700,
-      title: labels.payrollList
+      }
     })
   }
 
