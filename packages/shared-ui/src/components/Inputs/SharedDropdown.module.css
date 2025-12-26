@@ -15,6 +15,13 @@
   font-weight: 600 !important;
 }
 
+.dropdownOptionIcon {
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  object-fit: contain;
+}
+
 .dropdownOptionCell,
 .dropdownOptionSingleText {
   font-size: 0.72rem !important;
@@ -37,4 +44,92 @@
   min-height: unset !important;
   padding: 4px 10px !important;
   align-items: flex-start !important;
+}
+
+@media (min-width: 1921px) {
+  .dropdownHeaderRow,
+  .dropdownOptionRow {
+    padding: 7px 14px !important;
+  }
+
+  .dropdownHeaderCell,
+  .dropdownHeaderCellMain {
+    font-size: 0.86rem !important;
+  }
+
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 0.86rem !important;
+  }
+
+  .dropdownPopper :global(.MuiAutocomplete-noOptions),
+  .dropdownPopper :global(.MuiAutocomplete-loading) {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (min-width: 1153px) and (max-width: 1920px) {
+  .dropdownHeaderCell,
+  .dropdownHeaderCellMain {
+    font-size: 0.72rem !important;
+  }
+
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 0.72rem !important;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 1152px) {
+  .dropdownHeaderRow,
+  .dropdownOptionRow {
+    padding: 4px 8px !important;
+  }
+
+  .dropdownHeaderCell,
+  .dropdownHeaderCellMain {
+    font-size: 0.64rem !important;
+  }
+
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 0.64rem !important;
+  }
+
+  .dropdownPopper :global(.MuiAutocomplete-noOptions),
+  .dropdownPopper :global(.MuiAutocomplete-loading) {
+    font-size: 0.56rem !important;
+    padding: 6px !important;
+  }
+}
+
+@media (max-width: 799px) {
+  .dropdownHeaderRow,
+  .dropdownOptionRow {
+    padding: 3px 6px !important;
+  }
+
+  .dropdownHeaderCell,
+  .dropdownHeaderCellMain {
+    font-size: 0.58rem !important;
+  }
+
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 0.58rem !important;
+  }
+
+  .dropdownPopper :global(.MuiAutocomplete-noOptions),
+  .dropdownPopper :global(.MuiAutocomplete-loading) {
+    font-size: 0.5rem !important;
+    padding: 5px !important;
+  }
 }

@@ -148,7 +148,7 @@
 }
 
 .hasImageRows :global(.ag-row) {
-  height: 56px !important; 
+  height: 70px !important; 
 }
 
 .agGridContainer :global(.ag-header-cell-text),
