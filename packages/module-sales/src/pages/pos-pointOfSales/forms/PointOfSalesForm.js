@@ -128,7 +128,7 @@ const PointOfSalesForm = ({ labels, maxAccess, setStore, store }) => {
     <FormShell form={formik} resourceId={ResourceIds.PointOfSale} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6.01}>
               <CustomTextField
                 name='reference'

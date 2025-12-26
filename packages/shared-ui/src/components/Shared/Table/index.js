@@ -882,6 +882,12 @@ const Table = ({
             hasImageColumn ? styles.hasImageRows : '',
             !props.maxHeight && !props.height ? styles.agGridFlex : ''
           ].join(' ')}
+          sx={{
+            height: props?.height|| height || '100%',
+            maxHeight: props?.maxHeight || 'none',
+            minHeight: 0
+          }}
+        
         >
           {hoveredTable && !pagination && (
             <Box className={styles.hoverReset}>

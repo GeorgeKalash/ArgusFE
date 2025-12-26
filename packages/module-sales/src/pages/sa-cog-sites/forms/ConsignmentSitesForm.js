@@ -70,7 +70,7 @@ export default function ConsignmentSitesForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.ConsignmentSites} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={SaleRepository.Client.snapshot}

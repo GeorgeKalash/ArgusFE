@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
-import MaterialRequestForm from './Forms/MaterialRequestForm'
+import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
 
 const IvMaterialsTransfer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -127,13 +127,8 @@ const IvMaterialsTransfer = () => {
     stack({
       Component: MaterialRequestForm,
       props: {
-        labels: _labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 1000,
-      height: 680,
-      title: _labels.MaterialRequest
+        recordId
+      }
     })
   }
 

@@ -126,7 +126,7 @@ export default function FinalSettlementForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.FinalSettlement} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

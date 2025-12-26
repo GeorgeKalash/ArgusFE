@@ -181,7 +181,7 @@ const TransactionLog = props => {
             />
           </Grid>
           <Grid container xs={0.7}></Grid>
-          <Grid container xs={4} spacing={4} className={styles.label}>
+          <Grid container xs={4} spacing={2} className={styles.label}>
             <Grid container xs={12} >
               <Grid item xs={6}>
                 {_labels.recordId}

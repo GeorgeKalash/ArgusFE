@@ -127,7 +127,8 @@ export const InventoryRepository = {
     page: service + 'pageMTL',
     get: service + 'getMTL',
     set: service + 'setMTL',
-    del: service + 'delMTL'
+    del: service + 'delMTL',
+    snapshot: service + 'snapshotMTL'
   },
   Scrap: {
     qry: service + 'qryMTS',

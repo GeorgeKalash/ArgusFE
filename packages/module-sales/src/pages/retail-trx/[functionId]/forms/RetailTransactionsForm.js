@@ -1310,7 +1310,7 @@ export default function RetailTransactionsForm({
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4} xs={12}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

@@ -230,7 +230,7 @@ export default function CashCountNotesForm({
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={4} sx={{ mb: 3, display: 'flex', justifyContent: 'right' }}>
+          <Grid container spacing={2} sx={{ mb: 3, display: 'flex', justifyContent: 'right' }}>
             <Grid item xs={4}>
               <CustomNumberField name='total' label={labels.total} value={total} readOnly={true} />
             </Grid>

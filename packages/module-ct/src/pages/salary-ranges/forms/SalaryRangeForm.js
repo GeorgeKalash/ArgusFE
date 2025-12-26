@@ -71,7 +71,7 @@ export default function SalaryRangeForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.SalaryRange} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4} style={{ marginTop: '0.1rem' }}>
+          <Grid container spacing={2} style={{ marginTop: '0.1rem' }}>
             <Grid item xs={12}>
               <CustomTextField
                 name='min'

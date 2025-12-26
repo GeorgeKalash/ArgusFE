@@ -119,7 +119,7 @@ const CategorySiteForm = ({ store, labels, maxAccess }) => {
     <FormShell form={formik} resourceId={ResourceIds.Category} isCleared={false} isInfo={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6.01}>
               <CustomTextField name='reference' label={labels.reference} value={store.ref} readOnly={true} />
             </Grid>

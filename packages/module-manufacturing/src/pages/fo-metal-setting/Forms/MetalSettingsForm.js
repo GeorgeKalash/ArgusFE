@@ -33,8 +33,7 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
       rate: '',
       stdLossRate: '',
       rmItemId: null,
-      sfItemId: null,
-      damageItemId: null
+      sfItemId: null
     },
     maxAccess,
     validateOnChange: true,
@@ -199,25 +198,6 @@ export default function MetalSettingsForm({ labels, maxAccess, store, setStore, 
                   formik.setFieldValue('sfItemName', newValue?.name)
                 }}
                 error={formik.touched.sfItemId && Boolean(formik.errors.sfItemId)}
-                maxAccess={maxAccess}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ResourceLookup
-                endpointId={InventoryRepository.Item.snapshot}
-                name='damageItemId'
-                label={labels.DMSKU}
-                valueField='sku'
-                displayField='name'
-                valueShow='damageItemSku'
-                secondValueShow='damageItemName'
-                form={formik}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('damageItemId', newValue?.recordId)
-                  formik.setFieldValue('damageItemSku', newValue?.sku)
-                  formik.setFieldValue('damageItemName', newValue?.name)
-                }}
-                error={formik.touched.damageItemId && Boolean(formik.errors.damageItemId)}
                 maxAccess={maxAccess}
               />
             </Grid>

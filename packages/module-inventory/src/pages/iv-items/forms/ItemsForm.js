@@ -336,7 +336,7 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
     <FormShell resourceId={ResourceIds.Items} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions} onPrint={ConfirmationPrint}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={8}>
               <Grid container spacing={2}>
                 <Grid item xs={8}>

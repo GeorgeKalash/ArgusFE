@@ -32,6 +32,22 @@ import SalesOrderForm from '@argus/shared-ui/src/components/Shared/Forms/SalesOr
 import PurchaseRquisitionForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseRquisitionForm'
 import LoanWindow from '@argus/shared-ui/src/components/Shared/Forms/LoanWindow'
 import PurchaseOrderForm from '@argus/shared-ui/src/components/Shared/Forms/PurchaseOrderForm'
+import MaterialRequestForm from '@argus/shared-ui/src/components/Shared/Forms/MaterialRequestForm'
+import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
+import ResignationReqForm from '@argus/shared-ui/src/components/Shared/Forms/ResignationReqForm'
+import LeaveRequestForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveRequestForm'
+import SamplesForm from '@argus/shared-ui/src/components/Shared/Forms/SamplesForm'
+import PayrollListForm from '@argus/shared-ui/src/components/Shared/Forms/PayrollListForm'
+import MatPlaningForm from '@argus/shared-ui/src/components/Shared/Forms/matPlaningForm'
+import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveReturnForm'
+import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
+import TimeVariatrionForm from '@argus/shared-ui/src/components/Shared/Forms/TimeVariatrionForm'
+import TaDslForm from '@argus/shared-ui/src/components/Shared/Forms/TaDslForm'
+import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoForm'
+import PaymentOrdersForm from '@argus/shared-ui/src/components/Shared/Forms/PaymentOrdersForm'
+import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
+import ProductionOrderForm from '@argus/shared-ui/src/components/Shared/Forms/ProductionOrderForm'
+import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
 
 const ApprovalsTable = ({ pageSize = 50 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -122,6 +138,18 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
 
         relevantComponent = ClientTemplateForm
         break
+      case SystemFunction.ResignationRequest:
+        relevantComponent = ResignationReqForm
+        break
+      case SystemFunction.LeaveRequest:
+        relevantComponent = LeaveRequestForm
+      break
+      case SystemFunction.Samples:
+        relevantComponent = SamplesForm
+      break
+      case SystemFunction.PayrollList:
+        relevantComponent = PayrollListForm
+      break
       case SystemFunction.OutwardsOrder:
         relevantComponent = OutwardsForm
         break
@@ -157,8 +185,43 @@ const ApprovalsTable = ({ pageSize = 50 }) => {
         break
       case SystemFunction.PurchaseOrder:
         relevantComponent = PurchaseOrderForm
+        break
+      case SystemFunction.MaterialRequest:
+        relevantComponent = MaterialRequestForm
+        break
+      case SystemFunction.CostAllocation:
+        relevantComponent = PuCostAllocationWindow
+        break
+      case SystemFunction.MRP:
+        relevantComponent = MatPlaningForm
+        break
+      case SystemFunction.ReturnFromLeave:
+        relevantComponent = LeaveReturnForm
+        break
+      case SystemFunction.Penalty:
+        relevantComponent = EmpPenaltyForm
+        break
+      case SystemFunction.TimeVariation:
+        relevantComponent = TimeVariatrionForm
+        break
+      case SystemFunction.DuringShiftLeave:
+        relevantComponent = TaDslForm
+        break
+      case SystemFunction.JobInfo:
+        relevantComponent = JobInfoForm
+        break
+      case SystemFunction.PaymentOrder:
+        relevantComponent = PaymentOrdersForm
+        break
+      case SystemFunction.WorkCenterConsumption:
+        relevantComponent = WCConsumpForm
+        break
+      case SystemFunction.ProductionOrder:
+        relevantComponent = ProductionOrderForm
+        break
+      case SystemFunction.StockCount:
+        relevantComponent = CycleCountsWindow
       default:
-         // Handle default case if needed
         break
     }
 

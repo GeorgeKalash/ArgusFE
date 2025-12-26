@@ -308,7 +308,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
                     store={store.category}
                     value={store?.category?.filter(item => item.recordId === parseInt(formik.values.defaultInc))[0]}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('defaultId', '')
                       formik.setFieldValue('defaultInc', newValue ? newValue.recordId : null)
                       getDefaultId(newValue?.recordId)
@@ -339,7 +339,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
                     valueField='recordId'
                     displayField='name'
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik && formik.setFieldValue('nationalityId', newValue?.recordId)
                     }}
                     error={formik.touched.nationalityId && Boolean(formik.errors.nationalityId)}
@@ -359,7 +359,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
                     displayField='name'
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik && formik.setFieldValue('legalStatusId', newValue?.recordId)
                     }}
                     error={formik.touched.legalStatusId && Boolean(formik.errors.legalStatusId)}

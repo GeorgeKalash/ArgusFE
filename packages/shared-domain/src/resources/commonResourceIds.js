@@ -33,5 +33,17 @@ export const commonResourceIds = [
   ResourceIds.Loans,
   ResourceIds.ProductionOrder,
   ResourceIds.LeaveRequestODOM,
-  ResourceIds.TimeVariation
+  ResourceIds.TimeVariation,
+  ResourceIds.PuCostAllocation,
+  ResourceIds.MaterialReplenishment,
+  ResourceIds.MaterialReqPlannings,
+  ResourceIds.LeaveReturn,
+  ResourceIds.EmployeePenalties,
+  ResourceIds.ShiftLeave,
+  ResourceIds.JobInfos,
+  ResourceIds.StockCounts,
+  ResourceIds.ResignationRequest,
+  ResourceIds.LeaveRequest,
+  ResourceIds.Samples,
+  ResourceIds.PayrollHeader
 ]

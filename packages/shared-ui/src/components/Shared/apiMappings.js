@@ -942,7 +942,7 @@ export const apiMappings = {
   },
   [ResourceIds.PayrollFilter]: {
     type: COMBOBOX,
-    endpoint: PayrollRepository.PayrollFilters.qry,
+    endpoint: PayrollRepository.Payroll.qry,
     parameters: `_year=0&_salaryType=5&_status=0`,
     valueField: 'recordId',
     displayField: ['reference'],

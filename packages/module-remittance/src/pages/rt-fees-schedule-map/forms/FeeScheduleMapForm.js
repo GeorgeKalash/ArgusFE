@@ -98,7 +98,7 @@ export default function FeeScheduleMapForm({ labels, maxAccess, recordId, record
     <FormShell resourceId={ResourceIds.FeeScheduleMap} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={RemittanceSettingsRepository.Correspondent.snapshot}

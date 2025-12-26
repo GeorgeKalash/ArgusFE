@@ -94,7 +94,7 @@ export const ClientRelationList = ({ recordId, name, reference, category, window
   return (
     <VertLayout>
       <Fixed>
-        <Grid container xs={9} spacing={4} sx={{ p: 5 }}>
+        <Grid container xs={9} spacing={2} sx={{ p: 5 }}>
           <Grid item xs={4}>
             <CustomTextField value={reference} label={_labels.reference} readOnly={true} />
           </Grid>

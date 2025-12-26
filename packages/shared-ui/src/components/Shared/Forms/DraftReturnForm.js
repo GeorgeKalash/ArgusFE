@@ -1306,7 +1306,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             onValidationRequired={onValidationRequired}
           />
         </Grow>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={6.5} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'

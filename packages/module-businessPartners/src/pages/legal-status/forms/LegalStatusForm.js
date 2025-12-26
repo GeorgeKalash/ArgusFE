@@ -64,7 +64,7 @@ export default function LegalStatusForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.LegalStatus} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

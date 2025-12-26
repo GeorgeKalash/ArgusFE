@@ -449,5 +449,11 @@ export const ManufacturingRepository = {
   },
   DisposalSerial: {
     qry: service + 'qryDISRL'
+  },
+  MetalSetting: {
+    page: service + 'pageMTS',
+    set: service + 'setMTS',
+    get: service + 'getMTS',
+    del: service + 'delMTS'
   }
 }

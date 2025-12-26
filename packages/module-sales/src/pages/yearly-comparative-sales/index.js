@@ -328,10 +328,11 @@ const YearlyComparativeSales = () => {
           <Grid item xs={10} sx={{ display: 'flex', flex: 1, p: 2 }}>
             {chartInfo.labels?.length > 0 && (
               <LineChartDark
+                id="yearly-sales-chart"
                 labels={chartInfo.labels}
                 datasets={chartInfo.datasets}
                 datasetLabels={chartInfo.datasetLabels}
-              />
+                />
             )}
           </Grid>
         </Grid>

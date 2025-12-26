@@ -1201,7 +1201,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             onValidationRequired={onValidationRequired}
           />
         </Grow>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={5} height={135} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='metal'

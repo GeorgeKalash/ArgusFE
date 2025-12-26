@@ -117,7 +117,7 @@ export default function ExpensesCostCenters({ row, window, updateRow, recordId, 
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} disabledSubmit={canSubmit}>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomNumberField
                 name='amount'

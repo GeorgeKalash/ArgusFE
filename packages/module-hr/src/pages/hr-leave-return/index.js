@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import toast from 'react-hot-toast'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import LeaveReturnForm from './form/LeaveReturnForm'
+import LeaveReturnForm from '@argus/shared-ui/src/components/Shared/Forms/LeaveReturnForm'
 
 const LeaveReturn = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -112,13 +112,8 @@ const LeaveReturn = () => {
     stack({
       Component: LeaveReturnForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 800,
-      height: 500,
-      title: labels.title
+        recordId
+      }
     })
   }
 

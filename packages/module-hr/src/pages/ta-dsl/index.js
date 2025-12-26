@@ -13,7 +13,7 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
-import TaDslForm from './form/TaDslForm'
+import TaDslForm from '@argus/shared-ui/src/components/Shared/Forms/TaDslForm'
 
 const TaDsl = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -126,13 +126,8 @@ const TaDsl = () => {
     stack({
       Component: TaDslForm,
       props: {
-        labels,
-        access,
         recordId
-      },
-      width: 1000,
-      height: 550,
-      title: labels.duringShiftLeave
+      }
     })
   }
 

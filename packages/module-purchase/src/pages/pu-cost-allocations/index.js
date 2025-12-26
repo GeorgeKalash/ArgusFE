@@ -12,8 +12,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import PuCostAllocationWindow from './window/PuCostAllocationWindow'
 import { CostAllocationRepository } from '@argus/repositories/src/repositories/CostAllocationRepository'
+import PuCostAllocationWindow from '@argus/shared-ui/src/components/Shared/Forms/PuCostAllocationWindow'
 
 const PuCostAllocations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -105,13 +105,8 @@ const PuCostAllocations = () => {
     stack({
       Component: PuCostAllocationWindow,
       props: {
-        labels: labels,
-        recordId: obj?.recordId,
-        maxAccess: access
-      },
-      width: 800,
-      height: 500,
-      title: labels.PuCostAllocations
+        recordId: obj?.recordId
+      }
     })
   }
 

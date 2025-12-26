@@ -114,7 +114,7 @@ export default function CashAccountForm({ labels, recordId, maxAccess }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='name'

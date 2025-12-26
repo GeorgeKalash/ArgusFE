@@ -12,8 +12,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { IVReplenishementRepository } from '@argus/repositories/src/repositories/IVReplenishementRepository'
-import MatPlaningForm from './Forms/matPlaningForm'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import MatPlaningForm from '@argus/shared-ui/src/components/Shared/Forms/matPlaningForm'
 
 const MatPlaning = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -121,13 +121,8 @@ const MatPlaning = () => {
     stack({
       Component: MatPlaningForm,
       props: {
-        labels,
         recordId,
-        access
-      },
-      width: 1300,
-      height: 600,
-      title: labels?.materialRequestPlaning
+      }
     })
   }
 

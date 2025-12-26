@@ -69,7 +69,7 @@ const FunctionForm = ({ labels, maxAccess, getFunctionGridData, recordId, functi
     <FormShell form={formik} resourceId={ResourceIds.Functions} maxAccess={maxAccess} isInfo={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.SYSTEM_FUNCTION}

@@ -121,7 +121,7 @@ export default function PlantSupervisorsForm({ _labels: labels, maxAccess }) {
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}

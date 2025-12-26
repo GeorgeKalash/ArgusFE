@@ -247,7 +247,7 @@ export const LOShipmentForm = ({ recordId, functionId, editMode, totalBaseAmount
           </Grid>
         </Fixed>
         <Grow>
-          <Grid container xs={12} spacing={3}>
+          <Grid container xs={12} spacing={2}>
             <Grid item xs={8} sx={{ display: 'flex', flex: 1 }}>
               <FieldSet sx={{ flex: 1 }}>
                 <Grid container wrap='nowrap' sx={{ flexDirection: 'column', flex: 1 }}>

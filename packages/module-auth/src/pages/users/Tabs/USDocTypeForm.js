@@ -116,7 +116,7 @@ const USDocTypeForm = ({ labels, maxAccess, storeRecordId, functionId, invalidat
           <Grid item xs={6}>
             <ResourceComboBox
               endpointId={SystemRepository.DocumentType.qry}
-              parameters={`_dgId=${functionId}&_startAt=${0}&_pageSize=${50}`}
+              parameters={`_dgId=${functionId}&_startAt=0&_pageSize=1000`}
               filter={!editMode ? item => item.activeStatus === 1 : undefined}
               name='dtId'
               label={labels.docType}

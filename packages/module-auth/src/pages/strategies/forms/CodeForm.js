@@ -67,7 +67,7 @@ const CodeForm = ({ labels, editMode, maxAccess, recordId, store, window }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.GroupCode.qry}

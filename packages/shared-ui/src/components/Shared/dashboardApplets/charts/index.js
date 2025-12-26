@@ -288,7 +288,7 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
   }, [labels, data1, data2, label1, label2, rotation, hasLegend, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -428,7 +428,7 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
   }, [id, labels, data, label, color, hoverColor])
 
 return (
-  <div  className={ styles.charthight}>
+  <div  className={ styles.chartHeight}>
 
 
     <canvas
@@ -560,7 +560,7 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
   }, [labels, data, label, color, hoverColor, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -688,7 +688,7 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
   }, [labels, data, label, ratio])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       ref={canvasRef}
@@ -865,7 +865,7 @@ export const LineChart = ({ id, labels, data, label }) => {
   }, [id, labels, data, label])
 
   return (
-    <div  className={ styles.charthight}>
+    <div  className={ styles.chartHeight}>
     <canvas
       id={id}
       ref={chartRef}
@@ -875,95 +875,63 @@ export const LineChart = ({ id, labels, data, label }) => {
   )
 }
 
-export const LineChartDark = ({ id, labels, datasets, datasetLabels }) => {
+export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
+  const ref = useRef(null)
+  const inst = useRef(null)
+
   useEffect(() => {
-    const canvas = document.getElementById(id)
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    if (!ref.current || !labels.length || !datasets.length) return
+    if (inst.current) inst.current.destroy()
 
-    const datasetConfig = datasets
-      .map((data, index) => {
-        const color = getColorForIndex(index, canvas)
+    const canvas = ref.current
 
-        if (data.some(value => value !== 0)) {
-          return {
-            label: datasetLabels[index],
-            data,
-            borderColor: color,
-            backgroundColor: color,
-            borderWidth: 2,
-            tension: 0.3,
-            pointRadius: 3,
-            spanGaps: true
-          }
-        }
-
-        return null
-      })
-      .filter(dataset => dataset !== null)
-
-    if (datasetConfig.length === 0) {
-      return
-    }
-
-    const chart = new Chart(ctx, {
+    inst.current = new Chart(canvas, {
       type: 'line',
       data: {
         labels,
-        datasets: datasetConfig
+        datasets: datasets
+          .map((d, i) => {
+            if (!Array.isArray(d) || !d.some(v => v !== 0)) return null
+
+            const color = getColorForIndex(i, canvas)
+
+            return {
+              label: datasetLabels?.[i] ?? `Year ${i + 1}`,
+              data: d,
+              borderColor: color,
+              backgroundColor: color,
+              tension: 0.3,
+              pointRadius: 5,
+              spanGaps: true
+            }
+          })
+          .filter(Boolean)
       },
       options: {
         responsive: true,
-        aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: datasetConfig.length > 0,
             position: 'left',
+            align: 'center',
             labels: {
-              usePointStyle: true,
-              padding: 10
-            }
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function (value) {
-                return value.toLocaleString()
-              }
+              boxHeight: 14,
+              padding: 12
             }
           }
         }
       }
     })
 
-    return () => {
-      chart.destroy()
-    }
-  }, [id, labels, datasets, datasetLabels])
+    return () => inst.current?.destroy()
+  }, [labels, datasets, datasetLabels])
 
   return (
-    <div className={styles.charthight}>
-    <canvas
-      id={id}
-      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
-      
-    ></canvas>
+    <div className={styles.chartHeight}>
+      <canvas
+        ref={ref}
+        className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
+      />
     </div>
   )
 }
@@ -1209,7 +1177,7 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   }, [labels, datasets, collapsed])
 
   return (
-    <div className={styles.charthight}>
+    <div className={styles.chartHeight}>
     <canvas
       id={id}
       className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}

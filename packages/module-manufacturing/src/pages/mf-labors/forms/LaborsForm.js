@@ -91,8 +91,8 @@ export default function LaborsForm({ labels, maxAccess, recordId }) {
     <FormShell resourceId={ResourceIds.Labor} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
-            <Grid item rowSpacing={4} xs={6}>
+          <Grid container spacing={2}>
+            <Grid item rowspacing={2} xs={6}>
               <Grid item sx={{ pb: '10px' }} xs={12}>
                 <CustomTextField
                   name='reference'

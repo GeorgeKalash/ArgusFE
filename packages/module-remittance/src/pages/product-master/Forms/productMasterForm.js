@@ -161,7 +161,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   firstValue={formik.values.corRef}
                   secondValue={formik.values.corName}
                   displayFieldWidth={2}
-                  onChange={(event, newValue) => {
+                  onChange={(_, newValue) => {
                     if (newValue) {
                       formik.setFieldValue('corId', newValue?.recordId)
                       formik.setFieldValue('corRef', newValue?.reference)
@@ -184,9 +184,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   valueField='key'
                   displayField='value'
                   values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('languages', newValue?.key)
-                  }}
+                  onChange={(_, newValue) => formik.setFieldValue('languages', newValue?.key)}
                   error={formik.touched.languages && Boolean(formik.errors.languages)}
                 />
               </Grid>
@@ -201,9 +199,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   valueField='recordId'
                   displayField='name'
                   values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('interfaceId', newValue?.recordId)
-                  }}
+                  onChange={(_, newValue) => formik.setFieldValue('interfaceId', newValue?.recordId)}
                   error={formik.touched.interfaceId && Boolean(formik.errors.interfaceId)}
                 />
               </Grid>
@@ -217,9 +213,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   displayField='value'
                   values={formik.values}
                   required
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('commissionBase', newValue?.key)
-                  }}
+                  onChange={(_, newValue) => formik.setFieldValue('commissionBase', newValue?.key)}
                   error={formik.touched.commissionBase && Boolean(formik.errors.commissionBase)}
                 />
               </Grid>
@@ -243,9 +237,7 @@ const ProductMasterForm = ({ store, setStore, labels, editMode, setEditMode, max
                   valueField='key'
                   displayField='value'
                   values={formik.values}
-                  onChange={(event, newValue) => {
-                    formik.setFieldValue('accessLevel', newValue?.key)
-                  }}
+                  onChange={(_, newValue) => formik.setFieldValue('accessLevel', newValue?.key)}
                   error={formik.touched.accessLevel && Boolean(formik.errors.accessLevel)}
                 />
               </Grid>

@@ -74,7 +74,7 @@ export default function CcCashNotesForm({ labels, maxAccess, record, recordId, w
     <FormShell resourceId={ResourceIds.CashNote} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Currency.qry}

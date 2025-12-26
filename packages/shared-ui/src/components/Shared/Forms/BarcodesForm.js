@@ -124,7 +124,7 @@ export default function BarcodesForm({ labels, access, store, recordId, msId, ba
     <FormShell resourceId={ResourceIds.Barcodes} form={formik} maxAccess={access} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={8}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

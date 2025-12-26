@@ -324,7 +324,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
                 endpointId={SystemRepository.DocumentType.qry}
@@ -427,7 +427,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
             allowAddNewLine={!isPosted}
           />
           <Fixed>
-            <Grid container spacing={4} sx={{ mb: 3, display: 'flex', justifyContent: 'left' }}>
+            <Grid container spacing={2} sx={{ mb: 3, display: 'flex', justifyContent: 'left' }}>
               <Grid item xs={4}>
                 <CustomTextArea
                   name='notes'

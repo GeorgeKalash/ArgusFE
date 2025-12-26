@@ -13,6 +13,9 @@ import { VertLayout } from "@argus/shared-ui/src/components/Layouts/VertLayout"
 import { Grow } from "@argus/shared-ui/src/components/Layouts/Grow"
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
+import * as yup from 'yup'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -22,14 +25,26 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
     endpointId: FoundryRepository.MetalSettings.page
   })
 
+  const conditions = {
+    sku: row => row?.sku,
+    itemName: row => row?.itemName,
+    puritySource: row => row?.puritySource
+  }
+
+  const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
   const { formik } = useForm({
     maxAccess,
     initialValues: { recordId, metalRef, items: [] },
+    validationSchema: yup.object({
+      items: yup.array().of(schema)
+    }),
+    conditionSchema: ['items'],
     onSubmit: async values => {
       const payload = {
         metalId: recordId,
         items: values.items
-          .filter(item => item?.itemId)
+          .filter(row => Object.values(requiredFields).every(fn => fn(row)))
           .map((row, index) => ({
             ...row,
             metalId: recordId,
@@ -79,6 +94,7 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'recordId',
         displayField: 'sku',
+        displayFieldWidth: 1.5,
         mapping: [
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
@@ -96,6 +112,20 @@ const SmeltingScrapItemsForm = ({ labels, maxAccess, recordId, metalRef }) => {
       name: 'itemName',
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'resourcecombobox',
+      label: labels.puritySource,
+      name: 'puritySource',
+      props: {
+        datasetId: DataSets.PURITY_SOURCE,
+        valueField: 'key',
+        displayField: 'value',
+        mapping: [
+          { from: 'key', to: 'puritySource' },
+          { from: 'value', to: 'puritySourceName' }
+        ]
       }
     }
   ]

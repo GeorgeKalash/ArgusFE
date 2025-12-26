@@ -122,7 +122,7 @@ export default function DocumentsForm({ labels, maxAccess, functionId, seqNo, re
     <Form actions={actions} isSaved={false} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

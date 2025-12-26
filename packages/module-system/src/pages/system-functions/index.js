@@ -151,7 +151,7 @@ const SystemFunction = () => {
       <VertLayout>
         <Fixed>
           <Grid container>
-            <Grid item xs={3} spacing={4} p={2}>
+            <Grid item xs={3} spacing={2} p={2}>
               <CustomTextField
                 name='search'
                 value={formik.values.search}

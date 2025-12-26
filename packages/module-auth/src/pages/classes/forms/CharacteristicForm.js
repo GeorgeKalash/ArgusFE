@@ -46,7 +46,7 @@ const CharacteristicForm = ({ labels, maxAccess, getCharacteristicGridData, reco
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={DocumentReleaseRepository.CharacteristicsGeneral.qry}

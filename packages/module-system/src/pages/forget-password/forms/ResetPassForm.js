@@ -61,7 +61,7 @@ const ResetPassForm = ({ labels, username = '' }) => {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={3} sx={{ px: '10px', pt: '10px' }}>
+        <Grid container spacing={2} sx={{ px: '10px', pt: '10px' }}>
           <Grid item xs={12}>
             <CustomTextField
               name='code'

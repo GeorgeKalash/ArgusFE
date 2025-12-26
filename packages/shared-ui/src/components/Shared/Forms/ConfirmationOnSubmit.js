@@ -45,7 +45,7 @@ export default function ConfirmationOnSubmit({ formik, labels, window }) {
       <FormShell form={fetchFormik} isInfo={false}>
         <VertLayout>
           <Grow>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
                 <CustomTextField
                   name='idNoRepeat'

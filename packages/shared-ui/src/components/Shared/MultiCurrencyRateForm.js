@@ -94,7 +94,7 @@ export default function MultiCurrencyRateForm({ data, onOk, DatasetIdAccess, win
     <Form onSave={ok} actions={actions} maxAccess={maxAccess} editMode={false} isSaved={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='currencyName'

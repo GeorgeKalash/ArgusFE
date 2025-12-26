@@ -13,10 +13,9 @@ import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolba
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { Grid } from '@mui/material'
-
-import EmpPenaltyForm from './forms/EmpPenaltyForm'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
+import EmpPenaltyForm from '@argus/shared-ui/src/components/Shared/Forms/EmpPenaltyForm'
 
 const EmpPenalty = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -135,13 +134,8 @@ const EmpPenalty = () => {
     stack({
       Component: EmpPenaltyForm,
       props: {
-        labels,
-        recordId,
-        access
-      },
-      width: 600,
-      height: 470,
-      title: labels.empPenalty
+        recordId
+      }
     })
   }
 

@@ -37,7 +37,7 @@ export default function CopyToClipboardForm({ barcode, window }) {
   return (
     <VertLayout>
       <Grow>
-        <Grid container spacing={4} sx={{ padding: 2 }}>
+        <Grid container spacing={2} sx={{ padding: 2 }}>
           <Grid item xs={12}>
             <CustomTextField
               name='barcode'

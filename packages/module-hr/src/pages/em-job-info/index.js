@@ -11,9 +11,9 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
-import JobInfoForm from './form/jobInfoForm'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
+import JobInfoForm from '@argus/shared-ui/src/components/Shared/Forms/jobInfoForm'
 
 const EMJobInfo = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -137,13 +137,8 @@ const EMJobInfo = () => {
     stack({
       Component: JobInfoForm,
       props: {
-        labels,
         recordId,
-        access
-      },
-      width: 600,
-      height: 520,
-      title: labels.jobInfo
+      }
     })
   }
 

@@ -149,7 +149,7 @@ export default function CreditCardForm({ recordId, labels, maxAccess }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='reference'

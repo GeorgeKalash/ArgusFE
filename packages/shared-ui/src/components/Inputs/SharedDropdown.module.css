@@ -1,7 +1,7 @@
 .dropdownHeaderRow,
 .dropdownOptionRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 5px 10px !important;
   line-height: 1.35 !important;
 }
@@ -11,21 +11,8 @@
   border-bottom: 0.1rem solid #b9b9b9 !important;
 }
 
-.dropdownHeaderCell,
-.dropdownHeaderCellMain {
+.dropdownHeaderCell {
   font-weight: 600 !important;
-}
-
-.dropdownOptionCell,
-.dropdownOptionCellMain,
-.dropdownOptionCellSecondary,
-.dropdownOptionSingleText {
-  font-size: 0.72rem !important;
-  font-weight: 400 !important;
-  line-height: 1.35 !important;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
 }
 
 .dropdownOptionIcon {
@@ -35,6 +22,20 @@
   object-fit: contain;
 }
 
+.dropdownOptionCell,
+.dropdownOptionSingleText {
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+
+  display: flex;
+  align-items: flex-start;
+
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .dropdownPopper :global(.MuiAutocomplete-listbox) {
   padding: 4px !important;
 }
@@ -42,17 +43,8 @@
 .dropdownPopper :global(.MuiAutocomplete-option) {
   min-height: unset !important;
   padding: 4px 10px !important;
-  line-height: 1.35 !important;
-  align-items: center !important;
+  align-items: flex-start !important;
 }
-
-/* .dropdownPopper :global(.MuiAutocomplete-noOptions),
-.dropdownPopper :global(.MuiAutocomplete-loading) {
-  font-size: 0.68rem !important;
-  padding: 8px !important;
-  line-height: 1.35 !important;
-  text-align: center;
-} */
 
 @media (min-width: 1921px) {
   .dropdownHeaderRow,

@@ -187,7 +187,7 @@ const NumberRange = () => {
   return (
     <VertLayout>
       <Fixed>
-        <Grid container xs={6} spacing={3} sx={{ padding: '10px' }}>
+        <Grid container xs={6} spacing={2} sx={{ padding: '10px' }}>
           <Grid item xs={6}>
             <ResourceComboBox
               endpointId={SystemRepository.Country.qry}

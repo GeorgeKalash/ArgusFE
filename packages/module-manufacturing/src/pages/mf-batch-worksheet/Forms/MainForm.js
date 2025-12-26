@@ -515,7 +515,7 @@ export default function MainForm({ labels, access, store, setStore, window }) {
         <Fixed>
           <Grid
             container
-            spacing={4}
+            spacing={2}
             sx={{
               justifyContent: 'flex-end'
             }}

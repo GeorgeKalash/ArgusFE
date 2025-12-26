@@ -103,7 +103,7 @@ const VendorForm = ({ labels, editMode, maxAccess, store, record }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceLookup
                 endpointId={PurchaseRepository.Vendor.snapshot}

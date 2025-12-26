@@ -128,14 +128,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
               return true
             }),
-            qty: yup.number().required(),
-            purity: yup.number().test(function (value) {
-              if (this.parent.type == 1) {
-                return !!value && value > 0
-              }
-
-              return true
-            }),
             sku: yup.string().required(),
             itemName: yup.string().required()
           })

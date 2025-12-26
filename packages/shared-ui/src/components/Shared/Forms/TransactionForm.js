@@ -1492,7 +1492,7 @@ const TransactionForm = ({ recordId, plantId, window: windowStack }) => {
                     />
                   </Grid>
                   <Grid item xs={3}>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                       <Grid item xs={12}>
                         <CustomNumberField label={labels.netAmount} value={total} readOnly />
                       </Grid>

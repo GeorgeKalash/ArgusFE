@@ -111,7 +111,7 @@ const PlantForm = ({ _labels, maxAccess, store, setStore, editMode }) => {
       editMode={editMode}
       actions={actions}
     >
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomTextField
             name='reference'

@@ -54,7 +54,7 @@ export default function GenerateTransferForm({ cashCountId, fromPlantId, labels,
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.Plant.qry}

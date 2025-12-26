@@ -46,7 +46,7 @@ export default function GlSyncForm({ _labels, access }) {
     <FormShell resourceId={ResourceIds.GlSync} form={formik} maxAccess={access} editMode={true} isSavedClear={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={SystemRepository.FiscalYears.qry}

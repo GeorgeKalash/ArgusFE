@@ -95,7 +95,7 @@ const PersonalSettings = ({ _labels, access }) => {
     <Form onSave={formik.handleSubmit} maxAccess={access}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomTextField
                 name='fullName'

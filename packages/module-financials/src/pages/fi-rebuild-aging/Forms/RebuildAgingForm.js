@@ -81,7 +81,7 @@ export default function RebuildAgingForm({ _labels, access, values }) {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant='body1'>{_labels.infoText}</Typography>
             </Grid>

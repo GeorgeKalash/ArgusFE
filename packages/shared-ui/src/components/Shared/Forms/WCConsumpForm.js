@@ -517,7 +517,7 @@ export default function WCConsumpForm({ recordId, window }) {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={3} xs={12}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={6}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -683,7 +683,7 @@ export default function WCConsumpForm({ recordId, window }) {
           />
         </Grow>
         <Fixed>
-          <Grid container spacing={3} xs={12}>
+          <Grid container spacing={2} xs={12}>
             <Grid item xs={4}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

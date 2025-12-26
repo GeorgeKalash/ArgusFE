@@ -67,7 +67,7 @@ export function DataGrid({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-  width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
+    width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
 
   function checkDuplicates(field, data) {
@@ -402,6 +402,11 @@ export function DataGrid({
   const onCellKeyDown = params => {
     const { event, api, node, data, colDef } = params
 
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
     if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
       isDup.current = true
 
@@ -586,18 +591,18 @@ export function DataGrid({
 
     return (
       <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''} `}>
-       <Box className={`${styles.cellEditorInner} ${centered ? styles.cellEditorInnerCentered : ''}`}>
-        <Component
-          id={params.node.data.id}
-          {...params}
-          value={currentValue}
-          column={{
-            ...column.colDef,
-            props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
-          }}
-          updateRow={updateRow}
-          update={update}
-        />
+        <Box className={`${styles.cellEditorInner} ${centered ? styles.cellEditorInnerCentered : ''}`}>
+          <Component
+            id={params.node.data.id}
+            {...params}
+            value={currentValue}
+            column={{
+              ...column.colDef,
+              props: column?.colDef?.propsReducer ? column?.colDef?.propsReducer({ row: data, props }) : props
+            }}
+            updateRow={updateRow}
+            update={update}
+          />
         </Box>
       </Box>
     )
@@ -652,55 +657,58 @@ export function DataGrid({
       styles.wrapTextCell
     ]
 
-    const centered =
-    (column.component === 'checkbox' ||
-    column.component === 'button' ||
-    column.component === 'icon' ) ?  'cellBoxCentered' : 'noCenterCell'
+      const centered =
+        column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
+          ? 'cellBoxCentered'
+          : 'noCenterCell'
 
       return {
-      ...column,
-      ...{ width: column.width + additionalWidth },
-      field: column.name,
-      headerName: column.label || column.name,
-      headerTooltip: column.label,
-      editable: !_disabled,
-      flex: column.flex || (!column.width && 1),
-      sortable: false,
-      cellRenderer: CustomCellRenderer,
-      cellEditor: CustomCellEditor,
-      wrapText: true ,
-      autoHeight: true,
-      cellClass: `${mergedCellClass  || undefined}  ${centered}`,
-      ...(column?.checkAll?.visible && {
-        headerComponent: () => {
-          const selectAll = e => {
-            if (column?.checkAll?.onChange) {
-              column?.checkAll?.onChange({ checked: e.target?.checked })
+        ...column,
+        ...{ width: column.width + additionalWidth },
+        field: column.name,
+        headerName: column.label || column.name,
+        headerTooltip: column.label,
+        editable: !_disabled,
+        flex: column.flex || (!column.width && 1),
+        sortable: false,
+        cellRenderer: CustomCellRenderer,
+        cellEditor: CustomCellEditor,
+        wrapText: true,
+        autoHeight: true,
+        cellClass: `${mergedCellClass || undefined}  ${centered}`,
+        ...(column?.checkAll?.visible && {
+          headerComponent: () => {
+            const selectAll = e => {
+              if (column?.checkAll?.onChange) {
+                column?.checkAll?.onChange({ checked: e.target?.checked })
+              }
             }
+
+            return (
+              <Grid container className={styles.headerCheckboxContainer}>
+                <CustomCheckBox
+                  className={styles.headerCheckbox}
+                  checked={column?.checkAll?.value}
+                  onChange={e => {
+                    selectAll(e)
+                  }}
+                  disabled={column.checkAll?.disabled}
+                />
+              </Grid>
+            )
           }
+        }),
+        cellEditorParams: { maxAccess },
+        cellClassRules: cellClassRules,
+        suppressKeyboardEvent: params => {
+          const { event } = params
 
-          return (
-            <Grid container className={styles.headerCheckboxContainer}>
-              <CustomCheckBox
-                className={styles.headerCheckbox}
-                checked={column?.checkAll?.value}
-                onChange={e => {
-                  selectAll(e)
-                }}
-                disabled={column.checkAll?.disabled}
-              />
-            </Grid>
-          )
+          return event.key === 'Tab' || event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
+            ? true
+            : false
         }
-      }),
-      cellEditorParams: { maxAccess },
-      cellClassRules: cellClassRules,
-      suppressKeyboardEvent: params => {
-        const { event } = params
-
-        return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
       }
-    }}),
+    }),
     allowDelete && !isAccessDenied
       ? {
           field: 'actions',
@@ -752,8 +760,8 @@ export function DataGrid({
 
       if (
         !event.target.closest('.ag-cell') &&
-          !pressedButton?.closest('.MuiPaper-root') &&
-          gridApiRef.current?.getEditingCells()?.length > 0 
+        !pressedButton?.closest('.MuiPaper-root') &&
+        gridApiRef.current?.getEditingCells()?.length > 0
       ) {
         gridApiRef.current?.stopEditing()
       } else {
@@ -865,27 +873,25 @@ export function DataGrid({
     gridApiRef.current?.setQuickFilter(searchValue)
   }, [searchValue])
 
-
-
   const onColumnResized = params => {
     if (params?.source === 'uiColumnResized') {
       const columnState = params.columnApi.getColumnState()
-    setColumnState(columnState)
+      setColumnState(columnState)
+    }
   }
-}
 
-const finalColumns =  columnDefs?.map(def => {
-  const colId = def.field
-  const state = columnState?.find(s => s.colId === colId)
+  const finalColumns =  columnDefs?.map(def => {
+    const colId = def.field
+    const state = columnState?.find(s => s.colId === colId)
 
-  if (!state) return def
+    if (!state) return def
 
-  return {
-    ...def,
-    flex: undefined,    
-    width: state.width   
-  }
-})
+    return {
+      ...def,
+      flex: undefined,
+      width: state.width
+    }
+  })
 
   return (
     <Box className={styles.root} sx={{ height: height || 'auto' }}>
@@ -915,8 +921,8 @@ const finalColumns =  columnDefs?.map(def => {
               onCellClicked={onCellClicked}
               onColumnResized={onColumnResized}
               getRowId={params => params?.data?.id}
-              tabToNextCell={() => true}
-              tabToPreviousCell={() => true}
+              tabToNextCell={() => null}
+              tabToPreviousCell={() => null}
               onCellEditingStopped={onCellEditingStopped}
               enableBrowserTooltips={true}
               enableRtl={user?.languageId === 2}

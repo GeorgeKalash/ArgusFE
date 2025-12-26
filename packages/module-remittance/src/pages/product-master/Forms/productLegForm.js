@@ -206,7 +206,7 @@ const ProductLegForm = ({ store, labels, editMode, maxAccess, active }) => {
       {rowSelectionSaved && active && (
         <VertLayout>
           <Fixed>
-            <Grid container xs={12} spacing={3}>
+            <Grid container xs={12} spacing={2}>
               <Grid item xs={3}>
                 <ResourceComboBox
                   endpointId={SystemRepository.Plant.qry}

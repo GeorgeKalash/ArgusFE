@@ -59,7 +59,7 @@ export default function DimValuesForm({ labels, maxAccess, recordId, dimValue })
     <FormShell resourceId={ResourceIds.DimensionsValues} form={formik} maxAccess={maxAccess} isInfo={false}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <CustomNumberField
                 name='id'

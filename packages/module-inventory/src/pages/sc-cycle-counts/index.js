@@ -10,10 +10,10 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
-import CycleCountsWindow from './Windows/CycleCountsWindow'
 import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -125,14 +125,9 @@ const CycleCounts = () => {
     stack({
       Component: CycleCountsWindow,
       props: {
-        labels: _labels,
         recordId,
         plantId,
-        maxAccess: access
-      },
-      width: 650,
-      height: 750,
-      title: _labels.cycleCounts
+      }
     })
   }
 

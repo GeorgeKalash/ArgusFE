@@ -387,7 +387,7 @@ const CashCountForm = ({ recordId, window }) => {
     >
       <VertLayout>
         <Fixed>
-          <Grid container spacing={4}>
+          <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceLookup
                 endpointId={CashBankRepository.CashAccount.snapshot}
