@@ -215,8 +215,10 @@ export default function DamageForm({ recordId, jobId }) {
     }
 
     const items = await getRequest({
-      extension: ManufacturingRepository.DamageReturnRawMaterial.preview,
-      parameters: `_jobId=${formik.values.header.jobId || 0}&_rate=${formik.values.header.damageRate || 0}`
+      extension: ManufacturingRepository.Damage.preview,
+      parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
+        formik.values.header.damagedQty || 0
+      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_jobNonMetalQty=${formik.values.header.nonMetalQty || 0}`
     })
 
     formik.setFieldValue('items', items?.list || [])
