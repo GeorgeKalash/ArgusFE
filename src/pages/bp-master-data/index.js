@@ -97,7 +97,7 @@ const BPMasterData = () => {
     openForm()
   }
 
-  function openForm(recordId) {
+  function openForm(recordId, reference) {
     stack({
       Component: BPMasterDataWindow,
       props: {
@@ -107,12 +107,13 @@ const BPMasterData = () => {
       },
       width: 800,
       height: 500,
-      title: _labels.masterData
+      title: _labels.masterData,
+      nextToTitle: reference ? reference : null
     })
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj.recordId, obj?.reference)
   }
 
   const del = async obj => {

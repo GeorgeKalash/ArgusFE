@@ -11,7 +11,7 @@ import SalesForm from '../forms/SalesForm'
 import PurchaseForm from '../forms/PurchaseForm'
 import BankTab from '../forms/BankTab'
 
-const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
+const BPMasterDataWindow = ({ labels, maxAccess, recordId, height, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -42,6 +42,7 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
           store={store}
           setStore={setStore}
           setEditMode={setEditMode}
+          window={window}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
