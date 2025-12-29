@@ -176,42 +176,16 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   })
 
   async function refetchForm(recordId) {
-    const diHeader = await getDraftInv(recordId)
-    const diItems = await getDraftInvItems(recordId)
-    await fillForm(diHeader, diItems)
-  }
-
-  async function getDraftInv(diId) {
-    const res = await getRequest({
-      extension: SaleRepository.DraftInvoice.get,
-      parameters: `_recordId=${diId}`
-    })
-
-    const clientRes = await getRequest({
-      extension: SaleRepository.Client.get,
-      parameters: `_recordId=${res.record.clientId}`
-    })
-
-    res.record.date = formatDateFromApi(res?.record?.date)
-    res.record.accountId = clientRes.record.accountId
-
-    return res
-  }
-
-  async function getDraftInvItems(diId) {
-    return await getRequest({
-      extension: SaleRepository.DraftInvoiceSerial.qry,
-      parameters: `_draftId=${diId}`
-    })
+    const pack = await getDraftInvoicePack(recordId)
+    await fillDraftFromPack(pack)
   }
 
   async function fillTaxStore() {
     const taxDet = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=0`
+      extension: SaleRepository.DraftInvoice.pack
     })
 
-    formik.setFieldValue('taxDetailsStore', taxDet?.list)
+    formik.setFieldValue('taxDetailsStore', taxDet?.record?.taxDetails)
   }
 
   function getItemPriceRow(newRow, dirtyField) {
@@ -322,7 +296,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }
 
-  async function saveHeader(lastLine) {
+  async function saveHeader() {
     const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
       formik?.values
 
@@ -332,7 +306,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         pcs: 0,
         date: formatDateToApi(date)
       },
-      items: []
+      items: formik.values.serials
     }
 
     const diRes = await postRequest({
@@ -340,25 +314,35 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       record: JSON.stringify(DraftInvoicePack)
     })
 
-    const diHeader = await getDraftInv(diRes.recordId)
-    formik.setFieldValue('recordId', diRes.recordId)
-    formik.setFieldValue('reference', diHeader?.record?.reference)
-    formik.setFieldValue('date', diHeader?.record?.date)
-
-    const success = await autoSave(diRes.recordId, lastLine)
-
-    if (success) {
+    if (diRes?.recordId) {
       toast.success(platformLabels.Saved)
 
-      const diHeader = await getDraftInv(diRes.recordId)
-      const diItems = await getDraftInvItems(diRes.recordId)
-      await fillForm(diHeader, diItems)
+      const pack = await getDraftInvoicePack(diRes.recordId)
+      await fillDraftFromPack(pack)
 
       return true
-    } else {
-      return false
     }
   }
+
+  async function getDraftInvoicePack(recordId) {
+    if (!recordId) return null
+
+    const res = await getRequest({
+      extension: SaleRepository.DraftInvoice.get2,
+      parameters: `_recordId=${recordId}`
+    })
+
+    const clientRes = await getRequest({
+      extension: SaleRepository.Client.get,
+      parameters: `_recordId=${res?.record?.header?.clientId}`
+    })
+
+    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
+    res.record.header.accountId = clientRes.record.accountId
+
+    return res?.record || null
+  }
+
 
   const serialsColumns = [
     {
@@ -377,72 +361,70 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           return
         }
 
-        if (newRow?.srlNo && newRow.srlNo !== oldRow?.srlNo) {
-          const res = await getRequest({
-            extension: SaleRepository.DraftInvoiceSerial.get,
-            parameters: `_currencyId=${formik?.values?.currencyId}&_plId=${formik?.values?.plId}&_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.siteId}`
-          })
+        const res = await getRequest({
+          extension: SaleRepository.DraftInvoiceSerial.get,
+          parameters: `_currencyId=${formik?.values?.currencyId}&_plId=${formik?.values?.plId}&_srlNo=${newRow?.srlNo}&_siteId=${formik?.values?.siteId}`
+        })
 
-          if (formik?.values?.autoSrlNo) {
-            let lineObj = {
-              fieldName: 'srlNo',
-              changes: {
-                id: newRow.id,
-                seqNo: newRow.id,
-                draftId: formik?.values?.recordId,
-                srlNo: res?.record?.srlNo || '',
-                sku: res?.record?.sku || '',
-                itemName: res?.record?.itemName || '',
-                weight: res?.record?.weight || 0,
-                itemId: res?.record?.itemId || null,
-                priceType: res?.record?.priceType || 0,
-                metalId: res?.record?.metalId || null,
-                metalRef: res?.record?.metalRef || '',
-                designId: res?.record?.designId || null,
-                designRef: res?.record?.designRef || null,
-                categoryName: res?.record?.categoryName,
-                volume: res?.record?.volume || 0,
-                baseLaborPrice: res?.record?.baseLaborPrice || 0,
-                unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
-                vatPct: res?.record?.vatPct || 0,
-                vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
+        if (formik?.values?.autoSrlNo) {
+          let lineObj = {
+            fieldName: 'srlNo',
+            changes: {
+              id: newRow.id,
+              seqNo: newRow.id,
+              draftId: formik?.values?.recordId,
+              srlNo: res?.record?.srlNo || '',
+              sku: res?.record?.sku || '',
+              itemName: res?.record?.itemName || '',
+              weight: res?.record?.weight || 0,
+              itemId: res?.record?.itemId || null,
+              priceType: res?.record?.priceType || 0,
+              metalId: res?.record?.metalId || null,
+              metalRef: res?.record?.metalRef || '',
+              designId: res?.record?.designId || null,
+              designRef: res?.record?.designRef || null,
+              categoryName: res?.record?.categoryName,
+              volume: res?.record?.volume || 0,
+              baseLaborPrice: res?.record?.baseLaborPrice || 0,
+              unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
+              vatPct: res?.record?.vatPct || 0,
+              vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
 
-                ...(res?.record?.taxId && {
-                  taxId: formik.values?.taxId || res?.record?.taxId,
-                  taxDetails: await FilteredListByTaxId(
-                    formik?.values?.taxDetailsStore,
-                    formik.values?.taxId || res?.record?.taxId
-                  )
-                })
-              }
-            }
-
-            const { unitPrice, baseLaborPrice } = getItemPriceRow(lineObj.changes, DIRTYFIELD_UNIT_PRICE)
-
-            lineObj.changes.unitPrice = unitPrice
-            lineObj.changes.baseLaborPrice = baseLaborPrice
-
-            if (lineObj.changes.taxId != null) {
-              ;(lineObj.changes.extendedPrice = unitPrice),
-                (lineObj.changes.taxDetails = FilteredListByTaxId(
+              ...(res?.record?.taxId && {
+                taxId: formik.values?.taxId || res?.record?.taxId,
+                taxDetails: await FilteredListByTaxId(
                   formik?.values?.taxDetailsStore,
-                  lineObj.changes.taxId
-                ))
-            }
-
-            const successSave = formik?.values?.recordId
-              ? await autoSave(formik?.values?.recordId, lineObj.changes)
-              : await saveHeader(lineObj.changes)
-
-            if (!successSave) {
-              update({
-                ...formik?.initialValues?.serials,
-                id: newRow?.id,
-                srlNo: ''
+                  formik.values?.taxId || res?.record?.taxId
+                )
               })
-            } else {
-              await addRow(lineObj)
             }
+          }
+
+          const { unitPrice, baseLaborPrice } = getItemPriceRow(lineObj.changes, DIRTYFIELD_UNIT_PRICE)
+
+          lineObj.changes.unitPrice = unitPrice
+          lineObj.changes.baseLaborPrice = baseLaborPrice
+
+          if (lineObj.changes.taxId != null) {
+            ;(lineObj.changes.extendedPrice = unitPrice),
+              (lineObj.changes.taxDetails = FilteredListByTaxId(
+                formik?.values?.taxDetailsStore,
+                lineObj.changes.taxId
+              ))
+          }
+
+          const successSave = formik?.values?.recordId
+            ? await autoSave(formik?.values?.recordId, lineObj.changes)
+            : await saveHeader()
+
+          if (!successSave) {
+            update({
+              ...formik?.initialValues?.serials,
+              id: newRow?.id,
+              srlNo: ''
+            })
+          } else {
+            await addRow(lineObj)
           }
         }
       }
@@ -638,13 +620,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   ]
 
-  async function fillGrids() {
-    const diHeader = await getDraftInv(formik?.values?.recordId)
-    const diItems = await getDraftInvItems(formik?.values?.recordId)
+  async function fillDraftFromPack(pack) {
+    if (!pack) return
+
+    const { header, items } = pack
 
     const modifiedList = await Promise.all(
-      diItems.list?.map(async (item, index) => {
-        const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+      (items || []).map(async (item, index) => {
+        const taxDetailsResponse =
+          header?.isVattable && item.taxId
+            ? await getTaxDetails(item.taxId)
+            : null
 
         return {
           ...item,
@@ -660,58 +646,33 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
     await formik.setValues({
       ...formik.values,
-      ...diHeader.record,
-      plId: defplId || formik?.values?.plId,
-      amount: diHeader?.record?.amount,
-      vatAmount: diHeader?.record?.vatAmount,
-      subtotal: diHeader?.record?.subtotal,
-      weight: diHeader?.record?.weight,
-      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
+      ...header,
+      plId: defplId || formik.values.plId,
+      amount: header.amount,
+      vatAmount: header.vatAmount,
+      subtotal: header.subtotal,
+      weight: header.weight,
+      serials: modifiedList.length
+        ? modifiedList
+        : formik.initialValues.serials
     })
 
     assignStoreTaxDetails(modifiedList)
   }
 
-  async function fillForm(diHeader, diItems) {
-    const modifiedList = await Promise.all(
-      diItems?.list?.map(async (item, index) => {
-        const taxDetailsResponse = diHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
-
-        return {
-          ...item,
-          id: item.seqNo,
-          baseLaborPrice: parseFloat(item.baseLaborPrice).toFixed(2),
-          unitPrice: parseFloat(item.unitPrice).toFixed(2),
-          vatAmount: parseFloat(item.vatAmount).toFixed(2),
-          amount: parseFloat(item.amount).toFixed(2),
-          taxDetails: taxDetailsResponse
-        }
-      })
-    )
-
-    await formik.setValues({
-      ...formik.values,
-      ...diHeader.record,
-      plId: defplId || formik?.values?.plId,
-      amount: diHeader?.record?.amount,
-      vatAmount: diHeader?.record?.vatAmount,
-      subtotal: diHeader?.record?.subtotal,
-      weight: diHeader?.record?.weight,
-      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
-    })
-
-    assignStoreTaxDetails(modifiedList)
+  async function fillGrids() {
+    const pack = await getDraftInvoicePack(formik?.values?.recordId)
+    await fillDraftFromPack(pack)
   }
 
   async function getTaxDetails(taxId) {
     if (!taxId) return
 
     const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
+      extension: SaleRepository.DraftInvoice.pack
     })
 
-    return res?.list
+    return res?.record?.taxDetails?.filter(td => td.taxId === taxId) || []
   }
 
   const filteredData = formik.values.search
@@ -874,7 +835,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           <Grid container spacing={2}>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.documentTypes}
                 parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DraftSerialsIn}`}
                 name='dtId'
                 label={labels.documentType}
@@ -898,7 +860,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.sites}
                 name='siteId'
                 readOnly={isClosed || formik?.values?.serials?.some(serial => serial.srlNo)}
                 label={labels.site}
@@ -926,7 +889,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.currencies}
                 filter={item => item.currencyType === 1}
                 name='currencyId'
                 label={labels.currency}
@@ -973,7 +937,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.plants}
                 name='plantId'
                 label={labels.plant}
                 readOnly
@@ -1028,7 +993,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesPerson.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.salesPeople}
                 name='spId'
                 required
                 label={labels.salesPerson}
@@ -1048,7 +1014,8 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={FinancialRepository.TaxSchedules.qry}
+                endpointId={SaleRepository.DraftInvoice.pack}
+                reducer={response => response?.record?.taxSchedules}
                 name='taxId'
                 label={labels.tax}
                 valueField='recordId'
