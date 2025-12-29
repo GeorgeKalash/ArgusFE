@@ -103,12 +103,13 @@ const BPMasterData = () => {
       props: {
         labels: _labels,
         maxAccess: access,
-        recordId: recordId ? recordId : null
+        recordId,
+        invalidate
       },
       width: 800,
       height: 500,
       title: _labels.masterData,
-      nextToTitle: reference ? reference : null
+      nextToTitle: reference || null
     })
   }
 
