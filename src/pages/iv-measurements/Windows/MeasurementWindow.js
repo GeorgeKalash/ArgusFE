@@ -4,7 +4,7 @@ import { useState } from 'react'
 import MeasurementForm from '../Forms/MeasurementForm'
 import MeasurementUnit from '../Forms/MeasurementUnit'
 
-const MeasurementWindow = ({ recordId, decimals, labels, maxAccess }) => {
+const MeasurementWindow = ({ recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({

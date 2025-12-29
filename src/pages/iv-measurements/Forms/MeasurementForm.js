@@ -46,15 +46,23 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
         extension: InventoryRepository.Measurement.set,
         record: JSON.stringify(obj)
       })
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
 
-      setStore(prevStore => ({
-        ...prevStore,
-        recordId: response.recordId,
-        decimals: formik.values.decimals
-      }))
+      if (!obj.recordId) {
+        setStore(prevStore => ({
+          ...prevStore,
+          recordId: response.recordId,
+          decimals: formik.values.decimals
+        }))
+        toast.success(platformLabels.Added)
+        formik.setFieldValue('recordId', response.recordId)
+      } else {
+        toast.success(platformLabels.Edited)
 
-      formik.setFieldValue('recordId', response.recordId)
+        setStore(prevStore => ({
+          ...prevStore,
+          decimals: formik.values.decimals
+        }))
+      }
       invalidate()
     }
   })
@@ -69,9 +77,9 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
 
         formik.setValues(res.record)
         setStore(prevStore => ({
-        ...prevStore,
-        decimals: res.record.decimals
-      }))
+          ...prevStore,
+          decimals: res.record.decimals
+        }))
       }
     })()
   }, [])
@@ -120,7 +128,6 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 label={labels.decimals}
                 value={formik.values.decimals}
                 decimalScale={0}
-                maxLength={1}
                 required
                 allowNegative={false}
                 readOnly={editMode}
