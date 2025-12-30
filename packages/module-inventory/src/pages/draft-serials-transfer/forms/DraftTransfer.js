@@ -242,7 +242,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         pcs: 0,
         date: formatDateToApi(formik.values.date)
       },
-      items: []
+      items: [lastLine]
     }
 
     delete DraftTransferPack.header.serials
@@ -252,14 +252,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       record: JSON.stringify(DraftTransferPack)
     })
 
-    const diHeader = await getDraftTransferPack(diRes?.recordId)
-    formik.setFieldValue('recordId', diRes.recordId)
-    formik.setFieldValue('reference', diHeader?.record?.header?.reference)
-    formik.setFieldValue('date', diHeader?.record?.header?.date)
-
-    const success = await autoSave(diHeader?.header, lastLine)
-
-    if (success) {
+    if (diRes.recordId) {
       toast.success(platformLabels.Saved)
 
       await refetchForm(diRes.recordId)
