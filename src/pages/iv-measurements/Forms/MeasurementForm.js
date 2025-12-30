@@ -55,14 +55,8 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
         }))
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
-      } else {
-        toast.success(platformLabels.Edited)
+      } else toast.success(platformLabels.Edited)
 
-        setStore(prevStore => ({
-          ...prevStore,
-          decimals: formik.values.decimals
-        }))
-      }
       invalidate()
     }
   })
