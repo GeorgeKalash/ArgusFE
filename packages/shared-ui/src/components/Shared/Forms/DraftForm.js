@@ -10,8 +10,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -20,7 +18,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
-import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -296,17 +293,40 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }
 
-  async function saveHeader() {
-    const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
-      formik?.values
+  function calculateTotalsFromSerials(serials) {
+    return serials.reduce(
+      (acc, row) => {
+        const unitPrice = parseFloat(row.unitPrice) || 0
+        const vat = parseFloat(row.vatAmount) || 0
+        const weight = parseFloat(row.weight) || 0
+
+        acc.subtotal += unitPrice
+        acc.vatAmount += vat
+        acc.weight += weight
+        acc.amount += unitPrice + vat
+
+        return acc
+      },
+      { subtotal: 0, vatAmount: 0, weight: 0, amount: 0 }
+    )
+  }
+
+
+  async function saveHeader(lastLine) {
+    const serialsForCalc = [lastLine]
+
+    const totals = calculateTotalsFromSerials(serialsForCalc)
+    const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, date, ...rest } =
+      formik.values
 
     const DraftInvoicePack = {
       header: {
         ...rest,
-        pcs: 0,
+        pcs: serialsForCalc.length,
+        ...totals,
         date: formatDateToApi(date)
       },
-      items: formik.values.serials
+      items: [lastLine]
     }
 
     const diRes = await postRequest({
@@ -316,11 +336,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
     if (diRes?.recordId) {
       toast.success(platformLabels.Saved)
-
-      const pack = await getDraftInvoicePack(diRes.recordId)
-      await fillDraftFromPack(pack)
-
-      return true
+      refetchForm(diRes?.recordId)
     }
   }
 
@@ -372,7 +388,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             changes: {
               id: newRow.id,
               seqNo: newRow.id,
-              draftId: formik?.values?.recordId,
+              draftId: formik?.values?.recordId || 0,
               srlNo: res?.record?.srlNo || '',
               sku: res?.record?.sku || '',
               itemName: res?.record?.itemName || '',
@@ -413,9 +429,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
               ))
           }
 
+          !reCal && setReCal(true)
+
           const successSave = formik?.values?.recordId
             ? await autoSave(formik?.values?.recordId, lineObj.changes)
-            : await saveHeader()
+            : await saveHeader(lineObj.changes)
 
           if (!successSave) {
             update({
@@ -759,30 +777,17 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }, [formik?.values?.serials])
 
-  const { subtotal, vatAmount, weight, amount } = formik?.values?.serials?.reduce(
-    (acc, row) => {
-      const subTot = parseFloat(row?.unitPrice) || 0
-      const vatAmountTot = parseFloat(row?.vatAmount) || 0
-      const totWeight = parseFloat(row?.weight) || 0
-
-      return {
-        subtotal: reCal ? parseFloat((acc?.subtotal + subTot).toFixed(2)) : formik.values?.subtotal || 0,
-        vatAmount: reCal ? parseFloat((acc?.vatAmount + vatAmountTot).toFixed(2)) : formik.values?.vatAmount || 0,
-        weight: reCal ? acc?.weight + totWeight : formik.values?.weight || 0,
-        amount: reCal
-          ? parseFloat((acc?.subtotal + subTot + acc?.vatAmount + vatAmountTot).toFixed(2))
-          : formik.values?.amount || 0
-      }
-    },
-    { subtotal: 0, vatAmount: 0, weight: 0, amount: 0 }
-  )
-
   useEffect(() => {
-    formik.setFieldValue('subtotal', subtotal)
-    formik.setFieldValue('vatAmount', vatAmount)
-    formik.setFieldValue('weight', weight)
-    formik.setFieldValue('amount', amount)
-  }, [weight, subtotal, vatAmount, amount])
+    if (!formik.values.serials?.length) return
+    const totals = calculateTotalsFromSerials(formik.values.serials)
+
+    formik.setFieldValue('subtotal', totals.subtotal)
+    formik.setFieldValue('vatAmount', totals.vatAmount)
+    formik.setFieldValue('weight', totals.weight)
+    formik.setFieldValue('amount', totals.amount)
+
+  }, [formik.values.serials])
+
 
   useEffect(() => {
     ;(async function () {
@@ -1148,7 +1153,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   name='weight'
                   maxAccess={maxAccess}
                   label={labels.totalWeight}
-                  value={weight}
+                  value={formik.values.weight}
                   readOnly
                 />
               </Grid>
@@ -1158,7 +1163,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   name='subtotal'
                   maxAccess={maxAccess}
                   label={labels.subtotal}
-                  value={subtotal}
+                  value={formik.values.subtotal}
                   readOnly
                 />
               </Grid>
@@ -1167,12 +1172,12 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
                   name='vatAmount'
                   maxAccess={maxAccess}
                   label={labels.vat}
-                  value={vatAmount}
+                  value={formik.values.vatAmount}
                   readOnly
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.total} value={amount} readOnly />
+                <CustomNumberField name='amount' maxAccess={maxAccess} label={labels.total} value={formik.values.amount} readOnly />
               </Grid>
             </Grid>
           </Grid>
