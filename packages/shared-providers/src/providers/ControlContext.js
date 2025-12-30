@@ -10,7 +10,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { debounce } from 'lodash'
 import { commonResourceIds } from '@argus/shared-domain/src/resources/commonResourceIds'
 import { useLabelsAccessContext } from './LabelsAccessContext'
-import { DataSets } from 'src/resources/DataSets'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const ControlContext = createContext()
 
