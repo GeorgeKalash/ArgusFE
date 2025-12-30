@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -265,8 +265,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           ...res.record,
           date: formatDateFromApi(res.record.date)
         })
-      } else {
-        getCashAccountAndPayment(cashAccountId)
       }
     })()
   }, [])
@@ -421,8 +419,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.PaymentVoucher}&_startAt=${0}&_pageSize=${50}`}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -469,7 +467,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.plants}
                 name='plantId'
                 label={labels.plant}
                 valueField='recordId'
@@ -488,7 +487,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.FI_PV_GROUP_TYPE}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.groupTypes}
                 name='accountType'
                 filter={item => item.key == 1 || item.key == 4}
                 label={labels.accountType}
@@ -569,8 +569,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={CashBankRepository.CashAccount.qry}
-                parameters={`_type=0`}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.cashAccounts}
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -593,7 +593,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
               <Grid container spacing={1} alignItems='center'>
                 <Grid item xs={8}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
+                    endpointId={FinancialRepository.PaymentVouchers.pack}
+                    reducer={response => response?.record?.currencies}
                     name='currencyId'
                     label={labels.currency}
                     filter={item => item.currencyType === 1}
@@ -629,7 +630,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.PAYMENT_METHOD}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.paymentMethods}
                 name='paymentMethod'
                 label={labels.paymentMethod}
                 valueField='key'
@@ -690,7 +692,25 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.checkBooks}
+                name='checkbookId'
+                label={labels.checkbook}
+                valueField='recordId'
+                displayField={'firstCheckNo'}
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
+                }}
+                error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
+                disabled={formik.values.paymentMethod != 3}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                neverPopulate
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 readOnly={isPosted || isCancelled}
@@ -709,22 +729,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 maxAccess={maxAccess}
               />
             </Grid>
-            <Grid item xs={6}>
-              <ResourceComboBox
-                endpointId={CashBankRepository.CACheckbook.qry}
-                name='checkbookId'
-                label={labels.checkbook}
-                valueField='recordId'
-                displayField={'firstCheckNo'}
-                values={formik.values}
-                onChange={(event, newValue) => {
-                  formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
-                }}
-                error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
-                disabled={formik.values.paymentMethod != 3}
-              />
-            </Grid>
-
             <Grid item xs={6}>
               <CustomTextField
                 name='sourceReference'
@@ -754,7 +758,8 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={FinancialRepository.PaymentReasons.qry}
+                endpointId={FinancialRepository.PaymentVouchers.pack}
+                reducer={response => response?.record?.paymentReasons}
                 name='paymentReasonId'
                 readOnly={isPosted || isCancelled}
                 label={labels.paymentReasons}

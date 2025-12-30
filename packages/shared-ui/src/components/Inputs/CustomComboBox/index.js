@@ -40,6 +40,7 @@ const CustomComboBox = ({
   hasBorder = true,
   fetchData,
   refresh = true,
+  allowClear = true,
   isLoading,
   onOpen,
   onBlur = () => {},
@@ -260,7 +261,7 @@ const CustomComboBox = ({
                           </IconButton>
                         )
                       ))}
-                 { !_readOnly && value && <IconButton
+                 { !_readOnly && value && allowClear && <IconButton
                       className={inputs.iconButton}
                       tabIndex={-1}
                       onClick={() => onChange(name, '')}
