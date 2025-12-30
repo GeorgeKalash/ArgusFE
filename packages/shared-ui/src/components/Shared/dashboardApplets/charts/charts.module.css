@@ -111,3 +111,30 @@
     height: clamp(180px, 40vh, 320px);
   }
 }
+.chartCanvas {
+  --chart-title-size: 16px;
+}
+
+@media (max-width: 1024px) {
+  .chartCanvas {
+    --chart-title-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .chartCanvas {
+    --chart-title-size: 12px;
+  }
+}
+
+@media (min-width: 1441px) and (max-width: 1599px) {
+  .chartCanvas {
+    --chart-title-size: 15px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .chartCanvas {
+    --chart-title-size: 16px;
+  }
+}

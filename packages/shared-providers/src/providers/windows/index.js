@@ -23,8 +23,7 @@ export function WindowProvider({ children }) {
       parameters: `_resourceId=${obj.resourceId}&_recordId=${obj.recordId}`
     }).then(res => {
       if (res.record && res.record.userId != userId) {
-        obj.isAlreadyLocked ? obj.isAlreadyLocked(res.record.userName) : null
-
+        obj.isAlreadyLocked?.(res.record.userName)
         return
       }
 
@@ -32,16 +31,16 @@ export function WindowProvider({ children }) {
         resourceId: obj.resourceId,
         recordId: obj.recordId,
         reference: obj.reference,
-        userId: userId,
+        userId,
         clockStamp: new Date()
       }
 
       postRequest({
         extension: AccessControlRepository.lockRecord,
         record: JSON.stringify(body)
-      }).then(res => {
+      }).then(() => {
         setLockProps(obj)
-        obj.onSuccess ? obj.onSuccess() : null
+        obj.onSuccess?.()
       })
     })
   }
@@ -65,9 +64,7 @@ export function WindowProvider({ children }) {
 
   function closeWindow() {
     unlockRecord()
-    setStack(stack => {
-      return stack.slice(0, stack.length - 1)
-    })
+    setStack(stack => stack.slice(0, stack.length - 1))
   }
 
   function closeWindowById(givenId) {
@@ -77,26 +74,14 @@ export function WindowProvider({ children }) {
   }
 
   function openWindow(id) {
-    if (closedWindow.current) {
-      if (closedWindow?.current?.id === id) {
-        addToStack(closedWindow.current)
-      }
-    } else {
-      return
-    }
+    if (closedWindow.current?.id === id) addToStack(closedWindow.current)
   }
 
   function addToStack(options) {
     const { Component } = options
-
     setStack(stack => [
       ...stack,
-      {
-        ...options,
-        width: Component?.width || options.width,
-        height: Component?.height || options.height,
-        id: uuidv4()
-      }
+      { ...options, width: Component?.width || options.width, height: Component?.height || options.height, id: uuidv4() }
     ])
   }
 
@@ -121,7 +106,8 @@ export function WindowProvider({ children }) {
           refresh,
           draggable,
           height,
-          styles
+          styles,
+          minimizable
         }) => (
           <ClearContext.Provider
             key={rerenderFlag}
@@ -163,13 +149,12 @@ export function WindowProvider({ children }) {
           >
             <Window
               key={id}
-              sx={{ display: 'flex !important', flex: '1' }}
               Title={title}
               nextToTitle={nextToTitle}
-              controlled={true}
+              controlled
               onClose={() => {
                 closeWindow()
-                if (onClose) onClose()
+                onClose?.()
               }}
               onRefresh={() => {
                 closeWindowById(id)
@@ -181,6 +166,7 @@ export function WindowProvider({ children }) {
               refresh={refresh}
               draggable={draggable}
               closable={closable}
+              minimizable={minimizable}
               styles={styles}
             >
               <Component
@@ -203,11 +189,7 @@ export function WindowProvider({ children }) {
 
 export function ImmediateWindow({ datasetId, Component, labelKey, titleName, height, width, props = {} }) {
   const { stack } = useWindow()
-
-  const { labels: _labels, access } = useResourceParams({
-    datasetId: datasetId
-  })
-
+  const { labels: _labels, access } = useResourceParams({ datasetId })
   const [rendered, setRendered] = useState(false)
 
   useEffect(() => {
@@ -220,12 +202,9 @@ export function ImmediateWindow({ datasetId, Component, labelKey, titleName, hei
   function openForm() {
     stack({
       Component,
-      props: {
-        access,
-        _labels,
-        ...props
-      },
+      props: { access, _labels, ...props },
       expandable: false,
+      minimizable: false, 
       refresh: false,
       closable: false,
       draggable: false,
