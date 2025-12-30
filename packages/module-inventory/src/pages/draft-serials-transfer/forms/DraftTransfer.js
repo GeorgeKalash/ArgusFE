@@ -236,10 +236,12 @@ export default function DraftTransfer({ labels, access, recordId }) {
   }
 
   async function saveHeader(lastLine) {
+    const totals = calculateTotalWeightFromSerials([lastLine])
     const DraftTransferPack = {
       header: {
         ...formik?.values,
-        pcs: 0,
+        pcs: 1,
+        ...totals,
         date: formatDateToApi(formik.values.date)
       },
       items: [lastLine]
@@ -532,20 +534,25 @@ export default function DraftTransfer({ labels, access, recordId }) {
     }
   }, [formik?.values?.serials])
 
-  const { totalWeight } = formik?.values?.serials?.reduce(
-    (acc, row) => {
-      const totWeight = parseFloat(row?.weight) || 0
+  function calculateTotalWeightFromSerials(serials) {
+    return serials.reduce(
+      (acc, row) => {
+        const weight = parseFloat(row.weight) || 0
+        acc.totalWeight += weight
 
-      return {
-        totalWeight: reCal ? acc?.totalWeight + totWeight : formik.values?.totalWeight || 0
-      }
-    },
-    { totalWeight: 0 }
-  )
+        return acc
+      },
+      { totalWeight: 0 }
+    )
+  }
 
-  useEffect(() => {
-    formik.setFieldValue('totalWeight', totalWeight)
-  }, [totalWeight])
+    useEffect(() => {
+    if (!formik.values.serials?.length) return
+    const totals = calculateTotalWeightFromSerials(formik.values.serials)
+
+    formik.setFieldValue('totalWeight', totals.totalWeight)
+
+  }, [formik.values.serials])
 
   useEffect(() => {
     ;(async function () {
@@ -835,7 +842,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   name='totalWeight'
                   maxAccess={maxAccess}
                   label={labels.totalWeight}
-                  value={totalWeight}
+                  value={formik.values.totalWeight}
                   readOnly
                 />
               </Grid>
