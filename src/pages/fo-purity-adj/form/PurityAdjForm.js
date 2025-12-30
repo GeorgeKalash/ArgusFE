@@ -142,10 +142,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
-  const calculateTotal = key =>
-    formik.values.items.reduce((sum, item) => {
+const calculateTotal = key =>
+  formik.values.items
+    .reduce((sum, item) => {
       return sum + (parseFloat(item[key]) || 0)
     }, 0)
+    .toFixed(2)
 
   const totalMetal = recalc ? calculateTotal('qty') : formik.values?.header?.sumQty
   const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
@@ -153,13 +155,13 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const totalDiffQty = recalc ? calculateTotal('deltaRMQty') : formik.values?.header?.sumDeltaRMQty
 
   const avgPurity = recalc
-    ? ((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)).toFixed(2)
     : formik.values?.header?.avgPurity
 
   const avgStdPurity = recalc
-    ? ((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)
+    ? (((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)).toFixed(2)
     : formik.values?.header?.avgNewPuirty
-  const totalDiffPurity = recalc ? (avgStdPurity || 0) - (avgPurity || 0) : formik.values?.header?.sumDeltaPurity
+  const totalDiffPurity = recalc ? ((avgStdPurity || 0) - (avgPurity || 0)).toFixed(2) : formik.values?.header?.sumDeltaPurity
 
   const onPost = async () => {
     await postRequest({
@@ -237,7 +239,6 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: labels.count,
       label: '',
-      flex: 0.5,
       props: { readOnly: true }
     },
     {
@@ -269,7 +270,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         setRecalc(true)
         fillSKUStore(newRow?.metalId)
         update({
-          purity: newRow?.purity * 1000 || 0,
+          purity: (newRow?.purity * 1000 || 0).toFixed(2),
           deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0) * 1000).toFixed(2)
         })
       }
@@ -302,10 +303,10 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
         update({
-          stdPurity: newRow?.stdPurity || 0,
-          deltaPurity: (newRow?.stdPurity || 0) - (newRow?.purity || 0),
+          stdPurity: (newRow?.stdPurity || 0).toFixed(2),
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
           newRmQty,
-          deltaRMQty: newRmQty - (newRow?.rmQty || 0)
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
         })
       },
       propsReducer({ row, props }) {
@@ -341,7 +342,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         update({
           rmQty,
           newRmQty,
-          deltaRMQty: newRmQty - rmQty
+          deltaRMQty: (newRmQty - rmQty).toFixed(2)
         })
       }
     },
@@ -357,9 +358,9 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
         update({
-          deltaPurity: (newRow?.stdPurity || 0) - (newRow?.purity || 0),
+          deltaPurity:((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
           rmQty,
-          deltaRMQty: (newRow?.newRmQty || 0) - rmQty
+          deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
         })
       }
     },
