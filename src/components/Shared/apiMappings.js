@@ -1055,15 +1055,14 @@ export const apiMappings = {
     ]
   },
   [ResourceIds.Damages]: {
-    type: COMBOBOX,
-    endpoint: ManufacturingRepository.Damage.qry,
-    parameters: `_params=&_startAt=0&_pageSize=1000&_jobId=0`,
-    valueField: 'recordId',
-    displayField: ['reference'],
-    columnsInDropDown: [
-      { key: 'reference', value: 'Reference' },
-      { key: 'jobRef', value: 'Job Order' }
-    ]
+    type: LOOKUP,
+    endpoint: ManufacturingRepository.Damage.snapshot,
+    parameters: {
+      _jobId: 0
+    },
+    firstField: 'reference',
+    valueOnSelection: 'recordId',
+    secondDisplayField: false,
   },
   [ResourceIds.PriceGroups]: {
     type: COMBOBOX,

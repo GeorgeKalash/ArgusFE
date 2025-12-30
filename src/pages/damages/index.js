@@ -105,8 +105,8 @@ const Damages = () => {
       props: {
         recordId
       },
-      width: 850,
-      height: 680,
+      width: 1150,
+      height: 580,
       title: labels.damage
     })
   }
