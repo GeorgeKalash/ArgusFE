@@ -477,23 +477,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
     }
   ]
 
-  async function fillForm(diHeader, diItems) {
-    const modifiedList = await Promise.all(
-      diItems?.list?.map(async item => {
-        return {
-          ...item,
-          id: item.seqNo
-        }
-      })
-    )
-
-    formik.setValues({
-      ...formik.values,
-      ...diHeader.record,
-      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
-    })
-  }
-
   async function onChangeDtId(recordId) {
     const dtd = await getRequest({
       extension: InventoryRepository.DocumentTypeDefaults.get,
