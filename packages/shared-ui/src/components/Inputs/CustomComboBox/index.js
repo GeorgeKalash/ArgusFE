@@ -88,16 +88,20 @@ const CustomComboBox = ({
       options={store}
       key={value}
       PopperComponent={PopperComponent}
-      PaperComponent={({ children }) => (
-        <Paper
-          style={{
-            minWidth: `${displayFieldWidth * 100}%`,
-            width: 'max-content'
-          }}
-        >
-          {children}
-        </Paper>
-      )}
+      {...(!props.renderOption
+        ? {
+            PaperComponent: ({ children }) => (
+              <Paper
+                style={{
+                  minWidth: `${displayFieldWidth * 100}%`,
+                  width: 'max-content',
+                }}
+              >
+                {children}
+              </Paper>
+            ),
+          }
+        : {})}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
@@ -309,7 +313,7 @@ const CustomComboBox = ({
               startAdornment: value?.icon ? (
                 <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
               ) : (
-                props?.startAdornment || params.InputProps.startAdornment
+                <InputAdornment position='start' className={inputs.startAdornment}> { props?.startAdornment || params.InputProps.startAdornment} </InputAdornment> 
               ),
               endAdornment: mergedEndAdornment
             }}

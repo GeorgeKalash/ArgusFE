@@ -111,12 +111,6 @@ const ReportGenerator = ({
     <Grid
       item
       xs={reportSize}
-      sx={{
-        p: 0,                    
-        m: 0,
-        display: 'flex',
-        alignItems: 'center'      
-      }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <CustomComboBox

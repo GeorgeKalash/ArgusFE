@@ -1,7 +1,8 @@
 import { Box } from '@mui/material'
-import ResourceComboBox from './ResourceComboBox'
+import ResourceComboBox from '../ResourceComboBox'
+import styles from '@argus/shared-ui/src/components/Shared/ColorComboBox/ColorComboBox.module.css'
 
-export default function ColorComboBox({ colors, ...rest }) {
+export default function index({ colors, ...rest }) {
   const colorPalette = [
     '#000000',
     '#993300',
@@ -55,24 +56,12 @@ export default function ColorComboBox({ colors, ...rest }) {
       renderOption={(props, option, { selected }) => (
         <li {...props} style={{ padding: 0, margin: 0 }}>
           <Box
-            sx={{
-              width: 29,
-              height: 29,
-              borderRadius: '6px',
-              border: selected ? '1px solid #000' : '0px solid #ccc',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s',
-              '&:hover': { border: '1px solid #000' }
-            }}
+          className={styles.dropdown}
+  
           >
             <Box
+             className={styles.dropdownBox}
               sx={{
-                width: 25,
-                height: 25,
-                borderRadius: '4px',
                 backgroundColor: option
               }}
             />
