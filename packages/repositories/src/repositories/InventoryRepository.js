@@ -274,7 +274,6 @@ export const InventoryRepository = {
   DraftTransfer: {
     page: service + 'pageDTF',
     del: service + 'delDTF',
-    get: service + 'getDTF',
     set2: service + 'set2DTF',
     snapshot: service + 'snapshotDTF',
     post: service + 'postDTF',
@@ -283,7 +282,6 @@ export const InventoryRepository = {
     get2: service + 'get2DTF'
   },
   DraftTransferSerial: {
-    qry: service + 'qryDTI',
     del: service + 'delDTI',
     append: service + 'appendDTI'
   },
