@@ -10,6 +10,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { debounce } from 'lodash'
 import { commonResourceIds } from '@argus/shared-domain/src/resources/commonResourceIds'
 import { useLabelsAccessContext } from './LabelsAccessContext'
+import { DataSets } from 'src/resources/DataSets'
 
 const ControlContext = createContext()
 
@@ -20,6 +21,7 @@ const ControlProvider = ({ children }) => {
   const [defaultsData, setDefaultsData] = useState([])
   const [userDefaultsData, setUserDefaultsData] = useState([])
   const [systemChecks, setSystemChecks] = useState([])
+  const [exportFormat, setExportFormat] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
   const { labels, setLabels, access, setAccess, apiPlatformLabels, setApiPlatformLabels } = useLabelsAccessContext()
@@ -47,6 +49,7 @@ const ControlProvider = ({ children }) => {
       getDefaults(setDefaultsData)
       getUserDefaults(setUserDefaultsData)
       getSystemChecks(setSystemChecks)
+      getExportFormat()
     }
   }, [userData, user?.userId])
 
@@ -89,6 +92,15 @@ const ControlProvider = ({ children }) => {
     }).then(res => {
       callback(res.list)
     })
+  }
+
+  const getExportFormat = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: `_dataset=${DataSets.EXPORT_FORMAT}&_language=${languageId}`,
+      disableLoading: true
+    })
+    if (res?.list?.length) setExportFormat(res?.list || [])
   }
 
   const updateDefaults = data => {
@@ -208,7 +220,8 @@ const ControlProvider = ({ children }) => {
     updateDefaults,
     userDefaultsData,
     setUserDefaultsData,
-    systemChecks
+    systemChecks,
+    exportFormat
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

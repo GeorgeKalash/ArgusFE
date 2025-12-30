@@ -22,11 +22,8 @@ const ReportGenerator = ({
   reportSize = 3
 }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
-  const { getAllKvsByDataset } = useContext(CommonContext)
+  const { platformLabels, exportFormat } = useContext(ControlContext)
   const { stack } = useWindow()
-
-  const [exportFormats, setExportFormats] = useState([])
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({
     selectedFormat: '',
@@ -34,25 +31,21 @@ const ReportGenerator = ({
   })
 
   const getExportFormats = async () => {
-    await getAllKvsByDataset({
-      _dataset: DataSets.EXPORT_FORMAT,
-      callback: res => {
-        if (res.length > 0) {
-          setExportFormats(res)
-          setFormatIndex(0)
-          setReport(prev => ({
-            ...prev,
-            selectedFormat: res[0]
-          }))
-        }
-      }
-    })
+    if (!exportFormat.length) return
+    setFormatIndex(0)
+    setReport(prev => ({
+      ...prev,
+      selectedFormat: exportFormat[0]
+    }))
   }
+
+  useEffect(() => {
+    getExportFormats()
+  }, [exportFormat])
 
   useEffect(() => {
     const fetchReportLayout = async () => {
       if (previewReport) {
-        await getExportFormats()
         await getReportLayout(setReport)
       }
     }
@@ -70,11 +63,11 @@ const ReportGenerator = ({
   }, [reportStore])
 
   const cycleFormat = () => {
-    const nextIndex = (formatIndex + 1) % exportFormats.length
+    const nextIndex = (formatIndex + 1) % exportFormat.length
     setFormatIndex(nextIndex)
     setReport(prev => ({
       ...prev,
-      selectedFormat: exportFormats[nextIndex]
+      selectedFormat: exportFormat[nextIndex]
     }))
   }
 

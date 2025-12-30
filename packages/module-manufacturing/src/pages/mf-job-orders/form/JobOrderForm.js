@@ -343,8 +343,6 @@ export default function JobOrderForm({
       props: {
         labels,
         maxAccess,
-        recordId: formik.values.recordId,
-        itemId: formik.values.itemId,
         api: ManufacturingRepository.MFSerial.qry,
         parameters: `_jobId=${recordId}`
       }

@@ -5,13 +5,15 @@ export const SystemRepository = {
   getLabels: service + 'qryLBL',
   KeyValueStore: service + 'qryKVS',
   ParameterDefinition: service + 'qryRP',
-  ReportLayout: service + 'qryRL',
+  ReportLayout: {
+    qry: service + 'qryRL',
+    get: service + 'getPackRL'
+  },
   DynamicDashboard: {
     qry: service + 'qryUDB',
     set2: service + 'set2UDB'
   },
   ReportLayoutObject: {
-    qry: service + 'qryRLO',
     set2: service + 'set2RLO'
   },
   ReportTemplate: {
