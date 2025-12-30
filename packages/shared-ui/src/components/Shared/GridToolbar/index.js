@@ -152,9 +152,9 @@ const GridToolbar = ({
           />
         )}
 
-        <Grid item xs={3}>
+        {rightSection && <Grid item xs={3}>
           {rightSection}
-        </Grid>
+        </Grid>}
       </Grid>
 
       {bottomSection}
