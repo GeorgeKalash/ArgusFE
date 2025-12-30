@@ -151,26 +151,39 @@ export default function DraftTransfer({ labels, access, recordId }) {
   })
 
   async function refetchForm(recordId) {
-    const diHeader = await getDraftTransfer(recordId)
-    const diItems = await getDraftTransferItems(recordId)
-    await fillForm(diHeader, diItems)
+    const pack = await getDraftTransferPack(recordId)
+    await fillDraftTransferFromPack(pack)
   }
 
-  async function getDraftTransfer(diId) {
+  async function getDraftTransferPack(recordId) {
+    if (!recordId) return null
+
     const res = await getRequest({
-      extension: InventoryRepository.DraftTransfer.get,
-      parameters: `_recordId=${diId}`
+      extension: InventoryRepository.DraftTransfer.get2,
+      parameters: `_recordId=${recordId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
+    if (res?.record?.header?.date) {
+      res.record.header.date = formatDateFromApi(res.record.header.date)
+    }
 
-    return res
+    return res?.record || null
   }
 
-  async function getDraftTransferItems(diId) {
-    return await getRequest({
-      extension: InventoryRepository.DraftTransferSerial.qry,
-      parameters: `_draftTransferId=${diId}`
+  async function fillDraftTransferFromPack(pack) {
+    if (!pack) return
+
+    const { header, items } = pack
+
+    const serials = (items || []).map((item, index) => ({
+      ...item,
+      id: index + 1
+    }))
+
+    formik.setValues({
+      ...formik.values,
+      ...header,
+      serials: serials.length ? serials : formik.initialValues.serials
     })
   }
 
@@ -239,18 +252,17 @@ export default function DraftTransfer({ labels, access, recordId }) {
       record: JSON.stringify(DraftTransferPack)
     })
 
-    const diHeader = await getDraftTransfer(diRes.recordId)
+    const diHeader = await getDraftTransferPack(diRes?.recordId)
     formik.setFieldValue('recordId', diRes.recordId)
-    formik.setFieldValue('reference', diHeader?.record?.reference)
-    formik.setFieldValue('date', diHeader?.record?.date)
+    formik.setFieldValue('reference', diHeader?.record?.header?.reference)
+    formik.setFieldValue('date', diHeader?.record?.header?.date)
 
-    const success = await autoSave(diHeader?.record, lastLine)
+    const success = await autoSave(diHeader?.header, lastLine)
 
     if (success) {
       toast.success(platformLabels.Saved)
 
-      const diItems = await getDraftTransferItems(diRes.recordId)
-      await fillForm(diHeader, diItems)
+      await refetchForm(diRes.recordId)
 
       return true
     } else {
@@ -394,7 +406,9 @@ export default function DraftTransfer({ labels, access, recordId }) {
         header: {
           draftId: formik?.values?.recordId
         },
-        onCloseimport: fillGrids,
+        onCloseimport: async () => {
+          await refetchForm(formik.values.recordId)
+        },
         maxAccess: maxAccess
       }
     })
@@ -469,26 +483,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
       disabled: !isPosted
     }
   ]
-
-  async function fillGrids() {
-    const diHeader = await getDraftTransfer(formik?.values?.recordId)
-    const diItems = await getDraftTransferItems(formik?.values?.recordId)
-
-    const modifiedList = await Promise.all(
-      diItems.list?.map(async (item, index) => {
-        return {
-          ...item,
-          id: index + 1
-        }
-      })
-    )
-
-    formik.setValues({
-      ...formik.values,
-      ...diHeader.record,
-      serials: modifiedList.length ? modifiedList : formik?.initialValues?.serials
-    })
-  }
 
   async function fillForm(diHeader, diItems) {
     const modifiedList = await Promise.all(
@@ -632,7 +626,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
+                    endpointId={InventoryRepository.DraftTransfer.pack}
+                    reducer={response => response?.record?.documentTypes}
                     parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DraftTransfer}`}
                     name='dtId'
                     label={labels.documentType}
@@ -654,7 +649,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
+                    endpointId={InventoryRepository.DraftTransfer.pack}
+                    reducer={response => response?.record?.sites}
                     name='fromSiteId'
                     readOnly={isPosted || formik?.values?.serials?.some(serial => serial.srlNo)}
                     label={labels.fromSite}
@@ -694,7 +690,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
+                    endpointId={InventoryRepository.DraftTransfer.pack}
+                    reducer={response => response?.record?.sites}
                     name='toSiteId'
                     readOnly={isPosted}
                     label={labels.toSite}
@@ -738,7 +735,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
 
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={AccessControlRepository.NotificationGroup.qry}
+                    endpointId={InventoryRepository.DraftTransfer.pack}
+                    reducer={response => response?.record?.notificationGroups}
                     parameters='filter='
                     name='notificationGroupId'
                     label={labels.notificationGroup}
@@ -759,7 +757,8 @@ export default function DraftTransfer({ labels, access, recordId }) {
                 </Grid>
                 <Grid item xs={6}>
                   <ResourceComboBox
-                    endpointId={LogisticsRepository.LoCarrier.qry}
+                    endpointId={InventoryRepository.DraftTransfer.pack}
+                    reducer={response => response?.record?.carriers}
                     name='carrierId'
                     label={labels.carrier}
                     values={formik.values}
@@ -816,59 +815,57 @@ export default function DraftTransfer({ labels, access, recordId }) {
             autoDelete={autoDelete}
             onValidationRequired={onValidationRequired}
           />
-          <Grid container spacing={16}>
-            <Grid item xs={8}>
-              <Grid container>
-                <Grid item xs={12} height={190} sx={{ display: 'flex', flex: 1 }}>
-                  <Table
-                    name='metal'
-                    gridData={{ count: 1, list: formik?.values?.metalGridData }}
-                    maxAccess={access}
-                    columns={[
-                      { field: 'metal', headerName: labels.metal, flex: 1 },
-                      { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                      { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
-                    ]}
-                    rowId={['metal']}
-                    pagination={false}
-                  />
-                </Grid>
-                <Grid item xs={12} height={190} sx={{ display: 'flex', flex: 1 }}>
-                  <Table
-                    name='item'
-                    columns={[
-                      { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
-                      { field: 'sku', headerName: labels.sku, flex: 1 },
-                      { field: 'itemName', headerName: labels.itemName, flex: 2 },
-                      { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
-                      { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
-                    ]}
-                    gridData={{ count: 1, list: formik?.values?.itemGridData }}
-                    rowId={['sku']}
-                    maxAccess={access}
-                    pagination={false}
-                  />
-                </Grid>
+        </Grow>
+        <Grid container spacing={2}>
+          <Grid item xs={8}>
+              <Grid item xs={12} height={130} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  name='metal'
+                  gridData={{ count: 1, list: formik?.values?.metalGridData }}
+                  maxAccess={access}
+                  columns={[
+                    { field: 'metal', headerName: labels.metal, flex: 1 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'totalWeight', headerName: labels.totalWeight, type: 'number', flex: 1 }
+                  ]}
+                  rowId={['metal']}
+                  pagination={false}
+                />
               </Grid>
+              <Grid item xs={12} height={130} sx={{ display: 'flex', flex: 1 }}>
+                <Table
+                  name='item'
+                  columns={[
+                    { field: 'seqNo', headerName: labels.seqNo, type: 'number', flex: 1 },
+                    { field: 'sku', headerName: labels.sku, flex: 1 },
+                    { field: 'itemName', headerName: labels.itemName, flex: 2 },
+                    { field: 'pcs', headerName: labels.pcs, type: 'number', flex: 1 },
+                    { field: 'weight', headerName: labels.weight, type: 'number', flex: 1 }
+                  ]}
+                  gridData={{ count: 1, list: formik?.values?.itemGridData }}
+                  rowId={['sku']}
+                  maxAccess={access}
+                  pagination={false}
+                />
             </Grid>
-            <Grid item xs={4}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='totalWeight'
-                    maxAccess={maxAccess}
-                    label={labels.totalWeight}
-                    value={totalWeight}
-                    readOnly
-                  />
-                </Grid>
+          </Grid>
+          <Grid item xs={4}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}></Grid>
+              <Grid item xs={12}></Grid>
+              <Grid item xs={12}></Grid>
+              <Grid item xs={12}>
+                <CustomNumberField
+                  name='totalWeight'
+                  maxAccess={maxAccess}
+                  label={labels.totalWeight}
+                  value={totalWeight}
+                  readOnly
+                />
               </Grid>
             </Grid>
           </Grid>
-        </Grow>
+        </Grid>
       </VertLayout>
     </FormShell>
   )
