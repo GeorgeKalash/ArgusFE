@@ -132,7 +132,7 @@ const ReportGenerator = ({
         <CustomButton
           onClick={cycleFormat}
           image={`${report.selectedFormat?.value || 'PDF'}.png`}
-          disabled={exportFormats.length === 0 || !report.selectedReport}
+          disabled={exportFormat.length == 0 || !report.selectedReport}
         />
 
         <CustomButton

@@ -5,11 +5,9 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import RPBGridToolbar from './RPBGridToolbar'
-import ResourceComboBox from './ResourceComboBox'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
@@ -155,7 +153,7 @@ const ReportViewer = ({ resourceId }) => {
                 <CustomButton
                   onClick={cycleFormat}
                   image={`${report.selectedFormat?.value || 'PDF'}.png`}
-                  disabled={exportFormats.length === 0 || !report.selectedReport}
+                  disabled={exportFormat.length == 0 || !report.selectedReport}
                 />
               </Grid>
             </Grid>
