@@ -1,4 +1,3 @@
-
 import { useState, Fragment } from 'react'
 import { useRouter } from 'next/router'
 import Box from '@mui/material/Box'
@@ -24,7 +23,7 @@ const UserDropdown = props => {
   const [anchorEl, setAnchorEl] = useState(null)
   const router = useRouter()
   const auth = useAuth()
-  const { logout } = useAuth()
+  const { logout, companyName } = useAuth()
   const { direction } = settings
 
   const handleDropdownOpen = event => {
@@ -48,13 +47,13 @@ const UserDropdown = props => {
       <Badge
         overlap='circular'
         onClick={handleDropdownOpen}
-        sx={{ml: 2, cursor: 'pointer' }}
+        sx={{ ml: 2, cursor: 'pointer' }}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
         }}
       >
-        <Icon icon='mdi-account-circle' color='white' fontSize='1.8rem'/>
+        <Icon icon='mdi-account-circle' color='white' fontSize='1.8rem' />
       </Badge>
       <Menu
         anchorEl={anchorEl}
@@ -67,6 +66,17 @@ const UserDropdown = props => {
         <Box sx={{ pt: 2, pb: 3, px: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', ml: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
+              <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4 }}>{companyName}</Typography>
+
+              <Divider
+                sx={{
+                  width: '100%',
+                  my: 1,
+                  borderColor: '#383838',
+                  opacity: 0.6
+                }}
+              />
+
               <Typography sx={{ color: '#383838', fontWeight: 600, pr: 4 }}>{auth?.user?.username}</Typography>
               {/* <Typography variant='body2' sx={{ color: '#383838', fontSize: '0.8rem' }}>
                 {auth?.user?.role}

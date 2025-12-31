@@ -168,7 +168,11 @@ const CustomTextField = ({
                 tabIndex={-1}
                 id={props.ClearId}
                 edge='end'
-                onMouseDown={e => e.preventDefault()}
+                onMouseDown={e => {
+                  e.preventDefault()
+                  setIsFocused(false)
+                  }
+                }
                 onClick={e => {
                   onClear(e)
                   setFocus(true)
