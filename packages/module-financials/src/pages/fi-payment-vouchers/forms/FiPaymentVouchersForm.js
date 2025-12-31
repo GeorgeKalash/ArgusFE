@@ -717,13 +717,11 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
+                allowClear={false}
+                onChange={(_, newValue) => {
                   let notes = formik.values.notes
-                  notes += newValue?.name && formik.values.notes && '\n'
-                  notes += newValue?.name
-
-                  notes && formik.setFieldValue('notes', notes)
-                  newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
+                  if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
+                  formik.setFieldValue('templateId', newValue ? newValue?.recordId : '')
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}

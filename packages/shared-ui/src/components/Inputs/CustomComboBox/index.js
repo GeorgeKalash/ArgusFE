@@ -54,7 +54,6 @@ const CustomComboBox = ({
     hidden,
     disabled
   )
-
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
   const { platformLabels } = useContext(ControlContext)
