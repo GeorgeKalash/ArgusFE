@@ -115,6 +115,7 @@ export const FinancialRepository = {
     qry: service + 'qryTRX'
   },
   ReceiptVouchers: {
+    pack: service + 'getPackRV',
     qry: service + 'qryRV',
     get: service + 'getRV',
     set: service + 'setRV',
@@ -145,6 +146,7 @@ export const FinancialRepository = {
     del: service + 'delDI'
   },
   PaymentVouchers: {
+    pack: service + 'getPackPV',
     qry: service + 'qryPV',
     page: service + 'pagePV',
     page2: service + 'pagePV2',
