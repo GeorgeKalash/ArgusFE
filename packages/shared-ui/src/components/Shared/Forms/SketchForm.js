@@ -241,7 +241,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField={['reference', 'name']}
                     readOnly={editMode}
                     values={formik?.values}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
                       if (!newValue?.recordId) {
@@ -273,7 +273,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField='value'
                     required
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('source', newValue?.key || null)
                     }}
                     readOnly={isPosted || isClosed}
@@ -297,7 +297,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     readOnly={isClosed}
                     maxAccess={maxAccess}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
                     error={formik.touched.designerId && Boolean(formik.errors.designerId)}
@@ -326,7 +326,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField='name'
                     values={formik.values}
                     readOnly={isPosted || isClosed}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('designGroupId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.designGroupId && Boolean(formik?.errors?.designGroupId)}
@@ -354,7 +354,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     valueField='recordId'
                     displayField={['reference']}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('metalId', newValue?.recordId || null)
                       formik.setFieldValue('metalPurity', newValue?.purity || null)
                     }}
@@ -380,7 +380,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     ]}
                     readOnly={isPosted || isClosed}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('itemGroupId', newValue?.recordId || null)
                     }}
                     error={formik.touched.itemGroupId && formik.errors.itemGroupId}
@@ -396,7 +396,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField='name'
                     maxAccess={maxAccess}
                     readOnly={isPosted || isClosed}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('productionClassId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionClassId && Boolean(formik.errors.productionClassId)}
@@ -412,7 +412,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField='reference'
                     maxAccess={maxAccess}
                     readOnly={isPosted || isClosed}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('productionStandardId', newValue?.recordId || null)
                     }}
                     error={formik.touched.productionStandardId && Boolean(formik.errors.productionStandardId)}
@@ -432,7 +432,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     maxAccess={maxAccess}
                     readOnly={isPosted || isClosed}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('collectionId', newValue?.recordId || null)
                     }}
                     error={formik.touched.collectionId && Boolean(formik.errors.collectionId)}
@@ -448,8 +448,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     resourceId={ResourceIds.Sketch}
                     seqNo={0}
                     recordId={recordId}
-                    width={250}
-                    height={'auto'}
+                    height={250}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -463,7 +462,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     required
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('productionLineId', newValue?.recordId || null)
                     }}
                     readOnly

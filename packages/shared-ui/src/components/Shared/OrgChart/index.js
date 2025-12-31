@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
+import styles from '@argus/shared-ui/src/components/Shared/OrgChart/OrgChart.module.css'
 
-const OrgChart = ({ data, allowCollapse = false }) => {
+
+const index = ({ data, allowCollapse = false }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const OrgChart = ({ data, allowCollapse = false }) => {
     loadGoogleCharts();
   }, [data]);
 
-  return <div ref={chartRef}></div>;
+  return <div ref={chartRef} className={styles.orgChartRoot}></div>;
 };
 
-export default OrgChart;
+export default index;

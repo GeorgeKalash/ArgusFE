@@ -67,6 +67,7 @@ const getChartOptions = (label, type, canvas) => {
   const tooltipBg = getCssVar(canvas, '--chart-tooltip-bg')
   const tooltipTitleColor = getCssVar(canvas, '--chart-tooltip-title-color')
   const tooltipBodyColor = getCssVar(canvas, '--chart-tooltip-body-color')
+  const titleSize = parseFloat(getCssVar(canvas, '--chart-title-size', 16))
 
   const baseOptions = {
     responsive: true,
@@ -81,7 +82,7 @@ const getChartOptions = (label, type, canvas) => {
         display: true,
         text: label,
         font: {
-          size: 20,
+          size: titleSize,
           weight: 'bold'
         },
         color: titleColor

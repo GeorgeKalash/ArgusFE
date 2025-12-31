@@ -111,6 +111,21 @@
   }
 }
 
+@media (min-width: 1441px) and (max-width: 1599px) {
+  .circleIcon {
+    width: 88px;
+    font-size: 16px;
+  }
+
+  .span.big {
+    font-size: 16px;
+  }
+
+  .span.small {
+    font-size: 13px;
+  }
+}
+
 @media (min-width: 1600px) {
   .circleIcon {
     width: 100px;

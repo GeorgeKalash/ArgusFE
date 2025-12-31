@@ -53,6 +53,7 @@ const Window = React.memo(
     expandable = true,
     closable = true,
     refresh = true,
+    minimizable = true,
     Title,
     nextToTitle,
     onSave,
@@ -210,9 +211,11 @@ const Window = React.memo(
                   </Typography>
 
                   <Box>
-                    <IconButton className={`${styles.iconButton} no-drag`} onClick={handleMinimizeToggle}>
-                      <MinimizeIcon />
-                    </IconButton>
+                    {minimizable && (
+                      <IconButton className={`${styles.iconButton} no-drag`} onClick={handleMinimizeToggle}>
+                        <MinimizeIcon />
+                      </IconButton>
+                    )}
 
                     {refresh && !minimized && (
                       <IconButton className={`${styles.iconButton} no-drag`} onClick={props?.onRefresh}>
