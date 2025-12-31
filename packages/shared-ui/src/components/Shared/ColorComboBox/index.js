@@ -56,8 +56,7 @@ export default function index({ colors, ...rest }) {
       renderOption={(props, option, { selected }) => (
         <li {...props} style={{ padding: 0, margin: 0 }}>
           <Box
-          className={styles.dropdown}
-  
+          className={`${styles.dropdown} ${selected ? styles.dropdownSelected : ''}` }
           >
             <Box
              className={styles.dropdownBox}
@@ -69,25 +68,13 @@ export default function index({ colors, ...rest }) {
         </li>
       )}
       ListboxProps={{
-        sx: {
-          display: 'flex',
-          flexWrap: 'wrap',
-          flexDirection: 'row',
-          gap: 1,
-          p: 0.5
-        }
+        className: styles.listbox
       }}
       startAdornment={
         rest?.value ? (
           <Box
-            sx={{
-              width: 20,
-              height: 20,
-              borderRadius: '4px',
-              backgroundColor: rest?.value,
-              border: '1px solid #ccc',
-              marginRight: 1
-            }}
+          className={styles.colorBox}
+          style={{ '--box-color': rest?.value }}
           />
         ) : null
       }
