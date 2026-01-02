@@ -104,7 +104,7 @@ const SiteDashboard = () => {
           maxAccess={access}
           inputSearch={false}
           leftSection={
-            <Grid item sx={{ display: 'flex' }} xs={3}>
+            <Grid item sx={{ display: 'flex' }} xs={4}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Site.qry}
                 name='siteId'
@@ -126,9 +126,7 @@ const SiteDashboard = () => {
                 tooltipText={platformLabels.Preview}
                 onClick={() => formik.handleSubmit()}
                 style={{
-                  minWidth: 50,
-                  marginLeft: 8,
-                  height: 35,
+                  marginLeft: 2,
                   padding: 0
                 }}
               />

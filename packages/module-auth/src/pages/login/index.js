@@ -129,102 +129,101 @@ const LoginPage = () => {
     }
   }
 
-  return (
-      <>
-        <Box className={styles.contentCenter}>
-          <Box className={styles.loginCenter}>
-            <Card className={styles.loginCard}>
-              <Box
-                className={styles.loginCardHeader}
-                sx={{
-                  backgroundColor: theme.palette.primary.main
-                }}
-              >
-                <CardMedia
-                  component='img'
-                  image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
-                  alt='ArgusERP'
-                  sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
+ return (
+  <>
+    <Box className={styles.pageRoot}>
+      <Box className={styles.centerZone}>
+        <Card className={styles.loginCard}>
+          <Box
+            className={styles.loginCardHeader}
+            sx={{ backgroundColor: theme.palette.primary.main }}
+          >
+            <CardMedia
+              component='img'
+              image={require('@argus/shared-ui/src/components/images/logos/ArgusLogo.png').default.src}
+              alt='ArgusERP'
+              sx={{ height: '100%', maxWidth: '100%', objectFit: 'contain' }}
+            />
+          </Box>
+
+          <CardContent className={styles.cardContent} onKeyDown={handleKeyDown}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='companyName'
+                  size='small'
+                  fullWidth
+                  value={validation.values.companyName}
+                  label={platformLabels?.CompanyName}
+                  readOnly={!deployHost ? true : validCompanyName}
+                  allowClear={deployHost}
+                  onChange={validation.handleChange}
+                  onKeyDown={e => {
+                    if (e.key == 'Enter') e.target.blur()
+                  }}
+                  onBlur={
+                    deployHost
+                      ? e => {
+                          const value = e?.target?.value || ''
+                          setCompanyName(value)
+                        }
+                      : undefined
+                  }
+                  onClear={() => {
+                    setCompanyName('')
+                    validation.setFieldValue('companyName', '')
+                  }}
                 />
-              </Box>
-              <CardContent className={styles.cardContent} onKeyDown={handleKeyDown}>
-                <Grid container spacing={{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }}>
+              </Grid>
+
+              {validCompanyName && (
+                <>
                   <Grid item xs={12}>
                     <CustomTextField
-                      name='companyName'
-                      value={validation.values.companyName}
+                      name='username'
                       size='small'
                       fullWidth
-                      readOnly={!deployHost ? true : validCompanyName}
-                      allowClear={deployHost}
-                      label={platformLabels?.CompanyName}
+                      label={platformLabels?.Username}
+                      value={validation.values.username}
+                      type='text'
                       onChange={validation.handleChange}
-                      onKeyDown={e => {
-                        if (e.key == 'Enter') e.target.blur()
-                      }}
-                      onBlur={
-                        deployHost
-                          ? e => {
-                              const value = e?.target?.value || ''
-                              setCompanyName(value)
-                            }
-                          : undefined
-                      }
-                      onClear={() => {
-                        setCompanyName('')
-                        validation.setFieldValue('companyName', '')
-                      }}
+                      onClear={() => validation.setFieldValue('username', '')}
+                      error={validation.touched.username && Boolean(validation.errors.username)}
+                      helperText={validation.touched.username && validation.errors.username}
                     />
                   </Grid>
-                   {validCompanyName && (
-                      <>
-                        <Grid item xs={12}>
-                          <CustomTextField
-                            name='username'
-                            size='small'
-                            fullWidth
-                            label={platformLabels?.Username}
-                            value={validation.values.username}
-                            type='text'
-                            onChange={validation.handleChange}
-                            onClear={() => validation.setFieldValue('username', '')}
-                            error={validation.touched.username && Boolean(validation.errors.username)}
-                            helperText={validation.touched.username && validation.errors.username}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <CustomTextField
-                            name='password'
-                            size='small'
-                            fullWidth
-                            label={platformLabels?.password}
-                            type={showPassword ? 'text' : 'password'}
-                            value={validation.values.password}
-                            onChange={validation.handleChange}
-                            error={validation.touched.password && validation.errors.password}
-                            helperText={validation.touched.password && validation.errors.password}
-                            endIcons={[
-                              // eslint-disable-next-line react/jsx-key
-                              <Icon
-                                className={inputs.icon}
-                                icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
-                                onClick={() => setShowPassword(prev => !prev)}
-                                onMouseDown={e => e.preventDefault()}
-                              />
-                            ]}
-                          />
-                        </Grid>
-                      </>
-                    )}
-                </Grid>
-                <Box>
-                  {validCompanyName &&
-                    <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
-                      {platformLabels?.ForgotPass}
-                    </LinkStyled>
-                  }
-              </Box>
-              {validCompanyName && (
+
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='password'
+                      size='small'
+                      fullWidth
+                      label={platformLabels?.password}
+                      type={showPassword ? 'text' : 'password'}
+                      value={validation.values.password}
+                      onChange={validation.handleChange}
+                      error={validation.touched.password && validation.errors.password}
+                      helperText={validation.touched.password && validation.errors.password}
+                      endIcons={[
+                        <Icon
+                          className={inputs.icon}
+                          icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'}
+                          onClick={() => setShowPassword(prev => !prev)}
+                          onMouseDown={e => e.preventDefault()}
+                        />
+                      ]}
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+
+            {validCompanyName && (
+              <>
+                <LinkStyled href='/forget-password/reset' className={styles.linksRow}>
+                  {platformLabels?.ForgotPass}
+                </LinkStyled>
+
                 <CustomButton
                   fullWidth
                   type='submit'
@@ -233,37 +232,38 @@ const LoginPage = () => {
                   disabled={!validCompanyName}
                   label={platformLabels?.Login}
                 />
-              )}
-              </CardContent>
-              </Card>
-            </Box>
-          <Box className={styles.languageRow}>
-            <Typography variant='body2' className={styles.offered}>
-              {platformLabels?.ArgusOfferedIn}
-            </Typography>
-            <Box className={styles.languageLinks}>
-              <LinkStyled href='/pages/auth/login-en' className={styles.language}>
-                English
-              </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' className={styles.language}>
-                Français
-              </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' className={styles.language}>
-                عربي
-              </LinkStyled>
-            </Box>
-          </Box>
-          <Box component='footer' className={styles.footer}>
-            © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+
+      <Box className={styles.middleZone}>
+        <Box className={styles.languageRow}>
+          <Typography variant='body2' className={styles.offered}>
+            {platformLabels?.ArgusOfferedIn}
+          </Typography>
+          <Box className={styles.languageLinks}>
+            <LinkStyled href='/pages/auth/login-en' className={styles.language}>English</LinkStyled>
+            <LinkStyled href='/pages/auth/login-fr' className={styles.language}>Français</LinkStyled>
+            <LinkStyled href='/pages/auth/login-ar' className={styles.language}>عربي</LinkStyled>
           </Box>
         </Box>
+      </Box>
 
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      </>
-  )
+      <Box className={styles.bottomZone}>
+        <Box component='footer' className={styles.footer}>
+          © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+        </Box>
+      </Box>
+    </Box>
+
+    <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+  </>
+)
+
 }
 
 LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>
 LoginPage.guestGuard = true
-
 export default LoginPage

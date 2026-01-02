@@ -868,6 +868,7 @@ const Table = ({
   }
 
   const hasImageColumn = props?.columns?.some(col => col.type === 'image')
+  const resolvedHeight = props?.height|| height || '100%'
 
   return (
     <VertLayout>
@@ -876,14 +877,13 @@ const Table = ({
           ref={gridRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={[
+         className={[
             'ag-theme-alpine',
             styles.agGridContainer,
-            hasImageColumn ? styles.hasImageRows : '',
-            !props.maxHeight && !props.height ? styles.agGridFlex : ''
+            !height && !props?.maxHeight ? styles.agGridFlex : ''
           ].join(' ')}
           sx={{
-            height: props?.height|| height || '100%',
+            height: resolvedHeight,
             maxHeight: props?.maxHeight || 'none',
             minHeight: 0
           }}
