@@ -1,7 +1,7 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -38,6 +38,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
   const [reCal, setReCal] = useState(false)
+  const taxDetailsCacheRef = useRef(null)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DraftSerialsIn,
@@ -112,8 +113,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         }
       ],
       metalGridData: [],
-      itemGridData: [],
-      taxDetailsStore: []
+      itemGridData: []
     },
     validateOnChange: true,
     validationSchema: yup.object({
@@ -139,7 +139,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
       )
     }),
     onSubmit: async obj => {
-      const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
+      const { itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, serials, date, ...rest } =
         obj
 
       const header = {
@@ -172,17 +172,26 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   })
 
+  async function loadTaxDetails() {
+    if (taxDetailsCacheRef.current) {
+      return taxDetailsCacheRef.current
+    }
+
+    const res = await getRequest({
+      extension: SaleRepository.DraftInvoice.pack,
+      parameters: ''
+    })
+
+    const taxDetails = res?.record?.taxDetails || []
+
+    taxDetailsCacheRef.current = taxDetails
+    return taxDetails
+  }
+
+
   async function refetchForm(recordId) {
     const pack = await getDraftInvoicePack(recordId)
     await fillDraftFromPack(pack)
-  }
-
-  async function fillTaxStore() {
-    const taxDet = await getRequest({
-      extension: SaleRepository.DraftInvoice.pack
-    })
-
-    formik.setFieldValue('taxDetailsStore', taxDet?.record?.taxDetails)
   }
 
   function getItemPriceRow(newRow, dirtyField) {
@@ -227,27 +236,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
   const editMode = !!formik.values.recordId
   const isClosed = formik.values.wip === 2
-
-  const assignStoreTaxDetails = serials => {
-    if (serials.length) {
-      const updatedSer = serials?.map(serial => {
-        return serial.taxId != null
-          ? {
-              ...serial,
-              extendedPrice: serial.unitPrice,
-              taxDetails: FilteredListByTaxId(formik?.values?.taxDetailsStore, serial.taxId)
-            }
-          : serial
-      })
-      formik.setFieldValue('serials', updatedSer)
-    }
-  }
-
-  const FilteredListByTaxId = (store, taxId) => {
-    if (!store?.data?.items) return []
-
-    return store.data.items.map(item => item.data).filter(obj => obj.taxId === taxId)
-  }
 
   const autoDelete = async row => {
     if (!row?.draftId || !row?.itemId) return true
@@ -316,7 +304,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     const serialsForCalc = [lastLine]
 
     const totals = calculateTotalsFromSerials(serialsForCalc)
-    const { taxDetailsStore, itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, date, ...rest } =
+    const { itemGridData, metalGridData, search, autoSrlNo, disSkuLookup, date, ...rest } =
       formik.values
 
     const DraftInvoicePack = {
@@ -356,7 +344,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     res.record.header.date = formatDateFromApi(res?.record?.header?.date)
     res.record.header.accountId = clientRes.record.accountId
 
-    return res?.record || null
+    return res?.record || {}
   }
 
 
@@ -408,8 +396,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
               ...(res?.record?.taxId && {
                 taxId: formik.values?.taxId || res?.record?.taxId,
-                taxDetails: await FilteredListByTaxId(
-                  formik?.values?.taxDetailsStore,
+                taxDetails: await getTaxDetails(
                   formik.values?.taxId || res?.record?.taxId
                 )
               })
@@ -423,8 +410,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
 
           if (lineObj.changes.taxId != null) {
             ;(lineObj.changes.extendedPrice = unitPrice),
-              (lineObj.changes.taxDetails = FilteredListByTaxId(
-                formik?.values?.taxDetailsStore,
+              (lineObj.changes.taxDetails = await getTaxDetails(
                 lineObj.changes.taxId
               ))
           }
@@ -591,7 +577,9 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         header: {
           draftId: formik?.values?.recordId
         },
-        onCloseimport: fillGrids,
+        onCloseimport: async () => {
+          await refetchForm(formik.values.recordId)
+        },
         maxAccess: maxAccess
       }
     })
@@ -641,7 +629,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   async function fillDraftFromPack(pack) {
     if (!pack) return
 
-    const { header, items } = pack
+    const { header = {}, items = [] } = pack
 
     const modifiedList = await Promise.all(
       (items || []).map(async (item, index) => {
@@ -665,32 +653,23 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     await formik.setValues({
       ...formik.values,
       ...header,
-      plId: defplId || formik.values.plId,
-      amount: header.amount,
-      vatAmount: header.vatAmount,
-      subtotal: header.subtotal,
-      weight: header.weight,
+      plId: defplId || formik?.values?.plId,
+      amount: header?.amount,
+      vatAmount: header?.vatAmount,
+      subtotal: header?.subtotal,
+      weight: header?.weight,
       serials: modifiedList.length
         ? modifiedList
-        : formik.initialValues.serials
+        : formik?.initialValues?.serials
     })
 
-    assignStoreTaxDetails(modifiedList)
-  }
-
-  async function fillGrids() {
-    const pack = await getDraftInvoicePack(formik?.values?.recordId)
-    await fillDraftFromPack(pack)
   }
 
   async function getTaxDetails(taxId) {
-    if (!taxId) return
+    if (!taxId) return []
 
-    const res = await getRequest({
-      extension: SaleRepository.DraftInvoice.pack
-    })
-
-    return res?.record?.taxDetails?.filter(td => td.taxId === taxId) || []
+    const taxDetails = taxDetailsCacheRef.current
+    return taxDetails.filter(td => td.taxId === taxId)
   }
 
   const filteredData = formik.values.search
@@ -796,7 +775,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           message: labels.noSelectedplId
         })
 
-      fillTaxStore()
+      loadTaxDetails()
 
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
@@ -842,7 +821,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
               <ResourceComboBox
                 endpointId={SaleRepository.DraftInvoice.pack}
                 reducer={response => response?.record?.documentTypes}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DraftSerialsIn}`}
                 name='dtId'
                 label={labels.documentType}
                 columnsInDropDown={[
