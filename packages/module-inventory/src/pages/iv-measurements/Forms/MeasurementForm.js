@@ -39,7 +39,7 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
     validationSchema: yup.object({
       reference: yup.string().required(),
       name: yup.string().required(),
-      decimals: yup.number().required()
+      decimals: yup.number().required().min(0).max(5)
     }),
     onSubmit: async obj => {
       const response = await postRequest({
@@ -50,7 +50,8 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
       if (!obj.recordId) {
         setStore(prevStore => ({
           ...prevStore,
-          recordId: response.recordId
+          recordId: response.recordId,
+          decimals: formik.values.decimals
         }))
         toast.success(platformLabels.Added)
         formik.setFieldValue('recordId', response.recordId)
@@ -69,6 +70,10 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
         })
 
         formik.setValues(res.record)
+        setStore(prevStore => ({
+          ...prevStore,
+          decimals: res.record.decimals
+        }))
       }
     })()
   }, [])
@@ -117,7 +122,6 @@ export default function MeasurementForm({ labels, maxAccess, setStore, store }) 
                 label={labels.decimals}
                 value={formik.values.decimals}
                 decimalScale={0}
-                maxLength={2}
                 required
                 allowNegative={false}
                 readOnly={editMode}
