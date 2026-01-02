@@ -98,7 +98,7 @@ const Window = React.memo(
       screenWidth <= 768 ? 180 :
       screenWidth <= 1024 ? 200 :
       screenWidth <= 1366 ? 220 :
-      screenWidth <= 1600 ? 240 : 240
+      screenWidth <= 1600 ? 240 : 300
 
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
