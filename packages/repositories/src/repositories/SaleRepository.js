@@ -139,7 +139,8 @@ export const SaleRepository = {
     del: service + 'delTR',
     post: service + 'postTR',
     unpost: service + 'unpostTRX',
-    snapshot: service + 'snapshotTR'
+    snapshot: service + 'snapshotTR',
+    pack: service + 'getPackTR'
   },
   SalesOrder: {
     qry: service + 'qryORD',
