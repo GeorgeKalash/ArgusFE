@@ -386,8 +386,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     resourceId={ResourceIds.Design}
                     seqNo={0}
                     recordId={formik?.values?.recordId}
-                    width={300}
-                    height={'auto'}
+                    height={250}
                   />
                 </Grid>
                 <Grid item xs={12}>

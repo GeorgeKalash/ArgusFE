@@ -680,8 +680,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                 resourceId={ResourceIds.ThreeDDesign}
                 seqNo={0}
                 recordId={recordId}
-                width={300}
-                height={'auto'}
+                height={250}
               />
             </Grid>
           </Grid>

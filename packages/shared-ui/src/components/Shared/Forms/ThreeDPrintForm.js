@@ -529,8 +529,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     resourceId={ResourceIds.Printing}
                     seqNo={0}
                     recordId={recordId}
-                    width={272}
-                    height={'auto'}
+                    height={250}
                   />
                 </Grid>
                 <Grid item xs={12}>
