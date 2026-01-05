@@ -7,13 +7,17 @@ import AddressMasterDataForm from '../forms/AddressMasterDataForm'
 import RelationList from '../forms/RelationList'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import RolesTab from '../forms/RolesTab'
+import SalesForm from '../forms/SalesForm'
+import PurchaseForm from '../forms/PurchaseForm'
+import BankTab from '../forms/BankTab'
 
 const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    category: null
+    category: null,
+    bp: { ref: '', name: '' }
   })
   const [editMode, setEditMode] = useState(!!recordId)
 
@@ -22,7 +26,10 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
     { label: labels.idNumber, disabled: !editMode },
     { label: labels.relation, disabled: !editMode },
     { label: labels.address, disabled: !editMode },
-    { label: labels.role, disabled: !editMode }
+    { label: labels.role, disabled: !editMode },
+    { label: labels.sales, disabled: !editMode },
+    { label: labels.purchase, disabled: !editMode },
+    { label: labels.bank, disabled: !editMode }
   ]
 
   return (
@@ -48,6 +55,15 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
       </CustomTabPanel>
       <CustomTabPanel index={4} height={height} value={activeTab} maxAccess={maxAccess}>
         <RolesTab store={store} labels={labels} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel index={5} height={height} value={activeTab} maxAccess={maxAccess}>
+        <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel index={6} height={height} value={activeTab} maxAccess={maxAccess}>
+        <PurchaseForm store={store} labels={labels} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel index={7} height={height} value={activeTab} maxAccess={maxAccess}>
+        <BankTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </VertLayout>
   )

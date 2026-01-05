@@ -9,10 +9,10 @@
 }
 
 .timelineTitle {
-  margin: 0 0 8px;
-  text-align: center;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
+  margin-bottom: 5px;
+  color: #f0f0f0;
 }
 
 .timelineContainer {

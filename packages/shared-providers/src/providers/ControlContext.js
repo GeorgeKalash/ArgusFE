@@ -10,6 +10,7 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { debounce } from 'lodash'
 import { commonResourceIds } from '@argus/shared-domain/src/resources/commonResourceIds'
 import { useLabelsAccessContext } from './LabelsAccessContext'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const ControlContext = createContext()
 
@@ -20,6 +21,7 @@ const ControlProvider = ({ children }) => {
   const [defaultsData, setDefaultsData] = useState([])
   const [userDefaultsData, setUserDefaultsData] = useState([])
   const [systemChecks, setSystemChecks] = useState([])
+  const [exportFormat, setExportFormat] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
   const { labels, setLabels, access, setAccess, apiPlatformLabels, setApiPlatformLabels } = useLabelsAccessContext()
@@ -43,10 +45,11 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (userData != null) {
+    if (userData && user?.userId) {
       getDefaults(setDefaultsData)
       getUserDefaults(setUserDefaultsData)
       getSystemChecks(setSystemChecks)
+      getExportFormat()
     }
   }, [userData, user?.userId])
 
@@ -72,23 +75,30 @@ const ControlProvider = ({ children }) => {
   }, [countryId])
 
   const getDefaults = callback => {
-    var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+      parameters: `_filter=`
     }).then(res => {
       callback(res)
     })
   }
 
   const getSystemChecks = callback => {
-    const parameters = '_scope=1'
     getRequest({
       extension: SystemRepository.SystemChecks.qry,
-      parameters
+      parameters:`_scope=1`
     }).then(res => {
       callback(res.list)
     })
+  }
+
+  const getExportFormat = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: `_dataset=${DataSets.EXPORT_FORMAT}&_language=${languageId}`,
+      disableLoading: true
+    })
+    if (res?.list?.length) setExportFormat(res?.list || [])
   }
 
   const updateDefaults = data => {
@@ -106,10 +116,11 @@ const ControlProvider = ({ children }) => {
   }
 
   const getUserDefaults = callback => {
-    var parameters = '_userId=' + user?.userId
+    if(!user?.userId) return
+
     getRequest({
       extension: SystemRepository.UserDefaults.qry,
-      parameters: parameters
+      parameters: `_userId=` + user?.userId
     }).then(res => {
       callback(res)
     })
@@ -208,7 +219,8 @@ const ControlProvider = ({ children }) => {
     updateDefaults,
     userDefaultsData,
     setUserDefaultsData,
-    systemChecks
+    systemChecks,
+    exportFormat
   }
 
   return <ControlContext.Provider value={values}>{children}</ControlContext.Provider>

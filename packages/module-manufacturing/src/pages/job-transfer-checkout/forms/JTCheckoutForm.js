@@ -622,7 +622,10 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12} height={62}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
+                <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'

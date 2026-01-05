@@ -95,12 +95,26 @@ const CustomLookup = ({
           size={size}
           options={store}
           PopperComponent={PopperComponent}
-
-          /* 🔑 THIS IS THE IMPORTANT PART */
           slotProps={{
             popper: { className: dropdownStyles.dropdownPopper }
           }}
-
+          noOptionsText={
+              <div className={dropdownStyles.dropdownNoOptionsRow}>
+                {columnsInDropDown?.length > 0 ? (
+                  columnsInDropDown.map((col, i) => (
+                    <div
+                      key={i}
+                      className={dropdownStyles.dropdownNoOptionsCell}
+                      style={{ width: `${(col.grid ?? 2) / columnsInDropDown.reduce((s, c) => s + (c.grid ?? 2), 0) * 100}%` }}
+                    >
+                      {i === 0 ? 'No options' : ''}
+                    </div>
+                  ))
+                ) : (
+                  <div className={dropdownStyles.dropdownNoOptionsSingle}>No options</div>
+                )}
+              </div>
+            }
           filterOptions={options => (displayField ? options.filter(option => option) : options)}
           getOptionLabel={option => {
             if (typeof valueField === 'object') {

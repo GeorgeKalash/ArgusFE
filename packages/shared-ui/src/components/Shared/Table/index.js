@@ -26,7 +26,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
-import { getFromDB, saveToDB, deleteRowDB } from '@argus/shared-domain/src/lib/indexDB'
+import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import styles from './Table.module.css'
 
 const Table = ({
@@ -820,7 +820,7 @@ const Table = ({
   }
 
   const onReset = async () => {
-    await deleteRowDB(storeName, tableName)
+    await deleteFromDB(storeName, tableName)
     invalidate()
   }
 
@@ -883,7 +883,7 @@ const Table = ({
             !props.maxHeight && !props.height ? styles.agGridFlex : ''
           ].join(' ')}
           sx={{
-            height: props?.height|| height || '100%',
+            height: props?.height || '100%',
             maxHeight: props?.maxHeight || 'none',
             minHeight: 0
           }}

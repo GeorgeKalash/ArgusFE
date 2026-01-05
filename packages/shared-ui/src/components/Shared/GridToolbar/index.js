@@ -44,7 +44,7 @@ const GridToolbar = ({
     setReportStore([])
 
     await getRequest({
-      extension: SystemRepository.ReportLayout,
+      extension: SystemRepository.ReportLayout.qry,
       parameters: `_resourceId=${previewReport}`
     }).then(res => {
       if (res?.list) {
@@ -152,9 +152,9 @@ const GridToolbar = ({
           />
         )}
 
-        <Grid item xs={3}>
+        {rightSection && <Grid item xs={3}>
           {rightSection}
-        </Grid>
+        </Grid>}
       </Grid>
 
       {bottomSection}

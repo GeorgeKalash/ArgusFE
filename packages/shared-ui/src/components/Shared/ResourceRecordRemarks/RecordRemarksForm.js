@@ -8,6 +8,7 @@ import { formatDateDefault, formatDateToApi } from '@argus/shared-domain/src/lib
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import styles from './ResourceRecordRemarks.module.css'
 
 const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterRef, labels, window }) => {
   const { postRequest } = useContext(RequestsContext)
@@ -52,18 +53,12 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
     <Box sx={{ px: 5 }}>
       {data?.userName && (
         <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'left', 
-            fontSize: 14
-          }}
-          fontSize={14}
+        className={styles.username}
         >
           <Box fontWeight='bold'>{data.userName}</Box> - <Box sx={{ mx: 1 }}>{formatDateDefault(data.eventDate)}</Box>
         </Box>
       )}
-      <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      <Box className={styles.textareaContent}>
         <CustomTextArea
           name='notes'
           label={labels.note}

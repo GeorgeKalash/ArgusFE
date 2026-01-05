@@ -12,7 +12,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
-import ColorComboBox from '@argus/shared-ui/src/components/Shared/ColorCombobox'
+import ColorComboBox from '@argus/shared-ui/src/components/Shared/ColorComboBox'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 
 export default function DayTypesForm({ labels, maxAccess, recordId, window }) {

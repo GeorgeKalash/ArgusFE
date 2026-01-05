@@ -88,16 +88,20 @@ const CustomComboBox = ({
       options={store}
       key={value}
       PopperComponent={PopperComponent}
-      PaperComponent={({ children }) => (
-        <Paper
-          style={{
-            minWidth: `${displayFieldWidth * 100}%`,
-            width: 'max-content'
-          }}
-        >
-          {children}
-        </Paper>
-      )}
+      {...(!props.renderOption
+        ? {
+            PaperComponent: ({ children }) => (
+              <Paper
+                style={{
+                  minWidth: `${displayFieldWidth * 100}%`,
+                  width: 'max-content',
+                }}
+              >
+                {children}
+              </Paper>
+            ),
+          }
+        : {})}
       getOptionLabel={(option, value) => {
         if (typeof displayField == 'object') {
           const text = displayField
@@ -244,8 +248,8 @@ const CustomComboBox = ({
                   <InputAdornment position='end' className={inputs.inputAdornment}>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <IconButton    className={inputs.iconButton}>
-                          <CircularProgress     color='inherit' size={17} />
+                        <IconButton className={inputs.iconButton}>
+                          <CircularProgress color='inherit' size={17} />
                         </IconButton>
                       ) : (
                         refresh &&
@@ -309,7 +313,7 @@ const CustomComboBox = ({
               startAdornment: value?.icon ? (
                 <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
               ) : (
-                props?.startAdornment || params.InputProps.startAdornment
+                props?.startAdornment || params.InputProps.startAdornment && <InputAdornment position='start' className={inputs.startAdornment}> { props?.startAdornment || params.InputProps.startAdornment} </InputAdornment> 
               ),
               endAdornment: mergedEndAdornment
             }}
@@ -317,7 +321,8 @@ const CustomComboBox = ({
               classes: {
                 root: inputs.inputLabel,
                 shrink: inputs.inputLabelShrink, 
-              }            }}
+              }
+            }}
           />
         )
       }}

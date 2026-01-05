@@ -46,6 +46,20 @@
   align-items: flex-start !important;
 }
 
+.dropdownNoOptionsRow {
+  display: flex;
+  align-items: flex-start;
+  padding: 5px 10px !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
+}
+
+.dropdownNoOptionsCell,
+.dropdownNoOptionsSingle {
+  display: flex;
+  align-items: flex-start;
+}
+
 @media (min-width: 1921px) {
   .dropdownHeaderRow,
   .dropdownOptionRow {
@@ -53,7 +67,8 @@
   }
 
   .dropdownHeaderCell,
-  .dropdownHeaderCellMain {
+  .dropdownHeaderCellMain,
+  .dropdownNoOptionsRow {
     font-size: 0.86rem !important;
   }
 
@@ -75,6 +90,10 @@
   .dropdownHeaderCellMain {
     font-size: 0.72rem !important;
   }
+  
+  .dropdownNoOptionsRow {
+    font-size: 0.87rem !important;
+  }
 
   .dropdownOptionCell,
   .dropdownOptionCellMain,
@@ -91,7 +110,8 @@
   }
 
   .dropdownHeaderCell,
-  .dropdownHeaderCellMain {
+  .dropdownHeaderCellMain,
+  .dropdownNoOptionsRow {
     font-size: 0.64rem !important;
   }
 
@@ -116,7 +136,8 @@
   }
 
   .dropdownHeaderCell,
-  .dropdownHeaderCellMain {
+  .dropdownHeaderCellMain,
+  .dropdownNoOptionsRow {
     font-size: 0.58rem !important;
   }
 

@@ -53,6 +53,7 @@ const Window = React.memo(
     expandable = true,
     closable = true,
     refresh = true,
+    minimizable = true,
     Title,
     nextToTitle,
     onSave,
@@ -97,7 +98,7 @@ const Window = React.memo(
       screenWidth <= 768 ? 180 :
       screenWidth <= 1024 ? 200 :
       screenWidth <= 1366 ? 220 :
-      screenWidth <= 1600 ? 240 : 240
+      screenWidth <= 1600 ? 240 : 300
 
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
@@ -210,9 +211,11 @@ const Window = React.memo(
                   </Typography>
 
                   <Box>
-                    <IconButton className={`${styles.iconButton} no-drag`} onClick={handleMinimizeToggle}>
-                      <MinimizeIcon />
-                    </IconButton>
+                    {minimizable && (
+                      <IconButton className={`${styles.iconButton} no-drag`} onClick={handleMinimizeToggle}>
+                        <MinimizeIcon />
+                      </IconButton>
+                    )}
 
                     {refresh && !minimized && (
                       <IconButton className={`${styles.iconButton} no-drag`} onClick={props?.onRefresh}>

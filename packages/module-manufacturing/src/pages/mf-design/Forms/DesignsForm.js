@@ -57,6 +57,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
       standardId: null,
       stdWeight: 0,
       designerId: null,
+      itemCategoryId: null,
       designerRef: '',
       designerName: '',
       isInactive: false
@@ -224,6 +225,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       formik.setFieldValue('itemId', newValue?.recordId || null)
                       formik.setFieldValue('itemName', newValue?.name || '')
                       formik.setFieldValue('sku', newValue?.sku || '')
+                      formik.setFieldValue('itemCategoryId', newValue?.categoryId || null)
                     }}
                     displayFieldWidth={2}
                     maxAccess={maxAccess}
@@ -249,6 +251,18 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                       formik.setFieldValue('lineId', newValue?.recordId || null)
                     }}
                     error={formik.touched.lineId && formik.errors.lineId}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={InventoryRepository.Category.qry}
+                    parameters='_name=&_pageSize=1000&_startAt=0'
+                    values={formik.values}
+                    name='itemCategoryId'
+                    label={labels.category}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    readOnly
                   />
                 </Grid>
 
@@ -386,8 +400,7 @@ export default function DesignsForm({ labels, access, store, setStore }) {
                     resourceId={ResourceIds.Design}
                     seqNo={0}
                     recordId={formik?.values?.recordId}
-                    width={300}
-                    height={'auto'}
+                    height={250}
                   />
                 </Grid>
                 <Grid item xs={12}>

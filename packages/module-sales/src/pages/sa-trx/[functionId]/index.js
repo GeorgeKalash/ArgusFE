@@ -98,7 +98,8 @@ const SaTrx = () => {
     {
       field: 'qty',
       headerName: labels.qty,
-      flex: 1
+      flex: 1,
+      type: 'number'
     },
     {
       field: 'volume',

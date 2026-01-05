@@ -70,7 +70,7 @@ export default function Form({ children, isParentWindow = true, isSaved = true, 
             ? { p: '0 !important' }
             : {
                 '& .MuiBox-root': {
-                  pt: `${isParentWindow ? 7 : 2}px !important`,
+                  pt: `${isParentWindow ? 7 : 3}px !important`,
                   px: '0 !important',
                   pb: '0 !important'
                 }

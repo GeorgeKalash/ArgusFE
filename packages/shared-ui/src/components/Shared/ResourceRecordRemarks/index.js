@@ -12,6 +12,7 @@ import RecordRemarksForm from './RecordRemarksForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import styles from './ResourceRecordRemarks.module.css'
 
 const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -84,7 +85,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
   }
 
   return (
-    <Box>
+    <>
       <RecordRemarksForm
         userId={userId}
         resourceId={resourceId}
@@ -93,28 +94,29 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
         maxAccess={access}
         seqNo={data?.list?.length + 1}
       />
-      <Grid sx={{ p: 5 }}>
-        <TableContainer sx={{ height: `${expanded ? `calc(100vh - 300px)` : '250px'}`, pt: 2, px: 5 }}>
+      <Grid  className={styles.container}>
+        <TableContainer   className={`${styles.TableContainer} ${expanded ? styles.expanded : styles.collapsed}`}  >
           <Table>
             <TableBody>
               {data?.list?.map((row, index) => (
                 <TableRow
                   key={index}
+                  className={styles.tableRow}
                   sx={{
                     '&:last-child td, &:last-child th': { border: 0 },
                     background: ((index + 1) % 2 !== 0 || !(index + 1)) && '#EEEEEE'
                   }}
                 >
                   <TableCell component='th' scope='row' width={'900'}>
-                    <Box sx={{ display: 'flex', flexDirection: 'row' }} fontSize={14}>
+                    <Box className={styles.row}>
                       <Box fontWeight='bold'>{row.userName}</Box> - <Box sx={{ mx: 1 }}>{date(row.eventDate)}</Box>
                     </Box>
-                    {row.notes}
+                    <Box className={styles.text}>{row.notes}</Box>
                   </TableCell>
                   <TableCell align='right'>
-                    <Box sx={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
+                    <Box  className={styles.flexStart} >
                       <IconButton size='small'>
-                        <Icon icon='mdi:application-edit-outline' fontSize={18} onClick={() => onEdit(row)} />
+                        <Icon icon='mdi:application-edit-outline' className={styles.icon}  onClick={() => onEdit(row)} />
                       </IconButton>
 
                       {row.userId === userId && (
@@ -125,7 +127,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                           }}
                           color='error'
                         >
-                          <Icon icon='mdi:delete-forever' fontSize={18} />
+                          <Icon icon='mdi:delete-forever'  className={styles.icon}  />
                         </IconButton>
                       )}
                     </Box>
@@ -136,7 +138,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
           </Table>
         </TableContainer>
       </Grid>
-    </Box>
+    </>
   )
 }
 

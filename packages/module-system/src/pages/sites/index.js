@@ -44,8 +44,6 @@ const Sites = () => {
     query: { data },
     labels,
     access,
-    search,
-    clear,
     filterBy,
     refetch,
     paginationParameters
@@ -140,12 +138,8 @@ const Sites = () => {
         <RPBGridToolbar
           onAdd={add}
           maxAccess={access}
-          onSearch={search}
-          onSearchClear={clear}
           reportName={'IVSI'}
           filterBy={filterBy}
-          labels={labels}
-          inputSearch={true}
           previewReport={ResourceIds.Sites}
         />
       </Fixed>
