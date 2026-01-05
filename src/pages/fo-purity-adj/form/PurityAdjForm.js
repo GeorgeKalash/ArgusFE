@@ -10,7 +10,6 @@ import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
@@ -22,14 +21,14 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { DataGrid } from 'src/components/Shared/DataGrid'
 import { FoundryRepository } from 'src/repositories/FoundryRepository'
-import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { createConditionalSchema } from 'src/lib/validation'
 
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const [allMetals, setAllMetals] = useState([])
+  const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
   const functionId = SystemFunction.PurityAdjustment
 
@@ -41,11 +40,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   })
 
   const invalidate = useInvalidate({
-    endpointId: FoundryRepository.FoundaryTransaction.page
+    endpointId: FoundryRepository.PurityAdjustment.page
   })
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const baseSalesMetalId = parseInt(defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
 
   const conditions = {
     sku: row => row?.sku,
@@ -72,6 +72,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         status: 1,
         workCenterId: null,
         qty: 0,
+        baseSalesMetalPurity: 0,
+        baseSalesMetalRef: '',
         notes: ''
       },
       items: [
@@ -104,7 +106,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       const payload = getPayload(obj)
 
       const response = await postRequest({
-        extension: FoundryRepository.FoundaryTransaction.set2,
+        extension: FoundryRepository.PurityAdjustment.set2,
         record: JSON.stringify(payload)
       })
       toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
@@ -115,7 +117,17 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date), qty: totalMetal },
+      header: {
+        ...obj.header,
+        date: formatDateToApi(obj.header.date),
+        sumQty: totalMetal,
+        sumDeltaPurity: totalDiffPurity,
+        sumDeltaRMQty: totalDiffQty,
+        sumNewRMQty: totalRmNewQty,
+        sumRMQty: totalRmQty,
+        avgPurity,
+        avgNewPuirty: avgStdPurity
+      },
       items: (obj?.items || [])
         .filter(row => Object.values(requiredFields)?.every(fn => fn(row)))
         .map((item, index) => ({
@@ -124,23 +136,36 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           trxId: obj?.recordId || 0,
           seqNo: index + 1,
           purity: item.purity / 1000
-        })),
-      scraps: []
+        }))
     }
   }
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
-  const calculateTotal = key =>
-    formik.values.items.reduce((sum, item) => {
+const calculateTotal = key =>
+  formik.values.items
+    .reduce((sum, item) => {
       return sum + (parseFloat(item[key]) || 0)
     }, 0)
+    .toFixed(2)
 
-  const totalMetal = calculateTotal('qty')
+  const totalMetal = recalc ? calculateTotal('qty') : formik.values?.header?.sumQty
+  const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
+  const totalRmNewQty = recalc ? calculateTotal('newRmQty') : formik.values?.header?.sumNewRMQty
+  const totalDiffQty = recalc ? calculateTotal('deltaRMQty') : formik.values?.header?.sumDeltaRMQty
+
+  const avgPurity = recalc
+    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)).toFixed(2)
+    : formik.values?.header?.avgPurity
+
+  const avgStdPurity = recalc
+    ? (((totalRmNewQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (totalMetal || 0)).toFixed(2)
+    : formik.values?.header?.avgNewPuirty
+  const totalDiffPurity = recalc ? ((avgStdPurity || 0) - (avgPurity || 0)).toFixed(2) : formik.values?.header?.sumDeltaPurity
 
   const onPost = async () => {
     await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.post,
+      extension: FoundryRepository.PurityAdjustment.post,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -151,7 +176,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   const onUnpost = async () => {
     const res = await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.unpost,
+      extension: FoundryRepository.PurityAdjustment.unpost,
       record: JSON.stringify({ ...formik.values?.header, date: formatDateToApi(formik.values.header.date) })
     })
 
@@ -178,7 +203,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
   async function refetchForm(recordId) {
     const { record } = await getRequest({
-      extension: FoundryRepository.FoundaryTransaction.get2,
+      extension: FoundryRepository.PurityAdjustment.get2,
       parameters: `_recordId=${recordId}`
     })
 
@@ -191,34 +216,44 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     const itemsList = (record?.items || []).map((item, index) => ({
       ...item,
       id: index + 1,
-      purity: item.purity * 1000,
-      diffPurity: (item?.purity || 0) * 1000 - (item?.stdPurity || 0)
+      purity: item.purity * 1000
     }))
+
+    const metalInfo = await getBaseSalesMetalPurity()
 
     formik.setValues({
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
-        date: formatDateFromApi(record?.header?.date)
+        date: formatDateFromApi(record?.header?.date),
+        baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
+        baseSalesMetalRef: metalInfo?.reference || 0
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items
     })
+    setRecalc(false)
   }
 
   const columns = [
     {
       component: 'numberfield',
-      name: 'id',
+      name: labels.count,
       label: '',
-      flex: 0.5,
       props: { readOnly: true }
+    },
+    {
+      component: 'textfield',
+      label: labels.batchRef,
+      name: 'batchRef',
+      props: { maxLength: 10 }
     },
     {
       component: 'resourcecombobox',
       label: labels.metal,
       name: 'metalId',
       props: {
-        endpointId: InventoryRepository.Metals.qry,
+        endpointId: FoundryRepository.PurityAdjustment.combos,
+        reducer: response => response?.record?.metals,
         valueField: 'recordId',
         displayField: 'reference',
         displayFieldWidth: 1.5,
@@ -232,10 +267,11 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         return { ...props, readOnly: !!row.itemId }
       },
       onChange: async ({ row: { update, newRow } }) => {
+        setRecalc(true)
         fillSKUStore(newRow?.metalId)
         update({
-          purity: newRow?.purity * 1000 || 0,
-          diffPurity: (newRow?.purity || 0) * 1000 - (newRow?.stdPurity || 0)
+          purity: (newRow?.purity * 1000 || 0).toFixed(2),
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0) * 1000).toFixed(2)
         })
       }
     },
@@ -247,6 +283,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
+        refresh: false,
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
@@ -260,9 +297,16 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         displayFieldWidth: 3.5
       },
       onChange: async ({ row: { update, newRow } }) => {
+        setRecalc(true)
+
+        const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
         update({
-          stdPurity: newRow?.stdPurity || 0,
-          diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0)
+          stdPurity: (newRow?.stdPurity || 0).toFixed(2),
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          newRmQty,
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
         })
       },
       propsReducer({ row, props }) {
@@ -283,26 +327,70 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 }
+      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
+      async onChange({ row: { update, newRow } }) {
+        setRecalc(true)
+
+        const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+        const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+        update({
+          rmQty,
+          newRmQty,
+          deltaRMQty: (newRmQty - rmQty).toFixed(2)
+        })
+      }
     },
     {
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
-        update({ diffPurity: (newRow?.purity || 0) - (newRow?.stdPurity || 0) })
+        setRecalc(true)
+
+        const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+        update({
+          deltaPurity:((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          rmQty,
+          deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
+        })
       }
     },
     {
       component: 'numberfield',
+      name: 'rmQty',
+      label: `${labels.qty} ${formik.values?.header?.baseSalesMetalRef || ''}`,
+      props: { decimalScale: 2, readOnly: true }
+    },
+    {
+      component: 'numberfield',
       name: 'stdPurity',
-      label: labels.stdPurity,
+      label: labels.newPurity,
       props: { readOnly: true, decimalScale: 2 }
     },
     {
       component: 'numberfield',
-      name: 'diffPurity',
+      name: 'newRmQty',
+      label: `${labels.newRmQty} ${formik.values?.header?.baseSalesMetalRef || ''}`,
+      props: { decimalScale: 2, readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      name: 'deltaRMQty',
+      label: labels.diffQty,
+      props: { decimalScale: 2, readOnly: true }
+    },
+    {
+      component: 'numberfield',
+      name: 'deltaPurity',
       label: labels.diffPurity,
       props: { readOnly: true, decimalScale: 2 }
     }
@@ -349,6 +437,17 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     return res?.record || {}
   }
 
+  async function getBaseSalesMetalPurity() {
+    if (!baseSalesMetalId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${baseSalesMetalId}`
+    })
+
+    return res?.record || {}
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -358,6 +457,16 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       }
     })()
   }, [formik.values?.header?.dtId])
+
+  useEffect(() => {
+    ;(async function () {
+      if (baseSalesMetalId && !recordId) {
+        const res = await getBaseSalesMetalPurity()
+        formik.setFieldValue('header.baseSalesMetalPurity', res?.purity * 1000 || 0)
+        formik.setFieldValue('header.baseSalesMetalRef', res?.reference || '')
+      }
+    })()
+  }, [baseSalesMetalId])
 
   useEffect(() => {
     ;(async function () {
@@ -384,8 +493,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.documentTypes}
                     filter={!editMode ? item => item.activeStatus === 1 : undefined}
                     name='header.dtId'
                     label={labels.docType}
@@ -433,7 +542,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.plants}
                     name='header.plantId'
                     readOnly={editMode}
                     required
@@ -454,7 +564,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.sites}
                     name='header.siteId'
                     label={labels.site}
                     columnsInDropDown={[
@@ -473,7 +584,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.WorkCenter.qry}
+                    endpointId={FoundryRepository.PurityAdjustment.combos}
+                    reducer={response => response?.record?.workCenters}
                     name='header.workCenterId'
                     label={labels.workCenter}
                     valueField='recordId'
@@ -511,7 +623,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           />
         </Grow>
         <Fixed>
-          <Grid container>
+          <Grid container xs={12}>
             <Grid item xs={6}>
               <CustomTextArea
                 name='header.notes'
@@ -526,9 +638,74 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
                 error={formik.touched.header?.notes && Boolean(formik.errors.header?.notes)}
               />
             </Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs={2}>
-              <CustomNumberField label={labels.totalMetal} value={totalMetal} decimalScale={3} readOnly align='right' />
+            <Grid container xs={6} justifyContent={'flex-end'}>
+              <Grid container xs={4} spacing={2}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalQty}
+                    value={totalMetal}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={`${labels.totalQty} ${formik.values?.header?.baseSalesMetalRef || ''}`}
+                    value={totalRmQty}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={`${labels.totalNewRmQty} ${formik.values?.header?.baseSalesMetalRef || ''}`}
+                    value={totalRmNewQty}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalDiffQty}
+                    value={totalDiffQty}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+              </Grid>
+              <Grid container xs={4} spacing={2} sx={{ pl: 1, height: '70%' }}>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.avgPurity}
+                    value={avgPurity}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.avgStdPurity}
+                    value={avgStdPurity}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField
+                    label={labels.totalDiffPurity}
+                    value={totalDiffPurity}
+                    decimalScale={2}
+                    readOnly
+                    align='right'
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Fixed>

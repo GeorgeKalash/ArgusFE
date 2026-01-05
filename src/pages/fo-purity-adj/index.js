@@ -24,7 +24,7 @@ export default function PurityAdjustment() {
     const { _startAt = 0, _pageSize = 50, params = [] } = options
 
     const response = await getRequest({
-      extension: FoundryRepository.FoundaryTransaction.page,
+      extension: FoundryRepository.PurityAdjustment.page,
       parameters: `_startAt=${_startAt}&_params=${params}&_pageSize=${_pageSize}&_functionId=${SystemFunction.PurityAdjustment}`
     })
 
@@ -41,7 +41,7 @@ export default function PurityAdjustment() {
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: FoundryRepository.FoundaryTransaction.page,
+    endpointId: FoundryRepository.PurityAdjustment.page,
     datasetId: ResourceIds.PurityAdjustment,
     filter: {
       filterFn: fetchWithSearch
@@ -51,7 +51,7 @@ export default function PurityAdjustment() {
   async function fetchWithSearch({ filters, pagination }) {
     if (filters?.qry) {
       return await getRequest({
-        extension: FoundryRepository.FoundaryTransaction.snapshot,
+        extension: FoundryRepository.PurityAdjustment.snapshot,
         parameters: `_filter=${filters.qry}&_functionId=${SystemFunction.PurityAdjustment}`
       })
     } else {
@@ -112,7 +112,7 @@ export default function PurityAdjustment() {
         access
       },
       width: 1050,
-      height: 700,
+      height: 750,
       title: labels.purityAdjustment
     })
   }
@@ -128,7 +128,7 @@ export default function PurityAdjustment() {
 
   const del = async obj => {
     await postRequest({
-      extension: FoundryRepository.FoundaryTransaction.del,
+      extension: FoundryRepository.PurityAdjustment.del,
       record: JSON.stringify(obj)
     })
     invalidate()
