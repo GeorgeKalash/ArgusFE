@@ -171,7 +171,7 @@ const LoginPage = () => {
                   fullWidth
                   readOnly={!deployHost ? true : validCompanyName}
                   allowClear={deployHost}
-                  label={platformLabels?.CompanyName}
+                  label={platformLabels?.CompanyName || 'Company Name'}
                   onChange={validation.handleChange}
                   onKeyDown={e => {
                     if (e.key == 'Enter') e.target.blur()
