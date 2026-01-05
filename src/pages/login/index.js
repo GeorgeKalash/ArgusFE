@@ -1,7 +1,7 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
 import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
@@ -38,7 +38,7 @@ const LoginPage = () => {
       password: '',
       rememberMe: false,
       accountId: '',
-      companyName
+      companyName: ''
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -131,6 +131,10 @@ const LoginPage = () => {
       stackError({ message: error.message })
     }
   }
+
+  useEffect(() => {
+    validation.setFieldValue('companyName', companyName || '')
+  }, [companyName])
 
   return (
     <>
