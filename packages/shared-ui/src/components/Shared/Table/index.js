@@ -28,6 +28,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteRowDB } from '@argus/shared-domain/src/lib/indexDB'
 import styles from './Table.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const Table = ({
   name,
@@ -67,6 +68,14 @@ const Table = ({
   const storeName = 'tableSettings'
   const gridRef = useRef(null)
   const [hoveredTable, setHoveredTable] = useState(false)
+
+  const { width } = useWindowDimensions()
+
+  const rowHeight =
+  width <= 768 ? 30 : width <= 1024 ? 26 : width <= 1280 ? 25 : width <=1366 ? 28 : width < 1600 ? 30 : 32
+
+  const rowHeightImage =
+  width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <=1366 ? 50 : width < 1600 ? 52 : 70
 
   const columns = props?.columns
     .filter(
@@ -569,12 +578,12 @@ const Table = ({
     }
 
     return (
-      <Box>
+      <>
         {tooltipOpen && <Box className={styles.copiedTooltip}>Copied!</Box>}
-        <Box onClick={handleClick} onDoubleClick={handleDoubleClick} className={styles.fieldWrapper}>
+        <Box onClick={handleClick} onDoubleClick={handleDoubleClick} className={`${styles.fieldWrapper} ${!params.colDef?.wrapText ? styles.nowrap : ''}`}>
           {params.value}
         </Box>
-      </Box>
+      </>
     )
   }
 
@@ -646,7 +655,7 @@ const Table = ({
           ? imageUrl
           : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
 
-      return <img src={image?.default?.src||image} alt='' width={70} />
+      return <img src={image?.default?.src||image} alt='' width={rowHeightImage} />
     }
 
   const columnDefs = [
@@ -879,7 +888,6 @@ const Table = ({
           className={[
             'ag-theme-alpine',
             styles.agGridContainer,
-            hasImageColumn ? styles.hasImageRows : '',
             !props.maxHeight && !props.height ? styles.agGridFlex : ''
           ].join(' ')}
           sx={{
@@ -910,7 +918,7 @@ const Table = ({
             rowSelection={'single'}
             suppressAggFuncInHeader={true}
             suppressDragLeaveHidesColumns={true}
-            getRowHeight={params => (hasImageColumn ? undefined : undefined)}
+            rowHeight={hasImageColumn ? rowHeightImage : rowHeight}
             onFirstDataRendered={onFirstDataRendered}
             gridOptions={gridOptions}
             rowDragManaged={rowDragManaged}

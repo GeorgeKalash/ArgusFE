@@ -50,12 +50,12 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
   const disabled = (data?.userId && data?.userId !== userId) || !formik.values.notes
 
   return (
-    <Box sx={{ px: 5 }}>
+    <Box  className={styles.form}>
       {data?.userName && (
         <Box
         className={styles.username}
         >
-          <Box fontWeight='bold'>{data.userName}</Box> - <Box sx={{ mx: 1 }}>{formatDateDefault(data.eventDate)}</Box>
+          <Box fontWeight='bold'>{data.userName}</Box> - <Box>{formatDateDefault(data.eventDate)}</Box>
         </Box>
       )}
       <Box className={styles.textareaContent}>
@@ -72,14 +72,13 @@ const RecordRemarksForm = ({ seqNo, userId, resourceId, data, maxAccess, masterR
           onChange={e => formik.setFieldValue('notes', e.target.value)}
           onClear={() => formik.setFieldValue('notes', '')}
         />
+        <Box className={styles.customButton}>
         <CustomButton
           label={data?.seqNo ? 'Edit' : 'Add'}
           disabled={disabled}
           onClick={() => formik.handleSubmit()}
-          style={{
-            marginTop: -10
-          }}
         />
+        </Box>
       </Box>
     </Box>
   )
