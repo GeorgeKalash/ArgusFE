@@ -122,7 +122,7 @@ const SAClients = () => {
         return (
           <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
             <IconButton size='small' onClick={() => openPreview(row.data.recordId, row.data.addressId)}>
-              <img src='@argus/shared-ui/src/components/images/buttonsIcons/preview-black.png' alt={'preview'} />
+              <img src={require('@argus/shared-ui/src/components/images/buttonsIcons/preview-black.png').default.src} alt={'preview'} />
             </IconButton>
           </Box>
         )

@@ -284,7 +284,7 @@ const Navigation = props => {
           className={`${styles.node} ${isFolder ? styles.folder : styles.file} ${isOpen ? styles.open : ''}`}
           style={{ display: !isFolder && navCollapsed ? 'none' : 'flex' }}
           onClick={() => handleNodeClick(node)}
-          onContextMenu={e => !isFolder && handleRightClick(e, node, imgName)}
+          onContextMenu={e => !isFolder && handleRightClick(e, node, icon)}
         >
           <div className={styles['node-content']}>
             {icon ? (

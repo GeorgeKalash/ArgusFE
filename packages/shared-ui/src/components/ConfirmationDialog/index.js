@@ -25,42 +25,40 @@ const ConfirmationDialog = ({
 }) => {
   const { platformLabels } = useContext(ControlContext)
 
- const actions = [
+  const actions = [
     {
-    key: 'Ok',
+      key: 'Ok',
       condition: true,
       onClick: () => {
         okButtonAction(window)
-        if (props?.close) window.close()
+        if (props?.close) window?.close()
       },
       disabled: false
     }
   ]
 
-  return !fullScreen ? (
-    <FormShell
-      isSaved={false}
-      isInfo = {false}
-      isCleared={false}
-      actions={actions}
-    >
-      <VertLayout>
-        <Grow>
-          <Box className={styles.content}>
-            {DialogText}
-          </Box>
-        </Grow>
-      </VertLayout>
-    </FormShell>
-   
-  ) : (
+  if (!fullScreen) {
+    return (
+      <FormShell isSaved={false} isInfo={false} isCleared={false} actions={actions}>
+        <VertLayout>
+          <Grow>
+            <Box className={styles.content}>{DialogText}</Box>
+          </Grow>
+        </VertLayout>
+      </FormShell>
+    )
+  }
+
+  return (
     <Dialog
       className={styles.dialog}
       open={openCondition}
       onClose={closeCondition}
       fullWidth
       maxWidth="xs"
-    >
+      PaperProps={{ className: styles.dialogPaper }}
+      BackdropProps={{ className: styles.dialogBackdrop }}
+>
       <DialogTitle>{platformLabels.Confirmation}</DialogTitle>
 
       <DialogContent>
@@ -70,7 +68,7 @@ const ConfirmationDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <CustomButton onClick={okButtonAction} label={platformLabels.OK} />
+        <CustomButton onClick={() => okButtonAction(window)} label={platformLabels.OK} />
       </DialogActions>
     </Dialog>
   )
