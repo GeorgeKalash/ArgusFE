@@ -10,7 +10,6 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -1301,17 +1300,6 @@ export default function SaleTransactionForm({
     }
   }
 
-  async function getAddress(addressId) {
-    if (!addressId) return
-
-    const res = await getRequest({
-      extension: SystemRepository.Address.format,
-      parameters: `_addressId=${addressId}`
-    })
-
-    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
-  }
-
   async function getAccountLimit(currencyId, accountId) {
     const res = await getRequest({
       extension: FinancialRepository.AccountCreditLimit.get,
@@ -1339,8 +1327,8 @@ export default function SaleTransactionForm({
 
       return
     }
-    const billAdd = await getAddress(clientObject.billAddressId)
     const accountLimit = await getAccountLimit(currencyId, accountId)
+    const res = await getClientInfo(clientObject?.accountId, formik.values.header.currencyId, clientObject.billAddressId)
 
     formik.setValues({
       ...formik.values,
@@ -1358,21 +1346,22 @@ export default function SaleTransactionForm({
         plId: clientObject.plId ?? defaultsDataState.plId,
         szId: clientObject.szId,
         billAddressId: clientObject.billAddressId,
-        billAddress: billAdd,
+        billAddress: res?.address,
         creditLimit: accountLimit?.limit ?? 0,
-        accountId: clientObject?.accountId
+        accountId: clientObject?.accountId,
+        balance: res?.accountBalance?.balance
       }
     })
 
-    await getClientBalance(clientObject?.accountId, formik.values.header.currencyId)
   }
 
-  async function getClientBalance(accountId, currencyId) {
+  async function getClientInfo(accountId, currencyId, addressId) {
     const res = await getRequest({
-      extension: FinancialRepository.AccountCreditBalance.get,
-      parameters: `_accountId=${accountId}&_currencyId=${currencyId}`
+      extension: SaleRepository.Client.pack,
+      parameters: `_accountId=${accountId}&_currencyId=${currencyId}&_addressId=${addressId || 0}`
     })
-    formik.setFieldValue('header.balance', res?.record?.balance || 0)
+
+    return res?.record
   }
 
   async function getItemPhysProp(itemId) {
