@@ -611,7 +611,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.documentTypes}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.DraftTransfer}`}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -720,7 +719,6 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   <ResourceComboBox
                     endpointId={InventoryRepository.DraftTransfer.pack}
                     reducer={response => response?.record?.notificationGroups}
-                    parameters='filter='
                     name='notificationGroupId'
                     label={labels.notificationGroup}
                     valueField='recordId'
