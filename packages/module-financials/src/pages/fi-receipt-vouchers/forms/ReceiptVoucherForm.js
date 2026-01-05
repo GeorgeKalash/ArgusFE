@@ -27,6 +27,7 @@ import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiC
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -144,7 +145,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('plantId', record?.plantId || plantId)
-      formik.setFieldValue('cashAccountId', record?.cashAccountId || defaultAccountId)
+      getCashAccount(record?.cashAccountId || defaultAccountId)
     }
   }
 
@@ -173,11 +174,35 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
   const isPosted = formik.values.status === 3
   const isVerified = formik.values.isVerified
 
+  const getCashAccount = async cashAccountId => {
+    if (!cashAccountId) {
+      formik.setFieldValue('cashAccountId', null)
+      formik.setFieldValue('cashAccountRef', '')
+      formik.setFieldValue('cashAccountName', '')
+
+      return
+    }
+
+    const { record: cashAccountResult } = await getRequest({
+      extension: CashBankRepository.CbBankAccounts.get,
+      parameters: `_recordId=${cashAccountId}`
+    })
+
+    formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
+    formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
+    formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
+  }
+
   useEffect(() => {
     ;(async function () {
       if (recordId) await getData(recordId)
+      else getCashAccount(defaultAccountId)
     })()
   }, [])
+
+  useEffect(() => {
+    if (formik.values.templateId) formik.setFieldValue('templateId', null)
+  }, [formik.values.templateId])
 
   async function getData(recordId) {
     if (recordId) {
@@ -512,11 +537,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <ResourceComboBox
                 endpointId={FinancialRepository.ReceiptVouchers.pack}
                 reducer={response => response?.record?.cashAccounts}
-                filter={(item) => {
-                  const expected = formik.values.paymentMethod === 2 ? 1 : 0;
-                  if (expected === 0) return true;
-                  return Number(item.type) === expected;
-                }}
+                filter={item => formik.values.paymentMethod != 2 || Number(item.type) == 1}
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -670,11 +691,13 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 readOnly={isCancelled || isPosted}
                 valueField='recordId'
                 displayField='name'
+                values={formik.values} 
+                value={null} 
                 allowClear={false}
                 onChange={(_, newValue) => {
                   let notes = formik.values.notes
                   if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
-                  formik.setFieldValue('templateId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}

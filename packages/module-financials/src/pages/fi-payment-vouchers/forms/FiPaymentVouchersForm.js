@@ -252,6 +252,10 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }, [formik.values?.dtId])
 
   useEffect(() => {
+    if (formik.values.templateId) formik.setFieldValue('templateId', null)
+  }, [formik.values.templateId])
+
+  useEffect(() => {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
@@ -478,7 +482,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 ]}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('plantId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
               />
@@ -698,7 +702,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 displayField={'firstCheckNo'}
                 values={formik.values}
                 onChange={(event, newValue) => {
-                  formik.setFieldValue('checkbookId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('checkbookId', newValue?.recordId || null)
                 }}
                 error={formik.touched.checkbookId && Boolean(formik.errors.checkbookId)}
                 disabled={formik.values.paymentMethod != 3}
@@ -715,11 +719,12 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
+                value={null} 
                 allowClear={false}
                 onChange={(_, newValue) => {
                   let notes = formik.values.notes
                   if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
-                  formik.setFieldValue('templateId', newValue ? newValue?.recordId : '')
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}
