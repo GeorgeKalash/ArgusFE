@@ -327,7 +327,7 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
         setRecalc(true)
 
@@ -350,7 +350,7 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
         setRecalc(true)
 
