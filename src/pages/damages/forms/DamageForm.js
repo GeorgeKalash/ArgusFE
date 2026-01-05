@@ -218,7 +218,7 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.preview,
       parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
         formik.values.header.damagedQty || 0
-      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_jobNonMetalQty=${formik.values.header.nonMetalQty || 0}`
+      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${formik.values.header.metalQty || 0}&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
     })
 
     formik.setFieldValue('items', items?.list || [])
