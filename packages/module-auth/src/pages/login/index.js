@@ -1,7 +1,7 @@
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@argus/shared-hooks/src/hooks/useAuth'
 import { Card, CardContent, Grid, Box, CardMedia } from '@mui/material'
@@ -41,7 +41,7 @@ const LoginPage = () => {
       password: '',
       rememberMe: false,
       accountId: '',
-      companyName
+      companyName: ''
     },
     validationSchema: yup.object({
       username: yup.string().required(),
@@ -128,6 +128,10 @@ const LoginPage = () => {
       stackError({ message: error.message })
     }
   }
+
+  useEffect(() => {
+    validation.setFieldValue('companyName', companyName || '')
+  }, [companyName])
 
  return (
   <>
