@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -30,9 +30,13 @@ export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
-  const { labels, access, invalidate } = useResourceQuery({
+  const { labels, access } = useResourceQuery({
     endpointId: ManufacturingRepository.Damage.page,
     datasetId: ResourceIds.Damages
+  })
+
+  const invalidate = useInvalidate({
+    endpointId: ManufacturingRepository.Damage.page
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -127,8 +131,9 @@ export default function DamageForm({ recordId, jobId }) {
         await refetchForm(res.recordId)
 
         toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
-        invalidate()
       })
+
+      invalidate()
     }
   })
 
@@ -218,7 +223,9 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.preview,
       parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
         formik.values.header.damagedQty || 0
-      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${formik.values.header.metalQty || 0}&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
+      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${
+        formik.values.header.metalQty || 0
+      }&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
     })
 
     formik.setFieldValue('items', items?.list || [])
@@ -245,6 +252,8 @@ export default function DamageForm({ recordId, jobId }) {
 
     return { metalQty, nonMetalQty }
   }
+
+  const hasData = formik?.values?.items?.length > 0
 
   return (
     <FormShell
@@ -364,7 +373,7 @@ export default function DamageForm({ recordId, jobId }) {
                     form={formik}
                     formObject={formik.values.header}
                     required
-                    readOnly={editMode}
+                    readOnly={hasData || editMode}
                     displayFieldWidth={2}
                     valueShow='jobRef'
                     maxAccess={maxAccess}
@@ -501,7 +510,7 @@ export default function DamageForm({ recordId, jobId }) {
                       formik.setFieldValue('header.damagedQty', null)
                     }}
                     maxAccess={maxAccess}
-                    readOnly={isPosted}
+                    readOnly={hasData || isPosted}
                     required
                     error={formik?.touched?.header?.damagedQty && Boolean(formik?.errors?.header?.damagedQty)}
                   />
@@ -510,9 +519,10 @@ export default function DamageForm({ recordId, jobId }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.damagedPcs'
-                    readOnly={isPosted}
+                    readOnly={hasData || isPosted}
                     label={labels.damagedPcs}
                     value={formik.values?.header?.damagedPcs}
+                    decimalScale={0}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('header.damagedPcs', 0)}
                     required
