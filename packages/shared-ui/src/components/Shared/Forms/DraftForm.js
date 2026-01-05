@@ -173,10 +173,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   })
 
   async function loadTaxDetails() {
-    if (taxDetailsCacheRef.current) {
-      return taxDetailsCacheRef.current
-    }
-
     const res = await getRequest({
       extension: SaleRepository.DraftInvoice.pack,
       parameters: ''
@@ -185,7 +181,6 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     const taxDetails = res?.record?.taxDetails || []
 
     taxDetailsCacheRef.current = taxDetails
-    return taxDetails
   }
 
 
@@ -483,7 +478,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png',
+              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src,
               hidden: false
             }
           } else {
@@ -669,7 +664,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     if (!taxId) return []
 
     const taxDetails = taxDetailsCacheRef.current
-    return taxDetails.filter(td => td.taxId === taxId)
+    return taxDetails ? taxDetails?.filter(td => td.taxId === taxId) : []
   }
 
   const filteredData = formik.values.search
@@ -775,7 +770,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           message: labels.noSelectedplId
         })
 
-      loadTaxDetails()
+      await loadTaxDetails()
 
       if (formik?.values?.recordId) {
         await refetchForm(formik?.values?.recordId)
