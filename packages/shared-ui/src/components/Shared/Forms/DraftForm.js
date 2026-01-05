@@ -173,6 +173,10 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
   })
 
   async function loadTaxDetails() {
+    if (taxDetailsCacheRef.current) {
+      return
+    }
+
     const res = await getRequest({
       extension: SaleRepository.DraftInvoice.pack,
       parameters: ''
