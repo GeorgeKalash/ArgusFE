@@ -109,7 +109,7 @@ const RecordRemarks = ({ recordId, resourceId, expanded }) => {
                 >
                   <TableCell component='th' scope='row' width={'900'}>
                     <Box className={styles.row}>
-                      <Box fontWeight='bold'>{row.userName}</Box> - <Box sx={{ mx: 1 }}>{date(row.eventDate)}</Box>
+                      <Box fontWeight='bold'>{row.userName}</Box> - <Box>{date(row.eventDate)}</Box>
                     </Box>
                     <Box className={styles.text}>{row.notes}</Box>
                   </TableCell>
