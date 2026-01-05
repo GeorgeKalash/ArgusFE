@@ -23,7 +23,6 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
 
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
