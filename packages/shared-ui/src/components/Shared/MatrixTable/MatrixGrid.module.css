@@ -4,18 +4,13 @@
 }
 
 .rowLabelCell {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
   font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 0 8px;
+  /* padding: 0 8px; */
   direction: rtl;
+  font-size: 14px;
+  text-align: center;
+  text-justify: center;
+
 }
 
 .rotatedHeader {
@@ -26,6 +21,14 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  height: 100%;
+  width: 100%;
+}
+
+.matrixRoot :global(.ag-header-group-cell) {
+margin: 0px !important;
+padding: 0px !important;
+
 }
 
 .diagonalCell {
@@ -37,6 +40,7 @@
 .modifiedCell {
   background-color: #ffff99;
   font-weight: bold;
+  text-align: center;
 }
 
 .highlightCell {
@@ -51,3 +55,37 @@
 .highlightRow {
   background-color: #e0f7fa !important;
 }
+
+@media (max-width: 1600px) {
+  .matrixRoot :global(.ag-cell){
+    font-size: 12px !important;
+    }
+  
+    .matrixRoot :global(.ag-header-cell-comp-wrapper){
+      font-size: 12px !important;
+    }
+  }
+
+@media (max-width: 1280px) {
+.matrixRoot :global(.ag-cell){
+  font-size: 10px !important;
+  }
+
+  .matrixRoot :global(.ag-header-cell-comp-wrapper){
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .matrixRoot :global(.ag-cell){
+    font-size: 9px !important;
+    }
+  
+    .matrixRoot :global(.ag-header-cell-comp-wrapper){
+      font-size: 9px !important;
+    }
+  }
+
+
+
+
