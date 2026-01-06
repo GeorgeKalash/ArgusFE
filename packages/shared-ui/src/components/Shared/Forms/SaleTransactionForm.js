@@ -1184,10 +1184,16 @@ export default function SaleTransactionForm({
     saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
+      
+    const taxDetailsList = saTrxHeader.isVattable ? await getTaxDetails() : null
+
+    const taxDetailsMap = (taxDetailsList || []).reduce((acc, t) => {
+      acc[t.taxId] = t
+      return acc
+    }, {})
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
-        const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
         return {
           ...item,
@@ -1206,9 +1212,9 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails
+          taxDetails: taxDetailsMap[item.taxId] || null
         }
       })
     )
@@ -1385,8 +1391,8 @@ export default function SaleTransactionForm({
   async function getTaxDetails(taxId) {
     if (!taxId) return []
 
-    if (taxDetailsCacheRef.current) {
-      return taxDetailsCacheRef.current
+    if (taxDetailsCacheRef.current[taxId]) {
+      return taxDetailsCacheRef.current[taxId]
     }
 
     const res = await getRequest({
@@ -1397,7 +1403,7 @@ export default function SaleTransactionForm({
     const taxDetails =
       res?.record?.taxDetails?.filter(td => td.taxId === taxId) || []
 
-    taxDetailsCacheRef.current = taxDetails
+    taxDetailsCacheRef.current[taxId] = taxDetails
 
     return taxDetails
   }
