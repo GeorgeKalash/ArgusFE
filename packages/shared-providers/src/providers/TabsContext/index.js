@@ -280,6 +280,27 @@ const TabsProvider = ({ children }) => {
     if (locked) unlockRecord(tab.resourceId)
   }
 
+  const hardReloadTabAtIndex = index => {
+    const tab = openTabs[index]
+    if (!tab) return
+
+    unlockIfLocked(tab)
+
+    setOpenTabs(prev =>
+      prev.map((t, i) =>
+        i === index ? { ...t, page: null, id: uuidv4() } : t
+      )
+    )
+
+    requestAnimationFrame(() => {
+      setOpenTabs(prev =>
+        prev.map((t, i) =>
+          i === index ? { ...t, page: children, id: uuidv4() } : t
+        )
+      )
+    })
+  }
+
   return (
     <>
       <Box ref={tabsWrapperRef} className={styles.tabsWrapper}>
@@ -306,10 +327,7 @@ const TabsProvider = ({ children }) => {
                       className={styles.svgIcon}
                       onClick={e => {
                         e.stopPropagation()
-                        setOpenTabs(tabs =>
-                            tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
-                        )
-                        setReloadOpenedPage([])
+                        hardReloadTabAtIndex(i)
                       }}
                     >
                       <RefreshIcon className={styles.svgIcon} />
