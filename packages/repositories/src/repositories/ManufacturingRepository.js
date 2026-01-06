@@ -222,6 +222,7 @@ export const ManufacturingRepository = {
   Worksheet: {
     snapshot: service + 'snapshotWST',
     get: service + 'getWST',
+    pack: service + 'getPackWST',
     set: service + 'setWST',
     del: service + 'delWST',
     page: service + 'pageWST',
