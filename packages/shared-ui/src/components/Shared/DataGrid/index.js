@@ -68,9 +68,7 @@ export function DataGrid({
 
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
-
-
-  function checkDuplicates(field, data) {
+   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
     )
@@ -168,7 +166,7 @@ export function DataGrid({
             rowIndex: index + 1,
             colKey: column?.name
           })
-        }, 10)
+        }, 10)  
       } else {
         rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
         const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -401,11 +399,6 @@ export function DataGrid({
 
   const onCellKeyDown = params => {
     const { event, api, node, data, colDef } = params
-
-    if (event.key === 'Tab') {
-      event.preventDefault()
-      event.stopPropagation()
-    }
 
     if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
       isDup.current = true
@@ -703,7 +696,7 @@ export function DataGrid({
         suppressKeyboardEvent: params => {
           const { event } = params
 
-          return event.key === 'Tab' || event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
+          return  event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
             ? true
             : false
         }
@@ -921,11 +914,12 @@ export function DataGrid({
               onCellClicked={onCellClicked}
               onColumnResized={onColumnResized}
               getRowId={params => params?.data?.id}
-              tabToNextCell={() => null}
-              tabToPreviousCell={() => null}
+              tabToNextCell={() => true}
+              tabToPreviousCell={() => true}
               onCellEditingStopped={onCellEditingStopped}
               enableBrowserTooltips={true}
               enableRtl={user?.languageId === 2}
+              suppressFocusAfterRefresh={true}
             />
           )}
         </Box>

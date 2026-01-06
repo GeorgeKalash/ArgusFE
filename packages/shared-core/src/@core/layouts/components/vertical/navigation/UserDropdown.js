@@ -15,7 +15,7 @@ const UserDropdown = props => {
   const [anchorEl, setAnchorEl] = useState(null)
   const router = useRouter()
   const auth = useAuth()
-  const { logout } = useAuth()
+  const { logout,companyName } = useAuth()
   const { direction } = settings
 
   const handleDropdownOpen = event => {
@@ -54,8 +54,12 @@ const UserDropdown = props => {
         anchorOrigin={{ vertical: 'bottom', horizontal: direction === 'ltr' ? 'right' : 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: direction === 'ltr' ? 'right' : 'left' }}
       >
-          <Box className={styles.userHeader}>
-              <Typography className={styles.userName}>{auth?.user?.username}</Typography>
+        <Box className={styles.userHeader}>
+          <Typography className={styles.userName}>{companyName}</Typography>
+        </Box>
+          <Divider className={styles.userMenuDivider} />
+        <Box className={styles.userHeader}>
+          <Typography className={styles.userName}>{auth?.user?.username}</Typography>
         </Box>
 
         <Divider className={styles.userMenuDivider} />

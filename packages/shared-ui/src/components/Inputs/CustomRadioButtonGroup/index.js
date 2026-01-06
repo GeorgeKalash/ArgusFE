@@ -9,8 +9,6 @@ const CustomRadioButtonGroup = ({
   value,
   onChange,
   row = true,
-  labelStyle = {},
-  iconStyle = {},
   maxAccess,
   name,
   readOnly,
@@ -19,31 +17,34 @@ const CustomRadioButtonGroup = ({
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(name, maxAccess, required, readOnly, hidden)
-
   const _disabled = _readOnly || _hidden
 
-  return _hidden ? null : (
-    <RadioGroup row={row} value={value} onChange={onChange} className={styles.radioGroup} {...props}>
-      {options.map(({ label, value, disabled = false }) => {
-        const _optionDisabled = _disabled || disabled
+  if (_hidden) return null
 
-        return (
-          <FormControlLabel
-            key={value}
-            value={value}
-            control={<Radio className={styles.radio} 
-            classes={{
-              root: inputs.outlinedRoot, 
-            }} />}
-            label={label}
-            disabled={_optionDisabled}
-            required={_required}
-            classes={{
-              label: inputs.inputLabel,
-            }}
-          />
-        )
-      })}
+  return (
+    <RadioGroup
+      row={row}
+      value={value}
+      onChange={onChange}
+      className={styles.radioGroup}
+      {...props}
+    >
+      {options.map(({ label, value, disabled = false }) => (
+        <FormControlLabel
+          key={value}
+          value={value}
+          disabled={_disabled || disabled}
+          required={_required}
+          label={label}
+          classes={{ label: inputs.inputLabel }}
+          control={
+            <Radio
+              className={styles.radio}
+              classes={{ root: inputs.outlinedRoot }}
+            />
+          }
+        />
+      ))}
     </RadioGroup>
   )
 }

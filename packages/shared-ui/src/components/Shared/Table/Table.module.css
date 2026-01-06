@@ -104,14 +104,18 @@
   user-select: text;
   cursor: pointer;
   width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .fieldWrapper::selection {
   background: none !important;
   color: inherit;
+}
+
+.nowrap{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
 }
 
 .copiedTooltip {
@@ -143,14 +147,6 @@
   min-height: 32px !important;
 }
 
-.agGridContainer :global(.ag-row) {
-  height: 32px !important; 
-}
-
-.hasImageRows :global(.ag-row) {
-  height: 70px !important; 
-}
-
 .agGridContainer :global(.ag-header-cell-text),
 .agGridContainer :global(.ag-cell) {
   font-size: var(--ag-font-size);
@@ -177,99 +173,52 @@
 }
 
 @media (min-width: 1025px) and (max-width: 1600px) {
-  .agGridContainer {
-    --ag-font-size: 10px;
+  .agGridContainer:global(.ag-theme-alpine) {
+    --ag-font-size: 12px;
   }
 
-  .agGridContainer :global(.ag-row) {
-    height: 30px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 52px !important;
-  }
 }
 
 @media (max-width: 1366px) {
-  .agGridContainer {
+  .agGridContainer :global(.ag-header-cell-text),
+  .agGridContainer :global(.ag-cell) {
+    padding-inline: 10px !important;
+
+  }
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 9px;
   }
 
-  .agGridContainer :global(.ag-row) {
-    height: 28px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 50px !important;
-  }
 }
 
 @media (max-width: 1024px) {
-  .agGridContainer {
+
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 9.2px;
-  }
-
-  .agGridContainer :global(.ag-row) {
-    height: 26px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 46px !important;
   }
 }
 
 @media (max-width: 768px) {
-  .agGridContainer {
+
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 8.9px;
-  }
-
-  .agGridContainer :global(.ag-row) {
-    height: 24px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 44px !important;
   }
 }
 
 @media (max-width: 600px) {
-  .agGridContainer {
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 8.5px;
-  }
-  
-  .agGridContainer :global(.ag-row) {
-    height: 22px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 42px !important;
   }
 }
 
 @media (max-width: 480px) {
-  .agGridContainer {
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 8.2px;
-  }
-
-  .agGridContainer :global(.ag-row) {
-    height: 21px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 40px !important;
   }
 }
 
 @media (max-width: 375px) {
-  .agGridContainer {
+  .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 8px;
-  }
-
-  .agGridContainer :global(.ag-row) {
-    height: 20px !important;
-  }
-
-  .hasImageRows :global(.ag-row) {
-    height: 38px !important;
   }
 }

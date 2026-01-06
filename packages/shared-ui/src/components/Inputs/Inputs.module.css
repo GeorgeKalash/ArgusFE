@@ -4,8 +4,14 @@
   line-height: 1px !important
 }
 
-.startAdornment{
+.startAdornment:dir(ltr){
   padding-left: 5px;
+  padding-right: 0px;
+}
+
+.startAdornment:dir(rtl){
+  padding-left: 0px;
+  padding-right: 5px;
 }
 
 .fieldLabel {
@@ -161,8 +167,10 @@
   .outlinedRoot:dir(rtl) .inputAdornment {
     margin-left: -5px !important;
   }
+  
   .startAdornment{
     padding-left: 0px;
+    padding-right: 0px;
   }
 
 }

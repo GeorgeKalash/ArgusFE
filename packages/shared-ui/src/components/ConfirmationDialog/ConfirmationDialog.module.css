@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   z-index: 2;
-  background-color: #fff;
+  background: #ffffff !important;
+  color: #000 !important;
 }
 
 .content {
@@ -25,9 +26,33 @@
   z-index: 2;
 }
 
-.dialog :global(.MuiDialogContentText-root) {
-  font-size: 0.95rem;
-  line-height: 1.5;
+.dialogPaper {
+  background: #ffffff !important;
+  color: #000 !important;
+  border-radius: 14px !important;
+}
+
+.dialogPaper :global(.MuiDialogTitle-root) {
+  background: #ffffff !important;
+  color: #000 !important;
+  font-weight: 600;
+}
+
+.dialogPaper :global(.MuiDialogContent-root) {
+  background: #ffffff !important;
+  color: #000 !important;
+}
+
+.dialogPaper :global(.MuiDialogActions-root) {
+  background: #ffffff !important;
+}
+
+.dialogText {
+  color: #000 !important;
+}
+
+.dialogBackdrop {
+  width: 100%;
 }
 
 @media (max-width: 1600px) {
@@ -36,17 +61,14 @@
     font-size: 0.8rem;
   }
 
-  .dialog :global(.MuiDialogContentText-root) {
+  .dialogText {
     font-size: 0.8rem;
   }
 }
 
 @media (max-width: 1400px) {
-  .content {
-    font-size: 0.7rem;
-  }
-
-  .dialog :global(.MuiDialogContentText-root) {
+  .content,
+  .dialogText {
     font-size: 0.7rem;
   }
 }
@@ -61,7 +83,7 @@
     padding: 8px 12px;
   }
 
-  .dialog :global(.MuiDialogContentText-root) {
+  .dialogText {
     font-size: 0.6rem;
   }
 }

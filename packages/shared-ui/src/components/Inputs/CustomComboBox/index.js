@@ -248,8 +248,8 @@ const CustomComboBox = ({
                   <InputAdornment position='end' className={inputs.inputAdornment}>
                     {hover &&
                       (_disabled ? null : isLoading ? (
-                        <IconButton    className={inputs.iconButton}>
-                          <CircularProgress     color='inherit' size={17} />
+                        <IconButton className={inputs.iconButton}>
+                          <CircularProgress color='inherit' size={17} />
                         </IconButton>
                       ) : (
                         refresh &&
@@ -313,7 +313,7 @@ const CustomComboBox = ({
               startAdornment: value?.icon ? (
                 <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
               ) : (
-                <InputAdornment position='start' className={inputs.startAdornment}> { props?.startAdornment || params.InputProps.startAdornment} </InputAdornment> 
+                props?.startAdornment || params.InputProps.startAdornment && <InputAdornment position='start' className={inputs.startAdornment}> { props?.startAdornment || params.InputProps.startAdornment} </InputAdornment> 
               ),
               endAdornment: mergedEndAdornment
             }}
@@ -321,7 +321,8 @@ const CustomComboBox = ({
               classes: {
                 root: inputs.inputLabel,
                 shrink: inputs.inputLabelShrink, 
-              }            }}
+              }
+            }}
           />
         )
       }}

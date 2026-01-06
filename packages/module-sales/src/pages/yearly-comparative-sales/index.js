@@ -284,7 +284,7 @@ const YearlyComparativeSales = () => {
           isLoading={false}
           maxAccess={access}
           pagination={false}
-          maxHeight={'300px'}
+          height={'250px'}
         />
       </Fixed>
       <Grow>

@@ -199,7 +199,11 @@ const CustomTextField = ({
                 className={inputs.iconButton}
                 tabIndex={-1}
                 id={props.ClearId}
-                onMouseDown={e => e.preventDefault()}
+                onMouseDown={e => {
+                  e.preventDefault()
+                  setIsFocused(false)
+                  }
+                }
                 onClick={e => {
                   onClear(e)
                   setFocus(true)

@@ -203,7 +203,7 @@ const CategoryForm = ({ labels, maxAccess, setStore, store }) => {
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={InventoryRepository.Category.qry}
-                    parameters='_pagesize=30&_startAt=0&_name='
+                    parameters='_pagesize=1000&_startAt=0&_name='
                     name='parentId'
                     label={labels.parentCat}
                     valueField='recordId'

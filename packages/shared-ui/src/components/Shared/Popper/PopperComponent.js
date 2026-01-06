@@ -97,6 +97,8 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     ...(props.style || {})
   }
 
+  if (!rect) return null; 
+
   return ReactDOM.createPortal(
     <Box
       ref={popperRef}

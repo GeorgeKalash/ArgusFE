@@ -237,7 +237,7 @@ const RowAccessTab = ({ maxAccess, labels, storeRecordId }) => {
     : data
 
   return (
-    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId}>
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={!!storeRecordId} isParentWindow={false}>
       <VertLayout>
         <Fixed>
           <Grid container spacing={2}>
