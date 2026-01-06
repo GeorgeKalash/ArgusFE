@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import { useInvalidate, useResourceQuery } from 'src/hooks/resource'
+import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
@@ -25,18 +25,19 @@ import Table from 'src/components/Shared/Table'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
+import useResourceParams from 'src/hooks/useResourceParams'
 
 export default function DamageForm({ recordId, jobId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-
-  const { labels, access } = useResourceQuery({
-    endpointId: ManufacturingRepository.Damage.page,
-    datasetId: ResourceIds.Damages
-  })
-
+  
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Damage.page
+  })
+
+  const { labels, access } = useResourceParams({
+    endpointId: ManufacturingRepository.Damage.page,
+    datasetId: ResourceIds.Damages
   })
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -124,15 +125,14 @@ export default function DamageForm({ recordId, jobId }) {
             ...rest
           })) || []
       }
-      postRequest({
+
+      const res = await postRequest({
         extension: ManufacturingRepository.Damage.set2,
         record: JSON.stringify(payload)
-      }).then(async res => {
-        await refetchForm(res.recordId)
-
-        toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
       })
 
+      await refetchForm(res.recordId)
+      toast.success(editMode ? platformLabels.Edited : platformLabels.Added)
       invalidate()
     }
   })
