@@ -1,0 +1,19 @@
+.editorRoot {
+  position: relative;
+}
+
+.editorRoot :global(.rdw-editor-wrapper),
+.editorRoot :global(.rdw-editor-main) {
+  overflow: visible !important;
+}
+
+.editorRoot :global(.rdw-emoji-modal),
+.editorRoot :global(.rdw-link-modal),
+.editorRoot :global(.rdw-image-modal) {
+  z-index: 9999 !important;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+
