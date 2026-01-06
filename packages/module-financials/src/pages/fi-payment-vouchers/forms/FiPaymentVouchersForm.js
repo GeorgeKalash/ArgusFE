@@ -710,7 +710,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                neverPopulate
                 endpointId={FinancialRepository.PaymentVouchers.pack}
                 reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'
@@ -719,7 +718,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                value={null} 
                 allowClear={false}
                 onChange={(_, newValue) => {
                   let notes = formik.values.notes

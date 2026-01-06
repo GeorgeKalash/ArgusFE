@@ -683,7 +683,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                neverPopulate
                 endpointId={FinancialRepository.ReceiptVouchers.pack}
                 reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'
@@ -692,7 +691,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 valueField='recordId'
                 displayField='name'
                 values={formik.values} 
-                value={null} 
                 allowClear={false}
                 onChange={(_, newValue) => {
                   let notes = formik.values.notes
