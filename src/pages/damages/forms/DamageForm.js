@@ -253,7 +253,7 @@ export default function DamageForm({ recordId, jobId }) {
     return { metalQty, nonMetalQty }
   }
 
-  const hasData = formik?.values?.items?.length > 0
+  const hasItems = formik?.values?.items?.length > 0
 
   return (
     <FormShell
@@ -373,7 +373,7 @@ export default function DamageForm({ recordId, jobId }) {
                     form={formik}
                     formObject={formik.values.header}
                     required
-                    readOnly={hasData || editMode}
+                    readOnly={hasItems || editMode}
                     displayFieldWidth={2}
                     valueShow='jobRef'
                     maxAccess={maxAccess}
@@ -510,7 +510,7 @@ export default function DamageForm({ recordId, jobId }) {
                       formik.setFieldValue('header.damagedQty', null)
                     }}
                     maxAccess={maxAccess}
-                    readOnly={hasData || isPosted}
+                    readOnly={hasItems || isPosted}
                     required
                     error={formik?.touched?.header?.damagedQty && Boolean(formik?.errors?.header?.damagedQty)}
                   />
@@ -519,7 +519,7 @@ export default function DamageForm({ recordId, jobId }) {
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='header.damagedPcs'
-                    readOnly={hasData || isPosted}
+                    readOnly={hasItems || isPosted}
                     label={labels.damagedPcs}
                     value={formik.values?.header?.damagedPcs}
                     decimalScale={0}
