@@ -1385,8 +1385,8 @@ export default function SaleTransactionForm({
   async function getTaxDetails(taxId) {
     if (!taxId) return []
 
-    if (taxDetailsCacheRef.current[taxId]) {
-      return taxDetailsCacheRef.current[taxId]
+    if (taxDetailsCacheRef.current) {
+      return taxDetailsCacheRef.current
     }
 
     const res = await getRequest({
@@ -1397,7 +1397,7 @@ export default function SaleTransactionForm({
     const taxDetails =
       res?.record?.taxDetails?.filter(td => td.taxId === taxId) || []
 
-    taxDetailsCacheRef.current[taxId] = taxDetails
+    taxDetailsCacheRef.current = taxDetails
 
     return taxDetails
   }
