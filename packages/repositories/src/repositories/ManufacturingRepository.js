@@ -186,6 +186,7 @@ export const ManufacturingRepository = {
   WorksheetMaterials: {
     qry: service + 'qryIMA',
     get: service + 'getIMA',
+    pack: service + 'get2IMA',
     set: service + 'setIMA',
     set2: service + 'set2IMA',
     del: service + 'delIMA',
