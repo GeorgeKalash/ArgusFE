@@ -23,14 +23,11 @@ function CustomTabPanel(props) {
   const [showOverlay, setShowOverlay] = useState(false)
 
   useEffect(() => {
-    if (loading) {
-      setShowOverlay(false)
-      return
+    if (!loading) {
+      const timer = setTimeout(() => setShowOverlay(true), 300)
+
+      return () => clearTimeout(timer)
     }
-
-    const timer = setTimeout(() => setShowOverlay(true), 300)
-
-    return () => clearTimeout(timer)
   }, [loading])
 
   return (
@@ -159,8 +156,11 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = (event, newValue) => {
     setCurrentTabIndex(newValue)
-    if (newValue === 0 && !openTabs[newValue].page) router.push(openTabs[newValue].route)
-    else window.history.replaceState(null, '', openTabs[newValue].route)
+    if (newValue === 0 && !openTabs[newValue].page) {
+      router.push(openTabs[newValue].route)
+    } else {
+      window.history.replaceState(null, '', openTabs[newValue].route)
+    }
   }
 
   const handleCloseAllTabs = () => {
@@ -186,13 +186,21 @@ const TabsProvider = ({ children }) => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
 
-    if (activeTabsLength === 2) return handleCloseAllTabs()
+    if (activeTabsLength === 2) {
+      handleCloseAllTabs()
+
+      return
+    }
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      if (newValue === index - 1 || router.asPath === window?.history?.state?.as) setCurrentTabIndex(newValue)
+      if (newValue === index - 1 || router.asPath === window?.history?.state?.as) {
+        setCurrentTabIndex(newValue)
+      }
       window.history.replaceState(null, '', openTabs?.[newValue]?.route)
-    } else if (index < currentTabIndex) setCurrentTabIndex(currentValue => currentValue - 1)
+    } else if (index < currentTabIndex) {
+      setCurrentTabIndex(currentValue => currentValue - 1)
+    }
 
     setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
   }
@@ -201,8 +209,17 @@ const TabsProvider = ({ children }) => {
     if (tabRoute === router.asPath) {
       setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
       setReloadOpenedPage([])
-    } else router.push(tabRoute)
+    } else {
+      router.push(tabRoute)
+    }
   }
+
+  useEffect(() => {
+    if (reloadOpenedPage) {
+      setOpenTabs(openTabs => openTabs.map(tab => (tab.route === router.asPath ? { ...tab, id: uuidv4() } : tab)))
+      setReloadOpenedPage([])
+    }
+  }, [router.asPath])
 
   useEffect(() => {
     if (initialLoadDone) {
@@ -237,7 +254,7 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (!initialLoadDone && cssReady && router.asPath && (menu.length > 0 || dashboardId)) {
+    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
@@ -299,7 +316,8 @@ const TabsProvider = ({ children }) => {
           classes={{ indicator: styles.tabsIndicator }}
           className={styles.tabs}
         >
-          {openTabs.map((activeTab, i) => (
+          {openTabs.length > 0 &&
+            openTabs.map((activeTab, i) => (
             <Tab
               key={activeTab?.id}
               className={styles.tabName}
@@ -312,6 +330,9 @@ const TabsProvider = ({ children }) => {
                       className={styles.svgIcon}
                       onClick={e => {
                         e.stopPropagation()
+                        setOpenTabs(tabs =>
+                            tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
+                        )
                         setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
                       }}
                     >
@@ -322,9 +343,9 @@ const TabsProvider = ({ children }) => {
                     <IconButton
                       size='small'
                       className={styles.svgIcon}
-                      onClick={event => {
-                        event.stopPropagation()
-                        if (activeTab) unlockIfLocked(activeTab)
+                        onClick={event => {
+                          event.stopPropagation()
+                          if (activeTab) unlockIfLocked(activeTab)
                         closeTab(activeTab.route)
                       }}
                     >
@@ -333,11 +354,11 @@ const TabsProvider = ({ children }) => {
                   )}
                 </Box>
               }
-              onContextMenu={event => OpenItems(event, i)}
-              classes={{
-                root: styles.tabRoot,
-                selected: styles.selectedTab
-              }}
+                onContextMenu={event => OpenItems(event, i)}
+                classes={{
+                  root: styles.tabRoot,
+                  selected: styles.selectedTab
+                }}
             />
           ))}
         </Tabs>

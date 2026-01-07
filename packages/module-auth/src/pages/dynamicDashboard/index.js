@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -30,6 +30,8 @@ const DashboardLayout = () => {
   const [applets, setApplets] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
+   const dashboardRef = useRef(null)
+
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
@@ -95,19 +97,25 @@ const DashboardLayout = () => {
     fetchData()
   }, [_userId, _languageId])
 
-  if (loading) {
-    return <LoadingOverlay />
-  }
+  useEffect(() => {
+    if (!dashboardRef.current) return
 
-  const containsApplet = appletId => {
-    if (!Array.isArray(applets)) return false
+    const ro = new ResizeObserver(() => {
+      window.dispatchEvent(new Event('resize'))
+    })
 
-    return applets.some(applet => applet.appletId === appletId)
-  }
+    ro.observe(dashboardRef.current)
+    return () => ro.disconnect()
+  }, [])
+
+  if (loading) return <LoadingOverlay />
+
+  const containsApplet = appletId =>
+    Array.isArray(applets) && applets.some(applet => applet.appletId === appletId)
 
   return (
     <div className={styles.frame}>
-      <div className={styles.container}>
+      <div ref={dashboardRef} className={styles.container}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
