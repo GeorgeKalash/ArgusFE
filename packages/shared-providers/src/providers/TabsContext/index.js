@@ -17,8 +17,7 @@ function LoadingOverlay() {
   return <Box className={styles.loadingOverlay}></Box>
 }
 
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
+const CustomTabPanel = React.memo(({ children, value, index, ...other }) => {
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
 
@@ -42,7 +41,7 @@ function CustomTabPanel(props) {
       {children}
     </Box>
   )
-}
+})
 
 CustomTabPanel.propTypes = {
   children: PropTypes.node,
@@ -138,6 +137,7 @@ const TabsProvider = ({ children }) => {
 
   const handleCloseAllTabs = () => {
     const firstTab = openTabs[0]
+    if (openTabs.length === 1) return 
     window.history.replaceState(null, '', firstTab.route)
     setOpenTabs([firstTab])
     setCurrentTabIndex(0)
