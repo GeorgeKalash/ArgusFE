@@ -84,10 +84,7 @@ const TabsProvider = ({ children }) => {
     let cancelled = false
 
     const run = async () => {
-      try {
-        if (document?.fonts?.ready) await document.fonts.ready
-      } catch (e) {}
-
+      try { if (document?.fonts?.ready) await document.fonts.ready } catch {}
       await new Promise(r => requestAnimationFrame(r))
       await new Promise(r => requestAnimationFrame(r))
 
@@ -95,27 +92,21 @@ const TabsProvider = ({ children }) => {
     }
 
     run()
-
-    return () => {
-      cancelled = true
-    }
+    return () => (cancelled = true)
   }, [])
 
   useEffect(() => {
-    if (!tabsWrapperRef.current) return
-
+    if (!tabsWrapperRef.current || !cssReady) return
     const updateHeight = () => {
       const h = tabsWrapperRef.current.offsetHeight
-      document.documentElement.style.setProperty('--tabs-height', `${h}px`)
+      if (h > 0) document.documentElement.style.setProperty('--tabs-height', `${h}px`)
     }
-
     updateHeight()
-
     const ro = new ResizeObserver(updateHeight)
     ro.observe(tabsWrapperRef.current)
 
     return () => ro.disconnect()
-  }, [])
+  }, [cssReady])
 
   const OpenItems = (event, i) => {
     setTabsIndex(i)
@@ -133,9 +124,7 @@ const TabsProvider = ({ children }) => {
       if (node.children) {
         const result = findNode(node.children, targetRouter)
         if (result) return result
-      } else if (node.path && node.path === targetRouter) {
-        return node.name
-      }
+      } else if (node.path && node.path === targetRouter) return node.name
     }
 
     return null
@@ -146,9 +135,7 @@ const TabsProvider = ({ children }) => {
       if (node.children) {
         const result = findResourceId(node.children, targetRouter)
         if (result) return result
-      } else if (node.path && node.path === targetRouter) {
-        return node.resourceId
-      }
+      } else if (node.path && node.path === targetRouter) return node.resourceId
     }
 
     return null
@@ -156,11 +143,8 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = (event, newValue) => {
     setCurrentTabIndex(newValue)
-    if (newValue === 0 && !openTabs[newValue].page) {
-      router.push(openTabs[newValue].route)
-    } else {
-      window.history.replaceState(null, '', openTabs[newValue].route)
-    }
+    if (newValue === 0 && !openTabs[newValue].page) router.push(openTabs[newValue].route)
+    else window.history.replaceState(null, '', openTabs[newValue].route)
   }
 
   const handleCloseAllTabs = () => {
@@ -185,176 +169,122 @@ const TabsProvider = ({ children }) => {
   const closeTab = tabRoute => {
     const index = openTabs.findIndex(tab => tab.route === tabRoute)
     const activeTabsLength = openTabs.length
-
-    if (activeTabsLength === 2) {
-      handleCloseAllTabs()
-
-      return
-    }
+    if (activeTabsLength === 2) return handleCloseAllTabs()
 
     if (currentTabIndex === index) {
       const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-      if (newValue === index - 1 || router.asPath === window?.history?.state?.as) {
-        setCurrentTabIndex(newValue)
-      }
-      window.history.replaceState(null, '', openTabs?.[newValue]?.route)
-    } else if (index < currentTabIndex) {
-      setCurrentTabIndex(currentValue => currentValue - 1)
-    }
+      window.history.replaceState(null, '', openTabs[newValue]?.route)
+      setCurrentTabIndex(newValue)
+    } else if (index < currentTabIndex) setCurrentTabIndex(v => v - 1)
 
-    setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
+    setOpenTabs(prev => prev.filter(tab => tab.route !== tabRoute))
   }
 
   const reopenTab = tabRoute => {
     if (tabRoute === router.asPath) {
-      setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
+      setOpenTabs(tabs => tabs.map(tab => (tab.route === tabRoute ? { ...tab, renderKey: uuidv4() } : tab)))
       setReloadOpenedPage([])
-    } else {
-      router.push(tabRoute)
-    }
+    } else router.push(tabRoute)
   }
 
   useEffect(() => {
     if (reloadOpenedPage) {
-      setOpenTabs(openTabs => openTabs.map(tab => (tab.route === router.asPath ? { ...tab, id: uuidv4() } : tab)))
+      setOpenTabs(tabs => tabs.map(tab => (tab.route === router.asPath ? { ...tab, renderKey: uuidv4() } : tab)))
       setReloadOpenedPage([])
     }
   }, [router.asPath])
 
   useEffect(() => {
     if (initialLoadDone) {
-      const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
+      const isTabOpen = openTabs.some(tab => tab.route === router.asPath)
       if (!isTabOpen) {
         const newValueState = openTabs.length
-        setOpenTabs(prevState => [
-          ...prevState,
+        setOpenTabs(prev => [
+          ...prev,
           {
             page: children,
-            id: uuidv4(),
+            renderKey: uuidv4(),
             route: router.asPath,
-            label: lastOpenedPage
-              ? lastOpenedPage.name
-              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+            label: lastOpenedPage?.name || findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
             resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
           }
         ])
         setCurrentTabIndex(newValueState)
       } else {
-        setOpenTabs(prevState =>
-          prevState.map(tab => {
-            if (tab.route === router.asPath) return { ...tab, page: children }
-
-            return tab
-          })
-        )
+setOpenTabs(prev =>
+  prev.map(tab =>
+    tab.route === router.asPath && tab.page == null
+      ? { ...tab, page: children }
+      : tab
+  )
+)
       }
     }
-  }, [router.asPath, window.history?.state?.as])
+  }, [router.asPath])
 
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
-      const newTabs = [
-        {
-          page: router.asPath === '/default/' ? children : null,
-          id: uuidv4(),
-          route: '/default/',
-          label: 'Home'
-        }
-      ]
-
+      const newTabs = [{ page: router.asPath === '/default/' ? children : null, renderKey: uuidv4(), route: '/default/', label: 'Home' }]
       if (router.asPath !== '/default/') {
         newTabs.push({
           page: children,
-          id: uuidv4(),
+          renderKey: uuidv4(),
           route: router.asPath,
-          label: lastOpenedPage
-            ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+          label: lastOpenedPage?.name || findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
           resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
         setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
       }
-
       setOpenTabs(newTabs)
       menu.length > 0 && setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, cssReady])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone])
 
   function unlockRecord(resourceId) {
-    const body = {
-      resourceId,
-      recordId: 0,
-      reference: '',
-      userId,
-      clockStamp: new Date()
-    }
-    postRequest({
-      extension: AccessControlRepository.unlockRecord,
-      record: JSON.stringify(body)
-    })
-
+    const body = { resourceId, recordId: 0, reference: '', userId, clockStamp: new Date() }
+    postRequest({ extension: AccessControlRepository.unlockRecord, record: JSON.stringify(body) })
     removeLockedScreen(resourceId)
   }
 
   const unlockIfLocked = tab => {
     if (!tab?.resourceId) return
-    const locked = lockedScreens.some(screen => screen.resourceId === tab.resourceId)
-    if (locked) unlockRecord(tab.resourceId)
+    if (lockedScreens.some(screen => screen.resourceId === tab.resourceId)) unlockRecord(tab.resourceId)
   }
 
   return (
     <>
       <Box ref={tabsWrapperRef} className={styles.tabsWrapper}>
-        <Tabs
-          value={currentTabIndex}
-          onChange={handleChange}
-          variant='scrollable'
-          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
-          aria-label='scrollable auto tabs example'
-          classes={{ indicator: styles.tabsIndicator }}
-          className={styles.tabs}
-        >
-          {openTabs.length > 0 &&
-            openTabs.map((activeTab, i) => (
+        <Tabs value={currentTabIndex} onChange={handleChange} variant='scrollable' scrollButtons={openTabs.length > 3 ? 'auto' : 'off'} classes={{ indicator: styles.tabsIndicator }} className={styles.tabs}>
+          {openTabs.map((activeTab, i) => (
             <Tab
-              key={activeTab?.id}
+              key={activeTab.route}
               className={styles.tabName}
               label={
                 <Box display='flex' alignItems='center'>
                   <span>{activeTab.label}</span>
                   {i === currentTabIndex && (
-                    <IconButton
-                      size='small'
-                      className={styles.svgIcon}
-                      onClick={e => {
-                        e.stopPropagation()
-                        setOpenTabs(tabs =>
-                            tabs.map((tab, index) => (index === i ? { ...tab, id: uuidv4() } : tab))
-                        )
-                        setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
-                      }}
-                    >
+                    <IconButton size='small' className={styles.svgIcon} onClick={e => {
+                      e.stopPropagation()
+                      setOpenTabs(tabs => tabs.map((tab, index) => (index === i ? { ...tab, renderKey: uuidv4() } : tab)))
+                      setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
+                    }}>
                       <RefreshIcon className={styles.svgIcon} />
                     </IconButton>
                   )}
                   {activeTab.route !== '/default/' && (
-                    <IconButton
-                      size='small'
-                      className={styles.svgIcon}
-                        onClick={event => {
-                          event.stopPropagation()
-                          if (activeTab) unlockIfLocked(activeTab)
-                        closeTab(activeTab.route)
-                      }}
-                    >
+                    <IconButton size='small' className={styles.svgIcon} onClick={event => {
+                      event.stopPropagation()
+                      unlockIfLocked(activeTab)
+                      closeTab(activeTab.route)
+                    }}>
                       <CloseIcon className={styles.svgIcon} />
                     </IconButton>
                   )}
                 </Box>
               }
-                onContextMenu={event => OpenItems(event, i)}
+              onContextMenu={event => OpenItems(event, i)}
                 classes={{
                   root: styles.tabRoot,
                   selected: styles.selectedTab
@@ -365,8 +295,8 @@ const TabsProvider = ({ children }) => {
       </Box>
 
       {openTabs.map((activeTab, i) => (
-        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex} cssReady={cssReady}>
-          {activeTab.page}
+        <CustomTabPanel key={activeTab.route} index={i} value={currentTabIndex} cssReady={cssReady}>
+          <React.Fragment key={activeTab.renderKey}>{activeTab.page}</React.Fragment>
         </CustomTabPanel>
       ))}
       <Menu
