@@ -3,6 +3,7 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import styles from './MatrixGrid.module.css'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const MatrixGrid = ({
   intersectionValue = 'X',
@@ -15,6 +16,18 @@ const MatrixGrid = ({
   const gridRef = useRef(null)
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [selectedCol, setSelectedCol] = useState(null)
+
+  const { width } = useWindowDimensions()
+
+  const rowHeight =
+  width <= 768 ? 35 : width <= 1024 ? 27 : width <= 1280 ? 29.5 : width <=1366 ? 33 : width < 1600 ? 33 : 40
+
+  const rowHeightHeader =
+  width <= 768 ? 40 : width <= 1024 ? 65 : width <= 1280 ? 70 : width <=1366 ? 50 : width < 1600 ? 70 : 100
+
+  const widthLabelCell =  width <= 768 ? 160 : width <= 1024 ? 170 : width <= 1280 ? 170 : width <=1366 ? 180 : width < 1600 ? 220 : 250
+
+  const minWidth = width <= 960 ? 65 : width <= 1024 ? 70 : width <= 1280 ? 70 : width <=1366 ? 80 : width < 1600 ? 85 : 80
 
   const colKeyToRecord = useMemo(() => {
     if (!columns) return {}
@@ -50,16 +63,8 @@ const MatrixGrid = ({
         field: 'rowLabel',
         headerName: '',
         pinned: 'left',
-        width: 250,
-        cellRenderer: params => {
-          const value = params.value || ''
-          const displayValue = value.length > 30 ? value.slice(0, 30) + '...' : value
-          return (
-            <div title={value} className={styles.rowLabelCell}>
-              {displayValue}
-            </div>
-          )
-        }
+        width: widthLabelCell,
+        cellClass: styles.rowLabelCell,
       }
     ]
 
@@ -68,7 +73,7 @@ const MatrixGrid = ({
         field: `col${cIndex + 1}`,
         headerName: colItem.colLabels,
         flex: 1,
-        minWidth: 100,
+        minWidth: minWidth,
         headerComponent: props => (
           <div className={styles.rotatedHeader}>{props.displayName}</div>
         ),
@@ -151,7 +156,8 @@ const MatrixGrid = ({
         rowData={initialRowData}
         getRowId={params => params.data.id}
         columnDefs={columnDefs}
-        headerHeight={100}
+        headerHeight={rowHeightHeader}
+        rowHeight={rowHeight}
         suppressRowClickSelection
         onCellClicked={onCellClicked}
         onColumnHeaderClicked={onColumnHeaderClicked}

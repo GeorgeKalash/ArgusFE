@@ -1,9 +1,13 @@
 import React from 'react'
-import Window from './Window'
-import { Box, Button, DialogActions, DialogContent } from '@mui/material'
-
+import Window from '../Window'
+import { Box, DialogActions, DialogContent } from '@mui/material'
+import styles from './PageError.module.css'
+import CustomButton from '../../Inputs/CustomButton'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 const PageError = ({ onClose, message, height = '', spacing }) => {
-  const errorMessage =
+   const { width } = useWindowDimensions()
+    const heightDefault = width <= 960 ? 110 : width <= 1280 ? 120 : width <= 1366 ? 160 : width < 1600 ? 160 : 170
+    const errorMessage =
     typeof message === 'string'
       ? message
       : !message?.response
@@ -19,21 +23,17 @@ const PageError = ({ onClose, message, height = '', spacing }) => {
       Title='Error'
       width={450}
       spacing={spacing}
-      height={height || 200}
+      height={height || heightDefault}
       onClose={onClose}
       expandable={false}
       controlled={true}
       isLoading={false}
       refresh={false}
     >
-      <DialogContent>
-        <Box
-          sx={{
-            pt: 2
-          }}
-        >
+      <DialogContent className={styles.dialogContent} >
+        <p className={styles.errorMessageText} >
           {errorMessage}
-        </Box>
+        </p>
       </DialogContent>
       <DialogActions
         sx={{
@@ -46,9 +46,8 @@ const PageError = ({ onClose, message, height = '', spacing }) => {
             pl: 2
           }}
         >
-          <Button variant='contained' onClick={onClose} color='primary' autoFocus>
-            Ok
-          </Button>
+          <CustomButton label='ok' onClick={onClose}  autoFocus />
+         
         </Box>
       </DialogActions>
     </Window>
