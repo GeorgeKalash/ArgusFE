@@ -1,0 +1,21 @@
+.errorMessageText {
+    font-size: 16px;
+}
+
+.dialogContent{
+    padding-block: 0px !important;
+}
+
+
+@media (max-width: 1600px) { 
+    .errorMessageText {
+        font-size: 14px;
+    }
+}
+
+
+@media (max-width: 1366px) { 
+    .errorMessageText {
+        font-size: 11px;
+    }
+}
