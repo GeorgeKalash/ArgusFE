@@ -190,7 +190,8 @@ export function WindowProvider({ children }) {
                   : { access: { ...props?.access, editMode: !!props?.recordId } })}
                 window={{
                   close: () => closeWindowById(id),
-                  setTitle: newTitle => updateWindow(id, { title: newTitle || title })
+                  setTitle: newTitle => updateWindow(id, { title: newTitle || title }),
+                  setToNextTitle :  newTitle  =>   updateWindow(id, { nextToTitle: newTitle || title }),
                 }}
               />
             </Window>

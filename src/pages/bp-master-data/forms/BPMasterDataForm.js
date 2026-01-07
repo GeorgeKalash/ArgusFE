@@ -89,9 +89,9 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       const record = editMode ? { reference: formik?.values?.reference } : await refetchForm(res.recordId)
-      if (window.setTitle) {
-        window.setTitle(record?.reference ? `${labels.masterData} ${record?.reference}` : labels.masterData)
-      }
+        window.setToNextTitle(record?.reference)
+
+
     }
   })
 
@@ -147,9 +147,6 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
       ...record,
       birthDate: record?.birthDate ? formatDateFromApi(record?.birthDate) : null
     })
-
-    window.setTitle(`${labels.masterData} ${record?.reference}`)
-
     setStore(prevStore => ({
       ...prevStore,
       recordId: record?.recordId,
