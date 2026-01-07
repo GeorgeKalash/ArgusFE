@@ -1185,12 +1185,10 @@ export default function SaleTransactionForm({
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
       
-    const taxDetailsList = saTrxHeader.isVattable ? await getTaxDetails() : null
+    const taxDetailsMap = saTrxHeader.isVattable
+    ? await getAllTaxDetails()
+    : {}
 
-    const taxDetailsMap = (taxDetailsList || []).reduce((acc, t) => {
-      acc[t.taxId] = t
-      return acc
-    }, {})
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
@@ -1395,17 +1393,25 @@ export default function SaleTransactionForm({
       return taxDetailsCacheRef.current[taxId]
     }
 
+    const taxMap = await getAllTaxDetails()
+    return taxMap[taxId] || []
+  }
+
+
+  async function getAllTaxDetails() {
     const res = await getRequest({
       extension: SaleRepository.SaleTransaction.pack,
       parameters: ''
     })
 
-    const taxDetails =
-      res?.record?.taxDetails?.filter(td => td.taxId === taxId) || []
+    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
+      if (!acc[td.taxId]) acc[td.taxId] = []
+      acc[td.taxId].push(td)
+      return acc
+    }, {})
 
-    taxDetailsCacheRef.current[taxId] = taxDetails
-
-    return taxDetails
+    taxDetailsCacheRef.current = taxMap 
+    return taxMap
   }
 
 
