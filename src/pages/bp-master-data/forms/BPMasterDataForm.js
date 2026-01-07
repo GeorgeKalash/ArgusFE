@@ -147,6 +147,9 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
       ...record,
       birthDate: record?.birthDate ? formatDateFromApi(record?.birthDate) : null
     })
+
+    window.setTitle(`${labels.masterData} ${record?.reference}`)
+
     setStore(prevStore => ({
       ...prevStore,
       recordId: record?.recordId,

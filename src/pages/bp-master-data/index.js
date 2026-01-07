@@ -97,7 +97,7 @@ const BPMasterData = () => {
     openForm()
   }
 
-  function openForm(recordId, reference) {
+  function openForm(recordId) {
     stack({
       Component: BPMasterDataWindow,
       props: {
@@ -109,7 +109,6 @@ const BPMasterData = () => {
       width: 800,
       height: 500,
       title: _labels.masterData,
-      nextToTitle: reference || null
     })
   }
 
