@@ -252,10 +252,6 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
   }, [formik.values?.dtId])
 
   useEffect(() => {
-    if (formik.values.templateId) formik.setFieldValue('templateId', null)
-  }, [formik.values.templateId])
-
-  useEffect(() => {
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
@@ -710,6 +706,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
+                neverPopulate={true}
                 endpointId={FinancialRepository.PaymentVouchers.pack}
                 reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'

@@ -83,7 +83,7 @@ const CustomComboBox = ({
     <Autocomplete
       ref={autocompleteRef}
       name={name}
-      value={value}
+      value={neverPopulate ? null : value}
       size={size}
       options={store}
       key={value}
@@ -162,6 +162,14 @@ const CustomComboBox = ({
       onChange={(_, newValue) => {
         onChange(name, newValue)
         setAutoFocus(true)
+
+        if (neverPopulate) {
+         onChange(name, null)
+         if (autocompleteRef.current) {
+         const input = autocompleteRef.current.querySelector('input')
+         if (input) input.blur()
+         }
+        }
       }}
       fullWidth={fullWidth}
       readOnly={_readOnly}
@@ -285,8 +293,7 @@ const CustomComboBox = ({
             {...params}
             inputProps={{
               ...params.inputProps,
-              tabIndex: _readOnly ? -1 : 0,
-              ...(neverPopulate && { value: '' })
+              tabIndex: _readOnly ? -1 : 0
             }}
             type={type}
             variant={variant}

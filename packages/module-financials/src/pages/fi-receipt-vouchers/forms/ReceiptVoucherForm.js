@@ -200,10 +200,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     })()
   }, [])
 
-  useEffect(() => {
-    if (formik.values.templateId) formik.setFieldValue('templateId', null)
-  }, [formik.values.templateId])
-
   async function getData(recordId) {
     if (recordId) {
       const res = await getRequest({
@@ -683,6 +679,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
+                neverPopulate={true}
                 endpointId={FinancialRepository.ReceiptVouchers.pack}
                 reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'
