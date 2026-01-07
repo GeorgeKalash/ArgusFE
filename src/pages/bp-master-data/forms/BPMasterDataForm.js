@@ -11,7 +11,6 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemRepository } from 'src/repositories/SystemRepository'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
-import { useInvalidate } from 'src/hooks/resource'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -22,7 +21,7 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { useRefBehavior } from 'src/hooks/useReferenceProxy'
 
-export default function BPMasterDataForm({ labels, maxAccess: access, setEditMode, store, setStore }) {
+export default function BPMasterDataForm({ labels, maxAccess: access, invalidate, store, setStore, window }) {
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
@@ -65,33 +64,34 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
     }),
     onSubmit: async obj => {
       obj.recordId = recordId
-      const date = obj?.birthDate && formatDateToApi(obj?.birthDate)
-      const data = { ...obj, birthDate: date }
 
       const res = await postRequest({
         extension: BusinessPartnerRepository.MasterData.set,
-        record: JSON.stringify(data)
+        record: JSON.stringify({
+          ...obj,
+          birthDate: obj?.birthDate ? formatDateToApi(obj?.birthDate) : null
+        })
       })
 
-      if (!recordId) {
-        toast.success(platformLabels.Added)
-        setEditMode(true)
-        if (obj.defaultId) {
-          const data = {
-            bpId: res.recordId,
-            idNum: obj.defaultId,
-            incId: obj.defaultInc
-          }
-          await postRequest({
-            extension: BusinessPartnerRepository.MasterIDNum.set,
-            record: JSON.stringify(data)
-          })
+      if (obj.defaultId) {
+        const data = {
+          bpId: res.recordId,
+          idNum: obj.defaultId,
+          incId: obj.defaultInc
         }
-      } else toast.success(platformLabels.Edited)
+        await postRequest({
+          extension: BusinessPartnerRepository.MasterIDNum.set,
+          record: JSON.stringify(data)
+        })
+      }
 
-      setEditMode(true)
       invalidate()
-      refetchForm(res.recordId)
+      const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
+      toast.success(actionMessage)
+      const record = editMode ? { reference: formik?.values?.reference } : await refetchForm(res.recordId)
+        window.setNextToTitle(record?.reference)
+
+
     }
   })
 
@@ -124,10 +124,6 @@ export default function BPMasterDataForm({ labels, maxAccess: access, setEditMod
       }
     }
   }
-
-  const invalidate = useInvalidate({
-    endpointId: BusinessPartnerRepository.MasterData.qry
-  })
 
   const actions = [
     {
