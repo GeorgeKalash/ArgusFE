@@ -89,7 +89,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
       const actionMessage = editMode ? platformLabels.Edited : platformLabels.Added
       toast.success(actionMessage)
       const record = editMode ? { reference: formik?.values?.reference } : await refetchForm(res.recordId)
-        window.setToNextTitle(record?.reference)
+        window.setNextToTitle(record?.reference)
 
 
     }

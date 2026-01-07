@@ -191,7 +191,7 @@ export function WindowProvider({ children }) {
                 window={{
                   close: () => closeWindowById(id),
                   setTitle: newTitle => updateWindow(id, { title: newTitle || title }),
-                  setToNextTitle :  newTitle  =>   updateWindow(id, { nextToTitle: newTitle || title }),
+                  setNextToTitle :  newTitle  =>   updateWindow(id, { nextToTitle: newTitle || title }),
                 }}
               />
             </Window>
