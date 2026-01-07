@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 import React, { useEffect, useRef, useState } from 'react'
-import { ContentState, EditorState } from 'draft-js'
+import { ContentState, EditorState, Modifier } from 'draft-js'
 const Editor = dynamic(() => import('react-draft-wysiwyg').then(mod => mod.Editor), { ssr: false })
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import { tagGroups } from '@argus/shared-domain/src/resources/Tags'
@@ -46,6 +46,30 @@ export default function TextEditor({ value = '', onChange }) {
       reader.readAsDataURL(file)
     })
   }
+
+  const insertTag = tag => {
+    const content = editorState.getCurrentContent()
+    const selection = editorState.getSelection()
+
+    const newContent = Modifier.insertText(
+      content,
+      selection,
+      ` # ${tag} # `
+    )
+
+    const newState = EditorState.push(
+      editorState,
+      newContent,
+      'insert-characters'
+    )
+
+    setEditorState(newState)
+
+    if (onChange) onChange(newState)
+
+    setOpenDropdown(null)
+  }
+
 
   return (
     <>
@@ -112,8 +136,7 @@ export default function TextEditor({ value = '', onChange }) {
             <DropdownButton
               key={group.type}
               group={group}
-              editorState={editorState}
-              onChange={handleEditorChange}
+              onItemClick={insertTag}
               openDropdown={openDropdown}
               setOpenDropdown={setOpenDropdown}
             />

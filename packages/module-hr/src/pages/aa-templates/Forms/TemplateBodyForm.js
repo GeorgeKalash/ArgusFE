@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import toast from 'react-hot-toast'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
@@ -49,20 +49,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
       subject: yup.string().required()
     }),
     onSubmit: async obj => {
-      const html = draftToHtml(convertToRaw(editorState.getCurrentContent()), {
-        entityStyleFn: entity => {
-          const type = entity.get('type')
-          const data = entity.getData()
-
-          if (type === 'LINK') {
-            return {
-              element: 'a',
-              attributes: { href: data.url },
-              style: {}
-            }
-          }
-        }
-      })
+      const html = draftToHtml(convertToRaw(editorState.getCurrentContent()))
 
       await postRequest({
         extension: AdministrationRepository.TemplateBody.set,
@@ -81,8 +68,13 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
 
   function decodeHtml(textBody) {
     if (!textBody) return ''
+
+    if (/%u[0-9A-Fa-f]{4}/.test(textBody)) {
+      return unescape(textBody)
+    }
+
     try {
-      return decodeURIComponent(textBody.replace(/\+/g, '%2B'))
+      return decodeURIComponent(textBody)
     } catch {
       return textBody
     }
@@ -96,7 +88,9 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
           parameters: `_teId=${recordId}&_languageId=${languageId}`
         })
 
-        const decodedHTML = res?.record?.textBody ? decodeHtml(res.record.textBody) : ''
+        const decodedHTML = res?.record?.textBody
+          ? decodeHtml(res.record.textBody)
+          : ''
 
         setDecodedHtmlForEditor(decodedHTML)
 
@@ -119,6 +113,12 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
               }
 
               if (nodeName === 'a') {
+                const text = node.textContent || ''
+
+                if (/^#.+#$/.test(text)) {
+                  return null
+                }
+
                 return createEntity('LINK', 'MUTABLE', {
                   url: node.getAttribute('href')
                 })
@@ -210,7 +210,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
                 maxLength={30}
               />
             </Grid>
-            <TextEditor value={decodedHtmlForEditor} onChange={setEditorState} />
+            <TextEditor value={decodedHtmlForEditor} onChange={setEditorState}/>
           </Grid>
         </Grow>
       </VertLayout>
