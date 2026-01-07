@@ -21,7 +21,6 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
-import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import WorkFlow from '@argus/shared-ui/src/components/Shared/WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -64,6 +63,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
   const [defaults, setDefaults] = useState({ userDefaultsList: {}, systemDefaultsList: {} })
+  const taxDetailsCacheRef = useRef({})
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.SalesOrder,
@@ -785,19 +785,25 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   ]
 
-  async function fillForm(soHeader, soItems, client) {
-    const shipAdd = await getAddress(soHeader?.record?.shipToAddressId)
-    const billAdd = await getAddress(soHeader?.record?.billToAddressId)
+  async function refetchForm(soId) {
+    if (!soId) return
 
-    soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
+    const { header, items } = await getSalesOrder(soId)
+    const client = await getClient(header?.clientId)
+    const shipAdd = await getAddress(header?.shipToAddressId)
+    const billAdd = await getAddress(header?.billToAddressId)
+
+    header?.tdType == 1 || header?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
 
+    const taxDetailsMap = header?.isVattable
+      ? await getAllTaxDetails()
+      : {}
     const modifiedList =
-      soItems?.list?.length != 0
+      items?.length != 0
         ? await Promise.all(
-            soItems.list?.map(async (item, index) => {
-              const taxDetailsResponse = soHeader?.record?.isVattable ? await getTaxDetails(item.taxId) : null
+            items?.map(async (item, index) => {
               const itemInfo = await getItem(item?.itemId)
 
               return {
@@ -809,22 +815,22 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 vatAmount: item.vatAmount,
                 extendedPrice: item.extendedPrice,
                 msId: itemInfo?.msId || item.msId,
-                taxDetails: taxDetailsResponse
+                taxDetails: taxDetailsMap?.[item?.taxId] || null
               }
             })
           )
         : formik.initialValues.items
 
     formik.setValues({
-      ...soHeader.record,
+      ...header,
       currentDiscount:
-        soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
-          ? soHeader?.record?.tdAmount
-          : soHeader?.record?.tdPct,
-      amount: parseFloat(soHeader?.record?.amount).toFixed(2),
+        header?.tdType == 1 || header?.tdType == null
+          ? header?.tdAmount
+          : header?.tdPct,
+      amount: parseFloat(header?.amount).toFixed(2),
       shipAddress: shipAdd,
       billAddress: billAdd,
-      tdPct: soHeader?.record?.tdPct || 0,
+      tdPct: header?.tdPct || 0,
       initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
     })
@@ -832,20 +838,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   async function getSalesOrder(soId) {
     const res = await getRequest({
-      extension: SaleRepository.SalesOrder.get,
+      extension: SaleRepository.SalesOrder.get2,
       parameters: `_recordId=${soId}`
     })
 
-    res.record.date = formatDateFromApi(res?.record?.date)
+    res.record.header.date = formatDateFromApi(res?.record?.header?.date)
 
-    return res
-  }
-
-  async function getSalesOrderItems(soId) {
-    return await getRequest({
-      extension: SaleRepository.SalesOrderItem.qry,
-      parameters: `_params=1|${soId}`
-    })
+    return res.record
   }
 
   async function getAddress(addressId) {
@@ -906,14 +905,31 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   async function getTaxDetails(taxId) {
-    if (!taxId) return
+    if (!taxId) return []
 
+    if (taxDetailsCacheRef.current[taxId]) {
+      return taxDetailsCacheRef.current[taxId]
+    }
+
+    const taxMap = await getAllTaxDetails()
+    return taxMap[taxId] || []
+  }
+
+
+  async function getAllTaxDetails() {
     const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
+      extension: SaleRepository.SalesOrder.pack,
+      parameters: ''
     })
 
-    return res?.list
+    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
+      if (!acc[td.taxId]) acc[td.taxId] = []
+      acc[td.taxId].push(td)
+      return acc
+    }, {})
+
+    taxDetailsCacheRef.current = taxMap 
+    return taxMap
   }
 
   async function getItemConvertPrice(itemId, update, muId) {
@@ -1152,13 +1168,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     }
   }
 
-  async function refetchForm(recordId) {
-    const soHeader = await getSalesOrder(recordId)
-    const soItems = await getSalesOrderItems(recordId)
-    const client = await getClient(soHeader?.record?.clientId)
-
-    fillForm(soHeader, soItems, client)
-  }
   function setAddressValues(obj) {
     Object.entries(obj).forEach(([key, value]) => {
       formik.setFieldValue(key, value)
@@ -1191,10 +1200,12 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   }
 
   const getMeasurementUnits = async () => {
-    return await getRequest({
-      extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=0`
+    const res = await getRequest({
+      extension: SaleRepository.SalesOrder.pack,
+      parameters: ''
     })
+
+    return res.record.measurementUnits
   }
 
   async function getSiteRef(siteId) {
@@ -1283,7 +1294,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
   useEffect(() => {
     ;(async function () {
       const muList = await getMeasurementUnits()
-      setMeasurements(muList?.list)
+      setMeasurements(muList)
       const defaultValues = await getDefaultData()
       if (recordId) {
         refetchForm(recordId)
@@ -1341,8 +1352,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${SystemFunction.SalesOrder}`}
+                    endpointId={SaleRepository.SalesOrder.pack}
+                    reducer={response => response?.record?.documentTypes}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -1363,7 +1374,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SaleRepository.SalesPerson.qry}
+                    endpointId={SaleRepository.SalesOrder.pack}
+                    reducer={response => response?.record?.salesPeople}
                     filter={!editMode ? item => !item.isInactive : undefined}
                     name='spId'
                     label={labels.salesPerson}
@@ -1385,7 +1397,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
+                    endpointId={SaleRepository.SalesOrder.pack}
+                    reducer={response => response?.record?.currencies}
                     name='currencyId'
                     label={labels.currency}
                     valueField='recordId'
@@ -1433,7 +1446,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
                 </Grid>
                 <Grid item xs={4}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Plant.qry}
+                    endpointId={SaleRepository.SalesOrder.pack}
+                    reducer={response => response?.record?.plants}
                     name='plantId'
                     label={labels.plant}
                     readOnly={isClosed}
@@ -1539,7 +1553,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={FinancialRepository.TaxSchedules.qry}
+                endpointId={SaleRepository.SalesOrder.pack}
+                reducer={response => response?.record?.taxSchedules}
                 name='taxId'
                 label={labels.tax}
                 valueField='recordId'
@@ -1559,7 +1574,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
+                endpointId={SaleRepository.SalesOrder.pack}
+                reducer={response => response?.record?.sites}
                 name='siteId'
                 readOnly={isClosed}
                 label={labels.site}
@@ -1582,8 +1598,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesZone.qry}
-                parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                endpointId={SaleRepository.SalesOrder.pack}
+                reducer={response => response?.record?.saleZones}
                 name='szId'
                 label={labels.saleZone}
                 valueField='recordId'
