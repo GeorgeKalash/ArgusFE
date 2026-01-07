@@ -18,16 +18,19 @@ function LoadingOverlay() {
 }
 
 function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
+  const { children, value, index, cssReady, ...other } = props
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
 
   useEffect(() => {
-    if (!loading) {
-      const timer = setTimeout(() => setShowOverlay(true), 300)
-
-      return () => clearTimeout(timer)
+    if (loading) {
+      setShowOverlay(false)
+      return
     }
+
+    const timer = setTimeout(() => setShowOverlay(true), 300)
+
+    return () => clearTimeout(timer)
   }, [loading])
 
   return (
@@ -38,8 +41,8 @@ function CustomTabPanel(props) {
       className={`${styles.customTabPanel} ${value !== index ? styles.hidden : ''}`}
       {...other}
     >
-      {!showOverlay && <LoadingOverlay />}
-      {children}
+      {(!showOverlay || !cssReady) && <LoadingOverlay />}
+      {cssReady ? children : null}
     </Box>
   )
 }
@@ -47,7 +50,8 @@ function CustomTabPanel(props) {
 CustomTabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired
+  value: PropTypes.number.isRequired,
+  cssReady: PropTypes.bool
 }
 
 const TabsProvider = ({ children }) => {
@@ -76,6 +80,29 @@ const TabsProvider = ({ children }) => {
   const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
+
+  const [cssReady, setCssReady] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const run = async () => {
+      try {
+        if (document?.fonts?.ready) await document.fonts.ready
+      } catch (e) {}
+
+      await new Promise(r => requestAnimationFrame(r))
+      await new Promise(r => requestAnimationFrame(r))
+
+      if (!cancelled) setCssReady(true)
+    }
+
+    run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!tabsWrapperRef.current) return
@@ -210,7 +237,7 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (openTabs[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
+    if (!initialLoadDone && cssReady && router.asPath && (menu.length > 0 || dashboardId)) {
       const newTabs = [
         {
           page: router.asPath === '/default/' ? children : null,
@@ -236,7 +263,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       menu.length > 0 && setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, cssReady])
 
   function unlockRecord(resourceId) {
     const body = {
@@ -307,17 +334,17 @@ const TabsProvider = ({ children }) => {
                 </Box>
               }
               onContextMenu={event => OpenItems(event, i)}
-                classes={{
-                  root: styles.tabRoot,
-                  selected: styles.selectedTab
-                }}
+              classes={{
+                root: styles.tabRoot,
+                selected: styles.selectedTab
+              }}
             />
           ))}
         </Tabs>
       </Box>
 
       {openTabs.map((activeTab, i) => (
-        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex} cssReady={cssReady}>
           {activeTab.page}
         </CustomTabPanel>
       ))}
