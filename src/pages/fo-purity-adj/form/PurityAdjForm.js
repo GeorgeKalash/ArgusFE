@@ -237,8 +237,8 @@ const calculateTotal = key =>
   const columns = [
     {
       component: 'numberfield',
-      name: labels.count,
-      label: '',
+      name: 'id',
+      label: labels.count,
       props: { readOnly: true }
     },
     {
@@ -350,19 +350,7 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
-      async onChange({ row: { update, newRow } }) {
-        setRecalc(true)
-
-        const rmQty = formik.values?.header?.baseSalesMetalPurity
-          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
-          : 0
-        update({
-          deltaPurity:((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
-          rmQty,
-          deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
-        })
-      }
+      props: { decimalScale: 2, readOnly: true },
     },
     {
       component: 'numberfield',
@@ -374,7 +362,19 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.newPurity,
-      props: { readOnly: true, decimalScale: 2 }
+      props: {decimalScale: 2, maxLength: 11 , allowNegative: false},
+      async onChange({ row: { update, newRow } }) {
+       setRecalc(true)
+       
+       const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+        update({
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          newRmQty,
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
+        })
+      }
     },
     {
       component: 'numberfield',
