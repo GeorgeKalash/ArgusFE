@@ -201,6 +201,15 @@ const calculateTotal = key =>
     setAllMetals(res?.list)
   }
 
+  const getOpenMetalPurity = async itemId => {
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+  
+    return res?.record?.isOpenMetalPurity || false
+  }
+
   async function refetchForm(recordId) {
     const { record } = await getRequest({
       extension: FoundryRepository.PurityAdjustment.get2,
@@ -213,11 +222,18 @@ const calculateTotal = key =>
       return
     }
 
-    const itemsList = (record?.items || []).map((item, index) => ({
-      ...item,
-      id: index + 1,
-      purity: item.purity * 1000
-    }))
+   const itemsList = await Promise.all(
+    (record?.items || []).map(async (item, index) => {
+     const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+
+     return {
+     ...item,
+     id: index + 1,
+     purity: item.purity * 1000,
+     isOpenMetalPurity,
+     }
+    })
+   )
 
     const metalInfo = await getBaseSalesMetalPurity()
 
@@ -298,6 +314,7 @@ const calculateTotal = key =>
       },
       onChange: async ({ row: { update, newRow } }) => {
         setRecalc(true)
+        const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
 
         const newRmQty = formik.values?.header?.baseSalesMetalPurity
           ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
@@ -306,7 +323,8 @@ const calculateTotal = key =>
           stdPurity: (newRow?.stdPurity || 0).toFixed(2),
           deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
           newRmQty,
-          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2),
+          isOpenMetalPurity
         })
       },
       propsReducer({ row, props }) {
@@ -350,7 +368,22 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { decimalScale: 2, readOnly: true },
+      props: { decimalScale: 2 },
+      async onChange({ row: { update, newRow } }) {
+        setRecalc(true)
+
+        const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+        update({
+          deltaPurity:((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          rmQty,
+          deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
+        })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isOpenMetalPurity }
+      }
     },
     {
       component: 'numberfield',
