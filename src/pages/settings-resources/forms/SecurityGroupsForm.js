@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -12,10 +12,13 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import Form from 'src/components/Shared/Form'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
 
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [filterType, setFilterType] = useState('2')
 
   const {
     query: { data }
@@ -161,6 +164,25 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     }
   ]
 
+  const hasAnyAccess = item =>
+    item.get || item.add || item.edit || item.del || item.close || item.post || item.unpost || item.reopen
+
+  const filteredData = useMemo(() => {
+    if (!data?.list) return data
+
+    let list = data.list
+
+    if (filterType == 1) {
+      list = list.filter(item => !hasAnyAccess(item))
+    }
+
+    if (filterType == 3) {
+      list = list.filter(item => hasAnyAccess(item))
+    }
+
+    return { ...data, list }
+  }, [data, filterType])
+
   return (
     <Form onSave={onSubmit} maxAccess={maxAccess}>
       <VertLayout>
@@ -184,13 +206,27 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FILTER}
+                name='filter'
+                label={labels.filter}
+                value={filterType}
+                valueField='key'
+                displayField='value'
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  setFilterType(newValue?.key ?? 2)
+                }}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             name='items'
             columns={columns}
-            gridData={data}
+            gridData={filteredData}
             rowId={['sgId']}
             maxAccess={maxAccess}
             pagination={false}
