@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -12,7 +12,6 @@ import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import { debounce } from 'lodash'
 import { SummaryFiguresItem } from '@argus/shared-domain/src/resources/DashboardFigures'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Box } from '@mui/material'
@@ -25,20 +24,13 @@ import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTabl
 import styles from './DynamicDashboard.module.css'
 
 const DashboardLayout = () => {
-  const { getRequest, LoadingOverlay } = useContext(RequestsContext)
+  const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
-   const dashboardRef = useRef(null)
-
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
-
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
@@ -90,32 +82,20 @@ const DashboardLayout = () => {
           groupedData: groupedData
         }
       })
-
-      debouncedCloseLoading()
     }
 
     fetchData()
   }, [_userId, _languageId])
 
-  useEffect(() => {
-    if (!dashboardRef.current) return
+  const containsApplet = appletId => {
+    if (!Array.isArray(applets)) return false
 
-    const ro = new ResizeObserver(() => {
-      debounce(() => window.dispatchEvent(new Event('resize')), 300)()
-    })
-
-    ro.observe(dashboardRef.current)
-    return () => ro.disconnect()
-  }, [])
-
-  if (loading) return <LoadingOverlay />
-
-  const containsApplet = appletId =>
-    Array.isArray(applets) && applets.some(applet => applet.appletId === appletId)
+    return applets.some(applet => applet.appletId === appletId)
+  }
 
   return (
     <div className={styles.frame}>
-      <div ref={dashboardRef} className={styles.container}>
+      <div className={styles.container}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
