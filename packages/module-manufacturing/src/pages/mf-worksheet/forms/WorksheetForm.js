@@ -284,8 +284,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.DocumentType.qry}
-                    parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                    endpointId={ManufacturingRepository.Worksheet.pack}
+                    reducer={response => response?.record?.documentTypes}
                     name='dtId'
                     label={labels.documentType}
                     columnsInDropDown={[
@@ -380,7 +380,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={ManufacturingRepository.WorkCenter.qry}
+                        endpointId={ManufacturingRepository.Worksheet.pack}
+                        reducer={response => response?.record?.workCenters}
                         name='workCenterId'
                         label={labels.workCenter}
                         readOnly
@@ -524,7 +525,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={InventoryRepository.Site.qry}
+                        endpointId={ManufacturingRepository.Worksheet.pack}
+                        reducer={response => response?.record?.sites}
                         name='siteId'
                         label={labels.site}
                         required
@@ -637,7 +639,8 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.ProductionShifts.qry}
+                    endpointId={ManufacturingRepository.Worksheet.pack}
+                    reducer={response => response?.record?.shifts}
                     name='shiftId'
                     label={labels.shift}
                     maxAccess={access}
