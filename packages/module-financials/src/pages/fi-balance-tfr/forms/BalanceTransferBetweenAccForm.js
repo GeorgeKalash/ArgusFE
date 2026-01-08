@@ -203,10 +203,6 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
     }
   ]
 
-  useEffect(() => {
-    formik.setFieldValue('templateId', '')
-  }, [formik.values.notes])
-
   return (
     <FormShell
       resourceId={ResourceIds.FIBalanceTfr}
@@ -500,21 +496,17 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
+                    neverPopulate={true}
                     endpointId={FinancialRepository.DescriptionTemplate.qry}
                     name='templateId'
                     label={labels.descriptionTemplate}
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue?.name) {
-                        let notes = formik.values.notes
-                        notes += notes && '\n'
-                        notes += newValue?.name
-
-                        notes && formik.setFieldValue('notes', notes)
-                        newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
-                      }
+                    onChange={(_, newValue) => {
+                      const notes = formik.values.notes || ''
+                      if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
+                      formik.setFieldValue('templateId',newValue?.recordId || null)
                     }}
                     readOnly={isPosted}
                     error={formik.touched.templateId && Boolean(formik.errors.templateId)}

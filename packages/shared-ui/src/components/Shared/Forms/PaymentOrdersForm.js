@@ -223,10 +223,6 @@ export default function PaymentOrdersForm({ recordId, window }) {
     })()
   }, [])
 
-  useEffect(() => {
-    formik.setFieldValue('templateId', '')
-  }, [formik.values.notes])
-
   const onWorkFlowClick = async () => {
     stack({
       Component: WorkFlow,
@@ -549,21 +545,17 @@ export default function PaymentOrdersForm({ recordId, window }) {
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
+                neverPopulate={true}
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 valueField='recordId'
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  if (newValue?.name) {
-                    let notes = formik.values.notes
-                    notes += notes && '\n'
-                    notes += newValue?.name
-
-                    notes && formik.setFieldValue('notes', notes)
-                    newValue?.name && formik.setFieldValue('templateId', newValue?.recordId || null)
-                  }
+                onChange={(_, newValue) => {
+                  const notes = formik.values.notes || ''
+                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 readOnly={isClosed || isCancelled}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}

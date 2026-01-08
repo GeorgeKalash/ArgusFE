@@ -18,6 +18,7 @@ export default function ResourceComboBox({
   defaultIndex,
   reducer = res => res?.list,
   refresh,
+  allowClear,
   setData,
   ...rest
 }) {
@@ -134,6 +135,7 @@ export default function ResourceComboBox({
       {...{
         ...rest,
         refresh,
+        allowClear,
         fetchData,
         name,
         fullName: rest.name,

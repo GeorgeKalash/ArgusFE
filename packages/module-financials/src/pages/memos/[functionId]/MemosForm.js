@@ -167,10 +167,6 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
     })()
   }, [])
 
-  useEffect(() => {
-    formik.setFieldValue('templateId', '')
-  }, [formik.values.notes])
-
   const onPost = async () => {
     const res = await postRequest({
       extension: FinancialRepository.FiMemo.post,
@@ -667,6 +663,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
+                neverPopulate={true}
                 endpointId={FinancialRepository.DescriptionTemplate.qry}
                 name='templateId'
                 label={labels.descriptionTemplate}
@@ -674,13 +671,10 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
                 readOnly={isPosted || isCancelled}
                 displayField='name'
                 values={formik.values}
-                onChange={(event, newValue) => {
-                  let notes = formik.values.notes
-                  notes += newValue?.name && formik.values.notes && '\n'
-                  notes += newValue?.name
-
-                  notes && formik.setFieldValue('notes', notes)
-                  newValue?.name && formik.setFieldValue('templateId', newValue.recordId)
+                onChange={(_, newValue) => {
+                  const notes = formik.values.notes || ''
+                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}

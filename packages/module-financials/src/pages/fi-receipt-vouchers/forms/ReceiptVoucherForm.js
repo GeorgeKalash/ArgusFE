@@ -7,7 +7,6 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
@@ -15,16 +14,12 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
-import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
-import { LogisticsRepository } from '@argus/repositories/src/repositories/LogisticsRepository'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
@@ -32,6 +27,7 @@ import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiC
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -192,9 +188,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
       parameters: `_recordId=${cashAccountId}`
     })
 
-    formik.setFieldValue('cashAccountId', cashAccountResult?.recordId)
-    formik.setFieldValue('cashAccountRef', cashAccountResult?.reference)
-    formik.setFieldValue('cashAccountName', cashAccountResult?.name)
+    formik.setFieldValue('cashAccountId', cashAccountResult?.recordId || null)
+    formik.setFieldValue('cashAccountRef', cashAccountResult?.reference || '')
+    formik.setFieldValue('cashAccountName', cashAccountResult?.name || '')
   }
 
   useEffect(() => {
@@ -367,8 +363,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_dgId=${SystemFunction.ReceiptVoucher}&_startAt=${0}&_pageSize=${50}`}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.documentTypes}
                 filter={!editMode ? item => item.activeStatus === 1 : undefined}
                 name='dtId'
                 label={labels.documentType}
@@ -415,7 +411,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.plants}
                 name='plantId'
                 readOnly={isCancelled || isPosted}
                 label={labels.plant}
@@ -475,7 +472,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesPerson.qry}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.salesPeople}
                 name='spId'
                 readOnly={!formik.values.accountId || isCancelled || isPosted}
                 label={labels.salePerson}
@@ -496,7 +494,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                datasetId={DataSets.PAYMENT_METHOD}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.paymentMethods}
                 name='paymentMethod'
                 readOnly={isCancelled || isPosted}
                 label={labels.receiptMethod}
@@ -532,8 +531,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
 
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={CashBankRepository.CashAccount.qry}
-                parameters={`_type=${formik.values.paymentMethod == 2 ? 1 : 0}`}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.cashAccounts}
+                filter={item => formik.values.paymentMethod != 2 || Number(item.type) == 1}
                 name='cashAccountId'
                 readOnly={isCancelled || isPosted}
                 required
@@ -577,7 +577,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
               <Grid container spacing={1} alignItems='center'>
                 <Grid item xs={8}>
                   <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
+                    endpointId={FinancialRepository.ReceiptVouchers.pack}
+                    reducer={response => response?.record?.currencies}
                     name='currencyId'
                     readOnly={isCancelled || isPosted}
                     required
@@ -627,7 +628,8 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             </Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                endpointId={LogisticsRepository.LoCollector.qry}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.collectors}
                 name='collectorId'
                 readOnly={isCancelled || isPosted}
                 label={labels.collector}
@@ -677,17 +679,19 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
               <ResourceComboBox
-                neverPopulate
-                endpointId={FinancialRepository.DescriptionTemplate.qry}
+                neverPopulate={true}
+                endpointId={FinancialRepository.ReceiptVouchers.pack}
+                reducer={response => response?.record?.descriptionTemplates}
                 name='templateId'
                 label={labels.descriptionTemplate}
                 readOnly={isCancelled || isPosted}
                 valueField='recordId'
                 displayField='name'
+                values={formik.values} 
                 onChange={(_, newValue) => {
-                  let notes = formik.values.notes
-
-                  if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
+                  const notes = formik.values.notes || ''
+                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
+                  formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                 maxAccess={maxAccess}
