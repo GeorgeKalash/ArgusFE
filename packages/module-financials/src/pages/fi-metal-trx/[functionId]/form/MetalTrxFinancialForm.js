@@ -795,20 +795,23 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    neverPopulate
+                    neverPopulate={true}
                     endpointId={FinancialRepository.DescriptionTemplate.qry}
                     name='templateId'
                     label={labels.descriptionTemplate}
                     valueField='recordId'
                     displayField='name'
                     readOnly={isPosted}
-                    onChange={(event, newValue) => {
-                      if (newValue?.name)
-                        formik.setFieldValue('description', formik.values.description + newValue?.name + '\n')
+                    values={formik.values}
+                    onChange={(_, newValue) => {
+                     const description = formik.values.description || ''
+                     if (newValue?.name) formik.setFieldValue('description', description === '' ? newValue.name : `${description}\n${newValue.name}`)
+                     formik.setFieldValue('templateId',newValue?.recordId || null)
                     }}
+                    error={formik.touched.templateId && Boolean(formik.errors.templateId)}
                     maxAccess={maxAccess}
                   />
-                </Grid>
+              </Grid>
                 <Grid item xs={12}>
                   <CustomTextArea
                     name='description'

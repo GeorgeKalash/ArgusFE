@@ -688,10 +688,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
                 valueField='recordId'
                 displayField='name'
                 values={formik.values} 
-                allowClear={false}
                 onChange={(_, newValue) => {
-                  let notes = formik.values.notes
-                  if (newValue?.name) formik.setFieldValue('notes', notes + newValue?.name + '\n')
+                  const notes = formik.values.notes || ''
+                  if (newValue?.name) formik.setFieldValue('notes', notes === '' ? newValue.name : `${notes}\n${newValue.name}`)
                   formik.setFieldValue('templateId',newValue?.recordId || null)
                 }}
                 error={formik.touched.templateId && Boolean(formik.errors.templateId)}
