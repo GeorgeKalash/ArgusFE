@@ -798,7 +798,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       : setCycleButtonState({ text: '%', value: 2 })
 
     const taxDetailsMap = header?.isVattable
-      ? await getAllTaxDetails()
+      ? taxDetailsCacheRef.current
       : {}
     const modifiedList =
       items?.length != 0
@@ -911,25 +911,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       return taxDetailsCacheRef.current[taxId]
     }
 
-    const taxMap = await getAllTaxDetails()
-    return taxMap[taxId] || []
-  }
-
-
-  async function getAllTaxDetails() {
-    const res = await getRequest({
-      extension: SaleRepository.SalesOrder.pack,
-      parameters: ''
-    })
-
-    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
-      if (!acc[td.taxId]) acc[td.taxId] = []
-      acc[td.taxId].push(td)
-      return acc
-    }, {})
-
-    taxDetailsCacheRef.current = taxMap 
-    return taxMap
+    return []
   }
 
   async function getItemConvertPrice(itemId, update, muId) {
@@ -1199,13 +1181,21 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     })
   }
 
-  const getMeasurementUnits = async () => {
+  const getPackData = async () => {
     const res = await getRequest({
       extension: SaleRepository.SalesOrder.pack,
       parameters: ''
     })
 
-    return res.record.measurementUnits
+    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
+      if (!acc[td.taxId]) acc[td.taxId] = []
+      acc[td.taxId].push(td)
+      return acc
+    }, {})
+
+    taxDetailsCacheRef.current = taxMap 
+
+    return res?.record?.measurementUnits || []
   }
 
   async function getSiteRef(siteId) {
@@ -1293,7 +1283,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getMeasurementUnits()
+      const muList = await getPackData()
       setMeasurements(muList)
       const defaultValues = await getDefaultData()
       if (recordId) {
