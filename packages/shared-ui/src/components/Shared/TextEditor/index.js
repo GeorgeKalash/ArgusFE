@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ContentState, EditorState, Modifier } from 'draft-js'
 const Editor = dynamic(() => import('react-draft-wysiwyg').then(mod => mod.Editor), { ssr: false })
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
@@ -133,6 +133,7 @@ export default function TextEditor({ value = '', onChange }) {
             backgroundColor: '#fff'
           }}
           toolbarCustomButtons={tagGroups.map(group => (
+
             <DropdownButton
               key={group.type}
               group={group}
