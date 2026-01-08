@@ -101,7 +101,7 @@ const DashboardLayout = () => {
     if (!dashboardRef.current) return
 
     const ro = new ResizeObserver(() => {
-      window.dispatchEvent(new Event('resize'))
+      debounce(() => window.dispatchEvent(new Event('resize')), 300)()
     })
 
     ro.observe(dashboardRef.current)

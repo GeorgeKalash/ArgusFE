@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import DynamicDashboard from '@argus/module-auth/src/pages/dynamicDashboard'
 import DeliveryDashboard from '@argus/module-auth/src/pages/deliveryDashboard'
 import SalesPersonDashboard from '@argus/module-auth/src/pages/salesPersonDashboard'
 
 const Home = () => {
-  const { dashboardId } = useMemo(() => JSON.parse(window.sessionStorage.getItem('userData')), []) 
+  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
 
   const renderDashboard = () => {
     switch (dashboardId) {
