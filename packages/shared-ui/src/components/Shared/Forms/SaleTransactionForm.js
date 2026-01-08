@@ -1186,7 +1186,7 @@ export default function SaleTransactionForm({
       : setCycleButtonState({ text: '%', value: 2 })
       
     const taxDetailsMap = saTrxHeader.isVattable
-    ? await getAllTaxDetails()
+    ? taxDetailsCacheRef.current
     : {}
 
 
@@ -1267,14 +1267,23 @@ export default function SaleTransactionForm({
     return res.record
   }
 
-  const getMeasurementUnits = async () => {
+  const getPackData = async () => {
     const res = await getRequest({
       extension: SaleRepository.SaleTransaction.pack,
       parameters: ''
     })
 
-    return res.record.measurementUnits
+    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
+      if (!acc[td.taxId]) acc[td.taxId] = []
+      acc[td.taxId].push(td)
+      return acc
+    }, {})
+
+    taxDetailsCacheRef.current = taxMap 
+
+    return res?.record?.measurementUnits || []
   }
+
 
   async function fillMetalPrice(baseMetalCuId) {
     if (baseMetalCuId) {
@@ -1393,25 +1402,7 @@ export default function SaleTransactionForm({
       return taxDetailsCacheRef.current[taxId]
     }
 
-    const taxMap = await getAllTaxDetails()
-    return taxMap[taxId] || []
-  }
-
-
-  async function getAllTaxDetails() {
-    const res = await getRequest({
-      extension: SaleRepository.SaleTransaction.pack,
-      parameters: ''
-    })
-
-    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
-      if (!acc[td.taxId]) acc[td.taxId] = []
-      acc[td.taxId].push(td)
-      return acc
-    }, {})
-
-    taxDetailsCacheRef.current = taxMap 
-    return taxMap
+    return []
   }
 
 
@@ -1876,7 +1867,7 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getMeasurementUnits()
+      const muList = await getPackData()
       setMeasurements(muList)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
