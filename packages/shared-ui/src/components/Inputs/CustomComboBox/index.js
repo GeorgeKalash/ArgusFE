@@ -56,6 +56,8 @@ const CustomComboBox = ({
   )
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [inputValue, setInputValue] = useState('')
+
   const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
@@ -83,7 +85,12 @@ const CustomComboBox = ({
     <Autocomplete
       ref={autocompleteRef}
       name={name}
-      value={neverPopulate ? null : value}
+      value={value}
+      inputValue={neverPopulate ? inputValue : undefined}
+      onInputChange={(_, newInputValue) => {              
+        if (neverPopulate) setInputValue(newInputValue)
+      }}
+
       size={size}
       options={store}
       key={value}
@@ -164,11 +171,8 @@ const CustomComboBox = ({
         setAutoFocus(true)
 
         if (neverPopulate) {
-         onChange(name, null)
-         if (autocompleteRef.current) {
-         const input = autocompleteRef.current.querySelector('input')
-         if (input) input.blur()
-         }
+          setInputValue('') 
+          onChange(name, '')
         }
       }}
       fullWidth={fullWidth}
