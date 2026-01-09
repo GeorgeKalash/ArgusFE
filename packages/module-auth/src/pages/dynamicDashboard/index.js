@@ -35,6 +35,11 @@ const DashboardLayout = () => {
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
+  
+useEffect(() => {
+  if (!data) return
+  requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+}, [data])
 
   useEffect(() => {
     const controller = new AbortController() 
