@@ -22,41 +22,13 @@ function CustomTabPanel(props) {
   const { loading } = useContext(RequestsContext)
   const [showOverlay, setShowOverlay] = useState(false)
 
-  const isActive = value === index
-
   useEffect(() => {
-    if (loading) {
-      setShowOverlay(false)
-      return
-    }
+    if (!loading) {
+      const timer = setTimeout(() => setShowOverlay(true), 300)
 
-    const timer = setTimeout(() => setShowOverlay(true), 300)
-    return () => clearTimeout(timer)
+      return () => clearTimeout(timer)
+    }
   }, [loading])
-
-  useEffect(() => {
-    if (!isActive) return
-    if (typeof window === 'undefined') return
-
-    let raf1 = 0
-    let raf2 = 0
-    const run = () => {
-      raf1 = window.requestAnimationFrame(() => {
-        raf2 = window.requestAnimationFrame(() => {
-          window.dispatchEvent(new Event('resize'))
-        })
-      })
-    }
-
-    run()
-    const t = setTimeout(run, 120)
-
-    return () => {
-      clearTimeout(t)
-      if (raf1) window.cancelAnimationFrame(raf1)
-      if (raf2) window.cancelAnimationFrame(raf2)
-    }
-  }, [isActive, showOverlay])
 
   return (
     <Box
@@ -100,14 +72,8 @@ const TabsProvider = ({ children }) => {
 
   const tabsWrapperRef = useRef(null)
 
-  const _userData =
-    typeof window !== 'undefined'
-      ? JSON.parse(window.sessionStorage.getItem('userData') || '{}')
-      : {}
-
-  const { dashboardId } = _userData
-  const userId = _userData?.userId
-
+  const { dashboardId } = JSON.parse(window.sessionStorage.getItem('userData'))
+  const userId = JSON.parse(window.sessionStorage.getItem('userData'))?.userId
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
 
@@ -233,6 +199,7 @@ const TabsProvider = ({ children }) => {
         setOpenTabs(prevState =>
           prevState.map(tab => {
             if (tab.route === router.asPath) return { ...tab, page: children }
+
             return tab
           })
         )
@@ -340,10 +307,10 @@ const TabsProvider = ({ children }) => {
                 </Box>
               }
               onContextMenu={event => OpenItems(event, i)}
-              classes={{
-                root: styles.tabRoot,
-                selected: styles.selectedTab
-              }}
+                classes={{
+                  root: styles.tabRoot,
+                  selected: styles.selectedTab
+                }}
             />
           ))}
         </Tabs>
@@ -354,7 +321,6 @@ const TabsProvider = ({ children }) => {
           {activeTab.page}
         </CustomTabPanel>
       ))}
-
       <Menu
         anchorEl={anchorEl}
         id='account-menu'
