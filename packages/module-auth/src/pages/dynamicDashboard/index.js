@@ -61,7 +61,7 @@ const DashboardLayout = () => {
         getRequest({
           extension: SystemRepository.KeyValueStore,
           parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
-          signal
+          signal: controller.signal
         })
       ])
 
