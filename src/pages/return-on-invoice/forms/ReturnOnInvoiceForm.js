@@ -331,7 +331,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         mapping: [
           { from: 'recordId', to: 'invoiceId' },
           { from: 'reference', to: 'invoiceRef' }
-        ]
+        ],
+        displayFieldWidth: 2
       },
       async onChange({ row: { update } }) {
         if (!formik.values.currencyId) {
@@ -446,16 +447,16 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           return
         }
 
-        const [itemPhysProp, itemInfo, ItemConvertPrice] = await Promise.all([
+        const [itemPhysProp, itemInfo] = await Promise.all([
           getItemPhysProp(newRow.itemId),
-          getItem(newRow.itemId),
-          getItemConvertPrice(newRow.itemId, update)
+          getItem(newRow.itemId)
         ])
 
         const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
         getFilteredMU(newRow?.itemId, newRow?.msId)
         const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, defaultMu?.recordId)
 
         let rowTax
         let rowTaxDetails
@@ -544,49 +545,49 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           { from: 'recordId', to: 'muId' }
         ]
       },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
+        }
 
-      // async onChange({ row: { update, newRow } }) {
-      //   if (!newRow?.muId) {
-      //     update({ baseQty: 0 })
-      //   }
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
 
-      //   const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
-      //   const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-      //   const qtyInBase = newRow?.qty * filteredItems?.muQty
+        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
 
-      //   const unitPrice =
-      //     ItemConvertPrice?.priceType === 3
-      //       ? (newRow?.weight || 0) *
-      //         ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
-      //           (ItemConvertPrice?.baseLaborPrice || 0))
-      //       : ItemConvertPrice?.unitPrice || 0
+        const unitPrice =
+          ItemConvertPrice?.priceType === 3
+            ? (newRow?.weight || 0) *
+              ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
+                (ItemConvertPrice?.baseLaborPrice || 0))
+            : ItemConvertPrice?.unitPrice || 0
 
-      //   const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
-      //   const basePrice = ((formik?.values?.header?.KGmetalPrice || 0) * (newRow?.metalPurity || 0)) / 1000
-      //   const basePriceValue = postMetalToFinancials === false ? basePrice : 0
+        const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
+        const basePrice = ((formik?.values?.header?.KGmetalPrice || 0) * (newRow?.metalPurity || 0)) / 1000
+        const basePriceValue = postMetalToFinancials === false ? basePrice : 0
 
-      //   const data = getItemPriceRow(
-      //     {
-      //       ...newRow,
-      //       qtyInBase,
-      //       muQty: newRow?.muQty,
-      //       unitPrice,
-      //       minPrice: ItemConvertPrice?.minPrice || 0,
-      //       upo: ItemConvertPrice?.upo || 0,
-      //       priceType: ItemConvertPrice?.priceType || 1,
-      //       basePrice:
-      //         newRow?.isMetal === false
-      //           ? ItemConvertPrice?.basePrice || 0
-      //           : newRow?.metalPurity > 0
-      //           ? basePriceValue
-      //           : 0
-      //     },
-      //     DIRTYFIELD_QTY
-      //   )
-      //   update(data)
-      // },
+        getItemPriceRow(
+          update,
+          {
+            ...newRow,
+            qtyInBase,
+            muQty: newRow?.muQty,
+            unitPrice,
+            minPrice: ItemConvertPrice?.minPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1,
+            basePrice:
+              newRow?.isMetal === false
+                ? ItemConvertPrice?.basePrice || 0
+                : newRow?.metalPurity > 0
+                ? basePriceValue
+                : 0
+          },
+          DIRTYFIELD_QTY
+        )
+      },
       propsReducer({ row, props }) {
-        return { ...props, readOnly: formik.values.invoiceId, store: filteredMeasurements?.current }
+        return { ...props, readOnly: row.invoiceId, store: filteredMeasurements?.current }
       }
     },
     {
@@ -989,6 +990,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
       maxDiscount: clientDiscount.tdPct || 0,
+      KGmetalPrice: retHeader?.record?.metalPrice * 1000,
       items: modifiedList
     })
   }
@@ -1051,14 +1053,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     if (!itemId) return
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${
         formik.values.currencyId
-      }&_plId=${formik.values.plId || systemPriceLevel}&_muId=0`
+      }&_plId=${formik.values.plId || systemPriceLevel}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1402,11 +1404,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   useEffect(() => {
     ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+
       if (recordId) await refetchForm(recordId)
       else {
         await setMetalPriceOperations()
-        const muList = await getMeasurementUnits()
-        setMeasurements(muList?.list)
         if (systemSales) {
           setCycleButtonState({ text: '%', value: 2 })
           formik.setFieldValue('tdType', 2)
