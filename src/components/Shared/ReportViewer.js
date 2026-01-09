@@ -38,7 +38,7 @@ const ReportViewer = ({ resourceId }) => {
 
   const getReportLayout = () => {
     getRequest({
-      extension: SystemRepository.ReportLayout,
+      extension: SystemRepository.ReportLayout.qry,
       parameters: `_resourceId=${resourceId}`
     }).then(async res => {
       const inactiveReports = await getRequest({
