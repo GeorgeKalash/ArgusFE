@@ -92,6 +92,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return spId
   }
 
+  const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+
   const initialValues = {
     dtId: null,
     commitItems: false,
@@ -134,6 +136,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     hiddenkgMetalPrice: 0,
     clientDiscount: 0,
     currentDiscount: 0,
+    baseMetalCuId: parseInt(defaultMCbaseCU?.value),
     items: [
       {
         id: 1,
@@ -438,7 +441,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             volume: itemFound?.item?.volume,
             isMetal: itemFound?.item?.isMetal || false,
             metalid: itemFound?.item?.metalId,
-            metalPurity: itemFound?.item?.metalPurity
+            metalPurity: itemFound?.item?.metalPurity,
+            muId: itemFound?.item?.muId,
+            muRef: itemFound?.item?.muRef
           }
 
           update(itemData)
@@ -447,10 +452,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           return
         }
 
-        const [itemPhysProp, itemInfo] = await Promise.all([
-          getItemPhysProp(newRow.itemId),
-          getItem(newRow.itemId)
-        ])
+        const [itemPhysProp, itemInfo] = await Promise.all([getItemPhysProp(newRow.itemId), getItem(newRow.itemId)])
 
         const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
 
@@ -1333,7 +1335,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
     if (!defaultRateType.value) {
@@ -1456,8 +1457,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
+
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
