@@ -37,23 +37,29 @@ const DashboardLayout = () => {
   })
 
   useEffect(() => {
+    const controller = new AbortController() 
+    const signal = controller.signal
+
     const fetchData = async () => {
       const appletsRes = await getRequest({
         extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`
+        parameters: `_userId=${_userId}`,
+        signal
       })
       setApplets(appletsRes.list)
 
       const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+        getRequest({ extension: DashboardRepository.dashboard, signal }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal }),
         getRequest({
           extension: TimeAttendanceRepository.TimeVariation.qry2,
-          parameters: `_dayId=${formatDateForGetApI(new Date())}`
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+          signal
         }),
         getRequest({
           extension: SystemRepository.KeyValueStore,
-          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
+          signal
         })
       ])
 
@@ -85,6 +91,10 @@ const DashboardLayout = () => {
     }
 
     fetchData()
+ 
+    return () => {
+      controller.abort()
+    }
   }, [_userId, _languageId])
 
   const containsApplet = appletId => {
