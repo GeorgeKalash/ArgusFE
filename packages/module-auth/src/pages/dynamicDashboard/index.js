@@ -36,45 +36,46 @@ const DashboardLayout = () => {
     datasetId: ResourceIds.UserDashboard
   })
 
- useEffect(() => {
-  let alive = true
-  const controller = new AbortController()
+  useEffect(() => {
+    const controller = new AbortController() 
+    const signal = controller.signal
 
-  const safeGet = p =>
-    getRequest({ ...p, signal: controller.signal }).then(r => {
-      if (!alive) throw new DOMException('Aborted', 'AbortError')
-      return r
-    })
-
-  const fetchData = async () => {
-    try {
-      const appletsRes = await safeGet({
+    const fetchData = async () => {
+      const appletsRes = await getRequest({
         extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`
+        parameters: `_userId=${_userId}`,
+        signal
       })
-      if (!alive) return
       setApplets(appletsRes.list)
 
-      const resDashboard = await safeGet({ extension: DashboardRepository.dashboard })
-      const resSP = await safeGet({ extension: DashboardRepository.SalesPersonDashboard.spDB })
-      const resTV = await safeGet({
-        extension: TimeAttendanceRepository.TimeVariation.qry2,
-        parameters: `_dayId=${formatDateForGetApI(new Date())}`
-      })
-      const resTimeCode = await safeGet({
-        extension: SystemRepository.KeyValueStore,
-        parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-      })
-
-      if (!alive) return
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        getRequest({ extension: DashboardRepository.dashboard, signal }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal }),
+        getRequest({
+          extension: TimeAttendanceRepository.TimeVariation.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+          signal
+        }),
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
+          signal
+        })
+      ])
 
       const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+
       const filteredTabs = resTimeCode.list
         .filter(t => availableTimeCodes.has(Number(t.key)))
-        .map(t => ({ label: t.value, timeCode: Number(t.key), disabled: false }))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
 
       const groupedData = filteredTabs.reduce((acc, tab) => {
         acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+
         return acc
       }, {})
 
@@ -84,21 +85,17 @@ const DashboardLayout = () => {
         hr: {
           timeVariationDetails: resTV.list || [],
           tabs: filteredTabs,
-          groupedData
+          groupedData: groupedData
         }
       })
-    } catch (e) {
-      if (e.name !== 'AbortError') console.error(e)
     }
-  }
 
-  fetchData()
-
-  return () => {
-    alive = false
-    controller.abort()
-  }
-}, [_userId, _languageId])
+    fetchData()
+ 
+    return () => {
+      controller.abort()
+    }
+  }, [_userId, _languageId])
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
