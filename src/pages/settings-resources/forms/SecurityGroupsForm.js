@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { ResourceIds } from 'src/resources/ResourceIds'
-import { useContext } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
@@ -12,10 +12,19 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import Table from 'src/components/Shared/Table'
 import { useResourceQuery } from 'src/hooks/resource'
 import Form from 'src/components/Shared/Form'
+import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
+import { DataSets } from 'src/resources/DataSets'
+
+const SECURITY_GROUP_FILTER = {
+  ALL: '2',
+  NO_ACCESS: '1',
+  HAS_ACCESS: '3'
+}
 
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [filterType, setFilterType] = useState()
 
   const {
     query: { data }
@@ -161,6 +170,22 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     }
   ]
 
+  const hasAnyAccess = item => Object.values(item).some(value => value === true)
+
+  const filteredData = useMemo(() => {
+    if (!data?.list) return data
+
+    const list = data.list.filter(item =>
+      filterType === SECURITY_GROUP_FILTER.NO_ACCESS
+        ? !hasAnyAccess(item)
+        : filterType === SECURITY_GROUP_FILTER.HAS_ACCESS
+        ? hasAnyAccess(item)
+        : true
+    )
+
+    return { ...data, list }
+  }, [data, filterType])
+
   return (
     <Form onSave={onSubmit} maxAccess={maxAccess}>
       <VertLayout>
@@ -184,13 +209,29 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ASSIGNMENT_LEVEL}
+                name='filter'
+                label={labels.filter}
+                value={filterType}
+                valueField='key'
+                displayField='value'
+                defaultIndex={1}
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
+                }}
+                onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             name='items'
             columns={columns}
-            gridData={data}
+            gridData={filteredData}
             rowId={['sgId']}
             maxAccess={maxAccess}
             pagination={false}
