@@ -243,5 +243,5 @@ export const DataSets = {
   CHECK_IN_OUT: 1034,
   PURITY_SOURCE: 208,
   PURITY: 209,
-  FILTER: 210
+  ASSIGNMENT_LEVEL: 210
 }

@@ -15,10 +15,16 @@ import Form from 'src/components/Shared/Form'
 import ResourceComboBox from 'src/components/Shared/ResourceComboBox'
 import { DataSets } from 'src/resources/DataSets'
 
+const SECURITY_GROUP_FILTER = {
+  ALL: '2',
+  NO_ACCESS: '1',
+  HAS_ACCESS: '3'
+}
+
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [filterType, setFilterType] = useState('2')
+  const [filterType, setFilterType] = useState()
 
   const {
     query: { data }
@@ -164,21 +170,18 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     }
   ]
 
-  const hasAnyAccess = item =>
-    item.get || item.add || item.edit || item.del || item.close || item.post || item.unpost || item.reopen
+  const hasAnyAccess = item => Object.values(item).some(value => value === true)
 
   const filteredData = useMemo(() => {
     if (!data?.list) return data
 
-    let list = data.list
-
-    if (filterType == 1) {
-      list = list.filter(item => !hasAnyAccess(item))
-    }
-
-    if (filterType == 3) {
-      list = list.filter(item => hasAnyAccess(item))
-    }
+    const list = data.list.filter(item =>
+      filterType === SECURITY_GROUP_FILTER.NO_ACCESS
+        ? !hasAnyAccess(item)
+        : filterType === SECURITY_GROUP_FILTER.HAS_ACCESS
+        ? hasAnyAccess(item)
+        : true
+    )
 
     return { ...data, list }
   }, [data, filterType])
@@ -208,16 +211,18 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
             </Grid>
             <Grid item xs={12}>
               <ResourceComboBox
-                datasetId={DataSets.FILTER}
+                datasetId={DataSets.ASSIGNMENT_LEVEL}
                 name='filter'
                 label={labels.filter}
                 value={filterType}
                 valueField='key'
                 displayField='value'
+                defaultIndex={1}
                 maxAccess={maxAccess}
                 onChange={(event, newValue) => {
-                  setFilterType(newValue?.key ?? 2)
+                  setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
                 }}
+                onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}
               />
             </Grid>
           </Grid>
