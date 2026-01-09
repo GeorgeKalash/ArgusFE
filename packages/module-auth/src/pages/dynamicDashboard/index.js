@@ -37,24 +37,26 @@ const DashboardLayout = () => {
   })
 
   useEffect(() => {
-    const controller = new AbortController() 
-    const signal = controller.signal
+  let alive = true
+  const controller = new AbortController()
 
-    const fetchData = async () => {
+  const fetchData = async () => {
       const appletsRes = await getRequest({
         extension: SystemRepository.DynamicDashboard.qry,
         parameters: `_userId=${_userId}`,
-        signal
+        signal: controller.signal
       })
+
+      if (!alive) return
       setApplets(appletsRes.list)
 
       const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard, signal }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal }),
+        getRequest({ extension: DashboardRepository.dashboard, signal: controller.signal }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal: controller.signal }),
         getRequest({
           extension: TimeAttendanceRepository.TimeVariation.qry2,
           parameters: `_dayId=${formatDateForGetApI(new Date())}`,
-          signal
+          signal: controller.signal
         }),
         getRequest({
           extension: SystemRepository.KeyValueStore,
@@ -88,14 +90,16 @@ const DashboardLayout = () => {
           groupedData: groupedData
         }
       })
-    }
+  }
 
-    fetchData()
- 
-    return () => {
-      controller.abort()
-    }
-  }, [_userId, _languageId])
+  fetchData()
+
+  return () => {
+    alive = false
+    controller.abort()
+  }
+}, [_userId, _languageId])
+
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
