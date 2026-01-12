@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -96,11 +96,13 @@ useEffect(() => {
     fetchData()
   }, [_userId, _languageId])
 
-  const containsApplet = appletId => {
-    if (!Array.isArray(applets)) return false
-
-    return applets.some(applet => applet.appletId === appletId)
-  }
+  const containsApplet = useCallback(
+    (appletId) => {
+      if (!Array.isArray(applets)) return false;
+      return applets.some((applet) => applet.appletId === appletId);
+    },
+    [applets]
+  );
 
   return (
     <div className={styles.frame}>
