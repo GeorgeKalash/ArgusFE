@@ -419,6 +419,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             return
           }
 
+          let rowTax
+          let rowTaxDetails
+          if (itemFound.item.taxId) {
+            const taxDetailsResponse = await getTaxDetails(itemFound.item.taxId)
+            rowTax = itemFound.item.taxId
+            rowTaxDetails = taxDetailsResponse.map(item => ({
+              taxId: itemFound.item.taxId,
+              taxCodeId: item.taxCodeId,
+              taxBase: item.taxBase,
+              amount: item.amount
+            }))
+          }
+
           const itemData = {
             id: newRow?.id,
             itemId: itemFound?.item?.itemId,
@@ -444,7 +457,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             metalid: itemFound?.item?.metalId,
             metalPurity: itemFound?.item?.metalPurity,
             muId: itemFound?.item?.muId,
-            muRef: itemFound?.item?.muRef
+            muRef: itemFound?.item?.muRef,
+            taxId: rowTax,
+            taxDetails: rowTaxDetails || null
           }
 
           update(itemData)
