@@ -70,7 +70,6 @@ const RequestsProvider = ({ showLoading = false, children }) => {
       axios({
         method: 'GET',
         url: apiUrl + body.extension + '?' + body.parameters,
-        signal: body.signal,
         headers: {
           Authorization: 'Bearer ' + accessToken,
           'Content-Type': 'multipart/form-data',
