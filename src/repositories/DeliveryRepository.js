@@ -23,6 +23,7 @@ export const DeliveryRepository = {
     qry: service + 'qryTRP',
     del: service + 'delTRP',
     snapshot: service + 'snapshotTRP',
+    snapshot2: service + 'snapshot2TRP',
     reopen: service + 'reopenTRP',
     post: service + 'postTRP',
     unpost: service + 'unpostTRP',
@@ -91,5 +92,14 @@ export const DeliveryRepository = {
   },
   AllocatedVolume: {
     qry: service + 'qryVEH2'
+  },
+  InboundTransp: {
+    pack: service + 'getPackINB',
+    page: service + 'pageINB',
+    set2: service + 'set2INB',
+    get2: service + 'get2INB',
+    del: service + 'delINB',
+    snapshot: service + 'snapshotINB',
+    post: service + 'postINB',
   }
 }

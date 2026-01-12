@@ -615,6 +615,7 @@ export const ResourceIds = {
   PayrollDetail: 75302,
   MFDamageDtd: 42608,
   DeliverySettings: 52600,
+  InboundTransportation: 52314,
 
   // GL
   GLSalesInvoice: 51604,
