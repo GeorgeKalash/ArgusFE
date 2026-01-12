@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react'
+import React, { useEffect, useState, useContext, useCallback, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -22,6 +22,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
 import styles from './DynamicDashboard.module.css'
+import axios from 'axios';
 
 const DashboardLayout = () => {
   const { getRequest } = useContext(RequestsContext)
@@ -45,24 +46,31 @@ useEffect(() => {
   };
 }, [])
 
+  const cancelTokenSource = useRef(null);
+
   useEffect(() => {
+    cancelTokenSource.current = axios.CancelToken.source();
+
     const fetchData = async () => {
       const appletsRes = await getRequest({
         extension: SystemRepository.DynamicDashboard.qry,
         parameters: `_userId=${_userId}`,
+        cancelToken: cancelTokenSource.current.token,
       })
       setApplets(appletsRes.list)
 
       const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+        getRequest({ extension: DashboardRepository.dashboard, cancelToken: cancelTokenSource.current.token }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, cancelToken: cancelTokenSource.current.token }),
         getRequest({
           extension: TimeAttendanceRepository.TimeVariation.qry2,
           parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+          cancelToken: cancelTokenSource.current.token,
         }),
         getRequest({
           extension: SystemRepository.KeyValueStore,
           parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
+          cancelToken: cancelTokenSource.current.token,
         })
       ])
 
@@ -94,6 +102,10 @@ useEffect(() => {
     }
 
     fetchData()
+
+    return () => {
+      cancelTokenSource.current.cancel('Operation canceled by the user.');
+    };
   }, [_userId, _languageId])
 
   const containsApplet = useCallback(
