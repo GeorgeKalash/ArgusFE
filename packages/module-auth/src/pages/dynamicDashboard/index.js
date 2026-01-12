@@ -129,15 +129,36 @@ useEffect(() => {
     [applets]
   );
 
+  const fall = (name) => (styles && styles[name]) ? styles[name] : `dd-${name}`;
+
+  const fallbackStylesTag = (
+    <style>{`
+      .dd-frame { font-family: Arial, Helvetica, sans-serif; color: #222; padding: 16px; box-sizing: border-box; }
+      .dd-container { display: flex; flex-direction: column; gap: 16px; }
+      .dd-topRow, .dd-middleRow { display: flex; gap: 16px; flex-wrap: wrap; }
+      .dd-chartCard { background: #fff; border-radius: 6px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); min-width: 280px; flex: 1 1 320px; box-sizing: border-box; }
+      .dd-summaryCard { margin-bottom: 8px; }
+      .dd-title { font-size: 16px; margin: 0; }
+      .dd-strong { font-size: 20px; }
+      .dd-summaryGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .dd-summaryItem { background: #f8f8f8; padding: 8px; border-radius: 4px; }
+      .dd-redCenter { text-align: center; color: #d9534f; font-weight: 600; }
+      .dd-innerGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+      .dd-label { font-size: 12px; color: #666; }
+      .dd-value { font-size: 14px; font-weight: 600; }
+    `}</style>
+  );
+
   return (
-    <div className={styles.frame}>
-      <div className={styles.container}>
+    <div className={fall('frame')}>
+      {fallbackStylesTag}
+      <div className={fall('container')}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.retailSales}</h2>
-                <strong className={styles.strong}>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.retailSales}</h2>
+                <strong className={fall('strong')}>
                   {(
                     data?.dashboard?.summaryFigures?.find(
                       f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
@@ -154,10 +175,10 @@ useEffect(() => {
           </div>
         )}
         {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlySalesPerformance}</h2>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myYearlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
@@ -170,10 +191,10 @@ useEffect(() => {
           </div>
         )}
         {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myMonthlySalesPerformance}</h2>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myMonthlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
@@ -186,10 +207,10 @@ useEffect(() => {
           </div>
         )}
         {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.salesTeamOrdersSummary}</h2>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.salesTeamOrdersSummary}</h2>
               </div>
               <MixedBarChart
                 labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
@@ -203,11 +224,11 @@ useEffect(() => {
             </div>
           </div>
         )}
-        <div className={styles.middleRow}>
+        <div className={fall('middleRow')}>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyUnitsSoldList}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myYearlyUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
@@ -217,9 +238,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
@@ -229,9 +250,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyClientsAcquiredList}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myYearlyClientsAcquiredList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
@@ -241,9 +262,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyGrowthInClientsAc}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.myYearlyGrowthInClientsAc}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
@@ -254,11 +275,11 @@ useEffect(() => {
           )}
         </div>
         {containsApplet(ResourceIds.TodayPlantSales) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.todayPlantSales}</h2>
-                <strong className={styles.strong}>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.todayPlantSales}</h2>
+                <strong className={fall('strong')}>
                   {(
                     data?.dashboard?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
                   ).toLocaleString()}
@@ -274,9 +295,9 @@ useEffect(() => {
           </div>
         )}
 
-        <div className={styles.middleRow}>
+        <div className={fall('middleRow')}>
           {(containsApplet(ResourceIds.NewCustomers) || containsApplet(ResourceIds.GlobalSalesYTD)) && (
-            <div className={styles.summaryGrid}>
+            <div className={fall('summaryGrid')}>
               {containsApplet(ResourceIds.GlobalSalesYTD) && (
                 <>
                   {[
@@ -373,13 +394,13 @@ useEffect(() => {
                       ]
                     }
                   ].map((summary, index) => (
-                    <div className={styles.summaryItem} key={index}>
-                      <div className={styles.redCenter}>{summary.title}</div>
-                      <div className={styles.innerGrid}>
+                    <div className={fall('summaryItem')} key={index}>
+                      <div className={fall('redCenter')}>{summary.title}</div>
+                      <div className={fall('innerGrid')}>
                         {summary.rows.map((row, idx) => (
                           <React.Fragment key={idx}>
-                            <div className={styles.label}>{row.label}:</div>
-                            <div className={styles.value}>
+                            <div className={fall('label')}>{row.label}:</div>
+                            <div className={fall('value')}>
                               {row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </div>
                           </React.Fragment>
@@ -390,8 +411,8 @@ useEffect(() => {
                 </>
               )}
               {containsApplet(ResourceIds.NewCustomers) && (
-                <div className={styles.summaryItem} style={{ gridColumn: '1 / 3' }}>
-                  <div className={styles.redCenter}>
+                <div className={fall('summaryItem')} style={{ gridColumn: '1 / 3' }}>
+                  <div className={fall('redCenter')}>
                     {labels.newCostumers}:{' '}
                     {(
                       data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)
@@ -404,10 +425,10 @@ useEffect(() => {
           )}
 
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}> {labels.avWeeklySales}</h2>
-                <strong className={styles.strong}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}> {labels.avWeeklySales}</h2>
+                <strong className={fall('strong')}>
                   {(
                     (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.weeklySales?.length || 1)
@@ -422,10 +443,10 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.avMonthlySales}</h2>
-                <strong className={styles.strong}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.avMonthlySales}</h2>
+                <strong className={fall('strong')}>
                   {(
                     (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.monthlySales?.length || 1)
@@ -440,9 +461,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.accRevenues}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.accRevenues}</h2>
               </div>
               <CompositeBarChartDark
                 labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
@@ -454,9 +475,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.Receivables) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.receivables}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.receivables}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={Object.keys(data?.dashboard?.receivables || {})}
@@ -470,9 +491,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.TopCustomers) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.topCostumers}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.topCostumers}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
@@ -484,9 +505,9 @@ useEffect(() => {
             </div>
           )}
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.averageRevenuePerItem}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.averageRevenuePerItem}</h2>
               </div>
               <LineChart
                 labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
@@ -497,9 +518,9 @@ useEffect(() => {
           )}
 
           {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.todaysTimeVariationsDetails}</h2>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.todaysTimeVariationsDetails}</h2>
               </div>
 
               <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -528,10 +549,10 @@ useEffect(() => {
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.authorization}</h2>
+          <div className={fall('topRow')}>
+            <div className={fall('chartCard')}>
+              <div className={fall('summaryCard')}>
+                <h2 className={fall('title')}>{labels.authorization}</h2>
               </div>
               <Box sx={{ display: 'flex', height: '350px' }}>
                 <ApprovalsTable pageSize={10} />
