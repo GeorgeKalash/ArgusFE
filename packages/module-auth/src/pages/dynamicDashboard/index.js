@@ -1,154 +1,106 @@
 import React, { useEffect, useState, useContext } from 'react'
-import dynamic from 'next/dynamic'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import {
+  CompositeBarChartDark,
+  HorizontalBarChartDark,
+  MixedBarChart,
+  MixedColorsBarChartDark,
+  LineChart
+} from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { SummaryFiguresItem } from '@argus/shared-domain/src/resources/DashboardFigures'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Box } from '@mui/material'
+import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
+import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
 import styles from './DynamicDashboard.module.css'
-
-const CompositeBarChartDark = dynamic(
-  () =>
-    import('@argus/shared-ui/src/components/Shared/dashboardApplets/charts').then(m => m.CompositeBarChartDark),
-  { ssr: false }
-)
-
-const HorizontalBarChartDark = dynamic(
-  () =>
-    import('@argus/shared-ui/src/components/Shared/dashboardApplets/charts').then(m => m.HorizontalBarChartDark),
-  { ssr: false }
-)
-
-const MixedBarChart = dynamic(
-  () => import('@argus/shared-ui/src/components/Shared/dashboardApplets/charts').then(m => m.MixedBarChart),
-  { ssr: false }
-)
-
-const MixedColorsBarChartDark = dynamic(
-  () =>
-    import('@argus/shared-ui/src/components/Shared/dashboardApplets/charts').then(m => m.MixedColorsBarChartDark),
-  { ssr: false }
-)
-
-const LineChart = dynamic(
-  () => import('@argus/shared-ui/src/components/Shared/dashboardApplets/charts').then(m => m.LineChart),
-  { ssr: false }
-)
-
-const Table = dynamic(() => import('@argus/shared-ui/src/components/Shared/Table'), { ssr: false })
-const ApprovalsTable = dynamic(() => import('@argus/shared-ui/src/components/Shared/ApprovalsTable'), { ssr: false })
-const CustomTabs = dynamic(() => import('@argus/shared-ui/src/components/Shared/CustomTabs').then(m => m.CustomTabs), {
-  ssr: false
-})
 
 const DashboardLayout = () => {
   const { getRequest } = useContext(RequestsContext)
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
   const [activeTab, setActiveTab] = useState(0)
-
-  const [userData, setUserData] = useState(null)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const ud = getStorageData('userData')
-    if (ud) setUserData(ud)
-  }, [])
-
-  const _userId = userData?.userId
-  const _languageId = userData?.languageId
+  const userData = getStorageData('userData')
+  const _userId = userData.userId
+  const _languageId = userData.languageId
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
+  
+useEffect(() => {
+  if (!data) return
+  requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
+}, [data])
 
   useEffect(() => {
-    if (!data) return
-    if (typeof window === 'undefined') return
-    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')))
-  }, [data])
-
-  useEffect(() => {
-    if (!_userId || !_languageId) return
-
-    const controller = new AbortController()
+    const controller = new AbortController() 
     const signal = controller.signal
 
     const fetchData = async () => {
-      try {
-        const appletsRes = await getRequest({
-          extension: SystemRepository.DynamicDashboard.qry,
-          parameters: `_userId=${_userId}`,
+      const appletsRes = await getRequest({
+        extension: SystemRepository.DynamicDashboard.qry,
+        parameters: `_userId=${_userId}`,
+        signal
+      })
+      setApplets(appletsRes.list)
+
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        getRequest({ extension: DashboardRepository.dashboard, signal }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal }),
+        getRequest({
+          extension: TimeAttendanceRepository.TimeVariation.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+          signal
+        }),
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
           signal
         })
+      ])
 
-        setApplets(appletsRes?.list || [])
+      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-          getRequest({ extension: DashboardRepository.dashboard, signal }),
-          getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, signal }),
-          getRequest({
-            extension: TimeAttendanceRepository.TimeVariation.qry2,
-            parameters: `_dayId=${formatDateForGetApI(new Date())}`,
-            signal
-          }),
-          getRequest({
-            extension: SystemRepository.KeyValueStore,
-            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
-            signal
-          })
-        ])
+      const filteredTabs = resTimeCode.list
+        .filter(t => availableTimeCodes.has(Number(t.key)))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
 
-        const tvList = resTV?.list || []
-        const timeCodeList = resTimeCode?.list || []
+      const groupedData = filteredTabs.reduce((acc, tab) => {
+        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
 
-        const availableTimeCodes = new Set(tvList.map(d => d.timeCode))
+        return acc
+      }, {})
 
-        const filteredTabs = timeCodeList
-          .filter(t => availableTimeCodes.has(Number(t.key)))
-          .map(t => ({
-            label: t.value,
-            timeCode: Number(t.key),
-            disabled: false
-          }))
-
-        const groupedData = filteredTabs.reduce((acc, tab) => {
-          acc[tab.timeCode] = { list: tvList.filter(d => d.timeCode === tab.timeCode) }
-          return acc
-        }, {})
-
-        setData({
-          dashboard: resDashboard?.record,
-          sp: resSP?.record,
-          hr: {
-            timeVariationDetails: tvList,
-            tabs: filteredTabs,
-            groupedData: groupedData
-          }
-        })
-
-        setActiveTab(prev => {
-          const max = (filteredTabs?.length || 1) - 1
-          return prev > max ? 0 : prev
-        })
-      } catch (err) {
-        if (err?.name !== 'AbortError') throw err
-      }
+      setData({
+        dashboard: resDashboard?.record,
+        sp: resSP?.record,
+        hr: {
+          timeVariationDetails: resTV.list || [],
+          tabs: filteredTabs,
+          groupedData: groupedData
+        }
+      })
     }
 
     fetchData()
-
+ 
     return () => {
       controller.abort()
     }
-  }, [_userId, _languageId, getRequest])
+  }, [_userId, _languageId])
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
@@ -369,8 +321,9 @@ const DashboardLayout = () => {
                         {
                           label: labels.openSo,
                           value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.OPEN_SALES_ORDERS)
-                              ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.OPEN_SALES_ORDERS
+                            )?.amount ?? 0
                         },
                         {
                           label: labels.returnSales,
@@ -386,13 +339,15 @@ const DashboardLayout = () => {
                       rows: [
                         {
                           label: labels.revenues,
-                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                            ?.amount ?? 0
+                          value:
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
-                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                            ?.amount ?? 0
+                          value:
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
+                              ?.amount ?? 0
                         }
                       ]
                     }
@@ -400,15 +355,14 @@ const DashboardLayout = () => {
                     <div className={styles.summaryItem} key={index}>
                       <div className={styles.redCenter}>{summary.title}</div>
                       <div className={styles.innerGrid}>
-                        {summary.rows.map((row, idx) => {
-                          const _value = Number(row.value ?? 0)
-                          return (
-                            <React.Fragment key={idx}>
-                              <div className={styles.label}>{row.label}:</div>
-                              <div className={styles.value}>{_value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-                            </React.Fragment>
-                          )
-                        })}
+                        {summary.rows.map((row, idx) => (
+                          <React.Fragment key={idx}>
+                            <div className={styles.label}>{row.label}:</div>
+                            <div className={styles.value}>
+                              {row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </div>
+                          </React.Fragment>
+                        ))}
                       </div>
                     </div>
                   ))}
