@@ -371,7 +371,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
           { from: 'trackBy', to: 'trackBy' },
-          { from: 'defSaleMUId', to: 'defSaleMUId' }
+          { from: 'defSaleMUId', to: 'defSaleMUId' },
+          { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -506,9 +507,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           mdAmount: formik.values.clientDiscount || 0,
           qty: 0,
           pieces: 0,
-          msId: itemInfo?.msId,
+          msId: newRow?.msId,
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
+          muQty: defaultMu?.qty || null,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -517,7 +519,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           trackBy: newRow?.trackBy,
-          decimals: measurementSchedule?.decimals || 0
+          decimals: measurementSchedule?.decimals || 0,
+          baseQty: Number(defaultMu?.qty) * Number(newRow?.qty)
         })
       },
       propsReducer({ row, props }) {
@@ -567,6 +570,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
         const basePrice = ((formik?.values?.header?.KGmetalPrice || 0) * (newRow?.metalPurity || 0)) / 1000
         const basePriceValue = postMetalToFinancials === false ? basePrice : 0
+        const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
 
         getItemPriceRow(
           update,
@@ -575,6 +579,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             qtyInBase,
             muQty: newRow?.muQty,
             unitPrice,
+            baseQty: Number(newRow?.returnNowQty) * muQty,
             minPrice: ItemConvertPrice?.minPrice || 0,
             upo: ItemConvertPrice?.upo || 0,
             priceType: ItemConvertPrice?.priceType || 1,
@@ -605,12 +610,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         }
       },
       onChange({ row: { update, newRow } }) {
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const { returnNowQty, balanceQty, invoiceId } = newRow
         const validQty = invoiceId && Number(returnNowQty) > Number(balanceQty) ? balanceQty : returnNowQty
         update({ returnNowQty: validQty })
 
         getItemPriceRow(update, { ...newRow, returnNowQty: validQty }, DIRTYFIELD_QTY)
         if (invoiceId && Number(returnNowQty) > Number(balanceQty)) stackError({ message: labels.invalidQty })
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+
+        const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
+        update({
+          baseQty: Number(newRow?.returnNowQty) * muQty
+        })
       }
     },
     {
@@ -1136,6 +1148,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
