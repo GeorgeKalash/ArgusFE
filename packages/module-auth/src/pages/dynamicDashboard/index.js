@@ -47,63 +47,76 @@ useEffect(() => {
 }, [])
 
   const cancelTokenSource = useRef(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     cancelTokenSource.current = axios.CancelToken.source();
 
     const fetchData = async () => {
-      const appletsRes = await getRequest({
-        extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`,
-        cancelToken: cancelTokenSource.current.token,
-      })
-      setApplets(appletsRes.list)
-
-      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard, cancelToken: cancelTokenSource.current.token }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, cancelToken: cancelTokenSource.current.token }),
-        getRequest({
-          extension: TimeAttendanceRepository.TimeVariation.qry2,
-          parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+      try {
+        const appletsRes = await getRequest({
+          extension: SystemRepository.DynamicDashboard.qry,
+          parameters: `_userId=${_userId}`,
           cancelToken: cancelTokenSource.current.token,
-        }),
-        getRequest({
-          extension: SystemRepository.KeyValueStore,
-          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
-          cancelToken: cancelTokenSource.current.token,
-        })
-      ])
+        });
 
-      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
-
-      const filteredTabs = resTimeCode.list
-        .filter(t => availableTimeCodes.has(Number(t.key)))
-        .map(t => ({
-          label: t.value,
-          timeCode: Number(t.key),
-          disabled: false
-        }))
-
-      const groupedData = filteredTabs.reduce((acc, tab) => {
-        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
-
-        return acc
-      }, {})
-
-      setData({
-        dashboard: resDashboard?.record,
-        sp: resSP?.record,
-        hr: {
-          timeVariationDetails: resTV.list || [],
-          tabs: filteredTabs,
-          groupedData: groupedData
+        if (isMounted.current) {
+          setApplets(appletsRes.list);
         }
-      })
-    }
 
-    fetchData()
+        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+          getRequest({ extension: DashboardRepository.dashboard, cancelToken: cancelTokenSource.current.token }),
+          getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, cancelToken: cancelTokenSource.current.token }),
+          getRequest({
+            extension: TimeAttendanceRepository.TimeVariation.qry2,
+            parameters: `_dayId=${formatDateForGetApI(new Date())}`,
+            cancelToken: cancelTokenSource.current.token,
+          }),
+          getRequest({
+            extension: SystemRepository.KeyValueStore,
+            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
+            cancelToken: cancelTokenSource.current.token,
+          }),
+        ]);
+
+        if (isMounted.current) {
+          const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode));
+
+          const filteredTabs = resTimeCode.list
+            .filter(t => availableTimeCodes.has(Number(t.key)))
+            .map(t => ({
+              label: t.value,
+              timeCode: Number(t.key),
+              disabled: false,
+            }));
+
+          const groupedData = filteredTabs.reduce((acc, tab) => {
+            acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) };
+            return acc;
+          }, {});
+
+          setData({
+            dashboard: resDashboard?.record,
+            sp: resSP?.record,
+            hr: {
+              timeVariationDetails: resTV.list || [],
+              tabs: filteredTabs,
+              groupedData: groupedData,
+            },
+          });
+        }
+      } catch (error) {
+        if (!axios.isCancel(error)) {
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
+
+    fetchData();
 
     return () => {
+      isMounted.current = false;
       cancelTokenSource.current.cancel('Operation canceled by the user.');
     };
   }, [_userId, _languageId])
