@@ -1242,7 +1242,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
-        qty: item?.qty,
+        qty: parseFloat(item?.returnNowQty),
         weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),

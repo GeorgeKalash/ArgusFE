@@ -104,10 +104,9 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: form.values.tdPct,
           taxDetails: form.values.isVattable ? taxDetailList : null
         })
-        const { muId, ...restItem } = item
 
         return {
-          ...restItem,
+          ...item,
           id: index + 1,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,
@@ -119,13 +118,14 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           vatAmount: vatCalcRow.vatAmount,
           returnedQty,
           balanceQty,
-          returnNowQty: (itemPriceRow?.qty || 0).toFixed(restItem?.decimals || 0),
+          returnNowQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0),
           totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
           taxDetails: form.values.isVattable ? taxDetailList : null
         }
       })
     )
     form.setFieldValue('items', finalList)
+    setReCal(true)
     window.close()
   }
 
