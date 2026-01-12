@@ -43,7 +43,7 @@ useEffect(() => {
   return () => {
     window.removeEventListener('resize', resizeHandler);
   };
-}, [data])
+}, [])
 
   useEffect(() => {
     const fetchData = async () => {

@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 
 export const useWindowDimensions = () => {
-  const [windowDimensions, setWindowDimensions] = useState({
+  const [windowDimensions, setWindowDimensions] = useState(() => ({
     width: typeof window !== 'undefined' ? window.innerWidth : 100,
     height: typeof window !== 'undefined' ? window.innerHeight : 100
-  })
+  }))
 
   useEffect(() => {
     const handleResize = () => {
-      setWindowDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
+      const { innerWidth, innerHeight } = window
+      setWindowDimensions(prev => {
+        if (prev.width === innerWidth && prev.height === innerHeight) {
+          return prev
+        }
+        return { width: innerWidth, height: innerHeight }
       })
     }
 
