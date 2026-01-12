@@ -82,7 +82,10 @@ const TabsProvider = ({ children }) => {
 
     const updateHeight = () => {
       const h = tabsWrapperRef.current.offsetHeight
-      document.documentElement.style.setProperty('--tabs-height', `${h}px`)
+      const currentHeight = getComputedStyle(document.documentElement).getPropertyValue('--tabs-height')
+      if (currentHeight !== `${h}px`) {
+        document.documentElement.style.setProperty('--tabs-height', `${h}px`)
+      }
     }
 
     updateHeight()

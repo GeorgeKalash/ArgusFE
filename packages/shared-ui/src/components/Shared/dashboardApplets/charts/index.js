@@ -158,14 +158,6 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     if (!canvas) return
     const ctx = canvas.getContext('2d')
 
-    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
-    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
-    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg')
-    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg')
-
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
-
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -174,119 +166,33 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
           {
             label: label1 || null,
             data: data1,
-            backgroundColor: bar1Bg,
-            hoverBackgroundColor: bar1HoverBg
+            backgroundColor: getCssVar(canvas, '--chart-bar-1-bg'),
+            hoverBackgroundColor: getCssVar(canvas, '--chart-bar-1-hover-bg'),
           },
           {
             label: label2 || null,
             data: data2,
-            backgroundColor: bar2Bg,
-            hoverBackgroundColor: bar2HoverBg
-          }
-        ]
+            backgroundColor: getCssVar(canvas, '--chart-bar-2-bg'),
+            hoverBackgroundColor: getCssVar(canvas, '--chart-bar-2-hover-bg'),
+          },
+        ],
       },
       options: {
         responsive: true,
-        aspectRatio: ratio,
         maintainAspectRatio: false,
         plugins: {
           tooltip: {
-            bodyFont: {
-              size: chartSize.tooltipBodySize,
-            },
-            titleFont: {
-              size: chartSize.tooltipFontSize, 
-            },
+            bodyFont: { size: chartSize.tooltipBodySize },
+            titleFont: { size: chartSize.tooltipFontSize },
           },
-          datalabels: {
-            anchor: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            align: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? 'center' : 'end'
-            },
-            color: context => {
-              const chart = context.chart
-              const dataset = context.dataset
-              const value = dataset.data[context.dataIndex]
-
-              const chartHeight = chart.scales.y.bottom - chart.scales.y.top
-              const maxValue = chart.scales.y.max
-
-              const barHeight = (value / maxValue) * chartHeight
-
-              return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
-            },
-            offset: 0,
-            rotation: rotation || 0,
-            font: {
-              size: chartSize.size
-            },
-            formatter: (value, context) => {
-              const datasetIndex = context.datasetIndex
-              const lbl = datasetIndex === 0 ? label1 : label2
-              const roundedValue = Math.ceil(value)
-
-              if (hasLegend) {
-                return `${roundedValue.toLocaleString()}`
-              }
-
-              return `${lbl ? lbl + ':\n' : ''}${roundedValue.toLocaleString()}`
-            }
-          },
-          legend: {
-            display: hasLegend || false
-          }
         },
-        scales: {
-          x: {
-            ticks: {
-              font: {
-                size: chartSize.ticksSize, 
-              },
-            },
-          },
-          y: {
-            ticks: {
-              font: {
-                size: chartSize.ticksSize,
-              },
-              callback: function (value) {
-                if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`
-                if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`
-
-                return value
-              }
-            }
-          }
-        }
-   
       },
-      plugins: [ChartDataLabels]
-    })
+    });
 
     return () => {
-      chart.destroy()
-    }
-  }, [labels, data1, data2, label1, label2, rotation, hasLegend, ratio])
+      chart.destroy();
+    };
+  }, [labels, data1, data2, label1, label2, chartSize]);
 
   return (
     <div className={styles.chartHeight}>
