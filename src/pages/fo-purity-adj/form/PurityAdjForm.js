@@ -142,12 +142,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   const editMode = !!formik.values?.header.recordId
   const isPosted = formik.values.header.status === 3
 
-  const calculateTotal = key =>
-    formik.values.items
-      .reduce((sum, item) => {
-        return sum + (parseFloat(item[key]) || 0)
-      }, 0)
-      .toFixed(2)
+const calculateTotal = key =>
+  formik.values.items
+    .reduce((sum, item) => {
+      return sum + (parseFloat(item[key]) || 0)
+    }, 0)
+    .toFixed(2)
 
   const totalMetal = recalc ? calculateTotal('qty') : formik.values?.header?.sumQty
   const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
@@ -188,8 +188,8 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   async function fillSKUStore(metalId) {
     filteredItems.current = metalId
       ? allMetals.filter(metal => {
-        return metal.metalId === metalId
-      })
+          return metal.metalId === metalId
+        })
       : []
   }
 
@@ -206,7 +206,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
     })
-
+  
     return res?.record?.isOpenMetalPurity || false
   }
 
@@ -222,18 +222,18 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       return
     }
 
-    const itemsList = await Promise.all(
-      (record?.items || []).map(async (item, index) => {
-        const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+   const itemsList = await Promise.all(
+    (record?.items || []).map(async (item, index) => {
+     const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
 
-        return {
-          ...item,
-          id: index + 1,
-          purity: item.purity * 1000,
-          isOpenMetalPurity,
-        }
-      })
-    )
+     return {
+     ...item,
+     id: index + 1,
+     purity: item.purity * 1000,
+     isOpenMetalPurity,
+     }
+    })
+   )
 
     const metalInfo = await getBaseSalesMetalPurity()
 
@@ -303,7 +303,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
+          { from: 'sku', to: 'sku' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -316,10 +316,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
 
         const stdPurity = 0
         const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
+
         const newRmQty = formik.values?.header?.baseSalesMetalPurity
 
           ? (((newRow?.qty || 0) * (stdPurity)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
+
         update({
           stdPurity,
           deltaPurity: ((stdPurity) - (newRow?.purity || 0)).toFixed(2),
@@ -377,7 +379,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
         update({
-          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          deltaPurity:((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
           rmQty,
           deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
         })
@@ -396,12 +398,12 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.newPurity,
-      props: { decimalScale: 2, maxLength: 11, allowNegative: false },
       updateOn: 'blur',
+      props: {decimalScale: 2, maxLength: 11 , allowNegative: false},
       async onChange({ row: { update, newRow } }) {
-        setRecalc(true)
-
-        const newRmQty = formik.values?.header?.baseSalesMetalPurity
+       setRecalc(true)
+       
+       const newRmQty = formik.values?.header?.baseSalesMetalPurity
           ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
         update({
@@ -485,7 +487,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   }
 
   useEffect(() => {
-    ; (async function () {
+    ;(async function () {
       if (!recordId) {
         const dtInfo = await selectedDocTypeInfo(formik?.values?.header?.dtId)
         formik.setFieldValue('header.siteId', dtInfo?.siteId || null)
@@ -495,7 +497,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   }, [formik.values?.header?.dtId])
 
   useEffect(() => {
-    ; (async function () {
+    ;(async function () {
       if (baseSalesMetalId && !recordId) {
         const res = await getBaseSalesMetalPurity()
         formik.setFieldValue('header.baseSalesMetalPurity', res?.purity * 1000 || 0)
@@ -505,7 +507,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
   }, [baseSalesMetalId])
 
   useEffect(() => {
-    ; (async function () {
+    ;(async function () {
       await getAllMetals()
       if (recordId) refetchForm(recordId)
     })()
@@ -644,7 +646,7 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
+              onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setRecalc(true)
             }}
