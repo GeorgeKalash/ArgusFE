@@ -58,7 +58,7 @@ function ProgressBarComponent({ label, topLabel, width }) {
   )
 }
 
-export const ThreadProgress = ({ recordId, access, window }) => {
+export const ThreadProgress = ({ recordId, onComplete, access, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -88,8 +88,12 @@ export const ThreadProgress = ({ recordId, access, window }) => {
 
   const hasLogError = !!data.status && data.status < 0
 
-  //console.log(!!data.status)
-  //console.log(hasLogError)
+  useEffect(() => {
+    if(onComplete){
+      if(!tasksCompleted && !hasLogError) onComplete()
+    }
+  }, [hasLogError, tasksCompleted])
+
   useEffect(() => {
     const fetchDataAndSet = async () => {
       const data = await fetchData()

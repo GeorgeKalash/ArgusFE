@@ -27,6 +27,7 @@ import CustomButton from 'src/components/Inputs/CustomButton'
 import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,7 +77,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
             const updatedItems = (obj?.items || []).map(item => ({
                 ...item,
-                deliveryStatus: item.deliveryStatus ? 3 : 1
+                deliveryStatus: item.checked ? 3 : 1
             }))
 
             const response = await postRequest({
@@ -161,7 +162,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
         const formattedItems = (items || []).map(item => ({
             ...item,
-            deliveryStatus: item?.deliveryStatus == 3 || false
+            checked: item?.deliveryStatus == 3 || false
         }))
 
         const totals = getTotals(items)
@@ -175,21 +176,24 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }
 
     const onPost = async () => {
-        await postRequest({
+       const res = await postRequest({
             extension: DeliveryRepository.InboundTransp.post,
             record: JSON.stringify(formik.values)
         })
         toast.success(platformLabels.Posted)
-
-        // stack({
-        //     Component: ThreadProgress,
-        //     props: {
-        //         recordId: formik.values.recordId
-        //     },
-        //     closable: false
-        // })
+        
+        if(res.recordId){
+          stack({
+            Component: ThreadProgress,
+            props: {
+                recordId: res.recordId,
+                onComplete: () => refetchOrders()
+            },
+            closable: false
+          })
+        }
+        
         invalidate()
-        refetchForm(formik.values.recordId)
     }
 
     const actions = [
@@ -209,13 +213,6 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     ]
 
     const columns = [
-        {
-            field: 'deliveryStatus',
-            headerName: '',
-            type: 'checkbox',
-            flex: 0.7,
-            editable: !isPosted
-        },
         {
             field: 'soRef',
             headerName: labels.reference,
@@ -268,9 +265,15 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         },
     ]
 
+    function resetGrid(){
+        formik.setFieldValue('totalWeight', 0)
+        formik.setFieldValue('totalVolume', 0)
+        formik.setFieldValue('items', [])
+    }
+
     async function loadTripOrders() {
         if (!formik.values.tripId) {
-            formik.setFieldValue('items', [])
+            resetGrid()
 
             return
         }
@@ -284,16 +287,49 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             stackError({
                 message: labels.noOrders
             })
+            formik.setFieldValue('totalWeight', 0)
+            formik.setFieldValue('totalVolume', 0)
             formik.setFieldValue('tripId', null)
             formik.setFieldValue('tripRef', '')
 
             return
         }
 
+        const formattedItems = (res?.list || []).map(item => ({
+          ...item,
+          qty:item?.soQty || 0
+        }))
+
         const totals = getTotals(res?.list)
         formik.setValues({
             ...formik.values,
-            items: res?.list || [],
+            items: formattedItems,
+            ...totals
+        })
+    }
+
+    async function refetchOrders() {
+        if (!formik.values.recordId) {
+            resetGrid()
+
+            return
+        }
+        
+        const res = await getRequest({
+            extension: DeliveryRepository.InboundOrders.qry,
+            parameters: `_inboundId=${formik.values.recordId}`
+        })
+
+        const totals = getTotals(res?.list)
+
+        const formattedItems = (res?.list || []).map(item => ({
+          ...item,
+          checked: item?.deliveryStatus == 3 || false
+        }))
+        
+        formik.setValues({
+            ...formik.values,
+            items: formattedItems,
             ...totals
         })
     }
@@ -361,7 +397,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 onClick={loadTripOrders}
                                 image={'preview.png'}
                                 tooltipText={platformLabels.Preview}
-                                disabled={isPosted || !formik.values.tripId}
+                                disabled={isPosted || !formik.values.tripId || editMode}
                             />
                         </Grid>
                         <Grid item xs={4}>
@@ -484,6 +520,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         rowId={['soId']}
                         pagination={false}
                         maxAccess={maxAccess}
+                        showSelectAll={true}
+                        showCheckboxColumn={true}
                     />
                 </Grow>
                 <Fixed>
@@ -501,7 +539,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                             />
                         </Grid>
                         <Grid item xs={3}>
-                            <CustomTextField
+                            <CustomNumberField
                                 name='totalVolume'
                                 label={labels.totVol}
                                 value={formik.values.totalVolume}
@@ -509,7 +547,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                             />
                         </Grid>
                         <Grid item xs={3}>
-                            <CustomTextField
+                            <CustomNumberField
                                 name='totalWeight'
                                 label={labels.totalWeight}
                                 value={formik.values.totalWeight}

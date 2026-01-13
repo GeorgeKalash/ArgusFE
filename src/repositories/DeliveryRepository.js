@@ -101,5 +101,8 @@ export const DeliveryRepository = {
     del: service + 'delINB',
     snapshot: service + 'snapshotINB',
     post: service + 'postINB',
+  },
+  InboundOrders: {
+    qry: service + 'qryINO'
   }
 }

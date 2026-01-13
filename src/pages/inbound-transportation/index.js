@@ -66,8 +66,8 @@ export default function InboundTransp() {
       flex: 1
     },
     {
-      field: 'dtName',
-      headerName: labels.docType,
+      field: 'tripRef',
+      headerName: labels.outbound,
       flex: 1
     },
     {
