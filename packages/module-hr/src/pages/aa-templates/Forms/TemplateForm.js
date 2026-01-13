@@ -42,7 +42,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
       formik.setFieldValue('recordId', res.recordId)
-      toast.success(!res.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
   })

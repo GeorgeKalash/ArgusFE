@@ -12,7 +12,6 @@ export default function TextEditor({ value = '', onChange }) {
   const [openDropdown, setOpenDropdown] = useState(null)
 
 
-
   useEffect(() => {
     if (!value) return
 
@@ -80,6 +79,9 @@ export default function TextEditor({ value = '', onChange }) {
           toolbarClassName='toolbarClassName'
           wrapperClassName='wrapperClassName'
           editorClassName='editorClassName'
+          handleReturn={(e) => {
+            return 'not-handled';
+          }}
           toolbar={{
             colorPicker: {
               enableBackground: true
@@ -133,15 +135,15 @@ export default function TextEditor({ value = '', onChange }) {
             backgroundColor: '#fff'
           }}
           toolbarCustomButtons={tagGroups.map(group => (
-
-            <DropdownButton
-              key={group.type}
-              group={group}
-              onItemClick={insertTag}
-              openDropdown={openDropdown}
-              setOpenDropdown={setOpenDropdown}
-            />
-          ))}
+              <DropdownButton
+                key={group.type}
+                group={group}
+                onItemClick={insertTag}
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+              />
+            ))
+          }
         />
       </div>
     </>

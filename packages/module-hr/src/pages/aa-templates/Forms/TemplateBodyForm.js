@@ -17,22 +17,18 @@ import draftToHtml from 'draftjs-to-html'
 import { convertFromHTML } from 'draft-convert'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import TextEditor from '@argus/shared-ui/src/components/Shared/TextEditor'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function TemplateBodyForm({ labels, maxAccess, recordId, languageId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty())
   const [decodedHtmlForEditor, setDecodedHtmlForEditor] = useState('')
+  const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
     endpointId: AdministrationRepository.TemplateBody.qry
   })
-
-  function encodeHtml(html) {
-    const protectedHtml = html.replace(/\+/g, '%2B')
-
-    return encodeURIComponent(protectedHtml)
-  }
 
   const { formik } = useForm({
     initialValues: {
@@ -49,14 +45,24 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
       subject: yup.string().required()
     }),
     onSubmit: async obj => {
-      const html = draftToHtml(convertToRaw(editorState.getCurrentContent()))
+      const contentState = editorState.getCurrentContent()
+      const plainText = contentState.getPlainText().trim()
+
+      if (!plainText) {
+        stackError({
+          message: labels.emptyTextBody
+        })
+        return
+      }
+
+      const html = draftToHtml(convertToRaw(contentState))
 
       await postRequest({
         extension: AdministrationRepository.TemplateBody.set,
         record: JSON.stringify({
           ...obj,
           teId: recordId,
-          textBody: encodeHtml(html)
+          textBody: encodeURIComponent(html)
         })
       })
 
