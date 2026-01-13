@@ -1113,8 +1113,7 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   )
 }
 
-// Fallback helper and inline defaults for slow CSS load
-const fall = (name) => (styles && styles[name]) ? styles[name] : `dd-${name}`;
+const fall = (name) => `${styles && styles[name] ? styles[name] : ''} dd-${name}`;
 
 const fallbackStylesTag = (
   <style>{`

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -12,6 +12,7 @@ import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { DashboardRepository } from '@argus/repositories/src/repositories/DashboardRepository'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { debounce } from 'lodash'
 import { SummaryFiguresItem } from '@argus/shared-domain/src/resources/DashboardFigures'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { Box } from '@mui/material'
@@ -21,144 +22,97 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
+
 import styles from './DynamicDashboard.module.css'
-import axios from 'axios';
 
 const DashboardLayout = () => {
-  const { getRequest } = useContext(RequestsContext)
+  const { getRequest, LoadingOverlay } = useContext(RequestsContext)
   const [data, setData] = useState(null)
   const [applets, setApplets] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
   const userData = getStorageData('userData')
   const _userId = userData.userId
   const _languageId = userData.languageId
 
+  const debouncedCloseLoading = debounce(() => {
+    setLoading(false)
+  }, 500)
+
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
-  
-useEffect(() => {
-  const resizeHandler = () => window.dispatchEvent(new Event('resize'));
-  window.addEventListener('resize', resizeHandler);
-
-  return () => {
-    window.removeEventListener('resize', resizeHandler);
-  };
-}, [])
-
-  const cancelTokenSource = useRef(null);
-  const isMounted = useRef(true);
 
   useEffect(() => {
-    isMounted.current = true;
-    cancelTokenSource.current = axios.CancelToken.source();
-
     const fetchData = async () => {
-      try {
-        const appletsRes = await getRequest({
-          extension: SystemRepository.DynamicDashboard.qry,
-          parameters: `_userId=${_userId}`,
-          cancelToken: cancelTokenSource.current.token,
-        });
+      const appletsRes = await getRequest({
+        extension: SystemRepository.DynamicDashboard.qry,
+        parameters: `_userId=${_userId}`
+      })
+      setApplets(appletsRes.list)
 
-        if (isMounted.current) {
-          setApplets(appletsRes.list);
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        getRequest({ extension: DashboardRepository.dashboard }),
+        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+        getRequest({
+          extension: TimeAttendanceRepository.TimeVariation.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`
+        }),
+        getRequest({
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+        })
+      ])
+
+      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+
+      const filteredTabs = resTimeCode.list
+        .filter(t => availableTimeCodes.has(Number(t.key)))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
+
+      const groupedData = filteredTabs.reduce((acc, tab) => {
+        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+        return acc
+      }, {})
+
+      setData({
+        dashboard: resDashboard?.record,
+        sp: resSP?.record,
+        hr: {
+          timeVariationDetails: resTV.list || [],
+          tabs: filteredTabs,
+          groupedData: groupedData
         }
+      })
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-          getRequest({ extension: DashboardRepository.dashboard, cancelToken: cancelTokenSource.current.token }),
-          getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB, cancelToken: cancelTokenSource.current.token }),
-          getRequest({
-            extension: TimeAttendanceRepository.TimeVariation.qry2,
-            parameters: `_dayId=${formatDateForGetApI(new Date())}`,
-            cancelToken: cancelTokenSource.current.token,
-          }),
-          getRequest({
-            extension: SystemRepository.KeyValueStore,
-            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`,
-            cancelToken: cancelTokenSource.current.token,
-          }),
-        ]);
+      debouncedCloseLoading()
+    }
 
-        if (isMounted.current) {
-          const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode));
-
-          const filteredTabs = resTimeCode.list
-            .filter(t => availableTimeCodes.has(Number(t.key)))
-            .map(t => ({
-              label: t.value,
-              timeCode: Number(t.key),
-              disabled: false,
-            }));
-
-          const groupedData = filteredTabs.reduce((acc, tab) => {
-            acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) };
-            return acc;
-          }, {});
-
-          setData({
-            dashboard: resDashboard?.record,
-            sp: resSP?.record,
-            hr: {
-              timeVariationDetails: resTV.list || [],
-              tabs: filteredTabs,
-              groupedData: groupedData,
-            },
-          });
-        }
-      } catch (error) {
-        if (!axios.isCancel(error)) {
-          console.error('Error fetching data:', error);
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted.current = false;
-      cancelTokenSource.current.cancel('Operation canceled by the user.');
-    };
+    fetchData()
   }, [_userId, _languageId])
 
-  const containsApplet = useCallback(
-    (appletId) => {
-      if (!Array.isArray(applets)) return false;
-      return applets.some((applet) => applet.appletId === appletId);
-    },
-    [applets]
-  );
+  if (loading) {
+    return <LoadingOverlay />
+  }
 
-  const fall = (name) => (styles && styles[name]) ? styles[name] : `dd-${name}`;
-
-  const fallbackStylesTag = (
-    <style>{`
-      .dd-frame { font-family: Arial, Helvetica, sans-serif; color: #222; padding: 16px; box-sizing: border-box; }
-      .dd-container { display: flex; flex-direction: column; gap: 16px; }
-      .dd-topRow, .dd-middleRow { display: flex; gap: 16px; flex-wrap: wrap; }
-      .dd-chartCard { background: #fff; border-radius: 6px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); min-width: 280px; flex: 1 1 320px; box-sizing: border-box; }
-      .dd-summaryCard { margin-bottom: 8px; }
-      .dd-title { font-size: 16px; margin: 0; }
-      .dd-strong { font-size: 20px; }
-      .dd-summaryGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .dd-summaryItem { background: #f8f8f8; padding: 8px; border-radius: 4px; }
-      .dd-redCenter { text-align: center; color: #d9534f; font-weight: 600; }
-      .dd-innerGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-      .dd-label { font-size: 12px; color: #666; }
-      .dd-value { font-size: 14px; font-weight: 600; }
-    `}</style>
-  );
+  const containsApplet = appletId => {
+    if (!Array.isArray(applets)) return false
+    return applets.some(applet => applet.appletId === appletId)
+  }
 
   return (
-    <div className={fall('frame')}>
-      {fallbackStylesTag}
-      <div className={fall('container')}>
+    <div className={styles.frame}>
+      <div className={styles.container}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.retailSales}</h2>
-                <strong className={fall('strong')}>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.retailSales}</h2>
+                <strong>
                   {(
                     data?.dashboard?.summaryFigures?.find(
                       f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
@@ -174,11 +128,12 @@ useEffect(() => {
             </div>
           </div>
         )}
+
         {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myYearlySalesPerformance}</h2>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myYearlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
@@ -190,11 +145,12 @@ useEffect(() => {
             </div>
           </div>
         )}
+
         {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myMonthlySalesPerformance}</h2>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myMonthlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
@@ -206,11 +162,12 @@ useEffect(() => {
             </div>
           </div>
         )}
+
         {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.salesTeamOrdersSummary}</h2>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.salesTeamOrdersSummary}</h2>
               </div>
               <MixedBarChart
                 labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
@@ -224,11 +181,12 @@ useEffect(() => {
             </div>
           </div>
         )}
-        <div className={fall('middleRow')}>
+
+        <div className={styles.middleRow}>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myYearlyUnitsSoldList}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myYearlyUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
@@ -237,10 +195,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
@@ -249,10 +208,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myYearlyClientsAcquiredList}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myYearlyClientsAcquiredList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
@@ -261,10 +221,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.myYearlyGrowthInClientsAc}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.myYearlyGrowthInClientsAc}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
@@ -274,12 +235,13 @@ useEffect(() => {
             </div>
           )}
         </div>
+
         {containsApplet(ResourceIds.TodayPlantSales) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.todayPlantSales}</h2>
-                <strong className={fall('strong')}>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.todayPlantSales}</h2>
+                <strong>
                   {(
                     data?.dashboard?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
                   ).toLocaleString()}
@@ -295,9 +257,9 @@ useEffect(() => {
           </div>
         )}
 
-        <div className={fall('middleRow')}>
+        <div className={styles.middleRow}>
           {(containsApplet(ResourceIds.NewCustomers) || containsApplet(ResourceIds.GlobalSalesYTD)) && (
-            <div className={fall('summaryGrid')}>
+            <div className={styles.summaryGrid}>
               {containsApplet(ResourceIds.GlobalSalesYTD) && (
                 <>
                   {[
@@ -351,9 +313,8 @@ useEffect(() => {
                             (data?.dashboard?.summaryFigures?.find(
                               f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD
                             )?.amount ?? 0) +
-                            (data?.dashboard?.summaryFigures?.find(
-                              f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD
-                            )?.amount ?? 0)
+                            (data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)
+                              ?.amount ?? 0)
                         }
                       ]
                     },
@@ -381,26 +342,24 @@ useEffect(() => {
                       rows: [
                         {
                           label: labels.revenues,
-                          value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                              ?.amount ?? 0
+                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
+                            ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
-                          value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                              ?.amount ?? 0
+                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
+                            ?.amount ?? 0
                         }
                       ]
                     }
                   ].map((summary, index) => (
-                    <div className={fall('summaryItem')} key={index}>
-                      <div className={fall('redCenter')}>{summary.title}</div>
-                      <div className={fall('innerGrid')}>
+                    <div className={styles.summaryItem} key={index}>
+                      <div className={styles.redCenter}>{summary.title}</div>
+                      <div className={styles.innerGrid}>
                         {summary.rows.map((row, idx) => (
                           <React.Fragment key={idx}>
-                            <div className={fall('label')}>{row.label}:</div>
-                            <div className={fall('value')}>
+                            <div className={styles.label}>{row.label}:</div>
+                            <div className={styles.value}>
                               {row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </div>
                           </React.Fragment>
@@ -410,9 +369,10 @@ useEffect(() => {
                   ))}
                 </>
               )}
+
               {containsApplet(ResourceIds.NewCustomers) && (
-                <div className={fall('summaryItem')} style={{ gridColumn: '1 / 3' }}>
-                  <div className={fall('redCenter')}>
+                <div className={`${styles.summaryItem} ${styles.summaryItemFull}`}>
+                  <div className={styles.redCenter}>
                     {labels.newCostumers}:{' '}
                     {(
                       data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)
@@ -425,10 +385,10 @@ useEffect(() => {
           )}
 
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}> {labels.avWeeklySales}</h2>
-                <strong className={fall('strong')}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.avWeeklySales}</h2>
+                <strong>
                   {(
                     (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.weeklySales?.length || 1)
@@ -442,11 +402,12 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.avMonthlySales}</h2>
-                <strong className={fall('strong')}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.avMonthlySales}</h2>
+                <strong>
                   {(
                     (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.monthlySales?.length || 1)
@@ -460,10 +421,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.accRevenues}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.accRevenues}</h2>
               </div>
               <CompositeBarChartDark
                 labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
@@ -474,10 +436,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.Receivables) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.receivables}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.receivables}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={Object.keys(data?.dashboard?.receivables || {})}
@@ -490,10 +453,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.TopCustomers) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.topCostumers}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.topCostumers}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
@@ -504,10 +468,11 @@ useEffect(() => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.averageRevenuePerItem}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.averageRevenuePerItem}</h2>
               </div>
               <LineChart
                 labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
@@ -518,9 +483,9 @@ useEffect(() => {
           )}
 
           {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.todaysTimeVariationsDetails}</h2>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.todaysTimeVariationsDetails}</h2>
               </div>
 
               <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -549,10 +514,10 @@ useEffect(() => {
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <div className={fall('topRow')}>
-            <div className={fall('chartCard')}>
-              <div className={fall('summaryCard')}>
-                <h2 className={fall('title')}>{labels.authorization}</h2>
+          <div className={styles.topRow}>
+            <div className={styles.chartCard}>
+              <div className={styles.summaryCard}>
+                <h2 className={styles.title}>{labels.authorization}</h2>
               </div>
               <Box sx={{ display: 'flex', height: '350px' }}>
                 <ApprovalsTable pageSize={10} />

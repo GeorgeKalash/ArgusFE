@@ -18,12 +18,6 @@
   margin-bottom: 10px;
 }
 
-.title {
-  font-size: 17px;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
 .summaryCard {
   background: rgb(255, 255, 255);
   border-radius: 10px;
@@ -32,6 +26,7 @@
   justify-content: space-between;
   align-items: center;
 }
+
 .summaryGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -52,12 +47,41 @@
   align-items: center;
 }
 
+.summaryItem strong {
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+.summaryItemFull {
+  grid-column: 1 / 3;
+}
+
 .middleRow {
   display: grid;
   grid-template-columns: 50% 50%;
   gap: 10px;
   margin-bottom: 10px;
   margin-right: 10px;
+}
+
+.chartCard {
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+}
+
+.title {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.redCenter {
+  text-align: center;
+  color: red;
+  font-size: 18px;
+  margin-bottom: 5px;
 }
 
 .innerGrid {
@@ -68,72 +92,14 @@
   text-align: left;
 }
 
-.chartCard {
-  background: rgb(255, 255, 255);
-  border-radius: 10px;
-  display: flex;
-  padding: 5px 8px;
-  flex-direction: column;
-}
-
-.redCenter {
-  text-align: center;
-  color: red;
-  font-size: 18px;
-  margin-bottom: 5px;
-}
 .label {
   justify-self: start;
   color: #000;
   font-size: 16px;
 }
+
 .value {
   justify-self: end;
   color: #000;
   font-size: 16px;
-}
-
-@media (max-width: 1400px) {
-  .title {
-    font-size: 20px
-  }
-}
-
-@media (min-width: 1025px) and (max-width: 1280px) {
-  .strong {
-    font-size: 12px;
-  }
-  .redCenter {
-    font-size: 13px;
-  }
-  .label {
-    font-size: 11px;
-  }
-  .value {
-    font-size: 11px;
-  }
-  .title {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .chartCard {
-    padding: 5px 8px;
-  }
-  .strong {
-    font-size: 12px;
-  }
-  .redCenter {
-    font-size: 12px;
-  }
-  .label {
-    font-size: 11px;
-  }
-  .value {
-    font-size: 11px;
-  }
-  .title {
-    font-size: 14px;
-  }
 }
