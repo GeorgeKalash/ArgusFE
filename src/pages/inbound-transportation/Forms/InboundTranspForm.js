@@ -116,6 +116,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             (acc, item) => {
                 acc.totalWeight += Number(item?.soWeight) || 0
                 acc.totalVolume += Number(item?.soVolume) || 0
+
                 return acc
             },
             { totalWeight: 0, totalVolume: 0 }
@@ -173,13 +174,13 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         })
     }
 
-
     const onPost = async () => {
         await postRequest({
             extension: DeliveryRepository.InboundTransp.post,
             record: JSON.stringify(formik.values)
         })
         toast.success(platformLabels.Posted)
+
         // stack({
         //     Component: ThreadProgress,
         //     props: {
@@ -209,9 +210,38 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
     const columns = [
         {
+            field: 'deliveryStatus',
+            headerName: '',
+            type: 'checkbox',
+            flex: 0.7,
+            editable: !isPosted
+        },
+        {
             field: 'soRef',
             headerName: labels.reference,
             flex: 1
+        },
+        {
+            field: 'soDate',
+            headerName: labels.date,
+            flex: 1,
+            type: 'date'
+        },
+        {
+            field: 'clientName',
+            headerName: labels.client,
+            flex: 1,
+        },
+        {
+            field: 'szName',
+            headerName: labels.salesZone,
+            flex: 1
+        },
+        {
+            field: 'soVolume',
+            headerName: labels.volume,
+            flex: 1,
+            type: 'number'
         },
         {
             field: 'qty',
@@ -226,38 +256,9 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             type: 'number'
         },
         {
-            field: 'soDate',
-            headerName: labels.date,
-            flex: 1,
-            type: 'date'
-        },
-        {
-            field: 'szRef',
-            headerName: labels.szRef,
-            flex: 1
-        },
-        {
-            field: 'szName',
-            headerName: labels.szName,
-            flex: 1
-        },
-        {
-            field: 'soVolume',
-            headerName: labels.volume,
-            flex: 1,
-            type: 'number'
-        },
-        {
-            field: 'clientName',
-            headerName: labels.client,
-            flex: 1,
-        },
-        {
-            field: 'deliveryStatus',
+            field: 'deliveryStatusName',
             headerName: labels.deliveryStatus,
-            type: 'checkbox',
-            flex: 1,
-            editable: !isPosted
+            flex: 1
         },
         {
             field: 'isNotified',
@@ -273,6 +274,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
             return
         }
+        
         const res = await getRequest({
             extension: DeliveryRepository.TripOrder.qry,
             parameters: `_tripId=${formik.values.tripId}`
