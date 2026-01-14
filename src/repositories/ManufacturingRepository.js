@@ -458,6 +458,7 @@ export const ManufacturingRepository = {
     page: service + 'pageDCA',
     set: service + 'setDCA',
     get: service + 'getDCA',
-    del: service + 'delDCA'
+    del: service + 'delDCA',
+    snapshot: service + 'snapshotDCA'
   }
 }
