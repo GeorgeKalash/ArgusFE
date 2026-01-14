@@ -17,13 +17,6 @@ function LoadingOverlay() {
   return <Box className={styles.loadingOverlay}></Box>
 }
 
-const TabPage = React.memo(
-  function TabPage({ page }) {
-    return page || null
-  },
-  (prev, next) => prev.page === next.page
-)
-
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
@@ -54,7 +47,7 @@ function CustomTabPanel(props) {
       {...other}
     >
       {!showOverlay && isActive && <LoadingOverlay />}
-      <TabPage page={children} />
+      {children}
     </Box>
   )
 }
@@ -104,6 +97,11 @@ const TabsProvider = ({ children }) => {
 
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
+
+  const syncUrl = useCallback(route => {
+    if (!route || typeof window === 'undefined') return
+    window.history.replaceState(window.history.state, '', route)
+  }, [])
 
   const navigateTo = useCallback(
     async route => {
@@ -192,32 +190,35 @@ const TabsProvider = ({ children }) => {
     async (_, newValue) => {
       if (newValue === currentTabIndex) return
 
-      setCurrentTabIndex(newValue)
-
       const nextRoute = openTabs?.[newValue]?.route
       if (!nextRoute) return
 
-      if (nextRoute === router.asPath) return
+      const hasCachedPage = !!openTabs?.[newValue]?.page
 
-      if (newValue === 0 && !openTabs?.[newValue]?.page) {
-        await navigateTo(nextRoute)
-      } else {
-        await navigateTo(nextRoute)
-        if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
+      setCurrentTabIndex(newValue)
+
+      if (hasCachedPage) {
+        syncUrl(nextRoute)
+        return
       }
+      await navigateTo(nextRoute)
+      syncUrl(nextRoute)
     },
-    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
+    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, syncUrl]
   )
 
   const handleCloseAllTabs = useCallback(async () => {
     const firstTab = openTabs?.[0]
     if (firstTab?.route) {
-      await navigateTo(firstTab.route)
-      if (typeof window !== 'undefined') window.history.replaceState(null, '', firstTab.route)
+      if (firstTab?.page) syncUrl(firstTab.route)
+      else {
+        await navigateTo(firstTab.route)
+        syncUrl(firstTab.route)
+      }
     }
     setOpenTabs([firstTab])
     setCurrentTabIndex(0)
-  }, [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex])
+  }, [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex, syncUrl])
 
   const handleCloseOtherTab = useCallback(
     async tabIndex => {
@@ -228,14 +229,17 @@ const TabsProvider = ({ children }) => {
       const newOpenTabs = openTabs.filter((tab, index) => index === 0 || index === tabIndex)
 
       if (selectedTab?.route) {
-        await navigateTo(selectedTab.route)
-        if (typeof window !== 'undefined') window.history.replaceState(null, '', selectedTab.route)
+        if (selectedTab?.page) syncUrl(selectedTab.route)
+        else {
+          await navigateTo(selectedTab.route)
+          syncUrl(selectedTab.route)
+        }
       }
 
       setOpenTabs(newOpenTabs)
       setCurrentTabIndex(isHomeTabSelected ? 0 : newOpenTabs.length - 1)
     },
-    [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex]
+    [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex, syncUrl]
   )
 
   const closeTab = useCallback(
@@ -249,16 +253,21 @@ const TabsProvider = ({ children }) => {
         const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
         if (newValue === index - 1 || router.asPath === window?.history?.state?.as) setCurrentTabIndex(newValue)
 
-        const nextRoute = openTabs?.[newValue]?.route
+        const nextTab = openTabs?.[newValue]
+        const nextRoute = nextTab?.route
+
         if (nextRoute) {
-          await navigateTo(nextRoute)
-          if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+          if (nextTab?.page) syncUrl(nextRoute)
+          else {
+            await navigateTo(nextRoute)
+            syncUrl(nextRoute)
+          }
         }
       } else if (index < currentTabIndex) setCurrentTabIndex(currentValue => currentValue - 1)
 
       setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
     },
-    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, router.asPath, setCurrentTabIndex, setOpenTabs]
+    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, router.asPath, setCurrentTabIndex, setOpenTabs, syncUrl]
   )
 
   const reopenTab = useCallback(
