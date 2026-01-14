@@ -454,6 +454,13 @@ export const ManufacturingRepository = {
     get: service + 'getMTS',
     del: service + 'delMTS'
   },
+  DamageReason: {
+    page: service + 'pageDRS',
+    set: service + 'setDRS',
+    get: service + 'getDRS',
+    del: service + 'delDRS',
+    snapshot: service + 'snapshotDRS'
+  },
   DamageCategory: {
     page: service + 'pageDCA',
     set: service + 'setDCA',
