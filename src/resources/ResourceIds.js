@@ -616,7 +616,8 @@ export const ResourceIds = {
   MFDamageDtd: 42608,
   DeliverySettings: 52600,
   DamageReason: 42136,
-
+  DamageCategory: 42137,
+  
   // GL
   GLSalesInvoice: 51604,
   GLSalesReturn: 51605,
