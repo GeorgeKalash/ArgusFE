@@ -285,8 +285,8 @@ export default function DamageForm({ recordId, jobId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={formik.values.header.damagedQty !== 0 && !hasItems || isPosted}
-      disabledSavedClear={formik.values.header.damagedQty !== 0 && !hasItems || isPosted}
+      disabledSubmit={(formik.values.header.damagedQty !== 0 && !hasItems) || isPosted}
+      disabledSavedClear={(formik.values.header.damagedQty !== 0 && !hasItems) || isPosted}
       isParentWindow={false}
     >
       <VertLayout>
@@ -506,27 +506,6 @@ export default function DamageForm({ recordId, jobId }) {
                     </Grid>
                   </Grid>
                 </Grid>
-
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={ManufacturingRepository.DamageReason.qry}
-                    name='header.reasonId'
-                    label={labels.damageReason}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    disabled={isPosted}
-                    values={formik.values.header}
-                    maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.reasonId', newValue?.recordId || null)
-                    }}
-                    error={formik?.touched?.header?.reasonId && formik?.errors?.header?.reasonId}
-                  />
-                </Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>
@@ -620,6 +599,104 @@ export default function DamageForm({ recordId, jobId }) {
                     error={formik?.touched?.header?.laborId && Boolean(formik?.errors?.header?.laborId)}
                   />
                 </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.metalQty'
+                        label={labels.metalQty}
+                        value={formik.values?.header?.metalQty}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.metalQty', null)}
+                        maxAccess={maxAccess}
+                        required
+                        readOnly
+                        error={formik?.touched?.header?.metalQty && Boolean(formik?.errors?.header?.metalQty)}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.nonMetalQty'
+                        label={labels.nonMetalQty}
+                        value={formik.values?.header?.nonMetalQty}
+                        onChange={formik.handleChange}
+                        readOnly
+                        onClear={() => formik.setFieldValue('header.nonMetalQty', null)}
+                        maxAccess={maxAccess}
+                        required
+                        error={formik?.touched?.header?.nonMetalQty && Boolean(formik?.errors?.header?.nonMetalQty)}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.netJobQty'
+                        label={labels.netJobQty}
+                        value={netQty}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.netJobQty', null)}
+                        maxAccess={maxAccess}
+                        readOnly
+                        required
+                        error={formik?.touched?.header?.netJobQty && Boolean(formik?.errors?.header?.netJobQty)}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.netJobPcs'
+                        label={labels.netJobPcs}
+                        value={netPcs}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.netJobPcs', null)}
+                        maxAccess={maxAccess}
+                        readOnly
+                        required
+                        error={formik?.touched?.header?.netJobPcs && Boolean(formik?.errors?.header?.netJobPcs)}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <CustomTextField
+                    name='header.generatedJobRef'
+                    label={labels.generatedJobRef}
+                    value={formik.values?.header?.generatedJobRef}
+                    maxAccess={maxAccess}
+                    onChange={formik.handleChange}
+                    readOnly
+                    onClear={() => formik.setFieldValue('header.generatedJobRef', '')}
+                    error={formik.touched?.header?.generatedJobRef && Boolean(formik.errors?.header?.generatedJobRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DamageReason.qry}
+                    name='header.reasonId'
+                    label={labels.damageReason}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    disabled={isPosted}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.reasonId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.reasonId && formik?.errors?.header?.reasonId}
+                  />
+                </Grid>
+
                 <Grid item xs={12}>
                   <ResourceComboBox
                     endpointId={ManufacturingRepository.DamageCategory.qry}
@@ -638,75 +715,6 @@ export default function DamageForm({ recordId, jobId }) {
                       formik.setFieldValue('header.categoryId', newValue?.recordId || null)
                     }}
                     error={formik?.touched?.header?.categoryId && formik?.errors?.header?.categoryId}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.metalQty'
-                    label={labels.metalQty}
-                    value={formik.values?.header?.metalQty}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.metalQty', null)}
-                    maxAccess={maxAccess}
-                    required
-                    readOnly
-                    error={formik?.touched?.header?.metalQty && Boolean(formik?.errors?.header?.metalQty)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.nonMetalQty'
-                    label={labels.nonMetalQty}
-                    value={formik.values?.header?.nonMetalQty}
-                    onChange={formik.handleChange}
-                    readOnly
-                    onClear={() => formik.setFieldValue('header.nonMetalQty', null)}
-                    maxAccess={maxAccess}
-                    required
-                    error={formik?.touched?.header?.nonMetalQty && Boolean(formik?.errors?.header?.nonMetalQty)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.netJobQty'
-                    label={labels.netJobQty}
-                    value={netQty}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.netJobQty', null)}
-                    maxAccess={maxAccess}
-                    readOnly
-                    required
-                    error={formik?.touched?.header?.netJobQty && Boolean(formik?.errors?.header?.netJobQty)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.netJobPcs'
-                    label={labels.netJobPcs}
-                    value={netPcs}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.netJobPcs', null)}
-                    maxAccess={maxAccess}
-                    readOnly
-                    required
-                    error={formik?.touched?.header?.netJobPcs && Boolean(formik?.errors?.header?.netJobPcs)}
-                  />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='header.generatedJobRef'
-                    label={labels.generatedJobRef}
-                    value={formik.values?.header?.generatedJobRef}
-                    maxAccess={maxAccess}
-                    onChange={formik.handleChange}
-                    readOnly
-                    onClear={() => formik.setFieldValue('header.generatedJobRef', '')}
-                    error={formik.touched?.header?.generatedJobRef && Boolean(formik.errors?.header?.generatedJobRef)}
                   />
                 </Grid>
               </Grid>
