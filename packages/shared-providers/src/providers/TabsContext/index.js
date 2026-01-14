@@ -173,7 +173,6 @@ const TabsProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
     const route = router.asPath
     if (!route) return
     if (children && !pagesCacheRef.current.has(route)) {
@@ -182,12 +181,12 @@ const TabsProvider = ({ children }) => {
   }, [router.asPath, children])
 
   const handleChange = useCallback(
-    async (_, newValue) => {
+    async (event, newValue) => {
       if (newValue === currentTabIndex) return
 
+      const nextRoute = openTabs?.[newValue]?.route
       setCurrentTabIndex(newValue)
 
-      const nextRoute = openTabs?.[newValue]?.route
       if (!nextRoute) return
 
       if (nextRoute === router.asPath) return
@@ -257,7 +256,9 @@ const TabsProvider = ({ children }) => {
   const reopenTab = useCallback(
     async tabRoute => {
       if (tabRoute === router.asPath) {
-        setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
+        pagesCacheRef.current.delete(tabRoute)
+
+        setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4(), page: null } : tab)))
         setReloadOpenedPage([])
       } else await navigateTo(tabRoute)
     },
@@ -267,43 +268,51 @@ const TabsProvider = ({ children }) => {
   const historyAs = typeof window !== 'undefined' ? window.history?.state?.as : undefined
 
   useEffect(() => {
-    if (initialLoadDone) {
-      const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
+    if (!initialLoadDone) return
 
-      if (!isTabOpen) {
-        const newValueState = openTabs.length
+    const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
 
-        const label = lastOpenedPage
-          ? lastOpenedPage.name
-          : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+    if (!isTabOpen) {
+      const newValueState = openTabs.length
 
-        const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
+      const label = lastOpenedPage
+        ? lastOpenedPage.name
+        : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
 
-        const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+      const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
 
-        setOpenTabs(prevState => [
-          ...prevState,
-          {
-            page: cachedPage,
-            id: uuidv4(),
-            route: router.asPath,
-            label,
-            resourceId
-          }
-        ])
-        setCurrentTabIndex(newValueState)
-      } else {
-        setOpenTabs(prevState =>
-          prevState.map(tab => {
-            if (tab.route !== router.asPath) return tab
+      const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+      if (!pagesCacheRef.current.has(router.asPath) && cachedPage) pagesCacheRef.current.set(router.asPath, cachedPage)
 
-            if (tab.page) return tab
+      setOpenTabs(prevState => [
+        ...prevState,
+        {
+          page: cachedPage,
+          id: uuidv4(),
+          route: router.asPath,
+          label,
+          resourceId
+        }
+      ])
+      setCurrentTabIndex(newValueState)
+    } else {
+      setOpenTabs(prevState => {
+        let changed = false
 
-            const cachedPage = pagesCacheRef.current.get(router.asPath) || children
-            return { ...tab, page: cachedPage }
-          })
-        )
-      }
+        const next = prevState.map(tab => {
+          if (tab.route !== router.asPath) return tab
+
+          if (tab.page) return tab
+
+          const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+          if (cachedPage && !pagesCacheRef.current.has(router.asPath)) pagesCacheRef.current.set(router.asPath, cachedPage)
+
+          changed = true
+          return { ...tab, page: cachedPage }
+        })
+
+        return changed ? next : prevState
+      })
     }
   }, [router.asPath, historyAs])
 
@@ -312,7 +321,10 @@ const TabsProvider = ({ children }) => {
 
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const homeRoute = '/default/'
-      const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
+
+      const homeCached = pagesCacheRef.current.get(homeRoute)
+      const homePage = homeCached || (router.asPath === homeRoute ? children : null)
+      if (!pagesCacheRef.current.has(homeRoute) && homePage) pagesCacheRef.current.set(homeRoute, homePage)
 
       const newTabs = [
         {
@@ -324,16 +336,21 @@ const TabsProvider = ({ children }) => {
       ]
 
       if (router.asPath !== homeRoute) {
-        const currentPage = pagesCacheRef.current.get(router.asPath) || children
+        const label = lastOpenedPage
+          ? lastOpenedPage.name
+          : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+
+        const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
+
+        const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+        if (!pagesCacheRef.current.has(router.asPath) && cachedPage) pagesCacheRef.current.set(router.asPath, cachedPage)
 
         newTabs.push({
-          page: currentPage,
+          page: cachedPage,
           id: uuidv4(),
           route: router.asPath,
-          label: lastOpenedPage
-            ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
-          resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
+          label,
+          resourceId
         })
         setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
       }
@@ -423,7 +440,7 @@ const TabsProvider = ({ children }) => {
 
       {openTabs.map((activeTab, i) => (
         <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-          {activeTab.page}
+          {pagesCacheRef.current.get(activeTab.route) || activeTab.page}
         </CustomTabPanel>
       ))}
 
