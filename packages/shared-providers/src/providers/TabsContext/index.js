@@ -1,12 +1,4 @@
-import React, {
-  createContext,
-  useEffect,
-  useState,
-  useContext,
-  useRef,
-  useMemo,
-  useCallback
-} from 'react'
+import React, { createContext, useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -180,14 +172,9 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = useCallback(
     async (event, newValue) => {
-      if (newValue === currentTabIndex) return
-
       setCurrentTabIndex(newValue)
 
       const nextRoute = openTabs?.[newValue]?.route
-      if (!nextRoute) return
-
-      if (nextRoute === router.asPath) return
 
       if (newValue === 0 && !openTabs?.[newValue]?.page) {
         await navigateTo(nextRoute)
@@ -196,7 +183,7 @@ const TabsProvider = ({ children }) => {
         if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
       }
     },
-    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
+    [openTabs, setCurrentTabIndex, navigateTo]
   )
 
   const handleCloseAllTabs = useCallback(async () => {
@@ -284,10 +271,7 @@ const TabsProvider = ({ children }) => {
       } else {
         setOpenTabs(prevState =>
           prevState.map(tab => {
-            if (tab.route === router.asPath) {
-              if (tab.route === '/default/' && tab.page) return tab
-              return { ...tab, page: children }
-            }
+            if (tab.route === router.asPath) return { ...tab, page: children }
             return tab
           })
         )

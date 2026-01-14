@@ -118,26 +118,24 @@ export const MixedBarChart = ({
   const chartRef = useRef(null)
 
   useEffect(() => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current || chartRef.current) return
 
     const ctx = canvasRef.current.getContext('2d')
-
-    chartRef.current?.destroy()
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels,
+        labels: Array.isArray(labels) ? labels : [],
         datasets: [
           {
             label: label1 || null,
-            data: data1,
+            data: Array.isArray(data1) ? data1 : [],
             backgroundColor: 'rgb(88, 2, 1)',
             hoverBackgroundColor: 'rgb(113, 27, 26)'
           },
           {
             label: label2 || null,
-            data: data2,
+            data: Array.isArray(data2) ? data2 : [],
             backgroundColor: 'rgb(5, 28, 104)',
             hoverBackgroundColor: 'rgb(33, 58, 141)'
           }
@@ -153,7 +151,6 @@ export const MixedBarChart = ({
               const v = ctx.dataset.data[ctx.dataIndex]
               const h = ch.scales.y.bottom - ch.scales.y.top
               const max = ch.scales.y.max
-
               return (v / max) * h >= 120 ? 'center' : 'end'
             },
             align: ctx => {
@@ -161,7 +158,6 @@ export const MixedBarChart = ({
               const v = ctx.dataset.data[ctx.dataIndex]
               const h = ch.scales.y.bottom - ch.scales.y.top
               const max = ch.scales.y.max
-
               return (v / max) * h >= 120 ? 'center' : 'end'
             },
             color: ctx => {
@@ -169,7 +165,6 @@ export const MixedBarChart = ({
               const v = ctx.dataset.data[ctx.dataIndex]
               const h = ch.scales.y.bottom - ch.scales.y.top
               const max = ch.scales.y.max
-
               return (v / max) * h >= 120 ? '#fff' : '#000'
             },
             offset: 0,
@@ -180,7 +175,6 @@ export const MixedBarChart = ({
               const lab = dsIndex === 0 ? label1 : label2
               const rounded = Math.ceil(value)
               if (hasLegend) return `${rounded.toLocaleString()}`
-
               return `${lab ? lab + ':\n' : ''}${rounded.toLocaleString()}`
             }
           },
@@ -197,10 +191,41 @@ export const MixedBarChart = ({
             }
           }
         }
-      },
-      plugins: [ChartDataLabels]
+      }
     })
-  }, [label1, label2, labels, data1, data2, rotation, hasLegend])
+
+    return () => {
+      chartRef.current?.destroy()
+      chartRef.current = null
+    }
+  }, []) 
+
+  useEffect(() => {
+    const chart = chartRef.current
+    if (!chart) return
+
+    chart.data.labels = Array.isArray(labels) ? labels : []
+    if (chart.data.datasets?.[0]) {
+      chart.data.datasets[0].label = label1 || null
+      chart.data.datasets[0].data = Array.isArray(data1) ? data1 : []
+    }
+    if (chart.data.datasets?.[1]) {
+      chart.data.datasets[1].label = label2 || null
+      chart.data.datasets[1].data = Array.isArray(data2) ? data2 : []
+    }
+
+    chart.options.plugins.legend.display = hasLegend
+    chart.options.plugins.datalabels.rotation = rotation
+    chart.options.plugins.datalabels.formatter = (value, ctx) => {
+      const dsIndex = ctx.datasetIndex
+      const lab = dsIndex === 0 ? label1 : label2
+      const rounded = Math.ceil(value)
+      if (hasLegend) return `${rounded.toLocaleString()}`
+      return `${lab ? lab + ':\n' : ''}${rounded.toLocaleString()}`
+    }
+
+    chart.update()
+  }, [labels, data1, data2, label1, label2, rotation, hasLegend])
 
   return (
     <div className={styles.chartWrapper} style={{ height }}>
