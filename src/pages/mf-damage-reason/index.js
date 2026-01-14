@@ -29,17 +29,29 @@ const DamageReason = () => {
     return { ...response, _startAt: _startAt }
   }
 
+  async function fetchWithSearch({ qry }) {
+    return await getRequest({
+      extension: ManufacturingRepository.DamageReason.snapshot,
+      parameters: `_filter=${qry}`
+    })
+  }
+
   const {
     query: { data },
     labels,
     invalidate,
     paginationParameters,
     refetch,
-    access
+    access,
+    search,
+    clear
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ManufacturingRepository.DamageReason.page,
-    datasetId: ResourceIds.DamageReason
+    datasetId: ResourceIds.DamageReason,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
 
   const columns = [
@@ -89,7 +101,7 @@ const DamageReason = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table

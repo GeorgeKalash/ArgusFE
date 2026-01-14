@@ -458,6 +458,7 @@ export const ManufacturingRepository = {
     page: service + 'pageDRS',
     set: service + 'setDRS',
     get: service + 'getDRS',
-    del: service + 'delDRS'
+    del: service + 'delDRS',
+    snapshot: service + 'snapshotDRS'
   }
 }
