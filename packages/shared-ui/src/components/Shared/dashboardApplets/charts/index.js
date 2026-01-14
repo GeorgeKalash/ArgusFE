@@ -147,16 +147,19 @@ const getChartOptions = (label, type, canvas) => {
   }
 }
 
-export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend}) => {
+export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   const canvasRef = useRef(null)
+  const chartRef = useRef(null)
 
   const { width } = useWindowDimensions()
-  const chartSize = width >= 1280 ? sizes[1280] :  sizes[1024]
+  const chartSize = width >= 1280 ? sizes[1280] : sizes[1024]
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
+
+    if (chartRef.current) return
 
     const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
     const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
@@ -166,20 +169,20 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
     const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
-    const chart = new Chart(ctx, {
+    chartRef.current = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels,
+        labels: labels || [],
         datasets: [
           {
             label: label1 || null,
-            data: data1,
+            data: data1 || [],
             backgroundColor: bar1Bg,
             hoverBackgroundColor: bar1HoverBg
           },
           {
             label: label2 || null,
-            data: data2,
+            data: data2 || [],
             backgroundColor: bar2Bg,
             hoverBackgroundColor: bar2HoverBg
           }
@@ -191,114 +194,104 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
         maintainAspectRatio: false,
         plugins: {
           tooltip: {
-            bodyFont: {
-              size: chartSize.tooltipBodySize,
-            },
-            titleFont: {
-              size: chartSize.tooltipFontSize, 
-            },
+            bodyFont: { size: chartSize.tooltipBodySize },
+            titleFont: { size: chartSize.tooltipFontSize }
           },
           datalabels: {
             anchor: context => {
               const chart = context.chart
               const dataset = context.dataset
               const value = dataset.data[context.dataIndex]
-
               const chartHeight = chart.scales.y.bottom - chart.scales.y.top
               const maxValue = chart.scales.y.max
-
               const barHeight = (value / maxValue) * chartHeight
-
               return barHeight >= 120 ? 'center' : 'end'
             },
             align: context => {
               const chart = context.chart
               const dataset = context.dataset
               const value = dataset.data[context.dataIndex]
-
               const chartHeight = chart.scales.y.bottom - chart.scales.y.top
               const maxValue = chart.scales.y.max
-
               const barHeight = (value / maxValue) * chartHeight
-
               return barHeight >= 120 ? 'center' : 'end'
             },
             color: context => {
               const chart = context.chart
               const dataset = context.dataset
               const value = dataset.data[context.dataIndex]
-
               const chartHeight = chart.scales.y.bottom - chart.scales.y.top
               const maxValue = chart.scales.y.max
-
               const barHeight = (value / maxValue) * chartHeight
-
               return barHeight >= 120 ? datalabelInsideColor : datalabelOutsideColor
             },
             offset: 0,
             rotation: rotation || 0,
-            font: {
-              size: chartSize.size
-            },
+            font: { size: chartSize.size },
             formatter: (value, context) => {
               const datasetIndex = context.datasetIndex
               const lbl = datasetIndex === 0 ? label1 : label2
               const roundedValue = Math.ceil(value)
 
-              if (hasLegend) {
-                return `${roundedValue.toLocaleString()}`
-              }
-
+              if (hasLegend) return `${roundedValue.toLocaleString()}`
               return `${lbl ? lbl + ':\n' : ''}${roundedValue.toLocaleString()}`
             }
           },
-          legend: {
-            display: hasLegend || false
-          }
+          legend: { display: hasLegend || false }
         },
         scales: {
-          x: {
-            ticks: {
-              font: {
-                size: chartSize.ticksSize, 
-              },
-            },
-          },
+          x: { ticks: { font: { size: chartSize.ticksSize } } },
           y: {
             ticks: {
-              font: {
-                size: chartSize.ticksSize,
-              },
+              font: { size: chartSize.ticksSize },
               callback: function (value) {
                 if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`
                 if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`
-
                 return value
               }
             }
           }
         }
-   
       },
       plugins: [ChartDataLabels]
     })
 
     return () => {
-      chart.destroy()
+      chartRef.current?.destroy()
+      chartRef.current = null
     }
-  }, [labels, data1, data2, label1, label2, rotation, hasLegend, ratio])
+  }, []) 
+
+  useEffect(() => {
+    const chart = chartRef.current
+    if (!chart) return
+
+    chart.data.labels = labels || []
+    chart.data.datasets[0].label = label1 || null
+    chart.data.datasets[0].data = data1 || []
+    chart.data.datasets[1].label = label2 || null
+    chart.data.datasets[1].data = data2 || []
+
+    chart.options.aspectRatio = ratio
+
+    chart.options.plugins.tooltip.bodyFont.size = chartSize.tooltipBodySize
+    chart.options.plugins.tooltip.titleFont.size = chartSize.tooltipFontSize
+    chart.options.plugins.datalabels.font.size = chartSize.size
+    chart.options.plugins.datalabels.rotation = rotation || 0
+    chart.options.plugins.legend.display = hasLegend || false
+
+    chart.options.scales.x.ticks.font.size = chartSize.ticksSize
+    chart.options.scales.y.ticks.font.size = chartSize.ticksSize
+
+    chart.update('none') 
+  }, [labels, data1, data2, label1, label2, ratio, rotation, hasLegend, chartSize])
 
   return (
     <div className={styles.chartHeight}>
-    <canvas
-      id={id}
-      ref={canvasRef}
-      className={`${styles.chartCanvas} ${styles.chartCanvasDark}`}
-    />
+      <canvas id={id} ref={canvasRef} className={`${styles.chartCanvas} ${styles.chartCanvasDark}`} />
     </div>
   )
 }
-
 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
   const chartRef = useRef(null)
