@@ -56,8 +56,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const scrapsConditions = {
     sku: row => row?.sku,
-    itemName: row => row?.itemName,
-    qty: row => row?.qty
+    itemName: row => row?.itemName
   }
 
   const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
@@ -224,7 +223,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   const qtyAtPurityPerRow = (qty, purity, headerPurity) => {
-    return Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity))
+    return Boolean(headerPurity)? Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity)) : 0
   }
 
   const updatePurityRelatedFields = headerPurity => {
@@ -338,6 +337,12 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const columns = [
     {
+      component: 'numberfield',
+      name: 'id',
+      label: labels.count,
+      props: { readOnly: true }
+    },
+    {
       component: 'resourcecombobox',
       label: labels.type,
       name: 'type',
@@ -423,6 +428,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      updateOn: 'blur',
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
@@ -438,8 +444,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
 
-          update({ expectedAlloyQty, qtyAtPurity, rmQty })
+          update({ expectedAlloyQty, qtyAtPurity, rmQty, qty: newRow?.qty || 0 })
         }
+        else update({ qty: newRow?.qty || 0 })
       }
     },
     {
@@ -447,6 +454,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       name: 'purity',
       label: labels.purity,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
+      updateOn: 'blur',
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
         if (newRow?.type == 1) {
@@ -461,7 +469,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
 
-          update({ expectedAlloyQty, qtyAtPurity, rmQty })
+          update({ expectedAlloyQty, qtyAtPurity, rmQty, purity: newRow?.purity || 0 })
         }
       },
       propsReducer({ row, props }) {
