@@ -80,6 +80,8 @@ const TabsProvider = ({ children }) => {
 
   const tabsWrapperRef = useRef(null)
 
+  const pagesCacheRef = useRef(new Map())
+
   const userDataParsed = useMemo(() => {
     if (typeof window === 'undefined') return {}
     try {
@@ -170,11 +172,25 @@ const TabsProvider = ({ children }) => {
     return null
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const route = router.asPath
+    if (!route) return
+    if (children && !pagesCacheRef.current.has(route)) {
+      pagesCacheRef.current.set(route, children)
+    }
+  }, [router.asPath, children])
+
   const handleChange = useCallback(
-    async (event, newValue) => {
+    async (_, newValue) => {
+      if (newValue === currentTabIndex) return
+
       setCurrentTabIndex(newValue)
 
       const nextRoute = openTabs?.[newValue]?.route
+      if (!nextRoute) return
+
+      if (nextRoute === router.asPath) return
 
       if (newValue === 0 && !openTabs?.[newValue]?.page) {
         await navigateTo(nextRoute)
@@ -183,7 +199,7 @@ const TabsProvider = ({ children }) => {
         if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
       }
     },
-    [openTabs, setCurrentTabIndex, navigateTo]
+    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
   )
 
   const handleCloseAllTabs = useCallback(async () => {
@@ -253,26 +269,38 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
+
       if (!isTabOpen) {
         const newValueState = openTabs.length
+
+        const label = lastOpenedPage
+          ? lastOpenedPage.name
+          : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, ''))
+
+        const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
+
+        const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+
         setOpenTabs(prevState => [
           ...prevState,
           {
-            page: children,
+            page: cachedPage,
             id: uuidv4(),
             route: router.asPath,
-            label: lastOpenedPage
-              ? lastOpenedPage.name
-              : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
-            resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
+            label,
+            resourceId
           }
         ])
         setCurrentTabIndex(newValueState)
       } else {
         setOpenTabs(prevState =>
           prevState.map(tab => {
-            if (tab.route === router.asPath) return { ...tab, page: children }
-            return tab
+            if (tab.route !== router.asPath) return tab
+
+            if (tab.page) return tab
+
+            const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+            return { ...tab, page: cachedPage }
           })
         )
       }
@@ -283,18 +311,23 @@ const TabsProvider = ({ children }) => {
     if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
+      const homeRoute = '/default/'
+      const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
+
       const newTabs = [
         {
-          page: router.asPath === '/default/' ? children : null,
+          page: homePage,
           id: uuidv4(),
-          route: '/default/',
+          route: homeRoute,
           label: 'Home'
         }
       ]
 
-      if (router.asPath !== '/default/') {
+      if (router.asPath !== homeRoute) {
+        const currentPage = pagesCacheRef.current.get(router.asPath) || children
+
         newTabs.push({
-          page: children,
+          page: currentPage,
           id: uuidv4(),
           route: router.asPath,
           label: lastOpenedPage
