@@ -285,8 +285,8 @@ export default function DamageForm({ recordId, jobId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={(formik.values.header.damagedQty !== 0 && !hasItems) || isPosted}
-      disabledSavedClear={(formik.values.header.damagedQty !== 0 && !hasItems) || isPosted}
+      disabledSubmit={formik.values.header.damagedQty != 0 && !hasItems || isPosted}
+      disabledSavedClear={formik.values.header.damagedQty != 0 && !hasItems || isPosted}
       isParentWindow={false}
     >
       <VertLayout>
