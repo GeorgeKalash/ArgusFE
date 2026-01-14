@@ -17,6 +17,13 @@ function LoadingOverlay() {
   return <Box className={styles.loadingOverlay}></Box>
 }
 
+const TabPage = React.memo(
+  function TabPage({ page }) {
+    return page || null
+  },
+  (prev, next) => prev.page === next.page
+)
+
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
@@ -47,7 +54,7 @@ function CustomTabPanel(props) {
       {...other}
     >
       {!showOverlay && isActive && <LoadingOverlay />}
-      {children}
+      <TabPage page={children} />
     </Box>
   )
 }
