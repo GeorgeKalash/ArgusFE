@@ -687,7 +687,7 @@ export default function DamageForm({ recordId, jobId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    disabled={isPosted}
+                    readOnly={isPosted}
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
@@ -710,7 +710,7 @@ export default function DamageForm({ recordId, jobId }) {
                     ]}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    disabled={isPosted}
+                    readOnly={isPosted}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.categoryId', newValue?.recordId || null)
                     }}
