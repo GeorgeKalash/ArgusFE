@@ -459,5 +459,10 @@ export const ManufacturingRepository = {
   },
   DamageCategory: {
     qry: service + 'qryDCA',
+    page: service + 'pageDCA',
+    set: service + 'setDCA',
+    get: service + 'getDCA',
+    del: service + 'delDCA',
+    snapshot: service + 'snapshotDCA'
   }
 }
