@@ -22,7 +22,6 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
-
 import styles from './DynamicDashboard.module.css'
 
 const DashboardLayout = () => {
@@ -76,6 +75,7 @@ const DashboardLayout = () => {
 
       const groupedData = filteredTabs.reduce((acc, tab) => {
         acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+
         return acc
       }, {})
 
@@ -101,6 +101,7 @@ const DashboardLayout = () => {
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
+
     return applets.some(applet => applet.appletId === appletId)
   }
 
@@ -112,7 +113,7 @@ const DashboardLayout = () => {
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.retailSales}</h2>
-                <strong>
+                <strong className={styles.strong}>
                   {(
                     data?.dashboard?.summaryFigures?.find(
                       f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
@@ -128,7 +129,6 @@ const DashboardLayout = () => {
             </div>
           </div>
         )}
-
         {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
@@ -145,7 +145,6 @@ const DashboardLayout = () => {
             </div>
           </div>
         )}
-
         {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
@@ -162,7 +161,6 @@ const DashboardLayout = () => {
             </div>
           </div>
         )}
-
         {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
@@ -181,7 +179,6 @@ const DashboardLayout = () => {
             </div>
           </div>
         )}
-
         <div className={styles.middleRow}>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
             <div className={styles.chartCard}>
@@ -195,7 +192,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -208,7 +204,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -221,7 +216,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -235,13 +229,12 @@ const DashboardLayout = () => {
             </div>
           )}
         </div>
-
         {containsApplet(ResourceIds.TodayPlantSales) && (
           <div className={styles.topRow}>
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.todayPlantSales}</h2>
-                <strong>
+                <strong className={styles.strong}>
                   {(
                     data?.dashboard?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
                   ).toLocaleString()}
@@ -313,8 +306,9 @@ const DashboardLayout = () => {
                             (data?.dashboard?.summaryFigures?.find(
                               f => f.itemId === SummaryFiguresItem.CREDIT_SALES_YTD
                             )?.amount ?? 0) +
-                            (data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD)
-                              ?.amount ?? 0)
+                            (data?.dashboard?.summaryFigures?.find(
+                              f => f.itemId === SummaryFiguresItem.RETAIL_SALES_YTD
+                            )?.amount ?? 0)
                         }
                       ]
                     },
@@ -342,13 +336,15 @@ const DashboardLayout = () => {
                       rows: [
                         {
                           label: labels.revenues,
-                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                            ?.amount ?? 0
+                          value:
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
-                          value: data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                            ?.amount ?? 0
+                          value:
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
+                              ?.amount ?? 0
                         }
                       ]
                     }
@@ -369,9 +365,8 @@ const DashboardLayout = () => {
                   ))}
                 </>
               )}
-
               {containsApplet(ResourceIds.NewCustomers) && (
-                <div className={`${styles.summaryItem} ${styles.summaryItemFull}`}>
+                <div className={styles.summaryItem} style={{ gridColumn: '1 / 3' }}>
                   <div className={styles.redCenter}>
                     {labels.newCostumers}:{' '}
                     {(
@@ -387,8 +382,8 @@ const DashboardLayout = () => {
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.avWeeklySales}</h2>
-                <strong>
+                <h2 className={styles.title}> {labels.avWeeklySales}</h2>
+                <strong className={styles.strong}>
                   {(
                     (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.weeklySales?.length || 1)
@@ -402,12 +397,11 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.avMonthlySales}</h2>
-                <strong>
+                <strong className={styles.strong}>
                   {(
                     (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.monthlySales?.length || 1)
@@ -421,7 +415,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -436,7 +429,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.Receivables) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -453,7 +445,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.TopCustomers) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
@@ -468,7 +459,6 @@ const DashboardLayout = () => {
               />
             </div>
           )}
-
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
             <div className={styles.chartCard}>
               <div className={styles.summaryCard}>
