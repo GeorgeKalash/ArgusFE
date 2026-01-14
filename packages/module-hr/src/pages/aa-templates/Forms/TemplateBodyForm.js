@@ -66,7 +66,7 @@ export default function TemplateBodyForm({ labels, maxAccess, recordId, language
         })
       })
 
-      toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
+      toast.success(!languageId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
       window.close()
     }

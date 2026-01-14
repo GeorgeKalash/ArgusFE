@@ -153,10 +153,7 @@ export default function TemplateForm({ labels, maxAccess, recordId }) {
             rowId={['recordId']}
             onEdit={edit}
             onDelete={del}
-            pageSize={50}
-            paginationType='client'
             pagination={false}
-            refetch={refetch}
             maxAccess={maxAccess}
           />
         </Grow>
