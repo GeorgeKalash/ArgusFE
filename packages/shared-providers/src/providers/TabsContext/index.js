@@ -27,8 +27,7 @@ const TabPage = React.memo(
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
-
-   const [showOverlay, setShowOverlay] = useState(true)
+  const [showOverlay, setShowOverlay] = useState(false)
 
   const isActive = value === index
 
@@ -89,8 +88,6 @@ const TabsProvider = ({ children }) => {
   const tabsWrapperRef = useRef(null)
 
   const pagesCacheRef = useRef(new Map())
-
-  const didInitTabsRef = useRef(false)
 
   const userDataParsed = useMemo(() => {
     if (typeof window === 'undefined') return {}
@@ -319,11 +316,7 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (didInitTabsRef.current) return
-
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
-      didInitTabsRef.current = true
-
       const homeRoute = '/default/'
       const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
 
@@ -352,7 +345,7 @@ const TabsProvider = ({ children }) => {
       }
 
       setOpenTabs(newTabs)
-      setInitialLoadDone(true)
+      menu.length > 0 && setInitialLoadDone(true)
     }
   }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, dashboardId])
 
@@ -434,11 +427,13 @@ const TabsProvider = ({ children }) => {
         </Tabs>
       </Box>
 
-      {openTabs.map((activeTab, i) => (
-        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-          {activeTab.page}
-        </CustomTabPanel>
-      ))}
+      <Box className={styles.panelsWrapper}>
+        {openTabs.map((activeTab, i) => (
+          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+            {activeTab.page}
+          </CustomTabPanel>
+        ))}
+      </Box>
 
       <Menu
         anchorEl={anchorEl}
