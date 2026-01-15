@@ -12,19 +12,24 @@
 }
 
 .customTabPanel {
-  display: flex !important;
+  display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1 !important;
+  flex: 1;
   overflow: auto;
   padding-top: 5px;
   position: relative;
   background-color: white;
 }
 
-.hidden {
-  display: none !important;
+.customTabPanel[hidden] {
+  position: absolute !important;
+  inset: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
 }
+
 
 .tabsProviderContainer {
   display: flex !important;

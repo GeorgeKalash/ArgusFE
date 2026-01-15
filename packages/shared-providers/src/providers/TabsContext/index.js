@@ -47,11 +47,11 @@ function CustomTabPanel(props) {
 
   return (
     <Box
-      role='tabpanel'
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      className={`${styles.customTabPanel} ${value !== index ? styles.hidden : ''}`}
-      {...other}
+      role="tabpanel"
+      hidden={!isActive}
+      aria-hidden={!isActive}
+      {...(!isActive ? { inert: '' } : {})}
+      className={styles.customTabPanel}
     >
       {!showOverlay && isActive && <LoadingOverlay />}
       <TabPage page={children} />
