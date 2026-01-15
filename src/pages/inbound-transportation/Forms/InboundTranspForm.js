@@ -544,6 +544,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         maxAccess={maxAccess}
                         showSelectAll={true}
                         showCheckboxColumn={true}
+                        disableCheckBox={isPosted}
                     />
                 </Grow>
                 <Fixed>

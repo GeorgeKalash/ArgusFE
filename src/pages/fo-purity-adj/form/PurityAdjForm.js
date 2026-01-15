@@ -303,8 +303,7 @@ const calculateTotal = key =>
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'stdPurity', to: 'stdPurity' }
+          { from: 'sku', to: 'sku' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -314,14 +313,18 @@ const calculateTotal = key =>
       },
       onChange: async ({ row: { update, newRow } }) => {
         setRecalc(true)
+
+        const stdPurity = 0
         const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
 
         const newRmQty = formik.values?.header?.baseSalesMetalPurity
-          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+
+          ? (((newRow?.qty || 0) * (stdPurity)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
+
         update({
-          stdPurity: (newRow?.stdPurity || 0).toFixed(2),
-          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          stdPurity,
+          deltaPurity: ((stdPurity) - (newRow?.purity || 0)).toFixed(2),
           newRmQty,
           deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2),
           isOpenMetalPurity
@@ -395,6 +398,7 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.newPurity,
+      updateOn: 'blur',
       props: {decimalScale: 2, maxLength: 11 , allowNegative: false},
       async onChange({ row: { update, newRow } }) {
        setRecalc(true)
@@ -403,6 +407,7 @@ const calculateTotal = key =>
           ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
         update({
+          stdPurity: newRow?.stdPurity || 0,
           deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
           newRmQty,
           deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
@@ -641,7 +646,10 @@ const calculateTotal = key =>
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+              onChange={(value, action) => {
+              formik.setFieldValue('items', value)
+              action === 'delete' && setRecalc(true)
+            }}
             value={formik.values?.items}
             error={formik.errors?.items}
             name='items'

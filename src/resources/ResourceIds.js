@@ -615,6 +615,8 @@ export const ResourceIds = {
   PayrollDetail: 75302,
   MFDamageDtd: 42608,
   DeliverySettings: 52600,
+  DamageReason: 42136,
+  DamageCategory: 42137,
   InboundTransportation: 52314,
 
   // GL
