@@ -167,26 +167,19 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
   const getData = async recordId => {
     if (!recordId) return
 
-    const res = await getRequest({
-      extension: ManufacturingRepository.WorksheetMaterials.get,
+    const response = await getRequest({
+      extension: ManufacturingRepository.WorksheetMaterials.pack,
       parameters: `_recordId=${recordId}`
     })
-
-    const itemsResponse = await getRequest({
-      extension: ManufacturingRepository.IssueOfMaterialsItems.qry,
-      parameters: `_imaId=${recordId}`
-    })
-
-    const itemList = itemsResponse?.list || []
+    const header = response?.record?.header || {}
+    const itemList = response?.record?.items || []
 
     const items = await Promise.all(
       itemList.map(async (item, index) => {
-        const dimRes = await getRequest({
-          extension: ManufacturingRepository.IssueOfMaterialDimension.qry,
-          parameters: `_imaId=${recordId}&_seqNo=${item.seqNo}`
-        })
-
-        const dims = (dimRes?.list || []).sort((a, b) => a.dimension - b.dimension)
+        const dimRes = response?.record?.dimensions || []
+        const filteredDimRes = dimRes.filter(dim => dim?.seqNo === item?.seqNo)
+       
+        const dims = (filteredDimRes || []).sort((a, b) => a.dimension - b.dimension)
         const dimData = {}
 
         dims.forEach(d => {
@@ -211,7 +204,7 @@ export default function MaterialsForm({ labels, access, recordId, wsId, values, 
         recordId,
         header: {
           ...formik.values.header,
-          ...res?.record,
+          ...header,
           siteId: values.siteId,
           wsJobRef: values.reference,
           joJobRef: values.jobRef,

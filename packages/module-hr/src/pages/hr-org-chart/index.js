@@ -71,7 +71,7 @@ const HROrgChart = () => {
         <GridToolbar
           hasSearch={false}
           middleSection={
-            <Grid container spacing={2} padding={2}>
+            <Grid container spacing={2} padding={2} alignItems="flex-end">
               <Grid item xs={3}>
                 <ResourceComboBox
                   datasetId={DataSets.ORG_CHART_TYPE}
