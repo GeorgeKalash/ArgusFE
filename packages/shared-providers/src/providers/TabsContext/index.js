@@ -19,45 +19,35 @@ function LoadingOverlay() {
 
 const TabPage = React.memo(
   function TabPage({ page }) {
-    return page || null
+    return React.isValidElement(page) ? page : null
   },
   (prev, next) => prev.page === next.page
 )
 
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
+function CustomTabPanel({ page, isActive }) {
   const { loading } = useContext(RequestsContext)
-  const [showOverlay, setShowOverlay] = useState(false)
 
-  const isActive = value === index
+  const safePage =
+    React.isValidElement(page) || typeof page === 'string'
+      ? page
+      : null
 
-  useEffect(() => {
-    if (!isActive) return
-    if (loading) {
-      setShowOverlay(false)
-      return
-    }
-    const timer = setTimeout(() => setShowOverlay(true), 300)
-    return () => clearTimeout(timer)
-  }, [loading, isActive])
-
-  useEffect(() => {
-    if (isActive && loading) setShowOverlay(false)
-  }, [isActive, loading])
+  const hasPage = !!safePage
 
   return (
     <Box
-      role='tabpanel'
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      className={`${styles.customTabPanel} ${value !== index ? styles.hidden : ''}`}
-      {...other}
+      role="tabpanel"
+      className={`${styles.customTabPanel} ${!isActive ? styles.hidden : ''}`}
     >
-      {!showOverlay && isActive && <LoadingOverlay />}
-      <TabPage page={children} />
+      {!!loading && isActive && !hasPage && <LoadingOverlay />}
+      <TabPage page={safePage} />
     </Box>
   )
 }
+
+
+
+
 
 CustomTabPanel.propTypes = {
   children: PropTypes.node,
@@ -273,6 +263,17 @@ const TabsProvider = ({ children }) => {
 
   const historyAs = typeof window !== 'undefined' ? window.history?.state?.as : undefined
 
+  const getCachedPage = useCallback(
+  route => {
+    if (!pagesCacheRef.current.has(route)) {
+      pagesCacheRef.current.set(route, children)
+    }
+    return pagesCacheRef.current.get(route)
+  },
+  [children]
+)
+
+
   useEffect(() => {
     if (initialLoadDone) {
       const isTabOpen = openTabs.some(tab => tab.route === router.asPath || !window?.history?.state?.as)
@@ -286,7 +287,8 @@ const TabsProvider = ({ children }) => {
 
         const resourceId = findResourceId(menu, router.asPath.replace(/\/$/, ''))
 
-        const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+        const cachedPage = getCachedPage(router.asPath)
+
 
         setOpenTabs(prevState => [
           ...prevState,
@@ -295,7 +297,8 @@ const TabsProvider = ({ children }) => {
             id: uuidv4(),
             route: router.asPath,
             label,
-            resourceId
+            resourceId,
+            ready: !!cachedPage
           }
         ])
         setCurrentTabIndex(newValueState)
@@ -305,7 +308,8 @@ const TabsProvider = ({ children }) => {
             if (tab.route !== router.asPath) return tab
             if (tab.page) return tab
 
-            const cachedPage = pagesCacheRef.current.get(router.asPath) || children
+            const cachedPage = getCachedPage(router.asPath)
+
             return { ...tab, page: cachedPage }
           })
         )
@@ -429,9 +433,12 @@ const TabsProvider = ({ children }) => {
 
       <Box className={styles.panelsWrapper}>
         {openTabs.map((activeTab, i) => (
-          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-            {activeTab.page}
-          </CustomTabPanel>
+          <CustomTabPanel
+            key={activeTab.route}
+            page={activeTab.page}
+            isActive={i === currentTabIndex}
+          />
+
         ))}
       </Box>
 

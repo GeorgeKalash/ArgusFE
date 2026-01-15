@@ -1,31 +1,38 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import DynamicDashboard from '@argus/module-auth/src/pages/dynamicDashboard'
 import DeliveryDashboard from '@argus/module-auth/src/pages/deliveryDashboard'
 import SalesPersonDashboard from '@argus/module-auth/src/pages/salesPersonDashboard'
 
-const Home = () => {
-  const userData = useMemo(() => {
-    if (typeof window === 'undefined') return {}
-      return JSON.parse(window.sessionStorage.getItem('userData') || '{}')
-  
-  }, [])
+const Home = React.memo(() => {
+  const dashboardRef = React.useRef(null)
 
-  const dashboardId = userData?.dashboardId
+  useEffect(() => {
+  console.log('HOME MOUNTED')
+  return () => console.log('HOME UNMOUNTED')
+}, [])
 
-  const dashboard = useMemo(() => {
-    switch (dashboardId) {
+
+  if (!dashboardRef.current) {
+    const userData = JSON.parse(
+      window.sessionStorage.getItem('userData') || '{}'
+    )
+
+    switch (userData?.dashboardId) {
       case 1:
-        return <DynamicDashboard />
+        dashboardRef.current = <DynamicDashboard />
+        break
       case 2:
-        return <SalesPersonDashboard />
+        dashboardRef.current = <SalesPersonDashboard />
+        break
       case 3:
-        return <DeliveryDashboard />
+        dashboardRef.current = <DeliveryDashboard />
+        break
       default:
-        return null
+        dashboardRef.current = null
     }
-  }, [dashboardId])
+  }
 
-  return <>{dashboard}</>
-}
+  return dashboardRef.current
+})
 
 export default Home

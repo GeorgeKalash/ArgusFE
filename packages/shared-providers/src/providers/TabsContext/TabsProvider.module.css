@@ -10,7 +10,6 @@
   justify-content: center;
   z-index: 9999;
 }
-
 .panelsWrapper {
   position: relative;
   width: 100%;
@@ -36,6 +35,20 @@
   opacity: 0;
 }
 
+
+
+.customTabPanel {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+
 .tabsProviderContainer {
   display: flex !important;
   flex-direction: column;
@@ -50,6 +63,24 @@
   position: relative !important;
   z-index: 3 !important;
 }
+
+.customTabPanel {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
 
 .tabs {
   min-height: 35px !important;
