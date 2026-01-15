@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo } from 'react'
 import DynamicDashboard from '@argus/module-auth/src/pages/dynamicDashboard'
 import DeliveryDashboard from '@argus/module-auth/src/pages/deliveryDashboard'
 import SalesPersonDashboard from '@argus/module-auth/src/pages/salesPersonDashboard'
@@ -6,39 +6,26 @@ import SalesPersonDashboard from '@argus/module-auth/src/pages/salesPersonDashbo
 const Home = () => {
   const userData = useMemo(() => {
     if (typeof window === 'undefined') return {}
-    try {
       return JSON.parse(window.sessionStorage.getItem('userData') || '{}')
-    } catch {
-      return {}
-    }
+  
   }, [])
 
   const dashboardId = userData?.dashboardId
 
-  const cachedDashboardRef = useRef(null)
-
-  const dashboardKey = dashboardId || 'none'
-  if (!cachedDashboardRef.current || cachedDashboardRef.current.key !== dashboardKey) {
-    let element = null
-
+  const dashboard = useMemo(() => {
     switch (dashboardId) {
       case 1:
-        element = <DynamicDashboard />
-        break
+        return <DynamicDashboard />
       case 2:
-        element = <SalesPersonDashboard />
-        break
+        return <SalesPersonDashboard />
       case 3:
-        element = <DeliveryDashboard />
-        break
+        return <DeliveryDashboard />
       default:
-        element = null
+        return null
     }
+  }, [dashboardId])
 
-    cachedDashboardRef.current = { key: dashboardKey, element }
-  }
-
-  return <>{cachedDashboardRef.current.element}</>
+  return <>{dashboard}</>
 }
 
 export default Home

@@ -34,79 +34,105 @@ const DashboardLayout = () => {
   const _userId = userData.userId
   const _languageId = userData.languageId
 
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
+  const getRequestRef = React.useRef(getRequest)
+  useEffect(() => {
+    getRequestRef.current = getRequest
+  }, [getRequest])
+
+  const debouncedCloseLoadingRef = React.useRef(null)
+  if (!debouncedCloseLoadingRef.current) {
+    debouncedCloseLoadingRef.current = debounce(() => {
+      setLoading(false)
+    }, 500)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current.cancel()
+    }
+  }, [])
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
   useEffect(() => {
+    let cancelled = false
+
     const fetchData = async () => {
-      const appletsRes = await getRequest({
-        extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`
-      })
-      setApplets(appletsRes.list)
+      try {
+        setLoading(true)
 
-      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
-        getRequest({
-          extension: TimeAttendanceRepository.TimeVariation.qry2,
-          parameters: `_dayId=${formatDateForGetApI(new Date())}`
-        }),
-        getRequest({
-          extension: SystemRepository.KeyValueStore,
-          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+        const appletsRes = await getRequestRef.current({
+          extension: SystemRepository.DynamicDashboard.qry,
+          parameters: `_userId=${_userId}`
         })
-      ])
 
-      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+        if (cancelled) return
+        setApplets(appletsRes.list)
 
-      const filteredTabs = resTimeCode.list
-        .filter(t => availableTimeCodes.has(Number(t.key)))
-        .map(t => ({
-          label: t.value,
-          timeCode: Number(t.key),
-          disabled: false
-        }))
+        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+          getRequestRef.current({ extension: DashboardRepository.dashboard }),
+          getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+          getRequestRef.current({
+            extension: TimeAttendanceRepository.TimeVariation.qry2,
+            parameters: `_dayId=${formatDateForGetApI(new Date())}`
+          }),
+          getRequestRef.current({
+            extension: SystemRepository.KeyValueStore,
+            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+          })
+        ])
 
-      const groupedData = filteredTabs.reduce((acc, tab) => {
-        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+        if (cancelled) return
 
-        return acc
-      }, {})
+        const availableTimeCodes = new Set((resTV.list || []).map(d => d.timeCode))
 
-      setData({
-        dashboard: resDashboard?.record,
-        sp: resSP?.record,
-        hr: {
-          timeVariationDetails: resTV.list || [],
-          tabs: filteredTabs,
-          groupedData: groupedData
-        }
-      })
+        const filteredTabs = (resTimeCode.list || [])
+          .filter(t => availableTimeCodes.has(Number(t.key)))
+          .map(t => ({
+            label: t.value,
+            timeCode: Number(t.key),
+            disabled: false
+          }))
 
-      debouncedCloseLoading()
+        const groupedData = filteredTabs.reduce((acc, tab) => {
+          acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
+          return acc
+        }, {})
+
+        setData({
+          dashboard: resDashboard?.record,
+          sp: resSP?.record,
+          hr: {
+            timeVariationDetails: resTV.list || [],
+            tabs: filteredTabs,
+            groupedData: groupedData
+          }
+        })
+
+        if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
+      } catch (e) {
+        if (!cancelled) setLoading(false)
+      }
     }
 
     fetchData()
-  }, [_userId, _languageId])
 
-  if (loading) {
-    return <LoadingOverlay />
-  }
+    return () => {
+      cancelled = true
+    }
+  }, [_userId, _languageId])
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
-
     return applets.some(applet => applet.appletId === appletId)
   }
 
   return (
     <div className={styles.frame}>
+      {loading && <LoadingOverlay />}
+
       <div className={styles.container}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <div className={styles.topRow}>
