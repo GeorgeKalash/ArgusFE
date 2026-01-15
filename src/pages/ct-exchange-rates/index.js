@@ -24,15 +24,17 @@ import { useWindow } from 'src/windows'
 import ClearDialog from 'src/components/Shared/ClearDialog'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const CTExchangeRates = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [plantStore, setPlantsStore] = useState([])
   const clearButton = getButtons(platformLabels)?.find(({ key }) => key === 'Clear') || null
   const { stack } = useWindow()
 
-  const raCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value) || null
+  const raCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value) || null
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.CtExchangeRates

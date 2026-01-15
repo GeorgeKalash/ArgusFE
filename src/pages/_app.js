@@ -78,6 +78,7 @@ import { LabelsAccessContextProvider } from 'src/providers/LabelsAccessContext'
 import { LockedScreensProvider } from 'src/providers/LockedScreensContext'
 import GlobalErrorHandlers from 'src/providers/GlobalErrorHandlers'
 import RootBoundary from 'src/components/Shared/RootBoundary'
+import { DefaultsProvider } from 'src/providers/DefaultsContext'
 
 const clientSideEmotionCache = createEmotionCache()
 
@@ -114,6 +115,16 @@ const queryClient = new QueryClient({
   }
 })
 
+function CachedDefaults({ children }) {
+  const { user, loading } = useContext(AuthContext)
+  if (loading) return null 
+
+  if (!user) return children
+  
+  return <DefaultsProvider>{children}</DefaultsProvider>
+}
+
+
 // ** Configure JSS & ClassName
 const App = props => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
@@ -148,7 +159,8 @@ const App = props => {
         <AuthProvider>
           <GlobalErrorHandlers />
           <GuestGuard fallback={<Spinner />}>
-            <RequestsProvider>
+            <RequestsProvider>     
+             <CachedDefaults>
               <ErrorProvider>
                 <WindowProvider>
                   <LockedScreensProvider>
@@ -233,6 +245,7 @@ const App = props => {
                   </LockedScreensProvider>
                 </WindowProvider>
               </ErrorProvider>
+              </CachedDefaults>
             </RequestsProvider>
           </GuestGuard>
         </AuthProvider>

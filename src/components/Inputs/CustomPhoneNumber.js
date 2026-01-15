@@ -2,14 +2,14 @@ import { IconButton } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/material.css'
-import { ControlContext } from 'src/providers/ControlContext'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 import ClearIcon from '@mui/icons-material/Clear'
 import { checkAccess } from 'src/lib/maxAccess'
 
 function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, ...props }) {
   const prefix = '+'
 
-  const { defaultsData } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const [code, seCode] = useState('')
 
@@ -21,7 +21,7 @@ function CustomPhoneNumber({ label, name, type, value, onChange, onBlur, error, 
     props.hidden
   )
 
-  const countryRef = defaultsData?.list?.find(({ key }) => key === 'countryRef')?.value
+  const countryRef = systemDefaults?.list?.find(({ key }) => key === 'countryRef')?.value
 
   function replaceLeadingZeros(value) {
     return value?.replace(/^0+/, '00')

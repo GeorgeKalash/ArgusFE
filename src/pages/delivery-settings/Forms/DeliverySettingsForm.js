@@ -10,10 +10,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import Form from 'src/components/Shared/Form'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import CustomComboBox from 'src/components/Inputs/CustomComboBox'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function DeliverySettingsForm({ _labels, access }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults} = useContext(ControlContext)
+  const { platformLabels} = useContext(ControlContext)
+   const { systemDefaults, updateSystemDefaults} = useContext(DefaultsContext)
   const [store, setStore] = useState([]) 
 
   const defaultKeys = ['smsInvoiceReportLayout']
@@ -28,7 +30,7 @@ export default function DeliverySettingsForm({ _labels, access }) {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
@@ -64,13 +66,13 @@ export default function DeliverySettingsForm({ _labels, access }) {
   
   useEffect(() => {
     const updated = {}
-    defaultsData.list?.forEach(obj => {
+    systemDefaults.list?.forEach(obj => {
      if (defaultKeys.includes(obj.key)) {
       updated[obj.key] = obj.value ? parseFloat(obj.value) : null
       formik.setFieldValue(obj.key, updated[obj.key])
      }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
   
 
   useEffect(() => { 

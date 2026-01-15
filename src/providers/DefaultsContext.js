@@ -1,111 +1,106 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { RequestsContext } from 'src/providers/RequestsContext'
-import { KVSRepository } from 'src/repositories/KVSRepository'
-import { AccessControlRepository } from 'src/repositories/AccessControlRepository'
-import { ResourceIds } from 'src/resources/ResourceIds'
 import { AuthContext } from './AuthContext'
-import axios from 'axios'
 import { SystemRepository } from 'src/repositories/SystemRepository'
-import { useError } from 'src/error'
-import { debounce } from 'lodash'
-import { commonResourceIds } from 'src/resources/commonResourceIds'
-import { useLabelsAccessContext } from './LabelsAccessContext'
+import { RequestsContext } from './RequestsContext'
 
-const DefaultsContext = createContext()
+const DefaultsContext = createContext(null)
 
 const DefaultsProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
-  const { user, apiUrl, languageId } = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
   const userData = window.sessionStorage.getItem('userData')
-  const [defaultsData, setDefaultsData] = useState([])
-  const [userDefaultsData, setUserDefaultsData] = useState([])
+  
+  const [systemDefaults, setSystemDefaults] = useState({ list: [] })
+  const [userDefaults, setUserDefaults] = useState([])
   const [systemChecks, setSystemChecks] = useState([])
 
-  const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
-    
-  const getDefaults = callback => {
-    getRequest({
+
+  const fetchDefaults = async () => {
+    const res = await getRequest({
       extension: SystemRepository.Defaults.qry,
       parameters: `_filter=`
-    }).then(res => {
-      callback(res)
     })
+    setSystemDefaults(res || {})
   }
 
-  const getSystemChecks = callback => {
-    getRequest({
+  const fetchUserDefaults = async () => {
+    if (!user?.userId) return
+
+    const res = await getRequest({
+      extension: SystemRepository.UserDefaults.qry,
+      parameters: `_userId=${user.userId}`
+    })
+    setUserDefaults(res || {})
+  }
+
+  const fetchSystemChecks = async () => {
+    const res = await getRequest({
       extension: SystemRepository.SystemChecks.qry,
-      parameters:`_scope=1`
-    }).then(res => {
-      callback(res?.list || [])
+      parameters: `_scope=1`
     })
+    setSystemChecks(res?.list || [])
   }
 
-  const updateDefaults = data => {
-    const updatedDefaultsData = [...defaultsData.list, ...data].reduce((acc, obj) => {
-      const existing = acc.find(item => item.key === obj.key)
-      if (existing) {
-        existing.value = obj.value
-      } else {
-        acc.push({ ...obj, value: obj.value })
-      }
+  const fetchCountryReference = async countryId => {
+    if (!countryId) return
 
+    const res = await getRequest({
+      extension: SystemRepository.Country.get,
+      parameters: `_recordId=${countryId}`
+    })
+
+    setSystemDefaults(prevState => ({
+      ...prevState,
+      list: [...prevState.list, { key: 'countryRef', value: res?.record?.reference }],
+      count: prevState.list.length + 1
+    }))
+
+  }
+
+   const updateSystemDefaults = data => {
+    const updatedDefaultsData = [...systemDefaults.list, ...data].reduce((acc, obj) => {
+      const existing = acc.find(item => item.key === obj.key)
+      if (existing) existing.value = obj.value
+      else acc.push({ ...obj, value: obj.value })
+      
       return acc
     }, [])
-    setDefaultsData({ list: updatedDefaultsData })
+    setSystemDefaults({ list: updatedDefaultsData })
   }
-
-  const getUserDefaults = callback => {
-    if(!user?.userId) return
-
-    getRequest({
-      extension: SystemRepository.UserDefaults.qry,
-      parameters: `_userId=` + user?.userId
-    }).then(res => {
-      callback(res)
-    })
-  }
-
 
   useEffect(() => {
-    ;(async function () {
-      if (!countryId) return
-      
-        const res = await getRequest({
-          extension: SystemRepository.Country.get,
-          parameters: `_recordId=${countryId}`
-        })
+    if (!userData || !user?.userId) return
 
-        const newItem = { key: 'countryRef', value: res?.record?.reference }
-
-        setDefaultsData(prevState => ({
-          ...prevState,
-          list: [...prevState.list, newItem],
-          count: prevState.list.length + 1
-        }))
-      
-    })()
-  }, [countryId])
-
-    useEffect(() => {
-    if (userData && user?.userId) {
-      getDefaults(setDefaultsData)
-      getUserDefaults(setUserDefaultsData)
-      getSystemChecks(setSystemChecks)
-    }
+    fetchDefaults()
+    fetchUserDefaults()
+    fetchSystemChecks()
   }, [userData, user?.userId])
 
+  useEffect(() => {
+    if(!systemDefaults?.list?.length) return 
 
-    const values = {
-    defaultsData,
-    setDefaultsData,
-    updateDefaults,
-    userDefaultsData,
-    setUserDefaultsData,
+    const countryId = systemDefaults.list.find(item => item.key === 'countryId')?.value || null
+    const hasCountryRef = systemDefaults.list.some(item => item.key === 'countryRef')
+    
+    if (hasCountryRef) return
+    
+    fetchCountryReference(countryId)
+  }, [systemDefaults.list])
+
+  const value = {
+    systemDefaults,
+    setSystemDefaults,
+    updateSystemDefaults,
+    userDefaults,
+    setUserDefaults,
     systemChecks
   }
 
-  return <DefaultsContext.Provider value={values}>{children}</DefaultsContext.Provider>
+  return (
+    <DefaultsContext.Provider value={value}>
+      {children}
+    </DefaultsContext.Provider>
+  )
 }
 
 export { DefaultsContext, DefaultsProvider }
