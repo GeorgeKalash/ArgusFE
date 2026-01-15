@@ -1,10 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import styles from './charts.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-
-const TAB_ACTIVATED_EVENT = 'argus-tab-activated'
 
 const sizes = {
   1024: {
@@ -27,21 +25,46 @@ const sizes = {
   }
 }
 
+const useArgusTabActivatedResize = getChart => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const run = () => {
+      const chart = getChart?.()
+      if (!chart) return
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            chart.resize()
+            chart.update('none')
+          } catch {}
+        })
+      })
+    }
+
+    window.addEventListener('argus-tab-activated', run)
+
+    run()
+
+    return () => window.removeEventListener('argus-tab-activated', run)
+  }, [getChart])
+}
+
 const getCssVar = (el, name, fallback) => {
   if (!el) return fallback
   const value = getComputedStyle(el).getPropertyValue(name)
-  const trimmed = value?.trim()
-  return trimmed || fallback
+  return value?.trim() || fallback
 }
 
 const predefinedColors = canvas => [
-  getCssVar(canvas, '--chart-mixed-1', 'rgba(88, 2, 1)'),
-  getCssVar(canvas, '--chart-mixed-2', 'rgba(67, 67, 72)'),
-  getCssVar(canvas, '--chart-mixed-3', 'rgba(144, 237, 125)'),
-  getCssVar(canvas, '--chart-mixed-4', 'rgba(247, 163, 92)'),
-  getCssVar(canvas, '--chart-mixed-5', 'rgba(54, 162, 235)'),
-  getCssVar(canvas, '--chart-mixed-6', 'rgba(153, 102, 255)'),
-  getCssVar(canvas, '--chart-mixed-7', 'rgba(201, 203, 207)')
+  getCssVar(canvas, '--chart-mixed-1'),
+  getCssVar(canvas, '--chart-mixed-2'),
+  getCssVar(canvas, '--chart-mixed-3'),
+  getCssVar(canvas, '--chart-mixed-4'),
+  getCssVar(canvas, '--chart-mixed-5'),
+  getCssVar(canvas, '--chart-mixed-6'),
+  getCssVar(canvas, '--chart-mixed-7')
 ]
 
 const generateColors = (dataLength, canvas) => {
@@ -60,14 +83,14 @@ const generateColors = (dataLength, canvas) => {
 }
 
 const getChartOptions = (label, type, canvas) => {
-  const legendLabelColor = getCssVar(canvas, '--chart-legend-label-color', '#f0f0f0')
-  const titleColor = getCssVar(canvas, '--chart-title-color', '#f0f0f0')
-  const axisColor = getCssVar(canvas, '--chart-axis-color', '#f0f0f0')
+  const legendLabelColor = getCssVar(canvas, '--chart-legend-label-color')
+  const titleColor = getCssVar(canvas, '--chart-title-color')
+  const axisColor = getCssVar(canvas, '--chart-axis-color')
 
-  const tooltipBg = getCssVar(canvas, '--chart-tooltip-bg', '#f0f0f0')
-  const tooltipTitleColor = getCssVar(canvas, '--chart-tooltip-title-color', '#231F20')
-  const tooltipBodyColor = getCssVar(canvas, '--chart-tooltip-body-color', '#231F20')
-  const titleSize = parseFloat(getCssVar(canvas, '--chart-title-size', '16'))
+  const tooltipBg = getCssVar(canvas, '--chart-tooltip-bg')
+  const tooltipTitleColor = getCssVar(canvas, '--chart-tooltip-title-color')
+  const tooltipBodyColor = getCssVar(canvas, '--chart-tooltip-body-color')
+  const titleSize = parseFloat(getCssVar(canvas, '--chart-title-size', 16))
 
   const baseOptions = {
     responsive: true,
@@ -147,55 +170,15 @@ const getChartOptions = (label, type, canvas) => {
   }
 }
 
-/**
- * ✅ This is the important part:
- * Chart.js can “measure 0x0” when a tab is hidden (display:none).
- * When the tab becomes visible again we force resize + update.
- */
-const useRefreshChartOnTabActivated = (getChart, getCanvas) => {
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const refresh = () => {
-      const chart = getChart?.()
-      const canvas = getCanvas?.()
-      if (!chart || !canvas) return
-
-      // Wait a frame so layout is applied before measuring
-      requestAnimationFrame(() => {
-        try {
-          chart.resize()
-          chart.update('none')
-        } catch (_) {}
-      })
-    }
-
-    // When a tab becomes active
-    window.addEventListener(TAB_ACTIVATED_EVENT, refresh)
-
-    // Extra safety (prod timing / hydration / browser tab switching)
-    window.addEventListener('resize', refresh)
-    document.addEventListener('visibilitychange', refresh)
-
-    return () => {
-      window.removeEventListener(TAB_ACTIVATED_EVENT, refresh)
-      window.removeEventListener('resize', refresh)
-      document.removeEventListener('visibilitychange', refresh)
-    }
-  }, [])
-}
-
 export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
   const chartSize = width >= 1280 ? sizes[1280] : sizes[1024]
-
-  useRefreshChartOnTabActivated(
-    () => chartRef.current,
-    () => canvasRef.current
-  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -204,13 +187,13 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     if (!ctx) return
     if (chartRef.current) return
 
-    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
-    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg', 'rgb(5, 28, 104)')
-    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg', 'rgb(33, 58, 141)')
+    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
+    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
@@ -322,13 +305,13 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
     const canvas = canvasRef.current
     if (!chart || !canvas) return
 
-    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
-    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg', 'rgb(5, 28, 104)')
-    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg', 'rgb(33, 58, 141)')
+    const bar1Bg = getCssVar(canvas, '--chart-bar-1-bg')
+    const bar1HoverBg = getCssVar(canvas, '--chart-bar-1-hover-bg')
+    const bar2Bg = getCssVar(canvas, '--chart-bar-2-bg')
+    const bar2HoverBg = getCssVar(canvas, '--chart-bar-2-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label1 || null
@@ -376,14 +359,12 @@ export const MixedBarChart = ({ id, labels, data1, data2, label1, label2, ratio 
 export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverColor }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
   const chartSize = width >= 1280 ? sizes[1280] : sizes[1024]
-
-  useRefreshChartOnTabActivated(
-    () => chartInstanceRef.current,
-    () => chartRef.current
-  )
 
   useEffect(() => {
     const canvas = chartRef.current
@@ -393,11 +374,11 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 
     if (chartInstanceRef.current) return
 
-    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartInstanceRef.current = new Chart(ctx, {
       type: 'bar',
@@ -486,11 +467,11 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
     const chart = chartInstanceRef.current
     if (!canvas || !chart) return
 
-    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -529,14 +510,12 @@ export const HorizontalBarChartDark = ({ id, labels, data, label, color, hoverCo
 export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
   const chartSize = width > 1280 ? sizes[1281] : width > 1024 ? sizes[1280] : sizes[1024]
-
-  useRefreshChartOnTabActivated(
-    () => chartRef.current,
-    () => canvasRef.current
-  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -545,11 +524,11 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
     if (!ctx) return
     if (chartRef.current) return
 
-    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
@@ -628,11 +607,11 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
     const chart = chartRef.current
     if (!canvas || !chart) return
 
-    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg', 'rgb(88, 2, 1)')
-    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg', 'rgb(113, 27, 26)')
+    const barBg = color || getCssVar(canvas, '--chart-bar-1-bg')
+    const barHoverBg = hoverColor || getCssVar(canvas, '--chart-bar-1-hover-bg')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -671,14 +650,12 @@ export const CompositeBarChartDark = ({ id, labels, data, label, color, hoverCol
 export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
   const chartSize = width > 1280 ? sizes[1281] : width > 1024 ? sizes[1280] : sizes[1024]
-
-  useRefreshChartOnTabActivated(
-    () => chartRef.current,
-    () => canvasRef.current
-  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -689,8 +666,8 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
 
     const colors = generateColors((data || []).length, canvas)
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
@@ -772,8 +749,8 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
     if (!canvas || !chart) return
 
     const colors = generateColors((data || []).length, canvas)
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -812,11 +789,9 @@ export const MixedColorsBarChartDark = ({ id, labels, data, label, ratio = 3 }) 
 export const CompositeBarChart = ({ labels, data, label }) => {
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
-
-  useRefreshChartOnTabActivated(
-    () => chartRef.current,
-    () => canvasRef.current
-  )
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -825,8 +800,8 @@ export const CompositeBarChart = ({ labels, data, label }) => {
     if (!ctx) return
     if (chartRef.current) return
 
-    const barBg = getCssVar(canvas, '--chart-primary-bar-bg', '#6673FD')
-    const barBorder = getCssVar(canvas, '--chart-primary-bar-border', '#6673FD')
+    const barBg = getCssVar(canvas, '--chart-primary-bar-bg')
+    const barBorder = getCssVar(canvas, '--chart-primary-bar-border')
 
     chartRef.current = new Chart(ctx, {
       type: 'bar',
@@ -860,8 +835,8 @@ export const CompositeBarChart = ({ labels, data, label }) => {
     const chart = chartRef.current
     if (!canvas || !chart) return
 
-    const barBg = getCssVar(canvas, '--chart-primary-bar-bg', '#6673FD')
-    const barBorder = getCssVar(canvas, '--chart-primary-bar-border', '#6673FD')
+    const barBg = getCssVar(canvas, '--chart-primary-bar-bg')
+    const barBorder = getCssVar(canvas, '--chart-primary-bar-border')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -885,14 +860,12 @@ export const CompositeBarChart = ({ labels, data, label }) => {
 export const LineChart = ({ id, labels, data, label }) => {
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
+  
+  const getChart = useCallback(() => chartRef.current, [])
+  useArgusTabActivatedResize(getChart)
 
   const { width } = useWindowDimensions()
   const chartSize = width > 1280 ? sizes[1281] : width > 1024 ? sizes[1280] : sizes[1024]
-
-  useRefreshChartOnTabActivated(
-    () => chartInstanceRef.current,
-    () => chartRef.current
-  )
 
   useEffect(() => {
     const canvas = chartRef.current
@@ -901,11 +874,11 @@ export const LineChart = ({ id, labels, data, label }) => {
     if (!ctx) return
     if (chartInstanceRef.current) return
 
-    const lineColor = getCssVar(canvas, '--chart-line-1-color', 'rgb(102, 115, 253)')
-    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover', 'rgb(126, 135, 243)')
+    const lineColor = getCssVar(canvas, '--chart-line-1-color')
+    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chartInstanceRef.current = new Chart(ctx, {
       type: 'line',
@@ -997,11 +970,11 @@ export const LineChart = ({ id, labels, data, label }) => {
     const chart = chartInstanceRef.current
     if (!canvas || !chart) return
 
-    const lineColor = getCssVar(canvas, '--chart-line-1-color', 'rgb(102, 115, 253)')
-    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover', 'rgb(126, 135, 243)')
+    const lineColor = getCssVar(canvas, '--chart-line-1-color')
+    const lineHoverColor = getCssVar(canvas, '--chart-line-1-hover')
 
-    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color', '#fff')
-    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color', '#000')
+    const datalabelInsideColor = getCssVar(canvas, '--chart-datalabel-inside-color')
+    const datalabelOutsideColor = getCssVar(canvas, '--chart-datalabel-outside-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -1040,11 +1013,9 @@ export const LineChart = ({ id, labels, data, label }) => {
 export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
   const ref = useRef(null)
   const inst = useRef(null)
-
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1115,12 +1086,12 @@ export const LineChartDark = ({ labels, datasets, datasetLabels }) => {
 
 const getColorForIndex = (index, canvas) => {
   const colors = [
-    getCssVar(canvas, '--chart-line-multi-1', '#808000'),
-    getCssVar(canvas, '--chart-line-multi-2', '#1F3BB3'),
-    getCssVar(canvas, '--chart-line-multi-3', '#00FF00'),
-    getCssVar(canvas, '--chart-line-multi-4', '#FF5733'),
-    getCssVar(canvas, '--chart-line-multi-5', '#FFC300'),
-    getCssVar(canvas, '--chart-line-multi-6', '#800080')
+    getCssVar(canvas, '--chart-line-multi-1'),
+    getCssVar(canvas, '--chart-line-multi-2'),
+    getCssVar(canvas, '--chart-line-multi-3'),
+    getCssVar(canvas, '--chart-line-multi-4'),
+    getCssVar(canvas, '--chart-line-multi-5'),
+    getCssVar(canvas, '--chart-line-multi-6')
   ]
 
   return colors[index % colors.length]
@@ -1130,10 +1101,8 @@ export const PieChart = ({ id, labels, data, label }) => {
   const ref = useRef(null)
   const inst = useRef(null)
 
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1142,10 +1111,10 @@ export const PieChart = ({ id, labels, data, label }) => {
     if (!ctx) return
     if (inst.current) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     inst.current = new Chart(ctx, {
       type: 'pie',
@@ -1173,10 +1142,10 @@ export const PieChart = ({ id, labels, data, label }) => {
     const chart = inst.current
     if (!canvas || !chart) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -1193,11 +1162,9 @@ export const PieChart = ({ id, labels, data, label }) => {
 export const DoughnutChart = ({ id, labels, data, label }) => {
   const ref = useRef(null)
   const inst = useRef(null)
-
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1206,10 +1173,10 @@ export const DoughnutChart = ({ id, labels, data, label }) => {
     if (!ctx) return
     if (inst.current) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     inst.current = new Chart(ctx, {
       type: 'doughnut',
@@ -1237,10 +1204,10 @@ export const DoughnutChart = ({ id, labels, data, label }) => {
     const chart = inst.current
     if (!canvas || !chart) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -1258,10 +1225,8 @@ export const RadarChart = ({ id, labels, data, label }) => {
   const ref = useRef(null)
   const inst = useRef(null)
 
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1270,9 +1235,9 @@ export const RadarChart = ({ id, labels, data, label }) => {
     if (!ctx) return
     if (inst.current) return
 
-    const fill = getCssVar(canvas, '--chart-radar-fill', 'rgba(102, 115, 253, 0.2)')
-    const border = getCssVar(canvas, '--chart-radar-border', '#6673FD')
-    const point = getCssVar(canvas, '--chart-radar-point', '#6673FD')
+    const fill = getCssVar(canvas, '--chart-radar-fill')
+    const border = getCssVar(canvas, '--chart-radar-border')
+    const point = getCssVar(canvas, '--chart-radar-point')
 
     inst.current = new Chart(ctx, {
       type: 'radar',
@@ -1302,9 +1267,9 @@ export const RadarChart = ({ id, labels, data, label }) => {
     const chart = inst.current
     if (!canvas || !chart) return
 
-    const fill = getCssVar(canvas, '--chart-radar-fill', 'rgba(102, 115, 253, 0.2)')
-    const border = getCssVar(canvas, '--chart-radar-border', '#6673FD')
-    const point = getCssVar(canvas, '--chart-radar-point', '#6673FD')
+    const fill = getCssVar(canvas, '--chart-radar-fill')
+    const border = getCssVar(canvas, '--chart-radar-border')
+    const point = getCssVar(canvas, '--chart-radar-point')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -1323,11 +1288,9 @@ export const RadarChart = ({ id, labels, data, label }) => {
 export const PolarAreaChart = ({ id, labels, data, label }) => {
   const ref = useRef(null)
   const inst = useRef(null)
-
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1336,10 +1299,10 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
     if (!ctx) return
     if (inst.current) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     inst.current = new Chart(ctx, {
       type: 'polarArea',
@@ -1367,10 +1330,10 @@ export const PolarAreaChart = ({ id, labels, data, label }) => {
     const chart = inst.current
     if (!canvas || !chart) return
 
-    const c1 = getCssVar(canvas, '--chart-pie-1', '#6673FD')
-    const c2 = getCssVar(canvas, '--chart-pie-2', '#FF6384')
-    const c3 = getCssVar(canvas, '--chart-pie-3', '#36A2EB')
-    const c4 = getCssVar(canvas, '--chart-pie-4', '#FFCE56')
+    const c1 = getCssVar(canvas, '--chart-pie-1')
+    const c2 = getCssVar(canvas, '--chart-pie-2')
+    const c3 = getCssVar(canvas, '--chart-pie-3')
+    const c4 = getCssVar(canvas, '--chart-pie-4')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].label = label
@@ -1388,10 +1351,8 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
   const ref = useRef(null)
   const inst = useRef(null)
 
-  useRefreshChartOnTabActivated(
-    () => inst.current,
-    () => ref.current
-  )
+  const getChart = useCallback(() => inst.current, [])
+  useArgusTabActivatedResize(getChart)
 
   useEffect(() => {
     const canvas = ref.current
@@ -1407,12 +1368,12 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
     if (!ctx) return
 
     if (!inst.current) {
-      const barBg = getCssVar(canvas, '--chart-compbar-bg', 'rgba(0, 123, 255, 0.5)')
-      const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg', 'rgb(255, 255, 0)')
-      const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color', '#000000')
+      const barBg = getCssVar(canvas, '--chart-compbar-bg')
+      const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg')
+      const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color')
       const yTickColor = xTickColor
-      const gridColor = getCssVar(canvas, '--chart-compbar-grid-color', 'rgba(255, 255, 255, 0.2)')
-      const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color', 'black')
+      const gridColor = getCssVar(canvas, '--chart-compbar-grid-color')
+      const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color')
 
       inst.current = new Chart(ctx, {
         type: 'bar',
@@ -1488,12 +1449,12 @@ export const CompBarChart = ({ id, labels, datasets, collapsed }) => {
     if (!canvas || !chart) return
     if (collapsed) return
 
-    const barBg = getCssVar(canvas, '--chart-compbar-bg', 'rgba(0, 123, 255, 0.5)')
-    const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg', 'rgb(255, 255, 0)')
-    const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color', '#000000')
+    const barBg = getCssVar(canvas, '--chart-compbar-bg')
+    const barHoverBg = getCssVar(canvas, '--chart-compbar-hover-bg')
+    const xTickColor = getCssVar(canvas, '--chart-compbar-axis-color')
     const yTickColor = xTickColor
-    const gridColor = getCssVar(canvas, '--chart-compbar-grid-color', 'rgba(255, 255, 255, 0.2)')
-    const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color', 'black')
+    const gridColor = getCssVar(canvas, '--chart-compbar-grid-color')
+    const datalabelColor = getCssVar(canvas, '--chart-datalabel-compbar-color')
 
     chart.data.labels = labels || []
     chart.data.datasets[0].data = datasets || []
