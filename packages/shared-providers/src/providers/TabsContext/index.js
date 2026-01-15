@@ -13,8 +13,6 @@ import styles from './TabsProvider.module.css'
 
 const TabsContext = createContext()
 
-const HOME_ROUTE = '/default/'
-
 function LoadingOverlay() {
   return <Box className={styles.loadingOverlay}></Box>
 }
@@ -29,7 +27,8 @@ const TabPage = React.memo(
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props
   const { loading } = useContext(RequestsContext)
-  const [showOverlay, setShowOverlay] = useState(false)
+
+   const [showOverlay, setShowOverlay] = useState(true)
 
   const isActive = value === index
 
@@ -91,7 +90,7 @@ const TabsProvider = ({ children }) => {
 
   const pagesCacheRef = useRef(new Map())
 
-  const homePageRef = useRef(null)
+  const didInitTabsRef = useRef(false)
 
   const userDataParsed = useMemo(() => {
     if (typeof window === 'undefined') return {}
@@ -187,14 +186,8 @@ const TabsProvider = ({ children }) => {
     if (typeof window === 'undefined') return
     const route = router.asPath
     if (!route) return
-
     if (children && !pagesCacheRef.current.has(route)) {
       pagesCacheRef.current.set(route, children)
-    }
-
-    if (route === HOME_ROUTE && children && !homePageRef.current) {
-      homePageRef.current = children
-      pagesCacheRef.current.set(HOME_ROUTE, children)
     }
   }, [router.asPath, children])
 
@@ -274,15 +267,7 @@ const TabsProvider = ({ children }) => {
   const reopenTab = useCallback(
     async tabRoute => {
       if (tabRoute === router.asPath) {
-        setOpenTabs(openTabs =>
-          openTabs.map(tab => {
-            if (tab.route !== tabRoute) return tab
-
-            if (tab.route === HOME_ROUTE) return tab
-
-            return { ...tab, id: uuidv4() }
-          })
-        )
+        setOpenTabs(openTabs => openTabs.map(tab => (tab.route === tabRoute ? { ...tab, id: uuidv4() } : tab)))
         setReloadOpenedPage([])
       } else await navigateTo(tabRoute)
     },
@@ -319,9 +304,7 @@ const TabsProvider = ({ children }) => {
         setCurrentTabIndex(newValueState)
       } else {
         setOpenTabs(prevState =>
-          prevState.map((tab, idx) => {
-            if (idx === 0) return tab
-
+          prevState.map(tab => {
             if (tab.route !== router.asPath) return tab
             if (tab.page) return tab
 
@@ -336,9 +319,13 @@ const TabsProvider = ({ children }) => {
   useEffect(() => {
     if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
+    if (didInitTabsRef.current) return
+
     if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
-      const homeRoute = HOME_ROUTE
-      const homePage = homePageRef.current || pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
+      didInitTabsRef.current = true
+
+      const homeRoute = '/default/'
+      const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
 
       const newTabs = [
         {
@@ -365,9 +352,9 @@ const TabsProvider = ({ children }) => {
       }
 
       setOpenTabs(newTabs)
-      menu.length > 0 && setInitialLoadDone(true)
+      setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, dashboardId])
 
   function unlockRecord(resourceId) {
     const body = {
@@ -422,7 +409,7 @@ const TabsProvider = ({ children }) => {
                       <RefreshIcon className={styles.svgIcon} />
                     </IconButton>
                   )}
-                  {activeTab.route !== HOME_ROUTE && (
+                  {activeTab.route !== '/default/' && (
                     <IconButton
                       size='small'
                       className={styles.svgIcon}
