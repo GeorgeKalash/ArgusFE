@@ -24,12 +24,13 @@ const TabPage = React.memo(
   (prev, next) => prev.page === next.page
 )
 
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props
-  const { loading } = useContext(RequestsContext)
+const CustomTabPanel = React.memo(function CustomTabPanel({
+  page,
+  index,
+  isActive,
+  loading
+}) {
   const [showOverlay, setShowOverlay] = useState(false)
-
-  const isActive = value === index
 
   useEffect(() => {
     if (!isActive) return
@@ -48,16 +49,27 @@ function CustomTabPanel(props) {
   return (
     <Box
       role="tabpanel"
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      className={styles.customTabPanel}
       hidden={!isActive}
       aria-hidden={!isActive}
       {...(!isActive ? { inert: '' } : {})}
-      className={styles.customTabPanel}
     >
       {!showOverlay && isActive && <LoadingOverlay />}
-      <TabPage page={children} />
+      <TabPage page={page} />
     </Box>
   )
-}
+}, (prev, next) => {
+  if (!prev.isActive && !next.isActive) {
+    return prev.page === next.page
+  }
+
+  if (prev.isActive !== next.isActive) return false
+
+  return prev.page === next.page && prev.loading === next.loading
+})
+
 
 CustomTabPanel.propTypes = {
   children: PropTypes.node,
@@ -67,6 +79,7 @@ CustomTabPanel.propTypes = {
 
 const TabsProvider = ({ children }) => {
   const router = useRouter()
+  const { loading } = useContext(RequestsContext) 
 
   const {
     menu,
@@ -429,9 +442,13 @@ const TabsProvider = ({ children }) => {
       </Box>
 
       {openTabs.map((activeTab, i) => (
-        <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-          {activeTab.page}
-        </CustomTabPanel>
+        <CustomTabPanel
+          key={activeTab.id}
+          index={i}
+          isActive={i === currentTabIndex}
+          loading={loading}
+          page={activeTab.page}
+        />
       ))}
 
       <Menu
