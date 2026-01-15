@@ -97,7 +97,6 @@ export default function DamageForm({ recordId, jobId }) {
         netJobPcs: yup.number().required(),
         metalQty: yup.number().required(),
         nonMetalQty: yup.number().required(),
-        workCenterId: yup.number().required(),
         damagedPcs: yup.lazy((_, { parent }) =>
           yup
             .number()
@@ -285,8 +284,8 @@ export default function DamageForm({ recordId, jobId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={formik.values.header.damagedQty != 0 && !hasItems || isPosted}
-      disabledSavedClear={formik.values.header.damagedQty != 0 && !hasItems || isPosted}
+      disabledSubmit={(formik.values.header.damagedQty != 0 && !hasItems) || isPosted}
+      disabledSavedClear={(formik.values.header.damagedQty != 0 && !hasItems) || isPosted}
       isParentWindow={false}
     >
       <VertLayout>
@@ -462,24 +461,12 @@ export default function DamageForm({ recordId, jobId }) {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={ManufacturingRepository.WorkCenter.qry}
-                    name='header.workCenterId'
+                  <CustomTextField
+                    name='header.workCenterName'
                     label={labels.workCenter}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik.values.header}
+                    value={formik?.values?.header?.workCenterName}
                     maxAccess={maxAccess}
                     readOnly
-                    required
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.workCenterId', newValue?.recordId || null)
-                    }}
-                    error={formik?.touched?.header?.workCenterId && formik?.errors?.header?.workCenterId}
                   />
                 </Grid>
 
