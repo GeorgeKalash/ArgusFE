@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useMemo, useState, useContext, useCallback, useRef } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -34,75 +34,115 @@ const DashboardLayout = () => {
   const _userId = userData.userId
   const _languageId = userData.languageId
 
-  const debouncedCloseLoading = debounce(() => {
-    setLoading(false)
-  }, 500)
-
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
+  const getRequestRef = useRef(getRequest)
   useEffect(() => {
+    getRequestRef.current = getRequest
+  }, [getRequest])
+
+  const debouncedCloseLoading = useMemo(() => debounce(() => setLoading(false), 500), [])
+  useEffect(() => {
+    return () => {
+      debouncedCloseLoading.cancel()
+    }
+  }, [debouncedCloseLoading])
+
+  const lastFetchKeyRef = useRef(null)
+
+  useEffect(() => {
+    const fetchKey = `${_userId}-${_languageId}`
+    if (lastFetchKeyRef.current === fetchKey) return
+    lastFetchKeyRef.current = fetchKey
+
+    let isMounted = true
+
     const fetchData = async () => {
-      const appletsRes = await getRequest({
-        extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`
-      })
-      setApplets(appletsRes.list)
-
-      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
-        getRequest({
-          extension: TimeAttendanceRepository.TimeVariation.qry2,
-          parameters: `_dayId=${formatDateForGetApI(new Date())}`
-        }),
-        getRequest({
-          extension: SystemRepository.KeyValueStore,
-          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+      try {
+        const appletsRes = await getRequestRef.current({
+          extension: SystemRepository.DynamicDashboard.qry,
+          parameters: `_userId=${_userId}`
         })
-      ])
 
-      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+        if (!isMounted) return
+        setApplets(appletsRes.list)
 
-      const filteredTabs = resTimeCode.list
-        .filter(t => availableTimeCodes.has(Number(t.key)))
-        .map(t => ({
-          label: t.value,
-          timeCode: Number(t.key),
-          disabled: false
-        }))
+        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+          getRequestRef.current({ extension: DashboardRepository.dashboard }),
+          getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+          getRequestRef.current({
+            extension: TimeAttendanceRepository.TimeVariation.qry2,
+            parameters: `_dayId=${formatDateForGetApI(new Date())}`
+          }),
+          getRequestRef.current({
+            extension: SystemRepository.KeyValueStore,
+            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+          })
+        ])
 
-      const groupedData = filteredTabs.reduce((acc, tab) => {
-        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
+        if (!isMounted) return
 
-        return acc
-      }, {})
+        const availableTimeCodes = new Set((resTV.list || []).map(d => d.timeCode))
 
-      setData({
-        dashboard: resDashboard?.record,
-        sp: resSP?.record,
-        hr: {
-          timeVariationDetails: resTV.list || [],
-          tabs: filteredTabs,
-          groupedData: groupedData
-        }
-      })
+        const filteredTabs = (resTimeCode.list || [])
+          .filter(t => availableTimeCodes.has(Number(t.key)))
+          .map(t => ({
+            label: t.value,
+            timeCode: Number(t.key),
+            disabled: false
+          }))
 
-      debouncedCloseLoading()
+        const groupedData = filteredTabs.reduce((acc, tab) => {
+          acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
+          return acc
+        }, {})
+
+        setData({
+          dashboard: resDashboard?.record,
+          sp: resSP?.record,
+          hr: {
+            timeVariationDetails: resTV.list || [],
+            tabs: filteredTabs,
+            groupedData: groupedData
+          }
+        })
+
+        debouncedCloseLoading()
+      } catch (e) {
+        if (isMounted) setLoading(false)
+      }
     }
 
     fetchData()
-  }, [_userId, _languageId])
+
+    return () => {
+      isMounted = false
+      debouncedCloseLoading.cancel()
+    }
+  }, [_userId, _languageId, debouncedCloseLoading])
+
+  const containsApplet = useCallback(
+    appletId => {
+      if (!Array.isArray(applets)) return false
+      return applets.some(applet => applet.appletId === appletId)
+    },
+    [applets]
+  )
+
+  const tvColumns = useMemo(
+    () => [
+      { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
+      { field: 'branchName', headerName: labels.branchName, flex: 3 },
+      { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
+      { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
+    ],
+    [labels.employeeName, labels.branchName, labels.departmentName, labels.duration]
+  )
 
   if (loading) {
     return <LoadingOverlay />
-  }
-
-  const containsApplet = appletId => {
-    if (!Array.isArray(applets)) return false
-
-    return applets.some(applet => applet.appletId === appletId)
   }
 
   return (
@@ -485,12 +525,7 @@ const DashboardLayout = () => {
                   <Box sx={{ display: 'flex', height: '350px' }}>
                     <Table
                       name='TVtable'
-                      columns={[
-                        { field: 'employeeName', headerName: labels.employeeName, flex: 3 },
-                        { field: 'branchName', headerName: labels.branchName, flex: 3 },
-                        { field: 'departmentName', headerName: labels.departmentName, flex: 3 },
-                        { field: 'duration', headerName: labels.duration, flex: 2, type: 'number' }
-                      ]}
+                      columns={tvColumns}
                       gridData={data?.hr?.groupedData?.[tab.timeCode] || { list: [] }}
                       rowId={['recordId']}
                       pagination={false}
