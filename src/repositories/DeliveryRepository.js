@@ -97,6 +97,7 @@ export const DeliveryRepository = {
     pack: service + 'getPackINB',
     page: service + 'pageINB',
     set2: service + 'set2INB',
+    get: service + 'getINB',
     get2: service + 'get2INB',
     del: service + 'delINB',
     snapshot: service + 'snapshotINB',

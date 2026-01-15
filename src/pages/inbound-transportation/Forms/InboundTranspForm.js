@@ -51,13 +51,14 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         initialValues: {
             recordId: null,
             reference: '',
-            plantId: plantId ? parseInt(plantId) : null,
+            plantId,
             tripId: null,
             tripRef: '',
             vehicleId: null,
             driverId: null,
             date: new Date(),
             arrivalTime: null,
+            convertedArrivalTime: null,
             notes: '',
             dtId: null,
             status: 1,
@@ -68,6 +69,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             vehicleId: yup.number().required(),
             driverId: yup.number().required(),
             tripId: yup.number().required(),
+            date: yup.date().required(),
             arrivalTime: yup.date().required(),
             convertedArrivalTime: yup.string().required()
         }),
@@ -92,7 +94,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                 })
             })
 
-            !formik.values.recordId ? toast.success(platformLabels.Added) : toast.success(platformLabels.Edited)
+            toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
             refetchForm(response?.recordId)
             invalidate()
         }
@@ -100,14 +102,14 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
 
     function getShiftedDate(date, time) {
         const originalDate = dayjs(date).startOf('day')
-        let combinedDateTime = originalDate
 
         if (time) {
             const parsedTime = dayjs(time, 'hh:mm A')
-            combinedDateTime = originalDate.set('hour', parsedTime.hour()).set('minute', parsedTime.minute())
+
+            return originalDate.set('hour', parsedTime.hour()).set('minute', parsedTime.minute())
         }
 
-        return combinedDateTime
+        return originalDate
     }
 
     function getTotals(items = []) {
@@ -139,6 +141,24 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         })
     }
 
+    function formatHeader(data){
+        if (!Object.keys(data).length) return {}
+
+        const formattedArrivalDate = data?.arrivalTime
+        ? formatDateFromApi(data?.arrivalTime)
+        : null
+
+        return {
+            ...data,
+            date: data?.date ? formatDateFromApi(data?.date) : null,
+            arrivalTime: formattedArrivalDate,
+            ...(formattedArrivalDate && {
+                convertedArrivalTime: dayjs(dayjs(formattedArrivalDate), 'hh:mm A')
+            })
+        }
+
+    }
+
     async function refetchForm(recordId) {
         const res = await getOutboundTransp(recordId)
         const header = res?.record?.header || {}
@@ -147,19 +167,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }
 
     function fillForm(header = {}, items = []) {
-        const formattedArrivalDate = header.arrivalTime
-            ? formatDateFromApi(header.arrivalTime)
-            : null
-
-        const formattedHeader = {
-            ...header,
-            date: header.date ? formatDateFromApi(header.date) : null,
-            arrivalTime: formattedArrivalDate,
-            ...(formattedArrivalDate && {
-                convertedArrivalTime: dayjs(dayjs(formattedArrivalDate), 'hh:mm A')
-            })
-        }
-
+        const formattedHeader = formatHeader(header || {})
+        
         const formattedItems = (items || []).map(item => ({
             ...item,
             checked: item?.deliveryStatus == 3 || false
@@ -187,10 +196,11 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             Component: ThreadProgress,
             props: {
                 recordId: res.recordId,
-                onComplete: () => refetchOrders()
+                onComplete: async () => { await refetchOrders() }
             },
             closable: false
           })
+          await refetchInbound()
         }
         
         invalidate()
@@ -295,16 +305,32 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             return
         }
 
-        const formattedItems = (res?.list || []).map(item => ({
-          ...item,
-          qty:item?.soQty || 0
-        }))
-
         const totals = getTotals(res?.list)
+
         formik.setValues({
             ...formik.values,
-            items: formattedItems,
+            items: (res?.list || []).map(item => ({ ...item, qty:item?.soQty || 0 })),
             ...totals
+        })
+    }
+
+    async function refetchInbound() {
+        if (!formik.values.recordId) return
+        
+        const res = await getRequest({
+            extension: DeliveryRepository.InboundTransp.get,
+            parameters: `_recordId=${formik.values.recordId}`
+        })
+        const { items, totalVolume, totalWeight, ...otherFields } = formik.values
+
+        const formattedHeader = formatHeader(res?.record || {})
+
+        formik.setValues({
+            ...otherFields,                   
+            ...formattedHeader,                 
+            items,                           
+            totalVolume,                      
+            totalWeight                     
         })
     }
 
@@ -321,15 +347,10 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         })
 
         const totals = getTotals(res?.list)
-
-        const formattedItems = (res?.list || []).map(item => ({
-          ...item,
-          checked: item?.deliveryStatus == 3 || false
-        }))
         
         formik.setValues({
             ...formik.values,
-            items: formattedItems,
+            items: (res?.list || []).map(item => ({ ...item, checked: item?.deliveryStatus == 3 || false })),
             ...totals
         })
     }
@@ -382,7 +403,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 form={formik}
                                 required
                                 valueShow='tripRef'
-                                readOnly={isPosted}
+                                readOnly={isPosted || editMode}
                                 secondDisplayField={false}
                                 maxAccess={maxAccess}
                                 onChange={async (_, newValue) => {
@@ -475,6 +496,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 onChange={formik.setFieldValue}
                                 onClear={() => formik.setFieldValue('date', null)}
                                 readOnly={isPosted}
+                                required
                                 error={formik.touched.date && Boolean(formik.errors.date)}
                                 maxAccess={maxAccess}
                             />
