@@ -45,10 +45,6 @@ function CustomTabPanel({ page, isActive }) {
   )
 }
 
-
-
-
-
 CustomTabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
@@ -189,11 +185,14 @@ const TabsProvider = ({ children }) => {
 
       if (nextRoute === router.asPath) return
 
-      if (newValue === 0 && !openTabs?.[newValue]?.page) {
-        await navigateTo(nextRoute)
-      } else {
-        await navigateTo(nextRoute)
-        if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
+      await navigateTo(nextRoute)
+
+      if (typeof window !== 'undefined' && !(newValue === 0 && !openTabs?.[newValue]?.page) && nextRoute) {
+        window.history.replaceState(null, '', nextRoute)
+      }
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('argus-tab-activated'))
       }
     },
     [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
