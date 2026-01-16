@@ -57,7 +57,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const { platformLabels, defaultsData } = useContext(ControlContext)
-
+  const [measurements, setMeasurements] = useState([])
+  const filteredMeasurements = useRef([])
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [reCal, setReCal] = useState(false)
 
@@ -90,6 +91,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
     return spId
   }
+
+  const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
 
   const initialValues = {
     dtId: null,
@@ -133,6 +136,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     hiddenkgMetalPrice: 0,
     clientDiscount: 0,
     currentDiscount: 0,
+    baseMetalCuId: parseInt(defaultMCbaseCU?.value),
     items: [
       {
         id: 1,
@@ -300,6 +304,20 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res?.record
   }
 
+  async function getFilteredMU(itemId, msId) {
+    if (!itemId) return
+
+    const arrayMU = measurements?.filter(item => item.msId === msId) || []
+    filteredMeasurements.current = arrayMU
+  }
+
+  const getMeasurementUnits = async () => {
+    return await getRequest({
+      extension: InventoryRepository.MeasurementUnit.qry,
+      parameters: `_msId=0`
+    })
+  }
+
   const columns = [
     !formik.values.invoiceId && {
       component: 'resourcecombobox',
@@ -316,7 +334,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         mapping: [
           { from: 'recordId', to: 'invoiceId' },
           { from: 'reference', to: 'invoiceRef' }
-        ]
+        ],
+        displayFieldWidth: 2
       },
       async onChange({ row: { update } }) {
         if (!formik.values.currencyId) {
@@ -351,7 +370,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           { from: 'recordId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'name', to: 'itemName' },
-          { from: 'trackBy', to: 'trackBy' }
+          { from: 'trackBy', to: 'trackBy' },
+          { from: 'defSaleMUId', to: 'defSaleMUId' },
+          { from: 'msId', to: 'msId' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -398,6 +419,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             return
           }
 
+          let rowTax
+          let rowTaxDetails
+          if (itemFound.item.taxId) {
+            const taxDetailsResponse = await getTaxDetails(itemFound.item.taxId)
+            rowTax = itemFound.item.taxId
+            rowTaxDetails = taxDetailsResponse.map(item => ({
+              taxId: itemFound.item.taxId,
+              taxCodeId: item.taxCodeId,
+              taxBase: item.taxBase,
+              amount: item.amount
+            }))
+          }
+
           const itemData = {
             id: newRow?.id,
             itemId: itemFound?.item?.itemId,
@@ -421,7 +455,11 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             volume: itemFound?.item?.volume,
             isMetal: itemFound?.item?.isMetal || false,
             metalid: itemFound?.item?.metalId,
-            metalPurity: itemFound?.item?.metalPurity
+            metalPurity: itemFound?.item?.metalPurity,
+            muId: itemFound?.item?.muId,
+            muRef: itemFound?.item?.muRef,
+            taxId: rowTax,
+            taxDetails: rowTaxDetails || null
           }
 
           update(itemData)
@@ -430,13 +468,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           return
         }
 
-        const [itemPhysProp, itemInfo, ItemConvertPrice] = await Promise.all([
-          getItemPhysProp(newRow.itemId),
-          getItem(newRow.itemId),
-          getItemConvertPrice(newRow.itemId, update)
-        ])
+        const [itemPhysProp, itemInfo] = await Promise.all([getItemPhysProp(newRow.itemId), getItem(newRow.itemId)])
 
         const measurementSchedule = await getMeasurementObject(itemInfo?.msId)
+
+        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const defaultMu = measurements?.filter(item => item.recordId === itemInfo?.defSaleMUId)?.[0]
+        const ItemConvertPrice = await getItemConvertPrice(newRow.itemId, defaultMu?.recordId)
 
         let rowTax
         let rowTaxDetails
@@ -484,7 +522,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           mdAmount: formik.values.clientDiscount || 0,
           qty: 0,
           pieces: 0,
-          msId: itemInfo?.msId,
+          msId: newRow?.msId,
+          muRef: defaultMu?.reference || '',
+          muId: defaultMu?.recordId || null,
+          muQty: defaultMu?.qty || null,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -493,7 +534,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           trackBy: newRow?.trackBy,
-          decimals: measurementSchedule?.decimals || 0
+          decimals: measurementSchedule?.decimals || 0,
+          baseQty: Number(defaultMu?.qty) * Number(newRow?.qty)
         })
       },
       propsReducer({ row, props }) {
@@ -510,6 +552,67 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       }
     },
     {
+      component: 'resourcecombobox',
+      label: labels.measurementUnit,
+      name: 'muRef',
+      props: {
+        store: filteredMeasurements?.current,
+        displayField: 'reference',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'reference', to: 'muRef' },
+          { from: 'qty', to: 'muQty' },
+          { from: 'recordId', to: 'muId' }
+        ]
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow?.muId) {
+          update({ baseQty: 0 })
+        }
+
+        const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+
+        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
+
+        const unitPrice =
+          ItemConvertPrice?.priceType === 3
+            ? (newRow?.weight || 0) *
+              ((formik?.values?.header?.postMetalToFinancials ? 0 : ItemConvertPrice?.basePrice) +
+                (ItemConvertPrice?.baseLaborPrice || 0))
+            : ItemConvertPrice?.unitPrice || 0
+
+        const postMetalToFinancials = formik?.values?.header?.postMetalToFinancials ?? false
+        const basePrice = ((formik?.values?.header?.KGmetalPrice || 0) * (newRow?.metalPurity || 0)) / 1000
+        const basePriceValue = postMetalToFinancials === false ? basePrice : 0
+        const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
+
+        getItemPriceRow(
+          update,
+          {
+            ...newRow,
+            qtyInBase,
+            muQty: newRow?.muQty,
+            unitPrice,
+            baseQty: Number(newRow?.returnNowQty) * muQty,
+            minPrice: ItemConvertPrice?.minPrice || 0,
+            upo: ItemConvertPrice?.upo || 0,
+            priceType: ItemConvertPrice?.priceType || 1,
+            basePrice:
+              newRow?.isMetal === false
+                ? ItemConvertPrice?.basePrice || 0
+                : newRow?.metalPurity > 0
+                ? basePriceValue
+                : 0
+          },
+          DIRTYFIELD_QTY
+        )
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row.invoiceId, store: filteredMeasurements?.current }
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.qty,
       name: 'returnNowQty',
@@ -522,12 +625,19 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         }
       },
       onChange({ row: { update, newRow } }) {
+        getFilteredMU(newRow?.itemId, newRow?.msId)
         const { returnNowQty, balanceQty, invoiceId } = newRow
         const validQty = invoiceId && Number(returnNowQty) > Number(balanceQty) ? balanceQty : returnNowQty
         update({ returnNowQty: validQty })
 
         getItemPriceRow(update, { ...newRow, returnNowQty: validQty }, DIRTYFIELD_QTY)
         if (invoiceId && Number(returnNowQty) > Number(balanceQty)) stackError({ message: labels.invalidQty })
+        const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
+
+        const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
+        update({
+          baseQty: Number(newRow?.returnNowQty) * muQty
+        })
       }
     },
     {
@@ -909,6 +1019,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
       maxDiscount: clientDiscount.tdPct || 0,
+      KGmetalPrice: retHeader?.record?.metalPrice * 1000,
       items: modifiedList
     })
   }
@@ -971,14 +1082,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res?.list
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
     if (!itemId) return
 
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_itemId=${itemId}&_clientId=${formik.values.clientId}&_currencyId=${
         formik.values.currencyId
-      }&_plId=${formik.values.plId || systemPriceLevel}&_muId=0`
+      }&_plId=${formik.values.plId || systemPriceLevel}&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1052,6 +1163,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
 
     let commonData = {
+      ...newRow,
       id: newRow?.id,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
@@ -1130,7 +1242,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
         basePrice: parseFloat(item?.basePrice),
-        qty: item?.qty,
+        qty: parseFloat(item?.returnNowQty),
         weight: item?.weight,
         extendedPrice: parseFloat(item?.extendedPrice),
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
@@ -1251,7 +1363,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
     if (!defaultRateType.value) {
@@ -1322,6 +1433,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
   useEffect(() => {
     ;(async function () {
+      const muList = await getMeasurementUnits()
+      setMeasurements(muList?.list)
+
       if (recordId) await refetchForm(recordId)
       else {
         await setMetalPriceOperations()
@@ -1371,8 +1485,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     values={formik.values}
                     maxAccess={maxAccess}
                     onChange={(event, newValue) => {
-                      formik.setFieldValue('dtId', newValue?.recordId || null)
                       changeDT(newValue)
+
+                      formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
                   />
@@ -1770,6 +1885,9 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             error={formik.errors.items}
             columns={columns}
             name='items'
+            onSelectionChange={(row, update, field) => {
+              if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
+            }}
             maxAccess={maxAccess}
             disabled={!formik.values.clientId || formik.values.invoiceId || isPosted}
             allowDelete={!isPosted && !formik.values.invoiceId}

@@ -96,7 +96,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
         const vatCalcRow = getVatCalc({
           priceType: itemPriceRow?.priceType,
           basePrice: (form.values.metalPrice || 0) * (form.values.metalPurity || 0),
-          qty,
+          qty: itemPriceRow?.qty,
           weight: itemPriceRow?.weight,
           extendedPrice: parseFloat(itemPriceRow.extendedPrice) || 0,
           baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
@@ -104,10 +104,9 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: form.values.tdPct,
           taxDetails: form.values.isVattable ? taxDetailList : null
         })
-        const { muId, ...restItem } = item
 
         return {
-          ...restItem,
+          ...item,
           id: index + 1,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,
@@ -119,7 +118,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           vatAmount: vatCalcRow.vatAmount,
           returnedQty,
           balanceQty,
-          returnNowQty: (itemPriceRow?.qty || 0).toFixed(restItem?.decimals || 0),
+          returnNowQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0),
           totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
           taxDetails: form.values.isVattable ? taxDetailList : null
         }
