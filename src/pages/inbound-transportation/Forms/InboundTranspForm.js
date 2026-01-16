@@ -69,9 +69,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             vehicleId: yup.number().required(),
             driverId: yup.number().required(),
             tripId: yup.number().required(),
-            date: yup.date().required(),
-            arrivalTime: yup.date().required(),
-            convertedArrivalTime: yup.string().required()
+            date: yup.date().required()
         }),
         onSubmit: async obj => {
             const extractedHeader = { ...obj }
@@ -134,7 +132,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     const isPosted = formik.values.status == 3
     const editMode = !!formik.values.recordId
 
-    async function getOutboundTransp(recordId) {
+    async function getInboundTransp(recordId) {
         return await getRequest({
             extension: DeliveryRepository.InboundTransp.get2,
             parameters: `_recordId=${recordId}`
@@ -160,7 +158,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }
 
     async function refetchForm(recordId) {
-        const res = await getOutboundTransp(recordId)
+        const res = await getInboundTransp(recordId)
         const header = res?.record?.header || {}
         const items = res?.record?.items || []
         fillForm(header, items)
@@ -206,13 +204,24 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
         invalidate()
     }
 
+    const onUnpost = async () => {
+      const res = await postRequest({
+        extension: DeliveryRepository.InboundTransp.unpost,
+        record: JSON.stringify(formik.values)
+      })
+
+      toast.success(platformLabels.Unposted)
+      refetchForm(res?.recordId)
+      invalidate()
+    }
+
     const actions = [
         {
             key: 'Locked',
             condition: isPosted,
             onClick: 'onUnpostConfirmation',
-            onSuccess: () => { },
-            disabled: true
+            onSuccess: onUnpost,
+            disabled: !editMode
         },
         {
             key: 'Unlocked',
@@ -409,6 +418,8 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 onChange={async (_, newValue) => {
                                     formik.setFieldValue('tripId', newValue?.recordId || null)
                                     formik.setFieldValue('tripRef', newValue?.reference || '')
+                                    formik.setFieldValue('driverId', newValue?.driverId || null)
+                                    formik.setFieldValue('vehicleId', newValue?.vehicleId || null)
                                 }}
                                 errorCheck={'tripId'}
                             />
@@ -466,7 +477,6 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 onClear={() => formik.setFieldValue('arrivalTime', '')}
                                 readOnly={isPosted}
                                 maxAccess={maxAccess}
-                                required
                                 error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
                             />
                         </Grid>
@@ -477,7 +487,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 name='driverId'
                                 label={labels.driver}
                                 valueField='recordId'
-                                readOnly={isPosted}
+                                readOnly
                                 displayField='name'
                                 values={formik.values}
                                 maxAccess={maxAccess}
@@ -510,7 +520,6 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 onClear={() => formik.setFieldValue('convertedArrivalTime', '')}
                                 readOnly={isPosted || !formik.values?.arrivalTime}
                                 maxAccess={maxAccess}
-                                required
                                 error={formik.touched.convertedArrivalTime && Boolean(formik.errors.convertedArrivalTime)}
                             />
                         </Grid>
@@ -521,7 +530,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 name='vehicleId'
                                 label={labels.vehicle}
                                 valueField='recordId'
-                                readOnly={isPosted}
+                                readOnly
                                 displayField='name'
                                 values={formik.values}
                                 maxAccess={maxAccess}
@@ -544,6 +553,7 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                         maxAccess={maxAccess}
                         showSelectAll={true}
                         showCheckboxColumn={true}
+                        disable={(data) => data.isNotified}
                         disableCheckBox={isPosted}
                     />
                 </Grow>
