@@ -294,6 +294,13 @@ export default function DamageForm({ recordId, jobId }) {
 
       formik.setFieldValue('header.genJobFromDamage', res?.record?.genJobFromDamage)
 
+      if (!res?.record?.genJobFromDamage) {
+        formik.setFieldValue('header.routingId', null)
+        formik.setFieldValue('header.routingRef', '')
+        formik.setFieldValue('header.routingName', '')
+        formik.setFieldValue('header.routingSeqNo', null)
+      }
+
       return res?.record?.genJobFromDamage || false
     } else {
       formik.setFieldValue('header.genJobFromDamage', false)
