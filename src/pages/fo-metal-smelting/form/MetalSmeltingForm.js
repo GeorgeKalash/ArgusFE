@@ -56,7 +56,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const scrapsConditions = {
     sku: row => row?.sku,
-    itemName: row => row?.itemName
+    itemName: row => row?.itemName,
+    qty: row => row?.qty
   }
 
   const { schema, requiredFields } = createConditionalSchema(scrapsConditions, true, maxAccess, 'scraps')
@@ -113,11 +114,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
-        itemId: yup.number().required(),
         workCenterId: yup.number().required(),
-        purity: yup.number().required(),
-        metalId: yup.number().required(),
-        qty: yup.number().required()
+        metalId: yup.number().required()
       }),
       items: yup
         .array()
@@ -454,7 +452,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       name: 'purity',
       label: labels.purity,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
-      updateOn: 'blur',
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
         if (newRow?.type == 1) {
@@ -469,7 +466,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
 
-          update({ expectedAlloyQty, qtyAtPurity, rmQty, purity: newRow?.purity || 0 })
+          update({ expectedAlloyQty, qtyAtPurity, rmQty})
         }
       },
       propsReducer({ row, props }) {
@@ -815,7 +812,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     secondValueShow='itemName'
                     form={formik}
                     formObject={formik.values.header}
-                    required
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
@@ -853,7 +849,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.purity', value)
                     }}
                     value={formik.values.header.purity}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
@@ -875,7 +870,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.qty', value)
                     }}
                     value={formik.values.header?.qty}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
