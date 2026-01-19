@@ -187,21 +187,19 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
             extension: DeliveryRepository.InboundTransp.post,
             record: JSON.stringify(formik.values)
         })
-        toast.success(platformLabels.Posted)
-        
-        if(res.recordId){
-          stack({
-            Component: ThreadProgress,
-            props: {
-                recordId: res.recordId,
-                onComplete: async () => { await refetchOrders() }
-            },
-            closable: false
-          })
-          await refetchInbound()
-        }
-        
+        toast.success(platformLabels.Posted)     
+        await refetchInbound()
         invalidate()
+
+        stack({
+        Component: ThreadProgress,
+        props: {
+            recordId: res?.recordId || null,
+            onComplete: async () => { await refetchOrders() }
+        },
+        closable: false
+        })
+        
     }
 
     const onUnpost = async () => {
@@ -324,45 +322,52 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
     }
 
     async function refetchInbound() {
-        if (!formik.values.recordId) return
-        
-        const res = await getRequest({
-            extension: DeliveryRepository.InboundTransp.get,
-            parameters: `_recordId=${formik.values.recordId}`
-        })
-        const { items, totalVolume, totalWeight, ...otherFields } = formik.values
+     if (!formik.values.recordId) return
+    
+     const res = await getRequest({
+        extension: DeliveryRepository.InboundTransp.get,
+        parameters: `_recordId=${formik.values.recordId}`
+     })
 
-        const formattedHeader = formatHeader(res?.record || {})
+     const formattedHeader = formatHeader(res?.record || {})
 
-        formik.setValues({
-            ...otherFields,                   
-            ...formattedHeader,                 
-            items,                           
-            totalVolume,                      
-            totalWeight                     
-        })
-    }
+     formik.setValues(prev => {
+        const { items, totalVolume, totalWeight, ...otherFields } = prev
 
-    async function refetchOrders() {
-        if (!formik.values.recordId) {
-            resetGrid()
-
-            return
+        return {
+            ...otherFields,
+            ...formattedHeader,
+            items,
+            totalVolume,
+            totalWeight
         }
-        
-        const res = await getRequest({
-            extension: DeliveryRepository.InboundOrders.qry,
-            parameters: `_inboundId=${formik.values.recordId}`
-        })
-
-        const totals = getTotals(res?.list)
-        
-        formik.setValues({
-            ...formik.values,
-            items: (res?.list || []).map(item => ({ ...item, checked: item?.deliveryStatus == 3 || false })),
-            ...totals
-        })
+     })
     }
+
+   async function refetchOrders() {
+    if (!formik.values.recordId) {
+        resetGrid()
+        
+        return
+    }
+
+    const res = await getRequest({
+        extension: DeliveryRepository.InboundOrders.qry,
+        parameters: `_inboundId=${formik.values.recordId}`
+    })
+
+    const totals = getTotals(res?.list)
+
+    formik.setValues(prev => ({
+        ...prev,
+        items: (res?.list || []).map(item => ({
+        ...item,
+        checked: item?.deliveryStatus == 3 || false
+        })),
+        ...totals
+    }))
+   }
+
 
     useEffect(() => {
         if (recordId) refetchForm(recordId)
