@@ -18,23 +18,27 @@ const AddressForm = ({
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [updatedRecordId, setRecordId] = useState(recordId || null)
   const [localAddress, setLocalAddress] = useState()
-  const isControlled = !!propAddress && !!setPropAddress
+  const [isControlled, setControll] = useState(!!propAddress && !!setPropAddress)
   const address = isControlled ? propAddress : localAddress
-  const setAddress = isControlled ? setPropAddress : setLocalAddress
+  const setAddress = isControlled ? setPropAddress : setLocalAddress 
 
   useSetWindow({ title: platformLabels.Address, window })
 
   function onAddressSubmit(post) {
     if (required) {
-      const data = { ...post, recordId: recordId }
+      const data = { ...post, recordId : updatedRecordId}
 
       postRequest({
         extension: SystemRepository.Address.set,
         record: JSON.stringify(data)
       }).then(res => {
-        data.addressId = res.recordId
-        onSubmit(data, window)
+        const updatedData = {...data, recordId: res?.recordId || null, addressId: res?.recordId || null}
+        setRecordId(prev => res?.recordId || prev || null)
+        setControll(false)
+        setAddress(updatedData)
+        onSubmit(updatedData, window)
       })
     } else {
       setAddress(post)
@@ -43,16 +47,16 @@ const AddressForm = ({
   }
 
   useEffect(() => {
-    if (!isControlled && recordId) {
+    if (!isControlled && updatedRecordId) {
       ;(async () => {
         const res = await getRequest({
           extension: SystemRepository.Address.get,
-          parameters: `_filter=&_recordId=${recordId}`
+          parameters: `_filter=&_recordId=${updatedRecordId}`
         })
         setLocalAddress(res.record)
       })()
     }
-  }, [recordId, isControlled])
+  }, [updatedRecordId, isControlled])
 
   return (
     <AddressFormShell
