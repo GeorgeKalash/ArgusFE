@@ -50,7 +50,7 @@ function CustomTabPanel(props) {
       role='tabpanel'
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      className={`${styles.customTabPanel} ${value !== index ? styles.hidden : ''}`}
+      className={`${styles.customTabPanel} ${isActive ? styles.activePanel : styles.hiddenPanel}`}
       {...other}
     >
       {!showOverlay && isActive && <LoadingOverlay />}
@@ -199,22 +199,11 @@ const TabsProvider = ({ children }) => {
 
       if (nextRoute === router.asPath) return
 
-      const fireTabActivated = () => {
-        if (typeof window === 'undefined') return
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            window.dispatchEvent(new Event('argus-tab-activated'))
-          })
-        })
-      }
-
       if (newValue === 0 && !openTabs?.[newValue]?.page) {
         await navigateTo(nextRoute)
-        fireTabActivated()
       } else {
         await navigateTo(nextRoute)
         if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
-        fireTabActivated()
       }
     },
     [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
@@ -314,6 +303,7 @@ const TabsProvider = ({ children }) => {
         setOpenTabs(prevState =>
           prevState.map(tab => {
             if (tab.route !== router.asPath) return tab
+
             if (tab.page) return tab
 
             const cachedPage = pagesCacheRef.current.get(router.asPath) || children
@@ -358,7 +348,7 @@ const TabsProvider = ({ children }) => {
       setOpenTabs(newTabs)
       menu.length > 0 && setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, dashboardId])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   function unlockRecord(resourceId) {
     const body = {

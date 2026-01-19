@@ -23,17 +23,28 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  position: absolute;
-  inset: 0;
   overflow: auto;
   padding-top: 5px;
+  position: absolute;
+  inset: 0;
   background-color: white;
 }
 
-.hidden {
-  visibility: hidden !important;
-  pointer-events: none !important;
-  opacity: 0;
+.activePanel {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.hiddenPanel {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.panelsWrapper {
+  position: relative;
+  width: 100%;
+  flex: 1 !important;
+  overflow: hidden;
 }
 
 .tabsProviderContainer {
