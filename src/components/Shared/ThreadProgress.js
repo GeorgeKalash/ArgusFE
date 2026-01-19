@@ -90,7 +90,7 @@ export const ThreadProgress = ({ recordId, onComplete, access, window }) => {
 
   useEffect(() => {
     if(onComplete){
-      if(!tasksCompleted && !hasLogError) onComplete()
+      if(tasksCompleted || hasLogError) onComplete()
     }
   }, [hasLogError, tasksCompleted])
 
