@@ -1128,7 +1128,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })
   }
 
-  function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
+  async function getItemPriceRow(update, newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
     const itemPriceRow = getIPR({
@@ -1149,6 +1149,17 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       dirtyField: dirtyField
     })
 
+    const taxId = newRow.taxId ? formik.values.taxId || newRow.taxId : null
+
+    const taxDetails = await getTaxDetails(taxId)
+
+    const taxDetailList = taxDetails?.map(t => ({
+      taxId,
+      taxCodeId: t.taxCodeId,
+      taxBase: t.taxBase,
+      amount: t.amount
+    }))
+
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1158,12 +1169,13 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: parseFloat(itemPriceRow?.vatAmount),
       tdPct: formik?.values?.tdPct,
-      taxDetails: formik.values.isVattable ? newRow.taxDetails : null
+      taxDetails: formik.values.isVattable ? taxDetailList : null
     })
 
     let commonData = {
       ...newRow,
       id: newRow?.id,
+      taxId,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
@@ -1174,7 +1186,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       mdValue: itemPriceRow?.mdValue,
       mdType: itemPriceRow?.mdType,
       mdAmount: parseFloat(itemPriceRow?.mdAmount).toFixed(2),
-      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2)
+      vatAmount: parseFloat(vatCalcRow?.vatAmount).toFixed(2),
+      taxDetails: formik.values.isVattable ? taxDetailList : null
     }
     let data = iconClicked ? { changes: commonData } : commonData
     update({
