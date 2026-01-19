@@ -525,7 +525,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           msId: newRow?.msId,
           muRef: defaultMu?.reference || '',
           muId: defaultMu?.recordId || null,
-          muQty: defaultMu?.qty || null,
+          muQty: defaultMu?.qty || 0,
           extendedPrice: parseFloat('0').toFixed(2),
           mdValue: 0,
           taxId: rowTax,
@@ -534,8 +534,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           siteId: formik?.values?.siteId,
           siteRef: await getSiteRef(formik?.values?.siteId),
           trackBy: newRow?.trackBy,
-          decimals: measurementSchedule?.decimals || 0,
-          baseQty: Number(defaultMu?.qty) * Number(newRow?.qty)
+          decimals: measurementSchedule?.decimals || 0
         })
       },
       propsReducer({ row, props }) {
