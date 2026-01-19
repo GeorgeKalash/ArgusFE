@@ -521,7 +521,7 @@ const Table = ({
           height: '100%'
         }}
         checked={params.value}
-        disabled={props?.disable && props?.disable(params?.data)}
+        disabled={props?.disable && props?.disable(params?.data) || props?.disableCheckBox}
         onChange={e => {
           e.preventDefault()
           const rowIndex = params.node.rowIndex
@@ -717,6 +717,7 @@ const Table = ({
               showSelectAll && (
                 <Checkbox
                   checked={checked}
+                  disabled={props?.disableCheckBox}
                   onChange={e => {
                     e.preventDefault()
                     e.stopPropagation()
