@@ -34,16 +34,11 @@ function CustomTabPanel(props) {
   useEffect(() => {
     if (!isActive) return
     if (loading) {
-      setShowOverlay(false)
+      setShowOverlay(true)
       return
     }
-    const timer = setTimeout(() => setShowOverlay(true), 300)
-    return () => clearTimeout(timer)
+    setShowOverlay(false)
   }, [loading, isActive])
-
-  useEffect(() => {
-    if (isActive && loading) setShowOverlay(false)
-  }, [isActive, loading])
 
   return (
     <Box
@@ -51,9 +46,18 @@ function CustomTabPanel(props) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       className={`${styles.customTabPanel} ${isActive ? styles.activePanel : styles.hiddenPanel}`}
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'auto',
+        opacity: isActive ? 1 : 0,
+        pointerEvents: isActive ? 'auto' : 'none'
+      }}
       {...other}
     >
-      {!showOverlay && isActive && <LoadingOverlay />}
+      {showOverlay && isActive && <LoadingOverlay />}
       <TabPage page={children} />
     </Box>
   )
@@ -192,18 +196,28 @@ const TabsProvider = ({ children }) => {
     async (_, newValue) => {
       if (newValue === currentTabIndex) return
 
-      setCurrentTabIndex(newValue)
-
       const nextRoute = openTabs?.[newValue]?.route
       if (!nextRoute) return
-
       if (nextRoute === router.asPath) return
 
-      if (newValue === 0 && !openTabs?.[newValue]?.page) {
-        await navigateTo(nextRoute)
-      } else {
+      const needsPage = newValue === 0 ? !openTabs?.[newValue]?.page : !openTabs?.[newValue]?.page
+
+      if (needsPage) {
         await navigateTo(nextRoute)
         if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
+        setCurrentTabIndex(newValue)
+      } else {
+        setCurrentTabIndex(newValue)
+        await navigateTo(nextRoute)
+        if (typeof window !== 'undefined' && nextRoute) window.history.replaceState(null, '', nextRoute)
+      }
+
+      if (typeof window !== 'undefined') {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            window.dispatchEvent(new Event('argus-tab-activated'))
+          })
+        })
       }
     },
     [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
@@ -428,7 +442,10 @@ const TabsProvider = ({ children }) => {
         </Tabs>
       </Box>
 
-      <Box className={styles.panelsWrapper}>
+      <Box
+        className={styles.panelsWrapper}
+        sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
+      >
         {openTabs.map((activeTab, i) => (
           <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
             {activeTab.page}
