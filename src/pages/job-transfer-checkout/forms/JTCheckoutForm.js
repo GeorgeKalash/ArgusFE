@@ -92,13 +92,21 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       })
     }),
     onSubmit: async obj => {
-      
-      if (totalQty != obj.transfer.jobQty) {
-        stackError({
-          message: labels.QtyNotMatching
-        })
+      const round = (n, decimals = 3) => Number(n.toFixed(decimals))
 
-        return
+      const hasTotalQty = totalQty !== null && totalQty !== undefined
+      const hasJobQty = obj?.transfer?.jobQty !== null && obj?.transfer?.jobQty !== undefined
+
+      if (hasTotalQty && hasJobQty) {
+        const delta = Math.abs(round(Number(totalQty)) - round(Number(obj.transfer.jobQty)))
+
+        if (delta > 0.001) {
+          stackError({
+            message: labels.QtyNotMatching
+          })
+
+          return
+        }
       }
 
       const transferPack = {
@@ -472,6 +480,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         ]}
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.jobQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
                           formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
