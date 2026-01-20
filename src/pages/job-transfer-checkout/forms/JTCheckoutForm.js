@@ -100,7 +100,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       if (hasTotalQty && hasJobQty) {
         const delta = Math.abs(round(Number(totalQty)) - round(Number(obj.transfer.jobQty)))
 
-        if (delta > 0.001) {
+        if (delta > 0.01) {
           stackError({
             message: labels.QtyNotMatching
           })
