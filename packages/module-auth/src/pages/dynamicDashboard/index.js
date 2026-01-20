@@ -38,12 +38,12 @@ const DashboardLayout = () => {
   useEffect(() => {
     getRequestRef.current = getRequest
   }, [getRequest])
-
+  
   const debouncedCloseLoadingRef = React.useRef(null)
   if (!debouncedCloseLoadingRef.current) {
     debouncedCloseLoadingRef.current = debounce(() => {
-      setLoading(false)
-    }, 500)
+    setLoading(false)
+  }, 500)
   }
 
   useEffect(() => {
@@ -64,52 +64,52 @@ const DashboardLayout = () => {
         setLoading(true)
 
         const appletsRes = await getRequestRef.current({
-          extension: SystemRepository.DynamicDashboard.qry,
-          parameters: `_userId=${_userId}`
-        })
+        extension: SystemRepository.DynamicDashboard.qry,
+        parameters: `_userId=${_userId}`
+      })
 
         if (cancelled) return
-        setApplets(appletsRes.list)
+      setApplets(appletsRes.list)
 
-        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
-            extension: TimeAttendanceRepository.TimeVariation.qry2,
-            parameters: `_dayId=${formatDateForGetApI(new Date())}`
-          }),
+          extension: TimeAttendanceRepository.TimeVariation.qry2,
+          parameters: `_dayId=${formatDateForGetApI(new Date())}`
+        }),
           getRequestRef.current({
-            extension: SystemRepository.KeyValueStore,
-            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-          })
-        ])
+          extension: SystemRepository.KeyValueStore,
+          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+        })
+      ])
 
         if (cancelled) return
 
         const availableTimeCodes = new Set((resTV.list || []).map(d => d.timeCode))
 
         const filteredTabs = (resTimeCode.list || [])
-          .filter(t => availableTimeCodes.has(Number(t.key)))
-          .map(t => ({
-            label: t.value,
-            timeCode: Number(t.key),
-            disabled: false
-          }))
+        .filter(t => availableTimeCodes.has(Number(t.key)))
+        .map(t => ({
+          label: t.value,
+          timeCode: Number(t.key),
+          disabled: false
+        }))
 
-        const groupedData = filteredTabs.reduce((acc, tab) => {
+      const groupedData = filteredTabs.reduce((acc, tab) => {
           acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
-          return acc
-        }, {})
+        return acc
+      }, {})
 
-        setData({
-          dashboard: resDashboard?.record,
-          sp: resSP?.record,
-          hr: {
-            timeVariationDetails: resTV.list || [],
-            tabs: filteredTabs,
-            groupedData: groupedData
-          }
-        })
+      setData({
+        dashboard: resDashboard?.record,
+        sp: resSP?.record,
+        hr: {
+          timeVariationDetails: resTV.list || [],
+          tabs: filteredTabs,
+          groupedData: groupedData
+        }
+      })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
       } catch (e) {
@@ -124,6 +124,10 @@ const DashboardLayout = () => {
     }
   }, [_userId, _languageId])
 
+  if (loading) {
+    return <LoadingOverlay />
+  }
+
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
     return applets.some(applet => applet.appletId === appletId)
@@ -131,8 +135,6 @@ const DashboardLayout = () => {
 
   return (
     <div className={styles.frame}>
-      {loading && <LoadingOverlay />}
-
       <div className={styles.container}>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
           <div className={styles.topRow}>
@@ -364,13 +366,13 @@ const DashboardLayout = () => {
                           label: labels.revenues,
                           value:
                             data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                              ?.amount ?? 0
+                            ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
                           value:
                             data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                              ?.amount ?? 0
+                            ?.amount ?? 0
                         }
                       ]
                     }
