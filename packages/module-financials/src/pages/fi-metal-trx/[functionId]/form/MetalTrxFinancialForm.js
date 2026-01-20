@@ -686,6 +686,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
                 label={labels.date}
                 value={formik.values.date}
                 onChange={formik.setFieldValue}
+                maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('date', '')}
                 error={formik.touched.date && Boolean(formik.errors.date)}
               />

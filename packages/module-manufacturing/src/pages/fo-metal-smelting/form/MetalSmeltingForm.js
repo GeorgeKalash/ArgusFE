@@ -31,7 +31,7 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 
 export default function MetalSmeltingForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
   const { stack: stackError } = useError()
   const [allMetals, setAllMetals] = useState([])
   const [recalc, setRecalc] = useState(false)
@@ -52,6 +52,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
   const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const baseSalesMetalId = parseInt(defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
 
   const scrapsConditions = {
     sku: row => row?.sku,
@@ -82,7 +83,10 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         purity: null,
         metalId: null,
         smeltingMaxAllowedVariation: null,
-        notes: ''
+        notes: '',
+        baseSalesMetalPurity: 0,
+        baseSalesMetalRef: '',
+        avgPurity: 0
       },
       items: [
         {
@@ -110,11 +114,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
-        itemId: yup.number().required(),
         workCenterId: yup.number().required(),
-        purity: yup.number().required(),
-        metalId: yup.number().required(),
-        qty: yup.number().required()
+        metalId: yup.number().required()
       }),
       items: yup
         .array()
@@ -161,7 +162,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const getPayload = obj => {
     return {
-      header: { ...obj.header, date: formatDateToApi(obj.header.date), qtyDiff },
+      header: { ...obj.header, date: formatDateToApi(obj.header.date), qtyDiff, sumRMQty: totalRmQty, avgPurity},
       items: obj.items?.map((item, index) => ({
         ...item,
         trxId: obj?.recordId || 0,
@@ -198,6 +199,11 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   const totalAlloy = calculateTotal('qty', 2)
   const expectedAlloy = calculateTotal('expectedAlloyQty')
   const headerPurity = parseFloat(formik.values?.header?.purity)
+  const totalRmQty = recalc ? calculateTotal('rmQty') : formik.values?.header?.sumRMQty
+  
+  const avgPurity = recalc
+    ? (((totalRmQty || 0) * (formik.values?.header?.baseSalesMetalPurity || 0)) / (qtyOut || 0)).toFixed(2)
+    : formik.values?.header?.avgPurity || 0
 
   const totalDesiredPurity = headerPurity
     ? formik.values.items.reduce((sum, item) => {
@@ -215,7 +221,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   const qtyAtPurityPerRow = (qty, purity, headerPurity) => {
-    return Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity))
+    return Boolean(headerPurity)? Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity)) : 0
   }
 
   const updatePurityRelatedFields = headerPurity => {
@@ -310,12 +316,16 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       id: index + 1
     }))
 
+    const metalInfo = await getBaseSalesMetalPurity()
+
     formik.setValues({
       recordId: record?.header?.recordId,
       header: {
         ...(record?.header || {}),
         date: formatDateFromApi(record?.header?.date),
-        smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null
+        smeltingMaxAllowedVariation: dtInfo?.smeltingMaxAllowedVariation || null,
+        baseSalesMetalPurity: metalInfo?.purity * 1000 || 0,
+        baseSalesMetalRef: metalInfo?.reference || 0
       },
       items: itemsList?.length ? itemsList : formik.initialValues.items,
       scraps: scrapsList?.length ? scrapsList : formik.initialValues?.scraps
@@ -324,6 +334,12 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   const columns = [
+    {
+      component: 'numberfield',
+      name: 'id',
+      label: labels.count,
+      props: { readOnly: true }
+    },
     {
       component: 'resourcecombobox',
       label: labels.type,
@@ -410,6 +426,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      updateOn: 'blur',
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
@@ -420,8 +437,14 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
             formik.values?.header?.purity || 0
           )
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
-          update({ expectedAlloyQty, qtyAtPurity })
+          
+          const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+          update({ expectedAlloyQty, qtyAtPurity, rmQty, qty: newRow?.qty || 0 })
         }
+        else update({ qty: newRow?.qty || 0 })
       }
     },
     {
@@ -430,6 +453,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       label: labels.purity,
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       onChange: ({ row: { update, newRow } }) => {
+        setRecalc(true)
         if (newRow?.type == 1) {
           const qtyAtPurity = qtyAtPurityPerRow(
             newRow?.qty || 0,
@@ -437,12 +461,23 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
             formik.values?.header?.purity || 0
           )
           const expectedAlloyQty = expectedAlloyQtyPerRow(qtyAtPurity || 0, newRow?.qty || 0)
-          update({ expectedAlloyQty, qtyAtPurity })
+          
+          const rmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+
+          update({ expectedAlloyQty, qtyAtPurity, rmQty})
         }
       },
       propsReducer({ row, props }) {
         return { ...props, readOnly: row.type == 2 }
       }
+    },
+    {
+      component: 'numberfield',
+      name: 'rmQty',
+      label: `${labels.qty} ${formik.values?.header?.baseSalesMetalRef || ''}`,
+      props: { decimalScale: 2, readOnly: true }
     },
     {
       component: 'numberfield',
@@ -571,6 +606,17 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
     formik.setFieldValue('header.itemId', null)
   }
 
+  async function getBaseSalesMetalPurity() {
+    if (!baseSalesMetalId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Metals.get,
+      parameters: `_recordId=${baseSalesMetalId}`
+    })
+
+    return res?.record || {}
+  }
+
   useEffect(() => {
     ;(async function () {
       if (!recordId) {
@@ -599,6 +645,16 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       if (recordId) refetchForm(recordId)
     })()
   }, [])
+
+  useEffect(() => {
+    ;(async function () {
+      if (baseSalesMetalId && !recordId) {
+        const res = await getBaseSalesMetalPurity()
+        formik.setFieldValue('header.baseSalesMetalPurity', res?.purity * 1000 || 0)
+        formik.setFieldValue('header.baseSalesMetalRef', res?.reference || '')
+      }
+    })()
+  }, [baseSalesMetalId])
 
   return (
     <FormShell
@@ -756,7 +812,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     secondValueShow='itemName'
                     form={formik}
                     formObject={formik.values.header}
-                    required
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
@@ -794,7 +849,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.purity', value)
                     }}
                     value={formik.values.header.purity}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
@@ -816,7 +870,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.qty', value)
                     }}
                     value={formik.values.header?.qty}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
@@ -914,6 +967,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                 </Grid>
                 <Grid item xs={12}>
                   <CustomNumberField label={labels.qtyDiff} value={qtyDiff} decimalScale={3} readOnly align='right' />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomNumberField label={labels.avgPurity} value={avgPurity} decimalScale={3} readOnly align='right' />
                 </Grid>
               </Grid>
             </Grid>
