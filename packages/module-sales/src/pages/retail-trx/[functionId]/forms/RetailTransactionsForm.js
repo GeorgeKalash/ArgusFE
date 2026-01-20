@@ -72,6 +72,9 @@ export default function RetailTransactionsForm({
   const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
+  const level2CacheRef = useRef(null)
+  const cashAccountsRef = useRef([])
+
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
 
   const getEndpoint = {
@@ -935,8 +938,7 @@ export default function RetailTransactionsForm({
       label: labels.cashbox,
       name: 'cashAccountId',
       props: {
-        endpointId: PointofSaleRepository.CashAccount.qry,
-        parameters: `_posId=${parseInt(posUser?.posId)}`,
+        store: cashAccountsRef.current,
         displayField: 'cashAccountRef',
         valueField: 'cashAccountId',
         mapping: [
@@ -959,6 +961,9 @@ export default function RetailTransactionsForm({
         } else {
           update({ ccId: null, ccRef: '', bankFees: null })
         }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: cashAccountsRef?.current }
       }
     },
     {
@@ -1035,7 +1040,7 @@ export default function RetailTransactionsForm({
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   function openAddressForm() {
@@ -1114,50 +1119,33 @@ export default function RetailTransactionsForm({
   }
 
   async function isPosDtMatchesdgId(posDtId) {
+    const level2 = await loadLevel2()
+    return level2?.documentTypes?.some(x => x.recordId == posDtId) || false
+  }
+
+  async function fillCashObjects() {
+    const level2 = await loadLevel2()
+    if (!level2) return
+
+    setCashGridData({
+      cashAccounts: level2.cashAccounts || [],
+      creditCards: level2.creditCards || [],
+      creditCardFees: level2.creditCardFees || []
+    })
+  }
+
+
+  async function loadLevel2() {
+    if (level2CacheRef.current) return level2CacheRef.current
+
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
       parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
     })
 
-    return res?.record?.documentTypes?.some(x => x.recordId == posDtId) || false
-  }
-
-  async function fillCashObjects() {
-    const cashAccounts = await getAllCashBanks()
-    const creditCards = await fillCreditCardStore()
-    const creditCardFees = await getCreditCardFees()
-    setCashGridData({
-      cashAccounts: cashAccounts,
-      creditCards: creditCards,
-      creditCardFees: creditCardFees
-    })
-  }
-
-  async function getAllCashBanks() {
-    const res = await getRequest({
-      extension: CashBankRepository.CashAccount.qry,
-      parameters: `_type=1`
-    })
-
-    return res?.list || []
-  }
-
-  async function fillCreditCardStore() {
-    const res = await getRequest({
-      extension: CashBankRepository.CreditCard.qry,
-      parameters: `_filter=`
-    })
-
-    return res?.list || []
-  }
-
-  async function getCreditCardFees() {
-    const response = await getRequest({
-      extension: CashBankRepository.CreditCardFees.qry,
-      parameters: `_creditCardId=0&_filter=`
-    })
-
-    return response?.list?.sort((a, b) => a.upToAmount - b.upToAmount) || []
+    level2CacheRef.current = res?.record || null
+    cashAccountsRef.current = res?.record?.posCashAccounts
+    return level2CacheRef.current
   }
 
   async function getFilteredCC(cashAccountId) {
@@ -1286,6 +1274,7 @@ export default function RetailTransactionsForm({
 
   useEffect(() => {
     ;(async function () {
+      await loadLevel2()
       if (recordId) {
         await refetchForm(recordId)
       } else {
