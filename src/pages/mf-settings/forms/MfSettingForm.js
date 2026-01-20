@@ -12,6 +12,7 @@ import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 import Form from 'src/components/Shared/Form'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 const MfSettingForm = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -27,7 +28,8 @@ const MfSettingForm = () => {
       mf_fg_siteId: null,
       mf_rm_siteId: null,
       mf_jo_pic_source: null,
-      mf_pico_dataSource: null
+      mf_pico_dataSource: null,
+      mfMaxAllowQtyVariation: null
     },
     onSubmit: async obj => {
       const data = Object.entries(obj).map(([key, value]) => ({
@@ -51,11 +53,14 @@ const MfSettingForm = () => {
         parameters: `_filter=`
       })
 
-      const keysToExtract = ['mf_fg_siteId', 'mf_rm_siteId', 'mf_ava_siteId', 'mf_jo_pic_source', 'mf_pico_dataSource']
+      const keysToExtract = ['mf_fg_siteId', 'mf_rm_siteId', 'mf_ava_siteId', 'mf_jo_pic_source', 'mf_pico_dataSource', 'mfMaxAllowQtyVariation']
 
       const myObject = res.list.reduce((acc, { key, value }) => {
         if (keysToExtract.includes(key)) {
-          acc[key] = value ? parseInt(value) : null
+          if (value == null) acc[key] = null
+          else if (key == 'mfMaxAllowQtyVariation') acc[key] = Number(value) 
+          else acc[key] = parseInt(value)
+          
         }
 
         return acc
@@ -151,6 +156,16 @@ const MfSettingForm = () => {
               error={formik.touched.mf_pico_dataSource && Boolean(formik.errors.mf_pico_dataSource)}
             />
           </Grid>
+           <Grid item xs={12}>
+              <CustomNumberField
+                name='mfMaxAllowQtyVariation'
+                label={labels.mfMaxAllowQtyVariation}
+                value={formik.values.mfMaxAllowQtyVariation}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('mfMaxAllowQtyVariation', null)}
+                error={formik.touched.mfMaxAllowQtyVariation && Boolean(formik.errors.mfMaxAllowQtyVariation)}
+              />
+            </Grid>
         </Grid>
       </VertLayout>
     </Form>
