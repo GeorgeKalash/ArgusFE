@@ -186,6 +186,7 @@ export const ManufacturingRepository = {
   WorksheetMaterials: {
     qry: service + 'qryIMA',
     get: service + 'getIMA',
+    pack: service + 'get2IMA',
     set: service + 'setIMA',
     set2: service + 'set2IMA',
     del: service + 'delIMA',
@@ -222,6 +223,7 @@ export const ManufacturingRepository = {
   Worksheet: {
     snapshot: service + 'snapshotWST',
     get: service + 'getWST',
+    pack: service + 'getPackWST',
     set: service + 'setWST',
     del: service + 'delWST',
     page: service + 'pageWST',
@@ -453,5 +455,21 @@ export const ManufacturingRepository = {
     set: service + 'setMTS',
     get: service + 'getMTS',
     del: service + 'delMTS'
+  },
+  DamageReason: {
+    qry: service + 'qryDRS',
+    page: service + 'pageDRS',
+    set: service + 'setDRS',
+    get: service + 'getDRS',
+    del: service + 'delDRS',
+    snapshot: service + 'snapshotDRS'
+  },
+  DamageCategory: {
+    qry: service + 'qryDCA',
+    page: service + 'pageDCA',
+    set: service + 'setDCA',
+    get: service + 'getDCA',
+    del: service + 'delDCA',
+    snapshot: service + 'snapshotDCA'
   }
 }

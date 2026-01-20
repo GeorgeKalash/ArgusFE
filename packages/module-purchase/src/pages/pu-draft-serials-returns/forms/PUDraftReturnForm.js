@@ -911,7 +911,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
 
   return (
     <FormShell
-      resourceId={ResourceIds.DraftSerialReturns}
+      resourceId={ResourceIds.PUDraftSerialReturns}
       functionId={SystemFunction.DraftInvoiceReturn}
       form={formik}
       maxAccess={maxAccess}

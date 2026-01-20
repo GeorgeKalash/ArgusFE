@@ -56,7 +56,8 @@ export const SaleRepository = {
     page: service + 'pageCL',
     set: service + 'setCL',
     del: service + 'delCL',
-    preview: service + 'getCLQV'
+    preview: service + 'getCLQV',
+    pack: service + 'getPackCL'
   },
   WorkFlow: {
     graph: service + 'graph'
@@ -139,12 +140,11 @@ export const SaleRepository = {
     del: service + 'delTR',
     post: service + 'postTR',
     unpost: service + 'unpostTRX',
-    snapshot: service + 'snapshotTR'
+    snapshot: service + 'snapshotTR',
+    pack: service + 'getPackTR'
   },
   SalesOrder: {
-    qry: service + 'qryORD',
     page: service + 'pageORD',
-    get: service + 'getORD',
     set: service + 'setORD',
     set2: service + 'set2ORD',
     del: service + 'delORD',
@@ -153,7 +153,9 @@ export const SaleRepository = {
     cancel: service + 'terminateORD',
     postToInvoice: service + 'transfer2ORD',
     snapshot: service + 'snapshotORD',
-    summaryORD: service + 'summaryORD'
+    summaryORD: service + 'summaryORD',
+    pack: service + 'getPackORD',
+    get2: service + 'get2ORD',
   },
   SalesOrderItem: {
     qry: service + 'qryORI'

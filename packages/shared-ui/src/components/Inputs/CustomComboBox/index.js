@@ -40,6 +40,7 @@ const CustomComboBox = ({
   hasBorder = true,
   fetchData,
   refresh = true,
+  allowClear = true,
   isLoading,
   onOpen,
   onBlur = () => {},
@@ -53,9 +54,10 @@ const CustomComboBox = ({
     hidden,
     disabled
   )
-
   const [hover, setHover] = useState(false)
   const [focus, setAutoFocus] = useState(autoFocus)
+  const [inputValue, setInputValue] = useState('')
+
   const { platformLabels } = useContext(ControlContext)
 
   const autocompleteRef = useRef(null)
@@ -84,6 +86,11 @@ const CustomComboBox = ({
       ref={autocompleteRef}
       name={name}
       value={value}
+      inputValue={neverPopulate ? inputValue : undefined}
+      onInputChange={(_, newInputValue) => {              
+        if (neverPopulate) setInputValue(newInputValue)
+      }}
+
       size={size}
       options={store}
       key={value}
@@ -162,6 +169,11 @@ const CustomComboBox = ({
       onChange={(_, newValue) => {
         onChange(name, newValue)
         setAutoFocus(true)
+
+        if (neverPopulate) {
+          setInputValue('') 
+          onChange(name, '')
+        }
       }}
       fullWidth={fullWidth}
       readOnly={_readOnly}
@@ -264,7 +276,7 @@ const CustomComboBox = ({
                           </IconButton>
                         )
                       ))}
-                 { !_readOnly && value && <IconButton
+                 { !_readOnly && value && allowClear && <IconButton
                       className={inputs.iconButton}
                       tabIndex={-1}
                       onClick={() => onChange(name, '')}
@@ -285,8 +297,7 @@ const CustomComboBox = ({
             {...params}
             inputProps={{
               ...params.inputProps,
-              tabIndex: _readOnly ? -1 : 0,
-              ...(neverPopulate && { value: '' })
+              tabIndex: _readOnly ? -1 : 0
             }}
             type={type}
             variant={variant}

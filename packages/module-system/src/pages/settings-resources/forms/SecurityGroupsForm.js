@@ -219,7 +219,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                 displayField='value'
                 defaultIndex={1}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
                 }}
                 onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}

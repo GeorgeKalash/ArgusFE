@@ -114,11 +114,8 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
         date: yup.date().required(),
         siteId: yup.number().required(),
         plantId: yup.number().required(),
-        itemId: yup.number().required(),
         workCenterId: yup.number().required(),
-        purity: yup.number().required(),
-        metalId: yup.number().required(),
-        qty: yup.number().required()
+        metalId: yup.number().required()
       }),
       items: yup
         .array()
@@ -224,7 +221,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
   }
 
   const qtyAtPurityPerRow = (qty, purity, headerPurity) => {
-    return Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity))
+    return Boolean(headerPurity)? Math.abs((parseFloat(qty) * parseFloat(purity)) / parseFloat(headerPurity)) : 0
   }
 
   const updatePurityRelatedFields = headerPurity => {
@@ -338,6 +335,12 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
 
   const columns = [
     {
+      component: 'numberfield',
+      name: 'id',
+      label: labels.count,
+      props: { readOnly: true }
+    },
+    {
       component: 'resourcecombobox',
       label: labels.type,
       name: 'type',
@@ -423,6 +426,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
+      updateOn: 'blur',
       props: { allowNegative: false, maxLength: 12, decimalScale: 2 },
       onChange: ({ row: { update, newRow } }) => {
         setRecalc(true)
@@ -438,8 +442,9 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
 
-          update({ expectedAlloyQty, qtyAtPurity, rmQty })
+          update({ expectedAlloyQty, qtyAtPurity, rmQty, qty: newRow?.qty || 0 })
         }
+        else update({ qty: newRow?.qty || 0 })
       }
     },
     {
@@ -461,7 +466,7 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
           ? (((newRow?.qty || 0) * (newRow?.purity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
 
-          update({ expectedAlloyQty, qtyAtPurity, rmQty })
+          update({ expectedAlloyQty, qtyAtPurity, rmQty})
         }
       },
       propsReducer({ row, props }) {
@@ -807,7 +812,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                     secondValueShow='itemName'
                     form={formik}
                     formObject={formik.values.header}
-                    required
                     columnsInDropDown={[
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
@@ -845,7 +849,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.purity', value)
                     }}
                     value={formik.values.header.purity}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}
@@ -867,7 +870,6 @@ export default function MetalSmeltingForm({ labels, access, recordId, window }) 
                       formik.setFieldValue('header.qty', value)
                     }}
                     value={formik.values.header?.qty}
-                    required
                     maxLength={12}
                     decimalScale={3}
                     allowNegative={false}

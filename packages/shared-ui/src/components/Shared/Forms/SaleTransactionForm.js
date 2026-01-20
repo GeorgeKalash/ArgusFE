@@ -10,7 +10,6 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -64,6 +63,7 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import ChangeClient from '@argus/shared-ui/src/components/Shared/ChangeClient'
 
 export default function SaleTransactionForm({
   labels,
@@ -88,6 +88,7 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
+  const taxDetailsCacheRef = useRef({})
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
@@ -1175,15 +1176,22 @@ export default function SaleTransactionForm({
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
-    const billAdd = await getAddress(saTrxHeader?.billAddressId)
+    const balance = saTrxPack?.accountBalance?.balance
+    const accountId = saTrxPack?.client?.accountId
+    const maxDiscount = saTrxPack?.client?.maxDiscount
+    const billAdd = saTrxPack?.formattedAddress
 
     saTrxHeader?.tdType === 1 || saTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
       : setCycleButtonState({ text: '%', value: 2 })
+      
+    const taxDetailsMap = saTrxHeader.isVattable
+    ? taxDetailsCacheRef.current
+    : {}
+
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
-        const taxDetails = saTrxHeader.isVattable ? await getTaxDetails(item.taxId) : null
 
         return {
           ...item,
@@ -1202,16 +1210,14 @@ export default function SaleTransactionForm({
                 id: index
               }
             }),
-          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails
+          taxDetails: taxDetailsMap[item.taxId] || null
         }
       })
     )
 
     itemsUpdate.current = modifiedList
-    const res = await getClientInfo(saTrxHeader.clientId)
-    getClientBalance(res?.record?.accountId, saTrxHeader.currencyId)
     formik.setValues({
       ...formik.values,
       recordId: saTrxHeader.recordId || null,
@@ -1224,10 +1230,11 @@ export default function SaleTransactionForm({
           saTrxHeader?.tdType == 1 || saTrxHeader?.tdType == null ? saTrxHeader?.tdAmount : saTrxHeader?.tdPct,
         KGmetalPrice: saTrxHeader?.metalPrice * 1000,
         subtotal: saTrxHeader?.subtotal.toFixed(2),
-        accountId: res?.record?.accountId,
+        accountId,
         commitItems: dtInfo?.record?.commitItems,
         postMetalToFinancials: dtInfo?.record?.postMetalToFinancials,
-        maxDiscount: res?.record?.maxDiscount || 0
+        maxDiscount: maxDiscount || 0,
+        balance
       },
       items: modifiedList,
       taxes: [...saTrxTaxes]
@@ -1260,12 +1267,23 @@ export default function SaleTransactionForm({
     return res.record
   }
 
-  const getMeasurementUnits = async () => {
-    return await getRequest({
-      extension: InventoryRepository.MeasurementUnit.qry,
-      parameters: `_msId=0`
+  const getPackData = async () => {
+    const res = await getRequest({
+      extension: SaleRepository.SaleTransaction.pack,
+      parameters: ''
     })
+
+    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
+      if (!acc[td.taxId]) acc[td.taxId] = []
+      acc[td.taxId].push(td)
+      return acc
+    }, {})
+
+    taxDetailsCacheRef.current = taxMap 
+
+    return res?.record?.measurementUnits || []
   }
+
 
   async function fillMetalPrice(baseMetalCuId) {
     if (baseMetalCuId) {
@@ -1295,17 +1313,6 @@ export default function SaleTransactionForm({
     }
   }
 
-  async function getAddress(addressId) {
-    if (!addressId) return
-
-    const res = await getRequest({
-      extension: SystemRepository.Address.format,
-      parameters: `_addressId=${addressId}`
-    })
-
-    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
-  }
-
   async function getAccountLimit(currencyId, accountId) {
     const res = await getRequest({
       extension: FinancialRepository.AccountCreditLimit.get,
@@ -1325,20 +1332,16 @@ export default function SaleTransactionForm({
       return
     }
 
-    const res = await getClientInfo(clientId)
-
-    const record = res?.record || {}
-
-    const validSpId = await validateSalesPerson(record.spId)
-    const accountId = record.accountId
-    const currencyId = record.currencyId ?? formik.values.header.currencyId ?? null
+    const validSpId = await validateSalesPerson(clientObject.spId)
+    const accountId = clientObject.accountId
+    const currencyId = clientObject.currencyId ?? formik.values.header.currencyId ?? null
     if (!currencyId) {
       stackError({ message: labels.NoCurrencyAvailable })
 
       return
     }
-    const billAdd = await getAddress(record.billAddressId)
     const accountLimit = await getAccountLimit(currencyId, accountId)
+    const res = await getClientInfo(clientObject?.accountId, formik.values.header.currencyId, clientObject.billAddressId)
 
     formik.setValues({
       ...formik.values,
@@ -1352,32 +1355,26 @@ export default function SaleTransactionForm({
         taxId: clientObject?.taxId,
         currencyId: currencyId,
         spId: validSpId,
-        ptId: record.ptId ?? defaultsDataState.ptId,
-        plId: record.plId ?? defaultsDataState.plId,
-        szId: record.szId,
-        billAddressId: record.billAddressId,
-        billAddress: billAdd,
+        ptId: clientObject.ptId ?? defaultsDataState.ptId,
+        plId: clientObject.plId ?? defaultsDataState.plId,
+        szId: clientObject.szId,
+        billAddressId: clientObject.billAddressId,
+        billAddress: res?.address,
         creditLimit: accountLimit?.limit ?? 0,
-        accountId: record?.accountId
+        accountId: clientObject?.accountId,
+        balance: res?.accountBalance?.balance
       }
     })
 
-    await getClientBalance(record?.accountId, formik.values.header.currencyId)
   }
 
-  async function getClientInfo(clientId) {
-    return await getRequest({
-      extension: SaleRepository.Client.get,
-      parameters: `_recordId=${clientId}`
-    })
-  }
-
-  async function getClientBalance(accountId, currencyId) {
+  async function getClientInfo(accountId, currencyId, addressId) {
     const res = await getRequest({
-      extension: FinancialRepository.AccountCreditBalance.get,
-      parameters: `_accountId=${accountId}&_currencyId=${currencyId}`
+      extension: SaleRepository.Client.pack,
+      parameters: `_accountId=${accountId}&_currencyId=${currencyId}&_addressId=${addressId || 0}`
     })
-    formik.setFieldValue('header.balance', res?.record?.balance || 0)
+
+    return res?.record
   }
 
   async function getItemPhysProp(itemId) {
@@ -1399,17 +1396,15 @@ export default function SaleTransactionForm({
   }
 
   async function getTaxDetails(taxId) {
-    if (taxId) {
-      const res = await getRequest({
-        extension: FinancialRepository.TaxDetailPack.qry,
-        parameters: `_taxId=${taxId}`
-      })
+    if (!taxId) return []
 
-      return res?.list
+    if (taxDetailsCacheRef.current[taxId]) {
+      return taxDetailsCacheRef.current[taxId]
     }
 
-    return
+    return []
   }
+
 
   async function getItemConvertPrice(itemId, muId) {
     const res = await getRequest({
@@ -1872,8 +1867,8 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getMeasurementUnits()
-      setMeasurements(muList?.list)
+      const muList = await getPackData()
+      setMeasurements(muList)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
       getUserDefaultsData()
@@ -1885,7 +1880,7 @@ export default function SaleTransactionForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('header.tdType', 1)
         }
-      } else if (muList?.list) await refetchForm(recordId, true)
+      } else if (muList) await refetchForm(recordId, true)
     })()
   }, [])
 
@@ -1962,6 +1957,16 @@ export default function SaleTransactionForm({
     })
   }
 
+  useEffect(() => {
+    taxDetailsCacheRef.current = {}
+  }, [
+    formik.values.header.taxId,
+    formik.values.header.currencyId,
+    formik.values.header.date,
+    formik.values.header.isVattable
+  ])
+
+
   return (
     <FormShell
       resourceId={getResourceId(parseInt(functionId))}
@@ -1979,8 +1984,8 @@ export default function SaleTransactionForm({
           <Grid container spacing={2}>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SystemRepository.DocumentType.qry}
-                parameters={`_startAt=0&_pageSize=1000&_dgId=${functionId}`}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.documentTypes}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
                 label={labels.documentType}
@@ -2008,7 +2013,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesPerson.qry}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.salesPeople}
                 name='header.spId'
                 readOnly={isPosted}
                 label={labels.salesPerson}
@@ -2030,7 +2036,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={3}>
               <ResourceComboBox
-                endpointId={SystemRepository.Plant.qry}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.plants}
                 name='header.plantId'
                 label={labels.plant}
                 columnsInDropDown={[
@@ -2051,7 +2058,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SystemRepository.Currency.qry}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.currencies}
                 name='header.currencyId'
                 label={labels.currency}
                 filter={item => item.currencyType == 1}
@@ -2118,7 +2126,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                endpointId={InventoryRepository.Site.qry}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.sites}
                 name='header.siteId'
                 label={labels.site}
                 columnsInDropDown={[
@@ -2157,8 +2166,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={SaleRepository.SalesZone.qry}
-                parameters={`_startAt=0&_pageSize=1000&_sortField="recordId"&_filter=`}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.saleZones}
                 name='header.szId'
                 label={labels.saleZone}
                 readOnly={isPosted}
@@ -2247,7 +2256,8 @@ export default function SaleTransactionForm({
             </Grid>
             <Grid item xs={2}>
               <ResourceComboBox
-                endpointId={FinancialRepository.TaxSchedules.qry}
+                endpointId={SaleRepository.SaleTransaction.pack}
+                reducer={response => response?.record?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
                 valueField='recordId'
