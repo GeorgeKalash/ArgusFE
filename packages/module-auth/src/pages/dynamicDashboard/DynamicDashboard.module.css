@@ -32,7 +32,6 @@
   justify-content: space-between;
   align-items: center;
 }
-
 .summaryGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -83,13 +82,11 @@
   font-size: 18px;
   margin-bottom: 5px;
 }
-
 .label {
   justify-self: start;
   color: #000;
   font-size: 16px;
 }
-
 .value {
   justify-self: end;
   color: #000;
@@ -98,7 +95,7 @@
 
 @media (max-width: 1400px) {
   .title {
-    font-size: 20px;
+    font-size: 20px
   }
 }
 

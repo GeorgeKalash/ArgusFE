@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import {
@@ -124,158 +124,10 @@ const DashboardLayout = () => {
     }
   }, [_userId, _languageId])
 
-  const containsApplet = useCallback(
-    appletId => {
-      if (!Array.isArray(applets)) return false
-      return applets.some(applet => applet.appletId === appletId)
-    },
-    [applets]
-  )
-
-  const todaysRetailSalesLabels = useMemo(
-    () => data?.dashboard?.todaysRetailSales?.map(ws => ws.posRef) || [],
-    [data?.dashboard?.todaysRetailSales]
-  )
-  const todaysRetailSalesData = useMemo(
-    () => data?.dashboard?.todaysRetailSales?.map(ws => ws.sales) || [],
-    [data?.dashboard?.todaysRetailSales]
-  )
-
-  const myYearlySalesLabels = useMemo(
-    () => data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || [],
-    [data?.sp?.myYearlySalesPerformanceList]
-  )
-  const myYearlySalesData1 = useMemo(
-    () => data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.sales) || [],
-    [data?.sp?.myYearlySalesPerformanceList]
-  )
-  const myYearlySalesData2 = useMemo(
-    () => data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.target) || [],
-    [data?.sp?.myYearlySalesPerformanceList]
-  )
-
-  const myMonthlySalesLabels = useMemo(
-    () => data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || [],
-    [data?.sp?.myMonthlySalesPerformanceList]
-  )
-  const myMonthlySalesData1 = useMemo(
-    () => data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || [],
-    [data?.sp?.myMonthlySalesPerformanceList]
-  )
-  const myMonthlySalesData2 = useMemo(
-    () => data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.target) || [],
-    [data?.sp?.myMonthlySalesPerformanceList]
-  )
-
-  const salesTeamOrdersLabels = useMemo(
-    () => data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || [],
-    [data?.dashboard?.salesTeamOrdersSummaries]
-  )
-  const salesTeamOrdersData1 = useMemo(
-    () => data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.amount) || [],
-    [data?.dashboard?.salesTeamOrdersSummaries]
-  )
-  const salesTeamOrdersData2 = useMemo(
-    () => data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.orderCount) || [],
-    [data?.dashboard?.salesTeamOrdersSummaries]
-  )
-
-  const myYearlyUnitsLabels = useMemo(
-    () => data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || [],
-    [data?.sp?.myYearlyUnitsSoldList]
-  )
-  const myYearlyUnitsData = useMemo(
-    () => data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.qty) || [],
-    [data?.sp?.myYearlyUnitsSoldList]
-  )
-
-  const myYearlyGrowthUnitsLabels = useMemo(
-    () => data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || [],
-    [data?.sp?.myYearlyGrowthInUnitsSoldList]
-  )
-  const myYearlyGrowthUnitsData = useMemo(
-    () => data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || [],
-    [data?.sp?.myYearlyGrowthInUnitsSoldList]
-  )
-
-  const myYearlyClientsLabels = useMemo(
-    () => data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || [],
-    [data?.sp?.myYearlyClientsAcquiredList]
-  )
-  const myYearlyClientsData = useMemo(
-    () => data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || [],
-    [data?.sp?.myYearlyClientsAcquiredList]
-  )
-
-  const myYearlyGrowthClientsLabels = useMemo(
-    () => data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || [],
-    [data?.sp?.myYearlyGrowthInClientsAcquiredList]
-  )
-  const myYearlyGrowthClientsData = useMemo(
-    () => data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || [],
-    [data?.sp?.myYearlyGrowthInClientsAcquiredList]
-  )
-
-  const todaysCreditSalesLabels = useMemo(
-    () => data?.dashboard?.todaysCreditSales?.map(ws => ws.plantRef) || [],
-    [data?.dashboard?.todaysCreditSales]
-  )
-  const todaysCreditSalesData = useMemo(
-    () => data?.dashboard?.todaysCreditSales?.map(ws => ws.sales) || [],
-    [data?.dashboard?.todaysCreditSales]
-  )
-
-  const weeklySalesLabels = useMemo(
-    () => data?.dashboard?.weeklySales?.map(ws => ws.weekName) || [],
-    [data?.dashboard?.weeklySales]
-  )
-  const weeklySalesData = useMemo(
-    () => data?.dashboard?.weeklySales?.map(ws => ws.sales) || [],
-    [data?.dashboard?.weeklySales]
-  )
-
-  const monthlySalesLabels = useMemo(
-    () => data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || [],
-    [data?.dashboard?.monthlySales]
-  )
-  const monthlySalesData = useMemo(
-    () => data?.dashboard?.monthlySales?.map(ms => ms.sales) || [],
-    [data?.dashboard?.monthlySales]
-  )
-
-  const accumulatedMonthlySalesLabels = useMemo(
-    () => data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || [],
-    [data?.dashboard?.accumulatedMonthlySales]
-  )
-  const accumulatedMonthlySalesData = useMemo(
-    () => data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.sales) || [],
-    [data?.dashboard?.accumulatedMonthlySales]
-  )
-
-  const receivablesLabels = useMemo(() => Object.keys(data?.dashboard?.receivables || {}), [data?.dashboard?.receivables])
-  const receivablesData = useMemo(
-    () =>
-      Object.values(data?.dashboard?.receivables || {}).map(value => (typeof value === 'number' ? Math.ceil(value) : 0)),
-    [data?.dashboard?.receivables]
-  )
-
-  const topCustomersLabels = useMemo(
-    () => data?.dashboard?.topCustomers?.map(c => c.clientName) || [],
-    [data?.dashboard?.topCustomers]
-  )
-  const topCustomersData = useMemo(
-    () => data?.dashboard?.topCustomers?.map(c => c.amount) || [],
-    [data?.dashboard?.topCustomers]
-  )
-
-  const avgUnitSalesLabels = useMemo(
-    () => data?.dashboard?.avgUnitSales?.map(c => c.itemName) || [],
-    [data?.dashboard?.avgUnitSales]
-  )
-  const avgUnitSalesData = useMemo(
-    () => data?.dashboard?.avgUnitSales?.map(c => c.avgPrice) || [],
-    [data?.dashboard?.avgUnitSales]
-  )
+  const containsApplet = appletId => {
+    if (!Array.isArray(applets)) return false
+    return applets.some(applet => applet.appletId === appletId)
+  }
 
   return (
     <div className={styles.frame}>
@@ -295,7 +147,11 @@ const DashboardLayout = () => {
                   ).toLocaleString()}
                 </strong>
               </div>
-              <CompositeBarChartDark labels={todaysRetailSalesLabels} data={todaysRetailSalesData} label={labels.retailSales} />
+              <CompositeBarChartDark
+                labels={data?.dashboard?.todaysRetailSales?.map(ws => ws.posRef) || []}
+                data={data?.dashboard?.todaysRetailSales?.map(ws => ws.sales) || []}
+                label={labels.retailSales}
+              />
             </div>
           </div>
         )}
@@ -306,9 +162,9 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.myYearlySalesPerformance}</h2>
               </div>
               <MixedBarChart
-                labels={myYearlySalesLabels}
-                data1={myYearlySalesData1}
-                data2={myYearlySalesData2}
+                labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
+                data1={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.target) || []}
                 label1={labels.sales}
                 label2={labels.target}
               />
@@ -322,9 +178,9 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.myMonthlySalesPerformance}</h2>
               </div>
               <MixedBarChart
-                labels={myMonthlySalesLabels}
-                data1={myMonthlySalesData1}
-                data2={myMonthlySalesData2}
+                labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
+                data1={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.sales) || []}
+                data2={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.target) || []}
                 label1={labels.sales}
                 label2={labels.target}
               />
@@ -338,9 +194,9 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.salesTeamOrdersSummary}</h2>
               </div>
               <MixedBarChart
-                labels={salesTeamOrdersLabels}
-                data1={salesTeamOrdersData1}
-                data2={salesTeamOrdersData2}
+                labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
+                data1={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.amount) || []}
+                data2={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.orderCount) || []}
                 label1={labels.amount}
                 label2={labels.orderCount}
                 hasLegend={true}
@@ -355,7 +211,11 @@ const DashboardLayout = () => {
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.myYearlyUnitsSoldList}</h2>
               </div>
-              <MixedColorsBarChartDark labels={myYearlyUnitsLabels} data={myYearlyUnitsData} label={labels.qty} />
+              <MixedColorsBarChartDark
+                labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
@@ -363,7 +223,11 @@ const DashboardLayout = () => {
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
               </div>
-              <MixedColorsBarChartDark labels={myYearlyGrowthUnitsLabels} data={myYearlyGrowthUnitsData} label={labels.qty} />
+              <MixedColorsBarChartDark
+                labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
@@ -371,7 +235,11 @@ const DashboardLayout = () => {
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.myYearlyClientsAcquiredList}</h2>
               </div>
-              <MixedColorsBarChartDark labels={myYearlyClientsLabels} data={myYearlyClientsData} label={labels.qty} />
+              <MixedColorsBarChartDark
+                labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
             </div>
           )}
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
@@ -379,7 +247,11 @@ const DashboardLayout = () => {
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.myYearlyGrowthInClientsAc}</h2>
               </div>
-              <MixedColorsBarChartDark labels={myYearlyGrowthClientsLabels} data={myYearlyGrowthClientsData} label={labels.qty} />
+              <MixedColorsBarChartDark
+                labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
+                data={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.qty) || []}
+                label={labels.qty}
+              />
             </div>
           )}
         </div>
@@ -394,7 +266,12 @@ const DashboardLayout = () => {
                   ).toLocaleString()}
                 </strong>
               </div>
-              <CompositeBarChartDark labels={todaysCreditSalesLabels} data={todaysCreditSalesData} label={labels.todayPlantSales} ratio={5} />
+              <CompositeBarChartDark
+                labels={data?.dashboard?.todaysCreditSales?.map(ws => ws.plantRef) || []}
+                data={data?.dashboard?.todaysCreditSales?.map(ws => ws.sales) || []}
+                label={labels.todayPlantSales}
+                ratio={5}
+              />
             </div>
           </div>
         )}
@@ -486,14 +363,14 @@ const DashboardLayout = () => {
                         {
                           label: labels.revenues,
                           value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)?.amount ??
-                            0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
+                              ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
                           value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)?.amount ??
-                            0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
+                              ?.amount ?? 0
                         }
                       ]
                     }
@@ -504,7 +381,9 @@ const DashboardLayout = () => {
                         {summary.rows.map((row, idx) => (
                           <React.Fragment key={idx}>
                             <div className={styles.label}>{row.label}:</div>
-                            <div className={styles.value}>{row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                            <div className={styles.value}>
+                              {row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </div>
                           </React.Fragment>
                         ))}
                       </div>
@@ -517,8 +396,8 @@ const DashboardLayout = () => {
                   <div className={styles.redCenter}>
                     {labels.newCostumers}:{' '}
                     {(
-                      data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)?.amount ??
-                      0
+                      data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)
+                        ?.amount ?? 0
                     ).toLocaleString()}
                   </div>
                 </div>
@@ -537,7 +416,11 @@ const DashboardLayout = () => {
                   ).toLocaleString()}
                 </strong>
               </div>
-              <CompositeBarChartDark labels={weeklySalesLabels} data={weeklySalesData} label={labels.weeklySales} />
+              <CompositeBarChartDark
+                labels={data?.dashboard?.weeklySales?.map(ws => ws.weekName) || []}
+                data={data?.dashboard?.weeklySales?.map(ws => ws.sales) || []}
+                label={labels.weeklySales}
+              />
             </div>
           )}
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
@@ -551,7 +434,11 @@ const DashboardLayout = () => {
                   ).toLocaleString()}
                 </strong>
               </div>
-              <CompositeBarChartDark labels={monthlySalesLabels} data={monthlySalesData} label={labels.monthlySales} />
+              <CompositeBarChartDark
+                labels={data?.dashboard?.monthlySales?.map(ms => `${ms.year}/${ms.month}`) || []}
+                data={data?.dashboard?.monthlySales?.map(ms => ms.sales) || []}
+                label={labels.monthlySales}
+              />
             </div>
           )}
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
@@ -560,8 +447,8 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.accRevenues}</h2>
               </div>
               <CompositeBarChartDark
-                labels={accumulatedMonthlySalesLabels}
-                data={accumulatedMonthlySalesData}
+                labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
+                data={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.sales) || []}
                 label={labels.accRevenues}
                 color='#ff6c02'
                 hoverColor='#fec106'
@@ -574,8 +461,10 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.receivables}</h2>
               </div>
               <HorizontalBarChartDark
-                labels={receivablesLabels}
-                data={receivablesData}
+                labels={Object.keys(data?.dashboard?.receivables || {})}
+                data={Object.values(data?.dashboard?.receivables || {}).map(value =>
+                  typeof value === 'number' ? Math.ceil(value) : 0
+                )}
                 label={labels.receivables}
                 color='#6e87b6'
                 hoverColor='#818181'
@@ -588,8 +477,8 @@ const DashboardLayout = () => {
                 <h2 className={styles.title}>{labels.topCostumers}</h2>
               </div>
               <HorizontalBarChartDark
-                labels={topCustomersLabels}
-                data={topCustomersData}
+                labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
+                data={data?.dashboard?.topCustomers?.map(c => c.amount) || []}
                 label={labels.revenue}
                 color='#d5b552'
                 hoverColor='#818181'
@@ -601,7 +490,11 @@ const DashboardLayout = () => {
               <div className={styles.summaryCard}>
                 <h2 className={styles.title}>{labels.averageRevenuePerItem}</h2>
               </div>
-              <LineChart labels={avgUnitSalesLabels} data={avgUnitSalesData} label={labels.averageRevenue} />
+              <LineChart
+                labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
+                data={data?.dashboard?.avgUnitSales?.map(c => c.avgPrice) || []}
+                label={labels.averageRevenue}
+              />
             </div>
           )}
 
