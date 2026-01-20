@@ -24,10 +24,12 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useInvalidate } from 'src/hooks/resource'
+import { useError } from 'src/error'
 
 export default function JTCheckoutForm({ labels, recordId, access, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JTCheckOut,
@@ -55,6 +57,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         fromWCId: null,
         toWCId: null,
         designId: null,
+        jobQty: 0.0,
         qty: 0.0,
         pcs: 0.0,
         fromSeqNo: null,
@@ -89,6 +92,15 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       })
     }),
     onSubmit: async obj => {
+      
+      if (totalQty != obj.transfer.jobQty) {
+        stackError({
+          message: labels.QtyNotMatching
+        })
+
+        return
+      }
+
       const transferPack = {
         transfer: {
           ...obj.transfer,
@@ -203,6 +215,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
             fromWCId: record.workCenterId,
             workCenterId: record.workCenterId,
             fromSVName: record.supervisorName,
+            jobQty: record.qty,
             qty: record.qty,
             pcs: record.pcs,
             toWCId: toWCRecord?.workCenterId,
