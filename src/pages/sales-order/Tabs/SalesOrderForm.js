@@ -217,11 +217,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           address: address
         }
 
-        const addressRes = await postRequest({
+         await postRequest({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
-        copy.shipToAddressId = addressRes.recordId
       }
 
       const updatedRows = obj.items
@@ -1191,6 +1190,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
         onSubmit:async (values) => {
           const addressRes = await getAddress(values?.addressId || null)
           formik.setFieldValue('phoneNo',  `${addressRes?.phoneNo || ''};${addressRes?.phoneNo2 || ''}`)
+          formik.setFieldValue('shipToAddressId', values?.addressId || null)
         },
         isCleared: false,
         datasetId: ResourceIds.ADDSalesOrder
