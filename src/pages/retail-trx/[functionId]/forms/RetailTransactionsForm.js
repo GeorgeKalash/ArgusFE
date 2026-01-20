@@ -244,9 +244,6 @@ export default function RetailTransactionsForm({
     }),
     onSubmit: async obj => {
       let modifiedAddress = address || { recordId: '' }
-      if ((obj.header.recordId && addressModified) || !obj.header.recordId) {
-        modifiedAddress.recordId = ''
-      }
       if (modifiedAddress.name && modifiedAddress.street1 && modifiedAddress.cityId) {
         const res = await postRequest({
           extension: SystemRepository.Address.set,
