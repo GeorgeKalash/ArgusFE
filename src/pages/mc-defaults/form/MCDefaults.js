@@ -12,10 +12,12 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useForm } from 'src/hooks/form'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const MCDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const arrayAllow = [
     'mc_defaultRTSA',
@@ -37,23 +39,23 @@ const MCDefault = ({ _labels, access }) => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
 
   useEffect(() => {
     const updated = {}
-    defaultsData.list?.forEach(obj => {
+    systemDefaults.list?.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         updated[obj.key] = obj.value ? parseFloat(obj.value) : null
         formik.setFieldValue(obj.key, updated[obj.key])
       }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const isReadOnly = key => {
-    const item = defaultsData?.list?.find(obj => obj.key === key)
+    const item = systemDefaults?.list?.find(obj => obj.key === key)
 
     return item && item.value != null && item.value !== ''
   }

@@ -21,13 +21,14 @@ import { DataSets } from 'src/resources/DataSets'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { PayrollRepository } from 'src/repositories/PayrollRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function PayrollListForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
-
-  const pytvStartDate = parseInt(defaultsData?.list?.find(({ key }) => key === 'pytvStartDate')?.value) || null
-  const pytvEndDate = parseInt(defaultsData?.list?.find(({ key }) => key === 'pytvEndDate')?.value) || null
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const pytvStartDate = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pytvStartDate')?.value) || null
+  const pytvEndDate = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pytvEndDate')?.value) || null
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Payroll.page

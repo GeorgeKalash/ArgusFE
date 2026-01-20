@@ -32,13 +32,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function FiPaymentVoucherExpensesForm({ recordId, plantId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PaymentVoucherExpenses,

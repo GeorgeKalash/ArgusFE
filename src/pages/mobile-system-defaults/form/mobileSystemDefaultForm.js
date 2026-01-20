@@ -9,15 +9,15 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
-
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import { RequestsContext } from 'src/providers/RequestsContext'
-import FormShell from 'src/components/Shared/FormShell'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function MobileSystem() {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.MobileSystemDefaults
@@ -42,17 +42,17 @@ export default function MobileSystem() {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Updated)
     }
   })
 
   useEffect(() => {
     loadDefaults()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const loadDefaults = () => {
-    if (!defaultsData?.list) return
+    if (!systemDefaults?.list) return
 
     const fetchedValues = {}
 
@@ -65,7 +65,7 @@ export default function MobileSystem() {
       'smsMobileProviderId'
     ]
 
-    defaultsData.list
+    systemDefaults.list
       .filter(obj => keysToLoad.includes(obj.key))
       .forEach(obj => {
         const val = obj.value

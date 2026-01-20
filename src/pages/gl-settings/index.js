@@ -13,19 +13,21 @@ import { ControlContext } from 'src/providers/ControlContext'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const GLSettings = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   useEffect(() => {
     getDataResult()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'GLACSegments' ||
         obj.key === 'GLACSeg0' ||
@@ -156,7 +158,7 @@ const GLSettings = () => {
       record: JSON.stringify({ sysDefaults: dataToPost })
     }).then(res => {
       toast.success(platformLabels.Edited)
-      updateDefaults(dataToPost)
+      updateSystemDefaults(dataToPost)
     })
   }
 

@@ -19,17 +19,18 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { useError } from 'src/error'
-import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { MultiCurrencyRepository } from 'src/repositories/MultiCurrencyRepository'
 import { RateDivision } from 'src/resources/RateDivision'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { useWindow } from 'src/windows'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function CashTransfersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
@@ -68,7 +69,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   })
 
   async function getCurrencyId() {
-    const currencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+    const currencyId = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
 
     if (currencyId) {
       formik.setFieldValue('currencyId', parseInt(currencyId))
@@ -123,7 +124,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'currencyId'
     })
 

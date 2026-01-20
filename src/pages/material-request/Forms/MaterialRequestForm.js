@@ -29,10 +29,12 @@ import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { ManufacturingRepository } from 'src/repositories/ManufacturingRepository'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function MaterialRequestForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -53,7 +55,7 @@ export default function MaterialRequestForm({ labels, maxAccess: access, recordI
     if (editMode || documentType?.dtId) {
       return
     } else {
-      const defaultFromSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
+      const defaultFromSiteId = systemDefaults?.list?.find(({ key }) => key === 'de_siteId')
 
       if (defaultFromSiteId?.value) formik.setFieldValue('fromSiteId', parseInt(defaultFromSiteId?.value))
     }

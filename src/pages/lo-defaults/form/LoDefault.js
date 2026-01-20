@@ -11,22 +11,24 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const LoDefault = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const arrayAllow = ['transitSiteId', 'lo_min_car_amount']
 
   useEffect(() => {
     const myObject = {}
-    defaultsData.list.forEach(obj => {
+    systemDefaults.list.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         myObject[obj.key] = obj.value ? parseFloat(obj.value) : null
         formik.setFieldValue(obj.key, myObject[obj.key])
       }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const { formik } = useForm({
     maxAccess: access,
@@ -41,7 +43,7 @@ const LoDefault = ({ _labels, access }) => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })

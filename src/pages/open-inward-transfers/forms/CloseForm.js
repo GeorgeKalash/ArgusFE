@@ -13,6 +13,7 @@ import { useError } from 'src/error'
 import { useForm } from 'src/hooks/form'
 import { useInvalidate } from 'src/hooks/resource'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
 import { RemittanceOutwardsRepository } from 'src/repositories/RemittanceOutwardsRepository'
@@ -22,7 +23,8 @@ import * as yup from 'yup'
 export default function CloseForm({ form, labels, access, window }) {
   const { stack: stackError } = useError()
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [mismatchedFields, setMismatchedFields] = useState([])
   form.receiver_bankId = 2
 
@@ -135,7 +137,7 @@ export default function CloseForm({ form, labels, access, window }) {
   const getFieldError = fieldName => mismatchedFields.includes(fieldName)
 
   useEffect(() => {
-    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const defaultCountry = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     formik.setFieldValue('countryId', parseInt(defaultCountry.value))
   }, [])

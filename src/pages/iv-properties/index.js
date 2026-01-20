@@ -17,11 +17,13 @@ import toast from 'react-hot-toast'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import { useWindow } from 'src/windows'
 import PropertiesForm from './forms/PropertiesForm'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const Properties = () => {
   const [data, setData] = useState([])
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [dimNum, setDimNum] = useState(0)
   const { stack } = useWindow()
 
@@ -117,7 +119,7 @@ const Properties = () => {
   useEffect(() => {
     ;(async function () {
       const myObject = {}
-      const filteredList = defaultsData?.list?.filter(obj => obj.key.startsWith('ivtDimension'))
+      const filteredList = systemDefaults?.list?.filter(obj => obj.key.startsWith('ivtDimension'))
       filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
       const firstValidKey = filteredList?.find(item => item.value !== '')?.key
       if (firstValidKey) {

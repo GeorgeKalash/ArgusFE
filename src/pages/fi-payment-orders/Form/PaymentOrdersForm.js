@@ -32,10 +32,12 @@ import { RateDivision } from 'src/resources/RateDivision'
 import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import useResourceParams from 'src/hooks/useResourceParams'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function PaymentOrdersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
@@ -55,9 +57,9 @@ export default function PaymentOrdersForm({ recordId, window }) {
     endpointId: FinancialRepository.PaymentOrders.page2
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },

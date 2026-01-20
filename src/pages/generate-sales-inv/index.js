@@ -25,10 +25,12 @@ import toast from 'react-hot-toast'
 import SaleTransactionForm from '../sa-trx/[functionId]/forms/SaleTransactionForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, LockRecord } = useWindow()
 
   const { labels, access } = useResourceQuery({
@@ -39,7 +41,7 @@ const GeneratePurchaseInvoice = () => {
     datasetId: ResourceIds.SalesInvoice
   })
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const basicValidation = {
     clientId: yup.number().required(),

@@ -16,10 +16,12 @@ import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { TimeAttendanceRepository } from 'src/repositories/TimeAttendanceRepository'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.AttendanceSettings
@@ -29,7 +31,7 @@ const AttSettings = () => {
     ;(async function () {
       const myObject = {}
 
-      const filteredList = defaultsData?.list?.filter(obj => {
+      const filteredList = systemDefaults?.list?.filter(obj => {
         return (
           obj.key === 'caId' ||
           obj.key === 'fdowCombo' ||
@@ -56,7 +58,7 @@ const AttSettings = () => {
       })
       formik.setValues(myObject)
     })()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const { formik } = useForm({
     maxAccess: access,

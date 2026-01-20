@@ -29,10 +29,12 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import LotForm from './LotForm'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function AssemblyForm({ labels, maxAccess: access, store, setStore, totalOverhead }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels  } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const recordId = store?.recordId
   const currentItemId = useRef(null)
   const { stack } = useWindow()
@@ -48,8 +50,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     endpointId: ManufacturingRepository.Assembly.page
   })
 
-  const hiddenMuId = defaultsData?.list?.find(({ key }) => key === 'mf_mu')?.value == 1
-  const siteId = userDefaultsData?.list?.find(({ key }) => key === 'siteId')?.value
+  const hiddenMuId = systemDefaults?.list?.find(({ key }) => key === 'mf_mu')?.value == 1
+  const siteId = userDefaults?.list?.find(({ key }) => key === 'siteId')?.value
 
   const { formik } = useForm({
     initialValues: {

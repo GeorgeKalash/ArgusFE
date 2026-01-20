@@ -23,19 +23,21 @@ import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import { formatDateMDY, formatDateFromApi, formatDateToApi } from 'src/lib/date-helper'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function LoansForm({ labels, maxAccess, store, setStore, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
     endpointId: LoanTrackingRepository.Loans.page
   })
 
-  const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value
-  const defaultMethod = defaultsData?.list?.find(({ key }) => key === 'ldMethod')?.value
-  const defaultLdValue = defaultsData?.list?.find(({ key }) => key === 'ldValue')?.value
+  const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
+  const defaultMethod = systemDefaults?.list?.find(({ key }) => key === 'ldMethod')?.value
+  const defaultLdValue = systemDefaults?.list?.find(({ key }) => key === 'ldValue')?.value
 
   const { formik } = useForm({
     initialValues: {

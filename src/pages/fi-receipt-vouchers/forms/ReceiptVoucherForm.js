@@ -31,10 +31,12 @@ import { useWindow } from 'src/windows'
 import MultiCurrencyRateForm from 'src/components/Shared/MultiCurrencyRateForm'
 import { DIRTYFIELD_RATE, getRate } from 'src/utils/RateCalculator'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -47,9 +49,9 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
     endpointId: FinancialRepository.ReceiptVouchers.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defaultAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defaultAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     maxAccess: maxAccess,
