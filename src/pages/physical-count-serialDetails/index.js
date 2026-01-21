@@ -23,11 +23,13 @@ import ClearGridConfirmation from 'src/components/Shared/ClearGridConfirmation'
 import { useWindow } from 'src/windows'
 import ImportSerials from 'src/components/Shared/ImportSerials'
 import { formatDateFromApi } from 'src/lib/date-helper'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const PhysicalCountSerialDe = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const [editMode, setEditMode] = useState(false)
   const [combosDisabled, setCombosDisabled] = useState(false)
 

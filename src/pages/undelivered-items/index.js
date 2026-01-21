@@ -27,10 +27,12 @@ import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 import { useError } from 'src/error'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -42,7 +44,7 @@ const UndeliveredItems = () => {
     datasetId: ResourceIds.DeliveriesOrders
   })
 
-  const defaultVat = defaultsData?.list?.find(({ key }) => key === 'DEORDMaxVarPct')
+  const defaultVat = systemDefaults?.list?.find(({ key }) => key === 'DEORDMaxVarPct')
 
   const { formik } = useForm({
     maxAccess: access,

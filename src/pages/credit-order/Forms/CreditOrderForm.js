@@ -37,16 +37,18 @@ import useSetWindow from 'src/hooks/useSetWindow'
 import { createConditionalSchema } from 'src/lib/validation'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { getStorageData } from 'src/storage/storage'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const CreditOrderForm = ({ recordId, window }) => {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const [selectedFunctionId, setFunctionId] = useState(SystemFunction.CurrencyCreditOrderPurchase)
   const [baseCurrencyRef, setBaseCurrencyRef] = useState(null)
   const { stack } = useWindow()
   const userData = getStorageData('userData').userId
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.CreditOrder,

@@ -26,10 +26,12 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { SaleRepository } from 'src/repositories/SaleRepository'
 import AccountSummary from 'src/components/Shared/AccountSummary'
 import { useWindow } from 'src/windows'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -43,8 +45,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     endpointId: FinancialRepository.BalanceTransferMultiAccounts.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const spId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const spId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
 
   const { formik } = useForm({
     maxAccess,

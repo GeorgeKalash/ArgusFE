@@ -24,13 +24,15 @@ import { createConditionalSchema } from 'src/lib/validation'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useError } from 'src/error'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
 
-  const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,

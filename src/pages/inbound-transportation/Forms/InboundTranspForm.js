@@ -28,13 +28,15 @@ import { ThreadProgress } from 'src/components/Shared/ThreadProgress'
 import { useWindow } from 'src/windows'
 import { useError } from 'src/error'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
-    const { platformLabels, userDefaultsData } = useContext(ControlContext)
+    const { platformLabels } = useContext(ControlContext)
+    const { userDefaults } = useContext(DefaultsContext)
     const { stack } = useWindow()
     const { stack: stackError } = useError()
-    const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null
+    const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
 
     const { documentType, maxAccess, changeDT } = useDocumentType({
         functionId: SystemFunction.InboundTransportation,

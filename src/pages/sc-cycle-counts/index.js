@@ -14,10 +14,12 @@ import CycleCountsWindow from './Windows/CycleCountsWindow'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { stack } = useWindow()
 
@@ -137,7 +139,7 @@ const CycleCounts = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+    const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
     openCycleCountsWindow(plantId, recordId)
   }

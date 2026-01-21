@@ -18,11 +18,13 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import useSetWindow from 'src/hooks/useSetWindow'
 import Form from './Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export const SerialsForm = ({ row, siteId, checkForSiteId, window, updateRow, disabled }) => {
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const allowNegativeQty = systemChecks.some(check => check.checkId === SystemChecks.ALLOW_INVENTORY_NEGATIVE_QTY)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 

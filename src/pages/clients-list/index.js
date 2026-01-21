@@ -12,13 +12,15 @@ import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useError } from 'src/error'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const ClientsList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const {
     query: { data },

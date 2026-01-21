@@ -8,18 +8,18 @@ import { ResourceLookup } from 'src/components/Shared/ResourceLookup'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { useForm } from 'src/hooks/form'
 import { CashBankRepository } from 'src/repositories/CashBankRepository'
-import { ControlContext } from 'src/providers/ControlContext'
 import axios from 'axios'
 import { useWindow } from 'src/windows'
 import PopupDialog from 'src/components/Shared/PopupDialog'
 import * as yup from 'yup'
 import { useError } from 'src/error'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function POSForm({ labels, data, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
-  const { userDefaultsData } = useContext(ControlContext)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const { userDefaults } = useContext(DefaultsContext)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const [isSubmitting, setSubmitting] = useState(false)
   const { stack } = useWindow()
   const { stack: stackError } = useError()

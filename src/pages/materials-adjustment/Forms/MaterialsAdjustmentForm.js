@@ -28,10 +28,12 @@ import { SerialsForm } from 'src/components/Shared/SerialsForm'
 import { getFormattedNumber } from 'src/lib/numberField-helper'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function MaterialsAdjustmentForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults, systemChecks } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -44,8 +46,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     enabled: !recordId
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value
 
   const initialValues = {

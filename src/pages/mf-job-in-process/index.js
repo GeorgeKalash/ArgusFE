@@ -19,14 +19,16 @@ import { useForm } from 'src/hooks/form'
 import * as yup from 'yup'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 import NormalDialog from 'src/components/Shared/NormalDialog'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const JobInProcess = () => {
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
 
   const { stack, lockRecord } = useWindow()
-  const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
+  const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
   const {
     query: { data },

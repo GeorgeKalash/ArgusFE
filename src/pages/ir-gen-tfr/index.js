@@ -24,17 +24,19 @@ import { useError } from 'src/error'
 import MaterialsTransferForm from '../iv-materials-tfr/Form/MaterialsTransferForm'
 import { createConditionalSchema } from 'src/lib/validation'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function IRGenerateTransfer() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTransfers
   })
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const conditions = {
     transferNow: row => row?.transferNow > 0,

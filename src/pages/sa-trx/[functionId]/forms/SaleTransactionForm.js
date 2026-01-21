@@ -65,6 +65,7 @@ import { SystemFunction } from 'src/resources/SystemFunction'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import ChangeClient from 'src/components/Shared/ChangeClient'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function SaleTransactionForm({
   labels,
@@ -80,7 +81,8 @@ export default function SaleTransactionForm({
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: DIRTYFIELD_TDPCT })
   const [measurements, setMeasurements] = useState([])
   const [address, setAddress] = useState({})
@@ -101,7 +103,7 @@ export default function SaleTransactionForm({
     endpointId: SaleRepository.SalesTransaction.qry
   })
 
-  const allowNoLines = defaultsData?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
+  const allowNoLines = systemDefaults?.list?.find(({ key }) => key === 'allowSalesNoLinesTrx')?.value == 'true'
 
   const conditions = {
     sku: row => row?.sku,
@@ -1282,7 +1284,7 @@ export default function SaleTransactionForm({
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
     const MCbaseCU = defaultMCbaseCU?.value ? parseInt(defaultMCbaseCU.value) : null
     if (MCbaseCU != null) {
       const kgMetalPriceValue = await fillMetalPrice(MCbaseCU)
@@ -1901,7 +1903,7 @@ export default function SaleTransactionForm({
   async function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'baseMetalCuId' ||
         obj.key === 'mc_defaultRTSA' ||
@@ -1926,7 +1928,7 @@ export default function SaleTransactionForm({
   async function getUserDefaultsData() {
     const myObject = {}
 
-    const filteredList = userDefaultsData?.list?.filter(obj => {
+    const filteredList = userDefaults?.list?.filter(obj => {
       return obj.key === 'plantId' || obj.key === 'siteId' || obj.key === 'spId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))

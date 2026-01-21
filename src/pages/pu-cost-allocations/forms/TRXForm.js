@@ -20,15 +20,17 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import CustomDatePicker from 'src/components/Inputs/CustomDatePicker'
 import { SystemFunction } from 'src/resources/SystemFunction'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function TRXForm({ labels, access, setStore, store }) {
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { recordId } = store
   const { getRequest, postRequest } = useContext(RequestsContext)
   const functionId = SystemFunction.CostAllocation
 
   async function getDefaultPlant() {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+    const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')
 
     return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }

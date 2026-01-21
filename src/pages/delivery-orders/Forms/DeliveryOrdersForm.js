@@ -30,10 +30,12 @@ import WorkFlow from 'src/components/Shared/WorkFlow'
 import AddressFilterForm from 'src/components/Shared/AddressFilterForm'
 import GenerateInvoiceForm from './GenerateInvoiceForm'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function DeliveriesOrdersForm({ labels, maxAccess: access, recordId, refresh = true, ...props }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -43,8 +45,8 @@ export default function DeliveriesOrdersForm({ labels, maxAccess: access, record
     enabled: !recordId
   })
 
-  const defPId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defPId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const invalidate = useInvalidate(
     refresh && {

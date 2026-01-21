@@ -34,13 +34,15 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import useSetWindow from 'src/hooks/useSetWindow'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { EmployeeRepository } from 'src/repositories/EmployeeRepository'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function PurchaseRquisitionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const [maxSeqNo, setMaxSeqNo] = useState(1)
-  const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defaultPlant = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
   const userId = getStorageData('userData').userId
 
   const { labels, access } = useResourceParams({

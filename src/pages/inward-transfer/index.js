@@ -17,13 +17,15 @@ import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import InwardTransferForm from './forms/InwardTransferForm'
 import { getStorageData } from 'src/storage/storage'
 import { ControlContext } from 'src/providers/ControlContext'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const {
     query: { data },
@@ -64,7 +66,7 @@ const InwardTransfer = () => {
   }
 
   const getPlantId = async () => {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+    const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')
 
     return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }

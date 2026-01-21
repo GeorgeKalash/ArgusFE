@@ -15,10 +15,12 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import SalesOrderForm from './Tabs/SalesOrderForm'
 import { useError } from 'src/error'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -131,7 +133,7 @@ const SalesOrder = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value)
   }

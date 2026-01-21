@@ -1,10 +1,10 @@
 import { useContext, useRef } from 'react'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
-import { ControlContext } from 'src/providers/ControlContext'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 import { SystemChecks } from 'src/resources/SystemChecks'
 
 export default function NumberfieldEdit({ id, column: { props, field }, value, data, update, updateRow }) {
-  const { systemChecks } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const checkCondition = props?.onCondition && props?.onCondition(data)
   const decimalScale = checkCondition?.decimalScale ?? props?.decimalScale;
   const readOnly = checkCondition?.readOnly ?? props?.readOnly

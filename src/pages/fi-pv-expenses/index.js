@@ -12,13 +12,15 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import FiPaymentVoucherExpensesForm from './forms/PaymentVoucherExpensesForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const FiPaymentVouchers = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options

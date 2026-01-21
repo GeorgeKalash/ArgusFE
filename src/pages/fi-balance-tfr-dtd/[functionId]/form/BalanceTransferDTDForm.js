@@ -15,16 +15,18 @@ import { ControlContext } from 'src/providers/ControlContext'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomCheckBox from 'src/components/Inputs/CustomCheckBox'
 import { SaleRepository } from 'src/repositories/SaleRepository'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function BalanceTransferDTDForm({ labels, maxAccess, recordId, functionId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const invalidate = useInvalidate({
     endpointId: FinancialRepository.FIDocTypeDefaults.page
   })
 
-  const spId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const spId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
 
   const { formik } = useForm({
     initialValues: {

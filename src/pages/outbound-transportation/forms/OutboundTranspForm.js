@@ -24,10 +24,12 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.DeliveryTrip,
@@ -38,7 +40,7 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
   async function getDefaultData() {
     const userKeys = ['plantId']
 
-    const plantIdDefault = (userDefaultsData?.list || []).reduce((acc, { key, value }) => {
+    const plantIdDefault = (userDefaults?.list || []).reduce((acc, { key, value }) => {
       if (userKeys.includes(key)) {
         acc[key] = value ? parseInt(value) : null
       }
