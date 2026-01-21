@@ -24,10 +24,12 @@ import { PurchaseRepository } from 'src/repositories/PurchaseRepository'
 import { ReportPuGeneratorRepository } from 'src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const OpenPurchaseOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+   const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -35,7 +37,7 @@ const OpenPurchaseOrder = () => {
     datasetId: ResourceIds.OpenPOs
   })
 
-  const defaultVat = defaultsData?.list?.find(({ key }) => key === 'POSHPVarPct')
+  const defaultVat = systemDefaults?.list?.find(({ key }) => key === 'POSHPVarPct')
 
   const { formik } = useForm({
     maxAccess: access,

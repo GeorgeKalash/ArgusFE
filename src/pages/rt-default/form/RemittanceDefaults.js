@@ -13,10 +13,12 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useForm } from 'src/hooks/form'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const RemittanceDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const getNumberRange = async nraId => {
     const { record } = await getRequest({
@@ -52,17 +54,17 @@ const RemittanceDefaults = ({ _labels, access }) => {
         record: JSON.stringify({ sysDefaults: data })
       }).then(res => {
         if (res) toast.success(platformLabels.Updated)
-        updateDefaults(data)
+        updateSystemDefaults(data)
       })
     }
   })
 
   useEffect(() => {
     ;(async function () {
-      if (defaultsData) {
+      if (systemDefaults) {
         const myObject = { nraRef: null, nraDescription: null }
 
-        for (const { key, value } of defaultsData?.list ?? []) {
+        for (const { key, value } of systemDefaults?.list ?? []) {
           if (
             [
               'rt_max_monthly_amount',
@@ -85,7 +87,7 @@ const RemittanceDefaults = ({ _labels, access }) => {
         formik.setValues(myObject)
       }
     })()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={access}>

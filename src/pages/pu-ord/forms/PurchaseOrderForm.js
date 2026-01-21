@@ -58,11 +58,13 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog'
 import { createConditionalSchema } from 'src/lib/validation'
 import useSetWindow from 'src/hooks/useSetWindow'
 import useResourceParams from 'src/hooks/useResourceParams'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 export default function PurchaseOrderForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults} = useContext(DefaultsContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
   const [reCal, setReCal] = useState(false)
@@ -76,8 +78,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
 
   useSetWindow({ title: labels.purchaseOrder, window })
 
-  const defPlId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defPlId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
 
   const [cycleButtonState, setCycleButtonState] = useState({
     text: '%',

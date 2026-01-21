@@ -34,12 +34,14 @@ import { getIPR, DIRTYFIELD_UNIT_PRICE } from 'src/utils/ItemPriceCalculator'
 import { SystemChecks } from 'src/resources/SystemChecks'
 import { useError } from 'src/error'
 import AccountSummary from 'src/components/Shared/AccountSummary'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const DraftForm = ({ labels, access, recordId, invalidate }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const [reCal, setReCal] = useState(false)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -54,10 +56,10 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
     }
   }, [documentType?.dtId])
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const defplId = parseInt(defaultsData?.list?.find(obj => obj.key === 'plId')?.value)
-  const defspId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const defplId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'plId')?.value)
+  const defspId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     maxAccess,

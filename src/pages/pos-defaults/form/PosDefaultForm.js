@@ -10,10 +10,12 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
 import { DataSets } from 'src/resources/DataSets'
 import Form from 'src/components/Shared/Form'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const PosDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const formik = useFormik({
     validateOnChange: true,
@@ -32,7 +34,7 @@ const PosDefaultForm = ({ _labels, access }) => {
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'posItemPK'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
@@ -55,7 +57,7 @@ const PosDefaultForm = ({ _labels, access }) => {
       record: JSON.stringify({ SysDefaults: data })
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     })
   }
 

@@ -16,13 +16,14 @@ import Table from 'src/components/Shared/Table'
 import PurchaseTransactionForm from './PurchaseTransactionForm'
 import { Router } from 'src/lib/useRouter'
 import toast from 'react-hot-toast'
+import { DefaultsContext } from 'src/providers/DefaultsContext'
 
 const PuTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-
   const { functionId } = Router()
 
   const getResourceId = functionId => {
@@ -171,7 +172,7 @@ const PuTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value) || null
   }
