@@ -43,7 +43,7 @@ const ControlProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (userData != null) {
+    if (userData && user?.userId) {
       getDefaults(setDefaultsData)
       getUserDefaults(setUserDefaultsData)
       getSystemChecks(setSystemChecks)
@@ -72,20 +72,18 @@ const ControlProvider = ({ children }) => {
   }, [countryId])
 
   const getDefaults = callback => {
-    var parameters = `_filter=`
     getRequest({
       extension: SystemRepository.Defaults.qry,
-      parameters: parameters
+      parameters: `_filter=`
     }).then(res => {
       callback(res)
     })
   }
 
   const getSystemChecks = callback => {
-    const parameters = '_scope=1'
     getRequest({
       extension: SystemRepository.SystemChecks.qry,
-      parameters
+      parameters:`_scope=1`
     }).then(res => {
       callback(res.list)
     })
@@ -106,10 +104,11 @@ const ControlProvider = ({ children }) => {
   }
 
   const getUserDefaults = callback => {
-    var parameters = '_userId=' + user?.userId
+    if(!user?.userId) return
+
     getRequest({
       extension: SystemRepository.UserDefaults.qry,
-      parameters: parameters
+      parameters: `_userId=` + user?.userId
     }).then(res => {
       callback(res)
     })
@@ -117,7 +116,7 @@ const ControlProvider = ({ children }) => {
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
-  }, [user?.languageId, languageId])
+  }, [apiUrl, user?.languageId, languageId])
 
   const debouncedCloseLoading = debounce(() => {
     setLoading(false)
@@ -128,6 +127,7 @@ const ControlProvider = ({ children }) => {
     : {}
 
   const getPlatformLabels = (resourceId, callback) => {
+    if (!apiUrl) return
     const disableLoading = false
     !disableLoading && !loading && setLoading(true)
 

@@ -2,6 +2,7 @@ const service = 'DE.asmx/'
 
 export const DeliveryRepository = {
   Driver: {
+    snapshot: service + 'snapshotDRV',
     page: service + 'pageDRV',
     set: service + 'setDRV',
     get: service + 'getDRV',
@@ -22,6 +23,7 @@ export const DeliveryRepository = {
     qry: service + 'qryTRP',
     del: service + 'delTRP',
     snapshot: service + 'snapshotTRP',
+    snapshot2: service + 'snapshot2TRP',
     reopen: service + 'reopenTRP',
     post: service + 'postTRP',
     unpost: service + 'unpostTRP',
@@ -90,5 +92,19 @@ export const DeliveryRepository = {
   },
   AllocatedVolume: {
     qry: service + 'qryVEH2'
+  },
+  InboundTransp: {
+    pack: service + 'getPackINB',
+    page: service + 'pageINB',
+    set2: service + 'set2INB',
+    get: service + 'getINB',
+    get2: service + 'get2INB',
+    del: service + 'delINB',
+    snapshot: service + 'snapshotINB',
+    post: service + 'postINB',
+    unpost: service + 'unpostINB',
+  },
+  InboundOrders: {
+    qry: service + 'qryINO'
   }
 }

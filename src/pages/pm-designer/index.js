@@ -33,14 +33,28 @@ const Designer = () => {
     query: { data },
     labels,
     paginationParameters,
+    search,
+    clear,
     refetch,
     access,
     invalidate
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: ProductModelingRepository.Designer.page,
-    datasetId: ResourceIds.Designer
+    datasetId: ResourceIds.Designer,
+    search: {
+      searchFn: fetchWithSearch
+    }
   })
+
+  async function fetchWithSearch({ qry }) {
+    const response = await getRequest({
+      extension: ProductModelingRepository.Designer.snapshot,
+      parameters: `_filter=${qry}`
+    })
+
+    return response
+  }
 
   const columns = [
     {
@@ -89,16 +103,16 @@ const Designer = () => {
   return (
     <VertLayout>
       <Fixed>
-        <GridToolbar onAdd={add} maxAccess={access} />
+        <GridToolbar onAdd={add} maxAccess={access} onSearch={search} onSearchClear={clear} inputSearch={true} />
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
           paginationType='api'
           paginationParameters={paginationParameters}

@@ -41,7 +41,7 @@ const WindowToolbar = ({
 
   const getReportLayout = async () => {
     const reportLayoutRes = await getRequest({
-      extension: SystemRepository.ReportLayout,
+      extension: SystemRepository.ReportLayout.qry,
       parameters: `_resourceId=${resourceId}`
     })
 

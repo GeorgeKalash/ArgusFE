@@ -1,7 +1,7 @@
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import Typography from '@mui/material/Typography'
 import { AuthContext } from 'src/providers/AuthContext'
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from 'src/hooks/useAuth'
 import { Card, CardContent, Button, Grid, IconButton, Box, InputAdornment, CardMedia } from '@mui/material'
@@ -28,7 +28,7 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const theme = useTheme()
   const auth = useAuth()
-  const { companyName } = useContext(AuthContext)
+  const { companyName, setCompanyName, deployHost, validCompanyName } = useContext(AuthContext)
   const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
@@ -36,11 +36,13 @@ const LoginPage = () => {
     initialValues: {
       username: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+      accountId: '',
+      companyName: ''
     },
     validationSchema: yup.object({
       username: yup.string().required(),
-      password: yup.string().min(5, platformLabels.PassConf).required(),
+      password: yup.string().min(5, platformLabels?.PassConf).required(),
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {
@@ -124,141 +126,169 @@ const LoginPage = () => {
           LanguageId: languageId
         },
         data: bodyFormData
-      }).then(res => {})
+      })
     } catch (error) {
       stackError({ message: error.message })
     }
   }
 
+  useEffect(() => {
+    validation.setFieldValue('companyName', companyName || '')
+  }, [companyName])
+
   return (
-    Boolean(Object.keys(platformLabels)?.length) && (
-      <>
-        <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+    <>
+      <Box className='content-center' sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Card sx={{ zIndex: 0, width: '28rem', marginBottom: 10, marginTop: 'auto' }}>
+          <Box
+            sx={{
+              height: 60,
+              backgroundColor: theme.palette.primary.main,
+              p: 4,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <CardMedia
+              component='img'
+              image='/images/logos/ArgusLogo.png'
+              alt='ArgusERP'
+              sx={{
+                height: '100%',
+                maxWidth: '100%',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
+          <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
+            <Grid container spacing={5}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  name='companyName'
+                  value={validation.values.companyName}
+                  size='small'
+                  fullWidth
+                  readOnly={!deployHost ? true : validCompanyName}
+                  allowClear={deployHost}
+                  label={platformLabels?.CompanyName || 'Company Name'}
+                  onChange={validation.handleChange}
+                  onKeyDown={e => {
+                    if (e.key == 'Enter') e.target.blur()
+                  }}
+                  onBlur={
+                    deployHost
+                      ? e => {
+                          const value = e?.target?.value || ''
+                          setCompanyName(value)
+                        }
+                      : undefined
+                  }
+                  onClear={() => {
+                    setCompanyName('')
+                    validation.setFieldValue('companyName', '')
+                  }}
+                />
+              </Grid>
+
+              {validCompanyName && (
+                <>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='username'
+                      size='small'
+                      fullWidth
+                      label={platformLabels?.Username}
+                      value={validation.values.username}
+                      type='text'
+                      onChange={validation.handleChange}
+                      onClear={() => validation.setFieldValue('username', '')}
+                      error={validation.touched.username && Boolean(validation.errors.username)}
+                      helperText={validation.touched.username && validation.errors.username}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomTextField
+                      name='password'
+                      size='small'
+                      fullWidth
+                      label={platformLabels?.password}
+                      type={showPassword ? 'text' : 'password'}
+                      value={validation.values.password}
+                      onChange={validation.handleChange}
+                      error={validation.touched.password && validation.errors.password}
+                      helperText={validation.touched.password && validation.errors.password}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              onClick={() => setShowPassword(!showPassword)}
+                              onMouseDown={e => e.preventDefault()}
+                            >
+                              <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+
             <Box
               sx={{
-                height: 60,
-                backgroundColor: theme.palette.primary.main,
-                p: 4,
+                mb: 4,
+                mt: 4,
+                ml: 1,
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
               }}
             >
-              <CardMedia
-                component='img'
-                image='/images/logos/ArgusLogo.png'
-                alt='ArgusERP'
-                sx={{
-                  height: '100%',
-                  maxWidth: '100%',
-                  objectFit: 'contain'
-                }}
-              />
+              {validCompanyName && <LinkStyled href='/forget-password/reset'>{platformLabels?.ForgotPass}</LinkStyled>}
             </Box>
-            <CardContent sx={{ p: theme => `${theme.spacing(8, 9, 0)} !important` }} onKeyDown={handleKeyDown}>
-              <Grid container spacing={5}>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    readOnly
-                    name='companyName'
-                    value={companyName}
-                    size='small'
-                    fullWidth
-                    label={platformLabels.CompanyName}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='username'
-                    size='small'
-                    fullWidth
-                    label={platformLabels.Username}
-                    value={validation.values.username}
-                    type='text'
-                    onChange={validation.handleChange}
-                    onClear={() => validation.setFieldValue('username', '')}
-                    error={validation.touched.username && Boolean(validation.errors.username)}
-                    helperText={validation.touched.username && validation.errors.username}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomTextField
-                    name='password'
-                    size='small'
-                    fullWidth
-                    label={platformLabels.password}
-                    type={showPassword ? 'text' : 'password'}
-                    value={validation.values.password}
-                    onChange={validation.handleChange}
-                    error={validation.touched.password && validation.errors.password}
-                    helperText={validation.touched.password && validation.errors.password}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton
-                            edge='end'
-                            onClick={() => setShowPassword(!showPassword)}
-                            onMouseDown={e => e.preventDefault()}
-                          >
-                            <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} />
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Grid>
-              </Grid>
-              <Box
-                sx={{
-                  mb: 4,
-                  mt: 4,
-                  ml: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <LinkStyled href='/forget-password/reset'>{platformLabels.ForgotPass}</LinkStyled>
-              </Box>
+            {validCompanyName && (
               <Button
                 fullWidth
                 size='large'
                 type='submit'
                 variant='contained'
                 sx={{ mb: 7 }}
+                disabled={!validCompanyName}
                 onClick={validation.handleSubmit}
               >
-                {platformLabels.Login}
+                {platformLabels?.Login}
               </Button>
-            </CardContent>
-          </Card>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Language Selection Section */}
-          <Box sx={{ my: 5, display: 'flex', gap: 3, mt: 'auto' }}>
-            <Typography variant='body2'>{platformLabels.ArgusOfferedIn}</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
-              <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
-                English
-              </LinkStyled>
-              <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
-                Français
-              </LinkStyled>
-              <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
-                عربي
-              </LinkStyled>
-            </Box>
-          </Box>
-
-          {/* Footer Section */}
-          <Box component='footer' sx={{ mt: 'auto' }}>
-            © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+        {/* Language Selection Section */}
+        <Box sx={{ my: 5, display: 'flex', gap: 3, mt: 'auto' }}>
+          <Typography variant='body2'>{platformLabels?.ArgusOfferedIn}</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 5 }}>
+            <LinkStyled href='/pages/auth/login-en' sx={{ color: 'red' }}>
+              English
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-fr' sx={{ color: 'red' }}>
+              Français
+            </LinkStyled>
+            <LinkStyled href='/pages/auth/login-ar' sx={{ color: 'red' }}>
+              عربي
+            </LinkStyled>
           </Box>
         </Box>
-        <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
-      </>
-    )
+
+        {/* Footer Section */}
+        <Box component='footer' sx={{ mt: 'auto' }}>
+          © {new Date().getFullYear()} Argus. All rights reserved. 3.1.8 API: 2.8.8
+        </Box>
+      </Box>
+      <ErrorWindow open={errorMessage} onClose={() => setErrorMessage(null)} message={errorMessage} />
+    </>
   )
 }
 LoginPage.getLayout = page => <BlankLayout>{page}</BlankLayout>

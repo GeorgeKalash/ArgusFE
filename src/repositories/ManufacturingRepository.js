@@ -203,7 +203,8 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotDMG',
     post: service + 'postDMG',
     get2: service + 'get2DMG',
-    set2: service + 'set2DMG'
+    set2: service + 'set2DMG',
+    preview: service + 'previewDMG'
   },
   JobCategory: {
     qry: service + 'qryJCA'
@@ -359,13 +360,16 @@ export const ManufacturingRepository = {
     snapshot: service + 'snapshotTFR',
     post: service + 'postTFR',
     close: service + 'closeTFR',
-    reopen: service + 'reopenTFR'
+    reopen: service + 'reopenTFR',
+    qry: service + 'qryTFR'
   },
   JobWorkCenter: {
     qry: service + 'qryJWC',
     close: service + 'closeJWC',
     reopen: service + 'reopenJWC',
-    get: service + 'getJWC'
+    get: service + 'getJWC',
+    snapshot: service + 'snapshotJWC',
+    verify: service + 'verifyJWC'
   },
   WorkCenterConsumption: {
     page: service + 'pageCON',
@@ -401,9 +405,6 @@ export const ManufacturingRepository = {
   RefreshPoItem: {
     refresh: service + 'refreshPOI'
   },
-  DamageReturnRawMaterial: {
-    preview: service + 'previewDMRM'
-  },
   WorkCenterTransferMap: {
     qry: service + 'qryWCTM',
     set2: service + 'set2WCTM'
@@ -421,5 +422,52 @@ export const ManufacturingRepository = {
   },
   ProductionOrderFromSaleOrder: {
     gen: service + 'generatePOFromSO'
+  },
+  BatchTransfer: {
+    page: service + 'pageBTFR',
+    set2: service + 'set2BTFR',
+    del: service + 'delBTFR',
+    snapshot: service + 'snapshotBTFR',
+    get: service + 'getBTFR',
+    post: service + 'postBTFR',
+    unpost: service + 'unpostBTFR'
+  },
+  BatchTransferJob: {
+    qry: service + 'qryBTFJ'
+  },
+  Disposal: {
+    page: service + 'pageDIS',
+    snapshot: service + 'snapshotDIS',
+    get: service + 'getDIS',
+    set2: service + 'set2DIS',
+    del: service + 'delDIS'
+  },
+  DisposalItem: {
+    qry: service + 'qryDII'
+  },
+  DisposalSerial: {
+    qry: service + 'qryDISRL'
+  },
+  MetalSetting: {
+    page: service + 'pageMTS',
+    set: service + 'setMTS',
+    get: service + 'getMTS',
+    del: service + 'delMTS'
+  },
+  DamageReason: {
+    qry: service + 'qryDRS',
+    page: service + 'pageDRS',
+    set: service + 'setDRS',
+    get: service + 'getDRS',
+    del: service + 'delDRS',
+    snapshot: service + 'snapshotDRS'
+  },
+  DamageCategory: {
+    qry: service + 'qryDCA',
+    page: service + 'pageDCA',
+    set: service + 'setDCA',
+    get: service + 'getDCA',
+    del: service + 'delDCA',
+    snapshot: service + 'snapshotDCA'
   }
 }

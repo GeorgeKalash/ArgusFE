@@ -55,6 +55,29 @@ const Damages = () => {
       flex: 1
     },
     {
+      field: 'damagedQty',
+      headerName: labels.damagedQty,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'damagedPcs',
+      headerName: labels.damagedPcs,
+      flex: 1,
+      type: 'number'
+    },
+    {
+      field: 'reasonRef',
+      headerName: labels.damageReason,
+      flex: 1
+    },
+    {
+      field: 'routingSeqNo',
+      headerName: labels.routingSeqNo,
+      flex: 1,
+      type: 'number'
+    },
+    {
       field: 'statusName',
       headerName: labels.status,
       flex: 1
@@ -105,8 +128,8 @@ const Damages = () => {
       props: {
         recordId
       },
-      width: 850,
-      height: 680,
+      width: 1150,
+      height: 580,
       title: labels.damage
     })
   }

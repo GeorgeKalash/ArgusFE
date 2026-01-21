@@ -25,7 +25,7 @@ import { Grow } from './Layouts/Grow'
 import { Fixed } from './Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
-import { getFromDB, saveToDB, deleteRowDB } from 'src/lib/indexDB'
+import { getFromDB, saveToDB, deleteFromDB } from 'src/lib/indexDB'
 import StrictConfirmation from './StrictConfirmation'
 
 const Table = ({
@@ -79,7 +79,8 @@ const Table = ({
       if (col.type === 'date') {
         return {
           ...col,
-          valueGetter: ({ data }) => formatDateDefault(data?.[col.field]),
+          valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
+          cellRenderer: params => params?.value && formatDateDefault(`/Date(${params?.value})/`),
           comparator: dateComparator,
           sortable: !disableSorting
         }
@@ -87,7 +88,8 @@ const Table = ({
       if (col.type === 'dateTime') {
         return {
           ...col,
-          valueGetter: ({ data }) => data?.[col.field] && formatDateTimeDefault(data?.[col.field], col?.dateFormat),
+          valueGetter: ({ data }) => parseDateValue(data?.[col.field]),
+          cellRenderer: params => params?.value && formatDateTimeDefault(`/Date(${params?.value})/`, col?.dateFormat),
           comparator: dateComparator,
           sortable: !disableSorting
         }
@@ -164,33 +166,22 @@ const Table = ({
     })
 
   function dateComparator(date1, date2) {
-    var date1Number = _dateTimeToNum(date1)
-    var date2Number = _dateTimeToNum(date2)
-    if (date1Number === null && date2Number === null) return 0
-    if (date1Number === null) return -1
-    if (date2Number === null) return 1
+    if (date1 == null && date2 == null) return 0
+    if (date1 == null) return -1
+    if (date2 == null) return 1
 
-    return date1Number - date2Number
+    return date1 - date2
   }
 
-  function _dateTimeToNum(dateTime) {
-    if (!dateTime || dateTime.length < 10) return null
-    let [date, time = '00:00', meridian] = dateTime.split(/[\s:]+/)
-    let day = date.substring(0, 2)
-    let month = date.substring(3, 5)
-    let year = date.substring(6, 10)
-    let hours = 0
-    let minutes = 0
-    if (time.length === 2) {
-      hours = parseInt(time, 10)
-      minutes = parseInt(dateTime.substring(14, 16), 10) || 0
-      if (meridian === 'PM' && hours !== 12) hours += 12
-      else if (meridian === 'AM' && hours === 12) hours = 0
+  function parseDateValue(value) {
+    if (!value) return null
+    if (typeof value === 'string') {
+      const match = value.match(/\d+/)
+
+      return match ? parseInt(match[0], 10) : null
     }
 
-    return (
-      parseInt(year, 10) * 100000000 + parseInt(month, 10) * 1000000 + parseInt(day, 10) * 10000 + hours * 100 + minutes
-    )
+    return value instanceof Date ? value.getTime() : value
   }
 
   const shouldRemoveColumn = column => {
@@ -530,7 +521,7 @@ const Table = ({
           height: '100%'
         }}
         checked={params.value}
-        disabled={props?.disable && props?.disable(params?.data)}
+        disabled={props?.disable && props?.disable(params?.data) || props?.disableCheckBox}
         onChange={e => {
           e.preventDefault()
           const rowIndex = params.node.rowIndex
@@ -726,6 +717,7 @@ const Table = ({
               showSelectAll && (
                 <Checkbox
                   checked={checked}
+                  disabled={props?.disableCheckBox}
                   onChange={e => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -883,7 +875,7 @@ const Table = ({
   }
 
   const onReset = async () => {
-    await deleteRowDB(storeName, tableName)
+    await deleteFromDB(storeName, tableName)
     invalidate()
   }
 
