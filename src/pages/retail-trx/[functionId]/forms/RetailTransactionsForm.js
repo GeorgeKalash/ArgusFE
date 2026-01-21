@@ -73,6 +73,7 @@ export default function RetailTransactionsForm({
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -296,7 +297,7 @@ export default function RetailTransactionsForm({
     return res?.list
   }
 
-  async function barcodeSkuSelection(update, row) {
+  async function barcodeSkuSelection(update, row, addRow) {
     const itemRetail = await getItemRetail(row?.itemId)
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId)
@@ -329,7 +330,8 @@ export default function RetailTransactionsForm({
       taxId: row?.taxId || formik.values.header.taxId,
       taxDetails: taxDetailsInfo || null
     }
-    update(result)
+    
+    jumpToNextLine ? await addRow(result) : update(result)
 
     if (result?.basePrice) {
       const basePriceResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
@@ -713,15 +715,16 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
         if (!newRow?.barcode) return
-        await barcodeSkuSelection(update, newRow)
+        await barcodeSkuSelection(update, newRow, addRow)
       }
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       flex: 2,
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
@@ -745,10 +748,10 @@ export default function RetailTransactionsForm({
           displayFieldWidth: 3
         })
       },
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
         if (!formik.values.disableSKULookup) {
           if (!newRow.itemId) return
-          await barcodeSkuSelection(update, newRow)
+          await barcodeSkuSelection(update, newRow, addRow)
         } else {
           if (!newRow?.sku) {
             update({
@@ -782,7 +785,7 @@ export default function RetailTransactionsForm({
             taxId: skuInfo?.record?.taxId,
             priceType: skuInfo?.record?.priceType,
             qty: newRow?.qty || 0
-          })
+          }, addRow)
         }
       }
     },
