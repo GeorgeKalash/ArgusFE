@@ -13,19 +13,21 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GLSettings = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   useEffect(() => {
     getDataResult()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'GLACSegments' ||
         obj.key === 'GLACSeg0' ||
@@ -156,7 +158,7 @@ const GLSettings = () => {
       record: JSON.stringify({ sysDefaults: dataToPost })
     }).then(res => {
       toast.success(platformLabels.Edited)
-      updateDefaults(dataToPost)
+      updateSystemDefaults(dataToPost)
     })
   }
 

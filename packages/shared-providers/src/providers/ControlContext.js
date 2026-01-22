@@ -18,9 +18,6 @@ const ControlProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
   const { user, apiUrl, languageId } = useContext(AuthContext)
   const userData = window.sessionStorage.getItem('userData')
-  const [defaultsData, setDefaultsData] = useState([])
-  const [userDefaultsData, setUserDefaultsData] = useState([])
-  const [systemChecks, setSystemChecks] = useState([])
   const [exportFormat, setExportFormat] = useState([])
   const [loading, setLoading] = useState(false)
   const errorModel = useError()
@@ -44,53 +41,10 @@ const ControlProvider = ({ children }) => {
     if (errorModel) await errorModel.stack(props)
   }
 
-  useEffect(() => {
-    if (userData && user?.userId) {
-      getDefaults(setDefaultsData)
-      getUserDefaults(setUserDefaultsData)
-      getSystemChecks(setSystemChecks)
-      getExportFormat()
-    }
+   useEffect(() => {
+    if (userData && user?.userId) getExportFormat()
   }, [userData, user?.userId])
 
-  const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')?.value
-
-  useEffect(() => {
-    ;(async function () {
-      if (countryId) {
-        const res = await getRequest({
-          extension: SystemRepository.Country.get,
-          parameters: `_recordId=${countryId}`
-        })
-
-        const newItem = { key: 'countryRef', value: res?.record?.reference }
-
-        setDefaultsData(prevState => ({
-          ...prevState,
-          list: [...prevState.list, newItem],
-          count: prevState.list.length + 1
-        }))
-      }
-    })()
-  }, [countryId])
-
-  const getDefaults = callback => {
-    getRequest({
-      extension: SystemRepository.Defaults.qry,
-      parameters: `_filter=`
-    }).then(res => {
-      callback(res)
-    })
-  }
-
-  const getSystemChecks = callback => {
-    getRequest({
-      extension: SystemRepository.SystemChecks.qry,
-      parameters:`_scope=1`
-    }).then(res => {
-      callback(res.list)
-    })
-  }
 
   const getExportFormat = async () => {
     const res = await getRequest({
@@ -101,30 +55,6 @@ const ControlProvider = ({ children }) => {
     if (res?.list?.length) setExportFormat(res?.list || [])
   }
 
-  const updateDefaults = data => {
-    const updatedDefaultsData = [...defaultsData.list, ...data].reduce((acc, obj) => {
-      const existing = acc.find(item => item.key === obj.key)
-      if (existing) {
-        existing.value = obj.value
-      } else {
-        acc.push({ ...obj, value: obj.value })
-      }
-
-      return acc
-    }, [])
-    setDefaultsData({ list: updatedDefaultsData })
-  }
-
-  const getUserDefaults = callback => {
-    if(!user?.userId) return
-
-    getRequest({
-      extension: SystemRepository.UserDefaults.qry,
-      parameters: `_userId=` + user?.userId
-    }).then(res => {
-      callback(res)
-    })
-  }
 
   useEffect(() => {
     getPlatformLabels(ResourceIds.Common, setApiPlatformLabels)
@@ -214,12 +144,6 @@ const ControlProvider = ({ children }) => {
     getLabels,
     getAccess,
     platformLabels,
-    defaultsData,
-    setDefaultsData,
-    updateDefaults,
-    userDefaultsData,
-    setUserDefaultsData,
-    systemChecks,
     exportFormat
   }
 

@@ -26,6 +26,7 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BalanceTransferForm({
   labels,
@@ -37,7 +38,8 @@ export default function BalanceTransferForm({
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -50,8 +52,8 @@ export default function BalanceTransferForm({
     enabled: !recordId
   })
 
-  const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
-  const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
+  const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+  const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')?.value
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId, reference: documentType?.reference },

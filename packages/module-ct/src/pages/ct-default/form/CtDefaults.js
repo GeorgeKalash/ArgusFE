@@ -15,10 +15,12 @@ import { CTCLRepository } from '@argus/repositories/src/repositories/CTCLReposit
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const CtDefaults = ({ _labels, access }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const arrayAllow = [
     'ct-nra-individual',
@@ -69,19 +71,19 @@ const CtDefaults = ({ _labels, access }) => {
         extension: CurrencyTradingSettingsRepository.Defaults.set2,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Updated)
     }
   })
 
   useEffect(() => {
     getDataResult()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const getDataResult = () => {
     const myObject = {}
 
-    defaultsData.list.forEach(obj => {
+    systemDefaults.list.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         const parsedValue = obj.value ? parseInt(obj.value, 10) : null
         if (formik.values[obj.key] !== parsedValue) {
