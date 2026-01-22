@@ -678,11 +678,7 @@ export default function RetailTransactionsForm({
 
   const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
   const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
-
-  const totalWeight = reCal
-    ? _footerSummary?.totalWeight?.toFixed(2)
-    : parseFloat(formik.values?.header?.weight).toFixed(2) || 0
-
+  const totalWeight = _footerSummary?.totalWeight?.toFixed(2)
   const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
 
   const vatAmount = reCal
