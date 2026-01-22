@@ -327,7 +327,7 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: row?.taxId || formik.values.header.taxId,
+      taxId: formik.values.header.isVatable ? row?.taxId : null,
       taxDetails: taxDetailsInfo || null
     }
     update(result)
@@ -617,7 +617,7 @@ export default function RetailTransactionsForm({
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
+    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = newRow.taxDetails
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -771,7 +771,12 @@ export default function RetailTransactionsForm({
             itemId: skuInfo?.record?.recordId,
             sku: skuInfo?.record?.sku,
             itemName: skuInfo?.record?.name,
-            taxId: skuInfo?.record?.taxId,
+            taxId: formik.values.header.taxId
+              ? skuInfo?.record?.taxId
+                ? formik.values.header.taxId
+                : null
+              : skuInfo?.record?.taxId,
+
             priceType: skuInfo?.record?.priceType,
             qty: newRow?.qty || 0
           })
