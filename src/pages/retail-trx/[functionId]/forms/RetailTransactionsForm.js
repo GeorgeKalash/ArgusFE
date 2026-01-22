@@ -614,7 +614,7 @@ export default function RetailTransactionsForm({
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
       totalWeightPerG: newRow?.TotPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
@@ -628,7 +628,7 @@ export default function RetailTransactionsForm({
       qty: parseFloat(itemPriceRow?.qty),
       weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice),
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
