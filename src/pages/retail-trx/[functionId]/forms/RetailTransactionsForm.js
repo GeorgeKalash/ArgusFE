@@ -328,7 +328,7 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: row?.taxId || formik.values.header.taxId,
+      taxId: formik.values.header.isVatable ? row?.taxId : null,
       taxDetails: taxDetailsInfo || null
     }
     let finalResult = result
@@ -337,10 +337,10 @@ export default function RetailTransactionsForm({
       finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
       if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
-    
+
     if (!jumpToNextLine) return update(finalResult)
 
-    if (formik.values.disableSKULookup) 
+    if (formik.values.disableSKULookup)
       return addRow({
         fieldName: 'sku',
         changes: finalResult
@@ -620,7 +620,7 @@ export default function RetailTransactionsForm({
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
+    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = newRow.taxDetails
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -708,7 +708,7 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!newRow?.barcode) return
         await barcodeSkuSelection(update, newRow, addRow)
       }
@@ -741,7 +741,7 @@ export default function RetailTransactionsForm({
           displayFieldWidth: 3
         })
       },
-      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
           update({
             ...formik.initialValues.items[0],
@@ -754,7 +754,7 @@ export default function RetailTransactionsForm({
 
           return await barcodeSkuSelection(update, newRow, addRow)
         }
-        
+
         if (!newRow?.sku) return resetRow()
 
         const skuInfo = await getRequest({
@@ -765,7 +765,7 @@ export default function RetailTransactionsForm({
         if (!skuInfo?.record) {
           resetRow()
           stackError({ message: labels.invalidSKU })
-          
+
           return
         }
 
@@ -774,12 +774,16 @@ export default function RetailTransactionsForm({
           itemId: skuInfo.record.recordId,
           sku: skuInfo.record.sku,
           itemName: skuInfo.record.name,
-          taxId: skuInfo.record.taxId,
+          taxId: formik.values.header.taxId
+            ? skuInfo?.record?.taxId
+              ? formik.values.header.taxId
+              : null
+            : skuInfo?.record?.taxId,
           priceType: skuInfo.record.priceType,
           qty: newRow.qty || 0
         }
 
-        await barcodeSkuSelection(update, rowData, addRow)  
+        await barcodeSkuSelection(update, rowData, addRow)
       }
     },
     {
