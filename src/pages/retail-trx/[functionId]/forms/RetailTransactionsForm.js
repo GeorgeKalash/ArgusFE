@@ -330,22 +330,23 @@ export default function RetailTransactionsForm({
       taxId: row?.taxId || formik.values.header.taxId,
       taxDetails: taxDetailsInfo || null
     }
-    
-    jumpToNextLine ? await addRow(result) : update(result)
-
-    if (result?.basePrice) {
-      const basePriceResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
-      update(basePriceResult)
-    }
+    let finalResult = result
+    if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
     if (result?.unitPrice) {
-      const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
-      update(result2)
-
-      if (row?.qty > 0) {
-        const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
-        update(result3)
-      }
+      finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+      if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
+    
+    if (!jumpToNextLine) return update(finalResult)
+
+    if (formik.values.disableSKULookup) 
+      return addRow({
+        fieldName: 'sku',
+        changes: finalResult
+      })
+
+    update(finalResult)
+    addRow()
   }
 
   async function getItemRetail(itemId) {
@@ -749,44 +750,44 @@ export default function RetailTransactionsForm({
         })
       },
       async onChange({ row: { update, newRow, oldRow, addRow  } }) {
-        if (!formik.values.disableSKULookup) {
-          if (!newRow.itemId) return
-          await barcodeSkuSelection(update, newRow, addRow)
-        } else {
-          if (!newRow?.sku) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-
-            return
-          }
-
-          const skuInfo = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${newRow.sku}`
+        const resetRow = () => {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
           })
-          if (!skuInfo.record) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-            stackError({
-              message: labels.invalidSKU
-            })
-
-            return
-          }
-          await barcodeSkuSelection(update, {
-            id: newRow?.id,
-            itemId: skuInfo?.record?.recordId,
-            sku: skuInfo?.record?.sku,
-            itemName: skuInfo?.record?.name,
-            taxId: skuInfo?.record?.taxId,
-            priceType: skuInfo?.record?.priceType,
-            qty: newRow?.qty || 0
-          }, addRow)
         }
+
+        if (!formik.values.disableSKULookup) {
+          if (!newRow.itemId) return resetRow()
+
+          return await barcodeSkuSelection(update, newRow, addRow)
+        }
+        
+        if (!newRow?.sku) return resetRow()
+
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        if (!skuInfo?.record) {
+          resetRow()
+          stackError({ message: labels.invalidSKU })
+          
+          return
+        }
+
+        const rowData = {
+          id: newRow.id,
+          itemId: skuInfo.record.recordId,
+          sku: skuInfo.record.sku,
+          itemName: skuInfo.record.name,
+          taxId: skuInfo.record.taxId,
+          priceType: skuInfo.record.priceType,
+          qty: newRow.qty || 0
+        }
+
+        await barcodeSkuSelection(update, rowData, addRow)  
       }
     },
     {
