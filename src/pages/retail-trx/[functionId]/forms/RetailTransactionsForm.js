@@ -315,6 +315,7 @@ export default function RetailTransactionsForm({
       metalId: itemPhysical?.metalId || null,
       weight: itemPhysical?.weight || 0,
       volume: itemPhysical?.volume || 0,
+      baseLaborPrice: itemConvertPrice?.baseLaborPrice || 0,
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
       priceType: itemConvertPrice?.priceType,
