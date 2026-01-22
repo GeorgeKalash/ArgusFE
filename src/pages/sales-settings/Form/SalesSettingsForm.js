@@ -21,7 +21,7 @@ import { DefaultsContext } from 'src/providers/DefaultsContext'
 export default function SalesSettingsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { systemDefaults } = useContext(DefaultsContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const arrayAllow = [
     'plId',
@@ -80,14 +80,14 @@ export default function SalesSettingsForm({ _labels, access }) {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-
+      updateSystemDefaults(data)
       if (response) toast.success(platformLabels.Edited)
     }
   })
 
   useEffect(() => {
     const mapValuesToMyObject = obj => {
-      switch (obj.value?.toLowerCase()) {
+      switch (String(obj?.value)?.toLowerCase()) {
         case 'true':
           return true
         case 'false':
