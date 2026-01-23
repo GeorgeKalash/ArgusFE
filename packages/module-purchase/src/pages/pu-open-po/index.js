@@ -24,10 +24,12 @@ import { PurchaseRepository } from '@argus/repositories/src/repositories/Purchas
 import { ReportPuGeneratorRepository } from '@argus/repositories/src/repositories/ReportPuGeneratorRepository'
 import ShipmentsForm from '../shipments/forms/ShipmentsForm'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const OpenPurchaseOrder = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -35,7 +37,7 @@ const OpenPurchaseOrder = () => {
     datasetId: ResourceIds.OpenPOs
   })
 
-  const defaultVat = defaultsData?.list?.find(({ key }) => key === 'POSHPVarPct')
+  const defaultVat = systemDefaults?.list?.find(({ key }) => key === 'POSHPVarPct')
 
   const { formik } = useForm({
     maxAccess: access,

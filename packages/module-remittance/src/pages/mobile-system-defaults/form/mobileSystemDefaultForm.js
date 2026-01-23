@@ -9,15 +9,15 @@ import toast from 'react-hot-toast'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
-
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
-import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MobileSystem() {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.MobileSystemDefaults
@@ -42,17 +42,17 @@ export default function MobileSystem() {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Updated)
     }
   })
 
   useEffect(() => {
     loadDefaults()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const loadDefaults = () => {
-    if (!defaultsData?.list) return
+    if (!systemDefaults?.list) return
 
     const fetchedValues = {}
 
@@ -65,7 +65,7 @@ export default function MobileSystem() {
       'smsMobileProviderId'
     ]
 
-    defaultsData.list
+    systemDefaults.list
       .filter(obj => keysToLoad.includes(obj.key))
       .forEach(obj => {
         const val = obj.value

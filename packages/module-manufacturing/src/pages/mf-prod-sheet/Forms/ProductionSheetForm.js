@@ -24,10 +24,12 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ProductionSheetQueue from './ProductionSheetQueue'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ProductionSheetForm({ labels, maxAccess: access, recordId, plantId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -45,7 +47,7 @@ export default function ProductionSheetForm({ labels, maxAccess: access, recordI
   }, [])
 
   const getDataResult = () => {
-    const site = defaultsData?.list?.find(obj => {
+    const site = systemDefaults?.list?.find(obj => {
       return obj.key === 'de_siteId'
     })
 

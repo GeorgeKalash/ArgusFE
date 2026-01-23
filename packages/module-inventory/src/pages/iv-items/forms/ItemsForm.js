@@ -25,9 +25,11 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { SCRepository } from '@argus/repositories/src/repositories/SCRepository'
 import PrintConfirmationDialog from './PrintConfirmationDialog'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ItemsForm({ labels, maxAccess: access, setStore, store, setFormikInitial, window }) {
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [showLotCategories, setShowLotCategories] = useState(false)
   const [showSerialProfiles, setShowSerialProfiles] = useState(false)
   const { recordId } = store
@@ -36,8 +38,8 @@ export default function ItemsForm({ labels, maxAccess: access, setStore, store, 
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
-  const currencyId = defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value
-  const plId = defaultsData?.list?.find(({ key }) => key === 'plId')?.value
+  const currencyId = systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value
+  const plId = systemDefaults?.list?.find(({ key }) => key === 'plId')?.value
 
   const invalidate = useInvalidate({
     endpointId: InventoryRepository.Items.qry

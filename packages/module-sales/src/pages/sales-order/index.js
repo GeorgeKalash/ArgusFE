@@ -15,10 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import SalesOrderForm from '@argus/shared-ui/src/components/Shared/Forms/SalesOrderForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesOrder = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -131,7 +133,7 @@ const SalesOrder = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value)
   }

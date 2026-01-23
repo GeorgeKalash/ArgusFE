@@ -16,10 +16,12 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function SalesSettingsForm({ _labels, access }) {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const arrayAllow = [
     'plId',
@@ -95,7 +97,7 @@ export default function SalesSettingsForm({ _labels, access }) {
       }
     }
 
-    const filteredList = defaultsData?.list?.filter(obj => arrayAllow.includes(obj.key))
+    const filteredList = systemDefaults?.list?.filter(obj => arrayAllow.includes(obj.key))
 
     const myObject = filteredList?.reduce((acc, obj) => {
       acc[obj.key] = mapValuesToMyObject(obj)

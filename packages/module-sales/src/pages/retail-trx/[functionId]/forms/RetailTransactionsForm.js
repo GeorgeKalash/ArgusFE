@@ -1,6 +1,6 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -51,6 +51,7 @@ import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function RetailTransactionsForm({
   labels,
@@ -66,7 +67,8 @@ export default function RetailTransactionsForm({
   const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
   const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
@@ -536,7 +538,7 @@ export default function RetailTransactionsForm({
         }
       })
     )
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     formik.setValues({
       recordId: retailTrxHeader.recordId || null,
@@ -1010,8 +1012,8 @@ export default function RetailTransactionsForm({
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
-    const defaultRateType = defaultsData?.list?.find(({ key }) => key === 'mc_defaultRTSA')
+    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultRateType = systemDefaults?.list?.find(({ key }) => key === 'mc_defaultRTSA')
     formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
     if (!defaultRateType?.value) {
       stackError({
@@ -1091,7 +1093,7 @@ export default function RetailTransactionsForm({
     }
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
-    const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
     const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)

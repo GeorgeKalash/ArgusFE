@@ -23,10 +23,12 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PurityAdjForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [allMetals, setAllMetals] = useState([])
   const [recalc, setRecalc] = useState(false)
   const filteredItems = useRef()
@@ -43,9 +45,9 @@ export default function PurityAdjForm({ labels, access, recordId, window }) {
     endpointId: FoundryRepository.PurityAdjustment.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
-  const baseSalesMetalId = parseInt(defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value) || null
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const baseSalesMetalId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'baseSalesMetalId')?.value) || null
 
   const conditions = {
     sku: row => row?.sku,

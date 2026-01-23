@@ -30,10 +30,12 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function ShipmentsForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const unpostedOrders = useRef([])
   const skuStore = useRef([])
@@ -58,9 +60,9 @@ export default function ShipmentsForm({ recordId, window }) {
     objectName: 'header'
   })
 
-  const defplantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value) || null
-  const defSiteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value) || null
-  const marginDefault = parseInt(defaultsData?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
+  const defplantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value) || null
+  const defSiteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value) || null
+  const marginDefault = parseInt(systemDefaults?.list?.find(obj => obj.key === 'POSHPVarPct')?.value) || 0
 
   const { formik } = useForm({
     documentType: { key: 'header.dtId', value: documentType?.dtId, reference: documentType?.reference },
