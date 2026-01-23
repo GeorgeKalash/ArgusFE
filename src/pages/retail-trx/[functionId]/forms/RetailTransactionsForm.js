@@ -51,6 +51,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import SkuForm from 'src/pages/iv-materials-tfr/Form/SkuForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -172,7 +173,8 @@ export default function RetailTransactionsForm({
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null
+        taxId_amount: null,
+        details: false
       }
     ],
     cash: [
@@ -781,12 +783,37 @@ export default function RetailTransactionsForm({
               : null
             : skuInfo?.record?.taxId,
           priceType: skuInfo.record.priceType,
-          qty: newRow.qty || 0
+          qty: newRow.qty || 0,
+          details: true
         }
 
         await barcodeSkuSelection(update, rowData, addRow)
       }
     },
+        {
+          component: 'button',
+          name: 'details',
+          props: {
+            imgSrc: '/images/buttonsIcons/popup-black.png'
+          },
+          label: labels.details,
+          onClick: (e, row, update, newRow) => {
+            if (row?.itemId) {
+              stack({
+                Component: SkuForm,
+                props: {
+                  labels,
+                  maxAccess,
+                  itemId: row?.itemId || null,
+                  plId: formik.values?.header?.plId || null
+                },
+                width: 700,
+                height: 500,
+                title: labels.transfer
+              })
+            }
+          }
+        },
     {
       component: 'textfield',
       label: labels.itemName,
@@ -1454,7 +1481,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
@@ -1718,7 +1745,13 @@ export default function RetailTransactionsForm({
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('items', value)
+              const rowData = value?.map(item => {
+                return {
+                  ...item,
+                  details: false
+                }
+              })
+              formik.setFieldValue('items', rowData)
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}
