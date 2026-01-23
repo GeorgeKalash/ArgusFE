@@ -8,18 +8,17 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import axios from 'axios'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PopupDialog from '@argus/shared-ui/src/components/Shared/PopupDialog'
 import * as yup from 'yup'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function POSForm({ labels, data, maxAccess, amount }) {
   const { getRequestFullEndPoint, getRequest } = useContext(RequestsContext)
-  const { userDefaultsData } = useContext(ControlContext)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const { userDefaults } = useContext(DefaultsContext)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
   const [isSubmitting, setSubmitting] = useState(false)
   const { stack } = useWindow()
   const { stack: stackError } = useError()

@@ -26,17 +26,19 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import WCConsumpForm from '@argus/shared-ui/src/components/Shared/Forms/WCConsumpForm'
 import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function IRGenerateConsumption() {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateConsumption
   })
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const conditions = {
     transferNow: row => row?.transferNow > 0,
