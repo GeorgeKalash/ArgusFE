@@ -51,6 +51,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import SkuForm from 'src/pages/iv-materials-tfr/Form/SkuForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -172,7 +173,8 @@ export default function RetailTransactionsForm({
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null
+        taxId_amount: null,
+        details: false
       }
     ],
     cash: [
@@ -316,6 +318,7 @@ export default function RetailTransactionsForm({
       metalId: itemPhysical?.metalId || null,
       weight: itemPhysical?.weight || 0,
       volume: itemPhysical?.volume || 0,
+      baseLaborPrice: itemConvertPrice?.baseLaborPrice || 0,
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
       priceType: itemConvertPrice?.priceType,
@@ -327,7 +330,7 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: row?.taxId || formik.values.header.taxId,
+      taxId: formik.values.header.isVatable ? row?.taxId : null,
       taxDetails: taxDetailsInfo || null
     }
     let finalResult = result
@@ -336,10 +339,10 @@ export default function RetailTransactionsForm({
       finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
       if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
-    
+
     if (!jumpToNextLine) return update(finalResult)
 
-    if (formik.values.disableSKULookup) 
+    if (formik.values.disableSKULookup)
       return addRow({
         fieldName: 'sku',
         changes: finalResult
@@ -613,13 +616,13 @@ export default function RetailTransactionsForm({
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
       totalWeightPerG: newRow?.TotPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
+    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = newRow.taxDetails
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -627,7 +630,7 @@ export default function RetailTransactionsForm({
       qty: parseFloat(itemPriceRow?.qty),
       weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice),
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -640,6 +643,7 @@ export default function RetailTransactionsForm({
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
       weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(5) : 0,
       unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
@@ -681,16 +685,7 @@ export default function RetailTransactionsForm({
 
   const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
   const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
-
-  const totalWeight = reCal
-    ? formik.values.items.reduce((curSum, row) => {
-        const curValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
-        const result = curSum + curValue
-
-        return (parseFloat(result) || 0).toFixed(2)
-      }, 0)
-    : parseFloat(formik.values?.header?.weight || 0).toFixed(2)
-
+  const totalWeight = _footerSummary?.totalWeight?.toFixed(2)
   const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
 
   const vatAmount = reCal
@@ -716,7 +711,7 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!newRow?.barcode) return
         await barcodeSkuSelection(update, newRow, addRow)
       }
@@ -749,7 +744,7 @@ export default function RetailTransactionsForm({
           displayFieldWidth: 3
         })
       },
-      async onChange({ row: { update, newRow, oldRow, addRow  } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         const resetRow = () => {
           update({
             ...formik.initialValues.items[0],
@@ -762,7 +757,7 @@ export default function RetailTransactionsForm({
 
           return await barcodeSkuSelection(update, newRow, addRow)
         }
-        
+
         if (!newRow?.sku) return resetRow()
 
         const skuInfo = await getRequest({
@@ -773,7 +768,7 @@ export default function RetailTransactionsForm({
         if (!skuInfo?.record) {
           resetRow()
           stackError({ message: labels.invalidSKU })
-          
+
           return
         }
 
@@ -782,14 +777,43 @@ export default function RetailTransactionsForm({
           itemId: skuInfo.record.recordId,
           sku: skuInfo.record.sku,
           itemName: skuInfo.record.name,
-          taxId: skuInfo.record.taxId,
+          taxId: formik.values.header.taxId
+            ? skuInfo?.record?.taxId
+              ? formik.values.header.taxId
+              : null
+            : skuInfo?.record?.taxId,
           priceType: skuInfo.record.priceType,
-          qty: newRow.qty || 0
+          qty: newRow.qty || 0,
+          details: true
         }
 
-        await barcodeSkuSelection(update, rowData, addRow)  
+        await barcodeSkuSelection(update, rowData, addRow)
       }
     },
+        {
+          component: 'button',
+          name: 'details',
+          props: {
+            imgSrc: '/images/buttonsIcons/popup-black.png'
+          },
+          label: labels.details,
+          onClick: (e, row, update, newRow) => {
+            if (row?.itemId) {
+              stack({
+                Component: SkuForm,
+                props: {
+                  labels,
+                  maxAccess,
+                  itemId: row?.itemId || null,
+                  plId: formik.values?.header?.plId || null
+                },
+                width: 700,
+                height: 500,
+                title: labels.transfer
+              })
+            }
+          }
+        },
     {
       component: 'textfield',
       label: labels.itemName,
@@ -1457,7 +1481,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
@@ -1721,7 +1745,13 @@ export default function RetailTransactionsForm({
         <Grow>
           <DataGrid
             onChange={(value, action) => {
-              formik.setFieldValue('items', value)
+              const rowData = value?.map(item => {
+                return {
+                  ...item,
+                  details: false
+                }
+              })
+              formik.setFieldValue('items', rowData)
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}
