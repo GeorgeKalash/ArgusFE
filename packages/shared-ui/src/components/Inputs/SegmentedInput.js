@@ -1,11 +1,13 @@
 import InputMask from 'react-input-mask'
-import { FormControl, InputLabel, OutlinedInput } from '@mui/material'
+import { TextField } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import inputs from './Inputs.module.css'
 
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')
   const { defaultsData } = useContext(ControlContext)
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleInputChange = event => {
     if (!readOnly) {
@@ -50,31 +52,41 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
   }, [value])
 
   return (
-    <FormControl variant='outlined' fullWidth error={error} size='small' required={required}>
-      <InputLabel
-        htmlFor={name}
-        size='small'
-        sx={{ background: 'white', paddingInline: '5px', transform: 'translate(9px, -9px) scale(0.75)' }}
-      >
-        {label}
-      </InputLabel>
-      <OutlinedInput
-        id={name}
-        value={value}
-        onChange={handleInputChange}
-        label={label}
-        notched={false}
-        inputComponent={InputMask}
-        inputProps={{
+    <TextField
+      id={name}
+      name={name}
+      variant='outlined'
+      fullWidth
+      size='small'
+      value={value ?? ''}
+      onChange={handleInputChange}
+      label={label}
+      error={Boolean(error)}
+      helperText={error}
+      required={required}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      inputProps={{
+        readOnly: readOnly
+      }}
+      InputProps={{
+        classes: {
+          root: inputs.outlinedRoot,
+          notchedOutline: inputs.outlinedFieldset,
+          input: inputs.inputBase
+        },
+        inputComponent: InputMask,
+        inputProps: {
           mask: mask,
           alwaysShowMask: true,
           guide: false,
           readOnly: readOnly
-        }}
-        required={required}
-      />
-      {error}
-    </FormControl>
+        }
+      }}
+      InputLabelProps={{
+        className: isFocused || value ? inputs.inputLabelShrink : inputs.inputLabel
+      }}
+    />
   )
 }
 
