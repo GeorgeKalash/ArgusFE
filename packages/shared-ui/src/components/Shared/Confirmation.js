@@ -16,13 +16,15 @@ import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import CustomCheckBox from '../Inputs/CustomCheckBox'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
   const [showAsPassword, setShowAsPassword] = useState(true)
   const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
   const { getRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
-  const { systemChecks, platformLabels } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
 
   useSetWindow({ title: platformLabels.Fetch, window })
 
