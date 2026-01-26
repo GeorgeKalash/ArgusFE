@@ -767,6 +767,7 @@ export function DataGrid({
   }
 
   const onCellClicked = async params => {
+    if (params.event.target.closest('a')) return
     if (typeof onValidationRequired === 'function') onValidationRequired()
 
     const { colDef, rowIndex, api } = params
