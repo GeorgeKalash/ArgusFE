@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import * as yup from 'yup'
 import FormShell from 'src/components/Shared/FormShell'
 import toast from 'react-hot-toast'
@@ -12,11 +12,12 @@ import { SystemRepository } from 'src/repositories/SystemRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { useForm } from 'src/hooks/form'
+import { ControlContext } from 'src/providers/ControlContext'
 
 export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
   const editMode = !!recordId
-
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
 
   const invalidate = useInvalidate({
     endpointId: SystemRepository.SMSTemplate.page
@@ -29,7 +30,6 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
       smsBody: ''
     },
     maxAccess,
-    validateOnChange: true,
     validationSchema: yup.object({
       name: yup.string().required(),
       smsBody: yup.string().required()
@@ -40,11 +40,7 @@ export default function SmsTemplatesForms({ labels, maxAccess, recordId }) {
         record: JSON.stringify(obj)
       })
 
-      !obj.recordId &&
-        formik.setValues({
-          ...obj,
-          recordId: response.recordId
-        })
+      if (!obj.recordId) formik.setFieldValue('recordId', response?.recordId)
       toast.success(!obj.recordId ? platformLabels.Added : platformLabels.Edited)
       invalidate()
     }
