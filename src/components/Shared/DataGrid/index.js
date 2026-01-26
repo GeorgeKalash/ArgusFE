@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, Checkbox, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton, Link } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from 'src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -495,7 +495,7 @@ export function DataGrid({
             alignItems: 'center'
           }}
         >
-          <a
+          <Link
             href={popup ? '#' : linkHref} 
             target={!popup ? target || '_self' : undefined}
             rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
@@ -516,7 +516,7 @@ export function DataGrid({
             }}
           >
             {params.value}
-          </a>
+          </Link>
         </Box>
       )
     }
