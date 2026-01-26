@@ -7,6 +7,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   const [rect, setRect] = useState(null)
   const [measuredHeight, setMeasuredHeight] = useState(null)
   const [isPickerContent, setIsPickerContent] = useState(false)
+  const [isTimePickerContent, setIsTimePickerContent] = useState(false)
   const popperRef = useRef(null)
 
   const updateRect = useCallback(() => {
@@ -24,7 +25,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
       ) {
         return nextRect
       }
-      
+
       return prev
     })
   }, [anchorEl])
@@ -47,10 +48,10 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     }
   }, [anchorEl, open, updateRect])
 
-  const anchorTop = rect ? rect.top  : 0
-  const anchorBottom = rect ? rect.bottom  : 0
-  const anchorWidth = rect ? rect.width  : undefined
-  const left = rect ? rect.left  : 0
+  const anchorTop = rect ? rect.top : 0
+  const anchorBottom = rect ? rect.bottom : 0
+  const anchorWidth = rect ? rect.width : undefined
+  const left = rect ? rect.left : 0
 
   useEffect(() => {
     if (!open || !popperRef.current) return
@@ -63,9 +64,19 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     if (nextIsPicker !== isPickerContent) {
       setIsPickerContent(nextIsPicker)
     }
-  }, [open, rect, isPickerContent])
+
+    const timeNode = popperRef.current.querySelector(
+      '.MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
+    )
+
+    const nextIsTime = !!timeNode
+    if (nextIsTime !== isTimePickerContent) {
+      setIsTimePickerContent(nextIsTime)
+    }
+  }, [open, rect, isPickerContent, isTimePickerContent])
 
   const isPicker = isPickerContent || isDateTimePicker
+  const isTimePicker = isTimePickerContent
 
   useEffect(() => {
     if (!open || !popperRef.current) return
@@ -77,19 +88,18 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
   }, [open, rect, measuredHeight])
 
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
-  const defaultEstimate = isPicker ? 320  : viewportHeight * 0.43
+  const defaultEstimate = isTimePicker ? 260 : isPicker ? 320 : viewportHeight * 0.43
   const popperHeightForFlip = measuredHeight ?? defaultEstimate
 
-  const openAbove = rect
-    ? viewportHeight - anchorBottom <= popperHeightForFlip
-    : false
+  const openAbove = rect ? viewportHeight - anchorBottom <= popperHeightForFlip : false
 
   const baseStyle = {
     position: 'absolute',
     left,
     top: openAbove ? anchorTop : anchorBottom,
     ...(rect && !isPicker ? { width: anchorWidth } : {}),
-    transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none'
+    transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none',
+    overflow: 'visible'
   }
 
   const mergedStyle = {
@@ -97,7 +107,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
     ...(props.style || {})
   }
 
-  if (!rect) return null; 
+  if (!rect) return null
 
   return ReactDOM.createPortal(
     <Box
@@ -106,6 +116,7 @@ const PopperComponent = ({ children, anchorEl, open, isDateTimePicker = false, .
         styles.popperRoot,
         open ? styles.popperOpen : styles.popperClosed,
         isPicker ? styles.dateTimePopper : '',
+        isTimePicker ? styles.timePopper : '',
         props.className || ''
       ]
         .filter(Boolean)
