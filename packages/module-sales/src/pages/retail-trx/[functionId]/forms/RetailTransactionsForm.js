@@ -73,7 +73,6 @@ export default function RetailTransactionsForm({
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
   const level2CacheRef = useRef(null)
-  const cashAccountsRef = useRef([])
 
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
 
@@ -938,7 +937,7 @@ export default function RetailTransactionsForm({
       label: labels.cashbox,
       name: 'cashAccountId',
       props: {
-        store: cashAccountsRef.current,
+        store: level2CacheRef?.current?.posCashAccounts,
         displayField: 'cashAccountRef',
         valueField: 'cashAccountId',
         mapping: [
@@ -963,7 +962,7 @@ export default function RetailTransactionsForm({
         }
       },
       propsReducer({ row, props }) {
-        return { ...props, store: cashAccountsRef?.current }
+        return { ...props, store: level2CacheRef?.current?.posCashAccounts }
       }
     },
     {
@@ -1097,7 +1096,7 @@ export default function RetailTransactionsForm({
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
     const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
-    const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
+    const posDtId = level2CacheRef?.current?.documentTypes?.some(x => x.recordId == posInfo?.dtId) || false
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1118,34 +1117,22 @@ export default function RetailTransactionsForm({
     }))
   }
 
-  async function isPosDtMatchesdgId(posDtId) {
-    const level2 = await loadLevel2()
-    return level2?.documentTypes?.some(x => x.recordId == posDtId) || false
-  }
-
   async function fillCashObjects() {
-    const level2 = await loadLevel2()
-    if (!level2) return
-
     setCashGridData({
-      cashAccounts: level2.cashAccounts || [],
-      creditCards: level2.creditCards || [],
-      creditCardFees: level2.creditCardFees || []
+      cashAccounts: level2CacheRef?.current?.cashAccounts || [],
+      creditCards: level2CacheRef?.current?.creditCards || [],
+      creditCardFees: level2CacheRef?.current?.creditCardFees || []
     })
   }
 
 
   async function loadLevel2() {
-    if (level2CacheRef.current) return level2CacheRef.current
-
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
       parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
     })
 
     level2CacheRef.current = res?.record || null
-    cashAccountsRef.current = res?.record?.posCashAccounts
-    return level2CacheRef.current
   }
 
   async function getFilteredCC(cashAccountId) {
