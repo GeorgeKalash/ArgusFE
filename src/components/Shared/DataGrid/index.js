@@ -481,6 +481,47 @@ export function DataGrid({
   const CustomCellRenderer = params => {
     const { column } = params
 
+    if (column.colDef?.link?.enabled) {
+      const { getHref, target, popup, onClick } = column.colDef.link
+      const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
+
+      return (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            padding: '0 0px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <a
+            href={popup ? '#' : linkHref} 
+            target={!popup ? target || '_self' : undefined}
+            rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
+            onClick={e => {
+              e.stopPropagation()
+              if (popup) {
+                e.preventDefault()
+                popup(params.data)
+                
+                return
+              }
+              onClick?.(params.data)
+            }}
+            style={{
+              color: '#1976d2',
+              textDecoration: 'underline',
+              cursor: 'pointer'
+            }}
+          >
+            {params.value}
+          </a>
+        </Box>
+      )
+    }
+
+         
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view

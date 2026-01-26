@@ -173,8 +173,7 @@ export default function RetailTransactionsForm({
         posFlags: null,
         taxId: null,
         taxId_base: null,
-        taxId_amount: null,
-        details: false
+        taxId_amount: null
       }
     ],
     cash: [
@@ -722,6 +721,21 @@ export default function RetailTransactionsForm({
       name: 'sku',
       jumpToNextLine,
       flex: 2,
+      link: {
+        enabled: true,
+        popup: row => stack({
+          Component: SkuForm,
+          props: {
+            labels,
+            maxAccess,
+            itemId: row?.itemId || null,
+            plId: formik.values?.header?.plId || null
+          },
+          width: 700,
+          height: 500,
+          title: labels.transfer
+        })
+      },   
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
         ...(!formik.values.disableSKULookup && {
@@ -783,37 +797,12 @@ export default function RetailTransactionsForm({
               : null
             : skuInfo?.record?.taxId,
           priceType: skuInfo.record.priceType,
-          qty: newRow.qty || 0,
-          details: true
+          qty: newRow.qty || 0
         }
 
         await barcodeSkuSelection(update, rowData, addRow)
       }
     },
-        {
-          component: 'button',
-          name: 'details',
-          props: {
-            imgSrc: '/images/buttonsIcons/popup-black.png'
-          },
-          label: labels.details,
-          onClick: (e, row, update, newRow) => {
-            if (row?.itemId) {
-              stack({
-                Component: SkuForm,
-                props: {
-                  labels,
-                  maxAccess,
-                  itemId: row?.itemId || null,
-                  plId: formik.values?.header?.plId || null
-                },
-                width: 700,
-                height: 500,
-                title: labels.transfer
-              })
-            }
-          }
-        },
     {
       component: 'textfield',
       label: labels.itemName,
@@ -1744,14 +1733,8 @@ export default function RetailTransactionsForm({
 
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
-              const rowData = value?.map(item => {
-                return {
-                  ...item,
-                  details: false
-                }
-              })
-              formik.setFieldValue('items', rowData)
+             onChange={(value, action) => {
+              formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
             }}
             value={formik?.values?.items}
