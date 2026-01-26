@@ -128,7 +128,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                     ]}
                     values={formik?.values}
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plId', newValue?.recordId)
                     }}
                   />
@@ -147,7 +147,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                     ]}
                     values={formik?.values}
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('ptId', newValue?.recordId)
                     }}
                   />
@@ -166,9 +166,9 @@ export default function SalesSettingsForm({ _labels, access }) {
                     ]}
                     values={formik?.values}
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => 
                       formik.setFieldValue('currencyId', newValue?.recordId)
-                    }}
+                    }
                     error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
                   />
                 </Grid>
@@ -180,7 +180,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                     values={formik?.values}
                     displayField='name'
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
@@ -205,7 +205,7 @@ export default function SalesSettingsForm({ _labels, access }) {
                     valueField='key'
                     displayField='value'
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('SAFIIntegration', newValue ? newValue.key : '')
                     }}
                     error={formik.touched.SAFIIntegration && Boolean(formik.errors.SAFIIntegration)}

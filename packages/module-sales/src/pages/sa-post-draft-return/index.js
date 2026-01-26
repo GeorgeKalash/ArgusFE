@@ -136,7 +136,7 @@ const PostDraftReturn = () => {
             <Box display='flex' justifyContent='center' alignItems='center' height='100%'>
               <IconButton size='small' onClick={() => confirmationPost(row.data)}>
                 <Image
-                  src={`@argus/shared-ui/src/components/images/buttonsIcons/post-black.png`}
+                  src={require('@argus/shared-ui/src/components/images/buttonsIcons/post-black.png').default.src}
                   width={18}
                   height={18}
                   alt='post.png'

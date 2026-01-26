@@ -1425,7 +1425,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
                 <Grid item xs={12}></Grid>
-                <Grid item xs={12}>
+                <Grid item xs={2}>
                   <CustomButton
                     onClick={() => importItems()}
                     color='#231f20'
@@ -1433,6 +1433,8 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     disabled={!formik.values.requestId}
                     image={'import.png'}
                   />
+                </Grid>
+                <Grid item xs={2}>
                   <CustomButton
                     onClick={() => previewItems()}
                     color='#3D6186'
@@ -1441,6 +1443,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     image={'quotation-icon.png'}
                   />
                 </Grid>
+                <Grid item xs={8}></Grid>
               </Grid>
             </Grid>
             <Grid item xs={3}>

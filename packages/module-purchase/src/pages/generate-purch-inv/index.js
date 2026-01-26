@@ -270,7 +270,7 @@ const GeneratePurchaseInvoice = () => {
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('vendorName', newValue?.name || '')
                   formik.setFieldValue('vendorRef', newValue?.reference || '')
                   if (!newValue?.recordId) {
@@ -344,7 +344,7 @@ const GeneratePurchaseInvoice = () => {
                 displayField={['reference', 'name']}
                 values={formik.values}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId || null)
                   await onChangeDtId(newValue?.recordId)
                 }}
@@ -365,7 +365,7 @@ const GeneratePurchaseInvoice = () => {
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('plantId', newValue?.recordId || null)
                 }}
                 error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -375,7 +375,7 @@ const GeneratePurchaseInvoice = () => {
             <Grid item>
               <CustomButton onClick={openPUDetailsForm} label={labels.edit} color='#231f20' image={'notes.png'} />
             </Grid>
-            <Grid item xs={0.25}>
+            <Grid item>
               <CustomButton
                 onClick={onGeneratePI}
                 label={platformLabels.Generate}

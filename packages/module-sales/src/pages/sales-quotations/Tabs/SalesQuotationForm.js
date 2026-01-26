@@ -1250,7 +1250,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     displayField={['reference', 'name']}
                     values={formik.values}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId)
                       changeDT(newValue)
                     }}
@@ -1301,7 +1301,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     errorCheck={'clientId'}
                   />
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item >
                   <CustomButton
                     onClick={() => {
                       stack({
@@ -1370,7 +1370,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     displayField='name'
                     values={formik.values}
                     displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('spId', newValue?.recordId)
                     }}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
@@ -1421,7 +1421,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     readOnly={!isRaw}
                     values={formik.values}
                     displayFieldWidth={1.5}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('szId', newValue?.recordId)
                     }}
                     error={formik.touched.szId && Boolean(formik.errors.szId)}
@@ -1468,7 +1468,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue?.recordId)
                     }}
                     displayFieldWidth={2}
@@ -1490,7 +1490,7 @@ export default function SalesQuotationForm({ labels, access, recordId, currency,
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     displayFieldWidth={2}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId)
                       formik.setFieldValue('siteRef', newValue ? newValue.reference : null)
                       formik.setFieldValue('siteName', newValue ? newValue.name : null)

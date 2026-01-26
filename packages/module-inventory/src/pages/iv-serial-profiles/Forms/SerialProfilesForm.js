@@ -10,6 +10,8 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 export default function SerialProfilesForm({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
@@ -68,34 +70,38 @@ export default function SerialProfilesForm({ labels, maxAccess, store, setStore 
 
   return (
     <FormShell resourceId={ResourceIds.SerialNumber} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='10'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='20'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='20'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
     </FormShell>
   )
 }

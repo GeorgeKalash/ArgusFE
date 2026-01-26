@@ -944,7 +944,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     displayField={['reference', 'name']}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       await onChangeDtId(newValue?.recordId)
                       changeDT(newValue)
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
@@ -967,7 +967,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       if (!newValue?.isInactive) {
                         formik.setFieldValue('header.siteId', newValue?.recordId || null)
                       } else {
@@ -1007,7 +1007,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.plantId', newValue?.recordId)
                     }}
                     error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
@@ -1019,7 +1019,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     required
                     label={labels.postingDate}
                     value={formik?.values?.header?.date}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.date', newValue)
                       formik.setFieldValue('header.invoiceId', null)
                       formik.setFieldValue('header.invoiceRef', '')
@@ -1046,7 +1046,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                     readOnly={editMode}
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('header.invoiceId', null)
                       formik.setFieldValue('header.invoiceRef', '')
                       formik.setFieldValue('header.currencyId', newValue?.recordId || null)
@@ -1088,7 +1088,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 valueShow='vendorRef'
                 secondValueShow='vendorName'
                 maxAccess={maxAccess}
-                onSecondValueChange={(name, value) => {
+                onSecondValueChange={(_, value) => {
                   formik.setFieldValue('header.vendorName', value)
                 }}
                 columnsInDropDown={[
@@ -1096,7 +1096,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                   { key: 'name', value: 'Name' },
                   { key: 'flName', value: 'Foreign Language' }
                 ]}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   formik.setFieldValue('header.vendorName', newValue?.name || '')
                   formik.setFieldValue('header.vendorRef', newValue?.reference || '')
 
@@ -1124,7 +1124,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 readOnly
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.taxId', newValue?.recordId || null)
                 }}
                 error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
@@ -1152,7 +1152,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 readOnly={isPosted}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.invoiceId', newValue?.recordId || null)
                   formik.setFieldValue('header.invoiceRef', newValue?.reference || '')
                 }}
@@ -1204,7 +1204,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           />
         </Grow>
         <Grid container spacing={2}>
-          <Grid item xs={5} height={135} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={5} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='metal'
               gridData={{ count: 1, list: formik?.values?.metalGridData }}
@@ -1233,7 +1233,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={8} height={135} sx={{ display: 'flex', flex: 1 }}>
+          <Grid item xs={8} height={'13vh'} sx={{ display: 'flex', flex: 1 }}>
             <Table
               name='item'
               columns={[

@@ -1,11 +1,7 @@
-// ** Hook Import
 import { useSettings } from '@argus/shared-core/src/@core/hooks/useSettings'
-
-// ** Util Import
 import { hexToRGBA } from '@argus/shared-core/src/@core/utils/hex-to-rgba'
 
 const GlobalStyles = theme => {
-  // ** Hook & Var
   const { settings } = useSettings()
   const { mode } = settings
 

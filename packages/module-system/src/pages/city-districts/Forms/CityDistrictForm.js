@@ -168,7 +168,7 @@ export default function CityDistrictForm({ labels, recordId, maxAccess }) {
                 secondDisplayField={true}
                 firstValue={formik.values.cityRef}
                 secondValue={formik.values.cityName}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setValues({
                     ...formik.values,
                     cityId: newValue?.recordId || '',

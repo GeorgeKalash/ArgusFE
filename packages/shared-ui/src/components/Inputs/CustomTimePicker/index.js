@@ -8,8 +8,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import PopperComponent from '../../Shared/Popper/PopperComponent'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
-import styles from './CustomTimePicker.module.css'
-import inputs from '@argus/shared-ui/src/components/Inputs/Inputs.module.css'
+import inputs from '../Inputs.module.css'
 
 const CustomTimePicker = ({
   name,
@@ -40,9 +39,9 @@ const CustomTimePicker = ({
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
-  return _hidden ? (
-    <></>
-  ) : (
+  if (_hidden) return <></>
+
+  return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <TimePicker
         variant={variant}
@@ -69,35 +68,36 @@ const CustomTimePicker = ({
             fullWidth,
             error: !!error,
             helperText: typeof error === 'string' ? error : helperText,
-            className: [
-              styles.customTimeTextField,
-              !hasBorder ? styles.noBorder : '',
-              isFocused || value ? styles.labelFocused : styles.labelUnfocused
-            ]
-              .filter(Boolean)
-              .join(' '),
             InputProps: {
+              classes: {
+                root: inputs.outlinedRoot,
+                notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
+                input: inputs.inputBase
+              },
               endAdornment: !(_readOnly || disabled) && (
                 <InputAdornment position='end' className={inputs.inputAdornment}>
                   {value && (
                     <IconButton
                       tabIndex={-1}
-                      // edge='start'
+                      className={inputs.iconButton}
                       onClick={() => onChange(name, null)}
-                      className={inputs.IconButton}
                     >
                       <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
+
                   <IconButton
                     tabIndex={-1}
+                    className={inputs.iconButton}
                     onClick={() => setOpenTimePicker(true)}
-                    className={inputs.IconButton}
                   >
-                    <AccessTimeIcon className={inputs.icon}  />
+                    <AccessTimeIcon className={inputs.icon} />
                   </IconButton>
                 </InputAdornment>
               )
+            },
+            InputLabelProps: {
+              className: isFocused || value ? inputs.inputLabelShrink : inputs.inputLabel
             }
           },
           actionBar: {
@@ -105,8 +105,14 @@ const CustomTimePicker = ({
           }
         }}
         slots={{
-          actionBar: props => <PickersActionBar {...props} actions={['accept']} />,
-          popper: PopperComponent
+          actionBar: p => <PickersActionBar {...p} actions={['accept']} />,
+          popper: popperProps => (
+            <PopperComponent
+              {...popperProps}
+              matchAnchorWidth={false}
+              isDateTimePicker
+            />
+          )
         }}
         {...props}
       />

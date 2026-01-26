@@ -91,7 +91,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
     <FormShell resourceId={ResourceIds.DocumentTypeMaps} form={formik} maxAccess={maxAccess} editMode={editMode}>
       <VertLayout>
         <Grow>
-          <Grid container spacing={2} sx={{ px: 4, pt: 2 }}>
+          <Grid container spacing={2}>
             <Grid item xs={12}>
               <ResourceComboBox
                 datasetId={DataSets.SYSTEM_FUNCTION}
@@ -102,7 +102,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 readOnly={editMode}
                 maxAccess={maxAccess}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue) {
                     formik && formik.setFieldValue('fromFunctionId', newValue?.key)
                     formik && formik.setFieldValue('fromFunctionName', newValue?.value)
@@ -131,7 +131,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                     : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('fromDTId', newValue?.recordId)
                 }}
                 error={formik.touched.fromDTId && Boolean(formik.errors.fromDTId)}
@@ -147,7 +147,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                 displayField='value'
                 maxAccess={maxAccess}
                 values={formik.values}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   if (newValue) {
                     formik && formik.setFieldValue('toFunctionId', newValue?.key)
                     formik && formik.setFieldValue('toFunctionName', newValue?.value)
@@ -175,7 +175,7 @@ export default function DocumentTypeMapForm({ labels, maxAccess, recordId, recor
                     ? `_dgId=${formik.values.toFunctionId}&_startAt=${0}&_pageSize=${1000}`
                     : `_dgId=0&_startAt=${0}&_pageSize=${1000}`)
                 }
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('dtId', newValue?.recordId)
                 }}
                 error={formik.touched.dtId && Boolean(formik.errors.dtId)}

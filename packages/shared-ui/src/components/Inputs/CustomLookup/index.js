@@ -99,22 +99,28 @@ const CustomLookup = ({
             popper: { className: dropdownStyles.dropdownPopper }
           }}
           noOptionsText={
-              <div className={dropdownStyles.dropdownNoOptionsRow}>
-                {columnsInDropDown?.length > 0 ? (
-                  columnsInDropDown.map((col, i) => (
-                    <div
-                      key={i}
-                      className={dropdownStyles.dropdownNoOptionsCell}
-                      style={{ width: `${(col.grid ?? 2) / columnsInDropDown.reduce((s, c) => s + (c.grid ?? 2), 0) * 100}%` }}
-                    >
-                      {i === 0 ? 'No options' : ''}
-                    </div>
-                  ))
-                ) : (
-                  <div className={dropdownStyles.dropdownNoOptionsSingle}>No options</div>
-                )}
-              </div>
-            }
+            <div className={dropdownStyles.dropdownNoOptionsRow}>
+              {columnsInDropDown?.length > 0 ? (
+                columnsInDropDown.map((col, i) => (
+                  <div
+                    key={i}
+                    className={dropdownStyles.dropdownNoOptionsCell}
+                    style={{
+                      width: `${
+                        ((col.grid ?? 2) /
+                          columnsInDropDown.reduce((s, c) => s + (c.grid ?? 2), 0)) *
+                        100
+                      }%`
+                    }}
+                  >
+                    {i === 0 ? 'No options' : ''}
+                  </div>
+                ))
+              ) : (
+                <div className={dropdownStyles.dropdownNoOptionsSingle}>No options</div>
+              )}
+            </div>
+          }
           filterOptions={options => (displayField ? options.filter(option => option) : options)}
           getOptionLabel={option => {
             if (typeof valueField === 'object') {
@@ -152,7 +158,9 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+                    <li
+                      className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}
+                    >
                       {columnsWithGrid.map((header, i) => (
                         <Box
                           key={i}
@@ -165,7 +173,10 @@ const CustomLookup = ({
                     </li>
                   )}
 
-                  <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
+                  <li
+                    {...propsOption}
+                    className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
+                  >
                     {columnsWithGrid.map((header, i) => {
                       let displayValue = option[header.key]
                       if (header?.type === 'date' && displayValue) {
@@ -189,7 +200,9 @@ const CustomLookup = ({
             return (
               <Box>
                 {propsOption.id.endsWith('-0') && (
-                  <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
+                  <li
+                    className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}
+                  >
                     {secondDisplayField && (
                       <Box className={dropdownStyles.dropdownHeaderCellMain}>
                         {valueField.toUpperCase()}
@@ -203,8 +216,13 @@ const CustomLookup = ({
                   </li>
                 )}
 
-                <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
-                  <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+                <li
+                  {...propsOption}
+                  className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
+                >
+                  <Box className={dropdownStyles.dropdownOptionCellMain}>
+                    {option[valueField]}
+                  </Box>
                   {secondDisplayField && (
                     <Box className={dropdownStyles.dropdownOptionCellSecondary}>
                       {option[displayField]}

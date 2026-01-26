@@ -202,7 +202,7 @@ export default function BPMasterDataForm({ labels, maxAccess: access, invalidate
                     required
                     readOnly={editMode}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('category', newValue?.key)
                       formik.setFieldValue('defaultInc', '')
                       formik.setFieldValue('defaultId', '')
