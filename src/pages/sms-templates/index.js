@@ -23,7 +23,7 @@ const SmsTemplate = () => {
 
     const response = await getRequest({
       extension: SystemRepository.SMSTemplate.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -33,7 +33,9 @@ const SmsTemplate = () => {
     query: { data },
     labels,
     access,
-    invalidate
+    invalidate,
+    refetch,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.SMSTemplate.page,
@@ -98,7 +100,9 @@ const SmsTemplate = () => {
           onEdit={edit}
           onDelete={del}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>
