@@ -16,11 +16,19 @@
 
 .dropdownHeaderCellMain,
 .dropdownHeaderCellSecondary,
-.dropdownOptionCellMain,
-.dropdownOptionCellSecondary {
+.dropdownHeaderCell {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap; 
+  min-width: 0;
 }
 
 .dropdownHeaderRow,
@@ -29,6 +37,8 @@
   align-items: flex-start;
   padding: 5px 10px !important;
   line-height: 1.35 !important;
+
+  white-space: nowrap;
 }
 
 .dropdownHeaderRow {
@@ -51,9 +61,6 @@
   display: flex;
   align-items: flex-start;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .dropdownOptionIcon {
@@ -72,19 +79,33 @@
   display: flex;
   align-items: flex-start;
 
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.dropdownPopper :global(.MuiPaper-root) {
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
 }
 
 .dropdownPopper :global(.MuiAutocomplete-listbox) {
-  padding: 4px !important;
+  width: max-content !important;
+  min-width: 100% !important;
 }
 
 .dropdownPopper :global(.MuiAutocomplete-option) {
   min-height: unset !important;
   padding: 4px 10px !important;
   align-items: flex-start !important;
+
+  white-space: nowrap !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root)::-webkit-scrollbar {
+  height: 8px;
 }
 
 .dropdownNoOptionsRow {
@@ -93,6 +114,8 @@
   padding: 5px 10px !important;
   line-height: 1.35 !important;
   font-weight: 600 !important;
+
+  white-space: nowrap;
 }
 
 .dropdownNoOptionsCell,

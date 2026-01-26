@@ -4,16 +4,19 @@ const FieldSet = ({ children, title, form = false, ...props }) => {
   return (
     <Grid
       container
-      spacing={{ xs: 1.5, sm: 2 }}
+      spacing={{ xs: 1, sm: 1.25, md: 1.5 }}
       sx={{
         border: '1px solid',
         borderColor: '#cdd3d4',
         position: 'relative',
         ml: 0,
-        my: title ? { xs: 1, sm: 1.25 } : 0,
-        p: form ? 0 : { xs: 1.25, sm: 1.5 },
-        pt: form ? 0 : title ? { xs: 2.25, sm: 2.5 } : { xs: 1.25, sm: 1.5 },
-
+        my: title ? { xs: 0.75, sm: 1, md: 1.25 } : 0,
+        p: form ? 0 : 'clamp(8px, 0.8vw, 14px)',
+        pt: form
+          ? 0
+          : title
+            ? 'clamp(14px, 1.2vw, 22px)'
+            : 'clamp(8px, 0.8vw, 14px)',
         ...props.sx
       }}
     >
@@ -22,12 +25,14 @@ const FieldSet = ({ children, title, form = false, ...props }) => {
           variant='h6'
           sx={{
             position: 'absolute',
-            top: { xs: -10, sm: -13 },
-            left: { xs: 10, sm: 12 },
+            top: 'clamp(-12px, -0.9vw, -8px)',
+            left: 'clamp(10px, 1vw, 14px)',
             bgcolor: '#F4F5FA',
-            px: { xs: 1, sm: 1.25 },
-            fontSize: { xs: 11, sm: 14 },
+            px: 'clamp(6px, 0.7vw, 12px)',
+            py: 'clamp(1px, 0.2vw, 3px)',
+            fontSize: 'clamp(10px, 0.75vw, 14px)',
             lineHeight: 1.2,
+            fontWeight: 600,
             whiteSpace: 'nowrap',
             maxWidth: 'calc(100% - 20px)',
             overflow: 'hidden',
