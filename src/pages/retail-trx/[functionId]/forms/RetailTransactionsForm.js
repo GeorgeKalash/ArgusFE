@@ -231,7 +231,11 @@ export default function RetailTransactionsForm({
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1),
+          qty: yup.string().test(function () {
+            const { qty } = this.parent
+
+            return qty > 0
+          }),
           barcode: yup.string().required()
         })
       ),
