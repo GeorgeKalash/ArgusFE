@@ -490,7 +490,7 @@ export function DataGrid({
           sx={{
             width: '100%',
             height: '100%',
-            padding: '0 0px',
+            padding: '0',
             display: 'flex',
             alignItems: 'center'
           }}
