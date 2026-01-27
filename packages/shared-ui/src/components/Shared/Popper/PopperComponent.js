@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import ReactDOM from 'react-dom'
-import { Box } from '@mui/material'
+import { Box, Popper } from '@mui/material' // ✅ ADDED Popper (kept Box)
 import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({
@@ -8,10 +8,8 @@ const PopperComponent = ({
   anchorEl,
   open,
   isDateTimePicker = false,
-
-  // ✅ NEW: control width behavior
-  matchAnchorWidth = true, // for Autocomplete dropdowns you may want true
-  fitContent = false,      // force content width even for non-pickers
+  matchAnchorWidth = true,
+  fitContent = false,
 
   ...props
 }) => {
@@ -92,23 +90,15 @@ const PopperComponent = ({
   const popperHeightForFlip = measuredHeight ?? defaultEstimate
   const openAbove = rect ? viewportHeight - anchorBottom <= popperHeightForFlip : false
 
-  // ✅ Width rule:
-  // - Pickers always fit content
-  // - If fitContent=true → fit content
-  // - Else (normal dropdowns) → match anchor width if matchAnchorWidth=true
   const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
 
   const baseStyle = {
-    // ✅ viewport coordinates (matches getBoundingClientRect)
     position: 'fixed',
     left,
     top: openAbove ? anchorTop : anchorBottom,
     transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none',
     overflow: 'visible',
-
     ...(shouldMatchAnchorWidth ? { width: anchorWidth } : {}),
-
-    // ✅ content-fit behavior (especially for pickers)
     ...(isPicker || fitContent
       ? {
           width: 'max-content',

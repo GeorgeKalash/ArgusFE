@@ -10,24 +10,16 @@
   visibility: hidden;
 }
 
-/* Autocomplete listbox height */
 .popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
   max-height: 43vh;
 }
 
-/* MenuItem spacing (if your dropdown uses MenuItem) */
 .popperRoot :global(.MuiMenuItem-root) {
   padding-right: 10px;
 }
 
-/* =========================
-   PICKERS - SAFE DEFAULTS
-   ========================= */
-
 .dateTimePopper {
   background: #fff;
-
-  /* ✅ fit content width */
   width: max-content;
   max-width: calc(100vw - 16px);
   overflow-x: auto;
@@ -74,28 +66,21 @@
   font-size: 0.75rem;
 }
 
-/* =========================
-   ✅ TIME PICKER (content width)
-   ========================= */
-
 .timePopper {
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 
-  /* ✅ fit content width (no forced 190px) */
   width: max-content !important;
   min-width: unset !important;
   max-width: calc(100vw - 16px);
 }
 
-/* Remove toolbar/header for time dropdown */
 .timePopper :global(.MuiPickersLayout-toolbar) {
   display: none !important;
 }
 
-/* ✅ Let MUI decide natural width */
 .timePopper :global(.MuiPickersLayout-root),
 .timePopper :global(.MuiPickersLayout-contentWrapper),
 .timePopper :global(.MuiMultiSectionDigitalClock-root),
@@ -104,7 +89,6 @@
   width: max-content !important;
 }
 
-/* Ensure columns distribute correctly (2 or 3 columns incl. AM/PM) */
 .timePopper :global(.MuiMultiSectionDigitalClock-root) {
   display: flex !important;
 }
@@ -114,13 +98,11 @@
   min-width: 0 !important;
 }
 
-/* Items style */
 .timePopper :global(.MuiMultiSectionDigitalClockSection-item) {
   height: 32px !important;
   font-size: 0.85rem !important;
 }
 
-/* OK button area */
 .timePopper :global(.MuiPickersActionBar-root),
 .timePopper :global(.MuiPickersLayout-actionBar) {
   margin: 0 !important;
@@ -131,15 +113,10 @@
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* OK button */
 .timePopper :global(.MuiPickersActionBar-root .MuiButton-root) {
   font-size: 0.85rem !important;
   min-width: 0 !important;
 }
-
-/* =========================
-   YEAR CALENDAR
-   ========================= */
 
 .popperRoot :global(.MuiYearCalendar-root) {
   padding: 4px 0;
@@ -153,7 +130,6 @@
   min-height: 28px;
 }
 
-/* (your responsive year styles unchanged) */
 @media (max-width: 1600px) {
   .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
   .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
