@@ -2,17 +2,19 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { AuthContext } from './AuthContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 
 const DefaultsContext = createContext(null)
 
 const DefaultsProvider = ({ children }) => {
   const { getRequest } = useContext(RequestsContext)
-  const { user } = useContext(AuthContext)
+  const { user, languageId } = useContext(AuthContext)
   const userData = window.sessionStorage.getItem('userData')
   
   const [systemDefaults, setSystemDefaults] = useState({ list: [] })
   const [userDefaults, setUserDefaults] = useState([])
   const [systemChecks, setSystemChecks] = useState([])
+  const [exportFormat, setExportFormat] = useState([])
 
 
   const fetchDefaults = async () => {
@@ -57,7 +59,7 @@ const DefaultsProvider = ({ children }) => {
 
   }
 
-   const updateSystemDefaults = data => {
+  const updateSystemDefaults = data => {
     const updatedDefaultsData = [...systemDefaults.list, ...data].reduce((acc, obj) => {
       const existing = acc.find(item => item.key === obj.key)
       if (existing) existing.value = obj.value
@@ -68,12 +70,22 @@ const DefaultsProvider = ({ children }) => {
     setSystemDefaults({ list: updatedDefaultsData })
   }
 
+  const getExportFormat = async () => {
+    const res = await getRequest({
+      extension: SystemRepository.KeyValueStore,
+      parameters: `_dataset=${DataSets.EXPORT_FORMAT}&_language=${languageId}`,
+      disableLoading: true
+    })
+    if (res?.list?.length) setExportFormat(res?.list || [])
+  }
+  
   useEffect(() => {
     if (!userData || !user?.userId) return
 
     fetchDefaults()
     fetchUserDefaults()
     fetchSystemChecks()
+    getExportFormat()
   }, [userData, user?.userId])
 
   useEffect(() => {
@@ -93,7 +105,8 @@ const DefaultsProvider = ({ children }) => {
     updateSystemDefaults,
     userDefaults,
     setUserDefaults,
-    systemChecks
+    systemChecks,
+    exportFormat
   }
 
   return (

@@ -9,11 +9,11 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const ReportViewer = ({ resourceId }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { exportFormat } = useContext(ControlContext)
+  const { exportFormat } = useContext(DefaultsContext)
   const [reportStore, setReportStore] = useState([])
   const [report, setReport] = useState({ selectedFormat: '', selectedReport: '' })
   const [pdf, setPDF] = useState(null)

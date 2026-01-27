@@ -5,10 +5,9 @@ import CustomComboBox from '../Inputs/CustomComboBox'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import PreviewReport from './PreviewReport'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { generateReport } from '@argus/shared-utils/src/utils/ReportUtils'
-import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import CustomButton from '../Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const ReportGenerator = ({
   previewReport,
@@ -22,7 +21,8 @@ const ReportGenerator = ({
   reportSize = 3
 }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, exportFormat } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { exportFormat } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const [formatIndex, setFormatIndex] = useState(0)
   const [report, setReport] = useState({
