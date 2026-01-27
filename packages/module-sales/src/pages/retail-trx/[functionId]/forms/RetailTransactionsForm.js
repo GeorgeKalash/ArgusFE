@@ -51,7 +51,7 @@ import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
-import SkuForm from 'packages/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
+import SkuForm from '@argus/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
 
 export default function RetailTransactionsForm({
   labels,
