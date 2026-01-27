@@ -99,8 +99,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         metalId: null,
         metalRef: '',
         totalCost: 0,
-        priceType: null,
-        details: false
+        priceType: null
       }
     ],
     serials: []
@@ -383,18 +382,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
         return { ...props, imgSrc: onCondition(row) }
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.itemId) {
-          update({
-            details: false
-          })
-
-          return
-        }
-        if (newRow.isInactive) {
-          update({
+        const resetRow = () => {
+         update({
             ...formik.initialValues.transfers[0],
             id: newRow.id
           })
+        }
+
+        if (!newRow?.itemId) return resetRow()
+
+        if (newRow.isInactive) {
+          resetRow()
           stackError({
             message: labels.inactiveItem
           })
@@ -413,7 +411,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
             weight,
             unitCost,
             totalCost,
-            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
@@ -1033,7 +1030,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  details: false,
                   qtyInBase: 0
                 }
               })
