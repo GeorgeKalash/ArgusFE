@@ -47,19 +47,21 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PuQtnForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
 
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const filteredMeasurements = useRef([])
   const [measurements, setMeasurements] = useState([])
   const [reCal, setReCal] = useState(false)
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.PurchaseQuotations,

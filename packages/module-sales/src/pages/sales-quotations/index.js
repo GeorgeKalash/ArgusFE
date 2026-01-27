@@ -15,10 +15,12 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { useError } from '@argus/shared-providers/src/providers/error'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import SalesQuotationForm from './Tabs/SalesQuotationForm'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SalesQuotations = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -116,7 +118,7 @@ const SalesQuotations = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return parseInt(defaultCurrency?.value)
   }

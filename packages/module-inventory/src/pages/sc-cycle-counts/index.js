@@ -14,10 +14,12 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
 import CycleCountsWindow from '@argus/shared-ui/src/components/Shared/Forms/CycleCountsWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const CycleCounts = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const { stack } = useWindow()
 
@@ -132,7 +134,7 @@ const CycleCounts = () => {
   }
 
   async function openForm(recordId) {
-    const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+    const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
     openCycleCountsWindow(plantId, recordId)
   }

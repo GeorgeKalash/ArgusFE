@@ -21,10 +21,12 @@ import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceL
 import { useError } from '@argus/shared-providers/src/providers/error'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, refetchForm, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -40,7 +42,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'currencyId' || obj.key === 'PUCurrencyId'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))

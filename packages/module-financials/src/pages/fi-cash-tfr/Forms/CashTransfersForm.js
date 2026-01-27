@@ -26,10 +26,12 @@ import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalc
 import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiCurrencyRateForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function CashTransfersForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
 
@@ -68,7 +70,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   })
 
   async function getCurrencyId() {
-    const currencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+    const currencyId = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
 
     if (currencyId) {
       formik.setFieldValue('currencyId', parseInt(currencyId))
@@ -123,7 +125,7 @@ export default function CashTransfersForm({ labels, maxAccess: access, recordId 
   function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'currencyId'
     })
 

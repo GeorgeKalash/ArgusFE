@@ -17,13 +17,15 @@ import { useDocumentTypeProxy } from '@argus/shared-hooks/src/hooks/documentRefe
 import InwardTransferForm from '@argus/shared-ui/src/components/Shared/Forms/InwardTransferForm'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const InwardTransfer = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
   const userId = getStorageData('userData').userId
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
 
   const {
     query: { data },
@@ -64,7 +66,7 @@ const InwardTransfer = () => {
   }
 
   const getPlantId = async () => {
-    const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')
+    const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')
 
     return defaultPlant?.value ? parseInt(defaultPlant.value) : null
   }

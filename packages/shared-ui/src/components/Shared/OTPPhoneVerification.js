@@ -8,6 +8,7 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const OTPPhoneVerification = ({
   values,
@@ -21,7 +22,8 @@ const OTPPhoneVerification = ({
   window
 }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { defaultsData, platformLabels } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   useSetWindow({ title: platformLabels.OTPVerification, window })
 
@@ -150,7 +152,7 @@ const OTPPhoneVerification = ({
 
   const handleResendOtp = () => {
     setSent(true)
-    const expiryTimeObj = defaultsData.list.find(obj => obj.key === 'otp-expiry-time')
+    const expiryTimeObj = systemDefaults.list.find(obj => obj.key === 'otp-expiry-time')
     const expiryTime = parseInt(expiryTimeObj?.value, 10)
     if (!isNaN(expiryTime)) {
       setTimer(expiryTime)

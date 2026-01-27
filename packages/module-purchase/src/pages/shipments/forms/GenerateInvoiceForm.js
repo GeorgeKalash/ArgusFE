@@ -17,10 +17,12 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { PurchaseRepository } from '@argus/repositories/src/repositories/PurchaseRepository'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function GenerateInvoiceForm({ labels, maxAccess: access, recordId, form, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.PurchaseInvoice,
@@ -28,7 +30,7 @@ export default function GenerateInvoiceForm({ labels, maxAccess: access, recordI
     enabled: !recordId
   })
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'PUCurrencyId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'PUCurrencyId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },

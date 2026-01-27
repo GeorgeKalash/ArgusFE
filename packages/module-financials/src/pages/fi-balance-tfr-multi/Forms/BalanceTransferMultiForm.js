@@ -26,10 +26,12 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BalanceTransferMultiForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -43,8 +45,8 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
     endpointId: FinancialRepository.BalanceTransferMultiAccounts.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const spId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'spId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const spId = parseInt(userDefaults?.list?.find(obj => obj.key === 'spId')?.value)
 
   const { formik } = useForm({
     maxAccess,

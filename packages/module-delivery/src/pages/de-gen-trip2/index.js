@@ -22,6 +22,7 @@ import UnallocatedOrdersForm from './Forms/UnallocatedOrders'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GenerateOutboundTransportation2 = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState([])
@@ -29,14 +30,15 @@ const GenerateOutboundTransportation2 = () => {
   const [sortedZones, setSortedZones] = useState(selectedSaleZones)
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.GenerateTrip
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { formik } = useForm({
     initialValues: {

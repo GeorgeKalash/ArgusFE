@@ -11,10 +11,12 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const UserDefinedForm = ({ labels, maxAccess }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [errored, setErrored] = useState(false)
 
   const counter = 20
@@ -56,7 +58,7 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
   const getDataResult = () => {
     const fetchedValues = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return Object.keys(formik.values).includes(obj.key)
     })
 
@@ -83,7 +85,7 @@ const UserDefinedForm = ({ labels, maxAccess }) => {
       record: JSON.stringify({ sysDefaults: dataToPost })
     }).then(res => {
       toast.success(platformLabels.Updated)
-      updateDefaults(dataToPost)
+      updateSystemDefaults(dataToPost)
     })
   }
 

@@ -22,14 +22,15 @@ import { DeliveryRepository } from '@argus/repositories/src/repositories/Deliver
 import InvDetailsForm from './forms/InvDetailsForm'
 import { formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import toast from 'react-hot-toast'
-
 import SaleTransactionForm from '@argus/shared-ui/src/components/Shared/Forms/SaleTransactionForm'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GeneratePurchaseInvoice = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, LockRecord } = useWindow()
 
   const { labels, access } = useResourceQuery({
@@ -40,7 +41,7 @@ const GeneratePurchaseInvoice = () => {
     datasetId: ResourceIds.SalesInvoice
   })
 
-  const defCurrencyId = parseInt(defaultsData?.list?.find(({ key }) => key === 'currencyId')?.value)
+  const defCurrencyId = parseInt(systemDefaults?.list?.find(({ key }) => key === 'currencyId')?.value)
 
   const basicValidation = {
     clientId: yup.number().required(),

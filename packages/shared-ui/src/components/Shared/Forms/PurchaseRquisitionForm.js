@@ -34,13 +34,15 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { EmployeeRepository } from '@argus/repositories/src/repositories/EmployeeRepository'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PurchaseRquisitionForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const [maxSeqNo, setMaxSeqNo] = useState(1)
-  const defaultPlant = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const defaultPlant = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
   const userId = getStorageData('userData').userId
 
   const { labels, access } = useResourceParams({

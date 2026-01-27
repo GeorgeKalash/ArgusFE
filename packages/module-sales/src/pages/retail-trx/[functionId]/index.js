@@ -19,10 +19,12 @@ import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { getStorageData } from '@argus/shared-domain/src/storage/storage'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const RetailTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -95,7 +97,7 @@ const RetailTrx = () => {
   }
 
   async function getDefaultCountry() {
-    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const defaultCountry = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     return parseInt(defaultCountry?.value)
   }

@@ -32,12 +32,14 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
   const { stack } = useWindow()
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.InwardTransfer,
@@ -200,18 +202,18 @@ const InwardTransferForm = ({ recordId, plantId, userId, dtId, window }) => {
   }
 
   async function getDefaultVAT() {
-    const defaultVat = defaultsData?.list?.find(({ key }) => key === 'vatPct')
+    const defaultVat = systemDefaults?.list?.find(({ key }) => key === 'vatPct')
 
     formik.setFieldValue('vatPct', parseInt(defaultVat.value))
   }
 
   async function getDefaultCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')
 
     formik.setFieldValue('currencyId', parseInt(defaultCurrency.value))
   }
   async function getDefaultCountry() {
-    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const defaultCountry = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     formik.setFieldValue('countryId', parseInt(defaultCountry.value))
   }

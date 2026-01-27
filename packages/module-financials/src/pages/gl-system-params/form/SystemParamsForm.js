@@ -15,10 +15,12 @@ import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextFi
 import * as yup from 'yup'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SystemParamsForm = ({ _labels, access }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels  } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { formik } = useForm({
     validateOnChange: true,
@@ -83,7 +85,7 @@ const SystemParamsForm = ({ _labels, access }) => {
       'GLFYCDOECheck'
     ]
 
-    const filteredList = defaultsData?.list?.filter(obj => VALID_OBJ_KEY.includes(obj.key))
+    const filteredList = systemDefaults?.list?.filter(obj => VALID_OBJ_KEY.includes(obj.key))
 
     filteredList?.forEach(obj => {
       if (obj.key === 'GLFYCDOECheck') {
@@ -135,7 +137,7 @@ const SystemParamsForm = ({ _labels, access }) => {
       record: JSON.stringify({ SysDefaults: data })
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     })
   }
 

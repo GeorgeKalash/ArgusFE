@@ -18,11 +18,13 @@ import { CashBankRepository } from '@argus/repositories/src/repositories/CashBan
 import { RemittanceOutwardsRepository } from '@argus/repositories/src/repositories/RemittanceOutwardsRepository'
 import { RemittanceSettingsRepository } from '@argus/repositories/src/repositories/RemittanceRepository'
 import * as yup from 'yup'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function CloseForm({ form, labels, access, window }) {
   const { stack: stackError } = useError()
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const [mismatchedFields, setMismatchedFields] = useState([])
   form.receiver_bankId = 2
 
@@ -135,7 +137,7 @@ export default function CloseForm({ form, labels, access, window }) {
   const getFieldError = fieldName => mismatchedFields.includes(fieldName)
 
   useEffect(() => {
-    const defaultCountry = defaultsData?.list?.find(({ key }) => key === 'countryId')
+    const defaultCountry = systemDefaults?.list?.find(({ key }) => key === 'countryId')
 
     formik.setFieldValue('countryId', parseInt(defaultCountry.value))
   }, [])

@@ -29,10 +29,13 @@ import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, refetch, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
@@ -174,7 +177,7 @@ const OutwardsReturnForm = ({ recordId, plantId, dtId, isOpenOutwards = false, r
   })
 
   async function getRaCurrencyId() {
-    const raCurrencyId = defaultsData?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
+    const raCurrencyId = systemDefaults?.list?.find(({ key }) => key === 'baseCurrencyId')?.value
     if (raCurrencyId) {
       await formik.setFieldValue('raCurrencyId', raCurrencyId)
     }

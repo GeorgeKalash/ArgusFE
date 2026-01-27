@@ -16,10 +16,12 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/TimeAttendanceRepository'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const AttSettings = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.AttendanceSettings
@@ -29,7 +31,7 @@ const AttSettings = () => {
     ;(async function () {
       const myObject = {}
 
-      const filteredList = defaultsData?.list?.filter(obj => {
+      const filteredList = systemDefaults?.list?.filter(obj => {
         return (
           obj.key === 'caId' ||
           obj.key === 'fdowCombo' ||
@@ -56,7 +58,7 @@ const AttSettings = () => {
       })
       formik.setValues(myObject)
     })()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const { formik } = useForm({
     maxAccess: access,
@@ -91,7 +93,7 @@ const AttSettings = () => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
