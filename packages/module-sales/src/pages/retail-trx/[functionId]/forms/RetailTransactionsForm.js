@@ -51,6 +51,7 @@ import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import SkuForm from 'packages/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -73,6 +74,7 @@ export default function RetailTransactionsForm({
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -228,7 +230,11 @@ export default function RetailTransactionsForm({
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1),
+          qty: yup.string().test(function () {
+            const { qty } = this.parent
+
+            return qty > 0
+          }),
           barcode: yup.string().required()
         })
       ),
@@ -296,7 +302,7 @@ export default function RetailTransactionsForm({
     return res?.list
   }
 
-  async function barcodeSkuSelection(update, row) {
+  async function barcodeSkuSelection(update, row, addRow) {
     const itemRetail = await getItemRetail(row?.itemId)
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId)
@@ -315,6 +321,7 @@ export default function RetailTransactionsForm({
       metalId: itemPhysical?.metalId || null,
       weight: itemPhysical?.weight || 0,
       volume: itemPhysical?.volume || 0,
+      baseLaborPrice: itemConvertPrice?.baseLaborPrice || 0,
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
       priceType: itemConvertPrice?.priceType,
@@ -326,24 +333,26 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: row?.taxId || formik.values.header.taxId,
+      taxId: formik.values.header.isVatable ? row?.taxId : null,
       taxDetails: taxDetailsInfo || null
     }
-    update(result)
-
-    if (result?.basePrice) {
-      const basePriceResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
-      update(basePriceResult)
-    }
+    let finalResult = result
+    if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
     if (result?.unitPrice) {
-      const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
-      update(result2)
-
-      if (row?.qty > 0) {
-        const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
-        update(result3)
-      }
+      finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+      if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
+
+    if (!jumpToNextLine) return update(finalResult)
+
+    if (formik.values.disableSKULookup)
+      return addRow({
+        fieldName: 'sku',
+        changes: finalResult
+      })
+
+    update(finalResult)
+    addRow()
   }
 
   async function getItemRetail(itemId) {
@@ -610,13 +619,13 @@ export default function RetailTransactionsForm({
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
       totalWeightPerG: newRow?.TotPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
+    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = newRow.taxDetails
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -624,7 +633,7 @@ export default function RetailTransactionsForm({
       qty: parseFloat(itemPriceRow?.qty),
       weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice),
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -637,6 +646,7 @@ export default function RetailTransactionsForm({
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
       weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(5) : 0,
       unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
@@ -678,16 +688,7 @@ export default function RetailTransactionsForm({
 
   const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
   const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
-
-  const totalWeight = reCal
-    ? formik.values.items.reduce((curSum, row) => {
-        const curValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
-        const result = curSum + curValue
-
-        return (parseFloat(result) || 0).toFixed(2)
-      }, 0)
-    : parseFloat(formik.values?.header?.weight || 0).toFixed(2)
-
+  const totalWeight = _footerSummary?.totalWeight?.toFixed(2)
   const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
 
   const vatAmount = reCal
@@ -713,16 +714,32 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!newRow?.barcode) return
-        await barcodeSkuSelection(update, newRow)
+        await barcodeSkuSelection(update, newRow, addRow)
       }
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       flex: 2,
+      link: {
+        enabled: true,
+        popup: row => stack({
+          Component: SkuForm,
+          props: {
+            labels,
+            maxAccess,
+            itemId: row?.itemId || null,
+            plId: formik.values?.header?.plId || null
+          },
+          width: 700,
+          height: 500,
+          title: labels.transfer
+        })
+      },   
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
         ...(!formik.values.disableSKULookup && {
@@ -745,45 +762,49 @@ export default function RetailTransactionsForm({
           displayFieldWidth: 3
         })
       },
-      async onChange({ row: { update, newRow } }) {
-        if (!formik.values.disableSKULookup) {
-          if (!newRow.itemId) return
-          await barcodeSkuSelection(update, newRow)
-        } else {
-          if (!newRow?.sku) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-
-            return
-          }
-
-          const skuInfo = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${newRow.sku}`
-          })
-          if (!skuInfo.record) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-            stackError({
-              message: labels.invalidSKU
-            })
-
-            return
-          }
-          await barcodeSkuSelection(update, {
-            id: newRow?.id,
-            itemId: skuInfo?.record?.recordId,
-            sku: skuInfo?.record?.sku,
-            itemName: skuInfo?.record?.name,
-            taxId: skuInfo?.record?.taxId,
-            priceType: skuInfo?.record?.priceType,
-            qty: newRow?.qty || 0
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        const resetRow = () => {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
           })
         }
+
+        if (!formik.values.disableSKULookup) {
+          if (!newRow.itemId) return resetRow()
+
+          return await barcodeSkuSelection(update, newRow, addRow)
+        }
+
+        if (!newRow?.sku) return resetRow()
+
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        if (!skuInfo?.record) {
+          resetRow()
+          stackError({ message: labels.invalidSKU })
+
+          return
+        }
+
+        const rowData = {
+          id: newRow.id,
+          itemId: skuInfo.record.recordId,
+          sku: skuInfo.record.sku,
+          itemName: skuInfo.record.name,
+          taxId: formik.values.header.taxId
+            ? skuInfo?.record?.taxId
+              ? formik.values.header.taxId
+              : null
+            : skuInfo?.record?.taxId,
+          priceType: skuInfo.record.priceType,
+          qty: newRow.qty || 0
+        }
+
+        await barcodeSkuSelection(update, rowData, addRow)
       }
     },
     {
@@ -1453,7 +1474,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
@@ -1708,7 +1729,7 @@ export default function RetailTransactionsForm({
 
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
+             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
             }}

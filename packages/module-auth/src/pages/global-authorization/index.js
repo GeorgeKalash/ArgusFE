@@ -107,9 +107,7 @@ const GlobalAuthorization = () => {
       <Fixed>
         <GridToolbar
           maxAccess={access}
-          onSearch={value => {
-            filters.moduleId && filterBy('qry', value)
-          }}
+          onSearch={value => filters.moduleId && (!value ? clearFilter('qry') : filterBy('qry', value))}
           onSearchClear={() => {
             clearFilter('qry')
           }}
