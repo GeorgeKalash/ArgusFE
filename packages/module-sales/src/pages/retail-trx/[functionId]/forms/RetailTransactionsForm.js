@@ -390,7 +390,7 @@ export default function RetailTransactionsForm({
 
   function calculateBankFees(ccId, amount = 0) {
     if (!ccId || !amount) return
-    const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
+    const arrayCC = level2CacheRef?.current?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
     if (arrayCC.length === 0) return
     const feeTier = arrayCC.find(({ upToAmount }) => upToAmount >= amount)
     if (!feeTier) return
@@ -613,7 +613,7 @@ export default function RetailTransactionsForm({
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
       baseLaborPrice: newRow?.baseLaborPrice || 0,
-      totalWeightPerG: newRow?.TotPricePerG,
+      totalWeightPerG: newRow?.totPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
@@ -1117,14 +1117,6 @@ export default function RetailTransactionsForm({
     }))
   }
 
-  async function fillCashObjects() {
-    setCashGridData({
-      cashAccounts: level2CacheRef?.current?.cashAccounts || [],
-      creditCards: level2CacheRef?.current?.creditCards || [],
-      creditCardFees: level2CacheRef?.current?.creditCardFees || []
-    })
-  }
-
 
   async function loadLevel2() {
     const res = await getRequest({
@@ -1138,11 +1130,11 @@ export default function RetailTransactionsForm({
   async function getFilteredCC(cashAccountId) {
     if (!cashAccountId) return
 
-    const currentBankId = cashGridData?.cashAccounts?.find(
+    const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
       account => parseInt(account.recordId) === cashAccountId
     )?.bankId
 
-    const arrayCC = cashGridData?.creditCards?.filter(card => card.bankId == currentBankId) || []
+    const arrayCC = level2CacheRef?.current?.creditCards?.filter(card => card.bankId == currentBankId) || []
     filteredCreditCard.current = arrayCC
   }
 
@@ -1269,7 +1261,6 @@ export default function RetailTransactionsForm({
         const res = await getPosInfo()
         await setDefaults(res?.record)
       }
-      await fillCashObjects()
     })()
   }, [])
 
@@ -1429,7 +1420,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
