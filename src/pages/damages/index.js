@@ -141,8 +141,8 @@ const Damages = () => {
   async function openForm(recordId, reference, status) {
     if (recordId && status !== 3) {
       await lockRecord({
-        recordId: recordId,
-        reference: reference,
+        recordId,
+        reference,
         resourceId: ResourceIds.Damages,
         onSuccess: () => {
           addLockedScreen({
