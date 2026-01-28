@@ -73,6 +73,8 @@ export default function RetailTransactionsForm({
   const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
+  const level2CacheRef = useRef(null)
+
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
@@ -397,7 +399,7 @@ export default function RetailTransactionsForm({
 
   function calculateBankFees(ccId, amount = 0) {
     if (!ccId || !amount) return
-    const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
+    const arrayCC = level2CacheRef?.current?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
     if (arrayCC.length === 0) return
     const feeTier = arrayCC.find(({ upToAmount }) => upToAmount >= amount)
     if (!feeTier) return
@@ -620,7 +622,7 @@ export default function RetailTransactionsForm({
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
       baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
-      totalWeightPerG: newRow?.TotPricePerG,
+      totalWeightPerG: newRow?.totPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
@@ -951,8 +953,7 @@ export default function RetailTransactionsForm({
       label: labels.cashbox,
       name: 'cashAccountId',
       props: {
-        endpointId: PointofSaleRepository.CashAccount.qry,
-        parameters: `_posId=${parseInt(posUser?.posId)}`,
+        store: level2CacheRef?.current?.posCashAccounts,
         displayField: 'cashAccountRef',
         valueField: 'cashAccountId',
         mapping: [
@@ -975,6 +976,9 @@ export default function RetailTransactionsForm({
         } else {
           update({ ccId: null, ccRef: '', bankFees: null })
         }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: level2CacheRef?.current?.posCashAccounts }
       }
     },
     {
@@ -1051,7 +1055,7 @@ export default function RetailTransactionsForm({
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   function openAddressForm() {
@@ -1108,7 +1112,7 @@ export default function RetailTransactionsForm({
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
     const countryId = defaultsData?.list?.find(({ key }) => key === 'countryId')
-    const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
+    const posDtId = level2CacheRef?.current?.documentTypes?.some(x => x.recordId == posInfo?.dtId) || false
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1129,61 +1133,24 @@ export default function RetailTransactionsForm({
     }))
   }
 
-  async function isPosDtMatchesdgId(posDtId) {
+
+  async function loadLevel2() {
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
       parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
     })
 
-    return res?.record?.documentTypes?.some(x => x.recordId == posDtId) || false
-  }
-
-  async function fillCashObjects() {
-    const cashAccounts = await getAllCashBanks()
-    const creditCards = await fillCreditCardStore()
-    const creditCardFees = await getCreditCardFees()
-    setCashGridData({
-      cashAccounts: cashAccounts,
-      creditCards: creditCards,
-      creditCardFees: creditCardFees
-    })
-  }
-
-  async function getAllCashBanks() {
-    const res = await getRequest({
-      extension: CashBankRepository.CashAccount.qry,
-      parameters: `_type=1`
-    })
-
-    return res?.list || []
-  }
-
-  async function fillCreditCardStore() {
-    const res = await getRequest({
-      extension: CashBankRepository.CreditCard.qry,
-      parameters: `_filter=`
-    })
-
-    return res?.list || []
-  }
-
-  async function getCreditCardFees() {
-    const response = await getRequest({
-      extension: CashBankRepository.CreditCardFees.qry,
-      parameters: `_creditCardId=0&_filter=`
-    })
-
-    return response?.list?.sort((a, b) => a.upToAmount - b.upToAmount) || []
+    level2CacheRef.current = res?.record || null
   }
 
   async function getFilteredCC(cashAccountId) {
     if (!cashAccountId) return
 
-    const currentBankId = cashGridData?.cashAccounts?.find(
+    const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
       account => parseInt(account.recordId) === cashAccountId
     )?.bankId
 
-    const arrayCC = cashGridData?.creditCards?.filter(card => card.bankId == currentBankId) || []
+    const arrayCC = level2CacheRef?.current?.creditCards?.filter(card => card.bankId == currentBankId) || []
     filteredCreditCard.current = arrayCC
   }
 
@@ -1302,6 +1269,7 @@ export default function RetailTransactionsForm({
 
   useEffect(() => {
     ;(async function () {
+      await loadLevel2()
       if (recordId) {
         await refetchForm(recordId)
       } else {
@@ -1309,7 +1277,6 @@ export default function RetailTransactionsForm({
         const res = await getPosInfo()
         await setDefaults(res?.record)
       }
-      await fillCashObjects()
     })()
   }, [])
 
