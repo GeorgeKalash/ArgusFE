@@ -25,10 +25,12 @@ import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { useWindow } from 'src/windows'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrderWizard,
@@ -66,7 +68,10 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
         date: new Date(),
         status: 1,
         notes: '',
-        producedWeight: 0
+        producedWeight: 0,
+        activeHours: null,
+        idleHours: null,
+        totalHours: null
       },
       rows: [
         {
@@ -574,6 +579,45 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
                 value={formik?.values?.header?.weight}
                 maxAccess={maxAccess}
                 readOnly
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.activeHours'
+                label={labels.activeHours}
+                value={formik.values?.header?.activeHours}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.activeHours', null)}
+                maxAccess={maxAccess}
+                maxLength={5}
+                decimalScale={2}
+                error={formik?.touched?.header?.activeHours && Boolean(formik?.errors?.header?.activeHours)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.idleHours'
+                label={labels.idleHours}
+                value={formik.values?.header?.idleHours}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.idleHours', null)}
+                maxAccess={maxAccess}
+                maxLength={5}
+                decimalScale={2}
+                error={formik?.touched?.header?.idleHours && Boolean(formik?.errors?.header?.idleHours)}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <CustomNumberField
+                name='header.totalHours'
+                label={labels.totalHours}
+                value={formik.values?.header?.totalHours}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('header.totalHours', null)}
+                maxAccess={maxAccess}
+                maxLength={5}
+                decimalScale={2}
+                error={formik?.touched?.header?.totalHours && Boolean(formik?.errors?.header?.totalHours)}
               />
             </Grid>
             <Grid item xs={4}>
