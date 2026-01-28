@@ -94,6 +94,7 @@ export const AccessControlRepository = {
     post: service + 'postNTX'
   },
   LockedRecords: {
+    page: service + 'pageLOK',
     qry: service + 'qryLOK',
     del: service + 'delLOK',
     get: service + 'getLOK',
