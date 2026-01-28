@@ -36,7 +36,7 @@ export default function AddressFilterForm({
     initialValues: { search: '', cityId: null, countryId: null },
     validateOnChange: true,
     onSubmit: async () => {
-      const checkedADD = gridData?.list?.find(obj => obj.checked)
+      const checkedADD = data?.list?.find(obj => obj.checked)
       if (!checkedADD?.addressId) {
         handleAddressValues({ shipAddress: '', BillAddress: '', address: '' })
         window.close()
@@ -122,7 +122,7 @@ export default function AddressFilterForm({
   }
 
   const {
-    query: { data: gridData },
+    query: { data },
     paginationParameters,
     refetch
   } = useResourceQuery({
@@ -221,7 +221,7 @@ export default function AddressFilterForm({
         <Grow>
           <Table
             columns={rowColumns}
-            gridData={gridData}
+            gridData={data}
             rowId={['addressId']}
             pageSize={50}
             paginationType='api'
