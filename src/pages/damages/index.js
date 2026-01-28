@@ -14,11 +14,14 @@ import DamageForm from './forms/DamageForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
 import { useDocumentTypeProxy } from 'src/hooks/documentReferenceBehaviors'
 import { SystemFunction } from 'src/resources/SystemFunction'
+import NormalDialog from 'src/components/Shared/NormalDialog'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
 const Damages = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
+  const { stack, lockRecord } = useWindow()
+  const { addLockedScreen } = useContext(LockedScreensContext)
 
   const {
     query: { data },
@@ -119,19 +122,51 @@ const Damages = () => {
   }
 
   const edit = obj => {
-    openForm(obj.recordId)
+    openForm(obj?.recordId, obj?.reference, obj?.status)
   }
 
-  async function openForm(recordId) {
+  async function openStack(recordId) {
     stack({
       Component: DamageForm,
       props: {
-        recordId
+        recordId,
+        lockRecord,
       },
       width: 1150,
       height: 580,
       title: labels.damage
     })
+  }
+
+  async function openForm(recordId, reference, status) {
+    if (recordId && status !== 3) {
+      await lockRecord({
+        recordId,
+        reference,
+        resourceId: ResourceIds.Damages,
+        onSuccess: () => {
+          addLockedScreen({
+            resourceId: ResourceIds.Damages,
+            recordId,
+            reference
+          })
+          openStack(recordId, reference)
+        },
+        isAlreadyLocked: name => {
+          stack({
+            Component: NormalDialog,
+            props: {
+              DialogText: `${platformLabels.RecordLocked} ${name}`,
+              width: 600,
+              height: 200,
+              title: platformLabels.Dialog
+            }
+          })
+        }
+      })
+    } else {
+      openStack(recordId, reference)
+    }
   }
 
   const del = async obj => {
