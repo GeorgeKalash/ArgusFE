@@ -28,10 +28,9 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
-import NormalDialog from 'src/components/Shared/NormalDialog'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
-export default function DamageForm({ recordId, lockRecord, window }) {
+export default function DamageForm({ recordId, lockRecord }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -194,32 +193,6 @@ export default function DamageForm({ recordId, lockRecord, window }) {
     await postRequest({
       extension: ManufacturingRepository.Damage.post,
       record: JSON.stringify(formik.values.header)
-    })
-
-    lockRecord({
-      recordId: formik.values.header.recordId,
-      reference: formik.values.header.reference,
-      resourceId: ResourceIds.Damages,
-      onSuccess: () => {
-        addLockedScreen({
-          resourceId: ResourceIds.Damages,
-          recordId: formik.values.header.recordId,
-          reference: formik.values.header.reference
-        })
-        refetchForm(formik.values.header.recordId)
-      },
-      isAlreadyLocked: name => {
-        window.close()
-        stack({
-          Component: NormalDialog,
-          props: {
-            DialogText: `${platformLabels.RecordLocked} ${name}`,
-            width: 600,
-            height: 200,
-            title: platformLabels.Dialog
-          }
-        })
-      }
     })
 
     toast.success(platformLabels.Posted)
