@@ -340,9 +340,13 @@ export default function RetailTransactionsForm({
       taxDetails: taxDetailsInfo || null
     }
     let finalResult = result
-    if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
+    if (result?.basePrice) { 
+      finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
+      finalResult.priceWithVAT = calculatePrice(finalResult, finalResult.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+    }
     if (result?.unitPrice) {
       finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+      finalResult.priceWithVAT = calculatePrice(finalResult, finalResult.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
       if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
 
@@ -863,8 +867,11 @@ export default function RetailTransactionsForm({
       name: 'totPricePerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
-        update(data)
+        const updatedbaseLaborPrice = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
+        const updatedUnitPrice = getItemPriceRow(updatedbaseLaborPrice, DIRTYFIELD_BASE_LABOR_PRICE)
+        const rowData = getItemPriceRow(updatedUnitPrice, DIRTYFIELD_UNIT_PRICE)
+        const priceWithVAT = calculatePrice(rowData, rowData?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+        update({ ...rowData, priceWithVAT })
       }
     },
     {
