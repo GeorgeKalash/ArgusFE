@@ -307,6 +307,11 @@ export default function RetailTransactionsForm({
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
+
+    const unitPrice = itemConvertPrice?.priceType == 3
+          ? (itemPhysical?.weight || 0) * (TotPricePerG || 0)
+          : itemConvertPrice?.unitPrice
+
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
     const taxDetailsInfo = await getTaxDetails(row?.taxId)
 
@@ -324,11 +329,9 @@ export default function RetailTransactionsForm({
       baseLaborPrice: itemConvertPrice?.baseLaborPrice || 0,
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
+      priceWithVAT: calculatePrice({ ...row, unitPrice }, taxDetailsInfo?.[0], DIRTYFIELD_UNIT_PRICE),
       priceType: itemConvertPrice?.priceType,
-      unitPrice:
-        itemConvertPrice?.priceType == 3
-          ? (itemPhysical?.weight || 0) * (TotPricePerG || 0)
-          : itemConvertPrice?.unitPrice,
+      unitPrice,
       qty: row?.qty || 1,
       extendedPrice: 0,
       mdAmount: 0,
@@ -620,7 +623,7 @@ export default function RetailTransactionsForm({
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
       baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
-      totalWeightPerG: newRow?.TotPricePerG,
+      totalWeightPerG: newRow?.totPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
@@ -877,7 +880,13 @@ export default function RetailTransactionsForm({
     {
       component: 'numberfield',
       label: labels.priceWithVat,
-      name: 'priceWithVAT'
+      name: 'priceWithVAT',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        const unitPrice = calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
+        const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE)
+        update(data)
+      }
     },
     {
       component: 'numberfield',
@@ -1274,7 +1283,7 @@ export default function RetailTransactionsForm({
       mdAmount: header?.mdAmount || 0,
       mdType: item?.mdType || 1,
       baseLaborPrice: item?.baseLaborPrice || 0,
-      totalWeightPerG: item?.TotPricePerG,
+      totalWeightPerG: item?.totPricePerG,
       mdValue: parseFloat(item?.mdValue),
       tdPct: 0,
       dirtyField
