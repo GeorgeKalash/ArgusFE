@@ -357,6 +357,7 @@ const TabsProvider = ({ children }) => {
                             size='small'
                             onClick={event => {
                               event.stopPropagation()
+                              if (activeTab) unlockIfLocked(activeTab)
                               closeTab(activeTab.route)
                             }}
                             sx={{ p: 0.5 }}

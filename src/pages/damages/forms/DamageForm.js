@@ -28,10 +28,12 @@ import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import useResourceParams from 'src/hooks/useResourceParams'
 import { useWindow } from 'src/windows'
 import WorkFlow from 'src/components/Shared/WorkFlow'
+import { LockedScreensContext } from 'src/providers/LockedScreensContext'
 
-export default function DamageForm({ recordId, jobId }) {
+export default function DamageForm({ recordId, lockRecord }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -167,6 +169,20 @@ export default function DamageForm({ recordId, jobId }) {
         },
         items: res?.record?.items || []
       })
+
+      !formik.values.recordId &&
+        lockRecord({
+          recordId: res?.record?.header?.recordId,
+          reference: res?.record?.header?.reference,
+          resourceId: ResourceIds.Damages,
+          onSuccess: () => {
+            addLockedScreen({
+              resourceId: ResourceIds.Damages,
+              recordId: res?.record?.header?.recordId,
+              reference: res?.record?.header?.reference
+            })
+          }
+        })
     })
   }
 
