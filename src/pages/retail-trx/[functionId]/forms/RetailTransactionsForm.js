@@ -51,6 +51,7 @@ import TaxDetails from 'src/components/Shared/TaxDetails'
 import AddressForm from 'src/components/Shared/AddressForm'
 import CustomButton from 'src/components/Inputs/CustomButton'
 import { LockedScreensContext } from 'src/providers/LockedScreensContext'
+import SkuForm from 'src/pages/iv-materials-tfr/Form/SkuForm'
 
 export default function RetailTransactionsForm({
   labels,
@@ -724,6 +725,21 @@ export default function RetailTransactionsForm({
       name: 'sku',
       jumpToNextLine,
       flex: 2,
+      link: {
+        enabled: true,
+        popup: row => stack({
+          Component: SkuForm,
+          props: {
+            labels,
+            maxAccess,
+            itemId: row?.itemId || null,
+            plId: formik.values?.header?.plId || null
+          },
+          width: 700,
+          height: 500,
+          title: labels.transfer
+        })
+      },   
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
         ...(!formik.values.disableSKULookup && {
@@ -1458,7 +1474,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}
@@ -1721,7 +1737,7 @@ export default function RetailTransactionsForm({
 
         <Grow>
           <DataGrid
-            onChange={(value, action) => {
+             onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
             }}
