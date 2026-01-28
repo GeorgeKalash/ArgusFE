@@ -51,7 +51,7 @@ import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
-import SkuForm from '@argus/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
+import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 
 export default function RetailTransactionsForm({
   labels,
@@ -728,16 +728,11 @@ export default function RetailTransactionsForm({
       link: {
         enabled: true,
         popup: row => stack({
-          Component: SkuForm,
+          Component: ItemDetails,
           props: {
-            labels,
-            maxAccess,
             itemId: row?.itemId || null,
             plId: formik.values?.header?.plId || null
-          },
-          width: 700,
-          height: 500,
-          title: labels.transfer
+          }
         })
       },   
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),

@@ -27,10 +27,10 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
-import SkuForm from '@argus/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -99,8 +99,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         metalId: null,
         metalRef: '',
         totalCost: 0,
-        priceType: null,
-        details: false
+        priceType: null
       }
     ],
     serials: []
@@ -346,6 +345,16 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      link: {
+        enabled: true,
+        popup: row =>  stack({
+          Component: ItemDetails,
+          props: {
+            itemId: row?.itemId,
+            plId: formik.values?.plId
+          }
+        })
+      }, 
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
@@ -373,18 +382,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
         return { ...props, imgSrc: onCondition(row) }
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.itemId) {
-          update({
-            details: false
-          })
-
-          return
-        }
-        if (newRow.isInactive) {
-          update({
+        const resetRow = () => {
+         update({
             ...formik.initialValues.transfers[0],
             id: newRow.id
           })
+        }
+
+        if (!newRow?.itemId) return resetRow()
+
+        if (newRow.isInactive) {
+          resetRow()
           stackError({
             message: labels.inactiveItem
           })
@@ -403,36 +411,11 @@ export default function MaterialsTransferForm({ recordId, window }) {
             weight,
             unitCost,
             totalCost,
-            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
             metalId,
             metalRef
-          })
-        }
-      }
-    },
-    {
-      component: 'button',
-      name: 'details',
-      props: {
-        imgSrc:require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src
-      },
-      label: labels.details,
-      onClick: (e, row, update, newRow) => {
-        if (row?.itemId) {
-          stack({
-            Component: SkuForm,
-            props: {
-              labels,
-              maxAccess,
-              itemId: row?.itemId,
-              plId: formik.values?.plId
-            },
-            width: 700,
-            height: 500,
-            title: labels.Transfer
           })
         }
       }
@@ -1047,7 +1030,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  details: false,
                   qtyInBase: 0
                 }
               })
