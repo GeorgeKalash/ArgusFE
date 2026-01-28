@@ -30,7 +30,7 @@ import { AccessControlRepository } from '@argus/repositories/src/repositories/Ac
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import ItemDetails from '../ItemDetails'
+import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 
 export default function MaterialsTransferForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

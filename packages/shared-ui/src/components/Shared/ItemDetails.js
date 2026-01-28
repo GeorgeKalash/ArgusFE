@@ -15,7 +15,7 @@ export default function ItemDetails({ plId, itemId, window }) {
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.ItemDetails
   })
-  useSetWindow({ title: labels.transfer, window })
+  useSetWindow({ title: labels.itemQuickView, window })
 
   const { formik } = useForm({
     maxAccess,
