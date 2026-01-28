@@ -12,6 +12,8 @@ import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -87,55 +89,60 @@ const StrategiesForm = ({ labels, maxAccess, setStore, store, onChange }) => {
 
   return (
     <FormShell form={formik} resourceId={ResourceIds.Strategies} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik?.values?.name}
-            required
-            maxLength='50'
-            maxAccess={maxAccess}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={DocumentReleaseRepository.DRGroup.qry}
-            parameters='_startAt=0&_pageSize=100'
-            name='groupId'
-            label={labels.groupStrat}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            required
-            readOnly={editMode}
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik && formik.setFieldValue('groupId', newValue?.recordId)
-            }}
-            error={formik.touched.groupId && Boolean(formik.errors.groupId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.SY_TYPE}
-            name='type'
-            label={labels.type}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('type', newValue?.key)
-            }}
-            error={formik.touched.type && Boolean(formik.errors.type)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik?.values?.name}
+                required
+                maxLength='50'
+                maxAccess={maxAccess}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={DocumentReleaseRepository.DRGroup.qry}
+                parameters='_startAt=0&_pageSize=100'
+                name='groupId'
+                label={labels.groupStrat}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                required
+                readOnly={editMode}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik && formik.setFieldValue('groupId', newValue?.recordId)
+                }}
+                error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.SY_TYPE}
+                name='type'
+                label={labels.type}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                required
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('type', newValue?.key)
+                }}
+                error={formik.touched.type && Boolean(formik.errors.type)}
+              />
+            </Grid>
+          </Grid>  
+        </Grow>
+      </VertLayout>
+      
     </FormShell>
   )
 }

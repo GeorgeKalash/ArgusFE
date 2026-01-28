@@ -2,6 +2,19 @@
   overflow-x: hidden;
   transition: width 0.25s ease-in-out;
   background-color: #231f20;
+
+  --nav-font: clamp(10px, 0.85vw, 14px);
+  --nav-font-folder: clamp(10px, 0.9vw, 14px);
+  --nav-line: clamp(14px, 1.1vw, 18px);
+
+  --nav-icon: clamp(14px, 1.1vw, 22px);
+  --nav-arrow: clamp(12px, 1vw, 20px);
+
+  --nav-row-py: clamp(2px, 0.35vw, 6px);
+  --nav-row-px: clamp(6px, 0.6vw, 10px);
+
+  --nav-gap: clamp(4px, 0.5vw, 10px);
+  --nav-indent: clamp(8px, 0.8vw, 14px);
 }
 
 .layout-vertical-nav ul {
@@ -61,44 +74,63 @@
 
 .node {
   width: 100%;
-  padding: 4px 0;
+  padding: var(--nav-row-py) 0;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
   position: relative;
   transition: background-color 0.2s ease-in-out;
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
 }
 
 .node-content {
   display: flex;
   align-items: center;
   overflow-x: hidden;
+  gap: var(--nav-gap);
 }
 
 .node-icon {
   display: flex;
   align-items: center;
   justify-content: left;
-  padding-left: 8px;
+  padding-left: var(--nav-row-px);
   transition: transform 0.2s ease-in-out;
+}
+
+.node-icon img {
+  width: var(--nav-icon) !important;
+  height: var(--nav-icon) !important;
 }
 
 .node-text {
   margin: 2px 0 0 5px;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
+}
+
+.node-text :global(.text) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .folder {
-  font-size: 14px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #231f20 !important;
-  padding: 8px;
+  padding: var(--nav-row-py) var(--nav-row-px);
   border-radius: 4px;
   transition: all 0.2s ease-in-out;
+  font-size: var(--nav-font-folder);
+  line-height: var(--nav-line);
 }
 
 .menu-container {
@@ -122,7 +154,7 @@
 
 .search-field input {
   color: white;
-  font-size: 13px;
+  font-size: var(--nav-font);
   height: 11px;
   padding-right: 28px;
 }
@@ -173,7 +205,8 @@
 }
 
 .file {
-  font-size: 14px;
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
 }
 
 .open {
@@ -183,11 +216,20 @@
 
 .children {
   background-color: #231f20;
+  padding-left: var(--nav-indent);
 }
 
 .arrow {
   position: absolute;
-  bottom: 2px;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.arrow svg {
+  font-size: var(--nav-arrow) !important;
+  width: var(--nav-arrow) !important;
+  height: var(--nav-arrow) !important;
 }
 
 .collapse-button {
@@ -270,8 +312,8 @@
 .userHeader {
   display: flex;
   align-items: center;
-  justify-content: flex-start;    
-  padding: 4px 8px !important;    
+  justify-content: flex-start;
+  padding: 4px 8px !important;
   width: 100%;
   box-sizing: border-box;
 }
@@ -301,7 +343,7 @@
   padding-right: 10px !important;
   display: flex !important;
   align-items: center !important;
-  min-height: 24px !important; 
+  min-height: 24px !important;
 }
 
 .logoutMenuItem svg {
@@ -350,7 +392,6 @@
     border-radius: 3px;
   }
   .search-field input {
-    font-size: 11px;
     height: 7px;
     padding-right: 14px;
   }
@@ -452,9 +493,8 @@
 }
 
 @media (max-width: 1024px) {
-  .layout-vertical-nav{
+  .layout-vertical-nav {
     z-index: 1200;
-    
   }
   .menu-search-box svg,
   .box svg,
@@ -586,7 +626,6 @@
     padding: 4px;
   }
   .search-field input {
-    font-size: 10px;
     height: 6px;
     padding-right: 12px;
   }
@@ -658,7 +697,6 @@
     padding: 3px;
   }
   .search-field input {
-    font-size: 9px;
     height: 5px;
     padding-right: 10px;
   }
@@ -730,7 +768,6 @@
     padding: 2px;
   }
   .search-field input {
-    font-size: 8px;
     height: 4px;
     padding-right: 8px;
   }

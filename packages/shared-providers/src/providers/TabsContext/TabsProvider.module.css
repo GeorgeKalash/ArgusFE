@@ -11,19 +11,40 @@
   z-index: 9999;
 }
 
+.panelsWrapper {
+  position: relative;
+  width: 100%;
+  flex: 1 !important;
+  min-height: 0;
+}
+
 .customTabPanel {
   display: flex !important;
   flex-direction: column;
   width: 100%;
-  flex: 1 !important;
+  height: 100%;
   overflow: auto;
   padding-top: 5px;
-  position: relative;
+  position: absolute;
+  inset: 0;
   background-color: white;
 }
 
-.hidden {
-  display: none !important;
+.activePanel {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.hiddenPanel {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.panelsWrapper {
+  position: relative;
+  width: 100%;
+  flex: 1 !important;
+  overflow: hidden;
 }
 
 .tabsProviderContainer {

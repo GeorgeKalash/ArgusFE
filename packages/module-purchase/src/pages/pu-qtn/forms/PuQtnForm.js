@@ -414,7 +414,7 @@ export default function PuQtnForm({ recordId, window }) {
         }
       },
       label: labels.tax,
-      onClick: (e, row) => {
+      onClick: (_, row) => {
         stack({
           Component: TaxDetails,
           props: {

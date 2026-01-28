@@ -12,6 +12,8 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { LoanManagementRepository } from '@argus/repositories/src/repositories/LoanManagementRepository'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 
 const iconOptions = [
   {
@@ -148,132 +150,137 @@ export default function LeaveScheduleForm({ labels, maxAccess, store, setStore }
 
   return (
     <FormShell resourceId={ResourceIds.LeaveSchedule} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='10'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='10'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
 
-        <Grid item xs={12}>
-          <ResourceComboBox
-            endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
-            filter={item => item.isPaid}
-            name='ltId'
-            label={labels.ltId}
-            required
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            readOnly={editMode}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('ltId', newValue?.recordId || null)
-            }}
-            error={formik.touched.ltId && Boolean(formik.errors.ltId)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.FIRST_ACCRUAL}
-            name='firstAccrual'
-            label={labels.firstAccrual}
-            values={formik.values}
-            valueField='key'
-            displayField='value'
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('firstAccrual', newValue?.key || null)
-            }}
-            error={formik.touched.firstAccrual && Boolean(formik.errors.firstAccrual)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.CARRY_OVER_DATE}
-            name='coDate'
-            label={labels.coDate}
-            values={formik.values}
-            valueField='key'
-            displayField='value'
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('coDate', newValue?.key || null)
-            }}
-            error={formik.touched.coDate && Boolean(formik.errors.coDate)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.ACCRUAL_ACTIVATION}
-            name='accrualActivation'
-            label={labels.accrualActivation}
-            values={formik.values}
-            valueField='key'
-            displayField='value'
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('accrualActivation', newValue?.key || null)
-            }}
-            error={formik.touched.accrualActivation && Boolean(formik.errors.accrualActivation)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            datasetId={DataSets.WORKING_DAYS}
-            name='dayType'
-            label={labels.dayType}
-            values={formik.values}
-            valueField='key'
-            displayField='value'
-            required
-            maxAccess={maxAccess}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('dayType', newValue?.key || null)
-            }}
-            error={formik.touched.dayType && Boolean(formik.errors.dayType)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <ResourceComboBox
-            name='icon'
-            label={labels.icon}
-            valueField='key'
-            displayField='value'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('icon', newValue || null)
-              formik.setFieldValue('iconName', newValue?.key || '')
-            }}
-            options={iconOptions}
-            maxAccess={maxAccess}
-            error={formik.touched.icon && Boolean(formik.errors.icon)}
-          />
-        </Grid>
-      </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={LoanManagementRepository.IndemnityAccuralsFilters.qry}
+                filter={item => item.isPaid}
+                name='ltId'
+                label={labels.ltId}
+                required
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                readOnly={editMode}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('ltId', newValue?.recordId || null)
+                }}
+                error={formik.touched.ltId && Boolean(formik.errors.ltId)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.FIRST_ACCRUAL}
+                name='firstAccrual'
+                label={labels.firstAccrual}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('firstAccrual', newValue?.key || null)
+                }}
+                error={formik.touched.firstAccrual && Boolean(formik.errors.firstAccrual)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.CARRY_OVER_DATE}
+                name='coDate'
+                label={labels.coDate}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('coDate', newValue?.key || null)
+                }}
+                error={formik.touched.coDate && Boolean(formik.errors.coDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ACCRUAL_ACTIVATION}
+                name='accrualActivation'
+                label={labels.accrualActivation}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('accrualActivation', newValue?.key || null)
+                }}
+                error={formik.touched.accrualActivation && Boolean(formik.errors.accrualActivation)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.WORKING_DAYS}
+                name='dayType'
+                label={labels.dayType}
+                values={formik.values}
+                valueField='key'
+                displayField='value'
+                required
+                maxAccess={maxAccess}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('dayType', newValue?.key || null)
+                }}
+                error={formik.touched.dayType && Boolean(formik.errors.dayType)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                name='icon'
+                label={labels.icon}
+                valueField='key'
+                displayField='value'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('icon', newValue || null)
+                  formik.setFieldValue('iconName', newValue?.key || '')
+                }}
+                options={iconOptions}
+                maxAccess={maxAccess}
+                error={formik.touched.icon && Boolean(formik.errors.icon)}
+              />
+            </Grid>
+          </Grid> 
+        </Grow>
+      </VertLayout>
+      
     </FormShell>
   )
 }

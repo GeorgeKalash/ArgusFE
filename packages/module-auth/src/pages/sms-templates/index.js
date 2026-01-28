@@ -1,21 +1,21 @@
-import { useState, useContext } from 'react'
-import { Box } from '@mui/material'
+import { useContext } from 'react'
 import toast from 'react-hot-toast'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
-import { useInvalidate, useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import SmsTemplatesForms from './forms/SmsTemplatesForm'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const SmsTemplate = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-
+  const { platformLabels } = useContext(ControlContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -23,7 +23,7 @@ const SmsTemplate = () => {
 
     const response = await getRequest({
       extension: SystemRepository.SMSTemplate.page,
-      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&filter=`
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -31,27 +31,26 @@ const SmsTemplate = () => {
 
   const {
     query: { data },
-    labels: _labels,
-    access
+    labels,
+    access,
+    invalidate,
+    refetch,
+    paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: SystemRepository.SMSTemplate.page,
     datasetId: ResourceIds.SmsTemplates
   })
 
-  const invalidate = useInvalidate({
-    endpointId: SystemRepository.SMSTemplate.page
-  })
-
   const columns = [
     {
       field: 'name',
-      headerName: _labels.name,
+      headerName: labels.name,
       flex: 1
     },
     {
       field: 'smsBody',
-      headerName: _labels.smsBody,
+      headerName: labels.smsBody,
       flex: 1
     }
   ]
@@ -68,13 +67,13 @@ const SmsTemplate = () => {
     stack({
       Component: SmsTemplatesForms,
       props: {
-        labels: _labels,
-        recordId: recordId,
+        labels,
+        recordId,
         maxAccess: access
       },
       width: 500,
       height: 270,
-      title: _labels.smsTemplate
+      title: labels.smsTemplate
     })
   }
 
@@ -84,7 +83,7 @@ const SmsTemplate = () => {
       record: JSON.stringify(obj)
     })
     invalidate()
-    toast.success('Record Deleted Successfully')
+    toast.success(platformLabels.Deleted)
   }
 
   return (
@@ -94,14 +93,16 @@ const SmsTemplate = () => {
       </Fixed>
       <Grow>
         <Table
+          name='smsTable'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
           onDelete={del}
-          isLoading={false}
           pageSize={50}
-          paginationType='client'
+          refetch={refetch}
+          paginationParameters={paginationParameters}
+          paginationType='api'
           maxAccess={access}
         />
       </Grow>

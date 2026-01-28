@@ -527,7 +527,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
         onCondition: row => {
           if (row.itemId && row.taxId) {
             return {
-              imgSrc: '@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png',
+              imgSrc: require('@argus/shared-ui/src/components/images/buttonsIcons/tax-icon.png').default.src, 
               hidden: false
             }
           } else {

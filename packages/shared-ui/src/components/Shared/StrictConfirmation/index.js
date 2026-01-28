@@ -7,6 +7,7 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import styles from './StrictConfirmation.module.css'
 import Form from '../Form'
+import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const StrictConfirmation = ({ window, action, type = '' }) => {
   const { platformLabels } = useContext(ControlContext)
@@ -19,6 +20,21 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
     placeHolder: '',
     buttonKey: ''
   })
+
+  const { width: screenWidth } = useWindowDimensions()
+
+  const scaleFactor = (() => {
+    if (screenWidth >= 1680) return 1
+    if (screenWidth >= 1600) return 0.9
+
+    const minW = 1024
+    const maxW = 1600
+    const minScale = 0.7
+    const maxScale = 0.92
+
+    if (screenWidth <= minW) return minScale
+    return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+  })()
 
   useEffect(() => {
     switch (type) {
@@ -70,11 +86,8 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
 
   useSetWindow({ title: confirmation.title, window })
 
-  const handleChange = event =>
-    setConfirmation(prev => ({ ...prev, text: event.target.value }))
-
-  const handleClear = () =>
-    setConfirmation(prev => ({ ...prev, text: '' }))
+  const handleChange = event => setConfirmation(prev => ({ ...prev, text: event.target.value }))
+  const handleClear = () => setConfirmation(prev => ({ ...prev, text: '' }))
 
   const handleSubmit = () => {
     action()
@@ -100,7 +113,12 @@ const StrictConfirmation = ({ window, action, type = '' }) => {
     >
       <VertLayout>
         <Grow>
-          <Grid container spacing={2} className={styles.container}>
+          <Grid
+            container
+            spacing={2}
+            className={styles.container}
+            style={{ '--sf': scaleFactor }}
+          >
             <Grid item xs={12}>
               <p className={styles.title}>
                 {platformLabels.areYouSure}

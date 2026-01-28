@@ -1,10 +1,5 @@
-// ** MUI Theme Provider
 import { deepmerge } from '@mui/utils'
-
-// ** User Theme Options
 import UserThemeOptions from '@argus/shared-layouts/src/layouts/UserThemeOptions'
-
-// ** Theme Override Imports
 import palette from './palette'
 import spacing from './spacing'
 import shadows from './shadows'
@@ -13,10 +8,8 @@ import typography from './typography'
 import breakpoints from './breakpoints'
 
 const themeOptions = (settings, overrideMode) => {
-  // ** Vars
   const { skin, mode, direction, themeColor } = settings
 
-  // ** Create New object before removing user component overrides and typography objects from userThemeOptions
   const userThemeConfig = Object.assign({}, UserThemeOptions())
 
   const mergedThemeConfig = deepmerge(

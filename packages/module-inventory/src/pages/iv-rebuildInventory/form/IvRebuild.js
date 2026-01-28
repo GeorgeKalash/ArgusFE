@@ -8,8 +8,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
@@ -30,24 +28,22 @@ export default function RebuildForm({ _labels, access }) {
       date: yup.string().required()
     }),
     onSubmit: async obj => {
-      try {
-        const { recordId, ...rest } = obj
+      const { recordId, ...rest } = obj
 
-        const res = await postRequest({
-          extension: InventoryRepository.RebuildInventory.rebuild,
-          record: JSON.stringify(rest)
-        })
+      const res = await postRequest({
+        extension: InventoryRepository.RebuildInventory.rebuild,
+        record: JSON.stringify(rest)
+      })
 
-        toast.success(platformLabels.rebuild)
+      toast.success(platformLabels.rebuild)
 
-        stack({
-          Component: ThreadProgress,
-          props: {
-            recordId: res.recordId
-          },
-          closable: false
-        })
-      } catch (error) {}
+      stack({
+        Component: ThreadProgress,
+        props: {
+          recordId: res.recordId
+        },
+        closable: false
+      })
     }
   })
 
@@ -90,7 +86,7 @@ export default function RebuildForm({ _labels, access }) {
                 secondValueShow='itemName'
                 displayFieldWidth={2}
                 form={formik}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('itemId', newValue?.recordId || 0)
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('itemRef', newValue?.sku || '')

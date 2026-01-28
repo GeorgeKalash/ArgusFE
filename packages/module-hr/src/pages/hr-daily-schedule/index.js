@@ -227,7 +227,7 @@ export default function Calendar() {
                   error={formik.touched.toDate && Boolean(formik.errors.toDate)}
                 />
               </Grid>
-              <Grid item xs={0.3}>
+              <Grid item >
                 <CustomButton
                   onClick={formik.handleSubmit}
                   label={platformLabels.Preview}
@@ -236,8 +236,8 @@ export default function Calendar() {
                 />
               </Grid>
 
-              <Grid item xs={2}></Grid>
-              <Grid item xs={0.6}>
+              <Grid item xl={2} md={1}></Grid>
+              <Grid item >
                 <CustomButton
                   onClick={() => onImportExport(ImportExportMode.IMPORT)}
                   label={platformLabels.import}
@@ -245,7 +245,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
-              <Grid item xs={0.6}>
+              <Grid item >
                 <CustomButton
                   onClick={() => onImportExport(ImportExportMode.EXPORT)}
                   label={platformLabels.Export}
@@ -253,7 +253,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId}
                 />
               </Grid>
-              <Grid item xs={0.6}>
+              <Grid item >
                 <CustomButton
                   onClick={onDelete}
                   label={platformLabels.Delete}
@@ -261,7 +261,7 @@ export default function Calendar() {
                   disabled={!formik.values.employeeId || !formik.values.fromDate || !formik.values.toDate}
                 />
               </Grid>
-              <Grid item xs={0.6}>
+              <Grid item >
                 <CustomButton
                   onClick={onGenerate}
                   label={platformLabels.Generate}

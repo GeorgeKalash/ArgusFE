@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useContext } from 'react'
+import { useContext, useMemo, useState  } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,8 +12,8 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
-import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 
 const SECURITY_GROUP_FILTER = {
   ALL: '2',

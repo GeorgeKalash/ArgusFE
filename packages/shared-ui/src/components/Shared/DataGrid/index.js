@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, Grid, IconButton } from '@mui/material'
+import { Box, Grid, IconButton, Link } from '@mui/material'
 import components from './components'
 import { CacheStoreProvider } from '@argus/shared-providers/src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -489,6 +489,47 @@ export function DataGrid({
   const CustomCellRenderer = params => {
     const { column } = params
 
+    if (column.colDef?.link?.enabled) {
+      const { getHref, target, popup, onClick } = column.colDef.link
+      const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
+
+      return (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <Link
+            href={popup ? '#' : linkHref} 
+            target={!popup ? target || '_self' : undefined}
+            rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
+            onClick={e => {
+              e.stopPropagation()
+              if (popup) {
+                e.preventDefault()
+                popup(params.data)
+                
+                return
+              }
+              onClick?.(params.data)
+            }}
+            style={{
+              color: '#1976d2',
+              textDecoration: 'underline',
+              cursor: 'pointer'
+            }}
+          >
+            {params.value}
+          </Link>
+        </Box>
+      )
+    }
+
+         
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view
@@ -723,6 +764,7 @@ export function DataGrid({
   }
 
   const onCellClicked = async params => {
+    if (params.event.target.closest('a')) return
     if (typeof onValidationRequired === 'function') onValidationRequired()
 
     const { colDef, rowIndex, api } = params

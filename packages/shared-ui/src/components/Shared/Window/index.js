@@ -104,21 +104,39 @@ const Window = React.memo(
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
     const containerHeight = `calc(100vh - var(--tabs-height, 40px))`
 
-    const scaleFactor = (() => {
-      if (screenWidth >= 1680) return 1
-      if (screenWidth >= 1600) return 0.9
+       const availableWidth = Math.max(0, screenWidth - sidebarWidth)
+
+    const responsiveScale = (() => {
+      if (availableWidth >= 1680) return 1
+      if (availableWidth >= 1600) return 0.9
 
       const minW = 1024
       const maxW = 1600
       const minScale = 0.7
       const maxScale = 0.92
 
-      if (screenWidth <= minW) return minScale
-      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      if (availableWidth <= minW) return minScale
+      return (
+        minScale +
+        ((availableWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      )
     })()
 
-    const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
-    const scaledHeight = expanded ? containerHeight : Math.max(120, height * scaleFactor)
+    const fitScale = (() => {
+      const padding = 20
+      const fit = width ? (availableWidth - padding) / width : 1
+      return Number.isFinite(fit) ? Math.min(1, fit) : 1
+    })()
+
+    const scaleFactor = Math.min(responsiveScale, fitScale)
+
+    const scaledWidth = expanded
+      ? containerWidth
+      : Math.min(availableWidth - 20, Math.max(300, width * scaleFactor))
+
+    const scaledHeight = expanded
+      ? containerHeight
+      : Math.max(120, height * scaleFactor)
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()

@@ -122,7 +122,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Typography>{labels.start}</Typography>
+          <Typography variant='body2'>{labels.start}</Typography>
         </Grid>
         <Grid container spacing={2} alignItems='center'>
           <Grid item xs={3}>
@@ -154,10 +154,10 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
               error={formik.touched.period && Boolean(formik.errors.period)}
             />
           </Grid>
-          <Typography pl={2}>{labels.afterHireDate}</Typography>
+          <Typography variant='body2' pl={2}>{labels.afterHireDate}</Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography>{labels.AccruedHours}</Typography>
+          <Typography variant='body2'>{labels.AccruedHours}</Typography>
         </Grid>
         <Grid container spacing={2} alignItems='center'>
           <Grid item xs={3}>
@@ -191,7 +191,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Typography>{labels.MaxAccrualHours}</Typography>
+          <Typography variant='body2'>{labels.MaxAccrualHours}</Typography>
         </Grid>
         <Grid container spacing={2} alignItems='center'>
           <Grid item xs={3}>
@@ -210,7 +210,7 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Typography>{labels.CarryOver}</Typography>
+          <Typography variant='body2'>{labels.CarryOver}</Typography>
         </Grid>
         <Grid container spacing={2} alignItems='center'>
           <Grid item xs={4}>
@@ -245,12 +245,12 @@ export default function PeriodsForm({ labels, maxAccess, recordId, seqNo, window
             />
           </Grid>
           <Grid item xs={3}>
-            <Typography>{labels.hoursPerYear}</Typography>
+            <Typography variant='body2'>{labels.hoursPerYear}</Typography>
           </Grid>
         </Grid>
         <Grid container spacing={2} alignItems='center' paddingTop={2}>
           <Grid item xs={3}>
-            <Typography>{labels.accrualActivation}</Typography>
+            <Typography variant='body2'>{labels.accrualActivation}</Typography>
           </Grid>
           <Grid item xs={6}>
             <ResourceComboBox

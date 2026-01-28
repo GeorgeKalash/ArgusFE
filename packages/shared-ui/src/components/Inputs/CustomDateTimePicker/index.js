@@ -36,54 +36,46 @@ const CustomDateTimePicker = ({
   ...props
 }) => {
   const dateFormat = `${
-    window.localStorage.getItem('default') && JSON.parse(window.localStorage.getItem('default'))['dateFormat']
+    window.localStorage.getItem('default') &&
+    JSON.parse(window.localStorage.getItem('default'))['dateFormat']
   } ${formatTime}`
 
   const [openDatePicker, setOpenDatePicker] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
 
   const { _readOnly, _required, _hidden } = checkAccess(name, props.maxAccess, required, readOnly, hidden)
 
   const shouldDisableDate = dates => {
     const date = new Date(dates)
-
     const today = new Date()
     today.setDate(today.getDate())
     date.setDate(date.getDate())
 
-    if (disabledDate === '>=') {
-      return date >= today
-    }
-    if (disabledDate === '<') {
-      return date < today
-    }
-    if (disabledDate === '>') {
-      return date > today
-    }
+    if (disabledDate === '>=') return date >= today
+    if (disabledDate === '<') return date < today
+    if (disabledDate === '>') return date > today
+    return false
   }
 
   const newDate = new Date(disabledRangeDate.date)
   newDate.setDate(newDate.getDate() + disabledRangeDate.day)
 
   const getDefaultValue = () => {
-    let value
-
+    let v
     switch (defaultValue) {
       case 'today':
-        value = new Date()
+        v = new Date()
         break
       case 'yesterday':
-        value = new Date()
-        value.setDate(value.getDate() - 1)
+        v = new Date()
+        v.setDate(v.getDate() - 1)
         break
       case 'boy':
-        value = new Date(new Date().getFullYear(), 0, 1)
+        v = new Date(new Date().getFullYear(), 0, 1)
         break
       default:
-        value = null
+        v = null
     }
-
-    return value
+    return v
   }
 
   const resolvedValue = value === undefined ? getDefaultValue() : value
@@ -102,8 +94,6 @@ const CustomDateTimePicker = ({
         maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
         autoFocus={autoFocus}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         format={dateFormat}
         onChange={newValue => onChange(name, newValue)}
         onClose={() => setOpenDatePicker(false)}
@@ -113,6 +103,9 @@ const CustomDateTimePicker = ({
         clearable
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
+          // ✅ the important part: keep the popper in the same DOM tree
+          popper: { disablePortal: true },
+
           textField: {
             required: _required,
             size: size,
@@ -139,7 +132,11 @@ const CustomDateTimePicker = ({
                       <ClearIcon className={inputs.icon} />
                     </IconButton>
                   )}
-                  <IconButton tabIndex={-1} onClick={() => setOpenDatePicker(true)} className={inputs.iconButton}>
+                  <IconButton
+                    tabIndex={-1}
+                    onClick={() => setOpenDatePicker(true)}
+                    className={inputs.iconButton}
+                  >
                     <EventIcon className={inputs.icon} />
                   </IconButton>
                 </InputAdornment>
@@ -148,8 +145,8 @@ const CustomDateTimePicker = ({
             InputLabelProps: {
               classes: {
                 root: inputs.inputLabel,
-                shrink: inputs.inputLabelShrink, 
-              }            
+                shrink: inputs.inputLabelShrink
+              }
             }
           },
           actionBar: {
@@ -157,8 +154,9 @@ const CustomDateTimePicker = ({
           }
         }}
         slots={{
-          actionBar: props => <PickersActionBar {...props} actions={['accept', 'today']} />,
-          popper: props => <PopperComponent isDateTimePicker={true} {...props} />
+          actionBar: p => <PickersActionBar {...p} actions={['accept', 'today']} />,
+
+          popper: p => <PopperComponent isDateTimePicker={true} {...p} />
         }}
       />
     </LocalizationProvider>
@@ -166,4 +164,3 @@ const CustomDateTimePicker = ({
 }
 
 export default CustomDateTimePicker
-

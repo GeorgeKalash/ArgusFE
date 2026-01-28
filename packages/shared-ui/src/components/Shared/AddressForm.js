@@ -11,48 +11,62 @@ const AddressForm = ({
   onSubmit = () => {},
   window,
   actions = [],
-  address: propAddress,
-  setAddress: setPropAddress,
+  address: controlledAddress,
+  setAddress: setControlledAddress,
   required = true,
   ...props
 }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [localAddress, setLocalAddress] = useState()
-  const isControlled = !!propAddress && !!setPropAddress
-  const address = isControlled ? propAddress : localAddress
-  const setAddress = isControlled ? setPropAddress : setLocalAddress
+
+  const [currentRecordId, setCurrentRecordId] = useState(recordId || null)
+  const [localAddress, setLocalAddress] = useState(null)
+  const isControlled = !!controlledAddress && !!setControlledAddress
+
+  const address = isControlled ? controlledAddress : localAddress
+  const setAddress = isControlled ? setControlledAddress : setLocalAddress
 
   useSetWindow({ title: platformLabels.Address, window })
 
-  function onAddressSubmit(post) {
-    if (required) {
-      const data = { ...post, recordId: recordId }
-
-      postRequest({
-        extension: SystemRepository.Address.set,
-        record: JSON.stringify(data)
-      }).then(res => {
-        data.addressId = res.recordId
-        onSubmit(data, window)
-      })
-    } else {
+  const onAddressSubmit = async post => {
+    if (!required) {
       setAddress(post)
       onSubmit(post, window)
+
+      return
     }
+
+    const payload = { ...post, recordId: currentRecordId || address?.recordId || null}
+
+    const res = await postRequest({
+      extension: SystemRepository.Address.set,
+      record: JSON.stringify(payload)
+    })
+
+    const newRecordId = res?.recordId || currentRecordId || null
+
+    const updatedAddress = {
+      ...payload,
+      recordId: newRecordId,
+      addressId: newRecordId
+    }
+
+    setCurrentRecordId(newRecordId)
+    setAddress(updatedAddress)
+    onSubmit(updatedAddress, window)
   }
 
   useEffect(() => {
-    if (!isControlled && recordId) {
+    if (!isControlled && currentRecordId) {
       ;(async () => {
         const res = await getRequest({
           extension: SystemRepository.Address.get,
-          parameters: `_filter=&_recordId=${recordId}`
+          parameters: `_filter=&_recordId=${currentRecordId}`
         })
-        setLocalAddress(res.record)
+        setLocalAddress(res?.record || null)
       })()
     }
-  }, [recordId, isControlled])
+  }, [currentRecordId, isControlled])
 
   return (
     <AddressFormShell

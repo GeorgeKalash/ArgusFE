@@ -218,11 +218,10 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           address: address
         }
 
-        const addressRes = await postRequest({
+         await postRequest({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
-        copy.shipToAddressId = addressRes.recordId
       }
 
       const updatedRows = obj.items
@@ -831,7 +830,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       amount: parseFloat(soHeader?.record?.amount).toFixed(2),
       shipAddress: shipAdd?.address || '',
       billAddress: billAdd?.address || '',
-      phoneNo: shipAdd?.phoneNo || null,
+      phoneNo: `${shipAdd?.phoneNo || ''};${shipAdd?.phoneNo2 || ''}`,
       tdPct: soHeader?.record?.tdPct || 0,
       initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
@@ -857,7 +856,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       parameters: `_addressId=${addressId}`
     })
 
-    return {address: res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n'), phoneNo: res?.record?.phoneNo || null}
+    return {address: res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n'), 
+      phoneNo: res?.record?.phoneNo || null, 
+      phoneNo2: res?.record?.phoneNo2 || null }
   }
 
   const getClient = async clientId => {
@@ -886,7 +887,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
 
     formik.setFieldValue('shipAddress', shipAdd?.address || '')
     formik.setFieldValue('billAddress', billAdd?.address || '')
-    formik.setFieldValue('phoneNo', shipAdd?.phoneNo || null)
+    formik.setFieldValue('phoneNo', `${shipAdd?.phoneNo || ''};${shipAdd?.phoneNo2 || ''}`)
   }
 
   async function getItemPhysProp(itemId) {
@@ -1178,6 +1179,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         address: address,
         setAddress: setAddress,
+        onSubmit:async (values) => {
+          const addressRes = await getAddress(values?.addressId || null)
+          formik.setFieldValue('phoneNo',  `${addressRes?.phoneNo || ''};${addressRes?.phoneNo2 || ''}`)
+          formik.setFieldValue('shipToAddressId', values?.addressId || null)
+        },
         isCleared: false,
         datasetId: ResourceIds.ADDSalesOrder
       }
