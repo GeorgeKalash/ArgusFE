@@ -25,6 +25,7 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [filterType, setFilterType] = useState()
+  const [searchText, setSearchText] = useState('')
 
   const {
     query: { data }
@@ -175,7 +176,9 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const filteredData = useMemo(() => {
     if (!data?.list) return data
 
-    const list = data.list.filter(item =>
+    let list = data.list
+
+    list = list.filter(item =>
       filterType === SECURITY_GROUP_FILTER.NO_ACCESS
         ? !hasAnyAccess(item)
         : filterType === SECURITY_GROUP_FILTER.HAS_ACCESS
@@ -183,8 +186,15 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
         : true
     )
 
+    if (searchText) {
+      const value = searchText.toLowerCase()
+      list = list.filter(
+        item => item.name?.toLowerCase().includes(value) || item.description?.toLowerCase().includes(value)
+      )
+    }
+
     return { ...data, list }
-  }, [data, filterType])
+  }, [data, filterType, searchText])
 
   return (
     <Form onSave={onSubmit} maxAccess={maxAccess}>
@@ -223,6 +233,20 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                   setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
                 }}
                 onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='search'
+                value={searchText}
+                label={platformLabels.Search}
+                onClear={() => setSearchText('')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                  }
+                }}
+                onChange={e => setSearchText(e.target.value)}
               />
             </Grid>
           </Grid>
