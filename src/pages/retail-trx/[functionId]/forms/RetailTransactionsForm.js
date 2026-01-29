@@ -302,19 +302,32 @@ export default function RetailTransactionsForm({
     return res?.list
   }
 
+  const getBarcodeData = async barcode => {
+    const res = await getRequest({
+      extension: InventoryRepository.Barcodes.get,
+      parameters: `_barcode=${barcode}`
+    })
+
+    return res?.record
+  }
+
   async function barcodeSkuSelection(update, row, addRow) {
-    const itemRetail = await getItemRetail(row?.itemId)
-    const itemPhysical = await getItemPhysical(row?.itemId)
-    const itemConvertPrice = await getItemConvertPrice(row?.itemId)
+    const barcodeInfo = await getBarcodeData(row?.barcode)
+    const itemId = barcodeInfo ? barcodeInfo?.itemId : row?.itemId
+    const taxId = barcodeInfo ? barcodeInfo?.taxId : row?.taxId
+    const muId = barcodeInfo ? barcodeInfo?.muId : row?.muId
+    const itemRetail = await getItemRetail(itemId)
+    const itemPhysical = await getItemPhysical(itemId)
+    const itemConvertPrice = await getItemConvertPrice(itemId, muId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
-    const taxDetailsInfo = await getTaxDetails(row?.taxId)
+    const taxDetailsInfo = await getTaxDetails(taxId)
 
     const result = {
       id: row?.id,
-      itemId: row?.itemId,
-      sku: row?.sku,
-      itemName: row?.itemName,
+      itemId,
+      sku: barcodeInfo?.sku || row?.sku,
+      itemName: barcodeInfo?.itemName || row?.itemName,
       posFlags: itemRetail?.posFlags,
       metalPurity: itemPhysical?.metalPurity || 0,
       isMetal: itemPhysical?.isMetal || false,
@@ -333,7 +346,7 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: formik.values.header.isVatable ? row?.taxId : null,
+      taxId: formik.values.header.isVatable ? taxId : null,
       taxDetails: taxDetailsInfo || null
     }
     let finalResult = result
@@ -356,6 +369,8 @@ export default function RetailTransactionsForm({
   }
 
   async function getItemRetail(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.ItemRetail.get,
       parameters: `_itemId=${itemId}`
@@ -364,6 +379,8 @@ export default function RetailTransactionsForm({
     return res?.record
   }
   async function getItemPhysical(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
@@ -372,12 +389,14 @@ export default function RetailTransactionsForm({
     return res?.record
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_clientId=0&_itemId=${itemId}&_currencyId=${formik.values.header.currencyId}&_plId=${
         formik.values.header.plId
-      }&_muId=${0}`
+      }&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -1737,7 +1756,7 @@ export default function RetailTransactionsForm({
 
         <Grow>
           <DataGrid
-             onChange={(value, action) => {
+            onChange={(value, action) => {
               formik.setFieldValue('items', value)
               action === 'delete' && setReCal(true)
             }}
