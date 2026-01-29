@@ -46,7 +46,7 @@ const RelationList = ({ store, labels, maxAccess }) => {
     },
     {
       field: 'toBPRef',
-      headerName: labels.businessPartnerRef,
+      headerName: labels.reference,
       flex: 1
     },
     {
