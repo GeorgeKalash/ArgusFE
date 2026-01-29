@@ -606,7 +606,7 @@ export default function RetailTransactionsForm({
     })
   }
 
-  function getItemPriceRow(newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked, source) {
     !reCal && setReCal(true)
 
     const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType)
@@ -660,7 +660,7 @@ export default function RetailTransactionsForm({
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     }
 
-    commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
 
     return iconClicked ? { changes: commonData } : commonData
   }
@@ -886,7 +886,7 @@ export default function RetailTransactionsForm({
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
         const unitPrice = calculatePrice(newRow, newRow?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
-        const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE)
+        const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE,'', 'priceWithVAT')
         update(data)
       }
     },
