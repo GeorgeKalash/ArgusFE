@@ -37,8 +37,6 @@
   align-items: flex-start;
   padding: 5px 10px !important;
   line-height: 1.35 !important;
-
-  white-space: nowrap;
 }
 
 .dropdownHeaderRow {
@@ -49,6 +47,7 @@
   z-index: 5;
   background: #fff;
   width: 100%;
+  white-space: nowrap;
 }
 
 .dropdownHeaderCell {
@@ -71,17 +70,23 @@
 }
 
 .dropdownOptionCell,
-.dropdownOptionSingleText {
-  font-size: 0.72rem !important;
-  font-weight: 400 !important;
-  line-height: 1.35 !important;
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  display: block !important;
+  min-width: 0;
+}
 
-  display: flex;
-  align-items: flex-start;
-
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: clip;
+.dropdownCellClamp {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
 .dropdownPopper :global(.MuiPaper-root) {
@@ -100,8 +105,7 @@
   min-height: unset !important;
   padding: 4px 10px !important;
   align-items: flex-start !important;
-
-  white-space: nowrap !important;
+  white-space: normal !important;
 }
 
 .dropdownPopper :global(.MuiPaper-root)::-webkit-scrollbar {
@@ -114,7 +118,6 @@
   padding: 5px 10px !important;
   line-height: 1.35 !important;
   font-weight: 600 !important;
-
   white-space: nowrap;
 }
 

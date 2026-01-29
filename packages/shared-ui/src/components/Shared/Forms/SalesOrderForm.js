@@ -824,14 +824,14 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setValues({
       ...header,
       currentDiscount:
-        soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
-          ? soHeader?.record?.tdAmount
-          : soHeader?.record?.tdPct,
-      amount: parseFloat(soHeader?.record?.amount).toFixed(2),
+        header?.record?.tdType == 1 || header?.record?.tdType == null
+          ? header?.record?.tdAmount
+          : header?.record?.tdPct,
+      amount: parseFloat(header?.record?.amount).toFixed(2),
       shipAddress: shipAdd?.address || '',
       billAddress: billAdd?.address || '',
       phoneNo: `${shipAdd?.phoneNo || ''};${shipAdd?.phoneNo2 || ''}`,
-      tdPct: soHeader?.record?.tdPct || 0,
+      tdPct: header?.record?.tdPct || 0,
       initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
     })

@@ -186,7 +186,7 @@ const CustomLookup = ({
                           className={dropdownStyles.dropdownOptionCell}
                           style={{ width: `${(header.grid / totalGrid) * 100}%` }}
                         >
-                          {displayValue}
+                          <div className={dropdownStyles.dropdownCellClamp}>{displayValue}</div>
                         </Box>
                       )
                     })}
@@ -216,11 +216,13 @@ const CustomLookup = ({
                   {...propsOption}
                   className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
                 >
-                  <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+                  <Box className={dropdownStyles.dropdownOptionCellMain}>
+                    <div className={dropdownStyles.dropdownCellClamp}>{option[valueField]}</div>
+                  </Box>
 
                   {secondDisplayField && (
                     <Box className={dropdownStyles.dropdownOptionCellSecondary}>
-                      {option[displayField]}
+                      <div className={dropdownStyles.dropdownCellClamp}>{option[displayField]}</div>
                     </Box>
                   )}
                 </li>
@@ -237,7 +239,6 @@ const CustomLookup = ({
                 setInputValue(v)
 
                 if (v) {
-                  // optional minChars support (won't break if undefined)
                   if (!minChars || v.length >= minChars) {
                     onLookup(v)
                     setFreeSolo(true)

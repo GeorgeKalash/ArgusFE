@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import ReactDOM from 'react-dom'
-import { Box } from '@mui/material' 
+import { Box } from '@mui/material'
 import styles from './PopperComponent.module.css'
 
 const PopperComponent = ({
