@@ -1,0 +1,49 @@
+.lookupContainer {
+  width: 100% !important;
+}
+
+.firstField {
+  width: 100% !important;
+}
+
+.root:dir(ltr) :global(.MuiOutlinedInput-root) {
+  padding-right: 8px !important;
+}
+
+.root:dir(rtl) :global(.MuiOutlinedInput-root) {
+  padding-left: 8px !important;
+}
+
+.firstField:dir(ltr) :global(.MuiAutocomplete-inputRoot) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
+
+.firstField:dir(rtl) :global(.MuiAutocomplete-inputRoot) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.secondField:dir(ltr) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.secondField:dir(rtl) :global(.MuiOutlinedInput-root) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+}
+
+.secondField {
+  flex: 1 !important;
+  display: flex !important;
+  width: 100% !important;
+}

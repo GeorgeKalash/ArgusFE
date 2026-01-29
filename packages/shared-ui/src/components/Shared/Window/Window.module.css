@@ -1,0 +1,171 @@
+.parentBox {
+  bottom: 0;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  will-change: transform;
+}
+
+.paper {
+  transition: width 0.3s, height 0.3s;
+  outline: none;
+  box-shadow: none;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.paper[data-minimized='true'] {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+}
+
+.dialogTitle {
+  cursor: move;
+  padding-left: 15px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  margin: 0px !important;
+  background-color: #231f20;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  height: 40px;
+  line-height: 1rem;
+  touch-action: none;
+}
+
+.dialogTitleText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white !important;
+  line-height: 1rem;
+}
+
+.iconButton {
+  padding: 0px !important;
+  padding-right: 3px !important;
+  color: white !important;
+}
+
+.iconButton svg {
+  font-size: 1.2rem;
+}
+
+.loadingOverlay {
+  background-color: rgba(250, 250, 250, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper[data-minimized='true'] .dialogTitle {
+  cursor: pointer;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+}
+
+.paper[data-minimized='true'] .dialogTitleText {
+  font-size: 0.95rem !important;
+  line-height: 1rem !important;
+}
+
+.paper[data-minimized='true'] .iconButton svg {
+  font-size: 1.1rem !important;
+}
+
+.no-drag {
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+
+@media (max-width: 1600px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 35px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.95rem !important;
+    line-height: 0.95rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 1.15rem !important;
+  }
+}
+
+@media (max-width: 1300px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 32px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.9rem !important;
+    line-height: 0.9rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton {
+    padding-right: 2px !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 1.1rem !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 28px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.85rem !important;
+    line-height: 0.85rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 26px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.8rem !important;
+    line-height: 0.8rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 24px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.75rem !important;
+    line-height: 0.75rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .paper:not([data-minimized='true']) .dialogTitle {
+    height: 22px !important;
+  }
+  .paper:not([data-minimized='true']) .dialogTitleText {
+    font-size: 0.7rem !important;
+    line-height: 0.7rem !important;
+  }
+  .paper:not([data-minimized='true']) .iconButton svg {
+    font-size: 0.85rem !important;
+  }
+}

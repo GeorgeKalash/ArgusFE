@@ -1,0 +1,83 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 4px;
+  flex: 1;
+  border: grey dashed 1px;
+  cursor: pointer;
+}
+
+.filesContainer {
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0;
+  margin: 12px;
+  border-radius: 4px;
+}
+
+.fileItem {
+  border: black solid 1px;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.gridPadding {
+  padding: 8px;
+}
+
+.fileName {
+  font-size: 14px;
+}
+
+.fileSize {
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.deleteButton {
+  color: red;
+  padding: 4px;
+}
+
+.uploadBox {
+  flex: 1;
+  display: flex;
+  width: 100%;
+}
+
+.uploadArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+}
+
+.buttonsBox {
+  display: flex;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.clearButton {
+  margin-right: 8px;
+  background-color: #f44336;
+  width: 50px;
+  height: 35px;
+  min-width: 30px;
+  object-fit: contain;
+}
+
+.clearButton:hover {
+  background-color: #f44336;
+  opacity: 0.8;
+}
+
+.clearIcon {
+  width: 20px;
+  height: 20px;
+}
