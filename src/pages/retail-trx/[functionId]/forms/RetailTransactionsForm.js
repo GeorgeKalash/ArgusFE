@@ -314,13 +314,20 @@ export default function RetailTransactionsForm({
   async function barcodeSkuSelection(update, row, addRow) {
     const barcodeInfo = await getBarcodeData(row?.barcode)
     const itemId = barcodeInfo ? barcodeInfo?.itemId : row?.itemId
-    const taxId = barcodeInfo ? barcodeInfo?.taxId : row?.taxId
     const muId = barcodeInfo ? barcodeInfo?.muId : row?.muId
     const itemRetail = await getItemRetail(itemId)
     const itemPhysical = await getItemPhysical(itemId)
     const itemConvertPrice = await getItemConvertPrice(itemId, muId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
+
+    const taxId = !formik.values.header.isVatable
+      ? null
+      : formik.values.header.taxId
+      ? barcodeInfo?.taxId || row?.taxId
+        ? formik.values.header.taxId
+        : null
+      : barcodeInfo?.taxId ?? row?.taxId ?? null
     const taxDetailsInfo = await getTaxDetails(taxId)
 
     const result = {
@@ -814,11 +821,7 @@ export default function RetailTransactionsForm({
           itemId: skuInfo.record.recordId,
           sku: skuInfo.record.sku,
           itemName: skuInfo.record.name,
-          taxId: formik.values.header.taxId
-            ? skuInfo?.record?.taxId
-              ? formik.values.header.taxId
-              : null
-            : skuInfo?.record?.taxId,
+          taxId: skuInfo?.record?.taxId,
           priceType: skuInfo.record.priceType,
           qty: newRow.qty || 0
         }
