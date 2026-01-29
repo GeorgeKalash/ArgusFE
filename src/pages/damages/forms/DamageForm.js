@@ -95,8 +95,8 @@ export default function DamageForm({ recordId, jobId }) {
         jobPcs: yup.number().required(),
         netJobQty: yup.number().required(),
         netJobPcs: yup.number().required(),
-        metalQty: yup.number().required(),
-        nonMetalQty: yup.number().required(),
+        metalQty: yup.number().required().min(0),
+        nonMetalQty: yup.number().required().min(0),
         routingId: yup
           .number()
           .nullable()
