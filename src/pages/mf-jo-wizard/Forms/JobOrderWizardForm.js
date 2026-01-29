@@ -24,13 +24,10 @@ import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 import { useDocumentType } from 'src/hooks/documentReferenceBehaviors'
 import CustomTextField from 'src/components/Inputs/CustomTextField'
 import CustomTextArea from 'src/components/Inputs/CustomTextArea'
-import WorkFlow from 'src/components/Shared/WorkFlow'
-import { useWindow } from 'src/windows'
 
 export default function JobOrderWizardForm({ labels, access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const { stack } = useWindow()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JobOrderWizard,
@@ -277,16 +274,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
     return returned + returnedValue
   }, 0)
 
-  const onWorkFlowClick = async () => {
-    stack({
-      Component: WorkFlow,
-      props: {
-        functionId: SystemFunction.JobOrderWizard,
-        recordId: formik.values.header.recordId
-      }
-    })
-  }
-
   const actions = [
     {
       key: 'Unlocked',
@@ -299,12 +286,6 @@ export default function JobOrderWizardForm({ labels, access, recordId }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       disabled: true
-    },
-    {
-      key: 'WorkFlow',
-      condition: true,
-      onClick: onWorkFlowClick,
-      disabled: !editMode
     }
   ]
 
