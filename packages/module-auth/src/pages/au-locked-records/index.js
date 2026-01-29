@@ -1,0 +1,119 @@
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import RPBGridToolbar from '@argus/shared-ui/src/components/Shared/RPBGridToolbar'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+
+const LockedRecords = () => {
+  const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
+
+  const {
+    query: { data },
+    labels,
+    filterBy,
+    paginationParameters,
+    invalidate,
+    access,
+    refetch
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: AccessControlRepository.LockedRecords.page,
+    datasetId: ResourceIds.LockedRecords,
+    filter: {
+      filterFn: fetchWithFilter
+    }
+  })
+
+  async function fetchWithFilter({ filters, pagination }) {
+    if (filters?.qry) {
+      return await getRequest({
+        extension: AccessControlRepository.LockedRecords.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+    } else {
+      return fetchGridData({ _startAt: pagination._startAt || 0, params: filters?.params })
+    }
+  }
+
+  async function fetchGridData(options = {}) {
+    const { _startAt = 0, _pageSize = 50, params } = options
+
+    const response = await getRequest({
+      extension: AccessControlRepository.LockedRecords.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
+    })
+
+    return { ...response, _startAt: _startAt }
+  }
+
+  const columns = [
+    {
+      field: 'userName',
+      headerName: labels.username,
+      flex: 1
+    },
+    {
+      field: 'resourceId',
+      headerName: labels.resourceId,
+      flex: 1
+    },
+    {
+      field: 'resourceName',
+      headerName: labels.resourceName,
+      flex: 1
+    },
+    {
+      field: 'reference',
+      headerName: labels.reference,
+      flex: 1
+    },
+    {
+      field: 'clockStamp',
+      headerName: labels.clockStamp,
+      flex: 1,
+      type: 'dateTime'
+    }
+  ]
+
+  const del = async obj => {
+    await postRequest({
+      extension: AccessControlRepository.LockedRecords.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <RPBGridToolbar maxAccess={access} reportName={'AULOK'} filterBy={filterBy} />
+      </Fixed>
+      <Grow>
+        <Table
+          name='table'
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          paginationParameters={paginationParameters}
+          paginationType='api'
+          refetch={refetch}
+          onDelete={del}
+          deleteConfirmationType={'strict'}
+          pageSize={50}
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
+
+export default LockedRecords

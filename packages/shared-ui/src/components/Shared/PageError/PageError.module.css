@@ -1,0 +1,17 @@
+.dialogContent {
+  padding-block: 0px !important;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  /* default */
+  --sf: 1;
+}
+
+.errorMessageText {
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+
+  /* proportional like StrictConfirmation */
+  font-size: calc(16px * var(--sf));
+}

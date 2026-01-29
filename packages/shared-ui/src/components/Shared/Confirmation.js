@@ -1,0 +1,200 @@
+import { Grid } from '@mui/material'
+import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
+import * as yup from 'yup'
+import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
+import { useState, useContext } from 'react'
+import { formatDateForGetApI, formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import moment from 'moment-hijri'
+import { CurrencyTradingSettingsRepository } from '@argus/repositories/src/repositories/CurrencyTradingSettingsRepository'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
+import { useError } from '@argus/shared-providers/src/providers/error'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
+import CustomCheckBox from '../Inputs/CustomCheckBox'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import Form from './Form'
+
+const Confirmation = ({ labels, clientformik, editMode, maxAccess, idTypes, refreshProf = () => {}, window }) => {
+  const [showAsPassword, setShowAsPassword] = useState(true)
+  const [showAsPasswordRepeat, setShowAsPasswordRepeat] = useState(false)
+  const { getRequest } = useContext(RequestsContext)
+  const { stack: stackError } = useError()
+  const { systemChecks, platformLabels } = useContext(ControlContext)
+
+  useSetWindow({ title: platformLabels.Fetch, window })
+
+  const handleCopy = event => {
+    event.preventDefault()
+  }
+
+  const { formik } = useForm({
+    validateOnChange: true,
+    initialValues: {
+      idtId: clientformik.values?.idtId ? clientformik.values.idtId : clientformik.values?.id_type,
+      birthDate: clientformik.values?.birthDate,
+      idNo: clientformik.values?.idNo,
+      idNoRepeat: '',
+      liveRequest: false
+    },
+
+    validationSchema: yup.object({
+      birthDate: yup.string().required(),
+      idtId: yup.string().required(),
+      idNo: yup.string().required(),
+      idNoRepeat: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('idNo'), null], 'Number must match')
+    }),
+    onSubmit: values => {
+      postFetchDefault(values)
+    }
+  })
+
+  const postFetchDefault = obj => {
+    const hijriDate = moment(formatDateForGetApI(obj.birthDate), 'YYYY-MM-DD').format('iYYYY-iMM-iDD')
+
+    const defaultParams = `_number=${obj.idNo}&_date=${hijriDate}&_idType=${obj.idtId}&_liveRequest=${
+      formik.values.liveRequest ? 1 : 0
+    }`
+    var parameters = defaultParams
+    getRequest({
+      extension: CurrencyTradingSettingsRepository.Yakeen.get,
+      parameters: parameters
+    }).then(result => {
+      const res = result.record
+
+      if (!res.errorId) {
+        clientformik.setFieldValue('expiryDate', formatDateFromApi(res.idExpirationDate))
+        clientformik.setFieldValue('firstName', res.fl_firstName)
+        clientformik.setFieldValue('middleName', `${res.fl_middleName || ''} ${res.fl_familyName || ''}`.trim())
+        clientformik.setFieldValue('lastName', res.fl_lastName)
+        clientformik.setFieldValue('flName', res.flName)
+        clientformik.setFieldValue('fl_firstName', res.firstName)
+        clientformik.setFieldValue('fl_middleName', `${res.middleName || ''} ${res.familyName || ''}`.trim())
+        clientformik.setFieldValue('fl_lastName', res.lastName)
+        clientformik.setFieldValue('gender', res.gender === 'ذكر' ? '1' : '2')
+        clientformik.setFieldValue('professionId', res.professionId)
+        clientformik.setFieldValue('nationalityId', res.nationalityId)
+        clientformik.setFieldValue('idIssuePlaceCode', res.idIssuePlaceCode)
+        clientformik.setFieldValue('sponsorName', res.sponsorName)
+
+        res.newProfessionMode && refreshProf()
+        window.close()
+      } else {
+        stackError({ message: JSON.stringify(res?.errorDetail) })
+      }
+    })
+  }
+
+  return (
+    <Form onSave={formik.handleSubmit} maxAccess={maxAccess} editMode={editMode}>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='idTypeName'
+                label={labels.id_type}
+                readOnly={true}
+                value={
+                  idTypes?.list?.find(item => item.recordId === formik.values.idtId)?.name ||
+                  clientformik.values?.id_type?.name
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomDatePicker
+                name='birthDate'
+                label={labels.birthDate}
+                value={formik.values?.birthDate ? formik.values?.birthDate : formik.values?.birth_date}
+                required={true}
+                onChange={formik.setFieldValue}
+                onClear={() => formik.setFieldValue('birthDate', '')}
+                disabledDate={'>='}
+                readOnly={true}
+                error={formik.touched.birthDate && Boolean(formik.errors.birthDate)}
+                helperText={formik.touched.birthDate && formik.errors.birthDate}
+              />
+            </Grid>
+
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomTextField
+                sx={{ color: 'white' }}
+                name='idNo'
+                label={labels.id_number}
+                type={showAsPassword && 'password'}
+                value={formik.values?.idNo ? formik.values?.idNo : formik.values?.id_number}
+                required
+                onChange={e => {
+                  formik.handleChange(e)
+                }}
+                onCopy={handleCopy}
+                onPaste={handleCopy}
+                readOnly={true}
+                maxLength='15'
+                onBlur={e => {
+                  setShowAsPassword(true)
+                }}
+                onFocus={e => {
+                  setShowAsPassword(false)
+                }}
+                onClear={() => {
+                  formik.setFieldValue('idNo', '')
+                }}
+                error={formik.touched.idNo && Boolean(formik.errors.idNo)}
+                helperText={formik.touched.idNo && formik.errors.idNo}
+              />
+            </Grid>
+
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomTextField
+                name='idNoRepeat'
+                label={labels.confirmIdNumber}
+                value={formik.values?.idNoRepeat}
+                required
+                type={showAsPasswordRepeat && 'password'}
+                onChange={e => {
+                  formik.handleChange(e)
+                }}
+                onCopy={handleCopy}
+                onPaste={handleCopy}
+                readOnly={editMode && true}
+                onBlur={e => {
+                  setShowAsPasswordRepeat(true), formik.handleBlur(e)
+                }}
+                onFocus={e => {
+                  setShowAsPasswordRepeat(false)
+                }}
+                maxLength='15'
+                onClear={() => {
+                  formik.setFieldValue('idNoRepeat', '')
+                }}
+                error={formik.touched.idNoRepeat && Boolean(formik.errors.idNoRepeat)}
+                helperText={formik.touched.idNoRepeat && formik.errors.idNoRepeat}
+              />
+            </Grid>
+            <Grid item xs={12} sx={{ position: 'relative', width: '100%' }}>
+              <CustomCheckBox
+                name='liveRequest'
+                value={formik.values?.liveRequest}
+                onChange={event => formik.setFieldValue('liveRequest', event.target.checked)}
+                label={labels.yakeenLiveRequest}
+                maxAccess={maxAccess}
+                disabled={!systemChecks?.some(item => item.checkId === SystemChecks.CT_YAKEEN_INFORMATION)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+    </Form>
+  )
+}
+
+Confirmation.width = 400
+Confirmation.height = 400
+
+export default Confirmation
