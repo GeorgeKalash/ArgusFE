@@ -75,6 +75,7 @@ export default function RetailTransactionsForm({
   const filteredCreditCard = useRef([])
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
   const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
+  const DIRTYFIELD_PRICE_WITH_VAT = 1
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -531,7 +532,7 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_PRICE_WITH_VAT),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
@@ -660,7 +661,7 @@ export default function RetailTransactionsForm({
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     }
 
-    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_BASE_PRICE)
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_PRICE_WITH_VAT)
 
     return iconClicked ? { changes: commonData } : commonData
   }
@@ -1232,7 +1233,7 @@ export default function RetailTransactionsForm({
             qty: parseFloat(item.qty).toFixed(2),
             unitPrice: parseFloat(item.unitPrice).toFixed(2),
             extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_PRICE_WITH_VAT),
             taxDetails
           },
           DIRTYFIELD_BASE_PRICE
@@ -1257,7 +1258,7 @@ export default function RetailTransactionsForm({
     const { amount = 0, taxBase } = taxDetails
 
     switch (dirtyField) {
-      case DIRTYFIELD_BASE_PRICE:
+      case DIRTYFIELD_PRICE_WITH_VAT:
         return (unitPrice * (1 + amount / 100)).toFixed(2)
 
       case DIRTYFIELD_UNIT_PRICE:
