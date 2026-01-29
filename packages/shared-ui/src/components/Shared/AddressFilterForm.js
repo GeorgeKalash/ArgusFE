@@ -219,6 +219,7 @@ export default function AddressFilterForm({
         </Fixed>
         <Grow>
           <Table
+            name="addressFilterTable"
             columns={rowColumns}
             gridData={data}
             rowId={['addressId']}
