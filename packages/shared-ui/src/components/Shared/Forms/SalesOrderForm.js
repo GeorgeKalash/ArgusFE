@@ -828,8 +828,8 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           ? header?.tdAmount
           : header?.tdPct,
       amount: parseFloat(header?.amount).toFixed(2),
-      shipAddress: shipAdd,
-      billAddress: billAdd,
+      shipAddress: shipAdd?.address || '',
+      billAddress: billAdd?.address || '',
       tdPct: header?.tdPct || 0,
       initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
