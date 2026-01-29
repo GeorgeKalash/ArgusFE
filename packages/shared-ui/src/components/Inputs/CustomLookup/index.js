@@ -96,7 +96,12 @@ const CustomLookup = ({
           options={store}
           PopperComponent={PopperComponent}
           slotProps={{
-            popper: { className: dropdownStyles.dropdownPopper }
+            popper: {
+              className: dropdownStyles.dropdownPopper,
+              style: {
+                '--dropdown-min-width': `${displayFieldWidth * 100}%`
+              }
+            }
           }}
           noOptionsText={
             <div className={dropdownStyles.dropdownNoOptionsRow}>
@@ -142,7 +147,7 @@ const CustomLookup = ({
           }}
           PaperComponent={({ children }) =>
             props.renderOption && (
-              <Paper style={{ minWidth: `${displayFieldWidth * 100}%`, width: 'max-content' }}>
+              <Paper style={{ width: 'max-content' }}>
                 {children}
               </Paper>
             )
@@ -186,7 +191,7 @@ const CustomLookup = ({
                           className={dropdownStyles.dropdownOptionCell}
                           style={{ width: `${(header.grid / totalGrid) * 100}%` }}
                         >
-                          <div className={dropdownStyles.dropdownCellClamp}>{displayValue}</div>
+                          {displayValue}
                         </Box>
                       )
                     })}
@@ -216,13 +221,11 @@ const CustomLookup = ({
                   {...propsOption}
                   className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
                 >
-                  <Box className={dropdownStyles.dropdownOptionCellMain}>
-                    <div className={dropdownStyles.dropdownCellClamp}>{option[valueField]}</div>
-                  </Box>
+                  <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
 
                   {secondDisplayField && (
                     <Box className={dropdownStyles.dropdownOptionCellSecondary}>
-                      <div className={dropdownStyles.dropdownCellClamp}>{option[displayField]}</div>
+                      {option[displayField]}
                     </Box>
                   )}
                 </li>

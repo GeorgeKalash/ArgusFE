@@ -96,9 +96,11 @@
   overflow-x: auto !important;
 }
 
-.dropdownPopper :global(.MuiAutocomplete-listbox) {
+.dropdownPopper :global(.MuiPaper-root) {
   width: max-content !important;
-  min-width: 100% !important;
+  min-width: var(--dropdown-min-width, 100%) !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
 }
 
 .dropdownPopper :global(.MuiAutocomplete-option) {

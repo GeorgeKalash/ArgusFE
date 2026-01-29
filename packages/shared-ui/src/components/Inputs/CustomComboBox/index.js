@@ -90,13 +90,17 @@ const CustomComboBox = ({
       onInputChange={(_, newInputValue) => {
         if (neverPopulate) setInputValue(newInputValue)
       }}
-
       size={size}
       options={store}
       key={value}
       PopperComponent={PopperComponent}
       slotProps={{
-        popper: { className: dropdownStyles.dropdownPopper }
+        popper: {
+          className: dropdownStyles.dropdownPopper,
+          style: {
+            '--dropdown-min-width': `${displayFieldWidth * 100}%`
+          }
+        }
       }}
       noOptionsText={
         <div className={dropdownStyles.dropdownNoOptionsRow}>
@@ -107,8 +111,7 @@ const CustomComboBox = ({
                 className={dropdownStyles.dropdownNoOptionsCell}
                 style={{
                   width: `${
-                    ((col.width ?? 2) / columnsInDropDown.reduce((s, c) => s + (c.width ?? 2), 0)) *
-                    100
+                    ((col.width ?? 2) / columnsInDropDown.reduce((s, c) => s + (c.width ?? 2), 0)) * 100
                   }%`
                 }}
               >
@@ -125,7 +128,6 @@ const CustomComboBox = ({
             PaperComponent: ({ children }) => (
               <Paper
                 style={{
-                  minWidth: `${displayFieldWidth * 100}%`,
                   width: 'max-content'
                 }}
               >
