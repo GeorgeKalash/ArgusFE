@@ -531,7 +531,7 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          priceWithVAT: calculatePrice(item),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
@@ -660,7 +660,7 @@ export default function RetailTransactionsForm({
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     }
 
-    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData)
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
 
     return iconClicked ? { changes: commonData } : commonData
   }
@@ -885,7 +885,7 @@ export default function RetailTransactionsForm({
       name: 'priceWithVAT',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const unitPrice = calculatePrice(newRow, DIRTYFIELD_UNIT_PRICE)
+        const unitPrice = calculatePrice(newRow, newRow?.taxDetails?.[0])
         const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE, null, 'priceWithVAT')
         update(data)
       }
@@ -1232,7 +1232,7 @@ export default function RetailTransactionsForm({
             qty: parseFloat(item.qty).toFixed(2),
             unitPrice: parseFloat(item.unitPrice).toFixed(2),
             extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
             taxDetails
           },
           DIRTYFIELD_BASE_PRICE
@@ -1244,16 +1244,25 @@ export default function RetailTransactionsForm({
     formik.setFieldValue('items', modifiedItemsList)
     setReCal(true)
   }
-  function calculatePrice(item = {}, flag) {
-    const unitPrice = item?.unitPrice || 0
-    const priceWithVAT = item?.priceWithVAT || 0
-    const vatAmount = item?.vatAmount || 0
-    
-    if(flag == DIRTYFIELD_UNIT_PRICE)
-      return (parseFloat(priceWithVAT) - parseFloat(vatAmount)).toFixed(2)
-    else 
-      return (parseFloat(unitPrice) + parseFloat(vatAmount)).toFixed(2)
-   
+  function calculatePrice(item = {}, taxDetails = null, dirtyField) {
+    const unitPrice = parseFloat(item?.unitPrice || 0)
+    const priceWithVAT = parseFloat(item?.priceWithVAT || 0)
+
+    if (!taxDetails) {
+      const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
+
+      return price.toFixed(2)
+    }
+
+    const { amount = 0, taxBase } = taxDetails
+    if (dirtyField == DIRTYFIELD_UNIT_PRICE)
+      return (unitPrice * (1 + parseFloat(amount) / 100)).toFixed(2)
+    else {
+      if (taxBase == 1) return (priceWithVAT / (1 + parseFloat(amount) / 100)).toFixed(2)
+      if (taxBase == 2) return priceWithVAT.toFixed(2)
+
+      return (priceWithVAT - unitPrice).toFixed(2)
+    }
   }
 
   function getTotPricePerG(header, item, dirtyField) {
