@@ -307,7 +307,13 @@ export default function RetailTransactionsForm({
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
+
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
+
+     const unitPrice = itemConvertPrice?.priceType == 3
+          ? (itemPhysical?.weight || 0) * (TotPricePerG || 0)
+          : itemConvertPrice?.unitPrice
+
     const taxDetailsInfo = await getTaxDetails(row?.taxId)
 
     const result = {
@@ -325,10 +331,7 @@ export default function RetailTransactionsForm({
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
       priceType: itemConvertPrice?.priceType,
-      unitPrice:
-        itemConvertPrice?.priceType == 3
-          ? (itemPhysical?.weight || 0) * (TotPricePerG || 0)
-          : itemConvertPrice?.unitPrice,
+      unitPrice,
       qty: row?.qty || 1,
       extendedPrice: 0,
       mdAmount: 0,
@@ -528,7 +531,7 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
@@ -603,7 +606,7 @@ export default function RetailTransactionsForm({
     })
   }
 
-  function getItemPriceRow(newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked, source) {
     !reCal && setReCal(true)
 
     const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType)
@@ -620,7 +623,7 @@ export default function RetailTransactionsForm({
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
       baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
-      totalWeightPerG: newRow?.TotPricePerG,
+      totalWeightPerG: newRow?.totPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
@@ -656,6 +659,8 @@ export default function RetailTransactionsForm({
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
     }
+
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
 
     return iconClicked ? { changes: commonData } : commonData
   }
@@ -877,7 +882,13 @@ export default function RetailTransactionsForm({
     {
       component: 'numberfield',
       label: labels.priceWithVat,
-      name: 'priceWithVAT'
+      name: 'priceWithVAT',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        const unitPrice = calculatePrice(newRow, newRow?.taxDetails?.[0])
+        const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE, null, 'priceWithVAT')
+        update(data)
+      }
     },
     {
       component: 'numberfield',
@@ -1221,7 +1232,7 @@ export default function RetailTransactionsForm({
             qty: parseFloat(item.qty).toFixed(2),
             unitPrice: parseFloat(item.unitPrice).toFixed(2),
             extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
             taxDetails
           },
           DIRTYFIELD_BASE_PRICE
@@ -1234,8 +1245,8 @@ export default function RetailTransactionsForm({
     setReCal(true)
   }
   function calculatePrice(item = {}, taxDetails = null, dirtyField) {
-    const unitPrice = item?.unitPrice ?? 0
-    const priceWithVAT = item?.priceWithVAT ?? 0
+    const unitPrice = parseFloat(item?.unitPrice || 0)
+    const priceWithVAT = parseFloat(item?.priceWithVAT || 0)
 
     if (!taxDetails) {
       const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
@@ -1244,20 +1255,13 @@ export default function RetailTransactionsForm({
     }
 
     const { amount = 0, taxBase } = taxDetails
+    if (dirtyField == DIRTYFIELD_UNIT_PRICE)
+      return (unitPrice * (1 + parseFloat(amount) / 100)).toFixed(2)
+    else {
+      if (taxBase == 1) return (priceWithVAT / (1 + parseFloat(amount) / 100)).toFixed(2)
+      if (taxBase == 2) return priceWithVAT.toFixed(2)
 
-    switch (dirtyField) {
-      case DIRTYFIELD_BASE_PRICE:
-        return (unitPrice * (1 + amount / 100)).toFixed(2)
-
-      case DIRTYFIELD_UNIT_PRICE:
-        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
-
-        if (taxBase == 2) return priceWithVAT.toFixed(2)
-
-        return (priceWithVAT - unitPrice).toFixed(2)
-
-      default:
-        return
+      return (priceWithVAT - unitPrice).toFixed(2)
     }
   }
 
@@ -1274,7 +1278,7 @@ export default function RetailTransactionsForm({
       mdAmount: header?.mdAmount || 0,
       mdType: item?.mdType || 1,
       baseLaborPrice: item?.baseLaborPrice || 0,
-      totalWeightPerG: item?.TotPricePerG,
+      totalWeightPerG: item?.totPricePerG,
       mdValue: parseFloat(item?.mdValue),
       tdPct: 0,
       dirtyField
