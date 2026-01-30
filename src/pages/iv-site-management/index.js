@@ -10,12 +10,9 @@ import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { InventoryRepository } from 'src/repositories/InventoryRepository'
 import SiteManagementForm from './Forms/SiteManagementForm'
 import RPBGridToolbar from 'src/components/Shared/RPBGridToolbar'
-import { ControlContext } from 'src/providers/ControlContext'
-import toast from 'react-hot-toast'
 
 const SiteManagement = () => {
-  const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels } = useContext(ControlContext)
+  const { getRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
 
   async function fetchGridData(options = {}) {
@@ -119,16 +116,6 @@ const SiteManagement = () => {
     openForm(obj)
   }
 
-  const del = async obj => {
-    await postRequest({
-      extension: InventoryRepository.Management.del,
-      record: JSON.stringify({
-        itemId: obj.recordId
-      })
-    })
-    toast.success(platformLabels.Deleted)
-  }
-
   return (
     <VertLayout>
       <Fixed>
@@ -141,7 +128,6 @@ const SiteManagement = () => {
           gridData={data}
           rowId={['recordId']}
           onEdit={edit}
-          onDelete={del}
           pageSize={50}
           refetch={refetch}
           paginationType='api'
