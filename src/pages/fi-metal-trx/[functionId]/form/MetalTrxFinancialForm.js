@@ -347,31 +347,36 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
         store: filteredItems?.current,
         valueField: 'itemId',
         displayField: 'sku',
+        columnsInDropDown: [
+          { key: 'sku', value: 'Sku' },
+          { key: 'itemName', value: 'Name' }
+        ],
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
           { from: 'sku', to: 'sku' },
           { from: 'laborValuePerGram', to: 'creditAmount' }
         ],
-        displayFieldWidth: 2
+        displayFieldWidth: 4
       },
       propsReducer({ row, props }) {
         return { ...props, store: filteredItems?.current }
       },
       onChange: async ({ row: { update, newRow } }) => {
         const purityValue = newRow.purity || newRow.stdPurity
-        const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
+        const itemId = newRow?.itemId || null
 
-        if (!newRow?.itemId) return
+        if (!itemId) return
+        const isOpenMetalPurity = await getOpenMetalPurity(itemId)
 
         const res = await getRequest({
           extension: InventoryRepository.Items.get,
-          parameters: `_recordId=${newRow?.itemId}`
+          parameters: `_recordId=${itemId}`
         })
 
         const res2 = await getRequest({
           extension: InventoryRepository.Availability.get,
-          parameters: `_siteId=${formik.values?.siteId}&_itemId=${newRow?.itemId}&_seqNo=0`
+          parameters: `_siteId=${formik.values?.siteId}&_itemId=${itemId}&_seqNo=0`
         })
 
         if (!purityValue) return
