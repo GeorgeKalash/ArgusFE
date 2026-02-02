@@ -312,29 +312,26 @@ export default function RetailTransactionsForm({
   }
 
   async function barcodeSkuSelection(update, row, addRow) {
-    const barcodeInfo = await getBarcodeData(row?.barcode)
-    const itemId = barcodeInfo ? barcodeInfo?.itemId : row?.itemId
-    const muId = barcodeInfo ? barcodeInfo?.muId : row?.muId
-    const itemRetail = await getItemRetail(itemId)
-    const itemPhysical = await getItemPhysical(itemId)
-    const itemConvertPrice = await getItemConvertPrice(itemId, muId)
+    const itemRetail = await getItemRetail(row?.itemId)
+    const itemPhysical = await getItemPhysical(row?.itemId)
+    const itemConvertPrice = await getItemConvertPrice(row?.itemId, row?.muId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
 
     const taxId = !formik.values.header.isVatable
       ? null
       : formik.values.header.taxId
-      ? barcodeInfo?.taxId || row?.taxId
+      ? row?.taxId
         ? formik.values.header.taxId
         : null
-      : barcodeInfo?.taxId ?? row?.taxId ?? null
+      : row?.taxId ?? null
     const taxDetailsInfo = await getTaxDetails(taxId)
 
     const result = {
       id: row?.id,
-      itemId,
-      sku: barcodeInfo?.sku || row?.sku,
-      itemName: barcodeInfo?.itemName || row?.itemName,
+      itemId: row?.itemId,
+      sku: row?.sku,
+      itemName: row?.itemName,
       posFlags: itemRetail?.posFlags,
       metalPurity: itemPhysical?.metalPurity || 0,
       isMetal: itemPhysical?.isMetal || false,
@@ -353,7 +350,7 @@ export default function RetailTransactionsForm({
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: formik.values.header.isVatable ? taxId : null,
+      taxId,
       taxDetails: taxDetailsInfo || null
     }
     let finalResult = result
@@ -742,7 +739,20 @@ export default function RetailTransactionsForm({
       updateOn: 'blur',
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!newRow?.barcode) return
-        await barcodeSkuSelection(update, newRow, addRow)
+        const barcodeInfo = await getBarcodeData(newRow?.barcode)
+        if (barcodeInfo)
+          await barcodeSkuSelection(
+            update,
+            {
+              ...newRow,
+              taxId: barcodeInfo?.taxId ?? newRow?.taxId,
+              muId: barcodeInfo?.muId ?? newRow?.muId,
+              itemId: barcodeInfo?.itemId ?? newRow?.itemId,
+              sku: barcodeInfo?.sku ?? newRow?.sku,
+              itemName: barcodeInfo?.itemName ?? newRow?.itemName
+            },
+            addRow
+          )
       }
     },
     {
@@ -792,7 +802,8 @@ export default function RetailTransactionsForm({
         const resetRow = () => {
           update({
             ...formik.initialValues.items[0],
-            id: newRow.id
+            id: newRow.id,
+            barcode: newRow.barcode
           })
         }
 
