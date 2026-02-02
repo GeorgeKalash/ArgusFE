@@ -17,7 +17,7 @@ const LockedRecords = () => {
 
   const {
     query: { data },
-    labels: _labels,
+    labels,
     filterBy,
     paginationParameters,
     invalidate,
@@ -25,7 +25,7 @@ const LockedRecords = () => {
     refetch
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: AccessControlRepository.LockedRecords.qry,
+    endpointId: AccessControlRepository.LockedRecords.page,
     datasetId: ResourceIds.LockedRecords,
     filter: {
       filterFn: fetchWithFilter
@@ -45,12 +45,10 @@ const LockedRecords = () => {
 
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50, params } = options
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
-    var parameters = defaultParams
 
     const response = await getRequest({
-      extension: AccessControlRepository.LockedRecords.qry,
-      parameters: parameters
+      extension: AccessControlRepository.LockedRecords.page,
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=${params || ''}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -59,27 +57,27 @@ const LockedRecords = () => {
   const columns = [
     {
       field: 'userName',
-      headerName: _labels.username,
+      headerName: labels.username,
       flex: 1
     },
     {
       field: 'resourceId',
-      headerName: _labels.resourceId,
+      headerName: labels.resourceId,
       flex: 1
     },
     {
       field: 'resourceName',
-      headerName: _labels.resourceName,
+      headerName: labels.resourceName,
       flex: 1
     },
     {
       field: 'reference',
-      headerName: _labels.reference,
+      headerName: labels.reference,
       flex: 1
     },
     {
       field: 'clockStamp',
-      headerName: _labels.clockStamp,
+      headerName: labels.clockStamp,
       flex: 1,
       type: 'dateTime'
     }
@@ -101,6 +99,7 @@ const LockedRecords = () => {
       </Fixed>
       <Grow>
         <Table
+          name='table'
           columns={columns}
           gridData={data}
           rowId={['recordId']}
@@ -109,7 +108,6 @@ const LockedRecords = () => {
           refetch={refetch}
           onDelete={del}
           deleteConfirmationType={'strict'}
-          isLoading={false}
           pageSize={50}
           maxAccess={access}
         />
