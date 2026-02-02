@@ -1270,7 +1270,7 @@ export default function SaleTransactionForm({
   const getPackData = async () => {
     const res = await getRequest({
       extension: SaleRepository.SaleTransaction.pack,
-      parameters: ''
+      parameters: `_functionId=${functionId}`
     })
 
     const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
@@ -1985,6 +1985,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.documentTypes}
                 name='header.dtId'
                 readOnly={editMode || formik.values.items?.some(item => item.sku)}
@@ -2014,6 +2015,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.salesPeople}
                 name='header.spId'
                 readOnly={isPosted}
@@ -2037,6 +2039,7 @@ export default function SaleTransactionForm({
             <Grid item xs={3}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.plants}
                 name='header.plantId'
                 label={labels.plant}
@@ -2049,7 +2052,7 @@ export default function SaleTransactionForm({
                 valueField='recordId'
                 displayField={['reference', 'name']}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.plantId', newValue ? newValue.recordId : null)
                 }}
                 displayFieldWidth={2}
@@ -2059,6 +2062,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.currencies}
                 name='header.currencyId'
                 label={labels.currency}
@@ -2073,7 +2077,7 @@ export default function SaleTransactionForm({
                 required
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={async (event, newValue) => {
+                onChange={async (_, newValue) => {
                   await getMultiCurrencyFormData(
                     newValue?.recordId,
                     formik.values.header?.date,
@@ -2127,6 +2131,7 @@ export default function SaleTransactionForm({
             <Grid item xs={4}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.sites}
                 name='header.siteId'
                 label={labels.site}
@@ -2147,7 +2152,7 @@ export default function SaleTransactionForm({
                   !formik?.values?.header.dtId ||
                   (formik?.values?.header.dtId && formik?.values?.header.commitItems == true)
                 }
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.siteId', newValue ? newValue.recordId : null)
                   formik.setFieldValue('header.siteRef', newValue ? newValue.reference : null)
                   formik.setFieldValue('header.siteName', newValue ? newValue.name : null)
@@ -2167,6 +2172,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.saleZones}
                 name='header.szId'
                 label={labels.saleZone}
@@ -2201,7 +2207,7 @@ export default function SaleTransactionForm({
                   { key: 'keywords', value: 'Keywords' },
                   { key: 'cgName', value: 'Client Group' }
                 ]}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   fillClientData(newValue)
                 }}
                 secondField={{
@@ -2257,6 +2263,7 @@ export default function SaleTransactionForm({
             <Grid item xs={2}>
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
+                parameters={`_functionId=${functionId}`}
                 reducer={response => response?.record?.taxSchedules}
                 name='header.taxId'
                 label={labels.tax}
@@ -2283,7 +2290,7 @@ export default function SaleTransactionForm({
                 ]}
                 values={formik.values.header}
                 maxAccess={maxAccess}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('header.contactId', newValue?.recordId || null)
                 }}
                 error={formik?.touched?.header?.contactId && Boolean(formik?.errors?.header?.contactId)}
