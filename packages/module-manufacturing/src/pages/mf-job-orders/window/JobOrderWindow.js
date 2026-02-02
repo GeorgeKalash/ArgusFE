@@ -1,6 +1,6 @@
 import CustomTabPanel from '@argus/shared-ui/src/components/Shared/CustomTabPanel'
-import { CustomTabs } from '@argus/shared-ui/src/components/Shared/CustomTabs'
-import { useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
 import JobOrderForm from '../form/JobOrderForm'
 import RoutingTab from '../form/RoutingTab'
 import WorksheetTab from '../form/WorksheetTab'
@@ -10,11 +10,25 @@ import SizesTab from '../form/SizesTab'
 import WorkCenterTab from '../form/WorkCenterTab'
 import ItemTab from '../form/ItemTab'
 
+const CustomTabs = dynamic(
+  () =>
+    import('@argus/shared-ui/src/components/Shared/CustomTabs').then(m => m.CustomTabs),
+  {
+    ssr: false,
+    loading: () => null
+  }
+)
+
 const JobOrderWindow = ({ recordId, jobReference, access, labels, invalidate, lockRecord, window }) => {
   const [activeTab, setActiveTab] = useState(0)
   const [store, setStore] = useState({ recordId, jobReference, isPosted: false, isCancelled: false })
   const [refetchRouting, setRefetchRouting] = useState(false)
   const [refetchJob, setRefetchJob] = useState(false)
+
+  useEffect(() => {
+    CustomTabs.preload?.()
+    import('@argus/shared-ui/src/components/Shared/CustomTabs')
+  }, [])
 
   const tabs = [
     { label: labels.jobOrder },
