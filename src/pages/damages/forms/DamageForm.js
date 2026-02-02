@@ -253,9 +253,9 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.preview,
       parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
         formik.values.header.damagedQty || 0
-      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${
+      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${parseFloat(
         formik.values.header.metalQty || 0
-      }&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
+      ).toFixed(2)}&_nonMetalQty=${parseFloat(formik.values.header.nonMetalQty || 0).toFixed(2)}`
     })
 
     formik.setFieldValue('items', items?.list || [])
@@ -276,9 +276,21 @@ export default function DamageForm({ recordId, jobId }) {
 
     const list = res?.list || []
 
-    const metalQty = list.filter(i => !!i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+    const metalQty = list
+      .filter(i => !!i.isMetal)
+      .reduce((sum, i) => {
+        const value = Number(i.qty) || 0
 
-    const nonMetalQty = list.filter(i => !i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+        return Math.round((sum + value) * 100) / 100
+      }, 0)
+
+    const nonMetalQty = list
+      .filter(i => !i.isMetal)
+      .reduce((sum, i) => {
+        const value = Number(i.qty) || 0
+
+        return Math.round((sum + value) * 100) / 100
+      }, 0)
 
     return { metalQty, nonMetalQty }
   }
