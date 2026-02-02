@@ -270,8 +270,8 @@ export default function DamageForm({ recordId, lockRecord }) {
       parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
         formik.values.header.damagedQty || 0
       }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${
-        formik.values.header.metalQty || 0
-      }&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
+        parseFloat(formik.values.header.metalQty || 0).toFixed(2)
+      }&_nonMetalQty=${parseFloat(formik.values.header.nonMetalQty || 0).toFixed(2)}`
     })
 
     formik.setFieldValue('items', items?.list || [])
