@@ -170,17 +170,11 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     return combinedDateTime
   }
 
-  const totalVol = formik.values.orders.reduce((volSum, row) => {
-    const volValue = parseFloat(row.soVolume) || 0
+  const totalVol = formik.values.orders.reduce((volSum, row) => volSum + (parseFloat(row.soVolume) || 0), 0).toFixed(2)
 
-    return volSum + volValue
-  }, 0)
-
-  const totalWeight = formik.values.orders.reduce((weightSum, row) => {
-    const weightValue = parseFloat(row.soWeight) || 0
-
-    return weightSum + weightValue
-  }, 0)
+  const totalWeight = formik.values.orders
+    .reduce((weightSum, row) => weightSum + (parseFloat(row.soWeight) || 0), 0)
+    .toFixed(2)
 
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
