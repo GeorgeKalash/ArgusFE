@@ -24,6 +24,7 @@ import { SaleRepository } from 'src/repositories/SaleRepository'
 import { Fixed } from 'src/components/Shared/Layouts/Fixed'
 import CustomTimePicker from 'src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import CustomNumberField from 'src/components/Inputs/CustomNumberField'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -170,11 +171,17 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
     return combinedDateTime
   }
 
-  const totalVol = formik.values.orders.reduce((volSum, row) => volSum + (parseFloat(row.soVolume) || 0), 0).toFixed(2)
+  const totalVol = formik.values.orders.reduce((volSum, row) => {
+    const volValue = parseFloat(row.soVolume) || 0
 
-  const totalWeight = formik.values.orders
-    .reduce((weightSum, row) => weightSum + (parseFloat(row.soWeight) || 0), 0)
-    .toFixed(2)
+    return volSum + volValue
+  }, 0)
+
+  const totalWeight = formik.values.orders.reduce((weightSum, row) => {
+    const weightValue = parseFloat(row.soWeight) || 0
+
+    return weightSum + weightValue
+  }, 0)
 
   const isPosted = formik.values.status === 3
   const isClosed = formik.values.wip === 2
@@ -609,24 +616,24 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         <Fixed>
           <Grid container rowGap={1} xs={10} spacing={2} pt={2}>
             <Grid item xs={5}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalVolume'
                 label={labels.totVol}
                 maxAccess={maxAccess}
                 value={totalVol}
-                maxLength='30'
+                decimalScale={2}
                 readOnly
                 error={formik.touched.totalVolume && Boolean(formik.errors.totalVolume)}
                 helperText={formik.touched.totalVolume && formik.errors.totalVolume}
               />
             </Grid>
             <Grid item xs={5}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalWeight'
                 label={labels.totalWeight}
                 maxAccess={maxAccess}
                 value={totalWeight}
-                maxLength='30'
+                decimalScale={2}
                 readOnly
                 error={formik.touched.totalWeight && Boolean(formik.errors.totalWeight)}
                 helperText={formik.touched.totalWeight && formik.errors.totalWeight}
