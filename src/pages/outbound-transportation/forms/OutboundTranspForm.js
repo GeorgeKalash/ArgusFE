@@ -623,8 +623,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 value={totalVol}
                 decimalScale={2}
                 readOnly
-                error={formik.touched.totalVolume && Boolean(formik.errors.totalVolume)}
-                helperText={formik.touched.totalVolume && formik.errors.totalVolume}
               />
             </Grid>
             <Grid item xs={5}>
@@ -635,8 +633,6 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
                 value={totalWeight}
                 decimalScale={2}
                 readOnly
-                error={formik.touched.totalWeight && Boolean(formik.errors.totalWeight)}
-                helperText={formik.touched.totalWeight && formik.errors.totalWeight}
               />
             </Grid>
           </Grid>
