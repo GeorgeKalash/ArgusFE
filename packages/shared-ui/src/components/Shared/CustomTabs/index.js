@@ -16,8 +16,8 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
     }))
     ?.filter((_, index) => !indexes.includes(String(index)))
 
-  const _activeTab = _tabs?.[activeTab]?.id
-  const _disabledTab = _tabs?.[activeTab]?.disabled
+  const _activeTab = _tabs[activeTab]?.id
+  const _disabledTab = _tabs[activeTab]?.disabled
 
   useEffect(() => {
     if (_activeTab >= 0 && !_disabledTab && activeTab != _activeTab) {
@@ -34,18 +34,18 @@ export const CustomTabs = ({ tabs, activeTab, setActiveTab, maxAccess, name = 't
           variant='scrollable'
           scrollButtons={_tabs.length > 3 ? 'auto' : 'off'}
           aria-label='scrollable tabs'
-          className={styles.tabs}          TabIndicatorProps={{ className: styles.tabsIndicator }}
+          classes={{ indicator: styles.tabsIndicator }}
+          className={styles.tabs}
         >
           {_tabs?.map(tab => (
             <Tab
               key={tab.id}
               value={tab.id}
               disabled={tab?.disabled}
-              className={styles.tabName}
+              className={`${styles.tabName} ${tab.disabled ? styles.tabDisabled : ''}`}
               classes={{
                 root: styles.tabRoot,
-                selected: styles.selectedTab,
-                disabled: styles.tabDisabled
+                selected: styles.selectedTab
               }}
               label={
                 <Box display='flex' alignItems='center'>
