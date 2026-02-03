@@ -24,11 +24,18 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import { useError } from '@argus/shared-providers/src/providers/error'
 
-export default function JTCheckoutForm({ labels, recordId, access, window }) {
+export default function JTCheckoutForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.JTCheckOut,
+    editMode: !!recordId
+  })
   const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -37,6 +44,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     enabled: !recordId,
     objectName: 'transfer'
   })
+  
+  useSetWindow({ title: labels.jobTransfer, window })
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.JobTransfer.page
@@ -688,3 +697,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     </FormShell>
   )
 }
+
+JTCheckoutForm.width = 1200
+JTCheckoutForm.height = 700
