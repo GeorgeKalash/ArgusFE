@@ -65,7 +65,14 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
     const finalList = await Promise.all(
       filteredItems.map(async (entry, index) => {
         const { item, qty, balanceQty, returnedQty } = entry
-        const taxId = item.taxId
+
+        const taxId = !form.values.isVattable
+          ? null
+          : form.values.taxId
+          ? item.taxId
+            ? form.values.taxId
+            : null
+          : item.taxId ?? null
 
         const itemPriceRow = getIPR({
           priceType: item?.priceType || 0,

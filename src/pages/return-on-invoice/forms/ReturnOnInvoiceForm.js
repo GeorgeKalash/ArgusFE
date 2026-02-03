@@ -421,11 +421,20 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
           let rowTax
           let rowTaxDetails
-          if (itemFound.item.taxId) {
-            const taxDetailsResponse = await getTaxDetails(itemFound.item.taxId)
-            rowTax = itemFound.item.taxId
+
+          const effectiveTaxId = !formik.values.isVattable
+            ? null
+            : formik.values.taxId
+            ? itemFound.item.taxId
+              ? formik.values.taxId
+              : null
+            : itemFound.item.taxId ?? null
+
+          if (effectiveTaxId) {
+            const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+            rowTax = effectiveTaxId
             rowTaxDetails = taxDetailsResponse.map(item => ({
-              taxId: itemFound.item.taxId,
+              taxId: effectiveTaxId,
               taxCodeId: item.taxCodeId,
               taxBase: item.taxBase,
               amount: item.amount
@@ -478,7 +487,14 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
         let rowTax
         let rowTaxDetails
-        const effectiveTaxId = formik.values.taxId || itemInfo.taxId
+
+        const effectiveTaxId = !formik.values.isVattable
+          ? null
+          : formik.values.taxId
+          ? itemInfo?.taxId
+            ? formik.values.taxId
+            : null
+          : itemInfo?.taxId ?? null
 
         if (effectiveTaxId) {
           const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
@@ -593,7 +609,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             qtyInBase,
             muQty: newRow?.muQty,
             unitPrice,
-            baseQty: Number(newRow?.returnNowQty) * muQty,
+            baseQty: muQty ? Number(newRow?.returnNowQty) * muQty : 0,
             minPrice: ItemConvertPrice?.minPrice || 0,
             upo: ItemConvertPrice?.upo || 0,
             priceType: ItemConvertPrice?.priceType || 1,
@@ -635,7 +651,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
         const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
         update({
-          baseQty: Number(newRow?.returnNowQty) * muQty
+          baseQty: muQty ? Number(newRow?.returnNowQty) * muQty : 0
         })
       }
     },
