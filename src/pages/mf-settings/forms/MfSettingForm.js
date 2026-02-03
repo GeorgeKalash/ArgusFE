@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react'
 import { Grid } from '@mui/material'
-import { useFormik } from 'formik'
+import { useForm } from 'src/hooks/form'
 import toast from 'react-hot-toast'
 import { RequestsContext } from 'src/providers/RequestsContext'
 import { SystemRepository } from 'src/repositories/SystemRepository'
@@ -29,7 +29,7 @@ const MfSettingForm = ({ _labels, access }) => {
     MAX_ALLOW_QTY_VARIATION: DefaultFields.MAX_ALLOW_QTY_VARIATION
   }
 
-  const formik = useFormik({
+  const { formik } = useForm({
     maxAccess: access,
     initialValues: Object.values(DefaultFields).reduce(
       (acc, key) => ({ ...acc, [key]: null }),
