@@ -259,7 +259,6 @@ export default function SiteManagementForm({ labels, maxAccess, record }) {
     })
     toast.success(platformLabels.Deleted)
     refetchForm(itemId)
-    invalidate()
   }
 
   return (
