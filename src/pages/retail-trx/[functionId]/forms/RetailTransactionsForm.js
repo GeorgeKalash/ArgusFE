@@ -303,9 +303,11 @@ export default function RetailTransactionsForm({
   }
 
   const getBarcodeData = async barcode => {
+    if (!formik.values?.header?.siteId) return
+    
     const res = await getRequest({
-      extension: InventoryRepository.Barcodes.get,
-      parameters: `_barcode=${barcode}`
+      extension: InventoryRepository.Barcodes.get2,
+      parameters: `_barcode=${barcode}&_siteId=${formik.values?.header?.siteId}`
     })
 
     return res?.record
