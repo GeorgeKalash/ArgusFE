@@ -1,21 +1,17 @@
+.dialogContent {
+  padding-block: 0px !important;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  /* default */
+  --sf: 1;
+}
+
 .errorMessageText {
-    font-size: 16px;
-}
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
 
-.dialogContent{
-    padding-block: 0px !important;
-}
-
-
-@media (max-width: 1600px) { 
-    .errorMessageText {
-        font-size: 14px;
-    }
-}
-
-
-@media (max-width: 1366px) { 
-    .errorMessageText {
-        font-size: 11px;
-    }
+  /* proportional like StrictConfirmation */
+  font-size: calc(16px * var(--sf));
 }

@@ -119,7 +119,7 @@
 .headerCheckbox {
   width: 20%;
   height: 20%;
-  margin-left: 50px !important;
+  margin-left: 5px !important;
 }
 
 .wrapTextCell :global(.ag-cell-wrapper),

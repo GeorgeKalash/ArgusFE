@@ -1,3 +1,36 @@
+.dropdownHeaderCellMain,
+.dropdownOptionCellMain {
+  flex: 0 0 35%;
+  padding-right: 10px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.dropdownHeaderCellSecondary,
+.dropdownOptionCellSecondary {
+  flex: 1 1 auto;
+  padding-left: 10px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.dropdownHeaderCellMain,
+.dropdownHeaderCellSecondary,
+.dropdownHeaderCell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap; 
+  min-width: 0;
+}
+
 .dropdownHeaderRow,
 .dropdownOptionRow {
   display: flex;
@@ -9,10 +42,24 @@
 .dropdownHeaderRow {
   font-weight: 600 !important;
   border-bottom: 0.1rem solid #b9b9b9 !important;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
+  width: 100%;
+  white-space: nowrap;
 }
 
 .dropdownHeaderCell {
   font-weight: 600 !important;
+}
+
+.dropdownHeaderCell,
+.dropdownHeaderCellMain,
+.dropdownHeaderCellSecondary {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
 }
 
 .dropdownOptionIcon {
@@ -23,27 +70,48 @@
 }
 
 .dropdownOptionCell,
-.dropdownOptionSingleText {
-  font-size: 0.72rem !important;
-  font-weight: 400 !important;
-  line-height: 1.35 !important;
-
-  display: flex;
-  align-items: flex-start;
-
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  display: block !important;
+  min-width: 0;
 }
 
-.dropdownPopper :global(.MuiAutocomplete-listbox) {
-  padding: 4px !important;
+.dropdownCellClamp {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root) {
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root) {
+  width: max-content !important;
+  min-width: var(--dropdown-min-width, 100%) !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
 }
 
 .dropdownPopper :global(.MuiAutocomplete-option) {
   min-height: unset !important;
   padding: 4px 10px !important;
   align-items: flex-start !important;
+  white-space: normal !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root)::-webkit-scrollbar {
+  height: 8px;
 }
 
 .dropdownNoOptionsRow {
@@ -52,6 +120,7 @@
   padding: 5px 10px !important;
   line-height: 1.35 !important;
   font-weight: 600 !important;
+  white-space: nowrap;
 }
 
 .dropdownNoOptionsCell,
@@ -87,10 +156,11 @@
 
 @media (min-width: 1153px) and (max-width: 1920px) {
   .dropdownHeaderCell,
-  .dropdownHeaderCellMain {
+  .dropdownHeaderCellMain,
+  .dropdownHeaderCellSecondary {
     font-size: 0.72rem !important;
   }
-  
+
   .dropdownNoOptionsRow {
     font-size: 0.87rem !important;
   }
@@ -111,6 +181,7 @@
 
   .dropdownHeaderCell,
   .dropdownHeaderCellMain,
+  .dropdownHeaderCellSecondary,
   .dropdownNoOptionsRow {
     font-size: 0.64rem !important;
   }
@@ -137,6 +208,7 @@
 
   .dropdownHeaderCell,
   .dropdownHeaderCellMain,
+  .dropdownHeaderCellSecondary,
   .dropdownNoOptionsRow {
     font-size: 0.58rem !important;
   }

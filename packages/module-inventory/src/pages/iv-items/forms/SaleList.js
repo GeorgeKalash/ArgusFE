@@ -307,7 +307,7 @@ const SalesList = ({ store, labels, maxAccess, formikInitial }) => {
             onChange={value => formik.setFieldValue('items', value)}
             value={formik.values?.items}
             error={formik.errors?.items}
-            name='items'
+            name='salesTable'
             initialValues={formik?.initialValues?.items?.[0]}
             columns={columns}
             maxAccess={maxAccess}

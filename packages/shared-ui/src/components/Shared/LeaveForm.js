@@ -112,6 +112,8 @@ export const LeaveForm = ({ recordId, window }) => {
 
       await refetchData(res.recordId)
       toast.success(!values.recordId ? platformLabels.Added : platformLabels.Edited)
+
+      invalidate()
     }
   })
 

@@ -64,7 +64,8 @@ const LeaveRequestOneDayOrMore = () => {
     endpointId: LoanManagementRepository.LeaveRequest.page,
     datasetId: ResourceIds.LeaveRequestODOM,
     filter: {
-      filterFn: fetchWithFilter
+      filterFn: fetchWithFilter,
+      default: { _multiDayLeave: 2 }
     }
   })
   async function fetchWithFilter({ filters, pagination }) {

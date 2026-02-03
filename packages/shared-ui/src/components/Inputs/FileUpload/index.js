@@ -214,9 +214,8 @@ const FileUpload = forwardRef(({ resourceId, seqNo, recordId }, ref) => {
        <CustomButton
         image='clear.png'
         tooltipText='clear'
+        color={'red'}
         onClick={handleInputFileReset}
-        className={styles.clearButton}
-        style={{ padding: 0 }}
       />
       </Box>
     </>

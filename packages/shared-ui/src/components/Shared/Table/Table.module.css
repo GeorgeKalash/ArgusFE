@@ -182,21 +182,28 @@
 }
 
 @media (max-width: 1366px) {
-  .agGridContainer :global(.ag-header-cell-text),
-  .agGridContainer :global(.ag-cell) {
-    padding-inline: 10px !important;
-
-  }
   .agGridContainer:global(.ag-theme-alpine) {
-    --ag-font-size: 9px;
+    --ag-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+    --ag-header-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
   }
 
+  .agGridContainer :global(.ag-header-cell),
+  .agGridContainer :global(.ag-header-cell-label) {
+    padding-left: var(--ag-header-cell-horizontal-padding) !important;
+    padding-right: var(--ag-header-cell-horizontal-padding) !important;
+  }
+
+  .agGridContainer :global(.ag-cell) {
+    padding-left: var(--ag-cell-horizontal-padding) !important;
+    padding-right: var(--ag-cell-horizontal-padding) !important;
+  }
 }
 
 @media (max-width: 1024px) {
-
   .agGridContainer:global(.ag-theme-alpine) {
     --ag-font-size: 9.2px;
+    --ag-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+    --ag-header-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
   }
 }
 

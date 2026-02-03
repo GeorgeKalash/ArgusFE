@@ -46,7 +46,8 @@ const LeaveRequest = () => {
     endpointId: LoanManagementRepository.LeaveRequest.page,
     datasetId: ResourceIds.LeaveRequest,
     filter: {
-      filterFn: fetchWithFilter
+      filterFn: fetchWithFilter,
+      default: { _multiDayLeave: 1 }
     }
   })
 

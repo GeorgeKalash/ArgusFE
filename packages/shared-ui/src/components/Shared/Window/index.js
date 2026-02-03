@@ -92,7 +92,7 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-    const { width: screenWidth } = useWindowDimensions()
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
     const menuWidth =
       screenWidth <= 768 ? 180 :
@@ -103,22 +103,49 @@ const Window = React.memo(
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
     const containerHeight = `calc(100vh - var(--tabs-height, 40px))`
+    const availableWidth = Math.max(0, screenWidth - sidebarWidth)
 
-    const scaleFactor = (() => {
-      if (screenWidth >= 1680) return 1
-      if (screenWidth >= 1600) return 0.9
+    const safeScreenHeight =
+      screenHeight || (typeof window !== 'undefined' ? window.innerHeight : 0)
 
-      const minW = 1024
-      const maxW = 1600
-      const minScale = 0.7
-      const maxScale = 0.92
+    const tabsHeight = 40
+    const availableHeight = Math.max(0, safeScreenHeight - tabsHeight)
 
-      if (screenWidth <= minW) return minScale
-      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+    const padding = 20
+
+    const fitScaleW = (() => {
+      const fit = width ? Math.max(0, availableWidth - padding) / width : 1
+      return Number.isFinite(fit) ? fit : 1
     })()
 
-    const scaledWidth = expanded ? containerWidth : Math.max(300, width * scaleFactor)
-    const scaledHeight = expanded ? containerHeight : Math.max(120, height * scaleFactor)
+    const fitScaleH = (() => {
+      const fit = height ? Math.max(0, availableHeight - padding) / height : 1
+      return Number.isFinite(fit) ? fit : 1
+    })()
+
+    const responsiveScale = (() => {
+      const baseW = 1280
+      const baseH = 800
+
+      const w = baseW ? availableWidth / baseW : 1
+      const h = baseH ? availableHeight / baseH : 1
+
+      const s = Math.min(1, w, h)
+      return Math.max(0.8, s)
+    })()
+
+    const scaleFactor = Math.max(
+      0.8,
+      Math.min(1, fitScaleW, fitScaleH, responsiveScale)
+    )
+
+    const scaledWidth = expanded
+      ? containerWidth
+      : Math.min(availableWidth - 20, Math.max(300, width * scaleFactor))
+
+    const scaledHeight = expanded
+      ? containerHeight
+      : Math.max(120, height * scaleFactor)
 
     useEffect(() => {
       if (paperRef.current) paperRef.current.focus()

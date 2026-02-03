@@ -30,12 +30,12 @@ const PropertiesForm = ({ store, maxAccess }) => {
         })
 
         const filteredDimensions = response?.list?.filter(
-          item => item.key.includes('ivtDimension') && item.value.length > 0
+          item => item.key.includes('ivtDimension') && item?.value?.length > 0
         )
         setDimensions(filteredDimensions)
 
         const filteredDimensions2 = response?.list?.filter(
-          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item.value.length > 0
+          item => item.key.includes('ivtUDT') && item.key !== 'ivtUDTCount' && item?.value?.length > 0
         )
         setDimensionsUDT(filteredDimensions2)
       }
@@ -46,7 +46,7 @@ const PropertiesForm = ({ store, maxAccess }) => {
 
   useEffect(() => {
     const fetchDimensionsData = async () => {
-      if (recordId && dimensions.length > 0) {
+      if (recordId && dimensions?.length > 0) {
         const dimensionRequests = dimensions.map(dimension => {
           const dimensionNumber = dimension.key.match(/\d+$/)?.[0]
 
@@ -125,7 +125,7 @@ const PropertiesForm = ({ store, maxAccess }) => {
         item => item.value !== '' && item.value !== undefined && item.value !== null
       )
 
-      if (filteredData.length > 0) {
+      if (filteredData?.length > 0) {
         await postRequest({
           extension: InventoryRepository.DimensionId.set,
           record: JSON.stringify({
@@ -135,7 +135,7 @@ const PropertiesForm = ({ store, maxAccess }) => {
         })
       }
 
-      if (filteredUdtData.length > 0) {
+      if (filteredUdtData?.length > 0) {
         await postRequest({
           extension: InventoryRepository.DimensionUDT.set,
           record: JSON.stringify({

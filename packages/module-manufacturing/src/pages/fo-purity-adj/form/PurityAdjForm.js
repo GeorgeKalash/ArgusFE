@@ -201,6 +201,15 @@ const calculateTotal = key =>
     setAllMetals(res?.list)
   }
 
+  const getOpenMetalPurity = async itemId => {
+    const res = await getRequest({
+      extension: InventoryRepository.Physical.get,
+      parameters: `_itemId=${itemId}`
+    })
+  
+    return res?.record?.isOpenMetalPurity || false
+  }
+
   async function refetchForm(recordId) {
     const { record } = await getRequest({
       extension: FoundryRepository.PurityAdjustment.get2,
@@ -213,11 +222,18 @@ const calculateTotal = key =>
       return
     }
 
-    const itemsList = (record?.items || []).map((item, index) => ({
-      ...item,
-      id: index + 1,
-      purity: item.purity * 1000
-    }))
+   const itemsList = await Promise.all(
+    (record?.items || []).map(async (item, index) => {
+     const isOpenMetalPurity = await getOpenMetalPurity(item.itemId)
+
+     return {
+     ...item,
+     id: index + 1,
+     purity: item.purity * 1000,
+     isOpenMetalPurity,
+     }
+    })
+   )
 
     const metalInfo = await getBaseSalesMetalPurity()
 
@@ -237,8 +253,8 @@ const calculateTotal = key =>
   const columns = [
     {
       component: 'numberfield',
-      name: labels.count,
-      label: '',
+      name: 'id',
+      label: labels.count,
       props: { readOnly: true }
     },
     {
@@ -287,8 +303,7 @@ const calculateTotal = key =>
         mapping: [
           { from: 'itemName', to: 'itemName' },
           { from: 'itemId', to: 'itemId' },
-          { from: 'sku', to: 'sku' },
-          { from: 'stdPurity', to: 'stdPurity' }
+          { from: 'sku', to: 'sku' }
         ],
         columnsInDropDown: [
           { key: 'sku', value: 'SKU' },
@@ -299,14 +314,20 @@ const calculateTotal = key =>
       onChange: async ({ row: { update, newRow } }) => {
         setRecalc(true)
 
+        const stdPurity = 0
+        const isOpenMetalPurity = await getOpenMetalPurity(newRow?.itemId)
+
         const newRmQty = formik.values?.header?.baseSalesMetalPurity
-          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+
+          ? (((newRow?.qty || 0) * (stdPurity)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
           : 0
+
         update({
-          stdPurity: (newRow?.stdPurity || 0).toFixed(2),
-          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          stdPurity,
+          deltaPurity: ((stdPurity) - (newRow?.purity || 0)).toFixed(2),
           newRmQty,
-          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2),
+          isOpenMetalPurity
         })
       },
       propsReducer({ row, props }) {
@@ -350,7 +371,7 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'purity',
       label: labels.purity,
-      props: { allowNegative: false, maxLength: 11, decimalScale: 2 },
+      props: { decimalScale: 2 },
       async onChange({ row: { update, newRow } }) {
         setRecalc(true)
 
@@ -362,6 +383,9 @@ const calculateTotal = key =>
           rmQty,
           deltaRMQty: ((newRow?.newRmQty || 0) - rmQty).toFixed(2)
         })
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: !row.isOpenMetalPurity }
       }
     },
     {
@@ -374,7 +398,21 @@ const calculateTotal = key =>
       component: 'numberfield',
       name: 'stdPurity',
       label: labels.newPurity,
-      props: { readOnly: true, decimalScale: 2 }
+      updateOn: 'blur',
+      props: {decimalScale: 2, maxLength: 11 , allowNegative: false},
+      async onChange({ row: { update, newRow } }) {
+       setRecalc(true)
+       
+       const newRmQty = formik.values?.header?.baseSalesMetalPurity
+          ? (((newRow?.qty || 0) * (newRow?.stdPurity || 0)) / formik.values?.header?.baseSalesMetalPurity).toFixed(2)
+          : 0
+        update({
+          stdPurity: newRow?.stdPurity || 0,
+          deltaPurity: ((newRow?.stdPurity || 0) - (newRow?.purity || 0)).toFixed(2),
+          newRmQty,
+          deltaRMQty: (newRmQty - (newRow?.rmQty || 0)).toFixed(2)
+        })
+      }
     },
     {
       component: 'numberfield',
@@ -608,7 +646,10 @@ const calculateTotal = key =>
         </Fixed>
         <Grow>
           <DataGrid
-            onChange={value => formik.setFieldValue('items', value)}
+              onChange={(value, action) => {
+              formik.setFieldValue('items', value)
+              action === 'delete' && setRecalc(true)
+            }}
             value={formik.values?.items}
             error={formik.errors?.items}
             name='items'

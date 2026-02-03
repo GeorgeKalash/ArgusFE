@@ -87,26 +87,53 @@ const CustomComboBox = ({
       name={name}
       value={value}
       inputValue={neverPopulate ? inputValue : undefined}
-      onInputChange={(_, newInputValue) => {              
+      onInputChange={(_, newInputValue) => {
         if (neverPopulate) setInputValue(newInputValue)
       }}
-
       size={size}
       options={store}
       key={value}
       PopperComponent={PopperComponent}
+      slotProps={{
+        popper: {
+          className: dropdownStyles.dropdownPopper,
+          style: {
+            '--dropdown-min-width': `${displayFieldWidth * 100}%`
+          }
+        }
+      }}
+      noOptionsText={
+        <div className={dropdownStyles.dropdownNoOptionsRow}>
+          {columnsInDropDown?.length > 0 ? (
+            columnsInDropDown.map((col, i) => (
+              <div
+                key={i}
+                className={dropdownStyles.dropdownNoOptionsCell}
+                style={{
+                  width: `${
+                    ((col.width ?? 2) / columnsInDropDown.reduce((s, c) => s + (c.width ?? 2), 0)) * 100
+                  }%`
+                }}
+              >
+                {i === 0 ? 'No options' : ''}
+              </div>
+            ))
+          ) : (
+            <div className={dropdownStyles.dropdownNoOptionsSingle}>No options</div>
+          )}
+        </div>
+      }
       {...(!props.renderOption
         ? {
             PaperComponent: ({ children }) => (
               <Paper
                 style={{
-                  minWidth: `${displayFieldWidth * 100}%`,
-                  width: 'max-content',
+                  width: 'max-content'
                 }}
               >
                 {children}
               </Paper>
-            ),
+            )
           }
         : {})}
       getOptionLabel={(option, value) => {
@@ -171,7 +198,7 @@ const CustomComboBox = ({
         setAutoFocus(true)
 
         if (neverPopulate) {
-          setInputValue('') 
+          setInputValue('')
           onChange(name, '')
         }
       }}
@@ -212,7 +239,9 @@ const CustomComboBox = ({
                 </li>
               )}
               <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
-                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
+                {option.icon && (
+                  <img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />
+                )}
                 {columnsWithGrid.map((header, i) => {
                   let displayValue = option[header.key]
                   const widthPercent = `${(header.grid / totalGrid) * 100}%`
@@ -233,7 +262,9 @@ const CustomComboBox = ({
           return (
             <Box>
               <li {...propsOption} className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}>
-                {option.icon && (<img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />)}
+                {option.icon && (
+                  <img src={option.icon} alt={option[displayField]} className={dropdownStyles.dropdownOptionIcon} />
+                )}
                 <Box className={dropdownStyles.dropdownOptionSingleText}>{option[displayField]}</Box>
               </li>
             </Box>
@@ -276,14 +307,16 @@ const CustomComboBox = ({
                           </IconButton>
                         )
                       ))}
-                 { !_readOnly && value && allowClear && <IconButton
-                      className={inputs.iconButton}
-                      tabIndex={-1}
-                      onClick={() => onChange(name, '')}
-                      aria-label='clear input'
-                    >
-                      <ClearIcon className={inputs.icon} />
-                    </IconButton>}
+                    {!_readOnly && value && allowClear && (
+                      <IconButton
+                        className={inputs.iconButton}
+                        tabIndex={-1}
+                        onClick={() => onChange(name, '')}
+                        aria-label='clear input'
+                      >
+                        <ClearIcon className={inputs.icon} />
+                      </IconButton>
+                    )}
                     {childrenWithoutClear}
                   </InputAdornment>
                 )
@@ -323,15 +356,17 @@ const CustomComboBox = ({
               },
               startAdornment: value?.icon ? (
                 <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
-              ) : (
-                props?.startAdornment || params.InputProps.startAdornment && <InputAdornment position='start' className={inputs.startAdornment}> { props?.startAdornment || params.InputProps.startAdornment} </InputAdornment> 
-              ),
+              ) : props?.startAdornment || (params.InputProps.startAdornment && (
+                <InputAdornment position='start' className={inputs.startAdornment}>
+                  {props?.startAdornment || params.InputProps.startAdornment}
+                </InputAdornment>
+              )),
               endAdornment: mergedEndAdornment
             }}
             InputLabelProps={{
               classes: {
                 root: inputs.inputLabel,
-                shrink: inputs.inputLabelShrink, 
+                shrink: inputs.inputLabelShrink
               }
             }}
           />
@@ -343,4 +378,3 @@ const CustomComboBox = ({
 }
 
 export default CustomComboBox
-

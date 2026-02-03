@@ -18,6 +18,15 @@
   backface-visibility: hidden;
 }
 
+.paper[data-minimized='true'] {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 320px !important;
+}
+
 .dialogTitle {
   cursor: move;
   padding-left: 15px !important;
@@ -61,6 +70,18 @@
 
 .paper[data-minimized='true'] .dialogTitle {
   cursor: pointer;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+}
+
+.paper[data-minimized='true'] .dialogTitleText {
+  font-size: 0.95rem !important;
+  line-height: 1rem !important;
+}
+
+.paper[data-minimized='true'] .iconButton svg {
+  font-size: 1.1rem !important;
 }
 
 .no-drag {
@@ -69,82 +90,82 @@
 }
 
 @media (max-width: 1600px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 35px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.95rem !important;
     line-height: 0.95rem !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 1.15rem !important;
   }
 }
 
 @media (max-width: 1300px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 32px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.9rem !important;
     line-height: 0.9rem !important;
   }
-  .iconButton {
+  .paper:not([data-minimized='true']) .iconButton {
     padding-right: 2px !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 1.1rem !important;
   }
 }
 
 @media (max-width: 1280px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 28px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.85rem !important;
     line-height: 0.85rem !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 1rem !important;
   }
 }
 
 @media (max-width: 1024px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 26px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.8rem !important;
     line-height: 0.8rem !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 0.9rem !important;
   }
 }
 
 @media (max-width: 768px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 24px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.75rem !important;
     line-height: 0.75rem !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 0.9rem !important;
   }
 }
 
 @media (max-width: 480px) {
-  .dialogTitle {
+  .paper:not([data-minimized='true']) .dialogTitle {
     height: 22px !important;
   }
-  .dialogTitleText {
+  .paper:not([data-minimized='true']) .dialogTitleText {
     font-size: 0.7rem !important;
     line-height: 0.7rem !important;
   }
-  .iconButton svg {
+  .paper:not([data-minimized='true']) .iconButton svg {
     font-size: 0.85rem !important;
   }
 }

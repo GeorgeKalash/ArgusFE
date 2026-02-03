@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { useContext } from 'react'
+import { useContext, useMemo, useState  } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import toast from 'react-hot-toast'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -12,10 +12,20 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
+import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
+
+const SECURITY_GROUP_FILTER = {
+  ALL: '2',
+  NO_ACCESS: '1',
+  HAS_ACCESS: '3'
+}
 
 const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const [filterType, setFilterType] = useState()
+  const [searchText, setSearchText] = useState('')
 
   const {
     query: { data }
@@ -161,6 +171,31 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
     }
   ]
 
+  const hasAnyAccess = item => Object.values(item).some(value => value === true)
+
+  const filteredData = useMemo(() => {
+    if (!data?.list) return data
+
+    let list = data.list
+
+    list = list.filter(item =>
+      filterType === SECURITY_GROUP_FILTER.NO_ACCESS
+        ? !hasAnyAccess(item)
+        : filterType === SECURITY_GROUP_FILTER.HAS_ACCESS
+        ? hasAnyAccess(item)
+        : true
+    )
+
+    if (searchText) {
+      const value = searchText.toLowerCase()
+      list = list.filter(
+        item => item.name?.toLowerCase().includes(value) || item.description?.toLowerCase().includes(value)
+      )
+    }
+
+    return { ...data, list }
+  }, [data, filterType, searchText])
+
   return (
     <Form onSave={onSubmit} maxAccess={maxAccess}>
       <VertLayout>
@@ -184,13 +219,43 @@ const SecurityGroupsForm = ({ labels, maxAccess, row, window }) => {
                 maxAccess={maxAccess}
               />
             </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                datasetId={DataSets.ASSIGNMENT_LEVEL}
+                name='filter'
+                label={labels.filter}
+                value={filterType}
+                valueField='key'
+                displayField='value'
+                defaultIndex={1}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  setFilterType(newValue?.key ?? SECURITY_GROUP_FILTER.ALL)
+                }}
+                onClear={() => setFilterType(SECURITY_GROUP_FILTER.ALL)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                name='search'
+                value={searchText}
+                label={platformLabels.Search}
+                onClear={() => setSearchText('')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation()
+                  }
+                }}
+                onChange={e => setSearchText(e.target.value)}
+              />
+            </Grid>
           </Grid>
         </Fixed>
         <Grow>
           <Table
             name='items'
             columns={columns}
-            gridData={data}
+            gridData={filteredData}
             rowId={['sgId']}
             maxAccess={maxAccess}
             pagination={false}

@@ -242,7 +242,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
       editMode={editMode}
       actions={actions}
       functionId={systemFunction}
-      disabledSubmit={isPosted || isReleased}
+      disabledSubmit={isPosted}
     >
       <VertLayout>
         <Fixed>
@@ -470,7 +470,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     maxAccess={maxAccess}
                     maxLength={4}
                     decimalScale={0}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     onChange={formik.handleChange}
                     onClear={() => formik.setFieldValue('nbOfLayers', '')}
                     error={formik.touched.nbOfLayers && Boolean(formik.errors.nbOfLayers)}
@@ -482,7 +482,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     label={labels.density}
                     value={formik.values.density}
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     maxLength={9}
                     decimalScale={3}
                     onChange={formik.handleChange}
@@ -496,7 +496,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     label={labels.pieces}
                     value={formik.values.setPcs}
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     maxLength={4}
                     decimalScale={0}
                     onChange={formik.handleChange}
@@ -511,7 +511,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     label={labels.weight}
                     value={formik.values.weight}
                     maxAccess={maxAccess}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     onChange={formik.handleChange}
                     maxLength={8}
                     decimalScale={2}
@@ -539,7 +539,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     value={formik.values.fileReference}
                     maxAccess={maxAccess}
                     onChange={formik.handleChange}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     onClear={() => formik.setFieldValue('fileReference', '')}
                     error={formik.touched.fileReference && Boolean(formik.errors.fileReference)}
                   />
@@ -600,7 +600,7 @@ export default function ThreeDPrintForm({ recordId, window }) {
                     type='text'
                     label={labels.notes}
                     value={formik.values.notes}
-                    readOnly={isPosted || isReleased}
+                    readOnly={isPosted}
                     rows={3}
                     maxAccess={maxAccess}
                     onChange={e => formik.setFieldValue('notes', e.target.value || null)}

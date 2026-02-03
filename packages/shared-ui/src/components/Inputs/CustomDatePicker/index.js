@@ -121,7 +121,7 @@ const CustomDatePicker = ({
         open={openDatePicker}
         disabled={disabled}
         readOnly={_readOnly}
-        clearable // bug from mui not working for now
+        clearable
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
           textField: {

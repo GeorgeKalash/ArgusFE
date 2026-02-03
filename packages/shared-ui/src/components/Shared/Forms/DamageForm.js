@@ -26,11 +26,16 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import WorkFlow from '../WorkFlow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
-export default function DamageForm({ recordId, jobId }) {
+export default function DamageForm({ recordId, lockRecord }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  
+  const { addLockedScreen } = useContext(LockedScreensContext)
+  const { stack } = useWindow()
+
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.Damage.page
   })
@@ -92,8 +97,16 @@ export default function DamageForm({ recordId, jobId }) {
         jobPcs: yup.number().required(),
         netJobQty: yup.number().required(),
         netJobPcs: yup.number().required(),
-        metalQty: yup.number().required(),
-        nonMetalQty: yup.number().required(),
+        metalQty: yup.number().required().min(0),
+        nonMetalQty: yup.number().required().min(0),
+        routingId: yup
+          .number()
+          .nullable()
+          .when('genJobFromDamage', {
+            is: true,
+            then: () => yup.number().required(),
+            otherwise: () => yup.number().nullable()
+          }),
         damagedPcs: yup.lazy((_, { parent }) =>
           yup
             .number()
@@ -142,6 +155,8 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.get2,
       parameters: `_recordId=${damageId}`
     }).then(async res => {
+      const genJobFromDamage = await getDTD(res?.record?.header?.dtId)
+
       formik.setValues({
         recordId: res?.record?.header?.recordId || null,
         header: {
@@ -149,10 +164,25 @@ export default function DamageForm({ recordId, jobId }) {
           date: formatDateFromApi(res?.record?.header?.date),
           maxPcs: res?.record?.header?.jobPcs,
           workCenterName: res?.record?.header?.wcName,
-          workCenterRef: res?.record?.header?.wcRef
+          workCenterRef: res?.record?.header?.wcRef,
+          genJobFromDamage
         },
         items: res?.record?.items || []
       })
+
+      !formik.values.recordId &&
+        lockRecord({
+          recordId: res?.record?.header?.recordId,
+          reference: res?.record?.header?.reference,
+          resourceId: ResourceIds.Damages,
+          onSuccess: () => {
+            addLockedScreen({
+              resourceId: ResourceIds.Damages,
+              recordId: res?.record?.header?.recordId,
+              reference: res?.record?.header?.reference
+            })
+          }
+        })
     })
   }
 
@@ -171,6 +201,16 @@ export default function DamageForm({ recordId, jobId }) {
     await refetchForm(formik.values.recordId)
   }
 
+  async function onWorkFlowClick() {
+    stack({
+      Component: WorkFlow,
+      props: {
+        functionId: SystemFunction.Damage,
+        recordId: formik.values.recordId
+      }
+    })
+  }
+
   const actions = [
     {
       key: 'Locked',
@@ -182,6 +222,12 @@ export default function DamageForm({ recordId, jobId }) {
       condition: !isPosted,
       onClick: onPost,
       disabled: !editMode || isPosted
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
     }
   ]
 
@@ -255,6 +301,32 @@ export default function DamageForm({ recordId, jobId }) {
 
   const hasItems = formik?.values?.items?.length > 0
 
+  async function getDTD(dtId) {
+    if (dtId) {
+      const res = await getRequest({
+        extension: ManufacturingRepository.DocumentTypeDefault.get,
+        parameters: `_dtId=${dtId}`
+      })
+
+      formik.setFieldValue('header.genJobFromDamage', res?.record?.genJobFromDamage)
+
+      return res?.record?.genJobFromDamage || false
+    } else {
+      formik.setFieldValue('header.genJobFromDamage', false)
+    }
+  }
+
+  const getSeqNo = async routingId => {
+    if (!routingId) return
+
+    const res = await getRequest({
+      extension: ManufacturingRepository.RoutingSequence.qry,
+      parameters: `_routingId=${routingId}`
+    })
+
+    return res?.list?.[0]?.seqNo || null
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Damages}
@@ -265,8 +337,8 @@ export default function DamageForm({ recordId, jobId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
-      disabledSubmit={isPosted}
-      disabledSavedClear={isPosted}
+      disabledSubmit={(formik.values.header.damagedQty != 0 && !hasItems) || isPosted}
+      disabledSavedClear={(formik.values.header.damagedQty != 0 && !hasItems) || isPosted}
       isParentWindow={false}
     >
       <VertLayout>
@@ -284,7 +356,7 @@ export default function DamageForm({ recordId, jobId }) {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    readOnly={editMode}
+                    readOnly={formik.values.header.jobId || editMode}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     displayFieldWidth={2}
@@ -292,6 +364,7 @@ export default function DamageForm({ recordId, jobId }) {
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
                       await changeDT(newValue)
+                      await getDTD(newValue?.recordId)
 
                       formik.setFieldValue('header.dtId', newValue?.recordId || null)
                     }}
@@ -349,13 +422,27 @@ export default function DamageForm({ recordId, jobId }) {
                   />
                 </Grid>
 
-                <Grid item xs={4}>
-                  <CustomButton
-                    onClick={onPreview}
-                    image={'preview.png'}
-                    tooltipText={platformLabels.Preview}
-                    disabled={isPosted}
-                  />
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomButton
+                        onClick={onPreview}
+                        image={'preview.png'}
+                        tooltipText={platformLabels.Preview}
+                        disabled={formik.values.header.damagedQty == 0 || isPosted}
+                      />
+                    </Grid>
+
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.routingSeqNo'
+                        label={labels.routingSeqNo}
+                        value={formik?.values?.header?.routingSeqNo}
+                        maxAccess={maxAccess}
+                        readOnly
+                      />
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -399,11 +486,16 @@ export default function DamageForm({ recordId, jobId }) {
                           itemName: newValue?.itemName || '',
                           workCenterName: newValue?.wcName || '',
                           workCenterId: newValue?.workCenterId || null,
-                          plantId: newValue?.plantId || null,
                           maxPcs: newValue?.pcs || 0,
                           damageRate: (formik.values.qty / newValue?.qty) * 100 || 0,
-                          routingName: newValue?.routingName || '',
-                          routingId: newValue?.routingId || null,
+                          ...(!formik.values.header.genJobFromDamage
+                            ? {
+                                routingName: newValue?.routingName || '',
+                                routingId: newValue?.routingId || null,
+                                routingRef: newValue?.routingRef || '',
+                                routingSeqNo: newValue?.routingSeqNo || null
+                              }
+                            : {}),
                           metalQty: res?.metalQty || 0,
                           nonMetalQty: res?.nonMetalQty || 0
                         }
@@ -449,14 +541,37 @@ export default function DamageForm({ recordId, jobId }) {
                     readOnly
                   />
                 </Grid>
-
                 <Grid item xs={12}>
-                  <CustomTextField
-                    name='header.routingName'
+                  <ResourceLookup
+                    endpointId={ManufacturingRepository.Routing.snapshot}
+                    valueField='reference'
+                    displayField='name'
+                    name='header.routingId'
                     label={labels.routing}
-                    value={formik?.values?.header?.routingName}
+                    formObject={formik.values.header}
+                    form={formik}
+                    minChars={2}
+                    firstFieldWidth={5}
+                    firstValue={formik.values.header.routingRef}
+                    secondValue={formik.values.header.routingName}
+                    errorCheck={'header.routingId'}
                     maxAccess={maxAccess}
-                    readOnly
+                    displayFieldWidth={2}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    required={formik.values.header.genJobFromDamage}
+                    readOnly={!formik.values.header.genJobFromDamage || isPosted}
+                    onChange={async (_, newValue) => {
+                      const seqNo = await getSeqNo(newValue?.recordId)
+
+                      formik.setFieldValue('header.routingSeqNo', seqNo || null)
+                      formik.setFieldValue('header.routingRef', newValue?.reference || null)
+                      formik.setFieldValue('header.routingName', newValue?.name || null)
+
+                      formik.setFieldValue('header.routingId', newValue?.recordId || null)
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -557,56 +672,64 @@ export default function DamageForm({ recordId, jobId }) {
             <Grid item xs={3}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.metalQty'
-                    label={labels.metalQty}
-                    value={formik.values?.header?.metalQty}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.metalQty', null)}
-                    maxAccess={maxAccess}
-                    required
-                    readOnly
-                    error={formik?.touched?.header?.metalQty && Boolean(formik?.errors?.header?.metalQty)}
-                  />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.metalQty'
+                        label={labels.metalQty}
+                        value={formik.values?.header?.metalQty}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.metalQty', null)}
+                        maxAccess={maxAccess}
+                        required
+                        readOnly
+                        error={formik?.touched?.header?.metalQty && Boolean(formik?.errors?.header?.metalQty)}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.nonMetalQty'
+                        label={labels.nonMetalQty}
+                        value={formik.values?.header?.nonMetalQty}
+                        onChange={formik.handleChange}
+                        readOnly
+                        onClear={() => formik.setFieldValue('header.nonMetalQty', null)}
+                        maxAccess={maxAccess}
+                        required
+                        error={formik?.touched?.header?.nonMetalQty && Boolean(formik?.errors?.header?.nonMetalQty)}
+                      />
+                    </Grid>
+                  </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.nonMetalQty'
-                    label={labels.nonMetalQty}
-                    value={formik.values?.header?.nonMetalQty}
-                    onChange={formik.handleChange}
-                    readOnly
-                    onClear={() => formik.setFieldValue('header.nonMetalQty', null)}
-                    maxAccess={maxAccess}
-                    required
-                    error={formik?.touched?.header?.nonMetalQty && Boolean(formik?.errors?.header?.nonMetalQty)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.netJobQty'
-                    label={labels.netJobQty}
-                    value={netQty}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.netJobQty', null)}
-                    maxAccess={maxAccess}
-                    readOnly
-                    required
-                    error={formik?.touched?.header?.netJobQty && Boolean(formik?.errors?.header?.netJobQty)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='header.netJobPcs'
-                    label={labels.netJobPcs}
-                    value={netPcs}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('header.netJobPcs', null)}
-                    maxAccess={maxAccess}
-                    readOnly
-                    required
-                    error={formik?.touched?.header?.netJobPcs && Boolean(formik?.errors?.header?.netJobPcs)}
-                  />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.netJobQty'
+                        label={labels.netJobQty}
+                        value={netQty}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.netJobQty', null)}
+                        maxAccess={maxAccess}
+                        readOnly
+                        required
+                        error={formik?.touched?.header?.netJobQty && Boolean(formik?.errors?.header?.netJobQty)}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CustomNumberField
+                        name='header.netJobPcs'
+                        label={labels.netJobPcs}
+                        value={netPcs}
+                        onChange={formik.handleChange}
+                        onClear={() => formik.setFieldValue('header.netJobPcs', null)}
+                        maxAccess={maxAccess}
+                        readOnly
+                        required
+                        error={formik?.touched?.header?.netJobPcs && Boolean(formik?.errors?.header?.netJobPcs)}
+                      />
+                    </Grid>
+                  </Grid>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -619,6 +742,47 @@ export default function DamageForm({ recordId, jobId }) {
                     readOnly
                     onClear={() => formik.setFieldValue('header.generatedJobRef', '')}
                     error={formik.touched?.header?.generatedJobRef && Boolean(formik.errors?.header?.generatedJobRef)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DamageReason.qry}
+                    name='header.reasonId'
+                    label={labels.damageReason}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    readOnly={isPosted}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    onChange={(event, newValue) => {
+                      formik.setFieldValue('header.reasonId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.reasonId && formik?.errors?.header?.reasonId}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <ResourceComboBox
+                    endpointId={ManufacturingRepository.DamageCategory.qry}
+                    name='header.categoryId'
+                    label={labels.damageCategory}
+                    valueField='recordId'
+                    displayField={['reference', 'name']}
+                    columnsInDropDown={[
+                      { key: 'reference', value: 'Reference' },
+                      { key: 'name', value: 'Name' }
+                    ]}
+                    values={formik.values.header}
+                    maxAccess={maxAccess}
+                    readOnly={isPosted}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('header.categoryId', newValue?.recordId || null)
+                    }}
+                    error={formik?.touched?.header?.categoryId && formik?.errors?.header?.categoryId}
                   />
                 </Grid>
               </Grid>

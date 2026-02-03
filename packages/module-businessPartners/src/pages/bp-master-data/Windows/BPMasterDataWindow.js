@@ -11,7 +11,7 @@ import SalesForm from '../forms/SalesForm'
 import PurchaseForm from '../forms/PurchaseForm'
 import BankTab from '../forms/BankTab'
 
-const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
+const BPMasterDataWindow = ({ labels, maxAccess, recordId, invalidate, window }) => {
   const [activeTab, setActiveTab] = useState(0)
 
   const [store, setStore] = useState({
@@ -19,50 +19,50 @@ const BPMasterDataWindow = ({ labels, maxAccess, recordId, height }) => {
     category: null,
     bp: { ref: '', name: '' }
   })
-  const [editMode, setEditMode] = useState(!!recordId)
 
   const tabs = [
     { label: labels.general },
-    { label: labels.idNumber, disabled: !editMode },
-    { label: labels.relation, disabled: !editMode },
-    { label: labels.address, disabled: !editMode },
-    { label: labels.role, disabled: !editMode },
-    { label: labels.sales, disabled: !editMode },
-    { label: labels.purchase, disabled: !editMode },
-    { label: labels.bank, disabled: !editMode }
+    { label: labels.idNumber, disabled: !store.recordId },
+    { label: labels.relation, disabled: !store.recordId },
+    { label: labels.address, disabled: !store.recordId },
+    { label: labels.role, disabled: !store.recordId },
+    { label: labels.sales, disabled: !store.recordId },
+    { label: labels.purchase, disabled: !store.recordId },
+    { label: labels.bank, disabled: !store.recordId }
   ]
 
   return (
     <VertLayout>
       <CustomTabs tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} maxAccess={maxAccess} />
-      <CustomTabPanel index={0} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={0} value={activeTab} maxAccess={maxAccess}>
         <BPMasterDataForm
           labels={labels}
           maxAccess={maxAccess}
           store={store}
           setStore={setStore}
-          setEditMode={setEditMode}
+          invalidate={invalidate}
+          window={window}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={1} value={activeTab} maxAccess={maxAccess}>
         <IDNumberForm store={store} maxAccess={maxAccess} labels={labels} />
       </CustomTabPanel>
-      <CustomTabPanel index={2} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={2} value={activeTab} maxAccess={maxAccess}>
         <RelationList store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={3} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={3} value={activeTab} maxAccess={maxAccess}>
         <AddressMasterDataForm store={store} setStore={setStore} />
       </CustomTabPanel>
-      <CustomTabPanel index={4} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={4} value={activeTab} maxAccess={maxAccess}>
         <RolesTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={5} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={5} value={activeTab} maxAccess={maxAccess}>
         <SalesForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={6} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={6} value={activeTab} maxAccess={maxAccess}>
         <PurchaseForm store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
-      <CustomTabPanel index={7} height={height} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel index={7} value={activeTab} maxAccess={maxAccess}>
         <BankTab store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </VertLayout>

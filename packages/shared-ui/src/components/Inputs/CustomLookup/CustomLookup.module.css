@@ -4,7 +4,6 @@
 
 .firstField {
   width: 100% !important;
-
 }
 
 .root:dir(ltr) :global(.MuiOutlinedInput-root) {
@@ -13,7 +12,6 @@
 
 .root:dir(rtl) :global(.MuiOutlinedInput-root) {
   padding-left: 8px !important;
-  
 }
 
 .firstField:dir(ltr) :global(.MuiAutocomplete-inputRoot) {
@@ -49,4 +47,3 @@
   display: flex !important;
   width: 100% !important;
 }
-

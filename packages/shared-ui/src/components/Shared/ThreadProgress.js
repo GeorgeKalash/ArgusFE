@@ -11,8 +11,13 @@ import CustomTextField from '../Inputs/CustomTextField'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 
+const ProgressContainer = styled.div`
+  container-type: inline-size;
+  font-size: clamp(12px, 3.2cqw, 16px);
+`
+
 const ProgressBarLabel = styled.span`
-  font-size: 16px;
+  font-size: clamp(10px, 2.2cqw, 12px);
   font-weight: 600;
   color: #888888;
   position: absolute;
@@ -23,7 +28,7 @@ const ProgressBarLabel = styled.span`
 `
 
 const Label = styled.span`
-  font-size: 16px;
+  font-size: clamp(11px, 2.4cqw, 13px);
   font-weight: 600;
   margin-bottom: 3px;
   margin-top: 5px;
@@ -32,12 +37,16 @@ const Label = styled.span`
 
 const ProgressBarBackground = styled.div`
   width: 100%;
-  height: 35px;
+  height: clamp(28px, 7cqw, 35px);
   background-color: #f0f0f0;
   border-radius: 5px;
   overflow: hidden;
   margin: 10px 0;
   position: relative;
+`
+
+const ProgressBarsWrapper = styled.div`
+  container-type: inline-size;
 `
 
 const ProgressBar = styled.div`
@@ -58,7 +67,7 @@ function ProgressBarComponent({ label, topLabel, width }) {
   )
 }
 
-export const ThreadProgress = ({ recordId, access, window }) => {
+export const ThreadProgress = ({ recordId, onComplete, access, window }) => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -88,8 +97,12 @@ export const ThreadProgress = ({ recordId, access, window }) => {
 
   const hasLogError = !!data.status && data.status < 0
 
-  //console.log(!!data.status)
-  //console.log(hasLogError)
+  useEffect(() => {
+    if(onComplete){
+      if(tasksCompleted || hasLogError) onComplete()
+    }
+  }, [hasLogError, tasksCompleted])
+
   useEffect(() => {
     const fetchDataAndSet = async () => {
       const data = await fetchData()
@@ -134,8 +147,9 @@ export const ThreadProgress = ({ recordId, access, window }) => {
       actions={actions}
       isSaved={false}
     >
-      <VertLayout>
-        <Grow>
+    <VertLayout>
+      <Grow>
+        <ProgressContainer>
           <Grid item xs={12}>
             <CustomTextField
               name='phase'
@@ -145,16 +159,18 @@ export const ThreadProgress = ({ recordId, access, window }) => {
               maxAccess={access}
             />
           </Grid>
-          <ProgressBarComponent
-            label={`${platformLabels.Step} ${data.currentPhase} of ${data.phases}...`}
-            topLabel={platformLabels.currentPhase}
-            width={`${currentPhaseProgress}%`}
-          />
-          <ProgressBarComponent
-            label={`${platformLabels.Step} ${data.completed} of ${data.iterations}...`}
-            topLabel={platformLabels.Completed}
-            width={`${completedProgress}%`}
-          />
+          <ProgressBarsWrapper>
+            <ProgressBarComponent
+              label={`${platformLabels.Step} ${data.currentPhase} of ${data.phases}...`}
+              topLabel={platformLabels.currentPhase}
+              width={`${currentPhaseProgress}%`}
+            />
+            <ProgressBarComponent
+              label={`${platformLabels.Step} ${data.completed} of ${data.iterations}...`}
+              topLabel={platformLabels.Completed}
+              width={`${completedProgress}%`}
+            />
+          </ProgressBarsWrapper>
           <CustomTextArea
             name='log'
             label={platformLabels.Log}
@@ -163,10 +179,11 @@ export const ThreadProgress = ({ recordId, access, window }) => {
             maxAccess={access}
             readOnly={true}
           />
-        </Grow>
-      </VertLayout>
-    </FormShell>
-  )
+        </ProgressContainer>
+      </Grow>
+    </VertLayout>
+  </FormShell>
+)
 }
 
 ThreadProgress.width = 500

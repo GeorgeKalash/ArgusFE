@@ -143,7 +143,8 @@ const AuthProvider = ({ children }) => {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_AuthURL}/MA.asmx/getAC?_accountName=${accountName}`)
       const record = response?.data?.record
       setGetAC(response || null)
-      if (!record || !record.trial) {
+      
+      if (!record || (isDeploy && !record.trial)) {
         setErrorMsg(`Invalid deploy account: ${accountName}`)
         setValidCompanyName(false)
       } else {
@@ -151,9 +152,10 @@ const AuthProvider = ({ children }) => {
         setValidCompanyName(!!record.accountName)
         window.localStorage.setItem('apiUrl', record.api || '')
         await saveToDB('authSettings', 'companyName', record.accountName)
+
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error('Error Fetching Data: ', error)
     }
     setLoading(false)
   }

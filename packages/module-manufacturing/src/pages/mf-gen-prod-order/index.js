@@ -27,10 +27,6 @@ const GeneratePoductionOrder = () => {
     datasetId: ResourceIds.GenerateProductionOrder
   })
 
-  const { labels: _labels, access: maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.ProductionOrder
-  })
-
   const { formik } = useForm({
     initialValues: {
       clientId: null,

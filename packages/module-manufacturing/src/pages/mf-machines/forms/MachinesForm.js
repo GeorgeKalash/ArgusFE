@@ -13,6 +13,8 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { GeneralLedgerRepository } from '@argus/repositories/src/repositories/GeneralLedgerRepository'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 
 export default function MachinesForms({ labels, maxAccess, store, setStore }) {
   const { recordId } = store
@@ -92,165 +94,170 @@ export default function MachinesForms({ labels, maxAccess, store, setStore }) {
 
   return (
     <FormShell resourceId={ResourceIds.Machines} form={formik} maxAccess={maxAccess} editMode={editMode}>
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <CustomTextField
-            name='reference'
-            label={labels.reference}
-            value={formik.values?.reference}
-            required
-            maxAccess={maxAccess}
-            maxLength='4'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('reference', '')}
-            error={formik.touched.reference && Boolean(formik.errors.reference)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='minLoadQty'
-            label={labels.minLoadQty}
-            value={formik.values.minLoadQty}
-            onChange={formik.handleChange}
-            maxLength='3'
-            decimalScale={0}
-            onClear={() => formik.setFieldValue('minLoadQty', 0)}
-            error={formik.touched.minLoadQty && Boolean(formik.errors.minLoadQty)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomTextField
-            name='name'
-            label={labels.name}
-            value={formik.values.name}
-            required
-            maxAccess={maxAccess}
-            maxLength='30'
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('name', '')}
-            error={formik.touched.name && Boolean(formik.errors.name)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='maxLoadQty'
-            label={labels.maxLoadQty}
-            value={formik.values.maxLoadQty}
-            onChange={formik.handleChange}
-            maxLength='3'
-            decimalScale={0}
-            onClear={() => formik.setFieldValue('maxLoadQty', 0)}
-            error={formik.touched.maxLoadQty && Boolean(formik.errors.maxLoadQty)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.WorkCenter.qry}
-            name='workCenterId'
-            label={labels.workCenterId}
-            required
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('workCenterId', newValue?.recordId || null)
-            }}
-            error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={GeneralLedgerRepository.CostCenter.qry}
-            parameters={`_params=&_startAt=0&_pageSize=200`}
-            name='costCenterId'
-            label={labels.costCenter}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            valueField='recordId'
-            displayField={['reference', 'name']}
-            values={formik.values}
-            maxAccess={maxAccess}
-            onChange={(_, newValue) => {
-              formik.setFieldValue('costCenterId', newValue?.recordId || null)
-            }}
-            error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <CustomNumberField
-            name='defaultLoadQty'
-            label={labels.defaultLoadQty}
-            maxLength='3'
-            decimalScale={0}
-            value={formik.values.defaultLoadQty}
-            onChange={formik.handleChange}
-            onClear={() => formik.setFieldValue('defaultLoadQty', 0)}
-            error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.Operation.qry}
-            name='operationId'
-            label={labels.operationId}
-            parameters={`_startAt=0&_pageSize=200&_workCenterId=0`}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('operationId', newValue?.recordId || null)
-            }}
-            error={formik.touched.operationId && Boolean(formik.errors.operationId)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.ProductionLine.qry}
-            name='lineId'
-            label={labels.lineId}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('lineId', newValue?.recordId || null)
-            }}
-            error={formik.touched.lineId && Boolean(formik.errors.lineId)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <ResourceComboBox
-            endpointId={ManufacturingRepository.Labor.qry}
-            parameters={`_startAt=0&_pageSize=200&_params=`}
-            name='laborId'
-            label={labels.laborId}
-            columnsInDropDown={[
-              { key: 'reference', value: 'Reference' },
-              { key: 'name', value: 'Name' }
-            ]}
-            valueField='recordId'
-            displayField='name'
-            values={formik.values}
-            onChange={(event, newValue) => {
-              formik.setFieldValue('laborId', newValue?.recordId || null)
-            }}
-            error={formik.touched.laborId && Boolean(formik.errors.laborId)}
-          />
-        </Grid>
-      </Grid>
+      <VertLayout>
+        <Grow>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='reference'
+                label={labels.reference}
+                value={formik.values?.reference}
+                required
+                maxAccess={maxAccess}
+                maxLength='4'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('reference', '')}
+                error={formik.touched.reference && Boolean(formik.errors.reference)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='minLoadQty'
+                label={labels.minLoadQty}
+                value={formik.values.minLoadQty}
+                onChange={formik.handleChange}
+                maxLength='3'
+                decimalScale={0}
+                onClear={() => formik.setFieldValue('minLoadQty', 0)}
+                error={formik.touched.minLoadQty && Boolean(formik.errors.minLoadQty)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                name='name'
+                label={labels.name}
+                value={formik.values.name}
+                required
+                maxAccess={maxAccess}
+                maxLength='30'
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('name', '')}
+                error={formik.touched.name && Boolean(formik.errors.name)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='maxLoadQty'
+                label={labels.maxLoadQty}
+                value={formik.values.maxLoadQty}
+                onChange={formik.handleChange}
+                maxLength='3'
+                decimalScale={0}
+                onClear={() => formik.setFieldValue('maxLoadQty', 0)}
+                error={formik.touched.maxLoadQty && Boolean(formik.errors.maxLoadQty)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.WorkCenter.qry}
+                name='workCenterId'
+                label={labels.workCenterId}
+                required
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('workCenterId', newValue?.recordId || null)
+                }}
+                error={formik.touched.workCenterId && Boolean(formik.errors.workCenterId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={GeneralLedgerRepository.CostCenter.qry}
+                parameters={`_params=&_startAt=0&_pageSize=200`}
+                name='costCenterId'
+                label={labels.costCenter}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField={['reference', 'name']}
+                values={formik.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('costCenterId', newValue?.recordId || null)
+                }}
+                error={formik.touched.costCenterId && Boolean(formik.errors.costCenterId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomNumberField
+                name='defaultLoadQty'
+                label={labels.defaultLoadQty}
+                maxLength='3'
+                decimalScale={0}
+                value={formik.values.defaultLoadQty}
+                onChange={formik.handleChange}
+                onClear={() => formik.setFieldValue('defaultLoadQty', 0)}
+                error={formik.touched.defaultLoadQty && Boolean(formik.errors.defaultLoadQty)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Operation.qry}
+                name='operationId'
+                label={labels.operationId}
+                parameters={`_startAt=0&_pageSize=200&_workCenterId=0`}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('operationId', newValue?.recordId || null)
+                }}
+                error={formik.touched.operationId && Boolean(formik.errors.operationId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.ProductionLine.qry}
+                name='lineId'
+                label={labels.lineId}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('lineId', newValue?.recordId || null)
+                }}
+                error={formik.touched.lineId && Boolean(formik.errors.lineId)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <ResourceComboBox
+                endpointId={ManufacturingRepository.Labor.qry}
+                parameters={`_startAt=0&_pageSize=200&_params=`}
+                name='laborId'
+                label={labels.laborId}
+                columnsInDropDown={[
+                  { key: 'reference', value: 'Reference' },
+                  { key: 'name', value: 'Name' }
+                ]}
+                valueField='recordId'
+                displayField='name'
+                values={formik.values}
+                onChange={(event, newValue) => {
+                  formik.setFieldValue('laborId', newValue?.recordId || null)
+                }}
+                error={formik.touched.laborId && Boolean(formik.errors.laborId)}
+              />
+            </Grid>
+          </Grid>
+        </Grow>
+      </VertLayout>
+      
     </FormShell>
   )
 }

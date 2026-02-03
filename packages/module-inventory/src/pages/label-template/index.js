@@ -62,11 +62,10 @@ const LabelTemplate = () => {
       extension: SCRepository.LabelTemplate.del,
       record: JSON.stringify(obj)
     })
-      .then(res => {
+      .then(() => {
         invalidate()
         toast.success(platformLabels.Deleted)
       })
-      .catch(error => {})
   }
 
   const add = () => {

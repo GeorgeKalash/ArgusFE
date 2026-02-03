@@ -26,6 +26,7 @@ import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunctio
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
 export default function JTCheckoutForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
@@ -35,6 +36,7 @@ export default function JTCheckoutForm({ recordId, window }) {
     datasetId: ResourceIds.JTCheckOut,
     editMode: !!recordId
   })
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JTCheckOut,
@@ -64,6 +66,7 @@ export default function JTCheckoutForm({ recordId, window }) {
         fromWCId: null,
         toWCId: null,
         designId: null,
+        jobQty: 0.0,
         qty: 0.0,
         pcs: 0.0,
         fromSeqNo: null,
@@ -98,6 +101,23 @@ export default function JTCheckoutForm({ recordId, window }) {
       })
     }),
     onSubmit: async obj => {
+      const round = (n, decimals = 3) => Number(n.toFixed(decimals))
+
+      const hasTotalQty = totalQty !== null && totalQty !== undefined
+      const hasJobQty = obj?.transfer?.jobQty !== null && obj?.transfer?.jobQty !== undefined
+
+      if (hasTotalQty && hasJobQty) {
+        const delta = Math.abs(round(Number(totalQty)) - round(Number(obj.transfer.jobQty)))
+
+        if (delta > 0.01) {
+          stackError({
+            message: labels.QtyNotMatching
+          })
+
+          return
+        }
+      }
+
       const transferPack = {
         transfer: {
           ...obj.transfer,
@@ -212,6 +232,7 @@ export default function JTCheckoutForm({ recordId, window }) {
             fromWCId: record.workCenterId,
             workCenterId: record.workCenterId,
             fromSVName: record.supervisorName,
+            jobQty: record.qty,
             qty: record.qty,
             pcs: record.pcs,
             toWCId: toWCRecord?.workCenterId,
@@ -468,6 +489,7 @@ export default function JTCheckoutForm({ recordId, window }) {
                         ]}
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.jobQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
                           formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)

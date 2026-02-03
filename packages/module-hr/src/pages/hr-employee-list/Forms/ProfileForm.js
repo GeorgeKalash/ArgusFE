@@ -20,6 +20,7 @@ import { EmployeeRepository } from '@argus/repositories/src/repositories/Employe
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
+import CustomRadioButtonGroup from '@argus/shared-ui/src/components/Inputs/CustomRadioButtonGroup'
 
 const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getData }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
@@ -439,15 +440,17 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <RadioGroup
-                    row
+                  <CustomRadioButtonGroup
                     name='gender'
+                    maxAccess={maxAccess}
+                    row
                     value={formik.values.gender}
                     onChange={e => formik.setFieldValue('gender', Number(e.target.value))}
-                  >
-                    <FormControlLabel value={1} control={<Radio />} label={labels.male} />
-                    <FormControlLabel value={2} control={<Radio />} label={labels.female} />
-                  </RadioGroup>
+                    options={[
+                      { label: labels.male, value: 1 },
+                      { label: labels.female, value: 2 }
+                    ]}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <CustomCheckBox

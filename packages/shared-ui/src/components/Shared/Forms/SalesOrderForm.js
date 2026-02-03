@@ -216,7 +216,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           clientId: copy.clientId,
           address: address
         }
-
         const addressRes = await postRequest({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
@@ -854,7 +853,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
-
     return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
@@ -881,11 +879,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-
     formik.setFieldValue('shipAddress', shipAdd || '')
     formik.setFieldValue('billAddress', billAdd || '')
   }
-
   async function getItemPhysProp(itemId) {
     const res = await getRequest({
       extension: InventoryRepository.ItemPhysProp.get,

@@ -136,7 +136,7 @@ export default function BatchPostForm({ access }) {
                 secondValueShow='batchName'
                 displayFieldWidth={2}
                 form={formik}
-                onChange={(event, newValue) => {
+                onChange={(_, newValue) => {
                   formik.setFieldValue('batchId', newValue?.recordId || '')
                   formik.setFieldValue('batchRef', newValue?.reference || '')
                   formik.setFieldValue('batchName', newValue?.name || '')

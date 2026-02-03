@@ -34,38 +34,61 @@ const DashboardLayout = () => {
   const _userId = userData.userId
   const _languageId = userData.languageId
 
-  const debouncedCloseLoading = debounce(() => {
+  const getRequestRef = React.useRef(getRequest)
+  useEffect(() => {
+    getRequestRef.current = getRequest
+  }, [getRequest])
+  
+  const debouncedCloseLoadingRef = React.useRef(null)
+  if (!debouncedCloseLoadingRef.current) {
+    debouncedCloseLoadingRef.current = debounce(() => {
     setLoading(false)
   }, 500)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current.cancel()
+    }
+  }, [])
 
   const { labels, access } = useResourceParams({
     datasetId: ResourceIds.UserDashboard
   })
 
   useEffect(() => {
+    let cancelled = false
+
     const fetchData = async () => {
-      const appletsRes = await getRequest({
+      try {
+        setLoading(true)
+
+        const appletsRes = await getRequestRef.current({
         extension: SystemRepository.DynamicDashboard.qry,
         parameters: `_userId=${_userId}`
       })
+
+        if (cancelled) return
       setApplets(appletsRes.list)
 
       const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
-        getRequest({ extension: DashboardRepository.dashboard }),
-        getRequest({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
-        getRequest({
+          getRequestRef.current({ extension: DashboardRepository.dashboard }),
+          getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
+          getRequestRef.current({
           extension: TimeAttendanceRepository.TimeVariation.qry2,
           parameters: `_dayId=${formatDateForGetApI(new Date())}`
         }),
-        getRequest({
+          getRequestRef.current({
           extension: SystemRepository.KeyValueStore,
           parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
         })
       ])
 
-      const availableTimeCodes = new Set(resTV.list.map(d => d.timeCode))
+        if (cancelled) return
 
-      const filteredTabs = resTimeCode.list
+        const availableTimeCodes = new Set((resTV.list || []).map(d => d.timeCode))
+
+        const filteredTabs = (resTimeCode.list || [])
         .filter(t => availableTimeCodes.has(Number(t.key)))
         .map(t => ({
           label: t.value,
@@ -74,8 +97,7 @@ const DashboardLayout = () => {
         }))
 
       const groupedData = filteredTabs.reduce((acc, tab) => {
-        acc[tab.timeCode] = { list: resTV.list.filter(d => d.timeCode === tab.timeCode) }
-
+          acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
         return acc
       }, {})
 
@@ -89,10 +111,17 @@ const DashboardLayout = () => {
         }
       })
 
-      debouncedCloseLoading()
+        if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
+      } catch (e) {
+        if (!cancelled) setLoading(false)
+      }
     }
 
     fetchData()
+
+    return () => {
+      cancelled = true
+    }
   }, [_userId, _languageId])
 
   if (loading) {
@@ -101,7 +130,6 @@ const DashboardLayout = () => {
 
   const containsApplet = appletId => {
     if (!Array.isArray(applets)) return false
-
     return applets.some(applet => applet.appletId === appletId)
   }
 
@@ -338,13 +366,13 @@ const DashboardLayout = () => {
                           label: labels.revenues,
                           value:
                             data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                              ?.amount ?? 0
+                            ?.amount ?? 0
                         },
                         {
                           label: labels.profit,
                           value:
                             data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                              ?.amount ?? 0
+                            ?.amount ?? 0
                         }
                       ]
                     }

@@ -253,39 +253,46 @@ const ImportForm = ({ staticColumns = [], onSuccess, resourceId, access, window 
         <Fixed>
           <GridToolbar
             leftSection={
-              <Grid item sx={{ display: 'flex', mr: 2 }}>
-                <CustomTextField
-                  name='name'
-                  label={platformLabels?.SelectCSV}
-                  value={file?.name}
-                  readOnly
-                  disabled={!!file?.name}
-                />
-                <CustomButton
-                  label={`${platformLabels?.Browse}...`}
-                  disabled={!!file?.name}
-                  onClick={() => imageInputRef.current.click()}
-                  style={{
-                    marginLeft: 8,
-                  }}
-                />
-                <input
-                  type='file'
-                  accept='.csv'
-                  ref={imageInputRef}
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                />
-                <CustomButton
-                  image='clear.png'
-                  tooltipText={platformLabels?.Clear}
-                  onClick={clearFile}
-                  style={{
-                    marginLeft: 8,
-                    backgroundColor: '#f44336',
-                    padding: 0
-                  }}
-                />
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={4}>
+                  <Grid item sx={{ display: 'flex', mr: 2 }}>
+                    <CustomTextField
+                      name='name'
+                      label={platformLabels?.SelectCSV}
+                      value={file?.name}
+                      readOnly
+                      disabled={!!file?.name}
+                    />
+
+                    <CustomButton
+                      label={`${platformLabels?.Browse}...`}
+                      disabled={!!file?.name}
+                      onClick={() => imageInputRef.current.click()}
+                      style={{
+                        marginLeft: 2,
+                      }}
+                    />
+
+                    <input
+                      type='file'
+                      accept='.csv'
+                      ref={imageInputRef}
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                    />
+
+                    <CustomButton
+                      image='clear.png'
+                      tooltipText={platformLabels?.Clear}
+                      onClick={clearFile}
+                      style={{
+                        marginLeft: 2,
+                        backgroundColor: '#f44336',
+                        padding: 0
+                      }}
+                    />
+                  </Grid>
+                </Grid>
               </Grid>
             }
           />

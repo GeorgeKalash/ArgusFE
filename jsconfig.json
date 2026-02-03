@@ -39,6 +39,7 @@
     "apps/main/src",
     "packages/*/src",
     "packages/module-manufacturing/src/pages/wc-tfr-map",
-    "packages/module-manufacturing/src/pages/iom-properties"
+    "packages/module-manufacturing/src/pages/iom-properties",
+    "src"
   ]
 }

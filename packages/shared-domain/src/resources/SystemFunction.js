@@ -131,7 +131,8 @@ export const SystemFunction = {
   BatchTransfer: Module.Manufacturing * 100 + 16,
   ItemDisposal: Module.Manufacturing * 100 + 17,
   PayrollList: Module.Payroll * 100 + 1,
-  PurityAdjustment: Module.Foundry * 100 + 6
+  PurityAdjustment: Module.Foundry * 100 + 6,
+  InboundTransportation: Module.Delivery * 100 + 4,
 }
 
 export const getSystemFunctionModule = functionId => {
