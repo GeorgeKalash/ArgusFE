@@ -42,7 +42,7 @@ const LoginPage = () => {
     },
     validationSchema: yup.object({
       username: yup.string().required(),
-      password: yup.string().min(5, platformLabels?.PassConf).required(),
+      password: yup.string().required(),
       rememberMe: yup.boolean()
     }),
     onSubmit: values => {

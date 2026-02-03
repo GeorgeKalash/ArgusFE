@@ -229,7 +229,7 @@ export default function VendorsForm({ labels, maxAccess: access, recordId, setSt
                 label={labels.taxRef}
                 value={formik.values.taxRef}
                 onChange={formik.handleChange}
-                maxLength='10'
+                maxLength='20'
                 readOnly={!formik.values?.isTaxable}
                 required={formik.values?.isTaxable}
                 maxAccess={maxAccess}
