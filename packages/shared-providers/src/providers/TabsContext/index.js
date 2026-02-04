@@ -1,12 +1,4 @@
-import React, {
-  createContext,
-  useEffect,
-  useState,
-  useContext,
-  useRef,
-  useMemo,
-  useCallback
-} from 'react'
+import React, { createContext, useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -60,6 +52,7 @@ function CustomTabPanel(props) {
         width: '100%',
         height: '100%',
         overflow: 'auto',
+        opacity: isActive ? 1 : 0,
         pointerEvents: isActive ? 'auto' : 'none'
       }}
       {...other}
@@ -259,43 +252,52 @@ const TabsProvider = ({ children }) => {
     [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex]
   )
 
-  const closeTab = useCallback(
-    tabRoute => {
-      const index = openTabs.findIndex(tab => tab.route === tabRoute)
-      const activeTabsLength = openTabs.length
+const closeTab = useCallback(
+  async tabRoute => {
+    setOpenTabs(prevTabs => {
+      const index = prevTabs.findIndex(tab => tab.route === tabRoute)
+      if (index === -1) return prevTabs
 
-      if (activeTabsLength === 2) {
-        handleCloseAllTabs()
-        return
+      // If only 2 tabs (Home + one), keep behavior (close all)
+      if (prevTabs.length === 2) {
+        // Let the async flow below handle close-all navigation, but keep UI snappy
+        return prevTabs
       }
 
-      const isClosingActive = currentTabIndex === index
-      const newValue = isClosingActive
-        ? index === activeTabsLength - 1
-          ? index - 1
-          : index + 1
-        : currentTabIndex
+      const nextTabs = prevTabs.filter(tab => tab.route !== tabRoute)
 
-      const nextRoute = isClosingActive ? openTabs?.[newValue]?.route : null
-
-      setOpenTabs(prev => prev.filter(tab => tab.route !== tabRoute))
-
-      if (isClosingActive) {
-        setCurrentTabIndex(newValue)
-      } else if (index < currentTabIndex) {
-        setCurrentTabIndex(v => v - 1)
+      // If we closed a tab before the active one, active index shifts left
+      if (index < currentTabIndex) {
+        setCurrentTabIndex(v => Math.max(0, v - 1))
+        return nextTabs
       }
 
-      if (nextRoute) {
-        Promise.resolve().then(() => {
-          navigateTo(nextRoute).then(() => {
-            if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+      // If we closed the active tab, pick next active tab synchronously
+      if (index === currentTabIndex) {
+        const newIndex = index >= nextTabs.length ? nextTabs.length - 1 : index
+        setCurrentTabIndex(newIndex)
+
+        // Navigate AFTER state change (next tick), so UI closes instantly
+        const nextRoute = nextTabs?.[newIndex]?.route
+        if (nextRoute) {
+          queueMicrotask(() => {
+            navigateTo(nextRoute).finally(() => {
+              if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+            })
           })
-        })
+        }
       }
-    },
-    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, setCurrentTabIndex, setOpenTabs]
-  )
+
+      return nextTabs
+    })
+
+    // Handle "close all" case separately (still keep it fast)
+    if (openTabs.length === 2) {
+      await handleCloseAllTabs()
+    }
+  },
+  [currentTabIndex, navigateTo, setCurrentTabIndex, setOpenTabs, openTabs.length, handleCloseAllTabs]
+)
 
   const reopenTab = useCallback(
     async tabRoute => {
@@ -446,7 +448,7 @@ const TabsProvider = ({ children }) => {
                       onClick={async event => {
                         event.stopPropagation()
                         if (activeTab) unlockIfLocked(activeTab)
-                        closeTab(activeTab.route)
+                        await closeTab(activeTab.route)
                       }}
                     >
                       <CloseIcon className={styles.svgIcon} />
@@ -464,7 +466,10 @@ const TabsProvider = ({ children }) => {
         </Tabs>
       </Box>
 
-      <Box className={styles.panelsWrapper} sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
+      <Box
+        className={styles.panelsWrapper}
+        sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
+      >
         {openTabs.map((activeTab, i) => (
           <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
             {activeTab.page}
