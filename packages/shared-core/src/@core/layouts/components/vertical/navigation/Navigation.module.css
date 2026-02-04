@@ -128,7 +128,7 @@
 }
 
 .node {
-  padding: var(--nav-row-py) !important;
+  padding: var(--nav-row-py) var(--nav-row-px) !important;
 }
 
 .node-icon img {
