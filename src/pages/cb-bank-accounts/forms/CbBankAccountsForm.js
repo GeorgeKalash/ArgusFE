@@ -17,6 +17,7 @@ import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import { VertLayout } from 'src/components/Shared/Layouts/VertLayout'
 import { Grow } from 'src/components/Shared/Layouts/Grow'
 import { ControlContext } from 'src/providers/ControlContext'
+import { MasterSource } from 'src/resources/MasterSource'
 
 export default function CbBankAccountsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,8 +77,18 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.CashAccount,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.CbBankAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.CbBankAccounts} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={4}>
