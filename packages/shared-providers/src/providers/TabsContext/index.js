@@ -1,6 +1,14 @@
-import React, { createContext, useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react'
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react'
 import { useRouter } from 'next/router'
-import { Tabs, Tab, Box, IconButton, Menu, MenuItem, CircularProgress } from '@mui/material'
+import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import PropTypes from 'prop-types'
@@ -10,28 +18,30 @@ import { RequestsContext } from '../RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
 
+const styles = {
+  loadingOverlay: 'loadingOverlay',
+  panelsWrapper: 'panelsWrapper',
+  customTabPanel: 'customTabPanel',
+  activePanel: 'activePanel',
+  hiddenPanel: 'hiddenPanel',
+  tabsProviderContainer: 'tabsProviderContainer',
+  tabsWrapper: 'tabsWrapper',
+  tabs: 'tabs',
+  tabName: 'tabName',
+  tabRoot: 'tabRoot',
+  selectedTab: 'selectedTab',
+  tabsIndicator: 'tabsIndicator',
+  svgIcon: 'svgIcon',
+  tabSvgIcon: 'tabSvgIcon',
+  tabIconButton: 'tabIconButton',
+  dropdownMenu: 'dropdownMenu',
+  dropdownItem: 'dropdownItem'
+}
+
 const TabsContext = createContext()
 
 function LoadingOverlay() {
-  return (
-    <Box className={'loadingOverlay'}>
-      <CircularProgress />
-      <style jsx global>{`
-        .loadingOverlay {
-          position: absolute;
-          top: 0;
-          right: 0;
-          left: 0;
-          bottom: 0;
-          background-color: rgba(255, 255, 255, 0.65);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-        }
-      `}</style>
-    </Box>
-  )
+  return <Box className={styles.loadingOverlay}></Box>
 }
 
 const TabPage = React.memo(
@@ -62,7 +72,7 @@ function CustomTabPanel(props) {
       role='tabpanel'
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
-      className={`customTabPanel ${isActive ? 'activePanel' : 'hiddenPanel'}`}
+      className={`${styles.customTabPanel} ${isActive ? styles.activePanel : styles.hiddenPanel}`}
       sx={{
         position: 'absolute',
         inset: 0,
@@ -102,7 +112,6 @@ const TabsProvider = ({ children }) => {
   } = useContext(MenuContext)
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
-
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
@@ -125,8 +134,6 @@ const TabsProvider = ({ children }) => {
 
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
-
-  const safeTabIndex = Number.isInteger(currentTabIndex) ? currentTabIndex : 0
 
   const navigateTo = useCallback(
     async route => {
@@ -213,13 +220,13 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = useCallback(
     async (_, newValue) => {
-      if (newValue === safeTabIndex) return
+      if (newValue === currentTabIndex) return
 
       const nextRoute = openTabs?.[newValue]?.route
       if (!nextRoute) return
       if (nextRoute === router.asPath) return
 
-      const needsPage = !openTabs?.[newValue]?.page
+      const needsPage = newValue === 0 ? !openTabs?.[newValue]?.page : !openTabs?.[newValue]?.page
 
       if (needsPage) {
         await navigateTo(nextRoute)
@@ -239,7 +246,7 @@ const TabsProvider = ({ children }) => {
         })
       }
     },
-    [openTabs, setCurrentTabIndex, navigateTo, safeTabIndex, router.asPath]
+    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
   )
 
   const handleCloseAllTabs = useCallback(async () => {
@@ -336,9 +343,7 @@ const TabsProvider = ({ children }) => {
         setOpenTabs(prevState =>
           prevState.map(tab => {
             if (tab.route !== router.asPath) return tab
-
             if (tab.page) return tab
-
             const cachedPage = pagesCacheRef.current.get(router.asPath) || children
             return { ...tab, page: cachedPage }
           })
@@ -348,9 +353,9 @@ const TabsProvider = ({ children }) => {
   }, [router.asPath, historyAs])
 
   useEffect(() => {
-    if (openTabs?.[safeTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
+    if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (!initialLoadDone && router.asPath) {
+    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
       const homeRoute = '/default/'
       const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
 
@@ -372,18 +377,16 @@ const TabsProvider = ({ children }) => {
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')) || 'Page',
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
           resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
         setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
-      } else {
-        setCurrentTabIndex(0)
       }
 
       setOpenTabs(newTabs)
-      setInitialLoadDone(true)
+      menu.length > 0 && setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, safeTabIndex])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
 
   function unlockRecord(resourceId) {
     const body = {
@@ -409,121 +412,18 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box className={'tabsProviderContainer'}>
-        <Box ref={tabsWrapperRef} className={'tabsWrapper'}>
-          <Tabs
-            value={safeTabIndex}
-            onChange={handleChange}
-            variant='scrollable'
-            scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
-            aria-label='scrollable auto tabs example'
-            classes={{ indicator: 'tabsIndicator' }}
-            className={'tabs'}
-          >
-            {openTabs.map((activeTab, i) => (
-              <Tab
-                key={activeTab?.id}
-                className={'tabName'}
-                label={
-                  <Box display='flex' alignItems='center'>
-                    <span>{activeTab.label}</span>
-                    {i === safeTabIndex && (
-                      <IconButton
-                        size='small'
-                        className={'svgIcon'}
-                        onClick={e => {
-                          e.stopPropagation()
-                          setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
-                        }}
-                      >
-                        <RefreshIcon className={'svgIcon'} />
-                      </IconButton>
-                    )}
-                    {activeTab.route !== '/default/' && (
-                      <IconButton
-                        size='small'
-                        className={'svgIcon'}
-                        onClick={async event => {
-                          event.stopPropagation()
-                          if (activeTab) unlockIfLocked(activeTab)
-                          await closeTab(activeTab.route)
-                        }}
-                      >
-                        <CloseIcon className={'svgIcon'} />
-                      </IconButton>
-                    )}
-                  </Box>
-                }
-                onContextMenu={event => OpenItems(event, i)}
-                classes={{
-                  root: 'tabRoot',
-                  selected: 'selectedTab'
-                }}
-              />
-            ))}
-          </Tabs>
-        </Box>
-
-        <Box className={'panelsWrapper'} sx={{ position: 'relative', width: '100%', flex: 1, minHeight: 0 }}>
-          {openTabs.map((activeTab, i) => (
-            <CustomTabPanel key={activeTab.id} index={i} value={safeTabIndex}>
-              {activeTab.page}
-            </CustomTabPanel>
-          ))}
-        </Box>
-      </Box>
-
-      <Menu
-        anchorEl={anchorEl}
-        id='account-menu'
-        open={open}
-        onClose={handleClose}
-        onClick={handleClose}
-        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-        className={'dropdownMenu'}
-      >
-        <MenuItem
-          className={'dropdownItem'}
-          onClick={async event => {
-            await closeTab(openTabs[tabsIndex]?.route)
-            event.stopPropagation()
-            handleClose()
-          }}
-        >
-          Close Tab
-        </MenuItem>
-        <MenuItem
-          className={'dropdownItem'}
-          onClick={async event => {
-            event.stopPropagation()
-            await handleCloseOtherTab(tabsIndex)
-            handleClose()
-          }}
-        >
-          Close Other Tabs
-        </MenuItem>
-        <MenuItem
-          className={'dropdownItem'}
-          onClick={async event => {
-            event.stopPropagation()
-            await handleCloseAllTabs()
-            handleClose()
-          }}
-        >
-          Close All Tabs
-        </MenuItem>
-      </Menu>
-
       <style jsx global>{`
-        .tabsProviderContainer {
-          display: flex !important;
-          flex-direction: column;
-          width: 100%;
-          height: 100%;
-          flex: 1 !important;
-          min-height: 0;
-          overflow: hidden;
+        .loadingOverlay {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          bottom: 0;
+          background-color: rgba(250, 250, 250, 1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
         }
 
         .panelsWrapper {
@@ -531,7 +431,6 @@ const TabsProvider = ({ children }) => {
           width: 100%;
           flex: 1 !important;
           min-height: 0;
-          overflow: hidden;
         }
 
         .customTabPanel {
@@ -556,6 +455,21 @@ const TabsProvider = ({ children }) => {
           pointer-events: none;
         }
 
+        .panelsWrapper {
+          position: relative;
+          width: 100%;
+          flex: 1 !important;
+          overflow: hidden;
+        }
+
+        .tabsProviderContainer {
+          display: flex !important;
+          flex-direction: column;
+          width: 100%;
+          flex: 1 !important;
+          overflow: auto;
+        }
+
         .tabsWrapper {
           background-color: #231f20;
           padding-top: 5px;
@@ -565,6 +479,10 @@ const TabsProvider = ({ children }) => {
 
         .tabs {
           min-height: 35px !important;
+        }
+
+        .tabName {
+          font-size: 20px;
         }
 
         .tabRoot {
@@ -600,6 +518,17 @@ const TabsProvider = ({ children }) => {
           padding: 0px !important;
           padding-left: 1px !important;
           font-size: 20px !important;
+        }
+
+        .tabSvgIcon {
+          color: #5a585e !important;
+          transition: color 0.2s ease;
+          padding: 0px !important;
+        }
+
+        .tabIconButton:hover .tabSvgIcon {
+          color: #231f20 !important;
+          padding: 0px !important;
         }
 
         .dropdownMenu {
@@ -740,6 +669,110 @@ const TabsProvider = ({ children }) => {
           }
         }
       `}</style>
+
+      <Box ref={tabsWrapperRef} className={styles.tabsWrapper}>
+        <Tabs
+          value={currentTabIndex}
+          onChange={handleChange}
+          variant='scrollable'
+          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+          aria-label='scrollable auto tabs example'
+          classes={{ indicator: styles.tabsIndicator }}
+          className={styles.tabs}
+        >
+          {openTabs.map((activeTab, i) => (
+            <Tab
+              key={activeTab?.id}
+              className={styles.tabName}
+              label={
+                <Box display='flex' alignItems='center'>
+                  <span>{activeTab.label}</span>
+                  {i === currentTabIndex && (
+                    <IconButton
+                      size='small'
+                      className={styles.svgIcon}
+                      onClick={e => {
+                        e.stopPropagation()
+                        setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
+                      }}
+                    >
+                      <RefreshIcon className={styles.svgIcon} />
+                    </IconButton>
+                  )}
+                  {activeTab.route !== '/default/' && (
+                    <IconButton
+                      size='small'
+                      className={styles.svgIcon}
+                      onClick={async event => {
+                        event.stopPropagation()
+                        if (activeTab) unlockIfLocked(activeTab)
+                        await closeTab(activeTab.route)
+                      }}
+                    >
+                      <CloseIcon className={styles.svgIcon} />
+                    </IconButton>
+                  )}
+                </Box>
+              }
+              onContextMenu={event => OpenItems(event, i)}
+              classes={{
+                root: styles.tabRoot,
+                selected: styles.selectedTab
+              }}
+            />
+          ))}
+        </Tabs>
+      </Box>
+
+      <Box className={styles.panelsWrapper} sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
+        {openTabs.map((activeTab, i) => (
+          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
+            {activeTab.page}
+          </CustomTabPanel>
+        ))}
+      </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        id='account-menu'
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        className={styles.dropdownMenu}
+      >
+        <MenuItem
+          className={styles.dropdownItem}
+          onClick={async event => {
+            await closeTab(openTabs[tabsIndex]?.route)
+            event.stopPropagation()
+            handleClose()
+          }}
+        >
+          Close Tab
+        </MenuItem>
+        <MenuItem
+          className={styles.dropdownItem}
+          onClick={async event => {
+            event.stopPropagation()
+            await handleCloseOtherTab(tabsIndex)
+            handleClose()
+          }}
+        >
+          Close Other Tabs
+        </MenuItem>
+        <MenuItem
+          className={styles.dropdownItem}
+          onClick={async event => {
+            event.stopPropagation()
+            await handleCloseAllTabs()
+            handleClose()
+          }}
+        >
+          Close All Tabs
+        </MenuItem>
+      </Menu>
     </>
   )
 }
