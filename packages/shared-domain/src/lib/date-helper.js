@@ -141,6 +141,15 @@ const formatDate = dateString => {
   return `/Date(${timestamp})/`
 }
 
+const formatDateFromISO = (timestamp) => {
+  if (!timestamp) return null
+  const match = /Date\((\d+)\)/.exec(timestamp)
+  if (!match) return null
+  const date = new Date(Number(match[1]))
+
+  return  new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+}
+
 //Used for cases that we use Json.Stringify with no initial value in fields
 const formatDateToISO = date => {
   // Adjust date to keep the local time
@@ -182,6 +191,7 @@ export {
   getTimeInTimeZone,
   formatDate,
   formatDateTimeDefault,
+  formatDateFromISO,
   formatDateToISO,
   formatDateTimeForGetAPI,
   formatDayId
