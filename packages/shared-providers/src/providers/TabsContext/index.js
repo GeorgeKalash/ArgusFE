@@ -9,27 +9,30 @@ import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from '../RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const TabsContext = createContext()
 
 function LoadingOverlay() {
-  return <Box className={'loadingOverlay'}>
-    <style jsx global>{`
-      .loadingOverlay {
+  return (
+    <Box className='loadingOverlay'>
+      <CircularProgress />
+      <style jsx global>{`
+        .loadingOverlay {
           position: absolute;
           top: 0;
           right: 0;
           left: 0;
           bottom: 0;
-          background-color: rgba(250, 250, 250, 1);
+          background-color: rgba(255, 255, 255, 0.65);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 9999;
         }
-      `}
-    </style>
-  </Box>
+      `}</style>
+    </Box>
+  )
 }
 
 const TabPage = React.memo(
