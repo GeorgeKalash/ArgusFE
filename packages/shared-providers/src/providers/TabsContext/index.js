@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
+import { Tabs, Tab, Box, IconButton, Menu, MenuItem, CircularProgress } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import PropTypes from 'prop-types'
@@ -9,13 +9,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { RequestsContext } from '../RequestsContext'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
 import { LockedScreensContext } from '../LockedScreensContext'
-import CircularProgress from '@mui/material/CircularProgress'
 
 const TabsContext = createContext()
 
 function LoadingOverlay() {
   return (
-    <Box className='loadingOverlay'>
+    <Box className={'loadingOverlay'}>
       <CircularProgress />
       <style jsx global>{`
         .loadingOverlay {
@@ -103,12 +102,12 @@ const TabsProvider = ({ children }) => {
   } = useContext(MenuContext)
 
   const { lockedScreens, removeLockedScreen } = useContext(LockedScreensContext)
+
   const [anchorEl, setAnchorEl] = useState(null)
   const [tabsIndex, setTabsIndex] = useState(null)
   const [initialLoadDone, setInitialLoadDone] = useState(false)
 
   const tabsWrapperRef = useRef(null)
-
   const pagesCacheRef = useRef(new Map())
 
   const userDataParsed = useMemo(() => {
@@ -126,6 +125,8 @@ const TabsProvider = ({ children }) => {
 
   const { postRequest } = useContext(RequestsContext)
   const open = Boolean(anchorEl)
+
+  const safeTabIndex = Number.isInteger(currentTabIndex) ? currentTabIndex : 0
 
   const navigateTo = useCallback(
     async route => {
@@ -212,13 +213,13 @@ const TabsProvider = ({ children }) => {
 
   const handleChange = useCallback(
     async (_, newValue) => {
-      if (newValue === currentTabIndex) return
+      if (newValue === safeTabIndex) return
 
       const nextRoute = openTabs?.[newValue]?.route
       if (!nextRoute) return
       if (nextRoute === router.asPath) return
 
-      const needsPage = newValue === 0 ? !openTabs?.[newValue]?.page : !openTabs?.[newValue]?.page
+      const needsPage = !openTabs?.[newValue]?.page
 
       if (needsPage) {
         await navigateTo(nextRoute)
@@ -238,7 +239,7 @@ const TabsProvider = ({ children }) => {
         })
       }
     },
-    [openTabs, setCurrentTabIndex, navigateTo, currentTabIndex, router.asPath]
+    [openTabs, setCurrentTabIndex, navigateTo, safeTabIndex, router.asPath]
   )
 
   const handleCloseAllTabs = useCallback(async () => {
@@ -347,9 +348,9 @@ const TabsProvider = ({ children }) => {
   }, [router.asPath, historyAs])
 
   useEffect(() => {
-    if (openTabs?.[currentTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
+    if (openTabs?.[safeTabIndex]?.route === reloadOpenedPage?.path + '/') reopenTab(reloadOpenedPage?.path + '/')
 
-    if (!initialLoadDone && router.asPath && (menu.length > 0 || dashboardId)) {
+    if (!initialLoadDone && router.asPath) {
       const homeRoute = '/default/'
       const homePage = pagesCacheRef.current.get(homeRoute) || (router.asPath === homeRoute ? children : null)
 
@@ -371,16 +372,18 @@ const TabsProvider = ({ children }) => {
           route: router.asPath,
           label: lastOpenedPage
             ? lastOpenedPage.name
-            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')),
+            : findNode(menu, router.asPath.replace(/\/$/, '')) || findNode(gear, router.asPath.replace(/\/$/, '')) || 'Page',
           resourceId: findResourceId(menu, router.asPath.replace(/\/$/, ''))
         })
         setCurrentTabIndex(newTabs.findIndex(tab => tab.route === router.asPath))
+      } else {
+        setCurrentTabIndex(0)
       }
 
       setOpenTabs(newTabs)
-      menu.length > 0 && setInitialLoadDone(true)
+      setInitialLoadDone(true)
     }
-  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage])
+  }, [router.asPath, menu, gear, children, lastOpenedPage, initialLoadDone, reloadOpenedPage, safeTabIndex])
 
   function unlockRecord(resourceId) {
     const body = {
@@ -406,66 +409,68 @@ const TabsProvider = ({ children }) => {
 
   return (
     <>
-      <Box ref={tabsWrapperRef} className={'tabsWrapper'}>
-        <Tabs
-          value={currentTabIndex}
-          onChange={handleChange}
-          variant='scrollable'
-          scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
-          aria-label='scrollable auto tabs example'
-          classes={{ indicator: 'tabsIndicator' }}
-          className={'tabs'}
-        >
-          {openTabs.map((activeTab, i) => (
-            <Tab
-              key={activeTab?.id}
-              className={'tabName'}
-              label={
-                <Box display='flex' alignItems='center'>
-                  <span>{activeTab.label}</span>
-                  {i === currentTabIndex && (
-                    <IconButton
-                      size='small'
-                      className={'svgIcon'}
-                      onClick={e => {
-                        e.stopPropagation()
-                        setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
-                      }}
-                    >
-                      <RefreshIcon className={'svgIcon'} />
-                    </IconButton>
-                  )}
-                  {activeTab.route !== '/default/' && (
-                    <IconButton
-                      size='small'
-                      className={'svgIcon'}
-                      onClick={async event => {
-                        event.stopPropagation()
-                        if (activeTab) unlockIfLocked(activeTab)
-                        await closeTab(activeTab.route)
-                      }}
-                    >
-                      <CloseIcon className={'svgIcon'} />
-                    </IconButton>
-                  )}
-                </Box>
-              }
-              onContextMenu={event => OpenItems(event, i)}
-              classes={{
-                root: 'tabRoot',
-                selected: 'selectedTab'
-              }}
-            />
-          ))}
-        </Tabs>
-      </Box>
+      <Box className={'tabsProviderContainer'}>
+        <Box ref={tabsWrapperRef} className={'tabsWrapper'}>
+          <Tabs
+            value={safeTabIndex}
+            onChange={handleChange}
+            variant='scrollable'
+            scrollButtons={openTabs.length > 3 ? 'auto' : 'off'}
+            aria-label='scrollable auto tabs example'
+            classes={{ indicator: 'tabsIndicator' }}
+            className={'tabs'}
+          >
+            {openTabs.map((activeTab, i) => (
+              <Tab
+                key={activeTab?.id}
+                className={'tabName'}
+                label={
+                  <Box display='flex' alignItems='center'>
+                    <span>{activeTab.label}</span>
+                    {i === safeTabIndex && (
+                      <IconButton
+                        size='small'
+                        className={'svgIcon'}
+                        onClick={e => {
+                          e.stopPropagation()
+                          setReloadOpenedPage({ path: openTabs[i].route.replace(/\/$/, ''), name: openTabs[i].label })
+                        }}
+                      >
+                        <RefreshIcon className={'svgIcon'} />
+                      </IconButton>
+                    )}
+                    {activeTab.route !== '/default/' && (
+                      <IconButton
+                        size='small'
+                        className={'svgIcon'}
+                        onClick={async event => {
+                          event.stopPropagation()
+                          if (activeTab) unlockIfLocked(activeTab)
+                          await closeTab(activeTab.route)
+                        }}
+                      >
+                        <CloseIcon className={'svgIcon'} />
+                      </IconButton>
+                    )}
+                  </Box>
+                }
+                onContextMenu={event => OpenItems(event, i)}
+                classes={{
+                  root: 'tabRoot',
+                  selected: 'selectedTab'
+                }}
+              />
+            ))}
+          </Tabs>
+        </Box>
 
-      <Box className={'panelsWrapper'} sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
-        {openTabs.map((activeTab, i) => (
-          <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
-            {activeTab.page}
-          </CustomTabPanel>
-        ))}
+        <Box className={'panelsWrapper'} sx={{ position: 'relative', width: '100%', flex: 1, minHeight: 0 }}>
+          {openTabs.map((activeTab, i) => (
+            <CustomTabPanel key={activeTab.id} index={i} value={safeTabIndex}>
+              {activeTab.page}
+            </CustomTabPanel>
+          ))}
+        </Box>
       </Box>
 
       <Menu
@@ -511,11 +516,22 @@ const TabsProvider = ({ children }) => {
       </Menu>
 
       <style jsx global>{`
+        .tabsProviderContainer {
+          display: flex !important;
+          flex-direction: column;
+          width: 100%;
+          height: 100%;
+          flex: 1 !important;
+          min-height: 0;
+          overflow: hidden;
+        }
+
         .panelsWrapper {
           position: relative;
           width: 100%;
           flex: 1 !important;
           min-height: 0;
+          overflow: hidden;
         }
 
         .customTabPanel {
@@ -538,21 +554,6 @@ const TabsProvider = ({ children }) => {
         .hiddenPanel {
           visibility: hidden;
           pointer-events: none;
-        }
-
-        .panelsWrapper {
-          position: relative;
-          width: 100%;
-          flex: 1 !important;
-          overflow: hidden;
-        }
-
-        .tabsProviderContainer {
-          display: flex !important;
-          flex-direction: column;
-          width: 100%;
-          flex: 1 !important;
-          overflow: auto;
         }
 
         .tabsWrapper {
@@ -599,17 +600,6 @@ const TabsProvider = ({ children }) => {
           padding: 0px !important;
           padding-left: 1px !important;
           font-size: 20px !important;
-        }
-
-        .tabSvgIcon {
-          color: #5a585e !important;
-          transition: color 0.2s ease;
-          padding: 0px !important;
-        }
-
-        .tabIconButton:hover .tabSvgIcon {
-          color: #231f20 !important;
-          padding: 0px !important;
         }
 
         .dropdownMenu {
