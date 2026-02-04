@@ -938,7 +938,7 @@ const Table = ({
             width: 100%;
             height: auto;
             max-height: none;
-            --ag-font-size: 10.5px;
+            --ag-font-size: 14px;
           }
 
           .agGridFlex {
@@ -984,7 +984,7 @@ const Table = ({
           .pageTextField :global(.MuiInputBase-root) {
             height: 22px;
             min-height: 22px;
-            font-size: 0.78rem;
+            font-size: 1rem;
           }
 
           .pageTextField :global(.MuiOutlinedInput-input),
