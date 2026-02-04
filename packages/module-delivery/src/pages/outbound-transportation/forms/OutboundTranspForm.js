@@ -24,7 +24,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
-import CustomNumberField from 'src/components/Inputs/CustomNumberField'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
