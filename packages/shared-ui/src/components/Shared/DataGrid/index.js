@@ -12,7 +12,6 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
-import styles from './DataGrid.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 export function DataGrid({
@@ -68,7 +67,7 @@ export function DataGrid({
 
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
-   function checkDuplicates(field, data) {
+  function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
     )
@@ -166,7 +165,7 @@ export function DataGrid({
             rowIndex: index + 1,
             colKey: column?.name
           })
-        }, 10)  
+        }, 10)
       } else {
         rows = [...value.map(row => (row.id === updatedRow.id ? updatedRow : row))]
         const currentColumnIndex = allColumns?.findIndex(col => col.colId === params.column.getColId())
@@ -504,7 +503,7 @@ export function DataGrid({
           }}
         >
           <Link
-            href={popup ? '#' : linkHref} 
+            href={popup ? '#' : linkHref}
             target={!popup ? target || '_self' : undefined}
             rel={!popup && target === '_blank' ? 'noopener noreferrer' : undefined}
             onClick={e => {
@@ -512,7 +511,7 @@ export function DataGrid({
               if (popup) {
                 e.preventDefault()
                 popup(params.data)
-                
+
                 return
               }
               onClick?.(params.data)
@@ -529,7 +528,7 @@ export function DataGrid({
       )
     }
 
-         
+
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view
@@ -560,7 +559,7 @@ export function DataGrid({
     }
 
     return (
-      <Box className={`${styles.cellBox}`} >
+      <Box className={`cellBox`}>
         <Component {...params} column={column.colDef} updateRow={updateRow} update={update} />
       </Box>
     )
@@ -624,8 +623,8 @@ export function DataGrid({
     const centered = comp === 'checkbox' || comp === 'button' || comp === 'icon'
 
     return (
-      <Box className={`${styles.cellEditorBox} ${centered ? styles.cellEditorBoxCentered : ''} `}>
-        <Box className={`${styles.cellEditorInner} ${centered ? styles.cellEditorInnerCentered : ''}`}>
+      <Box className={`cellEditorBox ${centered ? 'cellEditorBoxCentered' : ''} `}>
+        <Box className={`cellEditorInner ${centered ? 'cellEditorInnerCentered' : ''}`}>
           <Component
             id={params.node.data.id}
             {...params}
@@ -659,14 +658,14 @@ export function DataGrid({
 
     return (
       <Box
-        className={styles.actionCell}
+        className={'actionCell'}
         onClick={() => openDelete(params)}
         sx={{
           pointerEvents: disabledForRow ? 'none' : 'auto'
         }}
       >
         <IconButton disabled={disabledForRow}>
-          <GridDeleteIcon className={styles.deleteIcon} />
+          <GridDeleteIcon className={'deleteIcon'} />
         </IconButton>
       </Box>
     )
@@ -685,11 +684,7 @@ export function DataGrid({
 
   const columnDefs = [
     ...allColumns.map(column => {
- 
-    const mergedCellClass = [
-      column.cellClass,
-      styles.wrapTextCell
-    ]
+      const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
       const centered =
         column.component === 'checkbox' || column.component === 'button' || column.component === 'icon'
@@ -719,9 +714,9 @@ export function DataGrid({
             }
 
             return (
-              <Grid container className={styles.headerCheckboxContainer}>
+              <Grid container className={'headerCheckboxContainer'}>
                 <CustomCheckBox
-                  className={styles.headerCheckbox}
+                  className={'headerCheckbox'}
                   checked={column?.checkAll?.value}
                   onChange={e => {
                     selectAll(e)
@@ -929,13 +924,9 @@ export function DataGrid({
   })
 
   return (
-    <Box className={styles.root} sx={{ height: height || 'auto' }}>
+    <Box className={'root'} sx={{ height: height || 'auto' }}>
       <CacheStoreProvider>
-        <Box
-          className={`ag-theme-alpine ${styles.agContainer}`}
-          ref={gridContainerRef}
-          style={{ '--ag-header-bg': bg }}
-        >
+        <Box className={`ag-theme-alpine agContainer`} ref={gridContainerRef} style={{ '--ag-header-bg': bg }}>
           {value && (
             <AgGridReact
               gridApiRef={gridApiRef}
@@ -966,6 +957,317 @@ export function DataGrid({
           )}
         </Box>
       </CacheStoreProvider>
+
+      <style jsx global>{`
+        .root {
+          flex: 1;
+        }
+
+        .agContainer {
+          width: 100%;
+          height: 100%;
+          flex: 1;
+        }
+
+        .agContainer.ag-theme-alpine {
+          --ag-header-height: 20px !important;
+          --ag-font-size: 0.9rem;
+        }
+
+        .agContainer :global(.ag-header),
+        .agContainer :global(.ag-header-cell),
+        .agContainer :global(.ag-header-row) {
+          height: 40px !important;
+          min-height: 40px !important;
+          background: var(--ag-header-bg, #f5f5f5);
+        }
+
+
+        .agContainer :global(.ag-header-cell-text) {
+          font-size: 0.9rem;
+        }
+
+
+        .agContainer :global(.cellBox) {
+          overflow: hidden; 
+        }
+
+
+        .agContainer :global(.ag-cell) {
+          border-right: 1px solid #d0d0d0 !important;
+          font-size: 0.8rem !important;
+          line-height: 1.1;
+          display: flex;
+          align-items: center;        
+          justify-content: flex-start; 
+        }
+
+        .agContainer :global(.ag-cell-wrapper),
+        .agContainer :global(.ag-cell-value) {
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          padding: 0px  !important;
+
+
+        }
+
+        .agContainer :global(.ag-cell .MuiBox-root) {
+          display: flex;
+          align-items: center;
+          height: auto;
+          padding: 0 !important;
+        }
+
+        .agContainer :global(.MuiIconButton-root){
+          padding: 0 !important;
+        }
+
+        .cellBox,
+        .cellEditorBox {
+          width: 100% !important;
+          height: auto;                  
+          padding: 0px !important;
+          display: flex;
+        }
+
+        .agContainer:dir(ltr) :global(.noCenterCell) {
+          padding-right: 0 !important;
+        }
+        .agContainer:dir(rtl) :global(.noCenterCell) {
+          padding-left: 0 !important;
+        }
+
+        .agContainer :global(.ag-cell.cellBoxCentered) {
+          justify-content: center;  
+          padding: 0 !important; 
+          margin: 0 !important; 
+        }
+
+        .cellEditorBoxCentered {
+          justify-content: center;
+        }
+        .cellEditorInner {
+          width: 100%;
+          height: auto;
+          display: flex;
+          align-items: center;
+          box-sizing: border-box;
+        }
+
+        .cellEditorInnerCentered {
+          justify-content: center;
+        }
+
+        .actionCell {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex: 1;
+        }
+
+        .deleteIcon,
+        .cellIcon {
+          font-size: 1.3rem !important; 
+        }
+
+        .headerCheckboxContainer {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .headerCheckbox {
+          width: 20%;
+          height: 20%;
+          margin-left: 5px !important;
+        }
+
+        .wrapTextCell :global(.ag-cell-wrapper),
+        .wrapTextCell :global(.ag-cell-value) {
+          white-space: normal;
+          line-height: 1.2;
+          height: auto;
+        }
+
+        .wrapTextCell .cellBox {
+          height: auto;
+        }
+
+        .agContainer :global(.ag-cell.cell-error) {
+          border: 1px solid #ff0000 !important;
+        }
+
+        .agContainer :global(.ag-cell.ag-cell-focus:not(.cell-error)),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing:not(.cell-error)),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing.ag-cell-focus:not(.cell-error)) {
+          box-shadow: none !important;
+          outline: none !important;
+          border-color: transparent !important;
+          border-radius: 0px !important;
+        }
+
+        .agContainer :global(.ag-cell),
+        .agContainer :global(.ag-cell-focus),
+        .agContainer :global(.ag-cell.ag-cell-inline-editing) {
+          border-right: 1px solid #d0d0d0 !important;
+        }
+
+        @media (max-width: 1599px) {
+
+          .agContainer.ag-theme-alpine {
+            --ag-font-size: 11px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell),
+          .agContainer :global(.ag-header-row) {
+            min-height: 33px !important;
+            height: 33px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 11px !important;
+          }
+        }
+
+        @media (max-width: 1280px) {
+          .agContainer.ag-theme-alpine {
+            --ag-header-height: 26px;
+            --ag-font-size: 10px;
+          }
+          
+          .agContainer :global(.ag-header-cell) {
+            padding-inline: 5px !important;
+          
+          }
+
+
+        .agContainer:dir(ltr) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+          padding-left: 5px !important;  
+        }
+
+        .agContainer:dir(rtl)  :global(.noCenterCell:not(.ag-cell-inline-editing) ) {
+          padding-right: 5px !important;  
+        }
+
+
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell) {
+            height: 29px !important;
+            min-height: 29px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 10px !important;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .agContainer.ag-theme-alpine {
+            --ag-font-size: 10px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell){
+            height: 29px !important;
+            min-height: 28px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 9px !important;
+          }
+
+        }
+
+        @media (max-width: 834px) {
+          .agContainer.ag-theme-alpine {
+            --ag-header-height: 26px;
+            --ag-font-size: 9px;
+          }
+
+          .agContainer :global(.ag-header),
+          .agContainer :global(.ag-header-cell) {
+            height: 26px !important;
+            min-height: 26px !important;
+          }
+
+          .agContainer :global(.ag-header-cell-text),
+          .agContainer :global(.ag-cell) {
+            font-size: 9px !important;
+          }
+        }
+
+
+        @media (max-width: 1600px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1.2rem !important;
+          }
+        }
+
+        @media (max-width: 1366px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1.1rem !important;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 1rem !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.95rem !important;
+          }
+        }
+
+
+        @media (max-width: 600px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.9rem !important;
+          }
+        }
+
+
+        @media (max-width: 480px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.85rem !important;
+          }
+        }
+
+
+        @media (max-width: 375px) {
+          .deleteIcon,
+          .cellIcon {
+            font-size: 0.8rem !important;
+          }
+        }
+
+        .agContainer :global(.ag-cell .wrap) {
+          white-space: normal;
+          line-height: 1.2;
+          display: flex;
+          align-items: center;
+        }
+
+        .agContainer :global(.ag-cell img),
+        .agContainer :global(.ag-cell svg),
+        .agContainer :global(.ag-cell .MuiSvgIcon-root) {
+          vertical-align: middle;
+        }
+      `}</style>
     </Box>
   )
 }

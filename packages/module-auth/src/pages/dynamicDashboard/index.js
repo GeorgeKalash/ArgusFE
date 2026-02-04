@@ -22,7 +22,6 @@ import { TimeAttendanceRepository } from '@argus/repositories/src/repositories/T
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 import ApprovalsTable from '@argus/shared-ui/src/components/Shared/ApprovalsTable'
-import styles from './DynamicDashboard.module.css'
 
 const DashboardLayout = () => {
   const { getRequest, LoadingOverlay } = useContext(RequestsContext)
@@ -38,12 +37,12 @@ const DashboardLayout = () => {
   useEffect(() => {
     getRequestRef.current = getRequest
   }, [getRequest])
-  
+
   const debouncedCloseLoadingRef = React.useRef(null)
   if (!debouncedCloseLoadingRef.current) {
     debouncedCloseLoadingRef.current = debounce(() => {
-    setLoading(false)
-  }, 500)
+      setLoading(false)
+    }, 500)
   }
 
   useEffect(() => {
@@ -64,52 +63,52 @@ const DashboardLayout = () => {
         setLoading(true)
 
         const appletsRes = await getRequestRef.current({
-        extension: SystemRepository.DynamicDashboard.qry,
-        parameters: `_userId=${_userId}`
-      })
+          extension: SystemRepository.DynamicDashboard.qry,
+          parameters: `_userId=${_userId}`
+        })
 
         if (cancelled) return
-      setApplets(appletsRes.list)
+        setApplets(appletsRes.list)
 
-      const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
+        const [resDashboard, resSP, resTV, resTimeCode] = await Promise.all([
           getRequestRef.current({ extension: DashboardRepository.dashboard }),
           getRequestRef.current({ extension: DashboardRepository.SalesPersonDashboard.spDB }),
           getRequestRef.current({
-          extension: TimeAttendanceRepository.TimeVariation.qry2,
-          parameters: `_dayId=${formatDateForGetApI(new Date())}`
-        }),
+            extension: TimeAttendanceRepository.TimeVariation.qry2,
+            parameters: `_dayId=${formatDateForGetApI(new Date())}`
+          }),
           getRequestRef.current({
-          extension: SystemRepository.KeyValueStore,
-          parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
-        })
-      ])
+            extension: SystemRepository.KeyValueStore,
+            parameters: `_dataset=${DataSets.TIME_CODE}&_language=${_languageId}`
+          })
+        ])
 
         if (cancelled) return
 
         const availableTimeCodes = new Set((resTV.list || []).map(d => d.timeCode))
 
         const filteredTabs = (resTimeCode.list || [])
-        .filter(t => availableTimeCodes.has(Number(t.key)))
-        .map(t => ({
-          label: t.value,
-          timeCode: Number(t.key),
-          disabled: false
-        }))
+          .filter(t => availableTimeCodes.has(Number(t.key)))
+          .map(t => ({
+            label: t.value,
+            timeCode: Number(t.key),
+            disabled: false
+          }))
 
-      const groupedData = filteredTabs.reduce((acc, tab) => {
+        const groupedData = filteredTabs.reduce((acc, tab) => {
           acc[tab.timeCode] = { list: (resTV.list || []).filter(d => d.timeCode === tab.timeCode) }
-        return acc
-      }, {})
+          return acc
+        }, {})
 
-      setData({
-        dashboard: resDashboard?.record,
-        sp: resSP?.record,
-        hr: {
-          timeVariationDetails: resTV.list || [],
-          tabs: filteredTabs,
-          groupedData: groupedData
-        }
-      })
+        setData({
+          dashboard: resDashboard?.record,
+          sp: resSP?.record,
+          hr: {
+            timeVariationDetails: resTV.list || [],
+            tabs: filteredTabs,
+            groupedData: groupedData
+          }
+        })
 
         if (debouncedCloseLoadingRef.current) debouncedCloseLoadingRef.current()
       } catch (e) {
@@ -134,14 +133,15 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className={styles.frame}>
-      <div className={styles.container}>
+    <>
+    <div className='frame'>
+      <div className='container'>
         {containsApplet(ResourceIds.TodayRetailOrders) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.retailSales}</h2>
-                <strong className={styles.strong}>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.retailSales}</h2>
+                <strong className='strong'>
                   {(
                     data?.dashboard?.summaryFigures?.find(
                       f => f.itemId === SummaryFiguresItem.TODAYS_TOTAL_RETAIL_SALES
@@ -158,10 +158,10 @@ const DashboardLayout = () => {
           </div>
         )}
         {containsApplet(ResourceIds.MyYearlySalesPerformance) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlySalesPerformance}</h2>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myYearlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myYearlySalesPerformanceList?.map(ws => ws.year) || []}
@@ -174,10 +174,10 @@ const DashboardLayout = () => {
           </div>
         )}
         {containsApplet(ResourceIds.MyMonthlySalesPerformance) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myMonthlySalesPerformance}</h2>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myMonthlySalesPerformance}</h2>
               </div>
               <MixedBarChart
                 labels={data?.sp?.myMonthlySalesPerformanceList?.map(ws => ws.monthName) || []}
@@ -190,10 +190,10 @@ const DashboardLayout = () => {
           </div>
         )}
         {containsApplet(ResourceIds.SalesTeamOrdersSummary) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.salesTeamOrdersSummary}</h2>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.salesTeamOrdersSummary}</h2>
               </div>
               <MixedBarChart
                 labels={data?.dashboard?.salesTeamOrdersSummaries?.map(ws => ws.spRef) || []}
@@ -207,11 +207,11 @@ const DashboardLayout = () => {
             </div>
           </div>
         )}
-        <div className={styles.middleRow}>
+        <div className='middleRow'>
           {containsApplet(ResourceIds.MyYearlyUnitsSoldList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyUnitsSoldList}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myYearlyUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyUnitsSoldList?.map(ws => ws.year) || []}
@@ -220,10 +220,11 @@ const DashboardLayout = () => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyGrowthInUnitsSoldList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyGrowthInUnitsSoldList}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myYearlyGrowthInUnitsSoldList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInUnitsSoldList?.map(ws => ws.year) || []}
@@ -232,10 +233,11 @@ const DashboardLayout = () => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyClientsAcquiredList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyClientsAcquiredList}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myYearlyClientsAcquiredList}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyClientsAcquiredList?.map(ws => ws.year) || []}
@@ -244,10 +246,11 @@ const DashboardLayout = () => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MyYearlyGrowthInClientsAcquiredList) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.myYearlyGrowthInClientsAc}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.myYearlyGrowthInClientsAc}</h2>
               </div>
               <MixedColorsBarChartDark
                 labels={data?.sp?.myYearlyGrowthInClientsAcquiredList?.map(ws => ws.year) || []}
@@ -257,12 +260,13 @@ const DashboardLayout = () => {
             </div>
           )}
         </div>
+
         {containsApplet(ResourceIds.TodayPlantSales) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.todayPlantSales}</h2>
-                <strong className={styles.strong}>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.todayPlantSales}</h2>
+                <strong className='strong'>
                   {(
                     data?.dashboard?.todaysCreditSales?.map(tcs => tcs.sales).reduce((acc, val) => acc + val, 0) || 0
                   ).toLocaleString()}
@@ -278,9 +282,9 @@ const DashboardLayout = () => {
           </div>
         )}
 
-        <div className={styles.middleRow}>
+        <div className='middleRow'>
           {(containsApplet(ResourceIds.NewCustomers) || containsApplet(ResourceIds.GlobalSalesYTD)) && (
-            <div className={styles.summaryGrid}>
+            <div className='summaryGrid'>
               {containsApplet(ResourceIds.GlobalSalesYTD) && (
                 <>
                   {[
@@ -365,27 +369,25 @@ const DashboardLayout = () => {
                         {
                           label: labels.revenues,
                           value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)
-                            ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.SALES_YTD)?.amount ??
+                            0
                         },
                         {
                           label: labels.profit,
                           value:
-                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)
-                            ?.amount ?? 0
+                            data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.PROFIT_YTD)?.amount ??
+                            0
                         }
                       ]
                     }
                   ].map((summary, index) => (
-                    <div className={styles.summaryItem} key={index}>
-                      <div className={styles.redCenter}>{summary.title}</div>
-                      <div className={styles.innerGrid}>
+                    <div className='summaryItem' key={index}>
+                      <div className='redCenter'>{summary.title}</div>
+                      <div className='innerGrid'>
                         {summary.rows.map((row, idx) => (
                           <React.Fragment key={idx}>
-                            <div className={styles.label}>{row.label}:</div>
-                            <div className={styles.value}>
-                              {row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                            </div>
+                            <div className='label'>{row.label}:</div>
+                            <div className='value'>{row.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                           </React.Fragment>
                         ))}
                       </div>
@@ -393,13 +395,14 @@ const DashboardLayout = () => {
                   ))}
                 </>
               )}
+
               {containsApplet(ResourceIds.NewCustomers) && (
-                <div className={styles.summaryItem} style={{ gridColumn: '1 / 3' }}>
-                  <div className={styles.redCenter}>
+                <div className='summaryItem' style={{ gridColumn: '1 / 3' }}>
+                  <div className='redCenter'>
                     {labels.newCostumers}:{' '}
                     {(
-                      data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)
-                        ?.amount ?? 0
+                      data?.dashboard?.summaryFigures?.find(f => f.itemId === SummaryFiguresItem.NEW_CUSTOMERS_YTD)?.amount ??
+                      0
                     ).toLocaleString()}
                   </div>
                 </div>
@@ -408,10 +411,10 @@ const DashboardLayout = () => {
           )}
 
           {containsApplet(ResourceIds.WeeklySalesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}> {labels.avWeeklySales}</h2>
-                <strong className={styles.strong}>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'> {labels.avWeeklySales}</h2>
+                <strong className='strong'>
                   {(
                     (data?.dashboard?.weeklySales?.map(ws => ws.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.weeklySales?.length || 1)
@@ -425,11 +428,12 @@ const DashboardLayout = () => {
               />
             </div>
           )}
+
           {containsApplet(ResourceIds.MonthlySalesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.avMonthlySales}</h2>
-                <strong className={styles.strong}>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.avMonthlySales}</h2>
+                <strong className='strong'>
                   {(
                     (data?.dashboard?.monthlySales?.map(ms => ms.sales).reduce((acc, val) => acc + val, 0) || 0) /
                     (data?.dashboard?.monthlySales?.length || 1)
@@ -444,9 +448,9 @@ const DashboardLayout = () => {
             </div>
           )}
           {containsApplet(ResourceIds.AccumulatedRevenuesYTD) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.accRevenues}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.accRevenues}</h2>
               </div>
               <CompositeBarChartDark
                 labels={data?.dashboard?.accumulatedMonthlySales?.map(ams => ams.monthName) || []}
@@ -458,9 +462,9 @@ const DashboardLayout = () => {
             </div>
           )}
           {containsApplet(ResourceIds.Receivables) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.receivables}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.receivables}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={Object.keys(data?.dashboard?.receivables || {})}
@@ -474,9 +478,9 @@ const DashboardLayout = () => {
             </div>
           )}
           {containsApplet(ResourceIds.TopCustomers) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.topCostumers}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.topCostumers}</h2>
               </div>
               <HorizontalBarChartDark
                 labels={data?.dashboard?.topCustomers?.map(c => c.clientName) || []}
@@ -488,9 +492,9 @@ const DashboardLayout = () => {
             </div>
           )}
           {containsApplet(ResourceIds.AverageRevenuePerItem) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.averageRevenuePerItem}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.averageRevenuePerItem}</h2>
               </div>
               <LineChart
                 labels={data?.dashboard?.avgUnitSales?.map(c => c.itemName) || []}
@@ -501,9 +505,9 @@ const DashboardLayout = () => {
           )}
 
           {containsApplet(ResourceIds.TodaysTimeVariationsDetails) && (
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.todaysTimeVariationsDetails}</h2>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.todaysTimeVariationsDetails}</h2>
               </div>
 
               <CustomTabs tabs={data?.hr?.tabs || []} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -532,10 +536,10 @@ const DashboardLayout = () => {
         </div>
 
         {containsApplet(ResourceIds.PendingAuthorizationRequests) && (
-          <div className={styles.topRow}>
-            <div className={styles.chartCard}>
-              <div className={styles.summaryCard}>
-                <h2 className={styles.title}>{labels.authorization}</h2>
+          <div className='topRow'>
+            <div className='chartCard'>
+              <div className='summaryCard'>
+                <h2 className='title'>{labels.authorization}</h2>
               </div>
               <Box sx={{ display: 'flex', height: '350px' }}>
                 <ApprovalsTable pageSize={10} />
@@ -545,6 +549,148 @@ const DashboardLayout = () => {
         )}
       </div>
     </div>
+       <style jsx global>{`
+       .frame {
+          display: flex;
+          justify-content: flex-start;
+          align-items: flex-start;
+        }
+
+        .container {
+          width: 100%;
+          height: 100%;
+          padding: 10px;
+          background: rgb(204, 204, 204);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .topRow {
+          display: grid;
+          margin-bottom: 10px;
+        }
+
+        .title {
+          font-size: 17px;
+          margin-bottom: 10px;
+          text-align: center;
+        }
+
+        .summaryCard {
+          background: rgb(255, 255, 255);
+          border-radius: 10px;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .summaryGrid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 10px;
+          text-align: center;
+          color: #000;
+          font-size: 16px;
+        }
+
+        .summaryItem {
+          background: #fff;
+          border-radius: 8px;
+          padding: 15px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .middleRow {
+          display: grid;
+          grid-template-columns: 50% 50%;
+          gap: 10px;
+          margin-bottom: 10px;
+          margin-right: 10px;
+        }
+
+        .innerGrid {
+          display: grid;
+          grid-template-columns: auto auto;
+          gap: 5px 20px;
+          align-items: center;
+          text-align: left;
+        }
+
+        .chartCard {
+          background: rgb(255, 255, 255);
+          border-radius: 10px;
+          display: flex;
+          padding: 5px 8px;
+          flex-direction: column;
+        }
+
+        .redCenter {
+          text-align: center;
+          color: red;
+          font-size: 18px;
+          margin-bottom: 5px;
+        }
+        .label {
+          justify-self: start;
+          color: #000;
+          font-size: 16px;
+        }
+        .value {
+          justify-self: end;
+          color: #000;
+          font-size: 16px;
+        }
+
+        @media (max-width: 1400px) {
+          .title {
+            font-size: 20px
+          }
+        }
+
+        @media (min-width: 1025px) and (max-width: 1280px) {
+          .strong {
+            font-size: 12px;
+          }
+          .redCenter {
+            font-size: 13px;
+          }
+          .label {
+            font-size: 11px;
+          }
+          .value {
+            font-size: 11px;
+          }
+          .title {
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .chartCard {
+            padding: 5px 8px;
+          }
+          .strong {
+            font-size: 12px;
+          }
+          .redCenter {
+            font-size: 12px;
+          }
+          .label {
+            font-size: 11px;
+          }
+          .value {
+            font-size: 11px;
+          }
+          .title {
+            font-size: 14px;
+          }
+        }
+      `}</style>
+      </>
   )
 }
 

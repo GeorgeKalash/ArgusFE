@@ -27,7 +27,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
-import styles from './Table.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const Table = ({
@@ -72,10 +71,10 @@ const Table = ({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-  width <= 768 ? 30 : width <= 1024 ? 26 : width <= 1280 ? 25 : width <=1366 ? 28 : width < 1600 ? 30 : 32
+    width <= 768 ? 30 : width <= 1024 ? 26 : width <= 1280 ? 25 : width <= 1366 ? 28 : width < 1600 ? 30 : 32
 
   const rowHeightImage =
-  width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <=1366 ? 50 : width < 1600 ? 52 : 70
+    width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
 
   const columns = props?.columns
     .filter(
@@ -136,7 +135,7 @@ const Table = ({
               <Checkbox
                 checked={data?.[col.field]}
                 onChange={col.editable ? handleCheckboxChange : null}
-                className={col.editable ? '' : styles.pointerNone}
+                className={col.editable ? '' : 'pointerNone'}
               />
             )
           }
@@ -149,8 +148,8 @@ const Table = ({
             const color = data?.[col.field]
 
             return color ? (
-              <div className={styles.colorComboWrapper}>
-                <div className={styles.colorSwatch} style={{ backgroundColor: color }} />
+              <div className={'colorComboWrapper'}>
+                <div className={'colorSwatch'} style={{ backgroundColor: color }} />
                 <span>{color}</span>
               </div>
             ) : null
@@ -245,7 +244,7 @@ const Table = ({
         return (
           <TextField
             size={'small'}
-            className={styles.pageTextField}
+            className={'pageTextField'}
             autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
@@ -282,8 +281,8 @@ const Table = ({
         }
 
         return (
-          <Box className={styles.paginationWrapper}>
-            <Box className={styles.paginationBar}>
+          <Box className={'paginationWrapper'}>
+            <Box className={'paginationBar'}>
               <IconButton
                 onClick={goToFirstPage}
                 disabled={page === 1}
@@ -323,7 +322,7 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              <IconButton onClick={onReset} className={styles.paginationBar}>
+              <IconButton onClick={onReset} className={'paginationBar'}>
                 <CachedIcon />
               </IconButton>
             </Box>
@@ -391,8 +390,8 @@ const Table = ({
           }
 
           return (
-            <Box className={styles.paginationWrapper}>
-              <Box className={styles.paginationBar}>
+            <Box className={'paginationWrapper'}>
+              <Box className={'paginationBar'}>
                 <IconButton
                   onClick={goToFirstPage}
                   disabled={page === 1}
@@ -479,7 +478,7 @@ const Table = ({
       refresh: false
     })
   }
-  
+
   function openDeleteConfirmation(obj) {
     stack({
       Component: StrictConfirmation,
@@ -496,9 +495,9 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
-        className={styles.fullSizeCheckbox}
+        className={'fullSizeCheckbox'}
         checked={params.value}
-        disabled={props?.disable && props?.disable(params?.data) || props?.disableCheckBox}
+        disabled={(props?.disable && props?.disable(params?.data)) || props?.disableCheckBox}
         onChange={e => {
           e.preventDefault()
           const rowIndex = params.node.rowIndex
@@ -570,8 +569,12 @@ const Table = ({
 
     return (
       <>
-        {tooltipOpen && <Box className={styles.copiedTooltip}>Copied!</Box>}
-        <Box onClick={handleClick} onDoubleClick={handleDoubleClick} className={`${styles.fieldWrapper} ${!params.colDef?.wrapText ? styles.nowrap : ''}`}>
+        {tooltipOpen && <Box className={'copiedTooltip'}>Copied!</Box>}
+        <Box
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
+        >
           {params.value}
         </Box>
       </>
@@ -678,7 +681,7 @@ const Table = ({
                     focusable && focusable.focus && focusable.focus()
                     selectAll(params, e)
                   }}
-                  className={styles.fullSizeCheckbox}
+                  className={'fullSizeCheckbox'}
                 />
               ),
             suppressMenu: true
@@ -720,16 +723,16 @@ const Table = ({
           const isWIP = data.wip === 2
 
           return (
-            <Box className={styles.actionsBox}>
+            <Box className={'actionsBox'}>
               {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
                   onClick={e => {
                     props?.onEdit(data)
                   }}
-                  className={styles.actionIconButton}
+                  className={'actionIconButton'}
                 >
-                  <Image src={editIcon} alt='Edit' className={styles.actionIcon} />
+                  <Image src={editIcon} alt='Edit' className={'actionIcon'} />
                 </IconButton>
               )}
 
@@ -744,9 +747,9 @@ const Table = ({
                     }
                   }}
                   color='error'
-                  className={styles.actionIconButton}
+                  className={'actionIconButton'}
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
+                  <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
                 </IconButton>
               )}
               {globalStatus &&
@@ -765,9 +768,9 @@ const Table = ({
                       }
                     }}
                     color='error'
-                    className={styles.actionIconButton}
+                    className={'actionIconButton'}
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
+                    <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
                   </IconButton>
                 )}
             </Box>
@@ -879,8 +882,8 @@ const Table = ({
           onMouseLeave={handleMouseLeave}
           className={[
             'ag-theme-alpine',
-            styles.agGridContainer,
-            !props.maxHeight && !props.height ? styles.agGridFlex : ''
+            'agGridContainer',
+            !props.maxHeight && !props.height ? 'agGridFlex' : ''
           ].join(' ')}
           sx={{
             height: props?.height || '100%',
@@ -890,7 +893,7 @@ const Table = ({
         
         >
           {hoveredTable && !pagination && (
-            <Box className={styles.hoverReset}>
+            <Box className={'hoverReset'}>
               <IconButton size='small' onClick={onReset}>
                 <CachedIcon fontSize='small' />
               </IconButton>
@@ -922,11 +925,248 @@ const Table = ({
           />
         </Box>
       </Grow>
+
       {pagination && (
         <Fixed>
           <CustomPagination />
         </Fixed>
       )}
+
+      <style jsx global>{`
+        .agGridContainer {
+            position: relative;
+            width: 100%;
+            height: auto;
+            max-height: none;
+            --ag-font-size: 10.5px;
+          }
+
+          .agGridFlex {
+            flex: 1 1 auto;
+          }
+
+          .hoverReset {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 9999;
+            box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
+            border-radius: 4px;
+            background: #fff;
+          }
+
+          .paginationWrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .paginationBar {
+            flex: 1 1 auto;
+            min-width: 0;
+            background-color: #fff;
+            font-size: 0.8rem;
+            padding: 1px 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 30px;
+            line-height: 1;
+          }
+
+          .pageTextField {
+            padding: 0;
+            width: 70px;
+          }
+
+          .pageTextField :global(.MuiOutlinedInput-root),
+          .pageTextField :global(.MuiInputBase-root) {
+            height: 22px;
+            min-height: 22px;
+            font-size: 0.78rem;
+          }
+
+          .pageTextField :global(.MuiOutlinedInput-input),
+          .pageTextField :global(.MuiInputBase-input) {
+            padding: 1px 5px;
+          }
+
+          .actionsBox {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .actionIconButton {
+            padding: 0;
+            width: 22px;
+            height: 22px;
+            min-width: 0;
+          }
+
+          .actionIcon {
+            width: 16px;
+            height: 16px;
+          }
+
+          .fullSizeCheckbox {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .agGridContainer :global(.MuiCheckbox-root) {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+            font-size: 20px !important;
+          }
+
+          .pointerNone {
+            pointer-events: none;
+          }
+
+          .fieldWrapper {
+            user-select: text;
+            cursor: pointer;
+            width: 100%;
+          }
+
+          .fieldWrapper::selection {
+            background: none !important;
+            color: inherit;
+          }
+
+          .nowrap{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+          }
+
+          .copiedTooltip {
+            z-index: 1000;
+            position: fixed;
+            top: -40px;
+            background-color: #000;
+            color: #fff;
+            padding: 1px 3px;
+            border-radius: 5px;
+          }
+
+          .colorComboWrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .colorSwatch {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+          }
+
+          .agGridContainer :global(.ag-header),
+          .agGridContainer :global(.ag-header-cell) {
+            height: 32px !important;
+            min-height: 32px !important;
+          }
+
+          .agGridContainer :global(.ag-header-cell-text),
+          .agGridContainer :global(.ag-cell) {
+            font-size: var(--ag-font-size);
+          }
+
+          .agGridContainer :global(.ag-cell) {
+            border-right: 1px solid #d0d0d0 !important;
+          }
+
+          .agGridContainer :global(.ag-cell .MuiBox-root) {
+            padding: 0 !important;
+          }
+
+          .paginationBar :global(.MuiIconButton-root) {
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            min-width: 0;
+          }
+
+          .paginationBar :global(.MuiSvgIcon-root) {
+            font-size: 20px;
+            line-height: 1;
+          }
+
+          @media (min-width: 1025px) and (max-width: 1600px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 12px;
+            }
+
+          }
+
+          @media (max-width: 1366px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+              --ag-header-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+            }
+
+            .agGridContainer :global(.ag-header-cell),
+            .agGridContainer :global(.ag-header-cell-label) {
+              padding-left: var(--ag-header-cell-horizontal-padding) !important;
+              padding-right: var(--ag-header-cell-horizontal-padding) !important;
+            }
+
+            .agGridContainer :global(.ag-cell) {
+              padding-left: var(--ag-cell-horizontal-padding) !important;
+              padding-right: var(--ag-cell-horizontal-padding) !important;
+            }
+          }
+
+          @media (max-width: 1024px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 9.2px;
+              --ag-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+              --ag-header-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+            }
+          }
+
+          @media (max-width: 768px) {
+
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 8.9px;
+            }
+          }
+
+          @media (max-width: 600px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 8.5px;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 8.2px;
+            }
+          }
+
+          @media (max-width: 375px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 8px;
+            }
+          }
+      `}</style>
     </VertLayout>
   )
 }
