@@ -1,4 +1,12 @@
-import React, { createContext, useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react'
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react'
 import { useRouter } from 'next/router'
 import { Tabs, Tab, Box, IconButton, Menu, MenuItem } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -52,7 +60,6 @@ function CustomTabPanel(props) {
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        opacity: isActive ? 1 : 0,
         pointerEvents: isActive ? 'auto' : 'none'
       }}
       {...other}
@@ -253,26 +260,41 @@ const TabsProvider = ({ children }) => {
   )
 
   const closeTab = useCallback(
-    async tabRoute => {
+    tabRoute => {
       const index = openTabs.findIndex(tab => tab.route === tabRoute)
       const activeTabsLength = openTabs.length
 
-      if (activeTabsLength === 2) return handleCloseAllTabs()
+      if (activeTabsLength === 2) {
+        handleCloseAllTabs()
+        return
+      }
 
-      if (currentTabIndex === index) {
-        const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-        if (newValue === index - 1 || router.asPath === window?.history?.state?.as) setCurrentTabIndex(newValue)
+      const isClosingActive = currentTabIndex === index
+      const newValue = isClosingActive
+        ? index === activeTabsLength - 1
+          ? index - 1
+          : index + 1
+        : currentTabIndex
 
-        const nextRoute = openTabs?.[newValue]?.route
-        if (nextRoute) {
-          await navigateTo(nextRoute)
-          if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
-        }
-      } else if (index < currentTabIndex) setCurrentTabIndex(currentValue => currentValue - 1)
+      const nextRoute = isClosingActive ? openTabs?.[newValue]?.route : null
 
-      setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
+      setOpenTabs(prev => prev.filter(tab => tab.route !== tabRoute))
+
+      if (isClosingActive) {
+        setCurrentTabIndex(newValue)
+      } else if (index < currentTabIndex) {
+        setCurrentTabIndex(v => v - 1)
+      }
+
+      if (nextRoute) {
+        Promise.resolve().then(() => {
+          navigateTo(nextRoute).then(() => {
+            if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+          })
+        })
+      }
     },
-    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, router.asPath, setCurrentTabIndex, setOpenTabs]
+    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, setCurrentTabIndex, setOpenTabs]
   )
 
   const reopenTab = useCallback(
@@ -424,7 +446,7 @@ const TabsProvider = ({ children }) => {
                       onClick={async event => {
                         event.stopPropagation()
                         if (activeTab) unlockIfLocked(activeTab)
-                        await closeTab(activeTab.route)
+                        closeTab(activeTab.route)
                       }}
                     >
                       <CloseIcon className={styles.svgIcon} />
@@ -442,10 +464,7 @@ const TabsProvider = ({ children }) => {
         </Tabs>
       </Box>
 
-      <Box
-        className={styles.panelsWrapper}
-        sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}
-      >
+      <Box className={styles.panelsWrapper} sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
         {openTabs.map((activeTab, i) => (
           <CustomTabPanel key={activeTab.id} index={i} value={currentTabIndex}>
             {activeTab.page}
