@@ -258,26 +258,21 @@ const closeTab = useCallback(
       const index = prevTabs.findIndex(tab => tab.route === tabRoute)
       if (index === -1) return prevTabs
 
-      // If only 2 tabs (Home + one), keep behavior (close all)
       if (prevTabs.length === 2) {
-        // Let the async flow below handle close-all navigation, but keep UI snappy
         return prevTabs
       }
 
       const nextTabs = prevTabs.filter(tab => tab.route !== tabRoute)
 
-      // If we closed a tab before the active one, active index shifts left
       if (index < currentTabIndex) {
         setCurrentTabIndex(v => Math.max(0, v - 1))
         return nextTabs
       }
 
-      // If we closed the active tab, pick next active tab synchronously
       if (index === currentTabIndex) {
         const newIndex = index >= nextTabs.length ? nextTabs.length - 1 : index
         setCurrentTabIndex(newIndex)
 
-        // Navigate AFTER state change (next tick), so UI closes instantly
         const nextRoute = nextTabs?.[newIndex]?.route
         if (nextRoute) {
           queueMicrotask(() => {
@@ -291,7 +286,6 @@ const closeTab = useCallback(
       return nextTabs
     })
 
-    // Handle "close all" case separately (still keep it fast)
     if (openTabs.length === 2) {
       await handleCloseAllTabs()
     }
