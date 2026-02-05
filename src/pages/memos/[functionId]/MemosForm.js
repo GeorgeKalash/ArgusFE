@@ -324,7 +324,8 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            moduleId: 1,
+            date: formik.values.date
           }
         })
       },

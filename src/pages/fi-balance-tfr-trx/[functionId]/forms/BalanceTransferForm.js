@@ -214,7 +214,8 @@ export default function BalanceTransferForm({
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.fromAccountId),
-            moduleId: 1
+            moduleId: 1,
+            date: formik.values.date
           }
         })
       },

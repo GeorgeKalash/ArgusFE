@@ -608,7 +608,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.header?.accountId),
-            moduleId: 1
+            moduleId: 1,
+            date: formik?.values?.header?.date
           }
         })
       }

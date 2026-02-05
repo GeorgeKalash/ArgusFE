@@ -5,7 +5,6 @@ import { ResourceLookup } from './ResourceLookup'
 import { ResourceIds } from 'src/resources/ResourceIds'
 import { useResourceQuery } from 'src/hooks/resource'
 import { Fixed } from './Layouts/Fixed'
-import { Grow } from './Layouts/Grow'
 import { VertLayout } from './Layouts/VertLayout'
 import ResourceComboBox from './ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
@@ -13,15 +12,18 @@ import CustomButton from '../Inputs/CustomButton'
 import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
-import { SystemRepository } from 'src/repositories/SystemRepository'
 import Table from './Table'
 import { RGFinancialRepository } from 'src/repositories/RGFinancialRepository'
 import useSetWindow from 'src/hooks/useSetWindow'
+import { formatDateForGetApI } from 'src/lib/date-helper'
+import CustomDatePicker from '../Inputs/CustomDatePicker'
+import CustomTextField from '../Inputs/CustomTextField'
 
-export default function AccountSummary({ accountId, moduleId, window }) {
+export default function AccountSummary({ accountId, moduleId, date, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
+  const [summary, setSummary] = useState(null)
 
   useSetWindow({ title: platformLabels.AccountSummary, window })
 
@@ -29,7 +31,9 @@ export default function AccountSummary({ accountId, moduleId, window }) {
     datasetId: ResourceIds.AccountSummary
   })
   const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
+  const baseSummaryColumns = [{ field: '', headerName: '', flex: 1 }]
   const [columns, setColumns] = useState(baseColumns)
+  const [summaryColumns, setSummaryColumns] = useState(baseSummaryColumns)
 
   const { formik } = useForm({
     maxAccess: access,
@@ -37,94 +41,124 @@ export default function AccountSummary({ accountId, moduleId, window }) {
       accountId: null,
       accountRef: '',
       accountName: '',
+      date: date || null,
       agpId: null,
       moduleId
     }
   })
 
   async function getDynamicColumns() {
-    let currencyItems
-    let colcounts = 2
-    let dynamicColumns = [...baseColumns]
-
-    const currecnyList = await getRequest({
-      extension: SystemRepository.Currency.qry,
-      parameters: `_filter=`
+    const res = await getRequest({
+      extension: RGFinancialRepository.AccountSummary.get,
+      parameters: `_accountId=${accountId}&_agpId=${formik.values.agpId}&_endDate=${formatDateForGetApI(date)}`
     })
-    if (moduleId == 1) currencyItems = currecnyList?.list?.filter(currency => currency.sale)
-    else if (moduleId == 2) currencyItems = currecnyList?.list?.filter(currency => currency.purchase)
 
-    if (currencyItems.length == 0) return
+    formik.setFieldValue('spRef', res?.record?.spRef || '')
+    formik.setFieldValue('spName', res?.record?.spName || '')
 
-    currencyItems?.forEach((cur, index) => {
+    const summaryData = {
+      list: [
+        {
+          label: labels.creditLimit,
+          metal: Number(res?.record?.credit_limit_reporting_metal || 0).toFixed(2),
+          base: Number(res?.record?.credit_limit_baseCurrency || 0).toFixed(2)
+        },
+        {
+          label: labels.totalBalance,
+          metal: Number(res?.record?.balance_reporting_metal || 0).toFixed(2),
+          base: Number(res?.record?.balance_baseCurrency || 0).toFixed(2)
+        },
+        {
+          label: labels.margin,
+          metal: Math.abs(
+            Number(res?.record?.credit_limit_reporting_metal || 0) - Number(res?.record?.balance_reporting_metal || 0)
+          ).toFixed(2),
+          base: Math.abs(
+            Number(res?.record?.credit_limit_baseCurrency || 0) - Number(res?.record?.balance_baseCurrency || 0)
+          ).toFixed(2)
+        }
+      ]
+    }
+
+    const summaryColumns = [
+      {
+        field: 'label',
+        headerName: '',
+        flex: 1
+      },
+      {
+        field: 'metal',
+        headerName: res?.record?.reportMetalRef,
+        flex: 1
+      },
+      {
+        field: 'base',
+        headerName: res?.record?.baseCurrencyRef,
+        flex: 1
+      }
+    ]
+
+    setSummary(summaryData)
+    setSummaryColumns(summaryColumns)
+
+    const agingProfiles = res?.record?.agingProfiles || []
+
+    if (!agingProfiles.length) {
+      setColumns([...baseColumns])
+      setData({ list: [] })
+
+      return
+    }
+
+    const currencies = [...new Set(agingProfiles.map(i => i.currencyRef).filter(Boolean))]
+
+    const dynamicColumns = [...baseColumns]
+
+    currencies.forEach((cur, index) => {
       dynamicColumns.push({
         field: `column${index + 1}`,
-        headerName: cur.reference,
+        headerName: cur,
         flex: 1,
         type: 'number'
       })
     })
     setColumns(dynamicColumns)
 
-    const agingLegList = await getRequest({
-      extension: FinancialRepository.AgingLeg.qry,
-      parameters: `_agpId=${formik.values.agpId}`
-    })
-
-    let listObject = agingLegList?.list?.map(item => {
-      const obj = new Array(currencyItems.length + 2).fill(0)
-      obj[0] = null
-      obj[1] = item.days
-
-      return obj
-    })
-
-    const promises = (currencyItems || []).map(cur =>
-      getRequest({
-        extension: RGFinancialRepository.AccountSummary.AccFI405b,
-        parameters: `_agpId=${formik.values.agpId}&_currencyId=${cur.recordId}&_accountId=${formik.values.accountId}`
-      }).then(summaryRes => ({ summaryRes }))
+    const agingRows = [...new Map(agingProfiles.filter(i => i.seqDays !== -1).map(i => [i.seqDays, i])).values()].sort(
+      (a, b) => a.seqDays - b.seqDays
     )
 
-    const results = await Promise.all(promises)
+    const rows = agingRows.map(row => {
+      const rowObject = { days: row.seqDays }
 
-    results.forEach(({ summaryRes }) => {
-      summaryRes?.list?.forEach(y => {
-        listObject?.forEach(ob => {
-          if (ob[1] == y.seqDays) ob[colcounts] = y.amount
-        })
+      currencies.forEach((cur, index) => {
+        const value = agingProfiles
+          .filter(i => i.seqDays === row.seqDays && i.currencyRef === cur)
+          .reduce((sum, i) => sum + Number(i.amount || 0), 0)
+
+        rowObject[`column${index + 1}`] = value.toFixed(2)
       })
-      colcounts++
+
+      return rowObject
     })
 
-    const modifiedListObj = new Array(currencyItems.length + 2).fill(null)
-    for (let co = 2; co < currencyItems.length + 2; co++) {
-      let sum = 0
-      listObject?.map(ob => {
-        sum += Number(ob[co] || 0)
-      })
-      modifiedListObj[co] = sum
-    }
+    const totalRow = {}
 
-    const newList = listObject
-      .filter(item => item[1] !== null)
-      .map(item => {
-        const [_, days, ...columns] = item
-        const rowObject = { days }
-        columns.forEach((value, index) => {
-          rowObject[`column${index + 1}`] = value.toFixed(2)
-        })
+    currencies.forEach((cur, index) => {
+      const total = agingProfiles.some(i => i.seqDays === -1 && i.currencyRef === cur)
+        ? agingProfiles
+            .filter(i => i.seqDays === -1 && i.currencyRef === cur)
+            .reduce((s, i) => s + Number(i.amount || 0), 0)
+        : agingProfiles
+            .filter(i => i.seqDays !== -1 && i.currencyRef === cur)
+            .reduce((s, i) => s + Number(i.amount || 0), 0)
 
-        return rowObject
-      })
+      totalRow[`column${index + 1}`] = total.toFixed(2)
+    })
 
-    let totalRow = {}
-    for (let i = 0; i < currencyItems.length; i++) {
-      totalRow[`column${i + 1}`] = modifiedListObj[i + 2].toFixed(2) ?? 0
-    }
-    newList.push(totalRow)
+    rows.push(totalRow)
 
-    setData({ list: newList })
+    setData({ list: rows })
   }
 
   useEffect(() => {
@@ -145,7 +179,7 @@ export default function AccountSummary({ accountId, moduleId, window }) {
     <VertLayout>
       <Fixed>
         <Grid container spacing={2} p={2}>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <ResourceLookup
               endpointId={FinancialRepository.Account.snapshot}
               name='accountId'
@@ -167,6 +201,18 @@ export default function AccountSummary({ accountId, moduleId, window }) {
                 formik.setFieldValue('accountName', newValue?.name || '')
                 formik.setFieldValue('accountRef', newValue?.reference || '')
               }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <CustomDatePicker
+              name='date'
+              label={labels.date}
+              readOnly
+              value={date}
+              onChange={formik.setFieldValue}
+              maxAccess={access}
+              onClear={() => formik.setFieldValue('date', null)}
+              error={formik.touched.date && Boolean(formik.errors.date)}
             />
           </Grid>
           <Grid item xs={6}>
@@ -210,11 +256,41 @@ export default function AccountSummary({ accountId, moduleId, window }) {
               tooltipText={platformLabels.Preview}
             />
           </Grid>
+
+          <Grid item xs={3}>
+            <CustomTextField
+              name='spRef'
+              label={labels.spRef}
+              value={formik.values.spRef}
+              maxAccess={access}
+              readOnly
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('spRef', '')}
+              error={formik.touched.spRef && Boolean(formik.errors.spRef)}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <CustomTextField
+              name='spName'
+              label={labels.spName}
+              value={formik.values.spName}
+              maxAccess={access}
+              readOnly
+              onChange={formik.handleChange}
+              onClear={() => formik.setFieldValue('spName', '')}
+              error={formik.touched.spName && Boolean(formik.errors.spName)}
+            />
+          </Grid>
         </Grid>
       </Fixed>
-      <Grow>
-        <Table columns={columns} gridData={data} isLoading={false} pagination={false} />
-      </Grow>
+      <Grid container spacing={1} sx={{ height: '100%' }}>
+        <Grid item xs={4} sx={{ display: 'flex' }}>
+          <Table name='summaryTable' columns={summaryColumns} gridData={summary} pagination={false} />
+        </Grid>
+        <Grid item xs={8} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Table name='agingProfilesTable' columns={columns} gridData={data} pagination={false} />
+        </Grid>
+      </Grid>
     </VertLayout>
   )
 }
