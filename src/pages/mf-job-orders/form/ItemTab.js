@@ -219,8 +219,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
 
         const updatedItems = formik.values.items.map(row => ({
           ...row,
-          metalQty: metalPct,
-          nonMetalQty: nonMetalPct
+          metalQty: (metalPct / 100) * row.qty,
+          nonMetalQty: (nonMetalPct / 100) * row.qty
         }))
 
         formik.setFieldValue('items', updatedItems)
