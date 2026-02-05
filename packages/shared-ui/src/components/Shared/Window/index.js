@@ -97,6 +97,7 @@ const Window = React.memo(
     const menuWidth =
       screenWidth <= 768 ? 180 :
       screenWidth <= 1024 ? 200 :
+      screenWidth <= 1280 ? 210 :
       screenWidth <= 1366 ? 220 :
       screenWidth <= 1600 ? 240 : 300
 
