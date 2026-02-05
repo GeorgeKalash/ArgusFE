@@ -336,6 +336,7 @@ export default function RetailTransactionsForm({
 
     const result = {
       id: row?.id,
+      barcode: row?.barcode,
       itemId: row?.itemId,
       sku: row?.sku,
       itemName: row?.itemName,
@@ -745,9 +746,18 @@ export default function RetailTransactionsForm({
       name: 'barcode',
       updateOn: 'blur',
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
-        if (!newRow?.barcode) return
+        if (!newRow?.barcode) return update({ barcode: null })
         const barcodeInfo = await getBarcodeData(newRow?.barcode)
-        if (barcodeInfo)
+
+        const resetRow = () => {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+        }
+        if (!barcodeInfo) {
+          resetRow()
+        } else {
           await barcodeSkuSelection(
             update,
             {
@@ -760,6 +770,7 @@ export default function RetailTransactionsForm({
             },
             addRow
           )
+        }
       }
     },
     {
