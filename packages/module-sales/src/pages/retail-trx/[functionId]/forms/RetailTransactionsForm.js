@@ -1,6 +1,6 @@
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateForGetApI, formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
 import * as yup from 'yup'
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
@@ -41,7 +41,6 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
-import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
@@ -70,7 +69,6 @@ export default function RetailTransactionsForm({
   const { platformLabels, defaultsData, systemChecks } = useContext(ControlContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
-  const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
   const level2CacheRef = useRef(null)
