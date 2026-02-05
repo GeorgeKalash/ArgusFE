@@ -29,6 +29,27 @@ export default function ItemTab({ labels, maxAccess, store }) {
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
+  const getMaterialPercentages = () => {
+    const materials = store?.jobMaterials || []
+
+    let metal = 0
+    let nonMetal = 0
+
+    materials.forEach(m => {
+      const qty = parseFloat(m.qty) || 0
+
+      if (m.isMetal) metal += qty
+      else nonMetal += qty
+    })
+
+    const total = metal + nonMetal || 1
+
+    return {
+      metalPct: (metal / total) * 100,
+      nonMetalPct: (nonMetal / total) * 100
+    }
+  }
+
   const { formik } = useForm({
     initialValues: {
       items: [
@@ -40,7 +61,9 @@ export default function ItemTab({ labels, maxAccess, store }) {
           qty: 0,
           pcs: 0,
           sku: '',
-          itemName: ''
+          itemName: '',
+          metalQty: 0,
+          nonMetalQty: 0
         }
       ]
     },
@@ -169,6 +192,39 @@ export default function ItemTab({ labels, maxAccess, store }) {
           }
         })
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.metalQty,
+      name: 'metalQty',
+      props: {
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.nonMetalQty,
+      name: 'nonMetalQty',
+      props: {
+        decimalScale: 2
+      }
+    },
+    {
+      component: 'button',
+      name: 'default',
+      label: platformLabels.default,
+      flex: 0.5,
+      onClick: () => {
+        const { metalPct, nonMetalPct } = getMaterialPercentages()
+
+        const updatedItems = formik.values.items.map(row => ({
+          ...row,
+          metalQty: metalPct,
+          nonMetalQty: nonMetalPct
+        }))
+
+        formik.setFieldValue('items', updatedItems)
+      }
     }
   ]
 
@@ -192,6 +248,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
                   return {
                     ...item,
                     id: index + 1,
+                    metal: item?.metal || 0,
+                    nonMetal: item?.nonMetal || 0,
                     extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
                   }
                 })
