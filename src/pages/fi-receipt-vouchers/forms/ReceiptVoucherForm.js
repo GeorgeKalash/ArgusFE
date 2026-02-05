@@ -342,7 +342,6 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1,
             date: formik.values.date
           }
         })

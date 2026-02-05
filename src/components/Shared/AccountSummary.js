@@ -9,7 +9,6 @@ import { VertLayout } from './Layouts/VertLayout'
 import ResourceComboBox from './ResourceComboBox'
 import { FinancialRepository } from 'src/repositories/FinancialRepository'
 import CustomButton from '../Inputs/CustomButton'
-import { DataSets } from 'src/resources/DataSets'
 import { ControlContext } from 'src/providers/ControlContext'
 import { useForm } from 'src/hooks/form'
 import Table from './Table'
@@ -19,7 +18,7 @@ import { formatDateForGetApI } from 'src/lib/date-helper'
 import CustomDatePicker from '../Inputs/CustomDatePicker'
 import CustomTextField from '../Inputs/CustomTextField'
 
-export default function AccountSummary({ accountId, moduleId, date, window }) {
+export default function AccountSummary({ accountId, date, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const [data, setData] = useState([])
@@ -42,8 +41,7 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
       accountRef: '',
       accountName: '',
       date: date || null,
-      agpId: null,
-      moduleId
+      agpId: null
     }
   })
 
@@ -163,7 +161,7 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
 
   useEffect(() => {
     ;(async function () {
-      if (accountId && moduleId) {
+      if (accountId) {
         const account = await getRequest({
           extension: FinancialRepository.Account.get,
           parameters: `_recordId=${accountId}`
@@ -189,7 +187,7 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
               valueShow='accountRef'
               secondValueShow='accountName'
               form={formik}
-              readOnly={formik.values.accountId && formik.values.moduleId}
+              readOnly={formik.values.accountId}
               required
               maxAccess={access}
               columnsInDropDown={[
@@ -215,7 +213,7 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
               error={formik.touched.date && Boolean(formik.errors.date)}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={5}>
             <ResourceComboBox
               endpointId={FinancialRepository.AgingProfile.qry}
               parameters={`_startAt=0&_pageSize=1000&filter=`}
@@ -232,32 +230,16 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
               }}
             />
           </Grid>
-          <Grid item xs={5}>
-            <ResourceComboBox
-              datasetId={DataSets.FI_AGING_MODULE}
-              label={labels.module}
-              name='moduleId'
-              values={formik.values}
-              valueField='key'
-              displayField='value'
-              maxAccess={access}
-              required
-              readOnly={formik.values.moduleId}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('moduleId', newValue?.key || null)
-              }}
-            />
-          </Grid>
           <Grid item xs={1}>
             <CustomButton
               onClick={getDynamicColumns}
               image={'preview.png'}
-              disabled={!formik.values.agpId || !formik.values.moduleId || !formik.values.accountId}
+              disabled={!formik.values.agpId || !formik.values.date || !formik.values.accountId}
               tooltipText={platformLabels.Preview}
             />
           </Grid>
 
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <CustomTextField
               name='spRef'
               label={labels.spRef}
@@ -269,7 +251,7 @@ export default function AccountSummary({ accountId, moduleId, date, window }) {
               error={formik.touched.spRef && Boolean(formik.errors.spRef)}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <CustomTextField
               name='spName'
               label={labels.spName}

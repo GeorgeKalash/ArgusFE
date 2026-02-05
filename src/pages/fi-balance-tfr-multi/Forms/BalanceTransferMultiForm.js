@@ -303,7 +303,6 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.header.accountId),
-            moduleId: 1,
             date: formik.values.header.date
           }
         })
