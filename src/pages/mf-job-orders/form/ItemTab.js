@@ -208,25 +208,20 @@ export default function ItemTab({ labels, maxAccess, store }) {
       props: {
         decimalScale: 2
       }
-    },
-    {
-      component: 'button',
-      name: 'default',
-      label: platformLabels.default,
-      flex: 0.5,
-      onClick: () => {
-        const { metalPct, nonMetalPct } = getMaterialPercentages()
-
-        const updatedItems = formik.values.items.map(row => ({
-          ...row,
-          metalQty: (metalPct / 100) * row.qty,
-          nonMetalQty: (nonMetalPct / 100) * row.qty
-        }))
-
-        formik.setFieldValue('items', updatedItems)
-      }
     }
   ]
+
+  const defaultOnClick = () => {
+    const { metalPct, nonMetalPct } = getMaterialPercentages()
+
+    const updatedItems = formik.values.items.map(row => ({
+      ...row,
+      metalQty: (metalPct / 100) * row.qty,
+      nonMetalQty: (nonMetalPct / 100) * row.qty
+    }))
+
+    formik.setFieldValue('items', updatedItems)
+  }
 
   const totalCost =
     formik?.values?.items?.length > 0
@@ -259,12 +254,22 @@ export default function ItemTab({ labels, maxAccess, store }) {
     })()
   }, [jobItems])
 
+  const actions = [
+    {
+      key: 'Default',
+      condition: true,
+      label: platformLabels.default,
+      onClick: defaultOnClick
+    }
+  ]
+
   return (
     <Form
       onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       isParentWindow={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
+      actions={actions}
     >
       <VertLayout>
         <Grow>

@@ -682,5 +682,12 @@ export const getButtons = platformLabels => [
     color: '#231f20',
     image: 'import.png',
     main: false
+  },
+  {
+    key: 'Default',
+    label: platformLabels.Default,
+    color: '#231f20',
+    image: 'rebuild.png',
+    main: false
   }
 ]
