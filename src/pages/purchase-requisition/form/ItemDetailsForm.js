@@ -27,6 +27,7 @@ export default function ItemDetailsForm({
   maxAccess,
   readOnlyField,
   refetchTable,
+  siteId,
   window
 }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -42,7 +43,7 @@ export default function ItemDetailsForm({
         seqNo: null,
         itemId: null,
         itemName: '',
-        siteId: null,
+        siteId,
         muId: null,
         muQty: null,
         qty: null,
