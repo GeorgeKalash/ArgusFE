@@ -20,6 +20,7 @@ import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
+
 export default function AccountSummary({ accountId, date, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
