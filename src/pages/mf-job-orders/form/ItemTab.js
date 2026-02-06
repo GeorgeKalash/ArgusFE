@@ -201,7 +201,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       name: 'metalQty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        decimalScale: 2,
+        allowNegative: false
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow) return
@@ -226,7 +227,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       name: 'nonMetalQty',
       updateOn: 'blur',
       props: {
-        decimalScale: 2
+        decimalScale: 2,
+        allowNegative: false
       },
       async onChange({ row: { update, newRow } }) {
         if (!newRow) return
