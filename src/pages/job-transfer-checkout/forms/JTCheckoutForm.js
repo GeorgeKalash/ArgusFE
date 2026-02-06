@@ -68,7 +68,9 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         sku: '',
         designRef: '',
         itemNmae: '',
-        designName: ''
+        designName: '',
+        closedDate: null,
+        postedDate: null
       },
       categorySummary: []
     },
@@ -639,12 +641,11 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     seqNo={0}
                     recordId={formik.values.transfer.jobId}
                     customWidth={330}
-                    customHeight={240}
+                    customHeight={220}
                     isAbsolutePath={true}
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12} height={62}></Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'
@@ -652,6 +653,30 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     readOnly
                     label={labels.totalQty}
                     maxAccess
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='transfer.closedDate'
+                    readOnly
+                    label={labels.closedDate}
+                    value={formik.values?.transfer?.closedDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('transfer.closedDate', null)}
+                    error={formik.touched.transfer?.closedDate && Boolean(formik.errors.transfer?.closedDate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='transfer.postedDate'
+                    readOnly
+                    label={labels.postedDate}
+                    value={formik.values?.transfer?.postedDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('transfer.postedDate', null)}
+                    error={formik.touched.transfer?.postedDate && Boolean(formik.errors.transfer?.postedDate)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
