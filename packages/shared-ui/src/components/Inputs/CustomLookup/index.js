@@ -64,6 +64,9 @@ const CustomLookup = ({
   const selectFirstValue = useRef(null)
   const autocompleteRef = useRef(null)
 
+  const inputElRef = useRef(null)
+  const textMeasureRef = useRef(null)
+
   const [inputValue, setInputValue] = useState(firstValue || '')
 
   useEffect(() => {
@@ -81,10 +84,22 @@ const CustomLookup = ({
     if (!firstValue) setInputValue('')
   }, [firstValue])
 
+  const measureTextWidth = (text, inputEl) => {
+    if (!textMeasureRef.current || !inputEl) return 0
+    const style = window.getComputedStyle(inputEl)
+
+    textMeasureRef.current.style.font = style.font
+    textMeasureRef.current.style.letterSpacing = style.letterSpacing
+    textMeasureRef.current.style.textTransform = style.textTransform
+    textMeasureRef.current.textContent = text || ''
+
+    return textMeasureRef.current.getBoundingClientRect().width
+  }
+
   if (_hidden) return <></>
 
   return (
-    <Grid container spacing={0} className={styles.lookupContainer}>
+    <Grid container spacing={0} className={styles.lookupContainer} style={{ position: 'relative' }}>
       <Grid item xs={firstFieldWidth}>
         <Autocomplete
           fullWidth
@@ -147,11 +162,7 @@ const CustomLookup = ({
             valueHighlightedOption.current = newValue
           }}
           PaperComponent={({ children }) =>
-            props.renderOption && (
-              <Paper style={{ width: 'max-content' }}>
-                {children}
-              </Paper>
-            )
+            props.renderOption && <Paper style={{ width: 'max-content' }}>{children}</Paper>
           }
           renderOption={(propsOption, option) => {
             if (columnsInDropDown?.length > 0) {
@@ -288,6 +299,12 @@ const CustomLookup = ({
                 }}
                 inputProps={{
                   ...params.inputProps,
+                  ref: node => {
+                    if (typeof params.inputProps.ref === 'function') params.inputProps.ref(node)
+                    else if (params.inputProps.ref) params.inputProps.ref.current = node
+
+                    inputElRef.current = node
+                  },
                   tabIndex: _readOnly ? -1 : 0,
                   style: {
                     ...(params.inputProps?.style || {}),
@@ -301,13 +318,33 @@ const CustomLookup = ({
                   },
                   onMouseDown: e => {
                     params.inputProps?.onMouseDown?.(e)
-                    if (!isValueLink) return
-                    e.preventDefault()
-                    e.stopPropagation()
                   },
                   onClick: e => {
                     params.inputProps?.onClick?.(e)
                     if (!isValueLink) return
+
+                    const inputEl = inputElRef.current
+                    if (!inputEl) return
+
+                    const valueText = (inputEl.value ?? '').toString()
+                    if (!valueText) return
+
+                    const rect = inputEl.getBoundingClientRect()
+                    const clickX = e.clientX - rect.left
+
+                    const style = window.getComputedStyle(inputEl)
+                    const paddingLeft = parseFloat(style.paddingLeft || '0')
+                    const paddingRight = parseFloat(style.paddingRight || '0')
+
+                    const textWidth = measureTextWidth(valueText, inputEl)
+
+                    const textStart = paddingLeft
+                    const textEnd = rect.width - paddingRight
+                    const effectiveTextEnd = Math.min(textStart + textWidth, textEnd)
+
+                    const clickedOnText = clickX >= textStart && clickX <= effectiveTextEnd
+                    if (!clickedOnText) return
+
                     e.preventDefault()
                     e.stopPropagation()
                     onValueClick()
@@ -372,9 +409,7 @@ const CustomLookup = ({
             size={size}
             variant={variant}
             placeholder={
-              secondFieldLabel === ''
-                ? displayField.toUpperCase()
-                : secondFieldLabel.toUpperCase()
+              secondFieldLabel === '' ? displayField.toUpperCase() : secondFieldLabel.toUpperCase()
             }
             value={secondValue || ''}
             required={_required}
@@ -400,6 +435,16 @@ const CustomLookup = ({
           />
         </Grid>
       )}
+
+      <span
+        ref={textMeasureRef}
+        style={{
+          position: 'absolute',
+          visibility: 'hidden',
+          whiteSpace: 'pre',
+          pointerEvents: 'none'
+        }}
+      />
     </Grid>
   )
 }
