@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  --sf: 1;
+}
+
+.title {
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+  font-size: calc(0.95rem * var(--sf));
+  word-break: break-word;
+}
+
+.message {
+  line-height: 1.4;
+  margin-top: 4px;
+  margin-bottom: 0;
+
+  font-size: calc(0.85rem * var(--sf));
+  word-break: break-word;
+}
+
+.input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}

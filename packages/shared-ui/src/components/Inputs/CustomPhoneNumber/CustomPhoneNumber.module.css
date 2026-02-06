@@ -1,0 +1,464 @@
+.phoneWrapper {
+  position: relative;
+  width: 100%;
+}
+.phoneLabel {
+  position: absolute;
+  z-index: 1;
+  top: -4px;
+  background: white !important;
+  color: #666 !important;
+  white-space: normal !important;   
+  transform: scale(0.75);
+
+}
+.errorLabel {
+  color: red !important;
+  background: white !important;
+
+}
+
+.phoneWrapper:dir(ltr)  .phoneLabel {
+  top: -4px;
+  left: 12px; 
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+
+.phoneWrapper:dir(rtl)  .phoneLabel {
+  top: -4px;
+  right: 12px;
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+}
+
+.phoneLabelRequired {
+  color: red;
+}
+
+.phoneContainer {
+  border: 1px solid #959d9e;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.phoneWrapper .react-tel-input {
+  width: 100%;
+  height: 100%;
+}
+
+.phoneWrapper .react-tel-input .flag-dropdown {
+  border: none;
+  background: transparent;
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-top: -10px;
+  justify-content: center;
+}
+
+
+
+.phoneWrapper :global(.country-list .flag) { 
+  margin-top:  -5px !important;     
+}
+
+.phoneWrapper .react-tel-input .selected-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.phoneWrapper .react-tel-input .selected-flag .flag {
+  width: 18px;
+  height: 12px;
+  background-size: contain;
+}
+
+.phoneWrapper .react-tel-input .selected-flag .arrow {
+  border-left: 0.25em solid transparent !important;
+  border-right: 0.25em solid transparent !important;
+  border-top: 0.35em solid #000 !important;
+  margin-left: 0.25em;
+}
+
+.phoneWrapper .special-label {
+  display: none;
+}
+
+.phoneClearButton {
+  position: absolute !important;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 10px !important;
+}
+
+.phoneClearIcon {
+  font-size: 18px !important;
+  border: 0 !important;
+}
+
+@media (min-width: 2048px) and (max-width: 2566px) {
+ 
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 10px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 6px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 36px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 14px;
+    height: 9px;
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .phoneLabel {
+    top: -11px !important;
+  }
+
+  .phoneClearIcon {
+    margin-top: 5px  !important;
+    font-size: 20px !important;
+  }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 18px !important;  
+    padding: 0px 0px 0px 50px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+}
+
+@media (min-width: 1280px)  {
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 6px !important;
+  }
+
+  .phoneWrapper :global(.country-list) { 
+    margin-top:  3px !important;   
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 6px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 36px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 14px;
+    height: 9px;
+  }
+
+  .phoneLabel {
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -8px !important;
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 0.5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 0.5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+
+  .phoneClearIcon {
+    margin-top: 0px  !important;
+    font-size: 13px !important;
+  }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 14px !important;   
+    height: 34px;                
+    padding: 0px 0px 0px 50px !important;      
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+}
+
+@media (max-width: 1280px) {
+  .phoneContainer {
+    height: 28px !important;
+  }
+  .phoneWrapper :global(.country-list) { 
+    margin-top:  3px !important;   
+  }
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 11px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 11px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 38px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 15px;
+    height: 10px;
+  }
+
+  .phoneLabel {
+    white-space: normal !important;   
+    transform: scale(0.75);
+    line-height: 1 !important;
+    top: -5px !important;
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  .phoneClearIcon {
+    font-size: 14px !important;
+  }
+
+  .phoneContainer :global(.form-control) {
+    font-size: 12px !important;  
+    height: 34px;                
+    padding: 0px 20px 0px 50px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  }
+}
+
+@media (max-width: 1024px) {
+  .phoneContainer {
+    height: 26px !important;
+  }
+  .phoneWrapper :global(.country-list .flag) { 
+    margin-top:  -2px !important;   
+  }
+
+  .phoneWrapper :global(.country-list) { 
+    margin-top:  3px !important;   
+  }
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 6px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 6px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 36px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 14px;
+    height: 9px;
+  }
+
+  .phoneWrapper:dir(ltr)  .phoneLabel {
+    left: 5px; 
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+  
+  .phoneWrapper:dir(rtl)  .phoneLabel {
+    right: 5px;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .phoneLabel {
+    white-space: normal !important;   
+    transform: scale(0.7);
+    line-height: 1 !important;
+    top: -5px !important;
+  }
+  
+  .phoneClearIcon {
+    font-size: 13px !important;
+  }
+  
+  .phoneContainer :global(.form-control) {
+    font-size: 10px !important;  
+    padding: 0px 0px 0px 40px !important;     
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;  
+  }
+
+  .phoneContainer:dir(rtl) :global(.form-control) {
+    font-size: 10px !important;  
+    padding: 0px 35px 0px 0px !important;     
+    width: 100%;
+    direction: "rtl";
+    border: none !important;
+    box-shadow: none !important;  
+  }
+
+  .phoneDropdown :global(.country) {
+    font-size: 10px !important; 
+    margin-top: -5px   !important; 
+    line-height: 0.7rem !important;
+  }
+    
+  .phoneDropdown :global(.country .country-name),
+  .phoneDropdown :global(.country .dial-code) {
+    font-size: 10px !important; 
+    padding-top: -5px   !important; 
+  }
+
+  .phoneContainer :global(.selected-flag .flag) {
+    font-size: 10px !important; 
+    transform: scale(0.7);    
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+  
+  .phoneDropdown :global(.flag) {
+    font-size: 10px !important; 
+    margin-top: 0px !important;
+    padding: 10px !important;
+    transform: scale(0.7);       
+  }
+  .phoneDropdown :global(.search-box) {
+    font-size: 0.65rem !important;    
+    height: 20px;           
+    padding: 2px 8px;      
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  .phoneContainer {
+    height: 24px !important;
+  }
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 9px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 9px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 34px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 13px;
+    height: 8px;
+    padding: 0px !important
+  }
+
+  .phoneLabel {
+    font-size: 9px !important;
+  }
+
+  .phoneClearIcon {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .phoneContainer {
+    height: 22px !important;
+  }
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 8px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 8px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 32px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 12px;
+    height: 7px;
+  }
+
+  .phoneLabel {
+    font-size: 8px !important;
+  }
+
+  .phoneClearIcon {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .phoneContainer {
+    height: 20px !important;
+  }
+
+  .phoneWrapper .react-tel-input .form-control {
+    font-size: 7px !important;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag {
+    font-size: 7px;
+  }
+
+  .phoneWrapper .react-tel-input .flag-dropdown {
+    width: 30px;
+  }
+
+  .phoneWrapper .react-tel-input .selected-flag .flag {
+    width: 11px;
+    height: 6px;
+  }
+
+  .phoneLabel {
+    font-size: 7px !important;
+  }
+
+  .phoneClearIcon {
+    font-size: 10px !important;
+  }
+}

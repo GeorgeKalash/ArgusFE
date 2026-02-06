@@ -1,0 +1,850 @@
+.layout-vertical-nav {
+  overflow-x: hidden;
+  transition: width 0.25s ease-in-out;
+  background-color: #231f20;
+
+  --nav-font: clamp(10px, 0.85vw, 14px);
+  --nav-font-folder: clamp(10px, 0.9vw, 14px);
+  --nav-line: clamp(14px, 1.1vw, 18px);
+
+  --nav-icon: clamp(14px, 1.1vw, 22px);
+  --nav-arrow: clamp(12px, 1vw, 20px);
+
+  --nav-row-py: clamp(2px, 0.35vw, 6px);
+  --nav-row-px: clamp(6px, 0.6vw, 10px);
+
+  --nav-gap: clamp(4px, 0.5vw, 10px);
+  --nav-indent: clamp(8px, 0.8vw, 14px);
+}
+
+.layout-vertical-nav ul {
+  list-style: none;
+}
+
+.layout-vertical-nav .MuiDrawer-paper {
+  overflow-x: hidden;
+  transition: width 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+  background-color: #231f20;
+  color: white;
+  width: inherit;
+}
+
+.menu-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: padding 0.25s ease-in-out;
+  min-height: 40px;
+  padding: 0 8px;
+}
+
+.Argus-Icon {
+  height: 25px;
+}
+
+.menu-header-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+}
+
+.link-styled {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.menu-search-box {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px 0px 8px;
+}
+
+.menu-scroll-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar {
+  overflow: visible;
+  height: auto;
+}
+
+.node {
+  width: 100%;
+  padding: var(--nav-row-py) 0;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
+}
+
+.node-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.node-icon {
+  padding-left: 1px !important;
+  width: 34px;
+  min-width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.node-icon-placeholder {
+  width: 34px;
+  min-width: 34px;
+  height: 22px;
+}
+
+.node-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.arrow {
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  right: auto !important;
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+}
+
+.folder {
+  padding: 0 !important;
+}
+
+.node {
+  padding: var(--nav-row-py) var(--nav-row-px) !important;
+}
+
+.node-icon img {
+  width: var(--nav-icon) !important;
+  height: var(--nav-icon) !important;
+}
+
+.node-text {
+  margin: 2px 0 0 5px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
+}
+
+.node-text :global(.text) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #231f20 !important;
+  padding: var(--nav-row-py) var(--nav-row-px);
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  font-size: var(--nav-font-folder);
+  line-height: var(--nav-line);
+}
+
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #231f20;
+  color: #fff;
+}
+
+.search-box {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-field {
+  width: 100%;
+  background-color: #231f20 !important;
+  border-radius: 5px;
+
+  flex: 1;
+  min-width: 0;
+}
+
+.search-field input {
+  color: white;
+  font-size: var(--nav-font);
+  height: 11px;
+  padding-right: 28px;
+}
+
+.search-field fieldset {
+  border-color: transparent !important;
+}
+
+.search-icon {
+  color: white;
+  font-size: 18px !important;
+  border: 0 !important;
+}
+
+.favorites-side {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.menu-scroll-wrapper {
+  flex: 1;
+  height: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0, 0, 0) transparent;
+}
+
+.menu-scroll-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-scroll-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgb(0, 0, 0);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #000000;
+}
+
+.sidebar {
+  padding: 0px 4px 0 10px;
+  overflow: visible;
+  height: auto;
+  transition: padding-right 0.2s ease-in-out;
+}
+
+.file {
+  font-size: var(--nav-font);
+  line-height: var(--nav-line);
+}
+
+.open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.children {
+  background-color: #231f20;
+  padding-left: var(--nav-indent);
+}
+
+.arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.arrow svg {
+  font-size: var(--nav-arrow) !important;
+  width: var(--nav-arrow) !important;
+  height: var(--nav-arrow) !important;
+}
+
+.collapse-button {
+  padding: 0 !important;
+  color: white !important;
+  background-color: #231f20 !important;
+  border-radius: 0 !important;
+  width: 10px !important;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+}
+
+.MuiTabs-scrollButtons.Mui-disabled {
+  display: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #231f20;
+  border-radius: 4px;
+  margin-left: 5px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.box svg {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+  line-height: 18px !important;
+}
+
+.image {
+  height: 26px;
+  padding: 3px;
+  margin: 0px;
+  transition: height 0.2s ease-in-out;
+}
+
+.menuItem {
+  display: flex;
+}
+
+.hidden {
+  display: none;
+}
+
+.userDropdownIcon {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.userDropdownIcon svg {
+  font-size: 1.3rem !important;
+  width: 1.3rem !important;
+  height: 1.3rem !important;
+}
+
+.userMenu {
+  background-color: #f4f5fa !important;
+  margin-top: 12px !important;
+  min-width: 283px !important;
+  max-width: 283px !important;
+  padding: 5px !important;
+}
+.userHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 8px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+.userMenu :global(.MuiBox-root) {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.userMenuDivider {
+  background-color: #383838 !important;
+}
+
+.userName {
+  color: #383838 !important;
+  font-weight: 600 !important;
+  padding-right: 16px;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+}
+
+.logoutMenuItem {
+  padding-top: 8px !important;
+  padding-bottom: 2px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+}
+
+.logoutMenuItem svg {
+  margin-right: 10px;
+  font-size: 1.05rem !important;
+  color: #383838 !important;
+}
+
+.logoutText {
+  color: #383838 !important;
+  padding-left: 4px;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+}
+
+
+@media (min-width: 1025px) and (max-width: 1600px) {
+  .menu-header-wrapper {
+    min-height: 30px;
+    padding: 0 6px;
+  }
+  .Argus-Icon {
+    height: 16px;
+  }
+  .menuItem {
+    font-size: 11px;
+  }
+  .node {
+    padding: 4px 0;
+  }
+  .node-text {
+    font-size: 11px;
+  }
+  .node-icon {
+    transform: scale(1);
+    padding-left: 0px;
+  }
+  .folder {
+    font-size: 11px;
+    padding: 5px;
+  }
+  .collapse-button {
+    width: 7px !important;
+  }
+  .search-field {
+    border-radius: 3px;
+  }
+  .search-field input {
+    height: 7px;
+    padding-right: 14px;
+  }
+  .search-icon {
+    font-size: 15px !important;
+  }
+
+  .userMenu {
+    min-width: 218px !important;
+    max-width: 218px !important;
+  }
+
+  .userDropdownIcon svg {
+    font-size: 1.2rem !important;
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 6px !important;
+    padding-bottom: 3px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+  }
+
+  .userName {
+    font-size: 0.8rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+    min-height: 22px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 1rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 1366px) {
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg {
+    font-size: 16px !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .userDropdownIcon svg {
+    font-size: 1.1rem !important;
+    width: 1.1rem !important;
+    height: 1.1rem !important;
+  }
+  .node-icon img {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .arrow svg {
+    font-size: 16px !important;
+  }
+
+  .userMenu {
+    min-width: 201px !important;
+    max-width: 201px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .userName {
+    font-size: 0.74rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    min-height: 20px !important;
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.95rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout-vertical-nav {
+    z-index: 1200;
+  }
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg,
+  .userDropdownIcon svg {
+    font-size: 0.95rem !important;
+    width: 0.95rem !important;
+    height: 0.95rem !important;
+  }
+  .node-icon img {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .arrow svg {
+    font-size: 14px !important;
+  }
+
+  .userMenu {
+    min-width: 187px !important;
+    max-width: 187px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .userName {
+    font-size: 0.7rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    min-height: 18px !important;
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.9rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.7rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg,
+  .userDropdownIcon svg {
+    font-size: 0.85rem !important;
+    width: 0.85rem !important;
+    height: 0.85rem !important;
+  }
+  .node-icon img {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .arrow svg {
+    font-size: 12px !important;
+  }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .userName {
+    font-size: 0.68rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    min-height: 18px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.85rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.66rem !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg,
+  .userDropdownIcon svg {
+    font-size: 0.75rem !important;
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+  }
+  .node-icon img {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .arrow svg {
+    font-size: 10px !important;
+  }
+  .menu-header-wrapper {
+    min-height: 28px;
+    padding: 0 4px;
+  }
+  .Argus-Icon {
+    height: 14px;
+  }
+  .node-text {
+    font-size: 10px;
+  }
+  .folder {
+    font-size: 10px;
+    padding: 4px;
+  }
+  .search-field input {
+    height: 6px;
+    padding-right: 12px;
+  }
+  .search-icon {
+    font-size: 12px !important;
+  }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .userName {
+    font-size: 0.64rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    min-height: 16px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.8rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.6rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg,
+  .userDropdownIcon svg {
+    font-size: 0.7rem !important;
+    width: 0.7rem !important;
+    height: 0.7rem !important;
+  }
+  .node-icon img {
+    width: 10px !important;
+    height: 10px !important;
+  }
+  .arrow svg {
+    font-size: 9px !important;
+  }
+  .menu-header-wrapper {
+    min-height: 26px;
+    padding: 0 2px;
+  }
+  .Argus-Icon {
+    height: 12px;
+  }
+  .node-text {
+    font-size: 9px;
+  }
+  .folder {
+    font-size: 9px;
+    padding: 3px;
+  }
+  .search-field input {
+    height: 5px;
+    padding-right: 10px;
+  }
+  .search-icon {
+    font-size: 10px !important;
+  }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .userName {
+    font-size: 0.6rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    min-height: 16px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.75rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.56rem !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .menu-search-box svg,
+  .box svg,
+  .collapse-button svg,
+  .userDropdownIcon svg {
+    font-size: 0.65rem !important;
+    width: 0.65rem !important;
+    height: 0.65rem !important;
+  }
+  .node-icon img {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  .arrow svg {
+    font-size: 8px !important;
+  }
+  .menu-header-wrapper {
+    min-height: 24px;
+    padding: 0 2px;
+  }
+  .Argus-Icon {
+    height: 10px;
+  }
+  .node-text {
+    font-size: 8px;
+  }
+  .folder {
+    font-size: 8px;
+    padding: 2px;
+  }
+  .search-field input {
+    height: 4px;
+    padding-right: 8px;
+  }
+  .search-icon {
+    font-size: 9px !important;
+  }
+
+  .userMenu {
+    min-width: 162px !important;
+    max-width: 162px !important;
+  }
+
+  .userMenu :global(.MuiBox-root) {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  .userName {
+    font-size: 0.56rem !important;
+  }
+
+  .logoutMenuItem {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    min-height: 14px !important; 
+  }
+
+  .logoutMenuItem svg {
+    font-size: 0.7rem !important;
+  }
+
+  .logoutText {
+    font-size: 0.52rem !important;
+  }
+}
