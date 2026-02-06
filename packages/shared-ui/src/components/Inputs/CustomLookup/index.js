@@ -46,6 +46,7 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
+  onValueClick,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
@@ -232,105 +233,133 @@ const CustomLookup = ({
               </Box>
             )
           }}
-          renderInput={params => (
-            <TextField
-              {...params}
-              fullWidth
-              className={`${secondDisplayField && styles.firstField} ${styles.root}`}
-              onChange={e => {
-                const v = e.target.value
-                setInputValue(v)
+          renderInput={params => {
+            const hasSelectedValue = !!(firstValue || inputValue)
+            const isValueLink = typeof onValueClick === 'function' && hasSelectedValue && !_readOnly
 
-                if (v) {
-                  if (!minChars || v.length >= minChars) {
-                    onLookup(v)
+            return (
+              <TextField
+                {...params}
+                fullWidth
+                className={`${secondDisplayField && styles.firstField} ${styles.root}`}
+                onChange={e => {
+                  const v = e.target.value
+                  setInputValue(v)
+
+                  if (v) {
+                    if (!minChars || v.length >= minChars) {
+                      onLookup(v)
+                      setFreeSolo(true)
+                    }
+                  } else {
+                    setStore([])
+                    setFreeSolo(false)
+                  }
+                }}
+                onKeyDown={onKeyDown}
+                onBlur={e => {
+                  if (
+                    !store.some(item => item?.[valueField] === inputValue) &&
+                    e.target.value !== firstValue
+                  ) {
+                    setInputValue('')
                     setFreeSolo(true)
                   }
-                } else {
+
+                  if (selectFirstValue.current !== 'click') {
+                    onBlur(e, valueHighlightedOption.current)
+                  }
+
+                  valueHighlightedOption.current = null
+                }}
+                onFocus={e => {
                   setStore([])
-                  setFreeSolo(false)
-                }
-              }}
-              onKeyDown={onKeyDown}
-              onBlur={e => {
-                if (
-                  !store.some(item => item?.[valueField] === inputValue) &&
-                  e.target.value !== firstValue
-                ) {
-                  setInputValue('')
                   setFreeSolo(true)
-                }
+                  selectFirstValue.current = ''
+                  onFocus(e)
+                }}
+                type={type}
+                variant={variant}
+                label={label}
+                required={_required}
+                onKeyUp={e => {
+                  onKeyUp(e, valueHighlightedOption.current)
+                  if (e.key !== 'Enter') setFreeSolo(false)
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  tabIndex: _readOnly ? -1 : 0,
+                  style: {
+                    ...(params.inputProps?.style || {}),
+                    ...(isValueLink
+                      ? {
+                          color: '#1976d2',
+                          textDecoration: 'underline',
+                          cursor: 'pointer'
+                        }
+                      : {})
+                  },
+                  onMouseDown: e => {
+                    params.inputProps?.onMouseDown?.(e)
+                    if (!isValueLink) return
+                    e.preventDefault()
+                    e.stopPropagation()
+                  },
+                  onClick: e => {
+                    params.inputProps?.onClick?.(e)
+                    if (!isValueLink) return
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onValueClick()
+                  }
+                }}
+                autoFocus={focus}
+                error={error}
+                helperText={helperText}
+                InputProps={{
+                  ...params.InputProps,
+                  classes: {
+                    root: inputs.outlinedRoot,
+                    notchedOutline: hasBorder
+                      ? !secondDisplayField && inputs.outlinedFieldset
+                      : inputs.outlinedNoBorder,
+                    input: inputs.inputBase
+                  },
+                  endAdornment: !_readOnly && (
+                    <InputAdornment position="end" className={inputs.inputAdornment}>
+                      {!isLoading ? (
+                        <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
+                          <SearchIcon className={inputs.icon} />
+                        </IconButton>
+                      ) : (
+                        <CircularProgress size={15} className={inputs.icon} />
+                      )}
 
-                if (selectFirstValue.current !== 'click') {
-                  onBlur(e, valueHighlightedOption.current)
-                }
-
-                valueHighlightedOption.current = null
-              }}
-              onFocus={e => {
-                setStore([])
-                setFreeSolo(true)
-                selectFirstValue.current = ''
-                onFocus(e)
-              }}
-              type={type}
-              variant={variant}
-              label={label}
-              required={_required}
-              onKeyUp={e => {
-                onKeyUp(e, valueHighlightedOption.current)
-                if (e.key !== 'Enter') setFreeSolo(false)
-              }}
-              inputProps={{
-                ...params.inputProps,
-                tabIndex: _readOnly ? -1 : 0
-              }}
-              autoFocus={focus}
-              error={error}
-              helperText={helperText}
-              InputProps={{
-                ...params.InputProps,
-                classes: {
-                  root: inputs.outlinedRoot,
-                  notchedOutline: hasBorder
-                    ? !secondDisplayField && inputs.outlinedFieldset
-                    : inputs.outlinedNoBorder,
-                  input: inputs.inputBase
-                },
-                endAdornment: !_readOnly && (
-                  <InputAdornment position="end" className={inputs.inputAdornment}>
-                    {!isLoading ? (
-                      <IconButton edge="start" className={inputs.iconButton} tabIndex={-1}>
-                        <SearchIcon className={inputs.icon} />
+                      <IconButton
+                        className={inputs.iconButton}
+                        tabIndex={-1}
+                        onClick={() => {
+                          setInputValue('')
+                          onChange(name, '')
+                          setStore([])
+                          setFreeSolo(true)
+                        }}
+                        aria-label="clear input"
+                      >
+                        <ClearIcon className={inputs.icon} />
                       </IconButton>
-                    ) : (
-                      <CircularProgress size={15} className={inputs.icon} />
-                    )}
-
-                    <IconButton
-                      className={inputs.iconButton}
-                      tabIndex={-1}
-                      onClick={() => {
-                        setInputValue('')
-                        onChange(name, '')
-                        setStore([])
-                        setFreeSolo(true)
-                      }}
-                      aria-label="clear input"
-                    >
-                      <ClearIcon className={inputs.icon} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: inputs.inputLabel,
-                  shrink: inputs.inputLabelShrink
-                }
-              }}
-            />
-          )}
+                    </InputAdornment>
+                  )
+                }}
+                InputLabelProps={{
+                  classes: {
+                    root: inputs.inputLabel,
+                    shrink: inputs.inputLabelShrink
+                  }
+                }}
+              />
+            )
+          }}
           readOnly={_readOnly}
           freeSolo={_readOnly || freeSolo}
           disabled={disabled}
