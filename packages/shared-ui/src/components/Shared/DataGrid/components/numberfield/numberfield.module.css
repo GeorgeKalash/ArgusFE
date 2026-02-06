@@ -1,0 +1,14 @@
+.gridNumberEditor :global(.MuiOutlinedInput-root) {
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  
+  .gridNumberEditor :global(.MuiOutlinedInput-root fieldset) {
+    border: none !important;
+  }
+  
+  .gridNumberEditor {
+    flex-grow: 1;
+    border: none;
+  }
+  

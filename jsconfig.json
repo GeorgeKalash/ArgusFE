@@ -1,8 +1,45 @@
 {
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "paths": {
+      "@argus/repositories/*": [
+        "packages/repositories/*"
+      ],
+      "@argus/shared-domain/*": [
+        "packages/shared-domain/*"
+      ],
+      "@argus/shared-hooks/*": [
+        "packages/shared-hooks/*"
+      ],
+      "@argus/shared-providers/*": [
+        "packages/shared-providers/*"
+      ],
+      "@argus/shared-ui/*": [
+        "packages/shared-ui/*"
+      ],
+      "@argus/shared-utils/*": [
+        "packages/shared-utils/s*"
+      ],
+      "@argus/shared-configs/*": [
+        "packages/shared-configs/*"
+      ],
+      "@argus/shared-core/*": [
+        "packages/shared-core/*"
+      ],
+      "@argus/shared-layouts/*": [
+        "packages/shared-layouts/*"
+      ],
+      "@argus/shared-store/*": [
+        "packages/shared-store/*"
+      ]
+    }
   },
   "include": [
+    "apps/main/src",
+    "packages/*/src",
+    "packages/module-manufacturing/src/pages/wc-tfr-map",
+    "packages/module-manufacturing/src/pages/iom-properties",
     "src"
   ]
 }

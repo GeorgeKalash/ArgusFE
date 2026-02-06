@@ -1,0 +1,220 @@
+.popperRoot {
+  z-index: 1500 !important;
+}
+
+.popperOpen {
+  visibility: visible;
+}
+
+.popperClosed {
+  visibility: hidden;
+}
+
+.popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
+  max-height: 43vh;
+}
+
+.popperRoot :global(.MuiMenuItem-root) {
+  padding-right: 10px;
+}
+
+.dateTimePopper {
+  background: #fff;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  overflow-x: auto;
+  border-radius: 10px;
+}
+
+.popperRoot :global(.MuiPickersLayout-actionBar),
+.popperRoot :global(.MuiPickersActionBar-root) {
+  padding: 2px 8px;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+
+.popperRoot :global(.MuiPickersActionBar-root .MuiButton-root),
+.popperRoot :global(.MuiDialogActions-root .MuiButton-root) {
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.popperRoot :global(.MuiPickersActionBar-actions) {
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.popperRoot :global(.MuiPickersLayout-toolbar),
+.popperRoot :global(.MuiPickersCalendarHeader-root) {
+  padding: 2px 8px;
+  min-height: 25px;
+  box-sizing: border-box;
+}
+
+.popperRoot :global(.MuiPickersCalendarHeader-label) {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.popperRoot :global(.MuiPickersCalendarHeader-root .MuiIconButton-root) {
+  padding: 0px;
+}
+
+.popperRoot :global(.MuiPickersLayout-toolbar .MuiButton-root) {
+  padding: 2px 6px;
+  font-size: 0.75rem;
+}
+
+.timePopper {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+  width: max-content !important;
+  min-width: unset !important;
+  max-width: calc(100vw - 16px);
+}
+
+.timePopper :global(.MuiPickersLayout-toolbar) {
+  display: none !important;
+}
+
+.timePopper :global(.MuiPickersLayout-root),
+.timePopper :global(.MuiPickersLayout-contentWrapper),
+.timePopper :global(.MuiMultiSectionDigitalClock-root),
+.timePopper :global(.MuiTimeClock-root),
+.timePopper :global(.MuiClock-root) {
+  width: max-content !important;
+}
+
+.timePopper :global(.MuiMultiSectionDigitalClock-root) {
+  display: flex !important;
+}
+
+.timePopper :global(.MuiMultiSectionDigitalClockSection-root) {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+.timePopper :global(.MuiMultiSectionDigitalClockSection-item) {
+  height: 32px !important;
+  font-size: 0.85rem !important;
+}
+
+.timePopper :global(.MuiPickersActionBar-root),
+.timePopper :global(.MuiPickersLayout-actionBar) {
+  margin: 0 !important;
+  padding: 12px 0 !important;
+  min-height: 56px !important;
+  display: flex !important;
+  justify-content: center !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.timePopper :global(.MuiPickersActionBar-root .MuiButton-root) {
+  font-size: 0.85rem !important;
+  min-width: 0 !important;
+}
+
+.popperRoot :global(.MuiYearCalendar-root) {
+  padding: 4px 0;
+  box-sizing: border-box;
+}
+
+.popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+.popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+  font-size: 0.9rem;
+  padding: 4px 0;
+  min-height: 28px;
+}
+
+@media (max-width: 1600px) {
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.85rem;
+    min-height: 26px;
+  }
+}
+
+@media (max-width: 1440px) {
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.82rem;
+    min-height: 25px;
+  }
+}
+
+@media (max-width: 1366px) {
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.8rem;
+    min-height: 24px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.78rem;
+    min-height: 23px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .popperRoot :global(.MuiYearCalendar-root) {
+    max-height: 230px;
+    overflow-y: auto;
+  }
+
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.76rem;
+    min-height: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.74rem;
+    min-height: 21px;
+  }
+}
+
+@media (max-width: 600px) {
+  .popperRoot :global(.MuiYearCalendar-root) {
+    max-height: 210px;
+  }
+
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.72rem;
+    min-height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .popperRoot :global(.MuiYearCalendar-root) {
+    max-height: 200px;
+  }
+
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.7rem;
+    min-height: 19px;
+  }
+}
+
+@media (max-width: 375px) {
+  .popperRoot :global(.MuiYearCalendar-root) {
+    max-height: 190px;
+  }
+
+  .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
+  .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
+    font-size: 0.68rem;
+    min-height: 18px;
+  }
+}
