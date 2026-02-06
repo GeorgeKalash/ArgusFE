@@ -653,7 +653,6 @@ export default function RetailTransactionsForm({
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = newRow.taxDetails
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -682,11 +681,10 @@ export default function RetailTransactionsForm({
       totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
-      taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
+      taxDetails: newRow.taxDetails
     }
 
-    if (source != 'priceWithVAT')
-      commonData.priceWithVAT = calculatePrice(commonData, commonData?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, vatCalcRow?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
 
     return iconClicked ? { changes: commonData } : commonData
   }
