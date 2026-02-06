@@ -152,6 +152,8 @@ export default function JTCheckoutForm({ recordId, window }) {
         transfer: {
           ...res?.record?.transfer,
           date: formatDateFromApi(res?.record?.transfer?.date),
+          closedDate: formatDateFromApi(res?.record?.transfer?.closedDate),
+          postedDate: formatDateFromApi(res?.record?.transfer?.postedDate),
           maxQty: res?.record?.transfer.qty,
           maxPcs: res?.record?.transfer.pcs,
           workCenterId: res?.record?.transfer?.fromWCId
@@ -655,10 +657,6 @@ export default function JTCheckoutForm({ recordId, window }) {
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'
