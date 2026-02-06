@@ -25,7 +25,9 @@ export default function ItemTab({ labels, maxAccess, store }) {
   const conditions = {
     sku: row => row?.sku,
     itemName: row => row?.itemName,
-    qty: row => row?.qty > 0
+    qty: row => row?.qty > 0,
+    metalQty: row => row?.qty > 0 && row?.metalQty <= row?.qty,
+    nonMetalQty: row => row?.qty > 0 && row?.nonMetalQty <= row?.qty
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
 
@@ -197,16 +199,50 @@ export default function ItemTab({ labels, maxAccess, store }) {
       component: 'numberfield',
       label: labels.metalQty,
       name: 'metalQty',
+      updateOn: 'blur',
       props: {
         decimalScale: 2
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow) return
+
+        const qty = newRow.qty || 0
+        const metal = newRow.metalQty || 0
+
+        if (metal <= qty && metal >= 0) {
+          update({
+            nonMetalQty: qty - metal
+          })
+        } else {
+          update({
+            metal: newRow?.metal
+          })
+        }
       }
     },
     {
       component: 'numberfield',
       label: labels.nonMetalQty,
       name: 'nonMetalQty',
+      updateOn: 'blur',
       props: {
         decimalScale: 2
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow) return
+
+        const qty = newRow.qty || 0
+        const nonMetal = newRow.nonMetalQty || 0
+
+        if (nonMetal <= qty && nonMetal >= 0) {
+          update({
+            metalQty: qty - nonMetal
+          })
+        } else {
+          update({
+            nonMetalQty: newRow?.nonMetalQty
+          })
+        }
       }
     }
   ]
