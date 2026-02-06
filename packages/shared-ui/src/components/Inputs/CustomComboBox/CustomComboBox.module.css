@@ -1,0 +1,186 @@
+.customComboTextField :global(.MuiAutocomplete-clearIndicator) {
+  padding: 0 !important;
+  margin: 0 !important;
+  visibility: hidden !important;
+}
+
+.comboStartIcon {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 4px !important;
+  margin-left: 4px !important;
+  object-fit: contain !important;
+}
+
+.refreshIconButton {
+  padding: 2px !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+
+.customComboTextField:dir(rtl) :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 5px !important;
+  margin-right: 0px !important;
+}
+
+.customComboTextField:dir(ltr) :global(.MuiAutocomplete-popupIndicator) {
+  font-size: 40px !important;
+  margin-left: 0px !important;
+  margin-right: -9px !important;
+}
+
+@media (min-width: 1281px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 18px !important;
+    margin: -1px !important;
+  }
+
+  .customComboTextField:dir(ltr) :global(.MuiAutocomplete-popupIndicator) {
+    margin-right: -10px !important;
+  }
+
+  .customComboTextField:dir(rtl) :global(.MuiAutocomplete-popupIndicator) {
+    margin-left: -10px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 16px !important;
+  }
+
+  .customComboTextField:dir(ltr) :global(.MuiAutocomplete-popupIndicator) {
+    margin-right: -1px !important;
+  }
+
+  .customComboTextField:dir(rtl) :global(.MuiAutocomplete-popupIndicator) {
+    margin-left: -1px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .customComboTextField :global(.MuiAutocomplete-popupIndicator) {
+    margin-right: 5px !important;
+    margin-left: 0px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
+    font-size: 10px !important;
+  }
+}
+
+.dropdownHeaderRow,
+.dropdownOptionRow {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px !important;
+  line-height: 1.35 !important;
+}
+
+.dropdownHeaderRow {
+  font-weight: 600 !important;
+  border-bottom: 0.1rem solid #b9b9b9 !important;
+}
+
+.dropdownHeaderCell,
+.dropdownHeaderCellMain {
+  font-weight: 600 !important;
+}
+
+.dropdownOptionCell,
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary,
+.dropdownOptionSingleText {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.dropdownOptionIcon {
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  object-fit: contain;
+}
+
+.dropdownPopper :global(.MuiAutocomplete-listbox) {
+  padding: 4px !important;
+}
+
+.dropdownPopper :global(.MuiAutocomplete-option) {
+  min-height: unset !important;
+  padding: 4px 10px !important;
+  align-items: center !important;
+  line-height: 1.35 !important;
+}
+
+.dropdownPopper :global(.MuiAutocomplete-noOptions),
+.dropdownPopper :global(.MuiAutocomplete-loading) {
+  font-size: 12px !important;
+  padding: 8px !important;
+  line-height: 1.35 !important;
+  text-align: center;
+}
+
+@media (max-width: 1280px) {
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 9px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .dropdownOptionCell,
+  .dropdownOptionCellMain,
+  .dropdownOptionCellSecondary,
+  .dropdownOptionSingleText {
+    font-size: 7px !important;
+  }
+}
