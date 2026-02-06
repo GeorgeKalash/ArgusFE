@@ -1,0 +1,52 @@
+.progressBarContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.progressBarLabel {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #f0f0f0;
+}
+
+.progressBarBackground {
+  width: 90%;
+  height: 20px;
+  background-color: #e0f2ff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #176fb5;
+  transition: width 1.5s ease-in-out;
+}
+@media (max-width: 1024px) {
+  .progressBarLabel {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .progressBarLabel {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1441px) and (max-width: 1599px) {
+  .progressBarLabel {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .progressBarLabel {
+    font-size: 16px;
+  }
+}

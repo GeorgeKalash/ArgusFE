@@ -1,0 +1,5 @@
+.smallSwitch :global(.MuiSwitch-thumb) {
+    width: 17px;
+    height: 17px;
+}
+  

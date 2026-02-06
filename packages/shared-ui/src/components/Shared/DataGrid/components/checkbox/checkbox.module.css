@@ -1,0 +1,34 @@
+.checkbox {
+    height: 26px !important;
+    width: 26px !important;
+  }
+
+  .checkbox :global(svg) {
+    padding: 5px !important;       
+    font-size: 30px !important;
+}
+   
+   @media (max-width: 1280px) {
+    .checkbox {
+       height: 23px !important;
+       width: 23px !important;
+     }
+  
+     .checkbox :global(svg) {
+       padding: 5px !important;       
+       font-size: 28px !important;
+   }
+ }
+
+  @media (max-width: 1024px) {
+     .checkbox {
+        height: 22px !important;
+        width: 22px !important;
+      }
+   
+      .checkbox :global(svg) {
+        padding: 5px !important;       
+        font-size: 27px !important;
+    }
+  }
+  
