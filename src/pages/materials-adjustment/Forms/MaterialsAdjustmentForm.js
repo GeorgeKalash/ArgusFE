@@ -363,7 +363,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       }
 
       update(data)
-      await addRow()
+      await addRow({ changes: null })
     }
   }
 
