@@ -52,7 +52,8 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
 
 const calcVatAmount = vatCalcRow => {
   let vatAmount = 0
-
+  vatCalcRow.qty = vatCalcRow.priceType == 3 ? vatCalcRow.qty * vatCalcRow.weight : vatCalcRow.qty
+  
   if (vatCalcRow.taxDetails != null) {
     for (let i = 0; i < vatCalcRow.taxDetails.length; i++) {
       vatAmount += calcVatAmountPerTaxDetail(vatCalcRow, vatCalcRow.taxDetails[i])
