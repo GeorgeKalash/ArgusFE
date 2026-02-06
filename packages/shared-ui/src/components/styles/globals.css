@@ -1,0 +1,79 @@
+html,
+body {
+  height: 100vh !important;
+}
+
+code {
+  font-family: 'Inter', sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+  padding: 0.1rem 0.4rem;
+  font-size: 90%;
+  color: #d400ff;
+  border-radius: 0.1335rem;
+}
+
+code:not([class*='language-']):before,
+code:not([class*='language-']):after {
+  content: '`';
+}
+
+code[class*='language-'] {
+  padding: 0;
+}
+
+.css-5chs84-MuiPaper-root-MuiMenu-paper-MuiPopover-paper {
+  background-color: #231f20 !important;
+}
+
+.MuiTabs-scrollButtons.Mui-disabled {
+  display: none;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.ag-theme-alpine .even-row {
+  background-color: rgb(238, 238, 238);
+}
+
+.ag-theme-alpine .ag-row-hover {
+  background-color: rgb(242, 234, 234) !important;
+}
+
+.ag-theme-alpine {
+  --ag-alpine-active-color: rgb(59, 57, 57) !important;
+  --ag-row-hover-color: rgb(249, 247, 247) !important;
+  --ag-selected-row-background-color: #d7d7d7 !important;
+}
+.ag-theme-alpine .ag-row-selected {
+  background-color: #b0b0b0 !important;
+}
+
+.ag-theme-alpine {
+  z-index: 0;
+}
+
+.ag-root-wrapper {
+  position: relative;
+}
+
+.ag-watermark {
+  display: none !important;
+}
+
+.special-label {
+  top: -10px !important;
+  font-size: 0.9rem;
+}
+
+.react-tel-input .form-control {
+  font-size: 0.9rem !important;
+  color: #3a3541de !important;
+  background: #ffffff;
+  border: none;
+  border-radius: 6px;
+  height: 1.4375em !important;
+  letter-spacing: 0.15px !important;
+  padding: 0px;
+  font-weight: normal !important;
+}

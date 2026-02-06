@@ -1,0 +1,19 @@
+.checkbox :global(.MuiSvgIcon-root) {
+  font-size: 15px !important;
+}
+
+.errorCheckbox {
+  color: #fd3535 !important;
+}
+
+.errorCheckbox:global(.Mui-checked) {
+  color: #fd3535 !important;
+}
+
+.disabledCheckbox:global(.Mui-disabled) {
+  opacity: 0.7 !important;
+}
+
+.errorLabel {
+  color: #fd3535 !important;
+}
