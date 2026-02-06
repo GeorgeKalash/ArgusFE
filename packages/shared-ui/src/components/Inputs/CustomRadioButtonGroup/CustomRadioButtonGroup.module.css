@@ -1,0 +1,54 @@
+.radioGroup:dir(ltr) { margin-left: 8px; }
+.radioGroup:dir(rtl) { margin-right: 8px; }
+
+.radio :global(.MuiRadio-root) {
+  padding: 2px !important;
+  min-width: auto !important;
+  min-height: auto !important;
+}
+
+.radio :global(.MuiRadio-root .MuiSvgIcon-root) {
+  font-size: 18px;
+}
+
+.radioGroup :global(.MuiFormControlLabel-label) {
+  font-size: 14px;
+}
+
+.radioGroup :global(.MuiFormControlLabel-label) {
+  white-space: nowrap;
+}
+
+.radioGroup :global(.MuiFormControlLabel-asterisk) {
+  display: inline;
+  white-space: nowrap;
+  margin-left: 2px;
+}
+
+@media (max-width: 1280px) {
+  .radioGroup:dir(ltr) { margin-left: 4px; }
+  .radioGroup:dir(rtl) { margin-right: 4px; }
+
+  .radio :global(.MuiRadio-root .MuiSvgIcon-root) { font-size: 14px; }
+  .radioGroup :global(.MuiFormControlLabel-label) { font-size: 11px; }
+}
+
+@media (max-width: 1024px) {
+  .radio :global(.MuiRadio-root .MuiSvgIcon-root) { font-size: 13px; }
+  .radioGroup :global(.MuiFormControlLabel-label) { font-size: 10px; }
+}
+
+@media (max-width: 768px) {
+  .radio :global(.MuiRadio-root .MuiSvgIcon-root) { font-size: 12px; }
+  .radioGroup :global(.MuiFormControlLabel-label) { font-size: 9px; }
+}
+
+@media (max-width: 480px) {
+  .radio :global(.MuiRadio-root .MuiSvgIcon-root) { font-size: 11px; }
+  .radioGroup :global(.MuiFormControlLabel-label) { font-size: 8px; }
+}
+
+@media (max-width: 360px) {
+  .radio :global(.MuiRadio-root .MuiSvgIcon-root) { font-size: 10px; }
+  .radioGroup :global(.MuiFormControlLabel-label) { font-size: 7px; }
+}
