@@ -660,7 +660,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
