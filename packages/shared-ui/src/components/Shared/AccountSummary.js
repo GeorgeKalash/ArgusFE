@@ -87,12 +87,14 @@ export default function AccountSummary({ accountId, date, window }) {
       {
         field: 'metal',
         headerName: res?.record?.reportMetalRef,
-        flex: 1
+        flex: 1,
+        type: 'number'
       },
       {
         field: 'base',
         headerName: res?.record?.baseCurrencyRef,
-        flex: 1
+        flex: 1,
+        type: 'number'
       }
     ]
 
@@ -207,10 +209,7 @@ export default function AccountSummary({ accountId, date, window }) {
               label={labels.date}
               readOnly
               value={date}
-              onChange={formik.setFieldValue}
               maxAccess={access}
-              onClear={() => formik.setFieldValue('date', null)}
-              error={formik.touched.date && Boolean(formik.errors.date)}
             />
           </Grid>
           <Grid item xs={5}>
