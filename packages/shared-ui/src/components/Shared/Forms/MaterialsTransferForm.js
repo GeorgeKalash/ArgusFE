@@ -674,6 +674,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
+  const onVerify = async () => {
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    invalidate()
+    window.close()
+  }
+  
+  const onCopy = async () => {
+    //  await postRequest({
+    //   extension: InventoryRepository.MaterialsTransfer.clone,
+    //   record: JSON.stringify(formik.values)
+    // })
+  }
+
   const actions = [
     {
       key: 'RecordRemarks',
@@ -723,6 +741,24 @@ export default function MaterialsTransferForm({ recordId, window }) {
       key: 'WorkFlow',
       condition: true,
       onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
       disabled: !editMode
     }
   ]
