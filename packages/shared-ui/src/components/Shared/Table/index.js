@@ -1133,6 +1133,69 @@ const Table = ({
               padding-right: var(--ag-cell-horizontal-padding) !important;
             }
           }
+          @media (min-width: 1025px) and (max-width: 1280px) {
+            .agGridContainer:global(.ag-theme-alpine) {
+              --ag-font-size: 10px;
+              --ag-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
+              --ag-header-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
+            }
+
+            .agGridContainer :global(.ag-header-cell),
+            .agGridContainer :global(.ag-header-cell-label) {
+              padding-left: var(--ag-header-cell-horizontal-padding) !important;
+              padding-right: var(--ag-header-cell-horizontal-padding) !important;
+            }
+
+            .agGridContainer :global(.ag-cell) {
+              padding-left: var(--ag-cell-horizontal-padding) !important;
+              padding-right: var(--ag-cell-horizontal-padding) !important;
+            }
+
+            .agGridContainer :global(.ag-header-cell-label) {
+              height: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+
+            .agGridContainer :global(.ag-cell) {
+              display: flex !important;
+              align-items: center !important;
+            }
+
+            .agGridContainer :global(.ag-cell-wrapper),
+            .agGridContainer :global(.ag-cell-value) {
+              height: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+            }
+
+            .fieldWrapper {
+              height: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+              padding-inline: 6px; /* spacing before/after text */
+              box-sizing: border-box;
+            }
+
+            .paginationWrapper,
+            .paginationBar,
+            .paginationBar * {
+              font-size: 0.6rem !important;
+              line-height: 1 !important;
+            }
+
+            .pageTextField :global(.MuiOutlinedInput-root),
+            .pageTextField :global(.MuiInputBase-root),
+            .pageTextField :global(.MuiOutlinedInput-input),
+            .pageTextField :global(.MuiInputBase-input) {
+              font-size: 0.6rem !important;
+              line-height: 1 !important;
+            }
+
+            .paginationBar :global(.MuiSvgIcon-root) {
+              font-size: 16px !important;
+            }
+          }
 
           @media (max-width: 1024px) {
             .agGridContainer:global(.ag-theme-alpine) {

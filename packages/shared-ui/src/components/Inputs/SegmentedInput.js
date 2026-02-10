@@ -7,7 +7,6 @@ import inputs from './Inputs.module.css'
 const SegmentedInput = ({ name, value, onChange, label, error, required, readOnly }) => {
   const [mask, setMask] = useState('')
   const { defaultsData } = useContext(ControlContext)
-  const [isFocused, setIsFocused] = useState(false)
 
   const handleInputChange = event => {
     if (!readOnly) {
@@ -64,8 +63,6 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
       error={Boolean(error)}
       helperText={error}
       required={required}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
       inputProps={{
         readOnly: readOnly
       }}
@@ -84,7 +81,8 @@ const SegmentedInput = ({ name, value, onChange, label, error, required, readOnl
         }
       }}
       InputLabelProps={{
-        className: isFocused || value ? inputs.inputLabelShrink : inputs.inputLabel
+        shrink: true,
+        className: inputs.inputLabelShrink
       }}
     />
   )
