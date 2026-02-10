@@ -647,7 +647,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Labor.qry}
+                    endpointId={ManufacturingRepository. .qry}
                     parameters={`_startAt=0&_pageSize=200&_params=`}
                     name='header.laborId'
                     label={labels.labor}
