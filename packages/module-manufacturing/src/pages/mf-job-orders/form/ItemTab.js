@@ -79,6 +79,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
         .map((details, index) => ({
           ...details,
           seqNo: index + 1,
+          metalQty: parseFloat(details?.metalQty).toFixed(2) || 0,
+          nonMetalQty: parseFloat(details?.nonMetalQty).toFixed(2) || 0,
           jobId: recordId
         }))
 
@@ -145,7 +147,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
       },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        update({ qty: newRow?.qty || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
+        update({ qty: parseFloat(newRow?.qty) || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
       }
     },
     {
@@ -207,8 +209,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       async onChange({ row: { update, newRow } }) {
         if (!newRow) return
 
-        const qty = newRow.qty || 0
-        const metal = newRow.metalQty || 0
+        const qty = parseFloat(newRow.qty) || 0
+        const metal = parseFloat(newRow.metalQty) || 0
 
         if (metal <= qty && metal >= 0) {
           update({
@@ -216,7 +218,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
           })
         } else {
           update({
-            metal: newRow?.metal
+            metal: parseFloat(newRow?.metal)
           })
         }
       }
@@ -233,8 +235,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       async onChange({ row: { update, newRow } }) {
         if (!newRow) return
 
-        const qty = newRow.qty || 0
-        const nonMetal = newRow.nonMetalQty || 0
+        const qty = parseFloat(newRow.qty) || 0
+        const nonMetal = parseFloat(newRow.nonMetalQty) || 0
 
         if (nonMetal <= qty && nonMetal >= 0) {
           update({
@@ -242,7 +244,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
           })
         } else {
           update({
-            nonMetalQty: newRow?.nonMetalQty
+            nonMetalQty: parseFloat(newRow?.nonMetalQty)
           })
         }
       }
