@@ -1147,7 +1147,7 @@ export default function SaleTransactionForm({
           }
         })
       },
-      disabled: !formik.values.header.clientId
+      disabled: !formik.values.header.clientId || !formik.values.header.date
     },
     {
       key: 'Verify',

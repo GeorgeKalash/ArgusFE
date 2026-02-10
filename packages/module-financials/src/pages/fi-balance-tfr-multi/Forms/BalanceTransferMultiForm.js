@@ -307,7 +307,7 @@ export default function BalanceTransferMultiForm({ labels, access, recordId, win
           }
         })
       },
-      disabled: !formik.values.header.accountId
+      disabled: !formik.values.header.accountId || !formik.values.header.date
     }
   ]
 

@@ -397,7 +397,7 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 

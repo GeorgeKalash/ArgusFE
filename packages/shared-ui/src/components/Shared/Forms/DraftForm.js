@@ -621,7 +621,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           }
         })
       },
-      disabled: !formik.values.clientId
+      disabled: !formik.values.clientId || !formik.values.date
     }
   ]
 

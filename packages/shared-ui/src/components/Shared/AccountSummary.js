@@ -1,19 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Grid from '@mui/system/Unstable_Grid/Grid'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
-import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
-import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RGFinancialRepository } from '@argus/repositories/src/repositories/RGFinancialRepository'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
@@ -24,8 +21,6 @@ import { formatDateForGetApI } from '@argus/shared-domain/src/lib/date-helper'
 export default function AccountSummary({ accountId, date, window }) {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
-  const [data, setData] = useState([])
-  const [summary, setSummary] = useState(null)
 
   useSetWindow({ title: platformLabels.AccountSummary, window })
 
@@ -34,8 +29,6 @@ export default function AccountSummary({ accountId, date, window }) {
   })
   const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
   const baseSummaryColumns = [{ field: '', headerName: '', flex: 1 }]
-  const [columns, setColumns] = useState(baseColumns)
-  const [summaryColumns, setSummaryColumns] = useState(baseSummaryColumns)
 
   const { formik } = useForm({
     maxAccess: access,
@@ -44,7 +37,11 @@ export default function AccountSummary({ accountId, date, window }) {
       accountRef: '',
       accountName: '',
       date: date || null,
-      agpId: null
+      agpId: null,
+      gridData: { list: [] }, 
+      summaryData: { list: [] }, 
+      columns: baseColumns, 
+      summaryColumns: baseSummaryColumns
     }
   })
 
@@ -99,16 +96,15 @@ export default function AccountSummary({ accountId, date, window }) {
       }
     ]
 
-    setSummary(summaryData)
-    setSummaryColumns(summaryColumns)
-
-    const agingProfiles = res?.record?.agingProfiles || []
-
-    if (!agingProfiles.length) {
-      setColumns([...baseColumns])
-      setData({ list: [] })
-
-      return
+    formik.setFieldValue('summaryData', summaryData) 
+    formik.setFieldValue('summaryColumns', summaryColumns) 
+    
+    const agingProfiles = res?.record?.agingProfiles || [] 
+    
+    if (!agingProfiles.length) { 
+      formik.setFieldValue('columns', baseColumns) 
+      formik.setFieldValue('gridData', { list: [] }) 
+      return 
     }
 
     const currencies = [...new Set(agingProfiles.map(i => i.currencyRef).filter(Boolean))]
@@ -123,7 +119,8 @@ export default function AccountSummary({ accountId, date, window }) {
         type: 'number'
       })
     })
-    setColumns(dynamicColumns)
+
+    formik.setFieldValue('columns', dynamicColumns)
 
     const agingRows = [...new Map(agingProfiles.filter(i => i.seqDays !== -1).map(i => [i.seqDays, i])).values()].sort(
       (a, b) => a.seqDays - b.seqDays
@@ -159,7 +156,7 @@ export default function AccountSummary({ accountId, date, window }) {
 
     rows.push(totalRow)
 
-    setData({ list: rows })
+    formik.setFieldValue('gridData', { list: rows })
   }
 
   useEffect(() => {
@@ -229,7 +226,15 @@ export default function AccountSummary({ accountId, date, window }) {
               required
               onChange={(event, newValue) => {
                 formik.setFieldValue('agpId', newValue?.recordId || null)
-                if (!newValue?.recordId) setData({ list: [] })
+                if (!newValue?.recordId) {
+                  formik.setValues({
+                    ...formik.values,
+                    gridData: { list: [] },
+                    summaryData: { list: [] },
+                    spRef: '',
+                    spName: ''
+                  })
+                }
               }}
             />
           </Grid>
@@ -237,7 +242,7 @@ export default function AccountSummary({ accountId, date, window }) {
             <CustomButton
               onClick={getDynamicColumns}
               image={'preview.png'}
-              disabled={!formik.values.agpId || !formik.values.date || !formik.values.accountId}
+              disabled={!formik.values.agpId || !formik.values.accountId}
               tooltipText={platformLabels.Preview}
             />
           </Grid>
@@ -270,10 +275,10 @@ export default function AccountSummary({ accountId, date, window }) {
       </Fixed>
       <Grid container spacing={1} sx={{ height: '100%' }}>
         <Grid item xs={4} sx={{ display: 'flex' }}>
-          <Table name='summaryTable' columns={summaryColumns} gridData={summary} pagination={false} />
+          <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} />
         </Grid>
         <Grid item xs={8} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <Table name='agingProfilesTable' columns={columns} gridData={data} pagination={false} />
+          <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} />
         </Grid>
       </Grid>
     </VertLayout>

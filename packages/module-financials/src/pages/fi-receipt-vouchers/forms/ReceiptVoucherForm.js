@@ -343,7 +343,7 @@ export default function ReceiptVoucherForm({ labels, maxAccess: access, recordId
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 

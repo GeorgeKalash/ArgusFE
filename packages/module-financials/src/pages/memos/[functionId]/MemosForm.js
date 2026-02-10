@@ -325,7 +325,7 @@ export default function MemosForm({ labels, access, recordId, functionId, getEnd
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     },
     {
       key: 'Apply',

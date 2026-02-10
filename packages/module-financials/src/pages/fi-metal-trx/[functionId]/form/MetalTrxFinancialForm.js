@@ -551,7 +551,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     },
     {
       key: 'IV',

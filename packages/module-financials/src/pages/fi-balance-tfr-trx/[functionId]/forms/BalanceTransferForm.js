@@ -218,7 +218,7 @@ export default function BalanceTransferForm({
           }
         })
       },
-      disabled: !formik.values.fromAccountId
+      disabled: !formik.values.fromAccountId || !formik.values.date
     }
   ]
 

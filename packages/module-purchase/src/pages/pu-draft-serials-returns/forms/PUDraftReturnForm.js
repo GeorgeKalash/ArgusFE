@@ -611,7 +611,8 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             date: formik?.values?.header?.date
           }
         })
-      }
+      },
+      disabled: !formik.values.header?.accountId || !formik.values.header?.date
     },
     {
       key: 'Unlocked',
@@ -1130,7 +1131,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
             </Grid>
             <Grid item xs={4}>
               <ResourceComboBox
-                key={`${formik.values.header?.vendorId}-${formik.values.header?.date?.toISOString()}-${
+                key={`${formik.values.header?.vendorId}-${formik?.values?.header?.date ? formik.values.header?.date?.toISOString() : null}-${
                   formik.values.header?.currencyId
                 }`}
                 endpointId={
@@ -1140,7 +1141,7 @@ export default function PUDraftReturnForm({ labels, access, recordId }) {
                 }
                 parameters={`_vendorId=${
                   formik?.values?.header?.vendorId
-                }&_returnDate=${formik?.values?.header?.date?.toISOString()}`}
+                }&_returnDate=${formik?.values?.header?.date ? formik?.values?.header?.date?.toISOString() : null}`}
                 filter={item => item.currencyId == formik?.values?.header?.currencyId}
                 name='header.invoiceId'
                 label={labels.puInv}
