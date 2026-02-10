@@ -299,7 +299,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
       key: 'Default',
       condition: true,
       label: platformLabels.default,
-      onClick: defaultOnClick
+      onClick: defaultOnClick,
+      disabled: store?.isCancelled || store?.isPosted
     }
   ]
 
