@@ -5,7 +5,6 @@ export default function handler(req, res) {
 
   try {
     config = getClientConfig()
-    console.log("CONFIG VALUE:", config)
   } catch (e) {
     console.error("getClientConfig THREW:", e)
     return res.status(500).json({
