@@ -211,20 +211,27 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-
       return res
     }
   }
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
-    if (!formik?.values?.dtId) {
-      formik.setFieldValue('disableSKULookup', false)
+    ;(async function () {
+      if (!formik?.values?.dtId) {
+        formik.setFieldValue('disableSKULookup', false)
 
-      return
-    }
+        return
+      }
+
+      const res = await getDTD(formik?.values?.dtId)
+
+      if (!recordId) {
+        formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
+        formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+        formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+      } else {
+        formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+      }
+    })()
   }, [formik.values.dtId])
 
   const onCondition = row => {
@@ -348,22 +355,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         priceType: newRow?.priceType
       }
 
-      if (!jumpToNextLine) {
-        return update(data)
-      }
-
-      if (formik.values.disableSKULookup) {
-        update(data) 
-
-        if (jumpToNextLine) {
-          await addRow({ changes: null })
-        }
-
-        return
-      }
-
       update(data)
-      await addRow({ changes: null })
+      if (jumpToNextLine) await addRow({ changes: null })
     }
   }
 
@@ -637,6 +630,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     )
 
     formik.setValues({
+      ...formik.values,
       ...res.record,
       date: formatDateFromApi(res.record.date),
       rows: updatedAdjustments
