@@ -103,7 +103,7 @@ const MfAccounts = () => {
         recordId: recordId ? recordId : null,
         maxAccess: access
       },
-      width: 600,
+      width: 800,
       height: 450,
       title: _labels.Accounts
     })

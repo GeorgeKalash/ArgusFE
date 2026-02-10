@@ -38,11 +38,9 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
         record: JSON.stringify(data)
       })
     })
-    Promise.all(saveCurrency)
-      .then(res => {
-        toast.success('Record Edited Successfully')
-      })
-      .catch(error => {})
+    Promise.all(saveCurrency).then(res => {
+      toast.success('Record Edited Successfully')
+    })
   }
 
   const column = [
@@ -70,22 +68,20 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
     getRequest({
       extension: FinancialRepository.AccountCreditLimit.qry,
       parameters: parameters
-    })
-      .then(res => {
-        if (res.list.length > 0) {
-          const currencies = res.list.map((currency, index) => ({
-            id: index,
-            ...currency
-          }))
-          formik.setValues({ currencies: currencies })
+    }).then(res => {
+      if (res.list.length > 0) {
+        const currencies = res.list.map((currency, index) => ({
+          id: index,
+          ...currency
+        }))
+        formik.setValues({ currencies: currencies })
 
-          setStore(prevStore => ({
-            ...prevStore,
-            currencies: currencies
-          }))
-        }
-      })
-      .catch(error => {})
+        setStore(prevStore => ({
+          ...prevStore,
+          currencies: currencies
+        }))
+      }
+    })
   }
 
   return (

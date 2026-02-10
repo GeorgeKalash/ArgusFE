@@ -4,8 +4,9 @@ import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceTable from '../forms/AccountBalanceTable'
+import DimensionsForm from '../forms/DimensionsForm'
 
-const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const editMode = !!recordId
 
@@ -16,6 +17,7 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
 
   const tabs = [
     { label: labels.Accounts },
+    { label: labels.Dimensions, disabled: !store.recordId },
     { label: labels.CreditLimits, disabled: !store.recordId },
     { label: labels.AccountBalance, disabled: !store.recordId }
   ]
@@ -29,23 +31,28 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
+        <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
+        <DimensionsForm
+          store={store}
+          setStore={setStore}
+          labels={labels}
+          maxAccess={maxAccess}
+          editMode={editMode}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <CreditLimitsForm
           store={store}
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>
-      <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
+      <CustomTabPanel height={height} index={3} value={activeTab} maxAccess={maxAccess}>
         <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>

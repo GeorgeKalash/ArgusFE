@@ -1,6 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
