@@ -7,9 +7,11 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
 const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId: accountId } = store
 
   const formik = useFormik({
@@ -39,7 +41,7 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
       })
     })
     Promise.all(saveCurrency).then(res => {
-      toast.success('Record Edited Successfully')
+      toast.success(platformLabels.Edited)
     })
   }
 
@@ -60,25 +62,23 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
 
   useEffect(() => {
     accountId && getCurrencies(accountId)
-  }, [accountId])
+  }, [])
 
   const getCurrencies = accountId => {
-    const defaultParams = `_accountId=${accountId}`
-    var parameters = defaultParams
     getRequest({
       extension: FinancialRepository.AccountCreditLimit.qry,
-      parameters: parameters
+      parameters: `_accountId=${accountId}`
     }).then(res => {
       if (res.list.length > 0) {
         const currencies = res.list.map((currency, index) => ({
           id: index,
           ...currency
         }))
-        formik.setValues({ currencies: currencies })
+        formik.setValues({ currencies })
 
         setStore(prevStore => ({
           ...prevStore,
-          currencies: currencies
+          currencies
         }))
       }
     })

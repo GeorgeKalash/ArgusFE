@@ -12,9 +12,9 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 
 export default function DimensionsForm({ store, maxAccess }) {
   const { postRequest, getRequest } = useContext(RequestsContext)
+  const { platformLabels, defaultsData } = useContext(ControlContext)
   const { recordId: accountId } = store
 
-  const { platformLabels, defaultsData } = useContext(ControlContext)
   const dimCount = parseInt(
     defaultsData?.list?.find(obj => obj.key === 'DimCount')?.value,
     10
@@ -122,30 +122,39 @@ export default function DimensionsForm({ store, maxAccess }) {
     run()
   }, [accountId, dimensionFields])
 
+  const leftColumn = dimensionFields.slice(0, 10)
+  const rightColumn = dimensionFields.slice(10, 20)
+
+  const renderField = f => (
+    <Grid item xs={12} key={f.fieldKey}>
+      <ResourceComboBox
+        endpointId={FinancialRepository.DimensionValue.qry}
+        parameters={`_dimension=${f.dimensionNumber}`}
+        name={f.fieldKey}
+        label={f.label}
+        valueField='id'
+        displayField='name'
+        values={formik.values}
+        onChange={(_, newValue) => formik.setFieldValue(f.fieldKey, newValue?.id ?? null)}
+      />
+    </Grid>
+  )
+
   return (
     <Form onSave={formik.handleSubmit} maxAccess={maxAccess}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              {dimensionFields.map(f => (
-                <Grid container mt={0.2} spacing={2} key={f.fieldKey}>
-                  <Grid item xs={12}>
-                    <ResourceComboBox
-                      endpointId={FinancialRepository.DimensionValue.qry}
-                      parameters={`_dimension=${f.dimensionNumber}`}
-                      name={f.fieldKey}
-                      label={f.label}
-                      valueField='id'
-                      displayField='name'
-                      values={formik.values}
-                      onChange={(_, newValue) =>
-                        formik.setFieldValue(f.fieldKey, newValue?.id ?? null)
-                      }
-                    />
-                  </Grid>
-                </Grid>
-              ))}
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                {leftColumn.map(renderField)}
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Grid container spacing={2}>
+                {rightColumn.map(renderField)}
+              </Grid>
             </Grid>
           </Grid>
         </Grow>

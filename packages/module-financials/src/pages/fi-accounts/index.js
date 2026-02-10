@@ -104,7 +104,7 @@ const MfAccounts = () => {
         maxAccess: access
       },
       width: 800,
-      height: 450,
+      height: 550,
       title: _labels.Accounts
     })
   }
