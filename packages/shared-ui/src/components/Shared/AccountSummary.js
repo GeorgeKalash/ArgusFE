@@ -266,11 +266,11 @@ export default function AccountSummary({ accountId, date, window }) {
           </Grid>
         </Grid>
       </Fixed>
-      <Grid container spacing={1} sx={{ height: '100%' }}>
+      <Grid container spacing={1} sx={{ flex: 1 }}>
         <Grid item xs={4} sx={{ display: 'flex' }}>
           <Table name='summaryTable' columns={formik.values.summaryColumns} gridData={formik.values.summaryData} pagination={false} />
         </Grid>
-        <Grid item xs={8} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Grid item xs={8} sx={{ display: 'flex' }}>
           <Table name='agingProfilesTable' columns={formik.values.columns} gridData={formik.values.gridData} pagination={false} />
         </Grid>
       </Grid>
