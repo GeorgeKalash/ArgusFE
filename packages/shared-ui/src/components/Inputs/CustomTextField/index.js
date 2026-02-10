@@ -45,20 +45,27 @@ const CustomTextField = ({
   )
 
   const inputRef = useRef(null)
+  const stringValue = value == null ? '' : String(value)
 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
-  const [hasValue, setHasValue] = useState(Boolean(value))
+  const [hasValue, setHasValue] = useState(Boolean(stringValue && stringValue.length > 0))
 
   useEffect(() => {
-    setHasValue(Boolean(value && value.length > 0))
-  }, [value])
+    setHasValue(Boolean(stringValue && stringValue.length > 0))
+  }, [stringValue])
 
   useEffect(() => {
-    if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
+    if (
+      inputRef.current &&
+      inputRef.current.selectionStart !== undefined &&
+      focus &&
+      stringValue &&
+      stringValue?.length < 1
+    ) {
       inputRef.current.focus()
     }
-  }, [value])
+  }, [stringValue])
 
   useEffect(() => {
     if (inputRef.current && typeof inputRef.current.selectionStart !== undefined && position) {
@@ -89,42 +96,53 @@ const CustomTextField = ({
   }, [hasValue])
 
   const handleInput = e => {
-    const inputValue = e.target.value
+    const inputValue = String(e.target.value ?? '')
 
     if (type === 'number' && props && e.target.value && inputValue.length > maxLength) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue
       props?.onChange(e)
+      setHasValue(truncatedValue.length > 0)
+      return
     }
 
     if (phone) {
       const truncatedValue = inputValue.slice(0, maxLength)
       e.target.value = truncatedValue?.replace(/[^\d+]/g, '')
       props?.onChange(e)
+      setHasValue(String(e.target.value ?? '').length > 0)
+      return
     }
 
     if (language === 'number') {
       e.target.value = inputValue?.replace(/[^0-9.]/g, '')
       props?.onChange(e)
+      setHasValue(String(e.target.value ?? '').length > 0)
+      return
     }
 
     if (language === 'arabic') {
       e.target.value = inputValue?.replace(/[^؀-ۿ\s]/g, '')
       props?.onChange(e)
+      setHasValue(String(e.target.value ?? '').length > 0)
+      return
     }
 
     if (language === 'english') {
       e.target.value = inputValue?.replace(/[^a-zA-Z]/g, '')
       props?.onChange(e)
+      setHasValue(String(e.target.value ?? '').length > 0)
+      return
     }
+
     setHasValue(inputValue.length > 0)
   }
 
   useEffect(() => {
-    if (autoFocus && inputRef.current && value == '' && !focus) {
+    if (autoFocus && inputRef.current && stringValue == '' && !focus) {
       inputRef.current.focus()
     }
-  }, [autoFocus, inputRef.current, value])
+  }, [autoFocus, inputRef.current, stringValue])
 
   const dynamicStartAdornment =
     props.InputProps?.startAdornment || startIcons.length > 0 ? (
@@ -149,14 +167,16 @@ const CustomTextField = ({
       inputRef={inputRef}
       type={type}
       variant={variant}
-      defaultValue={value}
-      value={value ?? ''}
+      defaultValue={stringValue}
+      value={stringValue}
       size={size}
       fullWidth={fullWidth}
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
-        setIsFocused(false), setFocus(false), setHasValue(Boolean(value && value.length > 0))
+        setIsFocused(false)
+        setFocus(false)
+        setHasValue(Boolean(stringValue && stringValue.length > 0))
       }}
       inputProps={{
         autoComplete: 'off',
@@ -175,7 +195,7 @@ const CustomTextField = ({
       }}
       autoComplete={autoComplete}
       onInput={handleInput}
-      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(e.target.value) : setFocus(true))}
+      onKeyDown={e => (e.key === 'Enter' ? search && onSearch(String(e.target.value ?? '')) : setFocus(true))}
       InputProps={{
         ...props.InputProps,
         classes: {
@@ -189,12 +209,12 @@ const CustomTextField = ({
             {props.InputProps?.endAdornment}
 
             {!_readOnly && search && (
-              <IconButton className={inputs.iconButton} tabIndex={-1} onClick={() => onSearch(value)}>
+              <IconButton className={inputs.iconButton} tabIndex={-1} onClick={() => onSearch(stringValue)}>
                 <SearchIcon className={inputs.icon} />
               </IconButton>
             )}
 
-            {(allowClear || (!clearable && !readOnly && (value || value === 0))) && onClear && (
+            {(allowClear || (!clearable && !readOnly && stringValue !== '')) && onClear && (
               <IconButton
                 className={inputs.iconButton}
                 tabIndex={-1}
@@ -228,9 +248,8 @@ const CustomTextField = ({
       InputLabelProps={{
         ...InputLabelProps,
         shrink: Boolean(InputLabelProps?.shrink || isFocused || hasValue),
-        className: isFocused || hasValue || InputLabelProps?.shrink
-          ? inputs.inputLabelShrink
-          : inputs.inputLabel
+        className:
+          isFocused || hasValue || InputLabelProps?.shrink ? inputs.inputLabelShrink : inputs.inputLabel
       }}
       required={_required}
       {...props}
