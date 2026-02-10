@@ -27,8 +27,6 @@ export default function AccountSummary({ accountId, date, window }) {
   const { labels, access } = useResourceQuery({
     datasetId: ResourceIds.AccountSummary
   })
-  const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
-  const baseSummaryColumns = [{ field: '', headerName: '', flex: 1 }]
 
   const { formik } = useForm({
     maxAccess: access,
@@ -40,8 +38,8 @@ export default function AccountSummary({ accountId, date, window }) {
       agpId: null,
       gridData: { list: [] }, 
       summaryData: { list: [] }, 
-      columns: baseColumns, 
-      summaryColumns: baseSummaryColumns
+      columns: [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }], 
+      summaryColumns: [{ field: '', headerName: '', flex: 1 }]
     }
   })
 
@@ -254,9 +252,6 @@ export default function AccountSummary({ accountId, date, window }) {
               value={formik.values.spRef}
               maxAccess={access}
               readOnly
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('spRef', '')}
-              error={formik.touched.spRef && Boolean(formik.errors.spRef)}
             />
           </Grid>
           <Grid item xs={4}>
@@ -266,9 +261,6 @@ export default function AccountSummary({ accountId, date, window }) {
               value={formik.values.spName}
               maxAccess={access}
               readOnly
-              onChange={formik.handleChange}
-              onClear={() => formik.setFieldValue('spName', '')}
-              error={formik.touched.spName && Boolean(formik.errors.spName)}
             />
           </Grid>
         </Grid>
