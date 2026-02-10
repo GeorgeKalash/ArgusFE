@@ -28,6 +28,8 @@ export default function AccountSummary({ accountId, date, window }) {
     datasetId: ResourceIds.AccountSummary
   })
 
+  const baseColumns = [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }]
+
   const { formik } = useForm({
     maxAccess: access,
     initialValues: {
@@ -38,7 +40,7 @@ export default function AccountSummary({ accountId, date, window }) {
       agpId: null,
       gridData: { list: [] }, 
       summaryData: { list: [] }, 
-      columns: [{ field: 'days', headerName: labels.days, flex: 1, type: 'number' }], 
+      columns: baseColumns, 
       summaryColumns: [{ field: '', headerName: '', flex: 1 }]
     }
   })
