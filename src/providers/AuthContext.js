@@ -144,16 +144,16 @@ const AuthProvider = ({ children }) => {
       const record = response?.data?.record
       setGetAC(response || null)
       
-      // if (!record || !record.trial) {
-      //   setErrorMsg(`Invalid deploy account: ${accountName}`)
-      //   setValidCompanyName(false)
-      // } else {
+      if (!record || (isDeploy && !record.trial)) {
+        setErrorMsg(`Invalid deploy account: ${accountName}`)
+        setValidCompanyName(false)
+      } else {
         setCompanyName(record.accountName || '')
         setValidCompanyName(!!record.accountName)
         window.localStorage.setItem('apiUrl', record.api || '')
         await saveToDB('authSettings', 'companyName', record.accountName)
 
-      //}
+      }
     } catch (error) {
       console.error('Error Fetching Data: ', error)
     }
