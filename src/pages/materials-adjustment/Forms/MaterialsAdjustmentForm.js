@@ -224,12 +224,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
 
       const res = await getDTD(formik?.values?.dtId)
 
+      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
       if (!recordId) {
         formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
         formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-        formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-      } else {
-        formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
       }
     })()
   }, [formik.values.dtId])
