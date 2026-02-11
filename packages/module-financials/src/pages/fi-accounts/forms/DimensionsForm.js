@@ -63,7 +63,6 @@ export default function DimensionsForm({ store, maxAccess }) {
 
   const { formik } = useForm({
     initialValues: { accountId: accountId ?? '' },
-    validateOnChange: true,
     onSubmit: async () => {
       const submissionData = dimensionFields.map(f => ({
         dimension: f.dimensionNumber,
@@ -94,7 +93,7 @@ export default function DimensionsForm({ store, maxAccess }) {
       if (!accountId) return
       if (!dimensionFields?.length) return
 
-      const nextValues = { ...formik.values, accountId: accountId ?? '' }
+      const nextValues = { ...formik.values, accountId }
 
       dimensionFields.forEach(f => {
         if (nextValues[f.fieldKey] === undefined) nextValues[f.fieldKey] = null

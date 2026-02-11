@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
@@ -8,14 +7,16 @@ import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
 const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId: accountId } = store
 
-  const formik = useFormik({
+  const { formik } = useForm({
     validateOnChange: true,
+    maxAccess,
     initialValues: {
       currencies: [{ id: 1, accountId: accountId, currencyName: '', currencyId: '', limit: '' }]
     },
