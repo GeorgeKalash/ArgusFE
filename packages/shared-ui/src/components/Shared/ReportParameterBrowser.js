@@ -95,7 +95,7 @@ const GetLookup = ({ field, formik }) => {
         form={formik}
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
-        onChange={(event, newValue) => {
+        onChange={(_, newValue) => {
           const display = Array.isArray(apiDetails?.firstField)
             ? apiDetails?.firstField
                 ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
@@ -168,7 +168,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
           values={formik.values?.parameters?.[field.id]?.value}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             const separator = apiDetails?.separator ?? ' '
 
             const textValue = Array.isArray(apiDetails?.displayField)
@@ -202,8 +202,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
             valueField={'key'}
             displayField={'value'}
             required={field.mandatory}
-            value={formik.values?.parameters?.[field.id]?.value}
-            onChange={(event, newValue) => {
+              values={formik.values?.parameters?.[field.id]?.value}
+              onChange={(_, newValue) => {
               formik.setFieldValue(
                 `parameters[${field.id}]`,
                 newValue
@@ -212,7 +212,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
                       fieldKey: field.key,
                       value: newValue?.key,
                       caption: field.caption,
-                      display: newValue?.value
+                      display: field.value
                     }
                   : ''
               )
@@ -246,7 +246,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
-        onChange={(name, newValue) => {
+        onChange={(_, newValue) => {
           newValue
             ? formik.setFieldValue(`parameters[${field.id}]`, {
                 fieldId: field.id,
@@ -320,7 +320,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
         value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
-        onChange={(name, newValue) => {
+        onChange={(_, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
             fieldId: field.id,
             fieldKey: field.key,

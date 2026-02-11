@@ -6,7 +6,6 @@ import { Grid } from '@mui/material'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-// ✅ keep styles.xxx usage without CSS modules
 const styles = {
   leftSectionGridItem: 'leftSectionGridItem',
   bottomSectionContainer: 'bottomSectionContainer'
