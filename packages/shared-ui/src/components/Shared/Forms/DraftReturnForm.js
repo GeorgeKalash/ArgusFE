@@ -660,11 +660,11 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.clientId
+      disabled: !formik.values.clientId || !formik.values.date
     }
   ]
 
@@ -1219,13 +1219,13 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
                 </Grid>
                 <Grid item xs={5.2}>
                   <ResourceComboBox
-                    key={`${formik.values.clientId}-${formik.values.date?.toISOString()}-${formik.values.currencyId}`}
+                    key={`${formik.values.clientId}-${formik.values.date ? formik.values.date?.toISOString() : null}-${formik.values.currencyId}`}
                     endpointId={
                       formik?.values?.clientId && formik?.values?.date && SaleRepository.ReturnOnInvoice.balance
                     }
                     parameters={`_clientId=${
                       formik?.values?.clientId
-                    }&_returnDate=${formik?.values?.date?.toISOString()}`}
+                    }&_returnDate=${formik?.values?.date ? formik?.values?.date?.toISOString() : null }`}
                     filter={item => item.currencyId == formik?.values?.currencyId}
                     name='invoiceId'
                     label={labels.salesInv}
