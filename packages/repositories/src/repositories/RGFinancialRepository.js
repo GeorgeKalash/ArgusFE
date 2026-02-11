@@ -8,7 +8,7 @@ export const RGFinancialRepository = {
     qry: service + 'FI404'
   },
   AccountSummary: {
-    AccFI405b: service + 'FI405b'
+    get: service + 'getACCSummary'
   },
   DocumentAging: {
     AgingFI406a: service + 'FI406a',
