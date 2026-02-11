@@ -719,80 +719,80 @@ export default function MaterialsTransferForm({ recordId, window }) {
   }
 
    const actions = [
-  //   {
-  //     key: 'RecordRemarks',
-  //     condition: true,
-  //     onClick: 'onRecordRemarks',
-  //     disabled: !editMode
-  //   },
-  //   {
-  //     key: 'GL',
-  //     condition: true,
-  //     onClick: 'onClickGL',
-  //     datasetId: ResourceIds.GLMaterialsTransfer,
-  //     disabled: !editMode
-  //   },
-  //   {
-  //     key: 'IV',
-  //     condition: true,
-  //     onClick: 'onInventoryTransaction',
-  //     disabled: !editMode || !isPosted
-  //   },
-  //   {
-  //     key: 'Locked',
-  //     condition: isPosted,
-  //     onClick: 'onUnpostConfirmation',
-  //     onSuccess: onUnpost,
-  //     disabled: !editMode || !isClosed || formik.values.isVerified
-  //   },
-  //   {
-  //     key: 'Unlocked',
-  //     condition: !isPosted,
-  //     onClick: onPost,
-  //     disabled: !editMode || !isClosed || formik.values.isVerified
-  //   },
-  //   {
-  //     key: 'Close',
-  //     condition: !isClosed,
-  //     onClick: () => onClose(formik.values.recordId),
-  //     disabled: isClosed || !editMode || isPosted
-  //   },
-  //   {
-  //     key: 'Reopen',
-  //     condition: isClosed,
-  //     onClick: onReopen,
-  //     disabled: !isClosed || !editMode || isPosted
-  //   },
-  //   {
-  //     key: 'WorkFlow',
-  //     condition: true,
-  //     onClick: onWorkFlowClick,
-  //     disabled: !editMode
-  //   },
-  //   {
-  //     key: 'Verify',
-  //     condition: !formik.values.isVerified,
-  //     onClick: onVerify,
-  //     disabled: !isPosted
-  //   },
-  //   {
-  //     key: 'Unverify',
-  //     condition: formik.values.isVerified,
-  //     onClick: onVerify,
-  //     disabled: !isPosted
-  //   },
-  //   {
-  //     key: 'Copy',
-  //     condition: true,
-  //     onClick: onCopy,
-  //     disabled: !editMode
-  //   },
-  //   {
-  //     key: 'Metals',
-  //     condition: true,
-  //     onClick: 'onClickMetal',
-  //     handleMetalClick
-  //   },
+    {
+      key: 'RecordRemarks',
+      condition: true,
+      onClick: 'onRecordRemarks',
+      disabled: !editMode
+    },
+    {
+      key: 'GL',
+      condition: true,
+      onClick: 'onClickGL',
+      datasetId: ResourceIds.GLMaterialsTransfer,
+      disabled: !editMode
+    },
+    {
+      key: 'IV',
+      condition: true,
+      onClick: 'onInventoryTransaction',
+      disabled: !editMode || !isPosted
+    },
+    {
+      key: 'Locked',
+      condition: isPosted,
+      onClick: 'onUnpostConfirmation',
+      onSuccess: onUnpost,
+      disabled: !editMode || !isClosed || formik.values.isVerified
+    },
+    {
+      key: 'Unlocked',
+      condition: !isPosted,
+      onClick: onPost,
+      disabled: !editMode || !isClosed || formik.values.isVerified
+    },
+    {
+      key: 'Close',
+      condition: !isClosed,
+      onClick: () => onClose(formik.values.recordId),
+      disabled: isClosed || !editMode || isPosted
+    },
+    {
+      key: 'Reopen',
+      condition: isClosed,
+      onClick: onReopen,
+      disabled: !isClosed || !editMode || isPosted
+    },
+    {
+      key: 'WorkFlow',
+      condition: true,
+      onClick: onWorkFlowClick,
+      disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
+      disabled: !editMode
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
+    },
     {
       key: 'Return',
       condition: true
