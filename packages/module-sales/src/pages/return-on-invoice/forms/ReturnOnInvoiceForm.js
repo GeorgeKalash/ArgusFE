@@ -609,7 +609,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
             qtyInBase,
             muQty: newRow?.muQty,
             unitPrice,
-            baseQty: muQty ? Number(newRow?.returnNowQty) * muQty : 0,
+            baseQty: muQty ? Number(newRow?.returnNowQty || 0) * muQty : 0,
             minPrice: ItemConvertPrice?.minPrice || 0,
             upo: ItemConvertPrice?.upo || 0,
             priceType: ItemConvertPrice?.priceType || 1,
@@ -640,19 +640,22 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         }
       },
       onChange({ row: { update, newRow } }) {
-        getFilteredMU(newRow?.itemId, newRow?.msId)
-        const { returnNowQty, balanceQty, invoiceId } = newRow
-        const validQty = invoiceId && Number(returnNowQty) > Number(balanceQty) ? balanceQty : returnNowQty
-        update({ returnNowQty: validQty })
-
-        getItemPriceRow(update, { ...newRow, returnNowQty: validQty }, DIRTYFIELD_QTY)
-        if (invoiceId && Number(returnNowQty) > Number(balanceQty)) stackError({ message: labels.invalidQty })
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
-
         const muQty = newRow?.muQty ?? filteredItems?.[0]?.qty
+
         update({
           baseQty: muQty ? Number(newRow?.returnNowQty) * muQty : 0
         })
+        getFilteredMU(newRow?.itemId, newRow?.msId)
+        const { returnNowQty, balanceQty, invoiceId } = newRow
+        const validQty = invoiceId && Number(returnNowQty) > Number(balanceQty) ? parseFloat(balanceQty) : parseFloat(returnNowQty)
+        update({ returnNowQty: parseFloat(validQty) })
+
+        const baseQty = muQty ? Number(newRow?.returnNowQty) * muQty : 0
+
+        getItemPriceRow(update, { ...newRow, returnNowQty: parseFloat(validQty), baseQty }, DIRTYFIELD_QTY)
+        if (invoiceId && Number(returnNowQty) > Number(balanceQty)) stackError({ message: labels.invalidQty })
+
       }
     },
     {
@@ -1034,7 +1037,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       isDefaultDtPresent: dtInfo?.dtId,
       clientDiscount: clientDiscount.tdPct || 0,
       maxDiscount: clientDiscount.tdPct || 0,
-      KGmetalPrice: retHeader?.record?.metalPrice * 1000,
+      KGmetalPrice: retHeader?.record?.metalPrice * 1000 || null,
       items: modifiedList
     })
   }
@@ -1192,6 +1195,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       ...newRow,
       id: newRow?.id,
       taxId,
+      baseQty: newRow?.muQty ? parseFloat(newRow.returnNowQty) * parseFloat(newRow?.muQty) : 0,
       qty: parseFloat(itemPriceRow?.qty).toFixed(2),
       volume: parseFloat(itemPriceRow?.volume).toFixed(2),
       weight: parseFloat(itemPriceRow?.weight).toFixed(2),
@@ -1634,7 +1638,10 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     hidden={
                       isPosted || (!editMode && !formik.values.baseMetalCuId) || (!editMode && !formik.values.dtId)
                     }
-                    onClear={() => formik.setFieldValue('KGmetalPrice', '')}
+                    onClear={() => {
+                      formik.setFieldValue('KGmetalPrice', '')
+                      formik.setFieldValue('metalPrice', null)
+                    }}
                     error={formik.touched?.KGmetalPrice && Boolean(formik.errors?.KGmetalPrice)}
                   />
                 </Grid>
