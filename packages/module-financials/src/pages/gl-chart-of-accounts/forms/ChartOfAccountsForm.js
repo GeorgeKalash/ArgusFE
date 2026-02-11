@@ -61,11 +61,13 @@ export default function ChartOfAccountsForm({ labels, maxAccess, recordId }) {
     onSubmit: async values => {
       const response = await postRequest({
         extension: GeneralLedgerRepository.ChartOfAccounts.set,
-        record: JSON.stringify(values)
+        record: JSON.stringify({
+          ...values,
+          segments: values.segments?.filter(segment => segment != null && segment !== '')
+        })
       })
 
-      const actionMessage = values.recordId ? platformLabels.Edited : platformLabels.Added
-      toast.success(actionMessage)
+      toast.success(values.recordId ? platformLabels.Edited : platformLabels.Added)
       formik.setFieldValue('recordId', response.recordId)
       invalidate()
     }
