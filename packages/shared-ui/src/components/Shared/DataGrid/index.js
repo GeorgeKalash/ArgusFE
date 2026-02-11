@@ -133,9 +133,10 @@ export function DataGrid({
 
     const addRow = async (param = {}) => {
       const { changes } = param
-      if (params.rowIndex === value.length - 1 && !changes) {
-        addNewRow(params)
-
+      if (!changes) {
+        if (params.rowIndex === value.length - 1) {
+          addNewRow(params)
+        }
         return
       }
 
