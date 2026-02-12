@@ -543,7 +543,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             totalCost
           })
         }
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.qty < 0 }
+      },
     },
     {
       component: 'numberfield',
@@ -557,7 +560,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             unitCost
           })
         }
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.qty < 0 }
+      },
     },
     {
       component: 'textfield',
