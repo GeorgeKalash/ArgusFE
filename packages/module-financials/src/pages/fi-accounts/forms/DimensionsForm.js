@@ -29,11 +29,22 @@ export default function DimensionsForm({ store, maxAccess }) {
 
     if (!Number.isFinite(dimCount) || dimCount <= 0) return []
 
-    const keys = Array.from({ length: dimCount }, (_, idx) => `tpaDimension${idx + 1}`)
-    const filteredList = (defaultsData?.list || []).filter(obj => keys.includes(obj.key))
+    const getDimNumberFromKey = key => {
+      const m = String(key || '').match(/^tpaDimension(\d+)$/)
+      return m ? parseInt(m[1], 10) : null
+    }
 
-    const fields = filteredList.map((obj, index) => {
-      const dimensionNumber = index + 1
+    const filteredList = (defaultsData?.list || [])
+      .map(obj => ({
+        ...obj,
+        dimensionNumber: getDimNumberFromKey(obj.key)
+      }))
+      .filter(obj => obj.dimensionNumber && obj.dimensionNumber <= dimCount)
+      .sort((a, b) => a.dimensionNumber - b.dimensionNumber)
+
+    const fields = filteredList.map(obj => {
+      const dimensionNumber = obj.dimensionNumber
+
       const safeValueKey = toSafeFieldKey(obj.value)
       const fallbackKey = toSafeFieldKey(obj.key)
       const fieldKey = safeValueKey || fallbackKey
