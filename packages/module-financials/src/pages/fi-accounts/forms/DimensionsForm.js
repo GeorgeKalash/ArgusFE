@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -15,24 +15,19 @@ export default function DimensionsForm({ store, maxAccess }) {
   const { platformLabels, defaultsData } = useContext(ControlContext)
   const { recordId: accountId } = store
 
-  const dimCount = parseInt(
-    defaultsData?.list?.find(obj => obj.key === 'DimCount')?.value,
-    10
-  )
-
-  const [dimensionFields, setDimensionFields] = useState([])
-
   const toSafeFieldKey = value => {
     const raw = String(value ?? '').trim()
     if (!raw) return ''
     return raw.replace(/[^a-zA-Z0-9_]/g, '_')
   }
 
-  useEffect(() => {
-    if (!Number.isFinite(dimCount) || dimCount <= 0) {
-      setDimensionFields([])
-      return
-    }
+  const dimensionFields = useMemo(() => {
+    const dimCount = parseInt(
+      defaultsData?.list?.find(obj => obj.key === 'DimCount')?.value,
+      10
+    )
+
+    if (!Number.isFinite(dimCount) || dimCount <= 0) return []
 
     const keys = Array.from({ length: dimCount }, (_, idx) => `tpaDimension${idx + 1}`)
     const filteredList = (defaultsData?.list || []).filter(obj => keys.includes(obj.key))
@@ -51,15 +46,13 @@ export default function DimensionsForm({ store, maxAccess }) {
     })
 
     const seen = new Set()
-    const uniqueFields = fields.map(f => {
+    return fields.map(f => {
       let k = f.fieldKey
       if (seen.has(k)) k = `${k}_${f.dimensionNumber}`
       seen.add(k)
       return { ...f, fieldKey: k }
     })
-
-    setDimensionFields(uniqueFields)
-  }, [dimCount, defaultsData])
+  }, [defaultsData])
 
   const { formik } = useForm({
     initialValues: { accountId: accountId ?? '' },
@@ -91,7 +84,7 @@ export default function DimensionsForm({ store, maxAccess }) {
   useEffect(() => {
     const run = async () => {
       if (!accountId) return
-      if (!dimensionFields?.length) return
+      if (!dimensionFields.length) return
 
       const nextValues = { ...formik.values, accountId }
 
@@ -105,10 +98,7 @@ export default function DimensionsForm({ store, maxAccess }) {
       })
 
       const list = res?.list || []
-
-      const mapByDimension = new Map(
-        dimensionFields.map(f => [Number(f.dimensionNumber), f.fieldKey])
-      )
+      const mapByDimension = new Map(dimensionFields.map(f => [Number(f.dimensionNumber), f.fieldKey]))
 
       list.forEach(item => {
         const fieldKey = mapByDimension.get(Number(item.dimension))
