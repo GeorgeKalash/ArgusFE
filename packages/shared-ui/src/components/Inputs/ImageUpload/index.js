@@ -12,8 +12,47 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import styles from './ImageUpload.module.css'
-import CustomButton from '../CustomButton'
+
+const styles = {
+  container: 'ImageUpload_container',
+  previewBox: 'ImageUpload_previewBox',
+  previewImage: 'ImageUpload_previewImage',
+  bottomSection: 'ImageUpload_bottomSection'
+}
+
+const css = `
+.${styles.container} {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.${styles.previewBox} {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.${styles.previewImage} {
+  height: 100%;
+  object-fit: cover;
+}
+
+.${styles.bottomSection} {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+}
+`
 
 const ImageUpload = forwardRef(
   (
@@ -194,51 +233,52 @@ const ImageUpload = forwardRef(
     }, [parentRecordId, recordId])
 
     return (
-      <Box className={styles.container}>
-       <Box
-          className={styles.previewBox}
-          style={{
-            width: '100%',
-            maxWidth: scaledWidth,
-            height: scaledHeight
-          }}
-          onClick={handleClick}
-        >
-          <img
-            src={
-              image ||
-              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
-            }
-            alt=""
-            className={styles.previewImage}
-            style={{ border: error ? '2px solid #F44336' : 'none' }}
-            onError={e => {
-              e.currentTarget.src =
-                require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+      <>
+        <style>{css}</style>
+
+        <Box className={styles.container}>
+          <Box
+            className={styles.previewBox}
+            style={{
+              width: '100%',
+              maxWidth: scaledWidth,
+              height: scaledHeight
             }}
-          />
-        </Box>
+            onClick={handleClick}
+          >
+            <img
+              src={image || require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src}
+              alt=""
+              className={styles.previewImage}
+              style={{ border: error ? '2px solid #F44336' : 'none' }}
+              onError={e => {
+                e.currentTarget.src =
+                  require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+              }}
+            />
+          </Box>
 
-        <Box className={styles.bottomSection}>
-          <input
-            hidden
-            type="file"
-            accept="image/png, image/jpeg, image/jpg"
-            ref={hiddenInputRef}
-            onChange={handleInputImageChange}
-            disabled={disabled}
-          />
+          <Box className={styles.bottomSection}>
+            <input
+              hidden
+              type="file"
+              accept="image/png, image/jpeg, image/jpg"
+              ref={hiddenInputRef}
+              onChange={handleInputImageChange}
+              disabled={disabled}
+            />
 
-          <CustomButton
-            onClick={handleInputImageReset}
-            image="clear.png"
-            tooltipText={platformLabels.Clear}
-            color="#F44336"
-            border="none"
-            disabled={disabled}
-          />
+            <CustomButton
+              onClick={handleInputImageReset}
+              image="clear.png"
+              tooltipText={platformLabels.Clear}
+              color="#F44336"
+              border="none"
+              disabled={disabled}
+            />
+          </Box>
         </Box>
-      </Box>
+      </>
     )
   }
 )
