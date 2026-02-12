@@ -14,15 +14,11 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 import CustomButton from '../CustomButton'
 
-const styles = {
-  container: 'ImageUpload_container',
-  previewBox: 'ImageUpload_previewBox',
-  previewImage: 'ImageUpload_previewImage',
-  bottomSection: 'ImageUpload_bottomSection'
-}
+const EMPTY_PHOTO =
+  require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
 
 const css = `
-.${styles.container} {
+.ImageUpload_container {
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -30,7 +26,7 @@ const css = `
   align-items: stretch;
 }
 
-.${styles.previewBox} {
+.ImageUpload_previewBox {
   flex: 1 1 auto;
   width: 100%;
   height: 100%;
@@ -41,12 +37,12 @@ const css = `
   cursor: pointer;
 }
 
-.${styles.previewImage} {
+.ImageUpload_previewImage {
   height: 100%;
   object-fit: cover;
 }
 
-.${styles.bottomSection} {
+.ImageUpload_bottomSection {
   flex: 0 0 auto;
   display: flex;
   align-items: flex-end;
@@ -184,7 +180,6 @@ const ImageUpload = forwardRef(
 
       const reader = new FileReader()
       readerRef.current = reader
-
       reader.onloadend = e => setImage(e.target.result)
       reader.readAsDataURL(file)
     }
@@ -237,9 +232,9 @@ const ImageUpload = forwardRef(
       <>
         <style>{css}</style>
 
-        <Box className={styles.container}>
+        <Box className="ImageUpload_container">
           <Box
-            className={styles.previewBox}
+            className="ImageUpload_previewBox"
             style={{
               width: '100%',
               maxWidth: scaledWidth,
@@ -248,18 +243,17 @@ const ImageUpload = forwardRef(
             onClick={handleClick}
           >
             <img
-              src={image || require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src}
+              src={image || EMPTY_PHOTO}
               alt=""
-              className={styles.previewImage}
+              className="ImageUpload_previewImage"
               style={{ border: error ? '2px solid #F44336' : 'none' }}
               onError={e => {
-                e.currentTarget.src =
-                  require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+                e.currentTarget.src = EMPTY_PHOTO
               }}
             />
           </Box>
 
-          <Box className={styles.bottomSection}>
+          <Box className="ImageUpload_bottomSection">
             <input
               hidden
               type="file"
