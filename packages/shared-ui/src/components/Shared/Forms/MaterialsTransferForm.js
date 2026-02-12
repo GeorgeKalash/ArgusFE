@@ -685,7 +685,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
     window.close()
   }
   
+  const hasInvalidQty = formik.values.transfers?.some(
+    item => Number(item.qty) == 0
+  )
+
   const onCopy = async () => {
+     if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
     const header = { ...formik.values }
     delete header.transfers
     delete header.serials
@@ -697,10 +707,47 @@ export default function MaterialsTransferForm({ recordId, window }) {
       lots: []
 
     }
+    
     const res = await postRequest({
       extension: InventoryRepository.MaterialsTransfer.clone,
       record: JSON.stringify(payload)
     })
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const onReturn = async () => {
+    if (formik.values?.fromSiteId == formik.values?.toSiteId) {
+      stackError({
+        message: labels.errorMessage
+      })
+
+      return
+    }
+
+    if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.return,
+      record: JSON.stringify(payload)
+    })
+    
     refetchForm(res?.recordId)
     invalidate()
   }
@@ -785,7 +832,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
       key: 'Copy',
       condition: true,
       onClick: onCopy,
-      disabled: !editMode
+      disabled: !isPosted
     },
     {
       key: 'Metals',
@@ -795,7 +842,9 @@ export default function MaterialsTransferForm({ recordId, window }) {
     },
     {
       key: 'Return',
-      condition: true
+      condition: true,
+      onClick: onReturn,
+      disabled: !isPosted
     }
   ]
 
