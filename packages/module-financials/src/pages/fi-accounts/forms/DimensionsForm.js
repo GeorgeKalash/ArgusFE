@@ -109,7 +109,7 @@ export default function DimensionsForm({ store, maxAccess }) {
     }
 
     run()
-  }, [accountId, dimensionFields])
+  }, [dimensionFields])
 
   const leftColumn = dimensionFields.slice(0, 10)
   const rightColumn = dimensionFields.slice(10, 20)
