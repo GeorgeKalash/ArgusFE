@@ -72,10 +72,9 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       record: JSON.stringify(obj)
     })
     if (!obj.recordId) {
-      setStore(prevStore => ({
-        ...prevStore,
+      setStore({
         recordId: res.recordId
-      }))
+      })
       formik.setFieldValue('recordId', res.recordId)
     }
     invalidate()

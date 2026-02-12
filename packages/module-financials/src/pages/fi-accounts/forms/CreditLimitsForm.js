@@ -9,7 +9,7 @@ import Form from '@argus/shared-ui/src/components/Shared/Form'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
-const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
+const CreditLimitsForm = ({ labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
   const { recordId: accountId } = store
@@ -76,11 +76,6 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
           ...currency
         }))
         formik.setValues({ currencies })
-
-        setStore(prevStore => ({
-          ...prevStore,
-          currencies
-        }))
       }
     })
   }

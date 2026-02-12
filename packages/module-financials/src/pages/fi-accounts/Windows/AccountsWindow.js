@@ -12,7 +12,6 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    currencies: null
   })
 
   const tabs = [
@@ -37,7 +36,6 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <CreditLimitsForm
           store={store}
-          setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
           editMode={editMode}
