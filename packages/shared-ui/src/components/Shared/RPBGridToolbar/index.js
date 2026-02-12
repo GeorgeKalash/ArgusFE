@@ -122,8 +122,7 @@ const RPBGridToolbar = ({
           width: 33.3333%;
           display: flex;
           justify-content: flex-start;
-          align-items: end;   
-          
+          align-items: end;
         }
 
         .bottomSectionContainer {
@@ -131,7 +130,7 @@ const RPBGridToolbar = ({
           flex-wrap: wrap;
           padding-top: 12px;
           margin: 0 !important;
-          gap: 4px 12px;          
+          gap: 4px 12px;
           align-items: center;
           font-size: 12px;
         }
@@ -141,7 +140,7 @@ const RPBGridToolbar = ({
             width: 40%;
             display: flex;
             justify-content: flex-start;
-            align-items: end;   
+            align-items: end;
           }
 
           .bottomSectionContainer {
@@ -154,7 +153,7 @@ const RPBGridToolbar = ({
             width: 50%;
             display: flex;
             justify-content: flex-start;
-            align-items: end;   
+            align-items: end;
           }
 
           .bottomSectionContainer {
@@ -164,10 +163,10 @@ const RPBGridToolbar = ({
 
         @media (max-width: 1024px) {
           .leftSectionGridItem {
-            width: 60%; 
+            width: 60%;
             display: flex;
             justify-content: flex-start;
-            align-items: end;   
+            align-items: end;
           }
 
           .bottomSectionContainer {
@@ -178,7 +177,7 @@ const RPBGridToolbar = ({
         @media (max-width: 768px) {
           .leftSectionGridItem {
             width: 100%;
-            margin-top: 8px;    
+            margin-top: 8px;
           }
 
           .bottomSectionContainer {

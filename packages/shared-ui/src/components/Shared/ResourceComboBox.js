@@ -20,6 +20,7 @@ export default function ResourceComboBox({
   refresh,
   allowClear,
   setData,
+  triggerOnDefault = false,
   ...rest
 }) {
   const { store: data } = rest
@@ -34,6 +35,8 @@ export default function ResourceComboBox({
   const [apiResponse, setApiResponse] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const finalItemsListRef = useRef([])
+
+  const didTriggerDefaultRef = useRef(false)
 
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
@@ -129,6 +132,19 @@ export default function ResourceComboBox({
       rest.onChange('', finalItemsListRef.current[defaultIndex])
     }
   }, [defaultIndex, finalItemsListRef.current.length])
+
+  useEffect(() => {
+    if (!triggerOnDefault) return
+    if (didTriggerDefaultRef.current) return
+
+    const hasPrimitiveDefault = typeof values[name] !== 'object' && (values[name] || values) && !value
+    if (!hasPrimitiveDefault) return
+
+    if (_value && typeof _value === 'object' && _value[valueField]) {
+      didTriggerDefaultRef.current = true
+      rest.onChange('', _value)
+    }
+  }, [_value, triggerOnDefault, values, name, valueField])
 
   return (
     <CustomComboBox
