@@ -12,6 +12,7 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import CustomButton from '../CustomButton'
 
 const styles = {
   container: 'ImageUpload_container',
