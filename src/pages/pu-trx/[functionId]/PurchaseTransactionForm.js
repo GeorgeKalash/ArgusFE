@@ -954,6 +954,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
     const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
+    const dtd = await getDTD(puTrxHeader.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -1013,6 +1014,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       header: {
         ...formik.values.header,
         ...puTrxHeader,
+        postMetalToFinancials: dtd?.record?.postMetalToFinancials ?? false,
         amount: parseFloat(puTrxHeader?.amount).toFixed(2),
         currentDiscount:
           puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
@@ -2002,7 +2004,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
-                hidden={metalPriceVisibility}
+                hidden={!metalPriceVisibility}
               />
             </Grid>
           </Grid>
