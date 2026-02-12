@@ -5,7 +5,8 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import WorksheetWindow from '../../mf-worksheet/window/WorksheetWindow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 
-export default function WorksheetTab({ store, maxAccess, labels }) {
+export default function WorksheetTab({ store, maxAccess, labels, setRefetchJob }) {
+
   const { stack } = useWindow()
   const { jobWorksheets, jobReference } = store || {}
   const [list, setList] = useState([])
@@ -59,7 +60,7 @@ export default function WorksheetTab({ store, maxAccess, labels }) {
       Component: WorksheetWindow,
       props: {
         recordId,
-        joInvalidate: refetch
+        joInvalidate: setRefetchJob
       }
     })
   }
