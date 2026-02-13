@@ -117,6 +117,13 @@ const RetailTrx = () => {
   }
 
   async function fetchWithFilter({ filters, pagination }) {
+    if (!posObj?.current?.posId) {
+      stackError({
+        message: labels.noUserPos
+      })
+
+      return
+    }
     if (filters.qry)
       return await getRequest({
         extension: PointofSaleRepository.RetailInvoice.snapshot,
