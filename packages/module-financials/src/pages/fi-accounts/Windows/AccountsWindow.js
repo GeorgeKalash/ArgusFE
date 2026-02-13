@@ -4,20 +4,21 @@ import { useState } from 'react'
 import AccountsForm from '../forms/AccountsForm'
 import CreditLimitsForm from '../forms/CreditLimitsForm'
 import AccountBalanceTable from '../forms/AccountBalanceTable'
+import DimensionsForm from '../forms/DimensionsForm'
 
-const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
+const AccountsWindow = ({ height, recordId, labels, maxAccess }) => {
   const [activeTab, setActiveTab] = useState(0)
   const editMode = !!recordId
 
   const [store, setStore] = useState({
     recordId: recordId || null,
-    currencies: null
   })
 
   const tabs = [
     { label: labels.Accounts },
     { label: labels.CreditLimits, disabled: !store.recordId },
-    { label: labels.AccountBalance, disabled: !store.recordId }
+    { label: labels.AccountBalance, disabled: !store.recordId },
+    { label: labels.Dimensions, disabled: !store.recordId }
   ]
 
   return (
@@ -29,24 +30,22 @@ const AccountsWindow = ({ height, recordId, labels, maxAccess, expanded }) => {
           setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={1} value={activeTab} maxAccess={maxAccess}>
         <CreditLimitsForm
           store={store}
-          setStore={setStore}
           labels={labels}
           maxAccess={maxAccess}
-          height={height}
-          expanded={expanded}
           editMode={editMode}
         />
       </CustomTabPanel>
       <CustomTabPanel height={height} index={2} value={activeTab} maxAccess={maxAccess}>
         <AccountBalanceTable store={store} labels={labels} maxAccess={maxAccess} />
+      </CustomTabPanel>
+      <CustomTabPanel height={height} index={3} value={activeTab} maxAccess={maxAccess}>
+        <DimensionsForm store={store} maxAccess={maxAccess} />
       </CustomTabPanel>
     </>
   )

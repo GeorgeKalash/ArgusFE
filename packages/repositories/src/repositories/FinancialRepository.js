@@ -4,6 +4,10 @@ export const FinancialRepository = {
   Segment: {
     qry: service + 'qrySEG'
   },
+  AccountDimensions: {
+    qry: service + 'qryADI',
+    set2: service + 'set2ADI'
+  },
   DescriptionTemplate: {
     qry: service + 'qryDTP',
     page: service + 'pageDTP',
