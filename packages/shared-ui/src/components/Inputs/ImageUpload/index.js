@@ -12,8 +12,44 @@ import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsC
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
-import styles from './ImageUpload.module.css'
 import CustomButton from '../CustomButton'
+
+const EMPTY_PHOTO =
+  require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+
+const css = `
+.ImageUpload_container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.ImageUpload_previewBox {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ImageUpload_previewImage {
+  height: 100%;
+  object-fit: cover;
+}
+
+.ImageUpload_bottomSection {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+}
+`
 
 const ImageUpload = forwardRef(
   (
@@ -144,7 +180,6 @@ const ImageUpload = forwardRef(
 
       const reader = new FileReader()
       readerRef.current = reader
-
       reader.onloadend = e => setImage(e.target.result)
       reader.readAsDataURL(file)
     }
@@ -194,51 +229,51 @@ const ImageUpload = forwardRef(
     }, [parentRecordId, recordId])
 
     return (
-      <Box className={styles.container}>
-       <Box
-          className={styles.previewBox}
-          style={{
-            width: '100%',
-            maxWidth: scaledWidth,
-            height: scaledHeight
-          }}
-          onClick={handleClick}
-        >
-          <img
-            src={
-              image ||
-              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
-            }
-            alt=""
-            className={styles.previewImage}
-            style={{ border: error ? '2px solid #F44336' : 'none' }}
-            onError={e => {
-              e.currentTarget.src =
-                require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+      <>
+        <style>{css}</style>
+
+        <Box className="ImageUpload_container">
+          <Box
+            className="ImageUpload_previewBox"
+            style={{
+              width: '100%',
+              maxWidth: scaledWidth,
+              height: scaledHeight
             }}
-          />
-        </Box>
+            onClick={handleClick}
+          >
+            <img
+              src={image || EMPTY_PHOTO}
+              alt=""
+              className="ImageUpload_previewImage"
+              style={{ border: error ? '2px solid #F44336' : 'none' }}
+              onError={e => {
+                e.currentTarget.src = EMPTY_PHOTO
+              }}
+            />
+          </Box>
 
-        <Box className={styles.bottomSection}>
-          <input
-            hidden
-            type="file"
-            accept="image/png, image/jpeg, image/jpg"
-            ref={hiddenInputRef}
-            onChange={handleInputImageChange}
-            disabled={disabled}
-          />
+          <Box className="ImageUpload_bottomSection">
+            <input
+              hidden
+              type="file"
+              accept="image/png, image/jpeg, image/jpg"
+              ref={hiddenInputRef}
+              onChange={handleInputImageChange}
+              disabled={disabled}
+            />
 
-          <CustomButton
-            onClick={handleInputImageReset}
-            image="clear.png"
-            tooltipText={platformLabels.Clear}
-            color="#F44336"
-            border="none"
-            disabled={disabled}
-          />
+            <CustomButton
+              onClick={handleInputImageReset}
+              image="clear.png"
+              tooltipText={platformLabels.Clear}
+              color="#F44336"
+              border="none"
+              disabled={disabled}
+            />
+          </Box>
         </Box>
-      </Box>
+      </>
     )
   }
 )
