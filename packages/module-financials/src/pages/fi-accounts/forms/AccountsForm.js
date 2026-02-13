@@ -138,8 +138,8 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     displayField='name'
                     values={formik.values}
                     onChange={(_, newValue) => {
-                      formik.setFieldValue('groupId', newValue?.recordId||null)
-                      formik.setFieldValue('groupName', newValue?.name||'')  
+                      formik.setFieldValue('groupName', newValue?.name || '')  
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                   />
@@ -262,7 +262,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(_, newValue) => formik.setFieldValue('spId', newValue?.recordId||null)}
+                    onChange={(_, newValue) => formik.setFieldValue('spId', newValue?.recordId || null)}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
                   />
                 </Grid>
