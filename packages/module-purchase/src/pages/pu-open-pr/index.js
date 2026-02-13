@@ -266,8 +266,7 @@ const OpenPurchaseRequisition = () => {
   return (
     <Form
       actions={actions}
-      onSave={formik.handleSubmit}
-      disabledSubmit={!vendorId || !currencyId}
+      isSaved={false}
       fullSize
       maxAccess={access}
     >
