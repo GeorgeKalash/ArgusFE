@@ -134,8 +134,7 @@ export default function ResourceComboBox({
   }, [defaultIndex, finalItemsListRef.current.length])
 
   useEffect(() => {
-    if (!triggerOnDefault) return
-    if (didTriggerDefaultRef.current) return
+    if (!triggerOnDefault || didTriggerDefaultRef.current) return
 
     const hasPrimitiveDefault = typeof values[name] !== 'object' && (values[name] || values) && !value
     if (!hasPrimitiveDefault) return
