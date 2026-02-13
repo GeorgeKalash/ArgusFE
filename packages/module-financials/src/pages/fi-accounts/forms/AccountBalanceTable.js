@@ -1,6 +1,4 @@
 import { useContext } from 'react'
-import { Box } from '@mui/material'
-import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
@@ -12,7 +10,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 const AccountBalanceForm = ({ labels, maxAccess, store }) => {
   const { getRequest } = useContext(RequestsContext)
   const { recordId } = store
-  var editMode = recordId ? true : false
+  var editMode = !!recordId 
 
   const columns = [
     {
@@ -30,12 +28,9 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
   async function fetchGridData(options = {}) {
     const { _startAt = 0, _pageSize = 50 } = options
 
-    const defaultParams = `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
-    var parameters = defaultParams
-
     const response = await getRequest({
       extension: FinancialRepository.AccountCreditBalance.qry,
-      parameters: parameters
+      parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_accountId=${recordId}`
     })
 
     return { ...response, _startAt: _startAt }
@@ -58,7 +53,6 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
           columns={columns}
           gridData={data}
           rowId={['currencyId']}
-          isLoading={false}
           maxAccess={maxAccess}
           pagination={false}
         />
