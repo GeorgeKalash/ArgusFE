@@ -1471,6 +1471,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function dtInfo(dtId) {
     if (!dtId) {
       formik.setFieldValue('disableSKULookup', false)
+      formik.setFieldValue('header.postMetalToFinancials', false)
 
       return
     }
