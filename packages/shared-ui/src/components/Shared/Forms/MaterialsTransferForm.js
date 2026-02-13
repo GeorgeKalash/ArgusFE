@@ -712,6 +712,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       extension: InventoryRepository.MaterialsTransfer.clone,
       record: JSON.stringify(payload)
     })
+
+    toast.success(platformLabels.Copied)
     refetchForm(res?.recordId)
     invalidate()
   }
@@ -747,7 +749,8 @@ export default function MaterialsTransferForm({ recordId, window }) {
       extension: InventoryRepository.MaterialsTransfer.return,
       record: JSON.stringify(payload)
     })
-    
+
+    toast.success(platformLabels.Returned)
     refetchForm(res?.recordId)
     invalidate()
   }
@@ -790,13 +793,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Close',
