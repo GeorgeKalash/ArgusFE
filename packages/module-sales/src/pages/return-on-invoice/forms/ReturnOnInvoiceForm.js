@@ -61,6 +61,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const filteredMeasurements = useRef([])
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [reCal, setReCal] = useState(false)
+  const KGValueRef = useRef('')
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReturnOnInvoice,
@@ -1484,6 +1485,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })()
   }, [])
 
+  useEffect(() => {
+    if (formik.values.KGmetalPrice != null && formik.values.KGmetalPrice !== '') {
+      KGValueRef.current = formik.values.KGmetalPrice
+    }
+  }, [formik.values.KGmetalPrice])
+
   return (
     <FormShell
       resourceId={ResourceIds.ReturnOnInvoice}
@@ -1628,7 +1635,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     name='KGmetalPrice'
                     maxAccess={maxAccess}
                     label={labels.metalPrice}
-                    value={formik.values.KGmetalPrice}
+                    value={formik.values.KGmetalPrice ?? KGValueRef.current}
                     onChange={e => {
                       let KGmetalPrice = Number(e.target.value.replace(/,/g, ''))
                       formik.setFieldValue('KGmetalPrice', KGmetalPrice)
