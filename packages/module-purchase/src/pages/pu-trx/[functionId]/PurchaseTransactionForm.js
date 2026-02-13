@@ -956,7 +956,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
-    const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
+    const doctypeInfo = await dtInfo(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -1005,7 +1005,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
-      disableSKULookup: disableLookup || false,
+      disableSKULookup: doctypeInfo?.disableSKULookup || false,
       installments: puTrxInstallments?.map((installment, index) => {
         return {
           ...installment,
@@ -1016,6 +1016,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       header: {
         ...formik.values.header,
         ...puTrxHeader,
+        postMetalToFinancials: doctypeInfo?.postMetalToFinancials ?? false,
         amount: parseFloat(puTrxHeader?.amount).toFixed(2),
         currentDiscount:
           puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
@@ -1470,9 +1471,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     fillMetalPrice()
   }
 
-  async function sKULookupInfo(dtId) {
+  async function dtInfo(dtId) {
     if (!dtId) {
       formik.setFieldValue('disableSKULookup', false)
+      formik.setFieldValue('header.postMetalToFinancials', false)
 
       return
     }
@@ -1483,7 +1485,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
 
-    return res?.record?.disableSKULookup || false
+    return res?.record
   }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
@@ -1555,7 +1557,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   useEffect(() => {
     if (!recordId) {
       if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
-      sKULookupInfo(formik.values.header.dtId)
+      dtInfo(formik.values.header.dtId)
     }
   }, [formik.values?.header.dtId])
 
@@ -2005,7 +2007,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
-                hidden={metalPriceVisibility}
+                hidden={!metalPriceVisibility}
               />
             </Grid>
           </Grid>
