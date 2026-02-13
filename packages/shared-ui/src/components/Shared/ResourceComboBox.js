@@ -144,7 +144,7 @@ export default function ResourceComboBox({
       didTriggerDefaultRef.current = true
       rest.onChange('', _value)
     }
-  }, [_value, triggerOnDefault, values, name, valueField])
+  }, [_value, triggerOnDefault])
 
   return (
     <CustomComboBox
