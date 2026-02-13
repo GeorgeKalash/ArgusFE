@@ -1,9 +1,9 @@
-import { DialogContent, Grid } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import CustomJsonFormat from '@argus/shared-ui/src/components/Inputs/CustomJsonFormat'
 
 export default function DataForm({ obj }) {
   const [data, setData] = useState({})
@@ -23,19 +23,8 @@ export default function DataForm({ obj }) {
   return (
     <VertLayout>
       <Fixed>
-        <DialogContent
-          sx={{
-            overflow: 'auto'
-          }}
-        >
-          <Grid item style={{ height: 290 }}>
-            {<pre style={{ margin: 0, fontFamily: 'inherit', fontWeight: 500 }}>{JSON.stringify(data, null, 2)}</pre>}
-          </Grid>
-        </DialogContent>
+        <CustomJsonFormat value={data} />
       </Fixed>
     </VertLayout>
   )
-}
-
-{
 }
