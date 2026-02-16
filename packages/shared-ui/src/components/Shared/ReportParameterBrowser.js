@@ -123,41 +123,20 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) => {
+const GetComboBox = ({ field, formik, rpbParams }) => {
   const apiDetails = field?.apiDetails
   let newParams = apiDetails?.parameters
-
   useEffect(() => {
     if (!formik.values?.parameters?.[field.id]?.value && field.value && rpbParams?.length < 1) {
       formik.setFieldValue(`parameters[${field.id}]`, {
         fieldId: field.id,
         fieldKey: field.key,
         value: Number(field.value),
-        caption: field.caption
+        caption: field.caption,
+        display: field.value
       })
     }
   }, [])
-
-  useEffect(() => {
-  if (field.id && optionInfo && !formik.values.parameters?.[field.id]?.display) {
-    if (optionInfo.id !== field.id) return
-
-    const separator = apiDetails?.separator ?? ' '
-    const textValue = Array.isArray(apiDetails?.displayField)
-      ? apiDetails.displayField
-          .map(header => optionInfo?.[header]?.toString())
-          .filter(Boolean)
-          .join(separator)
-      : optionInfo?.[apiDetails?.displayField] || optionInfo?.value 
-    formik.setFieldValue(
-      `parameters[${field.id}]`,
-      {
-        ...formik.values.parameters?.[field.id],
-        display: textValue || ''
-      }
-    )
-  }
-  }, [optionInfo, field.id])
 
   if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
     newParams += `&_functionIds=${field?.data}`
@@ -173,7 +152,6 @@ const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) =>
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
         <ResourceComboBox
-          id={field?.id || null}
           endpointId={apiDetails.endpoint}
           parameters={newParams}
           name={`parameters[${field.id}]`}
@@ -189,7 +167,7 @@ const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) =>
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
           values={formik.values?.parameters?.[field.id]?.value}
-          setOptionInfo={setOptionInfo}
+          triggerOnDefault={true}
           onChange={(_, newValue) => {
             const separator = apiDetails?.separator ?? ' '
 
@@ -218,7 +196,6 @@ const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) =>
       ) : (
         <>
           <ResourceComboBox
-            id={field?.id || null}
             datasetId={field?.data}
             name={`parameters[${field.id}]`}
             label={field.caption}
@@ -226,7 +203,7 @@ const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) =>
             displayField={'value'}
             required={field.mandatory}
             value={formik.values?.parameters?.[field.id]?.value}
-            setOptionInfo={setOptionInfo}
+            triggerOnDefault={true}
             onChange={(_, newValue) => {
               formik.setFieldValue(
                 `parameters[${field.id}]`,
@@ -420,7 +397,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
-  const [optionInfo, setOptionInfo] = useState(null)
+
   useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
   const getParameterDefinition = reportName => {
@@ -545,7 +522,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} optionInfo={optionInfo} setOptionInfo={setOptionInfo} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 4) {
             return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {

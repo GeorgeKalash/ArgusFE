@@ -6,11 +6,9 @@ import { useCacheDataContext } from '@argus/shared-providers/src/providers/Cache
 import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
 export default function ResourceComboBox({
-  id,
   endpointId,
   datasetId,
   valueField = 'recordId',
-  setOptionInfo,
   values = {},
   parameters = '_filter=',
   dynamicParams,
@@ -22,6 +20,7 @@ export default function ResourceComboBox({
   refresh,
   allowClear,
   setData,
+  triggerOnDefault = false,
   ...rest
 }) {
   const { store: data } = rest
@@ -39,6 +38,8 @@ export default function ResourceComboBox({
 
   const key = endpointId || datasetId
   const noCache = Boolean(dynamicParams)
+
+  const didTriggerDefaultRef = useRef(false)
 
   function fetch({ datasetId, endpointId, parameters, refresh }) {
     if (endpointId) {
@@ -132,14 +133,24 @@ export default function ResourceComboBox({
     }
   }, [defaultIndex, finalItemsListRef.current.length])
 
-   useEffect(() => {
-    if (typeof setOptionInfo !== 'function') return
+  useEffect(() => {
+    if (!triggerOnDefault || !rest.onChange ) return
+    if (!_value || typeof _value !== 'object') return
+
     const matchedValue = datasetId
       ? finalItemsList?.find(item => Number(item.key) === Number(_value))
       : _value
-      
-    if (matchedValue && Object?.keys(matchedValue).length > 0) setOptionInfo({ ...matchedValue, id })
-  }, [_value, setOptionInfo])
+
+    const shouldUpdate =
+      matchedValue &&
+      Object.keys(matchedValue).length > 0 &&
+      apiResponse?.list?.some(
+        item => item[valueField] === matchedValue[valueField]
+      )
+
+    if (shouldUpdate) rest.onChange(name, matchedValue)
+  }, [_value])
+
 
   return (
     <CustomComboBox
