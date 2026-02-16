@@ -1013,6 +1013,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                 upo: parseFloat(item.upo).toFixed(2),
                 vatAmount: parseFloat(item.vatAmount).toFixed(2),
                 extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
+                baseQty: parseFloat(item?.qty) * parseFloat(item?.muQty || 0),
                 returnNowQty: parseFloat(item.qty).toFixed(2),
                 taxDetails: taxDetailsResponse,
                 serials: serials?.filter(s => s.seqNo == item.seqNo),
@@ -1031,6 +1032,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
           ? retHeader?.record?.tdAmount
           : retHeader?.record?.tdPct,
       amount: parseFloat(retHeader?.record?.amount).toFixed(2),
+      postMetalToFinancials: dtInfo?.postMetalToFinancials || false,
       billAddress: billAdd || '',
       commitItems: dtInfo?.commitItems,
       isDefaultDtPresent: dtInfo?.dtId,
@@ -1371,6 +1373,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   function getDTD(dtId) {
+    if (!dtId) return
+    
     const res = getRequest({
       extension: SaleRepository.DocumentTypeDefault.get,
       parameters: `_dtId=${dtId}`
@@ -1412,14 +1416,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
       return
     }
     const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
-
-    if (kgMetalPriceValue != null) {
-      formik.setFieldValue('KGmetalPrice', kgMetalPriceValue)
-      formik.setFieldValue('metalPrice', kgMetalPriceValue / 1000)
-    } else {
-      formik.setFieldValue('KGmetalPrice', 0)
-      formik.setFieldValue('metalPrice', 0)
-    }
+    formik.setFieldValue('KGmetalPrice', kgMetalPriceValue != null ? kgMetalPriceValue : 0)
+    formik.setFieldValue('metalPrice', kgMetalPriceValue != null ? kgMetalPriceValue / 1000 : 0)
   }
 
   async function fillMetalPrice(baseMetalCuId) {
