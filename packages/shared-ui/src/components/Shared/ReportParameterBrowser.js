@@ -95,7 +95,7 @@ const GetLookup = ({ field, formik }) => {
         form={formik}
         firstValue={formik.values.parameters?.[field.id]?.display}
         secondValue={formik.values.parameters?.[field.id]?.display2}
-        onChange={(event, newValue) => {
+        onChange={(_, newValue) => {
           const display = Array.isArray(apiDetails?.firstField)
             ? apiDetails?.firstField
                 ?.map(header => newValue?.[header] && newValue?.[header]?.toString())
@@ -123,7 +123,7 @@ const GetLookup = ({ field, formik }) => {
   )
 }
 
-const GetComboBox = ({ field, formik, rpbParams }) => {
+const GetComboBox = ({ field, formik, rpbParams, optionInfo, setOptionInfo }) => {
   const apiDetails = field?.apiDetails
   let newParams = apiDetails?.parameters
 
@@ -133,11 +133,31 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
         fieldId: field.id,
         fieldKey: field.key,
         value: Number(field.value),
-        caption: field.caption,
-        display: field.value
+        caption: field.caption
       })
     }
   }, [])
+
+  useEffect(() => {
+  if (field.id && optionInfo && !formik.values.parameters?.[field.id]?.display) {
+    if (optionInfo.id !== field.id) return
+
+    const separator = apiDetails?.separator ?? ' '
+    const textValue = Array.isArray(apiDetails?.displayField)
+      ? apiDetails.displayField
+          .map(header => optionInfo?.[header]?.toString())
+          .filter(Boolean)
+          .join(separator)
+      : optionInfo?.[apiDetails?.displayField] || optionInfo?.value 
+    formik.setFieldValue(
+      `parameters[${field.id}]`,
+      {
+        ...formik.values.parameters?.[field.id],
+        display: textValue || ''
+      }
+    )
+  }
+  }, [optionInfo, field.id])
 
   if (apiDetails?.endpoint === SystemRepository.DocumentType.qry2) {
     newParams += `&_functionIds=${field?.data}`
@@ -153,6 +173,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
         <ResourceComboBox
+          id={field?.id || null}
           endpointId={apiDetails.endpoint}
           parameters={newParams}
           name={`parameters[${field.id}]`}
@@ -168,7 +189,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
           values={formik.values?.parameters?.[field.id]?.value}
-          onChange={(event, newValue) => {
+          setOptionInfo={setOptionInfo}
+          onChange={(_, newValue) => {
             const separator = apiDetails?.separator ?? ' '
 
             const textValue = Array.isArray(apiDetails?.displayField)
@@ -196,6 +218,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
       ) : (
         <>
           <ResourceComboBox
+            id={field?.id || null}
             datasetId={field?.data}
             name={`parameters[${field.id}]`}
             label={field.caption}
@@ -203,7 +226,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
             displayField={'value'}
             required={field.mandatory}
             value={formik.values?.parameters?.[field.id]?.value}
-            onChange={(event, newValue) => {
+            setOptionInfo={setOptionInfo}
+            onChange={(_, newValue) => {
               formik.setFieldValue(
                 `parameters[${field.id}]`,
                 newValue
@@ -246,7 +270,7 @@ const GetDate = ({ field, formik, rpbParams }) => {
         label={field.caption}
         value={formik.values?.parameters?.[field.id]?.value}
         required={field.mandatory}
-        onChange={(name, newValue) => {
+        onChange={(_, newValue) => {
           newValue
             ? formik.setFieldValue(`parameters[${field.id}]`, {
                 fieldId: field.id,
@@ -320,7 +344,7 @@ const GetDateTimePicker = ({ field, formik, rpbParams }) => {
         value={formik.values?.parameters?.[field.id]?.value || null}
         defaultValue={field.defaultValue}
         required={field.mandatory}
-        onChange={(name, newValue) => {
+        onChange={(_, newValue) => {
           formik.setFieldValue(`parameters[${field.id}]`, {
             fieldId: field.id,
             fieldKey: field.key,
@@ -396,7 +420,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
   const [parameters, setParameters] = useState([])
   const { stack: stackError } = useError()
   const { platformLabels } = useContext(ControlContext)
-
+  const [optionInfo, setOptionInfo] = useState(null)
   useSetWindow({ title: platformLabels.ReportParametersBrowser, window })
 
   const getParameterDefinition = reportName => {
@@ -521,7 +545,7 @@ const ReportParameterBrowser = ({ reportName, setRpbParams, rpbParams, window })
           if (item.controlType === 5 && item.apiDetails?.type === LOOKUP) {
             return <GetLookup key={item.fieldId} formik={formik} field={item} />
           } else if (item.controlType === 5 && item.apiDetails?.type === COMBOBOX) {
-            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
+            return <GetComboBox key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} optionInfo={optionInfo} setOptionInfo={setOptionInfo} />
           } else if (item.controlType === 4) {
             return <GetDate key={item.fieldId} formik={formik} field={item} rpbParams={rpbParams} />
           } else if (item.controlType === 1) {
