@@ -133,7 +133,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     isVerified: false,
     metalPrice: 0,
     KGmetalPrice: 0,
-    hiddenkgMetalPrice: 0,
     clientDiscount: 0,
     currentDiscount: 0,
     baseMetalCuId: parseInt(defaultMCbaseCU?.value),
@@ -588,7 +587,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
         const ItemConvertPrice = await getItemConvertPrice(newRow?.itemId, newRow?.muId)
         const filteredItems = filteredMeasurements?.current.filter(item => item.recordId === newRow?.muId)
 
-        const qtyInBase = newRow?.qty * filteredItems?.muQty ?? 0
+        const qtyInBase = newRow?.qty * filteredItems?.[0]?.muQty ?? 0
 
         const unitPrice =
           ItemConvertPrice?.priceType === 3
@@ -1383,11 +1382,12 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   async function onChangeDtId(dtId) {
     if (!dtId) return
     const res = await getDTD(dtId)
-
-    formik.setFieldValue('KGmetalPrice', formik.values.hiddenkgMetalPrice)
-    formik.setFieldValue('defaultBaseMC', formik.values.hiddenkgMetalPrice)
-    formik.setFieldValue('metalPrice', formik.values.hiddenkgMetalPrice ? formik.values.hiddenkgMetalPrice / 1000 : 0)
-
+    if (res?.record != null) {
+      setMetalPriceOperations()
+    } else {
+      formik.setFieldValue('KGmetalPrice', 0)
+      formik.setFieldValue('metalPrice', 0)
+    }
     formik.setFieldValue('plantId', res?.record?.plantId || null)
     const validSpId = await validateSalesPerson(res?.record?.spId)
     formik.setFieldValue('spId', validSpId)
@@ -1411,8 +1411,15 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
       return
     }
-    const hiddenkgMetalPrice = await fillMetalPrice(defaultMCbaseCU?.value)
-    formik.setFieldValue('hiddenkgMetalPrice', hiddenkgMetalPrice || 0)
+    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
+
+    if (kgMetalPriceValue != null) {
+      formik.setFieldValue('KGmetalPrice', kgMetalPriceValue)
+      formik.setFieldValue('metalPrice', kgMetalPriceValue / 1000)
+    } else {
+      formik.setFieldValue('KGmetalPrice', 0)
+      formik.setFieldValue('metalPrice', 0)
+    }
   }
 
   async function fillMetalPrice(baseMetalCuId) {
@@ -1647,7 +1654,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                       isPosted || (!editMode && !formik.values.baseMetalCuId) || (!editMode && !formik.values.dtId)
                     }
                     onClear={() => {
-                      formik.setFieldValue('KGmetalPrice', '')
+                      formik.setFieldValue('KGmetalPrice', null)
                       formik.setFieldValue('metalPrice', null)
                     }}
                     error={formik.touched?.KGmetalPrice && Boolean(formik.errors?.KGmetalPrice)}
