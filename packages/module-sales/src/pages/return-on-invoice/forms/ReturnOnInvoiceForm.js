@@ -61,7 +61,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   const filteredMeasurements = useRef([])
   const [cycleButtonState, setCycleButtonState] = useState({ text: '%', value: 2 })
   const [reCal, setReCal] = useState(false)
-  const KGValueRef = useRef('')
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.ReturnOnInvoice,
@@ -1330,7 +1329,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   async function refetchForm(recordId) {
     const retHeader = await getRetailInvoice(recordId)
     const retItems = await getRetailInvoiceItems(recordId)
-    const dtInfo = await onChangeDtId(retHeader.record.dtId)
+    const dtInfo = await getDTD(retHeader.record.dtId)
     const clientDiscount = await getClientInfo(retHeader.record.clientId)
     const serialsList = await getReturnSerials(recordId)
     await fillForm(retHeader, retItems, dtInfo, clientDiscount, serialsList?.list)
@@ -1372,16 +1371,23 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return res?.record?.reference
   }
 
+  function getDTD(dtId) {
+    const res = getRequest({
+      extension: SaleRepository.DocumentTypeDefault.get,
+      parameters: `_dtId=${dtId}`
+    })
+
+    return res
+  }
+
   async function onChangeDtId(dtId) {
     if (!dtId) return
+    const res = await getDTD(dtId)
+
     formik.setFieldValue('KGmetalPrice', formik.values.hiddenkgMetalPrice)
     formik.setFieldValue('defaultBaseMC', formik.values.hiddenkgMetalPrice)
     formik.setFieldValue('metalPrice', formik.values.hiddenkgMetalPrice ? formik.values.hiddenkgMetalPrice / 1000 : 0)
 
-    const res = await getRequest({
-      extension: SaleRepository.DocumentTypeDefault.get,
-      parameters: `_dtId=${dtId}`
-    })
     formik.setFieldValue('plantId', res?.record?.plantId || null)
     const validSpId = await validateSalesPerson(res?.record?.spId)
     formik.setFieldValue('spId', validSpId)
@@ -1485,11 +1491,6 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     })()
   }, [])
 
-  useEffect(() => {
-    if (formik.values.KGmetalPrice != null && formik.values.KGmetalPrice !== '') {
-      KGValueRef.current = formik.values.KGmetalPrice
-    }
-  }, [formik.values.KGmetalPrice])
 
   return (
     <FormShell
@@ -1635,7 +1636,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
                     name='KGmetalPrice'
                     maxAccess={maxAccess}
                     label={labels.metalPrice}
-                    value={formik.values.KGmetalPrice ?? KGValueRef.current}
+                    value={formik.values.KGmetalPrice}
                     onChange={e => {
                       let KGmetalPrice = Number(e.target.value.replace(/,/g, ''))
                       formik.setFieldValue('KGmetalPrice', KGmetalPrice)
