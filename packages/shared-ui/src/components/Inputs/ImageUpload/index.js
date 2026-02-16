@@ -58,7 +58,7 @@ const ImageUpload = forwardRef(
       error,
       seqNo,
       recordId,
-      width = 140,
+      width,
       height = 140,
       customWidth,
       customHeight,
@@ -92,11 +92,18 @@ const ImageUpload = forwardRef(
       const maxScale = 0.92
 
       if (screenWidth <= minW) return minScale
-      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      return (
+        minScale +
+        ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      )
     })()
 
-    const scaledWidth = (customWidth || width) * scaleFactor
-    const scaledHeight = (customHeight || height) * scaleFactor
+    const baseHeight = customHeight ?? height
+    const baseWidth =
+      customWidth ?? width ?? baseHeight * ((140 / 140) || 1)
+
+    const scaledHeight = baseHeight * scaleFactor
+    const scaledWidth = baseWidth * scaleFactor
 
     useImperativeHandle(ref, () => ({ submit }))
 
