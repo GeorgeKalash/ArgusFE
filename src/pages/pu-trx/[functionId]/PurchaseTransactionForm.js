@@ -963,17 +963,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ? await Promise.all(
           puTrxItems?.map(async (item, index) => {
             const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
-            const taxDetailsResponse = []
-
-            const updatedpuTrxTaxes =
-              puTrxTaxes?.map(tax => {
-                const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-                return {
-                  ...tax,
-                  taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-                }
-              }) || null
 
             return {
               ...item,
@@ -992,7 +981,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     id: index
                   }
                 }),
-              taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
+              taxDetails: puTrxTaxes
             }
           })
         )
@@ -1462,7 +1451,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
-      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
     )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
