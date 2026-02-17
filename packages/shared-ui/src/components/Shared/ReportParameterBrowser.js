@@ -148,6 +148,9 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
     newParams += `_currencyType=${field?.data}`
   }
 
+  const currentParam = formik.values?.parameters?.[field.id]
+  const shouldTriggerOnDefault = !currentParam?.display && currentParam?.value
+
   return (
     <Grid item xs={12} key={field.id}>
       {field?.classId ? (
@@ -166,8 +169,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           }
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          values={formik.values?.parameters?.[field.id]?.value}
-          triggerOnDefault={true}
+          values={currentParam?.value}
+          triggerOnDefault={shouldTriggerOnDefault}
           onChange={(_, newValue) => {
             const separator = apiDetails?.separator ?? ' '
 
@@ -202,8 +205,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
             valueField={'key'}
             displayField={'value'}
             required={field.mandatory}
-            values={formik.values?.parameters?.[field.id]?.value}
-            triggerOnDefault={true}
+            values={currentParam?.value}
+            triggerOnDefault={shouldTriggerOnDefault}
             onChange={(_, newValue) => {
               formik.setFieldValue(
                 `parameters[${field.id}]`,
