@@ -167,7 +167,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
             <Grid item xs={12}>
               <ResourceComboBox
                 endpointId={InventoryRepository.Category.qry}
-                parameters='_pagesize=30&_startAt=0&_name='
+                parameters='_pagesize=1000&_startAt=0&_name='
                 name='categoryId'
                 label={_labels.itemCategory}
                 valueField='recordId'
