@@ -69,7 +69,13 @@ const ModelMaker = () => {
     {
       field: 'threeDPRef',
       headerName: labels.print,
-      flex: 1
+      flex: 1,
+      valueLink: {
+        resourceId: ResourceIds.ThreeDPrint,
+        props: row => ({
+          recordId: row.threeDPId,
+        })
+      }
     },
     {
       field: 'laborRef',

@@ -82,7 +82,13 @@ const ThreeDDesign = () => {
     {
       field: 'sketchRef',
       headerName: labels.sketchRef,
-      flex: 1
+      flex: 1,
+      valueLink: {
+        resourceId: ResourceIds.Sketch,
+        props: row => ({
+          recordId: row.sketchId,
+        })
+      }
     },
     {
       field: 'designerName',

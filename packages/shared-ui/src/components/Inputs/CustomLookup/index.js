@@ -9,6 +9,7 @@ import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
 import styles from './CustomLookup.module.css'
 import dropdownStyles from '../SharedDropdown.module.css'
 import inputs from '../Inputs.module.css'
+import { useOpenResource } from '@argus/shared-hooks/src/hooks/useOpenResource'
 
 const CustomLookup = ({
   type = 'text',
@@ -46,7 +47,7 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
-  onValueClick,
+  valueLink,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
@@ -66,6 +67,15 @@ const CustomLookup = ({
 
   const inputElRef = useRef(null)
   const textMeasureRef = useRef(null)
+
+  const openResource = useOpenResource()
+  const onValueClick = () => {
+      if (!valueLink?.resourceId) return
+
+      openResource(valueLink.resourceId, {
+        props: valueLink.props
+      })
+  }
 
   const [inputValue, setInputValue] = useState(firstValue || '')
 
@@ -245,8 +255,7 @@ const CustomLookup = ({
             )
           }}
           renderInput={params => {
-            const hasSelectedValue = !!(firstValue || inputValue)
-            const isValueLink = typeof onValueClick === 'function' && hasSelectedValue && !_readOnly
+            const isValueLink = valueLink?.resourceId
 
             return (
               <TextField
