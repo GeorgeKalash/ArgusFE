@@ -6,9 +6,11 @@ import { useCacheDataContext } from '@argus/shared-providers/src/providers/Cache
 import { useCacheStoreContext } from '@argus/shared-providers/src/providers/CacheStoreContext'
 
 export default function ResourceComboBox({
+  id,
   endpointId,
   datasetId,
   valueField = 'recordId',
+  setOptionInfo,
   values = {},
   parameters = '_filter=',
   dynamicParams,
@@ -23,7 +25,6 @@ export default function ResourceComboBox({
   ...rest
 }) {
   const { store: data } = rest
-
   const { getRequest } = useContext(RequestsContext)
   const { updateStore, fetchWithCache } = useCacheDataContext() || {}
   const { cacheStore = {}, updateCacheStore = () => {} } = useCacheStoreContext() || {}
@@ -129,6 +130,14 @@ export default function ResourceComboBox({
       rest.onChange('', finalItemsListRef.current[defaultIndex])
     }
   }, [defaultIndex, finalItemsListRef.current.length])
+
+   useEffect(() => {
+    if (typeof setOptionInfo !== 'function') return
+    const matchedValue = datasetId
+      ? finalItemsList?.find(item => Number(item.key) === Number(_value))
+      : _value
+    if (matchedValue && Object?.keys(matchedValue).length > 0) setOptionInfo({ ...matchedValue, id })
+  }, [_value, setOptionInfo])
 
   return (
     <CustomComboBox
