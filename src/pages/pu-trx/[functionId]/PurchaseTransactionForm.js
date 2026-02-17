@@ -660,6 +660,49 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
+      component: 'resourcecombobox',
+      label: labels.taxDetails,
+      name: 'taxName',
+      props: {
+        endpointId: FinancialRepository.TaxSchedules.qry,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'recordId' },
+          { from: 'name', to: 'taxName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 4
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (newRow) {
+          const taxDetails = await getTaxDetails(newRow?.recordId)
+console.log('newRow',newRow,taxDetails,newRow?.values?.header?.tdPct)
+
+          const vatAmount = getVatCalc({
+            priceType: newRow?.priceType,
+            basePrice: newRow?.basePrice,
+            unitPrice: newRow?.unitPrice,
+            qty: newRow?.qty,
+            weight: newRow?.weight,
+            extendedPrice: newRow?.extendedPrice,
+            baseLaborPrice: newRow?.baseLaborPrice,
+            vatAmount: newRow?.vatAmount || 0,
+            tdPct: newRow?.values?.header?.tdPct,
+            taxDetails
+          })
+          update({
+            applyVat: true,
+            vatAmount,
+            taxDetails
+          })
+        }
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.VAT,
       name: 'vatAmount',
@@ -1111,6 +1154,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function getTaxDetails(taxId) {
+    if (!taxId) return
+
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
       parameters: `_taxId=${taxId}`
