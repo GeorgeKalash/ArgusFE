@@ -1692,10 +1692,9 @@ export default function SaleTransactionForm({
 
   async function refetchForm(recordId, callDt) {
     let dtInfo = {}
-    const taxDetails = getTaxDetails()
     const saTrxpack = await getSalesTransactionPack(recordId)
     if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
-    await fillForm(saTrxpack, dtInfo, taxDetails)
+    await fillForm(saTrxpack, dtInfo)
   }
 
   function setAddressValues(obj) {
