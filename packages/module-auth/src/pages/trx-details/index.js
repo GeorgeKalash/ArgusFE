@@ -3,7 +3,7 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { Grid, Button } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
@@ -15,9 +15,9 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import DataForm from './form/DataForm'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import DataForm from '@argus/shared-ui/src/components/Shared/DataForm'
 
 const TrxDetails = () => {
   const [data, setData] = useState([])
@@ -100,16 +100,19 @@ const TrxDetails = () => {
     openForm(obj)
   }
 
-  function openForm(obj) {
+  async function openForm(obj) {
+    const res = await getRequest({
+      extension: SystemRepository.TrxDetails.get,
+      parameters: `_recordId=${obj.recordId}`
+    })
+
     stack({
       Component: DataForm,
       props: {
-        obj
+        obj,
+        data: JSON.parse(res?.record?.data || '{}')
       },
-      width: 600,
-      height: 390,
-      expandable: false,
-      title: labels.data
+      expandable: false
     })
   }
 

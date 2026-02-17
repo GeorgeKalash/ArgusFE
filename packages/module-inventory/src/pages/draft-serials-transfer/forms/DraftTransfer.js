@@ -599,6 +599,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
       isPosted={isPosted}
       actions={actions}
       editMode={editMode}
+      isParentWindow={false}
       disabledSubmit={isPosted}
       disabledSavedClear={isPosted}
     >
@@ -799,7 +800,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
         </Grow>
         <Grid container spacing={2}>
           <Grid item xs={8}>
-              <Grid item xs={12} height={130} sx={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={12} height={105} sx={{ display: 'flex', flex: 1 }}>
                 <Table
                   name='metal'
                   gridData={{ count: 1, list: formik?.values?.metalGridData }}
@@ -813,7 +814,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
                   pagination={false}
                 />
               </Grid>
-              <Grid item xs={12} height={130} sx={{ display: 'flex', flex: 1 }}>
+              <Grid item xs={12} height={95} sx={{ display: 'flex', flex: 1 }}>
                 <Table
                   name='item'
                   columns={[

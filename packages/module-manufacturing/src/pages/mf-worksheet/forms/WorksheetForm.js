@@ -114,7 +114,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
         }
         getData(res.recordId)
         toast.success(obj.recordId ? platformLabels.Edited : platformLabels.Added)
-        joInvalidate ? joInvalidate() : invalidate()
+        joInvalidate ? joInvalidate(true) : invalidate()
       })
     }
   })
@@ -176,7 +176,7 @@ export default function WorksheetForm({ labels, maxAccess, setStore, store, joIn
       record: JSON.stringify(data)
     }).then(async () => {
       await getData()
-      joInvalidate ? joInvalidate() : invalidate()
+      joInvalidate ? joInvalidate(true) : invalidate()
       toast.success(platformLabels.Posted)
     })
   }

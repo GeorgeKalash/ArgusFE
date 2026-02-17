@@ -659,8 +659,12 @@ export default function DamageForm({ recordId, lockRecord }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Labor.qry}
-                    parameters={`_startAt=0&_pageSize=200&_params=`}
+                    endpointId={editMode ?
+                       ManufacturingRepository.Labor.qry : 
+                       formik.values?.header?.workCenterId && ManufacturingRepository.Labor.qry2}
+                    parameters={editMode ? 
+                      `_startAt=0&_pageSize=200&_params=` :
+                      `_workCenterId=${formik.values?.header?.workCenterId}`}
                     name='header.laborId'
                     label={labels.labor}
                     valueField='recordId'
@@ -671,7 +675,7 @@ export default function DamageForm({ recordId, lockRecord }) {
                     ]}
                     displayFieldWidth={2}
                     required
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.laborId', newValue?.recordId || null)

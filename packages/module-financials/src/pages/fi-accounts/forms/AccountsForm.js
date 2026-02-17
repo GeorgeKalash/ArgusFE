@@ -72,10 +72,9 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
       record: JSON.stringify(obj)
     })
     if (!obj.recordId) {
-      setStore(prevStore => ({
-        ...prevStore,
+      setStore({
         recordId: res.recordId
-      }))
+      })
       formik.setFieldValue('recordId', res.recordId)
     }
     invalidate()
@@ -138,14 +137,9 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('groupId', newValue?.recordId)
-                        formik.setFieldValue('groupName', newValue?.name)
-                      } else {
-                        formik.setFieldValue('groupId', '')
-                        formik.setFieldValue('groupName', '')
-                      }
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('groupName', newValue?.name || '')  
+                      formik.setFieldValue('groupId', newValue?.recordId || null)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
                   />
@@ -222,13 +216,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     values={formik.values}
                     valueField='key'
                     displayField='value'
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('type', newValue?.key)
-                      } else {
-                        formik.setFieldValue('type', newValue?.key)
-                      }
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('type', newValue?.key || null)}
                     error={formik.touched.type && Boolean(formik.errors.type)}
                   />
                 </Grid>
@@ -255,7 +243,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       if (newValue) {
                         formik.setFieldValue('szId', newValue?.recordId)
                       } else {
@@ -274,13 +262,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
-                      if (newValue) {
-                        formik.setFieldValue('spId', newValue?.recordId)
-                      } else {
-                        formik.setFieldValue('spId', '')
-                      }
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('spId', newValue?.recordId || null)}
                     error={formik.touched.spId && Boolean(formik.errors.spId)}
                   />
                 </Grid>
@@ -306,9 +288,7 @@ const AccountsForms = ({ labels, maxAccess, setStore, store }) => {
                     valueField='recordId'
                     displayField='name'
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('sgId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('sgId', newValue?.recordId || null)}
                     required={formik.values.isConfidential}
                     readOnly={!formik.values.isConfidential}
                     error={formik.touched.sgId && Boolean(formik.errors.sgId)}

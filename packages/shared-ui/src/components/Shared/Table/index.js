@@ -107,10 +107,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: params => ({
-            fontWeight: params.data?.isBold ? 'bold' : 'normal',
-            textAlign: languageId === 2 ? 'left' : 'right'
-          }),
+          cellClass: params => `${col?.isBold ? 'bold ' : ''}${languageId == 2 ? '' : 'right'}`,
           sortable: !disableSorting
         }
       }
@@ -1228,6 +1225,14 @@ const Table = ({
             .agGridContainer:global(.ag-theme-alpine) {
               --ag-font-size: 8px;
             }
+          }
+          .right .fieldWrapper {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+          }
+          .bold {
+            font-weight: bold;
           }
       `}</style>
     </VertLayout>
