@@ -133,8 +133,7 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
         fieldId: field.id,
         fieldKey: field.key,
         value: Number(field.value),
-        caption: field.caption,
-        display: field.value
+        caption: field.caption
       })
     }
   }, [])
