@@ -431,7 +431,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
               unitPrice: parseFloat(res?.record?.unitPrice).toFixed(2) || 0,
               vatPct: res?.record?.vatPct || 0,
               vatAmount: parseFloat(res?.record?.vatAmount).toFixed(2) || 0,
-              invoiceTrxId: res?.record?.trxId || 0,
+              invoiceTrxId: res?.record?.trxId || null,
 
               ...(res?.record?.taxId && {
                 taxId: formik.values?.taxId || res?.record?.taxId,
