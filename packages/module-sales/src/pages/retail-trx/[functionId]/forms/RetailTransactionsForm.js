@@ -313,7 +313,7 @@ export default function RetailTransactionsForm({
     return res?.record
   }
 
-  async function barcodeSkuSelection(update, row, addRow, type) {
+  async function barcodeSkuSelection(update, row, addRow) {
     const itemRetail = await getItemRetail(row?.itemId)
     const itemPhysical = await getItemPhysical(row?.itemId)
     const itemConvertPrice = await getItemConvertPrice(row?.itemId, row?.muId)
