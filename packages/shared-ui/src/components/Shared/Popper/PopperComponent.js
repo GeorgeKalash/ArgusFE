@@ -47,7 +47,6 @@ const PopperComponent = ({
     updateRect()
 
     const handle = () => updateRect()
-
     window.addEventListener('scroll', handle, true)
     window.addEventListener('resize', handle)
 
