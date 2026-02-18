@@ -635,14 +635,15 @@ const Table = ({
 
     props?.setRowData(updatedVisibleRows)
   }
-const imageRenderer =
+
+  const EMPTY_PHOTO = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
+  const imageRenderer =
   column =>
   ({ data }) => {
     const imageUrl = data?.[column.field]
     const src = imageUrl
       ? imageUrl
-      : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default?.src ||
-        require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
+      : EMPTY_PHOTO
 
     return (
       <div className="agImgCell">
@@ -651,9 +652,7 @@ const imageRenderer =
           alt=""
           className="agImg"
           onError={e => {
-            e.currentTarget.src =
-              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default?.src ||
-              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
+            e.currentTarget.src = EMPTY_PHOTO
           }}
         />
       </div>
