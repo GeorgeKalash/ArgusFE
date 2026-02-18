@@ -30,7 +30,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
       endDate: null,
       year: null,
       itemId: null,
-      categoryId: null
+      categoryId: 0
     },
     maxAccess,
     validationSchema: yup.object({
@@ -52,8 +52,7 @@ export default function RebuildACForm({ _labels, maxAccess }) {
 
           return endDate.getTime() >= startDate.getTime()
         }),
-      year: yup.number().required(),
-      categoryId: yup.number().required()
+      year: yup.number().required()
     }),
     onSubmit: async data => {
       const { itemId, ...rest } = data
@@ -173,9 +172,8 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 valueField='recordId'
                 displayField='name'
                 values={formik?.values}
-                required
                 maxAccess={maxAccess}
-                onChange={(_, newValue) => formik.setFieldValue('categoryId', newValue?.recordId || null)}
+                onChange={(_, newValue) => formik.setFieldValue('categoryId', newValue?.recordId || 0)}
                 error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
               />
             </Grid>
