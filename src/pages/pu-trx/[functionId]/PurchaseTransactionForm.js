@@ -963,6 +963,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ? await Promise.all(
           puTrxItems?.map(async (item, index) => {
             const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
+            
 
             return {
               ...item,
