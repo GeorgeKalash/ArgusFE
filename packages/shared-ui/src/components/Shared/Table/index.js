@@ -635,19 +635,30 @@ const Table = ({
 
     props?.setRowData(updatedVisibleRows)
   }
+const imageRenderer =
+  column =>
+  ({ data }) => {
+    const imageUrl = data?.[column.field]
+    const src = imageUrl
+      ? imageUrl
+      : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default?.src ||
+        require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
 
-  const imageRenderer =
-    column =>
-    ({ data }) => {
-      const imageUrl = data?.[column.field]
-
-      const image =
-        imageUrl
-          ? imageUrl
-          : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
-
-      return <img src={image?.default?.src||image} alt='' width={rowHeightImage} />
-    }
+    return (
+      <div className="agImgCell">
+        <img
+          src={src}
+          alt=""
+          className="agImg"
+          onError={e => {
+            e.currentTarget.src =
+              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default?.src ||
+              require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
+          }}
+        />
+      </div>
+    )
+  }
 
   const columnDefs = [
     ...(showCheckboxColumn
@@ -1025,6 +1036,23 @@ const Table = ({
             align-items: center;
             justify-content: center;
           }
+          .agGridContainer :global(.agImgCell) {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+          }
+
+          .agGridContainer :global(.agImg) {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+          }
 
           .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
             font-size: 20px !important;
@@ -1170,7 +1198,7 @@ const Table = ({
               height: 100% !important;
               display: flex !important;
               align-items: center !important;
-              padding-inline: 6px; /* spacing before/after text */
+              padding-inline: 6px;
               box-sizing: border-box;
             }
 
