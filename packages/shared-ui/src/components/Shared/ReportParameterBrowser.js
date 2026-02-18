@@ -169,7 +169,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
           }
           columnsInDropDown={apiDetails?.columnsInDropDown}
           required={field.mandatory}
-          values={currentParam?.value}
+          values={formik.values.parameters}
+          value={currentParam?.value}
           triggerOnDefault={shouldTriggerOnDefault}
           onChange={(_, newValue) => {
             const separator = apiDetails?.separator ?? ' '
@@ -205,7 +206,8 @@ const GetComboBox = ({ field, formik, rpbParams }) => {
             valueField={'key'}
             displayField={'value'}
             required={field.mandatory}
-            values={currentParam?.value}
+            values={formik.values.parameters}
+            value={currentParam?.value}
             triggerOnDefault={shouldTriggerOnDefault}
             onChange={(_, newValue) => {
               formik.setFieldValue(

@@ -1871,7 +1871,7 @@ export default function SaleTransactionForm({
       setMeasurements(muList)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
+      !recordId && getUserDefaultsData()
       if (!recordId) {
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
