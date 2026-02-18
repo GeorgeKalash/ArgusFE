@@ -38,8 +38,7 @@ const css = `
 }
 
 .ImageUpload_previewImage {
-  height: 100%;
-  object-fit: cover;
+  display: block;
 }
 
 .ImageUpload_bottomSection {
@@ -243,9 +242,19 @@ const ImageUpload = forwardRef(
           <Box
             className="ImageUpload_previewBox"
             style={{
-              width: '100%',
-              maxWidth: scaledWidth,
-              height: scaledHeight
+              ...(image
+                ? {
+                    width: 'auto',
+                    height: 'auto',
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain'
+                  }
+                : {
+                    width: '100%',
+                    maxWidth: scaledWidth,
+                    height: scaledHeight
+                  })
             }}
             onClick={handleClick}
           >
@@ -253,7 +262,22 @@ const ImageUpload = forwardRef(
               src={image || EMPTY_PHOTO}
               alt=""
               className="ImageUpload_previewImage"
-              style={{ border: error ? '2px solid #F44336' : 'none' }}
+              style={{
+                border: error ? '2px solid #F44336' : 'none',
+                ...(image
+                  ? {
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain'
+                    }
+                  : {
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    })
+              }}
               onError={e => {
                 e.currentTarget.src = EMPTY_PHOTO
               }}
