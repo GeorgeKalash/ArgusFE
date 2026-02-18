@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, Link } from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
 import components from './components'
 import { CacheStoreProvider } from '@argus/shared-providers/src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -9,7 +10,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -668,33 +668,43 @@ export function DataGrid({
         autoHeight: true,
         cellClass: `${mergedCellClass || undefined}  ${centered}`,
         ...(column?.checkAll?.visible && {
-          headerClass: 'agHeaderCentered',
-          headerComponent: () => {
+          headerClass: 'agHeaderCheckboxCell',
+          headerComponent: params => {
             const selectAll = e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const colId = params.column.getColId()
+              params.api.ensureColumnVisible(colId)
+              const root = params.api.getGui && params.api.getGui()
+              const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+              const cell = headerRoot && headerRoot.querySelector(`.ag-header-cell[col-id="${colId}"]`)
+              const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+              focusable && focusable.focus && focusable.focus()
+
               if (column?.checkAll?.onChange) {
                 column?.checkAll?.onChange({ checked: e.target?.checked })
               }
             }
 
             return (
-              <Box className="cellBoxCentered" sx={{ width: '100%', height: '100%' }}>
-                <CustomCheckBox
-                  checked={column?.checkAll?.value}
-                  onChange={selectAll}
-                  disabled={column.checkAll?.disabled}
-                />
-              </Box>
+              <Checkbox
+                checked={!!column?.checkAll?.value}
+                disabled={!!column?.checkAll?.disabled}
+                onChange={selectAll}
+                className={'fullSizeCheckbox'}
+              />
             )
-          }
+          },
+          suppressMenu: true
         }),
+
         cellEditorParams: { maxAccess },
         cellClassRules: cellClassRules,
         suppressKeyboardEvent: params => {
           const { event } = params
 
-          return  event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
-            ? true
-            : false
+          return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
         }
       }
     }),
@@ -939,18 +949,33 @@ export function DataGrid({
           font-size: 0.9rem;
         }
 
-        .agContainer :global(.agHeaderCentered .ag-header-cell-comp-wrapper) {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          justify-content: center;
+        .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+          padding: 0 !important;
         }
-        .agContainer :global(.agHeaderCentered .ag-header-cell-label) {
-          width: 100%;
+
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-comp-wrapper) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.fullSizeCheckbox) {
+          width: 100% !important;
+          height: 100% !important;
           display: flex;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
         }
 
         .agContainer :global(.cellBox) {
@@ -1004,10 +1029,6 @@ export function DataGrid({
           justify-content: center;
           padding: 0 !important;
           margin: 0 !important;
-        }
-
-        .agContainer :global(.MuiCheckbox-root) {
-          padding: 0 !important;
         }
 
         .cellEditorBoxCentered {
@@ -1112,6 +1133,13 @@ export function DataGrid({
           .agContainer :global(.ag-header-cell-text),
           .agContainer :global(.ag-cell) {
             font-size: 10px !important;
+          }
+
+          .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+            padding: 0 !important;
+          }
+          .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+            padding: 0 !important;
           }
         }
 
