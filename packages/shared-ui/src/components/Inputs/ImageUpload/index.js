@@ -98,8 +98,7 @@ const ImageUpload = forwardRef(
     })()
 
     const baseHeight = customHeight ?? height
-    const baseWidth =
-      customWidth ?? width ?? baseHeight * ((140 / 140) || 1)
+    const baseWidth = customWidth ?? width ?? baseHeight
 
     const scaledHeight = baseHeight * scaleFactor
     const scaledWidth = baseWidth * scaleFactor
