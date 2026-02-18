@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom'
 import { Box } from '@mui/material'
 import styles from './PopperComponent.module.css'
 
+const GAP = 4
+const EDGE_PADDING = 8
+
 const PopperComponent = ({
   children,
   anchorEl,
@@ -14,7 +17,7 @@ const PopperComponent = ({
   ...props
 }) => {
   const [rect, setRect] = useState(null)
-  const [measuredHeight, setMeasuredHeight] = useState(null)
+  const [measuredHeight, setMeasuredHeight] = useState(0)
   const [isPickerContent, setIsPickerContent] = useState(false)
   const [isTimePickerContent, setIsTimePickerContent] = useState(false)
   const popperRef = useRef(null)
@@ -29,7 +32,8 @@ const PopperComponent = ({
         prev.top !== nextRect.top ||
         prev.left !== nextRect.left ||
         prev.width !== nextRect.width ||
-        prev.height !== nextRect.height
+        prev.height !== nextRect.height ||
+        prev.bottom !== nextRect.bottom
       ) {
         return nextRect
       }
@@ -42,35 +46,41 @@ const PopperComponent = ({
 
     updateRect()
 
-    const handleScrollOrResize = () => updateRect()
+    const handle = () => updateRect()
 
-    window.addEventListener('scroll', handleScrollOrResize, true)
-    window.addEventListener('resize', handleScrollOrResize)
+    window.addEventListener('scroll', handle, true)
+    window.addEventListener('resize', handle)
+
+    const w = typeof window !== 'undefined' ? window.visualViewport : null
+    if (w) {
+      w.addEventListener('resize', handle)
+      w.addEventListener('scroll', handle)
+    }
 
     return () => {
-      window.removeEventListener('scroll', handleScrollOrResize, true)
-      window.removeEventListener('resize', handleScrollOrResize)
+      window.removeEventListener('scroll', handle, true)
+      window.removeEventListener('resize', handle)
+      if (w) {
+        w.removeEventListener('resize', handle)
+        w.removeEventListener('scroll', handle)
+      }
     }
   }, [anchorEl, open, updateRect])
-
-  const anchorTop = rect ? rect.top : 0
-  const anchorBottom = rect ? rect.bottom : 0
-  const anchorWidth = rect ? rect.width : undefined
-  const left = rect ? rect.left : 0
 
   useEffect(() => {
     if (!open || !popperRef.current) return
 
-    const pickerNode = popperRef.current.querySelector(
+    const root = popperRef.current
+
+    const pickerNode = root.querySelector(
       '.MuiDateCalendar-root, .MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
+    )
+    const timeNode = root.querySelector(
+      '.MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
     )
 
     const nextIsPicker = !!pickerNode
     if (nextIsPicker !== isPickerContent) setIsPickerContent(nextIsPicker)
-
-    const timeNode = popperRef.current.querySelector(
-      '.MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
-    )
 
     const nextIsTime = !!timeNode
     if (nextIsTime !== isTimePickerContent) setIsTimePickerContent(nextIsTime)
@@ -81,23 +91,64 @@ const PopperComponent = ({
 
   useEffect(() => {
     if (!open || !popperRef.current) return
-    const r = popperRef.current.getBoundingClientRect()
-    if (r.height > 0 && r.height !== measuredHeight) setMeasuredHeight(r.height)
-  }, [open, rect, measuredHeight])
 
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 0
+    const node = popperRef.current
+
+    const measure = () => {
+      const r = node.getBoundingClientRect()
+      if (r.height > 0) {
+        setMeasuredHeight(prev => (prev !== r.height ? r.height : prev))
+      }
+    }
+
+    measure()
+
+    const ro = new ResizeObserver(() => measure())
+    ro.observe(node)
+
+    return () => ro.disconnect()
+  }, [open])
+
+  if (!rect) return null
+
+  const anchorTop = rect.top
+  const anchorBottom = rect.bottom
+  const anchorWidth = rect.width
+  const left = rect.left
+
+  const viewportHeight =
+    typeof window !== 'undefined'
+      ? window.visualViewport?.height ?? window.innerHeight
+      : 0
+
   const defaultEstimate = isTimePicker ? 300 : isPicker ? 340 : viewportHeight * 0.43
-  const popperHeightForFlip = measuredHeight ?? defaultEstimate
-  const openAbove = rect ? viewportHeight - anchorBottom <= popperHeightForFlip : false
+  const popperHeightForFlip = measuredHeight || defaultEstimate
+
+  const spaceBelow = Math.max(0, viewportHeight - anchorBottom - EDGE_PADDING)
+  const spaceAbove = Math.max(0, anchorTop - EDGE_PADDING)
+
+  const openAbove =
+    spaceBelow < popperHeightForFlip &&
+    (spaceAbove >= popperHeightForFlip || spaceAbove > spaceBelow)
 
   const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
+
+  const maxHeight = Math.max(160, (openAbove ? spaceAbove : spaceBelow) - GAP)
+
+  const scale = Math.min(1, Math.max(0.86, viewportHeight / 700))
+  const scaledMaxHeight = maxHeight / scale
 
   const baseStyle = {
     position: 'fixed',
     left,
     top: openAbove ? anchorTop : anchorBottom,
-    transform: openAbove ? 'translateY(calc(-100% - 4px))' : 'none',
-    overflow: 'visible',
+    transform: openAbove
+      ? `translateY(calc(-100% - ${GAP}px)) scale(${scale})`
+      : `scale(${scale})`,
+    transformOrigin: openAbove ? 'bottom left' : 'top left',
+    overflow: 'auto',
+    maxHeight: scaledMaxHeight,
+
     ...(shouldMatchAnchorWidth ? { width: anchorWidth } : {}),
     ...(isPicker || fitContent
       ? {
@@ -108,8 +159,6 @@ const PopperComponent = ({
   }
 
   const mergedStyle = { ...baseStyle, ...(props.style || {}) }
-
-  if (!rect) return null
 
   return ReactDOM.createPortal(
     <Box
