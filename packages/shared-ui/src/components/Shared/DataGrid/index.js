@@ -944,6 +944,7 @@ export function DataGrid({
           display: flex;
           justify-content: center;
           align-items: center;
+          justify-content: center;
         }
         .agContainer :global(.agHeaderCentered .ag-header-cell-label) {
           width: 100%;
