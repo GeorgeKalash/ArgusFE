@@ -647,7 +647,7 @@ export default function DamageForm({ recordId, jobId }) {
                        ManufacturingRepository.Labor.qry : 
                        formik.values?.header?.workCenterId && ManufacturingRepository.Labor.qry2}
                     parameters={editMode ? 
-                      `_startAt=0&_pageSize=200&_params=` :
+                      `_startAt=0&_pageSize=10000&_params=` :
                       `_workCenterId=${formik.values?.header?.workCenterId}`}
                     name='header.laborId'
                     label={labels.labor}
