@@ -660,6 +660,46 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       }
     },
     {
+      component: 'resourcecombobox',
+      label: labels.taxDetails,
+      name: 'taxName',
+      props: {
+        endpointId: FinancialRepository.TaxSchedules.qry,
+        displayField: 'name',
+        valueField: 'recordId',
+        mapping: [
+          { from: 'recordId', to: 'taxId' },
+          { from: 'name', to: 'taxName' }
+        ],
+        columnsInDropDown: [
+          { key: 'reference', value: 'Reference' },
+          { key: 'name', value: 'Name' }
+        ],
+        displayFieldWidth: 4
+      },
+      async onChange({ row: { update, newRow } }) {
+          const taxDetails = newRow?.taxId ? await getTaxDetails(newRow?.taxId) : null
+
+          const vatCalcRow = getVatCalc({
+            priceType: newRow?.priceType,
+            basePrice: newRow?.basePrice,
+            unitPrice: newRow?.unitPrice,
+            qty: newRow?.qty,
+            weight: newRow?.weight,
+            extendedPrice: newRow?.extendedPrice,
+            baseLaborPrice: newRow?.baseLaborPrice,
+            vatAmount: newRow?.vatAmount || 0,
+            tdPct: formik?.values?.header?.tdPct,
+            taxDetails: formik.values.header.isVattable? taxDetails : null
+          })
+
+          update({
+            vatAmount: vatCalcRow?.vatAmount || 0 ,
+            taxDetails
+          })
+      }
+    },
+    {
       component: 'numberfield',
       label: labels.VAT,
       name: 'vatAmount',
@@ -1111,6 +1151,8 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function getTaxDetails(taxId) {
+    if (!taxId) return
+
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
       parameters: `_taxId=${taxId}`
@@ -1147,6 +1189,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const TotPricePerG = basePriceValue + baseLaborPrice
 
     let rowTax = null
+    let rowTaxName = ''
     let rowTaxDetails = null
 
     if (!formik.values.header.taxId) {
@@ -1162,6 +1205,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           amount: item.amount ?? 0
         }))
         rowTax = itemInfo.taxId
+        rowTaxName = itemInfo?.taxName || ''
         rowTaxDetails = details
       }
     } else {
@@ -1176,6 +1220,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         amount: item.amount
       }))
       rowTax = formik.values.header.taxId
+      rowTaxName = formik.values?.header?.taxName || ''
       rowTaxDetails = details
     }
 
@@ -1209,6 +1254,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       extendedPrice: 0,
       mdValue: 0,
       taxId: rowTax,
+      taxName: rowTaxName,
       taxDetails: rowTaxDetails
     }
     let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
@@ -1461,7 +1507,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
-      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
     )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
@@ -1990,6 +2036,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 values={formik.values.header}
                 onChange={(event, newValue) => {
                   formik.setFieldValue('header.taxId', newValue?.recordId || null)
+                  formik.setFieldValue('header.taxName', newValue?.name || null)
                 }}
                 error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
                 maxAccess={maxAccess}
