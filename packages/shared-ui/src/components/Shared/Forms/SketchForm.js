@@ -286,6 +286,12 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     endpointId={ProductModelingRepository.Designer.qry}
                     name='designerId'
                     label={labels.designer}
+                    valueLink={{
+                      resourceId: ResourceIds.Designer,
+                      props: {
+                        recordId: formik.values.designerId
+                      }
+                    }}
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     columnsInDropDown={[

@@ -11,7 +11,7 @@ import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ProductModelingRepository } from '@argus/repositories/src/repositories/ProductModelingRepository'
-import DesignerForm from './Forms/DesignerForm'
+import DesignerForm from '@argus/shared-ui/src/components/Shared/Forms/DesignerForm'
 
 const Designer = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -81,13 +81,8 @@ const Designer = () => {
     stack({
       Component: DesignerForm,
       props: {
-        labels,
-        recordId,
-        maxAccess: access
-      },
-      width: 600,
-      height: 300,
-      title: labels.designer
+        recordId
+      }
     })
   }
 

@@ -30,6 +30,21 @@
   margin-right: -9px !important;
 }
 
+.linkField input {
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkField input:hover {
+  color: #115293; /* darker blue */
+}
+
+.linkField input:active {
+  color: #0d3c75;
+}
+
+
 @media (min-width: 1281px) {
   .customComboTextField :global([data-testid='ArrowDropDownIcon']) {
     font-size: 18px !important;
