@@ -39,6 +39,7 @@ const css = `
 
 .ImageUpload_previewImage {
   display: block;
+  
 }
 
 .ImageUpload_bottomSection {
