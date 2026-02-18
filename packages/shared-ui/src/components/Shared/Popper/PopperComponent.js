@@ -6,6 +6,77 @@ import styles from './PopperComponent.module.css'
 const GAP = 4
 const EDGE_PADDING = 8
 
+function computeLayout({
+  rect,
+  measuredHeight,
+  isPicker,
+  isTimePicker,
+  fitContent,
+  matchAnchorWidth,
+  userStyle
+}) {
+  if (!rect) return null
+
+  const viewportHeight =
+    typeof window !== 'undefined'
+      ? window.visualViewport?.height ?? window.innerHeight
+      : 0
+
+  const scale = Math.min(1, Math.max(0.86, viewportHeight / 700))
+
+  const defaultEstimate = isTimePicker
+    ? 300
+    : isPicker
+      ? 340
+      : viewportHeight * 0.43
+
+  const popperHeightForFlip = measuredHeight || defaultEstimate
+
+  const spaceBelow = Math.max(0, viewportHeight - rect.bottom - EDGE_PADDING)
+  const spaceAbove = Math.max(0, rect.top - EDGE_PADDING)
+
+  const openAbove =
+    spaceBelow < popperHeightForFlip &&
+    (spaceAbove >= popperHeightForFlip || spaceAbove > spaceBelow)
+
+  const availableSpace = Math.max(0, (openAbove ? spaceAbove : spaceBelow) - GAP)
+
+  const popperRatio = viewportHeight < 600 ? 0.86 : 0.72
+  const popperCap = viewportHeight * popperRatio
+  const popperMaxHeight = Math.max(180, Math.min(availableSpace, popperCap))
+
+  const scaledPopperMaxHeight = popperMaxHeight / scale
+
+  const calendarRatio = viewportHeight < 600 ? 0.58 : 0.62
+  const calendarCap = viewportHeight * calendarRatio
+  const calendarMaxHeight = Math.max(240, Math.min(availableSpace, calendarCap))
+
+  const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
+
+  const baseStyle = {
+    position: 'fixed',
+    left: rect.left,
+    top: openAbove ? rect.top : rect.bottom,
+    transform: openAbove
+      ? `translateY(calc(-100% - ${GAP}px)) scale(${scale})`
+      : `scale(${scale})`,
+    transformOrigin: openAbove ? 'bottom left' : 'top left',
+    overflow: isPicker ? 'hidden' : 'auto',
+    maxHeight: scaledPopperMaxHeight,
+
+    ...(shouldMatchAnchorWidth ? { width: rect.width } : {}),
+    ...(isPicker || fitContent
+      ? { width: 'max-content', maxWidth: 'calc(100vw - 16px)' }
+      : {})
+  }
+
+  return {
+    openAbove,
+    calendarMaxHeight,
+    mergedStyle: { ...baseStyle, ...(userStyle || {}) }
+  }
+}
+
 const PopperComponent = ({
   children,
   anchorEl,
@@ -79,9 +150,9 @@ const PopperComponent = ({
     )
 
     const nextIsPicker = !!pickerNode
-    if (nextIsPicker !== isPickerContent) setIsPickerContent(nextIsPicker)
-
     const nextIsTime = !!timeNode
+
+    if (nextIsPicker !== isPickerContent) setIsPickerContent(nextIsPicker)
     if (nextIsTime !== isTimePickerContent) setIsTimePickerContent(nextIsTime)
   }, [open, rect, isPickerContent, isTimePickerContent])
 
@@ -102,7 +173,7 @@ const PopperComponent = ({
 
     measure()
 
-    const ro = new ResizeObserver(() => measure())
+    const ro = new ResizeObserver(measure)
     ro.observe(node)
 
     return () => ro.disconnect()
@@ -110,54 +181,17 @@ const PopperComponent = ({
 
   if (!rect) return null
 
-  const anchorTop = rect.top
-  const anchorBottom = rect.bottom
-  const anchorWidth = rect.width
-  const left = rect.left
+  const layout = computeLayout({
+    rect,
+    measuredHeight,
+    isPicker,
+    isTimePicker,
+    fitContent,
+    matchAnchorWidth,
+    userStyle: props.style
+  })
 
-  const viewportHeight =
-    typeof window !== 'undefined'
-      ? window.visualViewport?.height ?? window.innerHeight
-      : 0
-
-  const defaultEstimate = isTimePicker ? 300 : isPicker ? 340 : viewportHeight * 0.43
-  const popperHeightForFlip = measuredHeight || defaultEstimate
-
-  const spaceBelow = Math.max(0, viewportHeight - anchorBottom - EDGE_PADDING)
-  const spaceAbove = Math.max(0, anchorTop - EDGE_PADDING)
-
-  const openAbove =
-    spaceBelow < popperHeightForFlip &&
-    (spaceAbove >= popperHeightForFlip || spaceAbove > spaceBelow)
-
-  const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
-
-  const maxHeight = Math.max(160, (openAbove ? spaceAbove : spaceBelow) - GAP)
-
-  const scale = Math.min(1, Math.max(0.86, viewportHeight / 700))
-  const scaledMaxHeight = maxHeight / scale
-
-  const baseStyle = {
-    position: 'fixed',
-    left,
-    top: openAbove ? anchorTop : anchorBottom,
-    transform: openAbove
-      ? `translateY(calc(-100% - ${GAP}px)) scale(${scale})`
-      : `scale(${scale})`,
-    transformOrigin: openAbove ? 'bottom left' : 'top left',
-    overflow: 'auto',
-    maxHeight: scaledMaxHeight,
-
-    ...(shouldMatchAnchorWidth ? { width: anchorWidth } : {}),
-    ...(isPicker || fitContent
-      ? {
-          width: 'max-content',
-          maxWidth: 'calc(100vw - 16px)'
-        }
-      : {})
-  }
-
-  const mergedStyle = { ...baseStyle, ...(props.style || {}) }
+  if (!layout) return null
 
   return ReactDOM.createPortal(
     <Box
@@ -171,14 +205,38 @@ const PopperComponent = ({
       ]
         .filter(Boolean)
         .join(' ')}
-      style={mergedStyle}
+      style={layout.mergedStyle}
     >
-      {typeof children === 'function'
-        ? children({
-            placement: openAbove ? 'top-start' : 'bottom-start',
-            TransitionProps: { in: true }
-          })
-        : children}
+      <Box
+        sx={
+          isPicker
+            ? {
+                '& .MuiPickersLayout-root, & .MuiPickersLayout-contentWrapper': {
+                  overflow: 'visible'
+                },
+
+                '& .MuiDateCalendar-root': {
+                  maxHeight: layout.calendarMaxHeight,
+                  overflowY: 'hidden',
+                  overflowX: 'hidden'
+                },
+
+                '& .MuiMultiSectionDigitalClock-root, & .MuiTimeClock-root, & .MuiClock-root': {
+                  maxHeight: layout.calendarMaxHeight,
+                  overflowY: 'auto',
+                  overflowX: 'hidden'
+                }
+              }
+            : undefined
+        }
+      >
+        {typeof children === 'function'
+          ? children({
+              placement: layout.openAbove ? 'top-start' : 'bottom-start',
+              TransitionProps: { in: true }
+            })
+          : children}
+      </Box>
     </Box>,
     document.body
   )
