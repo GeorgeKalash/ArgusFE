@@ -98,16 +98,15 @@ export default function ResourceComboBox({
 
   finalItemsListRef.current = rest?.options || finalItemsList || []
   const fieldPath = rest?.name?.split('.')
-  const [parent, child] = fieldPath || []
+  const [parent, child] = fieldPath
   const name = child || rest?.name
-  const rawValue = typeof values === 'object' ? values?.[name] : values
 
   const _value =
-    (typeof rawValue === 'object'
-      ? rawValue
+    (typeof values[name] === 'object'
+      ? values[name]
       : datasetId
-      ? finalItemsList?.find(item => String(item?.[valueField]) === String(rawValue))
-      : finalItemsList?.find(item => String(item?.[valueField]) === String(rawValue))) ||
+      ? finalItemsList?.find(item => item[valueField] === values[name]?.toString())
+      : finalItemsList?.find(item => item[valueField] === (values[name] || values))) ||
     value ||
     ''
 
@@ -137,7 +136,7 @@ export default function ResourceComboBox({
   useEffect(() => {
     if (!triggerOnDefault || didTriggerDefaultRef.current) return
 
-    const hasPrimitiveDefault = typeof rawValue !== 'object' && rawValue && !value
+    const hasPrimitiveDefault = typeof values[name] !== 'object' && (values[name] || values) && !value
     if (!hasPrimitiveDefault) return
 
     if (_value && typeof _value === 'object' && _value[valueField]) {
