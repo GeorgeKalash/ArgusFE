@@ -68,54 +68,54 @@ const GeneratePoductionOrder = () => {
     {
       field: 'sku',
       headerName: labels.sku,
-      flex: 1
+      width: 50
     },
     {
       field: 'itemName',
       headerName: labels.itemName,
-      flex: 2
+      width: 100
     },
     {
       field: 'soQty',
       headerName: labels.soQty,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'remainingQty',
       headerName: labels.remainingQty,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'onHand',
       headerName: labels.onHand,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'minQty',
       headerName: labels.minQty,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'inProduction',
       headerName: labels.inProduction,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'deltaQty',
       headerName: labels.deltaQty,
       type: 'number',
-      width: 130
+      width: 100
     },
     {
       field: 'produceNow',
       headerName: labels.produceNow,
       type: 'number',
-      width: 130
+      width: 100
     }
   ]
 
