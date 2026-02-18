@@ -241,19 +241,9 @@ const ImageUpload = forwardRef(
           <Box
             className="ImageUpload_previewBox"
             style={{
-              ...(image
-                ? {
-                    width: 'auto',
-                    height: 'auto',
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain'
-                  }
-                : {
-                    width: '100%',
-                    maxWidth: scaledWidth,
-                    height: scaledHeight
-                  })
+              width: '100%',
+              maxWidth: scaledWidth,
+              height: scaledHeight
             }}
             onClick={handleClick}
           >
