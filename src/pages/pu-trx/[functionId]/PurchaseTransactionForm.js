@@ -678,6 +678,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         displayFieldWidth: 4
       },
       async onChange({ row: { update, newRow } }) {
+          setReCal(true)
           const taxDetails = newRow?.taxId ? await getTaxDetails(newRow?.taxId) : null
 
           const vatCalcRow = getVatCalc({
