@@ -743,6 +743,7 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
+      jumpToNextLine,
       async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!newRow?.barcode) return update({ barcode: null })
         const barcodeInfo = await getBarcodeData(newRow?.barcode)
