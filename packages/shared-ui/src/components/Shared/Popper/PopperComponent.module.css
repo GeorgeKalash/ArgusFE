@@ -129,23 +129,6 @@
   padding: 4px 0;
   min-height: 28px;
 }
-.dateTimePopper {
-  height: auto !important;
-}
-
-.popperRoot :global(.MuiPickersLayout-root),
-.popperRoot :global(.MuiPickersLayout-contentWrapper) {
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: unset !important;
-  height: auto !important;
-}
-
-.popperRoot :global(.MuiPickersLayout-actionBar),
-.popperRoot :global(.MuiPickersActionBar-root) {
-  margin: 0 !important;
-}
-
 
 @media (max-width: 1600px) {
   .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
@@ -233,28 +216,5 @@
   .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
     font-size: 0.68rem;
     min-height: 18px;
-  }
-}
-
-@media (max-height: 650px) {
-  .popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
-    max-height: 38vh;
-  }
-
-  .popperRoot :global(.MuiPickersLayout-actionBar),
-  .popperRoot :global(.MuiPickersActionBar-root) {
-    min-height: 30px;
-    padding: 2px 6px;
-  }
-
-  .popperRoot :global(.MuiPickersLayout-toolbar),
-  .popperRoot :global(.MuiPickersCalendarHeader-root) {
-    min-height: 24px;
-    padding: 2px 6px;
-  }
-
-  .timePopper :global(.MuiMultiSectionDigitalClockSection-item) {
-    height: 30px !important;
-    font-size: 0.82rem !important;
   }
 }
