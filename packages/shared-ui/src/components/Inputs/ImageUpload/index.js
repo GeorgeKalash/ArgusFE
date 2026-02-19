@@ -38,8 +38,8 @@ const css = `
 }
 
 .ImageUpload_previewImage {
-  height: 100%;
-  object-fit: cover;
+  display: block;
+  
 }
 
 .ImageUpload_bottomSection {
@@ -58,7 +58,7 @@ const ImageUpload = forwardRef(
       error,
       seqNo,
       recordId,
-      width = 140,
+      width,
       height = 140,
       customWidth,
       customHeight,
@@ -92,11 +92,17 @@ const ImageUpload = forwardRef(
       const maxScale = 0.92
 
       if (screenWidth <= minW) return minScale
-      return minScale + ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      return (
+        minScale +
+        ((screenWidth - minW) / (maxW - minW)) * (maxScale - minScale)
+      )
     })()
 
-    const scaledWidth = (customWidth || width) * scaleFactor
-    const scaledHeight = (customHeight || height) * scaleFactor
+    const baseHeight = customHeight ?? height
+    const baseWidth = customWidth ?? width ?? baseHeight
+
+    const scaledHeight = baseHeight * scaleFactor
+    const scaledWidth = baseWidth * scaleFactor
 
     useImperativeHandle(ref, () => ({ submit }))
 
@@ -246,7 +252,22 @@ const ImageUpload = forwardRef(
               src={image || EMPTY_PHOTO}
               alt=""
               className="ImageUpload_previewImage"
-              style={{ border: error ? '2px solid #F44336' : 'none' }}
+              style={{
+                border: error ? '2px solid #F44336' : 'none',
+                ...(image
+                  ? {
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain'
+                    }
+                  : {
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    })
+              }}
               onError={e => {
                 e.currentTarget.src = EMPTY_PHOTO
               }}
