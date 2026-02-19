@@ -71,7 +71,7 @@ const Table = ({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-    width <= 768 ? 30 : width <= 1024 ? 26 : width <= 1280 ? 25 : width <= 1366 ? 28 : width < 1600 ? 30 : 32
+    width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34    : 36
 
   const rowHeightImage =
     width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
@@ -782,8 +782,6 @@ const Table = ({
     }
   }
 
-  const height = gridData?.list?.length * 35 + 40 + 40
-
   const tableName =
     name && name !== 'table' ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
 
@@ -824,12 +822,6 @@ const Table = ({
     await deleteFromDB(storeName, tableName)
     invalidate()
   }
-
-  const totalWidth = tableSettings?.reduce((acc, col) => {
-    const width = parseFloat(col.width) || 0
-
-    return acc + width
-  }, 0)
 
   const updatedColumns = tableSettings
     ? columnDefs.map(({ flex, ...col }, index) => {
@@ -931,309 +923,316 @@ const Table = ({
 
       <style jsx global>{`
         .agGridContainer {
-            position: relative;
-            width: 100%;
-            height: auto;
-            max-height: none;
-            --ag-font-size: 14px;
+          position: relative;
+          width: 100%;
+          height: auto;
+          max-height: none;
+          --ag-font-size: 14px;
+        }
+
+        .agGridFlex {
+          flex: 1 1 auto;
+        }
+
+        .hoverReset {
+          position: absolute;
+          top: 0;
+          right: 0;
+          z-index: 9999;
+          box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
+          border-radius: 4px;
+          background: #fff;
+        }
+
+        .paginationWrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .paginationBar {
+          flex: 1 1 auto;
+          min-width: 0;
+          background-color: #fff;
+          font-size: 0.8rem;
+          padding: 1px 5px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          height: 30px;
+          line-height: 1;
+        }
+
+        .pageTextField {
+          padding: 0;
+          width: 70px;
+        }
+
+        .pageTextField :global(.MuiOutlinedInput-root),
+        .pageTextField :global(.MuiInputBase-root) {
+          height: 22px;
+          min-height: 22px;
+          font-size: 1rem;
+        }
+
+        .pageTextField :global(.MuiOutlinedInput-input),
+        .pageTextField :global(.MuiInputBase-input) {
+          padding: 1px 5px;
+        }
+
+        .actionsBox {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          justify-content: center;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .actionIconButton {
+          padding: 0;
+          width: 22px;
+          height: 22px;
+          min-width: 0;
+        }
+
+        .actionIcon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .fullSizeCheckbox {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .agGridContainer :global(.MuiCheckbox-root) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+          font-size: 20px !important;
+        }
+
+        .pointerNone {
+          pointer-events: none;
+        }
+
+        .fieldWrapper {
+          user-select: text;
+          cursor: pointer;
+          width: 100%;
+          line-height: 1.6;
+          padding-block: 2px;
+          box-sizing: border-box;
+        }
+
+        .agGridContainer :global(.ag-cell-value),
+        .agGridContainer :global(.ag-cell-wrapper) {
+          line-height: 1.6;
+        }
+
+        .fieldWrapper::selection {
+          background: none !important;
+          color: inherit;
+        }
+
+        .nowrap {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .copiedTooltip {
+          z-index: 1000;
+          position: fixed;
+          top: -40px;
+          background-color: #000;
+          color: #fff;
+          padding: 1px 3px;
+          border-radius: 5px;
+        }
+
+        .colorComboWrapper {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .colorSwatch {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+        }
+
+        .agGridContainer :global(.ag-header),
+        .agGridContainer :global(.ag-header-cell) {
+          height: 32px !important;
+          min-height: 32px !important;
+        }
+
+        .agGridContainer :global(.ag-header-cell-text),
+        .agGridContainer :global(.ag-cell) {
+          font-size: var(--ag-font-size);
+        }
+
+        .agGridContainer :global(.ag-cell) {
+          border-right: 1px solid #d0d0d0 !important;
+        }
+
+        .agGridContainer :global(.ag-cell .MuiBox-root) {
+          padding: 0 !important;
+        }
+
+        .paginationBar :global(.MuiIconButton-root) {
+          padding: 0;
+          width: 20px;
+          height: 20px;
+          min-width: 0;
+        }
+
+        .paginationBar :global(.MuiSvgIcon-root) {
+          font-size: 20px;
+          line-height: 1;
+        }
+
+        @media (min-width: 1025px) and (max-width: 1600px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 12px;
+          }
+        }
+
+        @media (max-width: 1366px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+            --ag-header-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
           }
 
-          .agGridFlex {
-            flex: 1 1 auto;
+          .agGridContainer :global(.ag-header-cell),
+          .agGridContainer :global(.ag-header-cell-label) {
+            padding-left: var(--ag-header-cell-horizontal-padding) !important;
+            padding-right: var(--ag-header-cell-horizontal-padding) !important;
           }
 
-          .hoverReset {
-            position: absolute;
-            top: 0;
-            right: 0;
-            z-index: 9999;
-            box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
-            border-radius: 4px;
-            background: #fff;
+          .agGridContainer :global(.ag-cell) {
+            padding-left: var(--ag-cell-horizontal-padding) !important;
+            padding-right: var(--ag-cell-horizontal-padding) !important;
+          }
+        }
+
+        @media (min-width: 1025px) and (max-width: 1280px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 10px;
+            --ag-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
+            --ag-header-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
           }
 
-          .paginationWrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
+          .agGridContainer :global(.ag-header-cell),
+          .agGridContainer :global(.ag-header-cell-label) {
+            padding-left: var(--ag-header-cell-horizontal-padding) !important;
+            padding-right: var(--ag-header-cell-horizontal-padding) !important;
           }
 
-          .paginationBar {
-            flex: 1 1 auto;
-            min-width: 0;
-            background-color: #fff;
-            font-size: 0.8rem;
-            padding: 1px 5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            height: 30px;
-            line-height: 1;
+          .agGridContainer :global(.ag-cell) {
+            padding-left: var(--ag-cell-horizontal-padding) !important;
+            padding-right: var(--ag-cell-horizontal-padding) !important;
           }
 
-          .pageTextField {
-            padding: 0;
-            width: 70px;
-          }
-
-          .pageTextField :global(.MuiOutlinedInput-root),
-          .pageTextField :global(.MuiInputBase-root) {
-            height: 22px;
-            min-height: 22px;
-            font-size: 1rem;
-          }
-
-          .pageTextField :global(.MuiOutlinedInput-input),
-          .pageTextField :global(.MuiInputBase-input) {
-            padding: 1px 5px;
-          }
-
-          .actionsBox {
-            display: flex;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-          }
-
-          .actionIconButton {
-            padding: 0;
-            width: 22px;
-            height: 22px;
-            min-width: 0;
-          }
-
-          .actionIcon {
-            width: 16px;
-            height: 16px;
-          }
-
-          .fullSizeCheckbox {
-            width: 100% !important;
+          .agGridContainer :global(.ag-header-cell-label) {
             height: 100% !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex !important;
+            align-items: center !important;
           }
 
-          .agGridContainer :global(.MuiCheckbox-root) {
-            width: 100% !important;
+          .agGridContainer :global(.ag-cell) {
+            display: flex !important;
+            align-items: center !important;
+          }
+
+          .agGridContainer :global(.ag-cell-wrapper),
+          .agGridContainer :global(.ag-cell-value) {
             height: 100% !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
-            font-size: 20px !important;
-          }
-
-          .pointerNone {
-            pointer-events: none;
+            display: flex !important;
+            align-items: center !important;
           }
 
           .fieldWrapper {
-            user-select: text;
-            cursor: pointer;
-            width: 100%;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            padding-inline: 6px;
           }
 
-          .fieldWrapper::selection {
-            background: none !important;
-            color: inherit;
+          .paginationWrapper,
+          .paginationBar,
+          .paginationBar * {
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
           }
 
-          .nowrap{
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-
-          }
-
-          .copiedTooltip {
-            z-index: 1000;
-            position: fixed;
-            top: -40px;
-            background-color: #000;
-            color: #fff;
-            padding: 1px 3px;
-            border-radius: 5px;
-          }
-
-          .colorComboWrapper {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-          }
-
-          .colorSwatch {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-          }
-
-          .agGridContainer :global(.ag-header),
-          .agGridContainer :global(.ag-header-cell) {
-            height: 32px !important;
-            min-height: 32px !important;
-          }
-
-          .agGridContainer :global(.ag-header-cell-text),
-          .agGridContainer :global(.ag-cell) {
-            font-size: var(--ag-font-size);
-          }
-
-          .agGridContainer :global(.ag-cell) {
-            border-right: 1px solid #d0d0d0 !important;
-          }
-
-          .agGridContainer :global(.ag-cell .MuiBox-root) {
-            padding: 0 !important;
-          }
-
-          .paginationBar :global(.MuiIconButton-root) {
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            min-width: 0;
+          .pageTextField :global(.MuiOutlinedInput-root),
+          .pageTextField :global(.MuiInputBase-root),
+          .pageTextField :global(.MuiOutlinedInput-input),
+          .pageTextField :global(.MuiInputBase-input) {
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
           }
 
           .paginationBar :global(.MuiSvgIcon-root) {
-            font-size: 20px;
-            line-height: 1;
+            font-size: 16px !important;
           }
+        }
 
-          @media (min-width: 1025px) and (max-width: 1600px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 12px;
-            }
-
+        @media (max-width: 1024px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 9.2px;
+            --ag-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+            --ag-header-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
           }
+        }
 
-          @media (max-width: 1366px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
-              --ag-header-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
-            }
-
-            .agGridContainer :global(.ag-header-cell),
-            .agGridContainer :global(.ag-header-cell-label) {
-              padding-left: var(--ag-header-cell-horizontal-padding) !important;
-              padding-right: var(--ag-header-cell-horizontal-padding) !important;
-            }
-
-            .agGridContainer :global(.ag-cell) {
-              padding-left: var(--ag-cell-horizontal-padding) !important;
-              padding-right: var(--ag-cell-horizontal-padding) !important;
-            }
+        @media (max-width: 768px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.9px;
           }
-          @media (min-width: 1025px) and (max-width: 1280px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 10px;
-              --ag-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
-              --ag-header-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
-            }
+        }
 
-            .agGridContainer :global(.ag-header-cell),
-            .agGridContainer :global(.ag-header-cell-label) {
-              padding-left: var(--ag-header-cell-horizontal-padding) !important;
-              padding-right: var(--ag-header-cell-horizontal-padding) !important;
-            }
-
-            .agGridContainer :global(.ag-cell) {
-              padding-left: var(--ag-cell-horizontal-padding) !important;
-              padding-right: var(--ag-cell-horizontal-padding) !important;
-            }
-
-            .agGridContainer :global(.ag-header-cell-label) {
-              height: 100% !important;
-              display: flex !important;
-              align-items: center !important;
-            }
-
-            .agGridContainer :global(.ag-cell) {
-              display: flex !important;
-              align-items: center !important;
-            }
-
-            .agGridContainer :global(.ag-cell-wrapper),
-            .agGridContainer :global(.ag-cell-value) {
-              height: 100% !important;
-              display: flex !important;
-              align-items: center !important;
-            }
-
-            .fieldWrapper {
-              height: 100% !important;
-              display: flex !important;
-              align-items: center !important;
-              padding-inline: 6px; /* spacing before/after text */
-              box-sizing: border-box;
-            }
-
-            .paginationWrapper,
-            .paginationBar,
-            .paginationBar * {
-              font-size: 0.6rem !important;
-              line-height: 1 !important;
-            }
-
-            .pageTextField :global(.MuiOutlinedInput-root),
-            .pageTextField :global(.MuiInputBase-root),
-            .pageTextField :global(.MuiOutlinedInput-input),
-            .pageTextField :global(.MuiInputBase-input) {
-              font-size: 0.6rem !important;
-              line-height: 1 !important;
-            }
-
-            .paginationBar :global(.MuiSvgIcon-root) {
-              font-size: 16px !important;
-            }
+        @media (max-width: 600px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.5px;
           }
+        }
 
-          @media (max-width: 1024px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 9.2px;
-              --ag-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
-              --ag-header-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
-            }
+        @media (max-width: 480px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.2px;
           }
+        }
 
-          @media (max-width: 768px) {
+        @media (max-width: 375px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8px;
+          }
+        }
 
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 8.9px;
-            }
-          }
+        .right .fieldWrapper {
+          display: flex;
+          justify-content: flex-end;
+          width: 100%;
+        }
 
-          @media (max-width: 600px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 8.5px;
-            }
-          }
-
-          @media (max-width: 480px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 8.2px;
-            }
-          }
-
-          @media (max-width: 375px) {
-            .agGridContainer:global(.ag-theme-alpine) {
-              --ag-font-size: 8px;
-            }
-          }
-          .right .fieldWrapper {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-          }
-          .bold {
-            font-weight: bold;
-          }
+        .bold {
+          font-weight: bold;
+        }
       `}</style>
     </VertLayout>
   )
