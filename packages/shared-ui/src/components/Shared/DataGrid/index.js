@@ -33,7 +33,8 @@ export function DataGrid({
   bg,
   searchValue,
   onValidationRequired,
-  isDeleteDisabled
+  isDeleteDisabled,
+  showCounterColumn = false,
 }) {
   const gridApiRef = useRef(null)
 
@@ -684,7 +685,29 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+  const counterColumn = showCounterColumn
+    ? [
+        {
+          field: 'Count',
+          headerName: platformLabels.Count,
+          headerTooltip: platformLabels.Count,
+          editable: false, 
+          sortable: false,
+          flex: 1,
+          autoHeight: true,
+          cellRenderer: params => (
+            <div
+              tabIndex={0} 
+            >
+              {params.node.rowIndex + 1 }
+            </div>
+          ),
+        },
+      ]
+    : []
+
   const columnDefs = [
+    ...counterColumn, 
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
