@@ -129,6 +129,23 @@
   padding: 4px 0;
   min-height: 28px;
 }
+.dateTimePopper {
+  height: auto !important;
+}
+
+.popperRoot :global(.MuiPickersLayout-root),
+.popperRoot :global(.MuiPickersLayout-contentWrapper) {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+  height: auto !important;
+}
+
+.popperRoot :global(.MuiPickersLayout-actionBar),
+.popperRoot :global(.MuiPickersActionBar-root) {
+  margin: 0 !important;
+}
+
 
 @media (max-width: 1600px) {
   .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),

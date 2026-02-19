@@ -22,6 +22,13 @@ function computeLayout({
       ? window.visualViewport?.height ?? window.innerHeight
       : 0
 
+  const viewportWidth =
+    typeof window !== 'undefined'
+      ? window.visualViewport?.width ?? window.innerWidth
+      : 0
+
+  const isNarrow = viewportWidth <= 600
+
   const scale = Math.min(1, Math.max(0.86, viewportHeight / 700))
 
   const defaultEstimate = isTimePicker
@@ -65,16 +72,20 @@ function computeLayout({
     transformOrigin: openAbove ? 'bottom left' : 'top left',
     overflow: isPicker ? 'hidden' : 'auto',
     maxHeight: scaledPopperMaxHeight,
+    height: 'auto',
 
     ...(shouldMatchAnchorWidth ? { width: rect.width } : {}),
     ...(isPicker || fitContent
-      ? { width: 'max-content', maxWidth: 'calc(100vw - 16px)' }
+      ? isNarrow
+        ? { width: 'calc(100vw - 16px)', maxWidth: 'calc(100vw - 16px)' }
+        : { width: 'max-content', maxWidth: 'calc(100vw - 16px)' }
       : {})
   }
 
   return {
     openAbove,
     calendarMaxHeight,
+    isNarrow,
     mergedStyle: { ...baseStyle, ...(userStyle || {}) }
   }
 }
@@ -213,20 +224,50 @@ const PopperComponent = ({
         sx={
           isPicker
             ? {
-                '& .MuiPickersLayout-root, & .MuiPickersLayout-contentWrapper': {
+                '& .MuiPickersLayout-root': {
+                  display: layout.isNarrow ? 'flex' : 'inline-flex',
+                  flexDirection: 'column',
+                  alignItems: layout.isNarrow ? 'stretch' : 'flex-start',
+                  justifyContent: 'flex-start',
+                  height: 'auto',
+                  minHeight: 'unset',
+                  maxHeight: 'unset',
+                  padding: 0,
+                  margin: 0,
                   overflow: 'visible'
                 },
 
+                '& .MuiPickersLayout-contentWrapper': {
+                  flex: '0 0 auto',
+                  height: 'auto',
+                  minHeight: 'unset',
+                  padding: 0,
+                  margin: 0,
+                  overflow: 'visible',
+                  width: layout.isNarrow ? '100%' : 'auto'
+                },
+
+                '& .MuiPickersLayout-actionBar, & .MuiPickersActionBar-root': {
+                  flex: '0 0 auto',
+                  margin: 0
+                },
+
                 '& .MuiDateCalendar-root': {
+                  flex: '0 0 auto',
+                  height: 'auto',
                   maxHeight: layout.calendarMaxHeight,
                   overflowY: 'auto',
-                  overflowX: 'hidden'
+                  overflowX: 'hidden',
+                  width: layout.isNarrow ? '100%' : 'auto'
                 },
 
                 '& .MuiMultiSectionDigitalClock-root, & .MuiTimeClock-root, & .MuiClock-root': {
+                  flex: '0 0 auto',
+                  height: 'auto',
                   maxHeight: layout.calendarMaxHeight,
-                  overflowY: 'auto',
-                  overflowX: 'hidden'
+                  overflowY: 'hidden',
+                  overflowX: 'hidden',
+                  width: layout.isNarrow ? '100%' : 'auto'
                 }
               }
             : undefined
