@@ -647,27 +647,11 @@ const Table = ({
           <img
             src={src}
             alt=""
-            className="agImg"
-            style={
-              isEmpty
-                ? {
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }
-                : {
-                    width: 'auto',
-                    height: 'auto',
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain'
-                  }
-            }
+            className={`agImg ${isEmpty ? 'agImg--empty' : 'agImg--real'}`}
             onError={e => {
               e.currentTarget.src = EMPTY_PHOTO
-              e.currentTarget.style.width = '100%'
-              e.currentTarget.style.height = '100%'
-              e.currentTarget.style.objectFit = 'cover'
+              e.currentTarget.classList.remove('agImg--real')
+              e.currentTarget.classList.add('agImg--empty')
             }}
           />
         </div>
@@ -1108,9 +1092,45 @@ const Table = ({
           overflow: hidden;
         }
 
-        .agGridContainer :global(.agImg) {
-          display: block;
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
         }
+
+        .agGridContainer :global(img.agImg--real) {
+          object-fit: contain !important;
+        }
+
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+          width: auto !important;
+          height: auto !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
 
         .agGridContainer :global(.ag-header),
         .agGridContainer :global(.ag-header-cell) {
