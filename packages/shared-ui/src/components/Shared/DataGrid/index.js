@@ -129,9 +129,12 @@ export function DataGrid({
       commit({ changes: updatedRow })
     }
 
-    const addRow = async ({ changes }) => {
-      if (params.rowIndex === value.length - 1 && !changes) {
-        addNewRow(params)
+    const addRow = async (param = {}) => {
+      const { changes } = param
+      if (!changes) {
+        if (params.rowIndex === value.length - 1) {
+          addNewRow(params)
+        }
         return
       }
 
