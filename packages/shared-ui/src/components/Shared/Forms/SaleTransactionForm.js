@@ -408,9 +408,8 @@ export default function SaleTransactionForm({
         taxCodeId: item.taxCodeId,
         taxBase: item.taxBase,
         amount: item.amount ?? 0,
-        invoiceId: formik.values.recordId,
+        invoiceId: formik.values.recordId || 0,
         taxSeqNo: item.seqNo,
-        taxId: formik.values.header.taxId,
       }))
     }
 
@@ -1165,7 +1164,7 @@ export default function SaleTransactionForm({
     return res?.record
   }
 
-  async function fillForm(saTrxPack, dtInfo) {
+  async function fillForm(saTrxPack, dtInfo, taxDetails) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
@@ -1180,8 +1179,7 @@ export default function SaleTransactionForm({
       
     const taxDetailsMap = saTrxHeader.isVattable
     ? taxDetails
-    : {}
-
+    : []
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
@@ -1205,7 +1203,7 @@ export default function SaleTransactionForm({
             }),
           priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: taxDetailsMap?.filter(td => td.taxId === item.taxId) || []
+          taxDetails: taxDetailsMap?.filter(td => td.taxId === item.taxId && td.seqNo === item.seqNo) || []
         }
       })
     )
@@ -1692,9 +1690,10 @@ export default function SaleTransactionForm({
 
   async function refetchForm(recordId, callDt) {
     let dtInfo = {}
+    const res = await getPackData()
     const saTrxpack = await getSalesTransactionPack(recordId)
     if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
-    await fillForm(saTrxpack, dtInfo)
+    await fillForm(saTrxpack, dtInfo, res?.taxDetails)
   }
 
   function setAddressValues(obj) {
