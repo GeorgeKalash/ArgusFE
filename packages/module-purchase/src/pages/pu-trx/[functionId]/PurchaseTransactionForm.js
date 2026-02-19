@@ -1338,6 +1338,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       volume: itemPriceRow?.volume ? itemPriceRow.volume : 0,
       weight: itemPriceRow?.weight ? itemPriceRow.weight : 0,
       basePrice: itemPriceRow?.basePrice ? itemPriceRow.basePrice : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
       unitPrice: itemPriceRow?.unitPrice ? itemPriceRow.unitPrice : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? itemPriceRow.extendedPrice : 0,
       mdValue: itemPriceRow?.mdValue,
