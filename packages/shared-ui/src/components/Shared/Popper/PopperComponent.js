@@ -41,15 +41,17 @@ function computeLayout({
 
   const availableSpace = Math.max(0, (openAbove ? spaceAbove : spaceBelow) - GAP)
 
-  const popperRatio = viewportHeight < 600 ? 0.86 : 0.72
-  const popperCap = viewportHeight * popperRatio
-  const popperMaxHeight = Math.max(180, Math.min(availableSpace, popperCap))
+  const isShort = viewportHeight <= 600
+  const isDate = isPicker && !isTimePicker
 
+  const popperRatio = isShort && isDate ? 0.82 : isShort ? 0.78 : 0.72
+  const popperCap = viewportHeight * popperRatio
+  const popperMaxHeight = Math.max(isShort && isDate ? 220 : 180, Math.min(availableSpace, popperCap))
   const scaledPopperMaxHeight = popperMaxHeight / scale
 
-  const calendarRatio = viewportHeight < 600 ? 0.58 : 0.62
+  const calendarRatio = isShort && isDate ? 0.68 : isShort ? 0.64 : 0.62
   const calendarCap = viewportHeight * calendarRatio
-  const calendarMaxHeight = Math.max(240, Math.min(availableSpace, calendarCap))
+  const calendarMaxHeight = Math.max(isShort && isDate ? 280 : 240, Math.min(availableSpace, calendarCap))
 
   const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
 
@@ -217,7 +219,7 @@ const PopperComponent = ({
 
                 '& .MuiDateCalendar-root': {
                   maxHeight: layout.calendarMaxHeight,
-                  overflowY: 'hidden',
+                  overflowY: 'auto',
                   overflowX: 'hidden'
                 },
 
