@@ -9,7 +9,6 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import ReportGenerator from '../ReportGenerator'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 
-// ✅ keep styles.xxx usage without CSS modules
 const styles = {
   dialogActions: 'dialogActions',
   gridContainer: 'gridContainer',
@@ -146,72 +145,69 @@ const GridToolbar = ({
             font-size: 13px;
           }
         }
-@media (min-width: 1025px) and (max-width: 1366px) {
-/* ✅ Pagination footer like your screenshot (compact) */
-.paginationWrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 4px;
-}
+        @media (min-width: 1025px) and (max-width: 1366px) {
+        .paginationWrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 4px;
+        }
 
-.paginationBar {
-  flex: 1 1 auto;
-  min-width: 0;
-  background-color: #fff;
+        .paginationBar {
+          flex: 1 1 auto;
+          min-width: 0;
+          background-color: #fff;
 
-  /* smaller text */
-  font-size: 10px !important;
-  line-height: 1 !important;
+          /* smaller text */
+          font-size: 10px !important;
+          line-height: 1 !important;
 
-  /* smaller height */
-  height: 24px !important;
-  padding: 0 4px !important;
+          /* smaller height */
+          height: 24px !important;
+          padding: 0 4px !important;
 
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-}
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          white-space: nowrap;
+        }
 
-/* force any children to follow (labels/text nodes + MUI default sizes) */
-.paginationBar * {
-  font-size: 10px !important;
-  line-height: 1 !important;
-}
+        .paginationBar * {
+          font-size: 10px !important;
+          line-height: 1 !important;
+        }
 
-/* icon buttons smaller */
-.paginationBar :global(.MuiIconButton-root) {
-  padding: 0 !important;
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 0 !important;
-}
+        .paginationBar :global(.MuiIconButton-root) {
+          padding: 0 !important;
+          width: 16px !important;
+          height: 16px !important;
+          min-width: 0 !important;
+        }
 
-.paginationBar :global(.MuiSvgIcon-root) {
-  font-size: 16px !important;
-}
+        .paginationBar :global(.MuiSvgIcon-root) {
+          font-size: 16px !important;
+        }
 
-/* page input smaller + shorter */
-.pageTextField {
-  padding: 0 !important;
-  width: 56px !important;
-}
+        /* page input smaller + shorter */
+        .pageTextField {
+          padding: 0 !important;
+          width: 56px !important;
+        }
 
-.pageTextField :global(.MuiOutlinedInput-root),
-.pageTextField :global(.MuiInputBase-root) {
-  height: 18px !important;
-  min-height: 18px !important;
-  font-size: 10px !important;
-}
+        .pageTextField :global(.MuiOutlinedInput-root),
+        .pageTextField :global(.MuiInputBase-root) {
+          height: 18px !important;
+          min-height: 18px !important;
+          font-size: 10px !important;
+        }
 
-.pageTextField :global(.MuiOutlinedInput-input),
-.pageTextField :global(.MuiInputBase-input) {
-  padding: 0 4px !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-}
-}
+        .pageTextField :global(.MuiOutlinedInput-input),
+        .pageTextField :global(.MuiInputBase-input) {
+          padding: 0 4px !important;
+          font-size: 10px !important;
+          line-height: 1 !important;
+        }
+        }
 
         @media (max-width: 1024px) {
           .gridContainer {
