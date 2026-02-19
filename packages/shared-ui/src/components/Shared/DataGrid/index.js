@@ -58,10 +58,10 @@ export function DataGrid({
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
-  const GridCheckbox = ({ checked, disabled, onChange, className = '' }) => {
+  const GridCheckbox = ({ checked, disabled, onChange }) => {
     return (
       <Checkbox
-        className={`fullSizeCheckbox ${className}`}
+        className={`fullSizeCheckbox`}
         checked={!!checked}
         disabled={!!disabled}
         onChange={onChange}
@@ -722,7 +722,7 @@ export function DataGrid({
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: !_disabled,
+        editable: column.component === 'checkbox' ? false : !_disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
         cellRenderer: CustomCellRenderer,
@@ -794,11 +794,15 @@ export function DataGrid({
 
     const { colDef, rowIndex, api } = params
 
-    if (colDef.component !== 'button')
+    const nonEditableByClick =
+      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon'
+
+    if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
         colKey: colDef.field
       })
+    }
 
     if (params?.data.id !== rowSelectionModel) {
       const selectedRow = params?.data
