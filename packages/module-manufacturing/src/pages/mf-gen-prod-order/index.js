@@ -255,6 +255,7 @@ const GeneratePoductionOrder = () => {
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
+                    name='ItemSummary'
                     columns={columnsItemsSummary}
                     gridData={formik?.values?.itemSummaries}
                     rowId={['itemId']}
@@ -274,6 +275,7 @@ const GeneratePoductionOrder = () => {
                 </Grid>
                 <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Table
+                    name='Orders'
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['itemId']}
