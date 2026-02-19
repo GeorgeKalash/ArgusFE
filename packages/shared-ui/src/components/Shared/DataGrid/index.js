@@ -58,6 +58,17 @@ export function DataGrid({
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
+  const GridCheckbox = ({ checked, disabled, onChange, className = '' }) => {
+    return (
+      <Checkbox
+        className={`fullSizeCheckbox ${className}`}
+        checked={!!checked}
+        disabled={!!disabled}
+        onChange={onChange}
+      />
+    )
+  }
+
   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
@@ -463,6 +474,55 @@ export function DataGrid({
   const CustomCellRenderer = params => {
     const { column } = params
 
+    const comp =
+      typeof column.colDef?.component === 'string' ? column.colDef.component : column.colDef?.component
+    const isCheckbox = comp === 'checkbox'
+
+    if (isCheckbox) {
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+
+      return (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <GridCheckbox
+            checked={params.value}
+            disabled={disabledCheckbox}
+            onChange={e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const rowIndex = params.node.rowIndex
+              const colId = params.column?.getColId?.() || params.colDef.field
+
+              params.api.setFocusedCell(rowIndex, colId)
+              params.api.ensureIndexVisible(rowIndex)
+              if (!params.node.isSelected?.() && params.node.setSelected) params.node.setSelected(true)
+
+              const checked = e.target.checked
+
+              params.node.setDataValue(params.colDef.field, checked)
+
+              const changes = { [params.colDef.field]: checked }
+              setData(changes, params)
+              commit({ ...params.data, ...changes })
+
+              if (params.colDef.updateOn !== 'blur') {
+                process(params, params.data, setData)
+              }
+            }}
+          />
+        </Box>
+      )
+    }
+
     if (column.colDef?.link?.enabled) {
       const { getHref, target, popup, onClick } = column.colDef.link
       const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
@@ -688,11 +748,10 @@ export function DataGrid({
             }
 
             return (
-              <Checkbox
+              <GridCheckbox
                 checked={!!column?.checkAll?.value}
                 disabled={!!column?.checkAll?.disabled}
                 onChange={selectAll}
-                className={'fullSizeCheckbox'}
               />
             )
           },
@@ -703,7 +762,6 @@ export function DataGrid({
         cellClassRules: cellClassRules,
         suppressKeyboardEvent: params => {
           const { event } = params
-
           return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
         }
       }
@@ -968,14 +1026,28 @@ export function DataGrid({
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
+          padding: 0 !important;
         }
-
         .agContainer :global(.fullSizeCheckbox) {
           width: 100% !important;
           height: 100% !important;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+          font-size: 20px !important;
         }
 
         .agContainer :global(.cellBox) {
