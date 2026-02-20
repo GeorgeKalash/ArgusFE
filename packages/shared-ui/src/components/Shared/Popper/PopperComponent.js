@@ -29,7 +29,7 @@ function computeLayout({
 
   const isNarrow = viewportWidth <= 600
 
-  const scale = Math.min(1, Math.max(0.86, viewportHeight / 700))
+ const scale = isPicker ? Math.min(1, Math.max(0.86, viewportHeight / 700)) : 1
 
   const defaultEstimate = isTimePicker
     ? 300
@@ -48,45 +48,72 @@ function computeLayout({
 
   const availableSpace = Math.max(0, (openAbove ? spaceAbove : spaceBelow) - GAP)
 
-  const isShort = viewportHeight <= 600
-  const isDate = isPicker && !isTimePicker
-
-  const popperRatio = isShort && isDate ? 0.82 : isShort ? 0.78 : 0.72
-  const popperCap = viewportHeight * popperRatio
-  const popperMaxHeight = Math.max(isShort && isDate ? 220 : 180, Math.min(availableSpace, popperCap))
-  const scaledPopperMaxHeight = popperMaxHeight / scale
-
-  const calendarRatio = isShort && isDate ? 0.68 : isShort ? 0.64 : 0.62
-  const calendarCap = viewportHeight * calendarRatio
-  const calendarMaxHeight = Math.max(isShort && isDate ? 280 : 240, Math.min(availableSpace, calendarCap))
-
   const shouldMatchAnchorWidth = !isPicker && !fitContent && matchAnchorWidth
 
-  const baseStyle = {
-    position: 'fixed',
-    left: rect.left,
-    top: openAbove ? rect.top : rect.bottom,
-    transform: openAbove
-      ? `translateY(calc(-100% - ${GAP}px)) scale(${scale})`
-      : `scale(${scale})`,
-    transformOrigin: openAbove ? 'bottom left' : 'top left',
-    overflow: isPicker ? 'hidden' : 'auto',
-    maxHeight: scaledPopperMaxHeight,
-    height: 'auto',
+  let calendarMaxHeight
+  let mergedStyle
 
-    ...(shouldMatchAnchorWidth ? { width: rect.width } : {}),
-    ...(isPicker || fitContent
-      ? isNarrow
+  if (isPicker) {
+    const isShort = viewportHeight <= 600
+    const isDate = isPicker && !isTimePicker
+
+    const popperRatio = isShort && isDate ? 0.82 : isShort ? 0.78 : 0.72
+    const popperCap = viewportHeight * popperRatio
+    const popperMaxHeight = Math.max(
+      isShort && isDate ? 220 : 180,
+      Math.min(availableSpace, popperCap)
+    )
+
+  const scaledPopperMaxHeight = popperMaxHeight / scale
+
+    const calendarRatio = isShort && isDate ? 0.68 : isShort ? 0.64 : 0.62
+    const calendarCap = viewportHeight * calendarRatio
+    calendarMaxHeight = Math.max(
+      isShort && isDate ? 280 : 240,
+      Math.min(availableSpace, calendarCap)
+    )
+
+    const baseStyle = {
+      position: 'fixed',
+      left: rect.left,
+      top: openAbove ? rect.top : rect.bottom,
+      transform: openAbove
+        ? `translateY(calc(-100% - ${GAP}px)) scale(${scale})`
+        : `scale(${scale})`,
+      transformOrigin: openAbove ? 'bottom left' : 'top left',
+      overflow: 'hidden',
+      maxHeight: scaledPopperMaxHeight,
+      height: 'auto',
+
+      ...(isNarrow
         ? { width: 'calc(100vw - 16px)', maxWidth: 'calc(100vw - 16px)' }
-        : { width: 'max-content', maxWidth: 'calc(100vw - 16px)' }
-      : {})
+        : { width: 'max-content', maxWidth: 'calc(100vw - 16px)' })
+    }
+
+    mergedStyle = { ...baseStyle, ...(userStyle || {}) }
+  } else {
+    const baseStyle = {
+      position: 'fixed',
+      left: rect.left,
+      top: openAbove ? rect.top : rect.bottom,
+      transform: openAbove ? `translateY(calc(-100% - ${GAP}px))` : 'none',
+      transformOrigin: openAbove ? 'bottom left' : 'top left',
+      overflow: 'visible',
+
+      ...(shouldMatchAnchorWidth ? { width: rect.width } : {}),
+      ...(fitContent ? { width: 'max-content' } : {}),
+      maxWidth: 'calc(100vw - 16px)'
+    }
+
+    mergedStyle = { ...baseStyle, ...(userStyle || {}) }
+    calendarMaxHeight = undefined
   }
 
   return {
     openAbove,
     calendarMaxHeight,
     isNarrow,
-    mergedStyle: { ...baseStyle, ...(userStyle || {}) }
+    mergedStyle
   }
 }
 
@@ -185,6 +212,7 @@ const PopperComponent = ({
     }
 
     measure()
+    requestAnimationFrame(measure)
 
     const ro = new ResizeObserver(measure)
     ro.observe(node)
