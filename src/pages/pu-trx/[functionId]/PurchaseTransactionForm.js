@@ -667,6 +667,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         endpointId: FinancialRepository.TaxSchedules.qry,
         displayField: 'name',
         valueField: 'recordId',
+        readOnly: formik.values?.header?.taxId,
         mapping: [
           { from: 'recordId', to: 'taxId' },
           { from: 'name', to: 'taxName' }
