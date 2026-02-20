@@ -79,17 +79,15 @@ const TaxDetails = props => {
     }
   ]
 
-  const mappedTaxes = useTaxes
+  const gridData = useTaxes
   ? {
       list: obj?.taxDetails?.map(t => ({
         ...t,
-        amount: t.taxScheduleAmount,   
-        vatAmount: t.amount.toFixed(2)        
+        amount: t.taxScheduleAmount,
+        vatAmount: t.amount?.toFixed(2)
       }))
     }
-  : null
-
-  const gridData = useTaxes ? mappedTaxes : data
+  : data
 
   async function fetchGridData() {
     const res = await getRequest({
