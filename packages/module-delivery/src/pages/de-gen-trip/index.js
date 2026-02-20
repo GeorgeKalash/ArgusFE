@@ -20,12 +20,14 @@ import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDial
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const GenerateOutboundTransportation = () => {
   const [selectedSaleZones, setSelectedSaleZones] = useState('')
   const [reCalc, setReCalc] = useState(false)
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceQuery({
@@ -36,7 +38,7 @@ const GenerateOutboundTransportation = () => {
     datasetId: ResourceIds.Trip
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const { formik } = useForm({
     initialValues: {

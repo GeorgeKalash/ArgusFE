@@ -27,10 +27,12 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import FieldSet from '@argus/shared-ui/src/components/Shared/FieldSet'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BalanceTransferForm({ labels, access, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
 
   const invalidate = useInvalidate({
@@ -43,8 +45,8 @@ export default function BalanceTransferForm({ labels, access, recordId, window }
     enabled: !recordId
   })
 
-  const defaultPlant = userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value
-  const defaultSP = userDefaultsData?.list?.find(({ key }) => key === 'spId')?.value
+  const defaultPlant = userDefaults?.list?.find(({ key }) => key === 'plantId')?.value
+  const defaultSP = userDefaults?.list?.find(({ key }) => key === 'spId')?.value
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },

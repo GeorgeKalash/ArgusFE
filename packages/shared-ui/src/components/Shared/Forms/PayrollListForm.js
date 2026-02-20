@@ -23,13 +23,15 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PayrollListForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
 
-  const pytvStartDate = parseInt(defaultsData?.list?.find(({ key }) => key === 'pytvStartDate')?.value) || null
-  const pytvEndDate = parseInt(defaultsData?.list?.find(({ key }) => key === 'pytvEndDate')?.value) || null
+  const pytvStartDate = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pytvStartDate')?.value) || null
+  const pytvEndDate = parseInt(systemDefaults?.list?.find(({ key }) => key === 'pytvEndDate')?.value) || null
 
   const invalidate = useInvalidate({
     endpointId: PayrollRepository.Payroll.page

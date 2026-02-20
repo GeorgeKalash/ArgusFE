@@ -43,11 +43,12 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import FixedGrid from '@argus/shared-ui/src/components/Shared/FixedGrid'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) => {
   const { stack } = useWindow()
   const { getRequestFullEndPoint, getRequest, postRequest } = useContext(RequestsContext)
-  const { systemChecks, defaultsData } = useContext(ControlContext)
+  const { systemChecks, systemDefaults } = useContext(DefaultsContext)
   const [showAsPassword, setShowAsPassword] = useState(!!recordId)
   const [showAsPasswordPhone, setShowAsPasswordPhone] = useState(!!recordId)
   const [showAsPasswordPhoneRepeat, setShowAsPasswordPhoneRepeat] = useState(!!recordId)
@@ -67,7 +68,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
   const { platformLabels } = useContext(ControlContext)
   const [formikSettings, setFormik] = useState({})
 
-  const trialDays = defaultsData?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
+  const trialDays = systemDefaults?.list?.find(({ key }) => key === 'ct-client-trial-days')?.value
 
   const { labels, access: maxAccess } = useResourceParams({
     datasetId: ResourceIds.ClientMaster,
@@ -663,7 +664,7 @@ const ClientTemplateForm = ({ recordId, plantId, allowEdit = false, window }) =>
           return
         }
 
-        const country = parseInt(defaultsData?.list?.find(obj => obj.key === 'countryId')?.value)
+        const country = parseInt(systemDefaults?.list?.find(obj => obj.key === 'countryId')?.value)
         formik.setFieldValue('idCountry', country)
         formik.setFieldValue('nationalityId', res.type == 1 ? country : null)
       } else {

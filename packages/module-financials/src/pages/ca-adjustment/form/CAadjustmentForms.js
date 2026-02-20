@@ -26,6 +26,7 @@ import MultiCurrencyRateForm from '@argus/shared-ui/src/components/Shared/MultiC
 import { DIRTYFIELD_RATE, getRate } from '@argus/shared-utils/src/utils/RateCalculator'
 import { RateDivision } from '@argus/shared-domain/src/resources/RateDivision'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function CAadjustmentForm({ labels, access, recordId, functionId }) {
   const { documentType, maxAccess, changeDT } = useDocumentType({
@@ -33,11 +34,12 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
     access: access,
     enabled: !recordId
   })
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
 
   const { stack } = useWindow()
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
 
   const { getRequest, postRequest } = useContext(RequestsContext)
 
@@ -184,7 +186,7 @@ export default function CAadjustmentForm({ labels, access, recordId, functionId 
   function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'currencyId'
     })
 

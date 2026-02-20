@@ -27,10 +27,12 @@ import DeliveriesOrdersForm from '../delivery-orders/Forms/DeliveryOrdersForm'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const UndeliveredItems = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
   const { stack: stackError } = useError()
 
@@ -42,7 +44,7 @@ const UndeliveredItems = () => {
     datasetId: ResourceIds.DeliveriesOrders
   })
 
-  const defaultVat = defaultsData?.list?.find(({ key }) => key === 'DEORDMaxVarPct')
+  const defaultVat = systemDefaults?.list?.find(({ key }) => key === 'DEORDMaxVarPct')
 
   const { formik } = useForm({
     maxAccess: access,

@@ -27,10 +27,12 @@ import { LogisticsRepository } from '@argus/repositories/src/repositories/Logist
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummary'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MetalTrxFinancialForm({ labels, access, recordId, functionId, getGLResourceId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const [metal, setMetal] = useState({})
   const [allMetals, setAllMetals] = useState([])
   const filteredItems = useRef()
@@ -51,8 +53,8 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     endpointId: FinancialRepository.MetalTrx.page
   })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const siteId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'siteId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const siteId = parseInt(userDefaults?.list?.find(obj => obj.key === 'siteId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },
@@ -579,7 +581,7 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
     ;(async function () {
       let metalInfo
       await getAllMetals()
-      const filteredItem = defaultsData?.list?.find(obj => obj.key === 'baseSalesMetalId')
+      const filteredItem = systemDefaults?.list?.find(obj => obj.key === 'baseSalesMetalId')
       if (parseInt(filteredItem?.value)) {
         const metalRes = await getRequest({
           extension: InventoryRepository.Metals.get,

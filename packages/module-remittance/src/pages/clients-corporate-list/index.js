@@ -13,15 +13,17 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const ClientsCorporateList = () => {
   const { stack } = useWindow()
   const { getRequest } = useContext(RequestsContext)
-  const { platformLabels, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { userDefaults } = useContext(DefaultsContext)
   const { stack: stackError } = useError()
   const [editMode, setEditMode] = useState(null)
 
-  const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value)
 
   const {
     query: { data },

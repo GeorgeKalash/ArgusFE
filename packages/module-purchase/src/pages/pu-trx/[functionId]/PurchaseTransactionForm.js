@@ -64,11 +64,13 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import Installments from '@argus/shared-ui/src/components/Shared/Installments'
 import { PUSerialsForm } from '@argus/shared-ui/src/components/Shared/PUSerialsForm'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function PurchaseTransactionForm({ labels, access, recordId, functionId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
-  const { platformLabels, defaultsData, userDefaultsData, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults, systemChecks } = useContext(DefaultsContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [measurements, setMeasurements] = useState([])
   const filteredMeasurements = useRef([])
@@ -1061,7 +1063,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = defaultsData?.list?.find(({ key }) => key === 'baseMetalCuId')
+    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
     const MCbaseCU = defaultMCbaseCU?.value ? parseInt(defaultMCbaseCU.value) : null
     if (MCbaseCU != null) {
       const kgMetalPriceValue = await fillMetalPrice(MCbaseCU)
@@ -1564,7 +1566,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function getDefaultsData() {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'baseMetalCuId' ||
         obj.key === 'mc_defaultRTSA' ||
@@ -1588,7 +1590,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   async function getUserDefaultsData() {
     const myObject = {}
 
-    const filteredList = userDefaultsData?.list?.filter(obj => {
+    const filteredList = userDefaults?.list?.filter(obj => {
       return obj.key === 'plantId' || obj.key === 'siteId'
     })
     filteredList.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))

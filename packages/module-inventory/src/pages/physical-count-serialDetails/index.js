@@ -23,11 +23,13 @@ import ClearGridConfirmation from '@argus/shared-ui/src/components/Shared/ClearG
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import ImportSerials from '@argus/shared-ui/src/components/Shared/ImportSerials'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const PhysicalCountSerialDe = () => {
   const { stack } = useWindow()
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, systemChecks } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const [editMode, setEditMode] = useState(false)
   const [combosDisabled, setCombosDisabled] = useState(false)
 

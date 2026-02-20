@@ -28,13 +28,15 @@ import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextAre
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function InboundTranspForm({ labels, maxAccess: access, recordId }) {
     const { getRequest, postRequest } = useContext(RequestsContext)
-    const { platformLabels, userDefaultsData } = useContext(ControlContext)
+    const { platformLabels } = useContext(ControlContext)
+    const { userDefaults } = useContext(DefaultsContext)
     const { stack } = useWindow()
     const { stack: stackError } = useError()
-    const plantId = parseInt(userDefaultsData?.list?.find(({ key }) => key === 'plantId')?.value) || null
+    const plantId = parseInt(userDefaults?.list?.find(({ key }) => key === 'plantId')?.value) || null
 
     const { documentType, maxAccess, changeDT } = useDocumentType({
         functionId: SystemFunction.InboundTransportation,

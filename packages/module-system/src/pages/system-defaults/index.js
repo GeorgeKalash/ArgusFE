@@ -16,20 +16,22 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import FormShell from '@argus/shared-ui/src/components/Shared/FormShell'
 import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SystemDefaults = () => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   useEffect(() => {
-    if (!defaultsData?.list?.length) return
+    if (!systemDefaults?.list?.length) return
     getDataResult()
-  }, [defaultsData])
+  }, [systemDefaults])
 
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return (
         obj.key === 'baseCurrencyId' ||
         obj.key === 'countryId' ||
@@ -113,7 +115,7 @@ const SystemDefaults = () => {
       record: JSON.stringify({ SysDefaults: data })
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     })
   }
   const editMode = formik.values.baseCurrencyId ? true : false

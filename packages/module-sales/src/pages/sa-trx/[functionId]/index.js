@@ -18,10 +18,12 @@ import toast from 'react-hot-toast'
 import NormalDialog from '@argus/shared-ui/src/components/Shared/NormalDialog'
 import { Router } from '@argus/shared-domain/src/lib/useRouter'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const SaTrx = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { stack, lockRecord } = useWindow()
   const { stack: stackError } = useError()
   const { addLockedScreen } = useContext(LockedScreensContext)
@@ -166,7 +168,7 @@ const SaTrx = () => {
   }
 
   async function getDefaultSalesCurrency() {
-    const defaultCurrency = defaultsData?.list?.find(({ key }) => key === 'currencyId')
+    const defaultCurrency = systemDefaults?.list?.find(({ key }) => key === 'currencyId')
 
     return defaultCurrency?.value ? parseInt(defaultCurrency.value) : null
   }

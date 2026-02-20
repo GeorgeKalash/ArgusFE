@@ -27,15 +27,16 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import CustomDatePicker from '@argus/shared-ui/src/components/Inputs/CustomDatePicker'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const UsersTab = ({ labels, maxAccess, storeRecordId, setRecordId }) => {
   const [emailPresent, setEmailPresent] = useState(false)
   const [passwordState, setPasswordState] = useState(false)
   const { getRequest, postRequest, getIdentityRequest } = useContext(RequestsContext)
   const editMode = !!storeRecordId
-  const { platformLabels, defaultsData } = useContext(ControlContext)
-  const passwordExpiryDays = defaultsData?.list?.find(({ key }) => key === 'passwordExpiryDays')?.value
-  const userData = getStorageData('userData')
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
+  const passwordExpiryDays = systemDefaults?.list?.find(({ key }) => key === 'passwordExpiryDays')?.value
 
   const { formik } = useForm({
     maxAccess,

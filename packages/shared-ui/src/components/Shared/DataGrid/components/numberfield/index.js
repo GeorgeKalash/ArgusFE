@@ -2,11 +2,11 @@ import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-hel
 import edit from './edit'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
 import { useContext } from 'react'
-import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { iconMapView } from '@argus/shared-utils/src/utils/iconMap'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export function View({ value, data, ...props }) {
-  const { systemChecks } = useContext(ControlContext)
+  const { systemChecks } = useContext(DefaultsContext)
   const hideLeadingZeros = systemChecks.some(check => check.checkId === SystemChecks.HIDE_LEADING_ZERO_DECIMALS)
 
   const symbol = props?.column?.props?.iconKey && props?.column?.props?.iconKey({ data })

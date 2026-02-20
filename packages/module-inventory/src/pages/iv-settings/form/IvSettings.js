@@ -12,9 +12,11 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IvSettings = ({ _labels, access }) => {
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const { postRequest } = useContext(RequestsContext)
 
   const arrayAllow = ['itemSearchStyle', 'itemSearchFields', 'iv_minSerialSize', 'minItemSearchTextSize']
@@ -36,20 +38,20 @@ const IvSettings = ({ _labels, access }) => {
         extension: SystemRepository.Defaults.set,
         record: JSON.stringify({ sysDefaults: data })
       })
-      updateDefaults(data)
+      updateSystemDefaults(data)
       toast.success(platformLabels.Edited)
     }
   })
 
   useEffect(() => {
     const myObject = {}
-    defaultsData?.list?.forEach(obj => {
+    systemDefaults?.list?.forEach(obj => {
       if (arrayAllow.includes(obj.key)) {
         myObject[obj.key] = obj.value ? parseFloat(obj.value) : null
         formik.setFieldValue(obj.key, myObject[obj.key])
       }
     })
-  }, [defaultsData])
+  }, [systemDefaults])
 
   return (
     <Form onSave={formik.handleSubmit} maxAccess={access}>

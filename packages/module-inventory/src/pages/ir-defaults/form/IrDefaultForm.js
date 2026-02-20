@@ -12,10 +12,12 @@ import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceCom
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import * as yup from 'yup'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IrDefaultForm = ({ _labels, access }) => {
   const { postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
 
   useEffect(() => {
     getDataResult()
@@ -24,7 +26,7 @@ const IrDefaultForm = ({ _labels, access }) => {
   const getDataResult = () => {
     const myObject = {}
 
-    const filteredList = defaultsData?.list?.filter(obj => {
+    const filteredList = systemDefaults?.list?.filter(obj => {
       return obj.key === 'ir_amcShortTerm' || obj.key === 'ir_amcLongTerm' || obj.key === 'ir_tfr_DocTypeId'
     })
     filteredList?.forEach(obj => (myObject[obj.key] = obj.value ? parseInt(obj.value) : null))
@@ -62,7 +64,7 @@ const IrDefaultForm = ({ _labels, access }) => {
       record: JSON.stringify({ SysDefaults: data })
     }).then(res => {
       if (res) toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     })
   }
 

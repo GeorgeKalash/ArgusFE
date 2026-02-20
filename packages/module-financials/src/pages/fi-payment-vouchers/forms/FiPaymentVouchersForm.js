@@ -31,10 +31,12 @@ import AccountSummary from '@argus/shared-ui/src/components/Shared/AccountSummar
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function FiPaymentVouchersForm({ recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, userDefaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, userDefaults } = useContext(DefaultsContext)
   const { stack } = useWindow()
 
   const { labels, access } = useResourceParams({
@@ -54,9 +56,9 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
 
   useSetWindow({ title: labels.paymentVoucher, window })
 
-  const plantId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'plantId')?.value)
-  const currencyId = parseInt(defaultsData?.list?.find(obj => obj.key === 'currencyId')?.value)
-  const cashAccountId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'cashAccountId')?.value)
+  const plantId = parseInt(userDefaults?.list?.find(obj => obj.key === 'plantId')?.value)
+  const currencyId = parseInt(systemDefaults?.list?.find(obj => obj.key === 'currencyId')?.value)
+  const cashAccountId = parseInt(userDefaults?.list?.find(obj => obj.key === 'cashAccountId')?.value)
 
   const { formik } = useForm({
     documentType: { key: 'dtId', value: documentType?.dtId },

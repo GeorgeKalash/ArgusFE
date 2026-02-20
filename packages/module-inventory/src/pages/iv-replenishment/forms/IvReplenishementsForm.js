@@ -16,10 +16,12 @@ import { formatDateFromApi, formatDateToISO } from '@argus/shared-domain/src/lib
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults } = useContext(DefaultsContext)
   const { recordId } = store
 
   const invalidate = useInvalidate({
@@ -95,7 +97,7 @@ const IvReplenishementsForm = ({ labels, maxAccess, setStore, store }) => {
       return
     }
 
-    const defaultSiteId = defaultsData?.list?.find(({ key }) => key === 'de_siteId')
+    const defaultSiteId = systemDefaults?.list?.find(({ key }) => key === 'de_siteId')
 
     if (defaultSiteId?.value) formik.setFieldValue('siteId', parseInt(defaultSiteId?.value || ''))
   }

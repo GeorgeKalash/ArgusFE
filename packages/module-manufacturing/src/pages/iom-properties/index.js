@@ -11,10 +11,12 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import CustomComboBox from '@argus/shared-ui/src/components/Inputs/CustomComboBox'
 import toast from 'react-hot-toast'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 const IomProperties = () => {
   const { postRequest, getRequest } = useContext(RequestsContext)
-  const { platformLabels, defaultsData, updateDefaults } = useContext(ControlContext)
+  const { platformLabels } = useContext(ControlContext)
+  const { systemDefaults, updateSystemDefaults } = useContext(DefaultsContext)
   const [propertyStore, setPropertyStore] = useState([])
 
   const { labels, access } = useResourceQuery({
@@ -35,7 +37,7 @@ const IomProperties = () => {
       })
 
       toast.success(platformLabels.Edited)
-      updateDefaults(data)
+      updateSystemDefaults(data)
     }
   })
 
@@ -69,7 +71,7 @@ const IomProperties = () => {
     const keys = ['mfimd1', 'mfimd2']
 
     const myObject =
-      defaultsData?.list?.reduce((acc, obj) => {
+      systemDefaults?.list?.reduce((acc, obj) => {
         if (keys.includes(obj.key)) {
           acc[obj.key] = obj.value ? parseInt(obj.value) : null
         }
