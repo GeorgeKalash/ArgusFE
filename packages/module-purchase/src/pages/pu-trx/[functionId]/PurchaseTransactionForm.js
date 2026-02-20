@@ -965,7 +965,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = puTrxItems.length
       ? await Promise.all(
           puTrxItems?.map(async (item, index) => {
-            const taxDetails = puTrxTaxes.filter(tax => tax.taxCodeId === item.taxId && tax.seqNo === item.seqNo) || []
+            const taxDetails = puTrxTaxes.filter(tax => tax.seqNo === item.seqNo) || []
 
             return {
               ...item,
@@ -1347,6 +1347,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         return {
           taxId: effectiveTaxId,
           taxCodeId: item.taxCodeId,
+          taxCodeName: item.taxCodeName,
+          taxBaseName: item.taxBaseName,
+          taxCodeRef: item.taxCodeRef,
           taxBase: item.taxBase,
           taxScheduleAmount: item.amount ?? 0,
           invoiceId: formik.values.recordId || 0,

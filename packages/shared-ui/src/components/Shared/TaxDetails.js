@@ -17,6 +17,7 @@ const TaxDetails = props => {
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
+  const useTaxes = Array.isArray(obj?.taxDetails) && obj?.taxDetails?.length > 0
   useSetWindow({ title: platformLabels.TaxDetails, window })
 
   const vatAmount = (taxDetail, taxItem) => {
@@ -41,6 +42,7 @@ const TaxDetails = props => {
     labels: _labels,
     access
   } = useResourceQuery({
+    enabled: !useTaxes,
     queryFn: fetchGridData,
     endpointId: FinancialRepository.TaxDetailPack.qry,
     datasetId: ResourceIds.TaxDetails
@@ -77,6 +79,18 @@ const TaxDetails = props => {
     }
   ]
 
+  const mappedTaxes = useTaxes
+  ? {
+      list: obj?.taxDetails?.map(t => ({
+        ...t,
+        amount: t.taxScheduleAmount,   
+        vatAmount: t.amount.toFixed(2)        
+      }))
+    }
+  : null
+
+  const gridData = useTaxes ? mappedTaxes : data
+
   async function fetchGridData() {
     const res = await getRequest({
       extension: FinancialRepository.TaxDetailPack.qry,
@@ -109,7 +123,7 @@ const TaxDetails = props => {
       <Grow>
         <Table
           columns={columns}
-          gridData={data}
+          gridData={gridData}
           rowId={['recordId']}
           isLoading={false}
           maxAccess={access}
