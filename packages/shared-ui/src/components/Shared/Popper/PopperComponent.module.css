@@ -19,11 +19,27 @@
 }
 
 .dateTimePopper {
-  background: #fff;
-  width: max-content;
-  max-width: calc(100vw - 16px);
-  overflow-x: auto;
-  border-radius: 10px;
+  --dt-actionbar-height: 56px;
+}
+
+.dateTimePopper :global(.MuiPickersLayout-root) {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 100% !important;
+}
+
+.dateTimePopper :global(.MuiPickersLayout-contentWrapper) {
+  flex: 1 1 auto !important;
+  overflow: auto !important;
+  max-height: calc(100% - var(--dt-actionbar-height)) !important;
+}
+
+.dateTimePopper :global(.MuiPickersLayout-actionBar),
+.dateTimePopper :global(.MuiPickersActionBar-root) {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  background: #fff !important;
 }
 
 .popperRoot :global(.MuiPickersLayout-actionBar),
@@ -146,7 +162,6 @@
   margin: 0 !important;
 }
 
-
 @media (max-width: 1600px) {
   .popperRoot :global(.MuiYearCalendar-root .MuiPickersYear-yearButton),
   .popperRoot :global(.MuiYearCalendar-root .MuiYearCalendar-yearButton) {
@@ -246,7 +261,14 @@
     min-height: 30px;
     padding: 2px 6px;
   }
+  .dateTimePopper {
+    width: calc(100vw - 16px);
+  }
 
+  .dateTimePopper :global(.MuiPickersLayout-root),
+  .dateTimePopper :global(.MuiPickersLayout-contentWrapper) {
+    width: 100%;
+  }
   .popperRoot :global(.MuiPickersLayout-toolbar),
   .popperRoot :global(.MuiPickersCalendarHeader-root) {
     min-height: 24px;
