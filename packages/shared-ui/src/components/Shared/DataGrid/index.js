@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { Box, Grid, IconButton, Link } from '@mui/material'
+import { Box, IconButton, Link } from '@mui/material'
+import Checkbox from '@mui/material/Checkbox'
 import components from './components'
 import { CacheStoreProvider } from '@argus/shared-providers/src/providers/CacheStoreContext'
 import { GridDeleteIcon } from '@mui/x-data-grid'
@@ -9,7 +10,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import DeleteDialog from '../DeleteDialog'
 import ConfirmationDialog from '@argus/shared-ui/src/components/ConfirmationDialog'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBox'
 import { accessMap, TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 import { AuthContext } from '@argus/shared-providers/src/providers/AuthContext'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
@@ -36,27 +36,17 @@ export function DataGrid({
   isDeleteDisabled
 }) {
   const gridApiRef = useRef(null)
-
   const { user } = useContext(AuthContext)
-
   let lastCellStopped = useRef()
-
   const isDup = useRef(null)
-
   const { platformLabels } = useContext(ControlContext)
-
   const { stack } = useWindow()
-
   const [ready, setReady] = useState(false)
-
   const [columnState, setColumnState] = useState()
-
   const skip = allowDelete ? 1 : 0
-
   const gridContainerRef = useRef(null)
 
   const generalMaxAccess = maxAccess && maxAccess?.record?.accessFlags
-
   const isAccessDenied = maxAccess?.editMode
     ? generalMaxAccess && !generalMaxAccess[accessMap[TrxType.EDIT]]
     : generalMaxAccess && !generalMaxAccess[accessMap[TrxType.ADD]]
@@ -67,6 +57,18 @@ export function DataGrid({
 
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
+
+  const GridCheckbox = ({ checked, disabled, onChange }) => {
+    return (
+      <Checkbox
+        className={`fullSizeCheckbox`}
+        checked={!!checked}
+        disabled={!!disabled}
+        onChange={onChange}
+      />
+    )
+  }
+
   function checkDuplicates(field, data) {
     return value.find(
       item => item.id != data.id && item?.[field] && item?.[field]?.toLowerCase() === data?.[field]?.toLowerCase()
@@ -102,14 +104,11 @@ export function DataGrid({
       commit({ changes: { ...params.node.data, changes } })
 
       const focusedCell = params.api.getFocusedCell()
-
       const colId = focusedCell.column.colId
-
       const isUpdatedColumn = Object.keys(changes || {}).includes(colId)
 
       if (isUpdatedColumn && !disableRefocus) {
         params.api.stopEditing()
-
         setTimeout(() => {
           params.api.startEditingCell({
             rowIndex: params.rowIndex,
@@ -121,7 +120,6 @@ export function DataGrid({
 
     const updateRowCommit = changes => {
       const rowToUpdate = value?.find(item => item?.id === changes?.id)
-
       const updatedRow = { ...rowToUpdate, ...changes.changes }
 
       gridApiRef.current.applyTransaction({
@@ -206,7 +204,6 @@ export function DataGrid({
     const newRows = value.filter(({ id }) => id !== params.data.id)
     gridApiRef.current.applyTransaction({ remove: [params.data] })
     if (newRows?.length < 1) setReady(true)
-
     onChange(newRows, 'delete', params.data)
   }
 
@@ -239,7 +236,6 @@ export function DataGrid({
       if (!el) return false
       const root = gridContainerRef.current
       const path = e?.composedPath?.()
-
       const withinContainer = !!(root && (root.contains(el) || path?.includes(root)))
 
       const agStructure = !!(
@@ -280,7 +276,6 @@ export function DataGrid({
     }
 
     window.addEventListener('pointerdown', onPointerDownCapture, true)
-
     return () => {
       window.removeEventListener('pointerdown', onPointerDownCapture, true)
     }
@@ -317,7 +312,6 @@ export function DataGrid({
 
       setTimeout(() => {
         const rowNode = gridApiRef.current.getRowNode(newRowNode.data.id)
-
         if (rowNode) {
           const rowIndex = rowNode.rowIndex
           gridApiRef.current.startEditingCell({
@@ -332,7 +326,6 @@ export function DataGrid({
 
   const findCell = params => {
     const allColumns = params.api.getColumnDefs()
-
     if (gridApiRef.current) {
       return {
         rowIndex: params.rowIndex,
@@ -394,7 +387,6 @@ export function DataGrid({
         count++
       }
     }
-
     return count
   }
 
@@ -403,7 +395,6 @@ export function DataGrid({
 
     if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && event.key !== 'Enter') {
       isDup.current = true
-
       return
     } else {
       isDup.current = false
@@ -418,7 +409,6 @@ export function DataGrid({
         rowIndex: node.rowIndex,
         colKey: nextColumnId
       })
-
       return
     }
 
@@ -428,10 +418,9 @@ export function DataGrid({
 
     const nextCell = findCell(params)
 
-    if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
+    if (currentColumnIndex === allCols.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if ((error || !allowAddNewLine) && !event.shiftKey) {
         event.stopPropagation()
-
         return
       }
     }
@@ -439,7 +428,7 @@ export function DataGrid({
     const countColumn = nextColumn(nextCell.columnIndex, data)
 
     if (
-      (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
+      (currentColumnIndex === allCols.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
       if (allowAddNewLine && !error && !_disabled) {
@@ -454,9 +443,7 @@ export function DataGrid({
 
       if (event.target.tabIndex === 0 && document.querySelector('.ag-root') && focusElement && !event.shiftKey) {
         event.preventDefault()
-
         focusElement.focus()
-
         return
       }
     }
@@ -490,6 +477,55 @@ export function DataGrid({
   const CustomCellRenderer = params => {
     const { column } = params
 
+    const comp =
+      typeof column.colDef?.component === 'string' ? column.colDef.component : column.colDef?.component
+    const isCheckbox = comp === 'checkbox'
+
+    if (isCheckbox) {
+      const disabledCheckbox = _disabled || !!column.colDef?.props?.readOnly
+
+      return (
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            padding: '0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <GridCheckbox
+            checked={params.value}
+            disabled={disabledCheckbox}
+            onChange={e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const rowIndex = params.node.rowIndex
+              const colId = params.column?.getColId?.() || params.colDef.field
+
+              params.api.setFocusedCell(rowIndex, colId)
+              params.api.ensureIndexVisible(rowIndex)
+              if (!params.node.isSelected?.() && params.node.setSelected) params.node.setSelected(true)
+
+              const checked = e.target.checked
+
+              params.node.setDataValue(params.colDef.field, checked)
+
+              const changes = { [params.colDef.field]: checked }
+              setData(changes, params)
+              commit({ ...params.data, ...changes })
+
+              if (params.colDef.updateOn !== 'blur') {
+                process(params, params.data, setData)
+              }
+            }}
+          />
+        </Box>
+      )
+    }
+
     if (column.colDef?.link?.enabled) {
       const { getHref, target, popup, onClick } = column.colDef.link
       const linkHref = typeof getHref === 'function' ? getHref(params.data) : '#'
@@ -513,7 +549,6 @@ export function DataGrid({
               if (popup) {
                 e.preventDefault()
                 popup(params.data)
-
                 return
               }
               onClick?.(params.data)
@@ -530,7 +565,6 @@ export function DataGrid({
       )
     }
 
-
     const Component =
       typeof column.colDef.component === 'string'
         ? components[column.colDef.component].view
@@ -544,19 +578,14 @@ export function DataGrid({
       }
 
       setData(changes, params)
-
       commit(changes)
-
       process(params, oldRow, setData)
     }
 
     const updateRow = ({ changes }) => {
       const oldRow = params.data
-
       setData(changes, params)
-
       commit(changes)
-
       process(params, oldRow, setData)
     }
 
@@ -592,7 +621,6 @@ export function DataGrid({
       }
 
       setCurrentValue(changes)
-
       setData(changes, params)
 
       if (column.colDef.updateOn !== 'blur' && value !== '.') {
@@ -603,20 +631,16 @@ export function DataGrid({
 
     const updateRow = ({ changes, commitOnBlur }) => {
       const oldRow = params.data
-
       setCurrentValue(changes || '')
-
       setData(changes, params)
 
       if (params?.colDef?.disableDuplicate && checkDuplicates(params.colDef?.field, params.node?.data)) {
         stackDuplicate(params)
-
         return
       }
 
       if (column.colDef.updateOn !== 'blur' || commitOnBlur) {
         commit(changes)
-
         process(params, oldRow, setData)
       }
     }
@@ -652,7 +676,6 @@ export function DataGrid({
       const shouldHide = Object.entries(deleteHideCondition).some(([key, value]) =>
         Array.isArray(value) ? value.includes(params.data[key]) : params.data[key] === value
       )
-
       if (shouldHide) return null
     }
 
@@ -699,7 +722,7 @@ export function DataGrid({
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: !_disabled,
+        editable: column.component === 'checkbox' ? false : !_disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
         cellRenderer: CustomCellRenderer,
@@ -708,35 +731,41 @@ export function DataGrid({
         autoHeight: true,
         cellClass: `${mergedCellClass || undefined}  ${centered}`,
         ...(column?.checkAll?.visible && {
-          headerComponent: () => {
+          headerClass: 'agHeaderCheckboxCell',
+          headerComponent: params => {
             const selectAll = e => {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const colId = params.column.getColId()
+              params.api.ensureColumnVisible(colId)
+              const root = params.api.getGui && params.api.getGui()
+              const headerRoot = root ? root.querySelector('.ag-header') : document.querySelector('.ag-header')
+              const cell = headerRoot && headerRoot.querySelector(`.ag-header-cell[col-id="${colId}"]`)
+              const focusable = cell && (cell.querySelector('.ag-focus-managed') || cell)
+              focusable && focusable.focus && focusable.focus()
+
               if (column?.checkAll?.onChange) {
                 column?.checkAll?.onChange({ checked: e.target?.checked })
               }
             }
 
             return (
-              <Grid container className={'headerCheckboxContainer'}>
-                <CustomCheckBox
-                  className={'headerCheckbox'}
-                  checked={column?.checkAll?.value}
-                  onChange={e => {
-                    selectAll(e)
-                  }}
-                  disabled={column.checkAll?.disabled}
-                />
-              </Grid>
+              <GridCheckbox
+                checked={!!column?.checkAll?.value}
+                disabled={!!column?.checkAll?.disabled}
+                onChange={selectAll}
+              />
             )
-          }
+          },
+          suppressMenu: true
         }),
+
         cellEditorParams: { maxAccess },
         cellClassRules: cellClassRules,
         suppressKeyboardEvent: params => {
           const { event } = params
-
-          return  event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter'
-            ? true
-            : false
+          return event.code === 'ArrowDown' || event.code === 'ArrowUp' || event.code === 'Enter' ? true : false
         }
       }
     }),
@@ -756,7 +785,6 @@ export function DataGrid({
     const allRowNodes = []
     gridApiRef.current.forEachNode(node => allRowNodes.push(node.data))
     const updatedGridData = allRowNodes.map(row => (row.id === data?.id ? data : row))
-
     onChange(updatedGridData)
   }
 
@@ -766,11 +794,15 @@ export function DataGrid({
 
     const { colDef, rowIndex, api } = params
 
-    if (colDef.component !== 'button')
+    const nonEditableByClick =
+      colDef.component === 'button' || colDef.component === 'checkbox' || colDef.component === 'icon'
+
+    if (!nonEditableByClick) {
       api.startEditingCell({
         rowIndex: rowIndex,
         colKey: colDef.field
       })
+    }
 
     if (params?.data.id !== rowSelectionModel) {
       const selectedRow = params?.data
@@ -802,7 +834,6 @@ export function DataGrid({
     }
 
     const gridContainer = gridContainerRef.current
-
     if (gridContainer) {
       document.addEventListener('click', handleBlur)
     }
@@ -827,7 +858,6 @@ export function DataGrid({
     }
 
     const gridContainer = gridContainerRef.current
-
     if (gridContainer) {
       gridContainer.addEventListener('mousedown', handleBlur)
     }
@@ -844,13 +874,11 @@ export function DataGrid({
     const index = newRows.findIndex(({ id }) => id === row.id)
     newRows[index] = row
     onChange(newRows)
-
     return row
   }
 
   async function updateState({ newRow }) {
     gridApiRef.current.updateRows([newRow])
-
     handleRowChange(newRow)
   }
 
@@ -860,9 +888,7 @@ export function DataGrid({
     const rowNode = params.api.getRowNode(id)
     if (rowNode) {
       const currentData = rowNode.data
-
       const newData = { ...currentData, ...changes }
-
       rowNode.updateData(newData)
     }
   }
@@ -871,6 +897,7 @@ export function DataGrid({
     const cellId = `${params.node.id}-${params.column.colId}`
     const { data, colDef } = params
     const disableRefocus = colDef?.component === 'numberfield'
+
     let newValue = params?.data[params.column.colId]
     let currentValue = value?.[params.rowIndex]?.[params.column.colId]
     if (newValue == currentValue && newValue !== '.') return
@@ -890,10 +917,10 @@ export function DataGrid({
 
     if (lastCellStopped.current == cellId) return
     lastCellStopped.current = cellId
+
     if (colDef.updateOn === 'blur' && data[colDef?.field] !== newValue?.[params?.columnIndex]?.[colDef?.field]) {
       if (colDef?.disableDuplicate && checkDuplicates(colDef?.field, data) && !isDup.current) {
         stackDuplicate(params)
-
         return
       }
 
@@ -915,7 +942,6 @@ export function DataGrid({
   const finalColumns =  columnDefs?.map(def => {
     const colId = def.field
     const state = columnState?.find(s => s.colId === colId)
-
     if (!state) return def
 
     return {
@@ -984,24 +1010,64 @@ export function DataGrid({
           background: var(--ag-header-bg, #f5f5f5);
         }
 
-
         .agContainer :global(.ag-header-cell-text) {
           font-size: 0.9rem;
         }
 
-
-        .agContainer :global(.cellBox) {
-          overflow: hidden; 
+        .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+          padding: 0 !important;
         }
 
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+          padding: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-comp-wrapper) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+        }
+        .agContainer :global(.fullSizeCheckbox) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .agContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+          font-size: 20px !important;
+        }
+
+        .agContainer :global(.cellBox) {
+          overflow: hidden;
+        }
 
         .agContainer :global(.ag-cell) {
           border-right: 1px solid #d0d0d0 !important;
           font-size: 0.8rem !important;
           line-height: 1.1;
           display: flex;
-          align-items: center;        
-          justify-content: flex-start; 
+          align-items: center;
+          justify-content: flex-start;
         }
 
         .agContainer :global(.ag-cell-wrapper),
@@ -1009,9 +1075,7 @@ export function DataGrid({
           display: flex;
           align-items: center;
           overflow: hidden;
-          padding: 0px  !important;
-
-
+          padding: 0px !important;
         }
 
         .agContainer :global(.ag-cell .MuiBox-root) {
@@ -1021,14 +1085,14 @@ export function DataGrid({
           padding: 0 !important;
         }
 
-        .agContainer :global(.MuiIconButton-root){
+        .agContainer :global(.MuiIconButton-root) {
           padding: 0 !important;
         }
 
         .cellBox,
         .cellEditorBox {
           width: 100% !important;
-          height: auto;                  
+          height: auto;
           padding: 0px !important;
           display: flex;
         }
@@ -1041,9 +1105,9 @@ export function DataGrid({
         }
 
         .agContainer :global(.ag-cell.cellBoxCentered) {
-          justify-content: center;  
-          padding: 0 !important; 
-          margin: 0 !important; 
+          justify-content: center;
+          padding: 0 !important;
+          margin: 0 !important;
         }
 
         .cellEditorBoxCentered {
@@ -1070,19 +1134,7 @@ export function DataGrid({
 
         .deleteIcon,
         .cellIcon {
-          font-size: 1.3rem !important; 
-        }
-
-        .headerCheckboxContainer {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .headerCheckbox {
-          width: 20%;
-          height: 20%;
-          margin-left: 5px !important;
+          font-size: 1.3rem !important;
         }
 
         .wrapTextCell :global(.ag-cell-wrapper),
@@ -1116,7 +1168,6 @@ export function DataGrid({
         }
 
         @media (max-width: 1599px) {
-
           .agContainer.ag-theme-alpine {
             --ag-font-size: 11px;
           }
@@ -1139,22 +1190,18 @@ export function DataGrid({
             --ag-header-height: 26px;
             --ag-font-size: 10px;
           }
-          
+
           .agContainer :global(.ag-header-cell) {
             padding-inline: 5px !important;
-          
           }
 
+          .agContainer:dir(ltr) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+            padding-left: 5px !important;
+          }
 
-        .agContainer:dir(ltr) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
-          padding-left: 5px !important;  
-        }
-
-        .agContainer:dir(rtl)  :global(.noCenterCell:not(.ag-cell-inline-editing) ) {
-          padding-right: 5px !important;  
-        }
-
-
+          .agContainer:dir(rtl) :global(.noCenterCell:not(.ag-cell-inline-editing)) {
+            padding-right: 5px !important;
+          }
 
           .agContainer :global(.ag-header),
           .agContainer :global(.ag-header-cell) {
@@ -1166,6 +1213,13 @@ export function DataGrid({
           .agContainer :global(.ag-cell) {
             font-size: 10px !important;
           }
+
+          .agContainer :global(.agHeaderCheckboxCell.ag-header-cell) {
+            padding: 0 !important;
+          }
+          .agContainer :global(.agHeaderCheckboxCell .ag-header-cell-label) {
+            padding: 0 !important;
+          }
         }
 
         @media (max-width: 1024px) {
@@ -1174,7 +1228,7 @@ export function DataGrid({
           }
 
           .agContainer :global(.ag-header),
-          .agContainer :global(.ag-header-cell){
+          .agContainer :global(.ag-header-cell) {
             height: 29px !important;
             min-height: 28px !important;
           }
@@ -1183,7 +1237,6 @@ export function DataGrid({
           .agContainer :global(.ag-cell) {
             font-size: 9px !important;
           }
-
         }
 
         @media (max-width: 834px) {
@@ -1203,7 +1256,6 @@ export function DataGrid({
             font-size: 9px !important;
           }
         }
-
 
         @media (max-width: 1600px) {
           .deleteIcon,
@@ -1233,7 +1285,6 @@ export function DataGrid({
           }
         }
 
-
         @media (max-width: 600px) {
           .deleteIcon,
           .cellIcon {
@@ -1241,14 +1292,12 @@ export function DataGrid({
           }
         }
 
-
         @media (max-width: 480px) {
           .deleteIcon,
           .cellIcon {
             font-size: 0.85rem !important;
           }
         }
-
 
         @media (max-width: 375px) {
           .deleteIcon,
