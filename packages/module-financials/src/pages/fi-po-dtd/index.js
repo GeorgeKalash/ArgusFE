@@ -12,9 +12,9 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
-import PODocTypeDefaultsForm from './Forms/PODocTypeDefaultsForm'
+import PaymentOrderDTDForm from './Forms/PaymentOrderDTDForm'
 
-const PODocTypeDefaults = () => {
+const PaymentOrderDTD = () => {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -41,7 +41,7 @@ const PODocTypeDefaults = () => {
   } = useResourceQuery({
     queryFn: fetchGridData,
     endpointId: FinancialRepository.FIDocTypeDefaults.qry,
-    datasetId: ResourceIds.PODocTypeDefaults
+    datasetId: ResourceIds.PaymentOrderDTD
   })
 
   const invalidate = useInvalidate({
@@ -90,7 +90,7 @@ const PODocTypeDefaults = () => {
 
   function openForm(dtId) {
     stack({
-      Component: PODocTypeDefaultsForm,
+      Component: PaymentOrderDTDForm,
       props: {
         labels,
         recordId: dtId,
@@ -126,4 +126,4 @@ const PODocTypeDefaults = () => {
   )
 }
 
-export default PODocTypeDefaults
+export default PaymentOrderDTD

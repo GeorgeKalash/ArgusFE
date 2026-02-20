@@ -17,7 +17,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 
-export default function PODocTypeDefaultsForm({ labels, maxAccess, recordId, window }) {
+export default function PaymentOrderDTDForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
