@@ -34,11 +34,27 @@
   max-height: calc(100% - var(--dt-actionbar-height)) !important;
 }
 
+.dateTimePopper :global(.MuiPickersLayout-root) {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.dateTimePopper :global(.MuiPickersLayout-contentWrapper) {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.dateTimePopper :global(.MuiDivider-root) {
+  display: none !important;
+}
 .dateTimePopper :global(.MuiPickersLayout-actionBar),
 .dateTimePopper :global(.MuiPickersActionBar-root) {
   position: sticky !important;
   bottom: 0 !important;
   z-index: 2 !important;
+  border-top: 0 !important;
   background: #fff !important;
 }
 
