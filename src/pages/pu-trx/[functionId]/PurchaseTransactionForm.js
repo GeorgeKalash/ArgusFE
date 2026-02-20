@@ -1128,6 +1128,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         currentDiscount: object?.tradeDiscount || 0,
         tdType: currenctTdType,
         taxId: object?.taxId,
+        taxName: object?.taxName || '',
         paymentMethod: object?.paymentMethod
       }
     })
