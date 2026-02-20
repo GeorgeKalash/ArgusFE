@@ -9,6 +9,7 @@ import { InventoryRepository } from '@argus/repositories/src/repositories/Invent
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 
 export default function ItemDetails({ plId, itemId, window }) {
   const { getRequest } = useContext(RequestsContext)
@@ -57,16 +58,16 @@ export default function ItemDetails({ plId, itemId, window }) {
             <CustomTextField name='name' value={formik?.values?.name} label={labels.name} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly maxAccess={maxAccess}/>
+            <CustomNumberField name='weight' value={formik?.values?.weight} label={labels.weight} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly maxAccess={maxAccess}/>
+            <CustomNumberField name='volume' value={formik?.values?.volume} label={labels.volume} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly maxAccess={maxAccess}/>
+            <CustomNumberField name='qtyOnHand' value={formik?.values?.qtyOnHand} label={labels.qtyOnHand} readOnly maxAccess={maxAccess}/>
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomNumberField
               name='currentCost'
               value={formik?.values?.currentCost}
               label={labels.currentCost}
@@ -75,7 +76,7 @@ export default function ItemDetails({ plId, itemId, window }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <CustomTextField
+            <CustomNumberField
               name='defaultSalePrice'
               value={formik?.values?.defaultSalePrice}
               label={labels.defaultSalePrice}
