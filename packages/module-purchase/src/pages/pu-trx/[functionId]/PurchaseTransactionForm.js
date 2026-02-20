@@ -117,7 +117,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       vendorRef: '',
       currencyId: null,
       szId: null,
-      spId: null,
       siteId: null,
       description: '',
       status: 1,
@@ -1197,7 +1196,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       muId: filteredMeasurements?.[0]?.recordId,
       muQty: filteredMeasurements?.[0]?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
-      mdValue: 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
@@ -1232,15 +1230,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     update(data)
     addRow()
-  }
-
-  async function getTaxDetails(taxId) {
-    const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
-    })
-
-    return res?.list
   }
 
   const handleButtonClick = () => {
@@ -1519,7 +1508,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
       dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
@@ -1590,7 +1578,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       setMeasurements(muList?.list)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
+      await getUserDefaultsData()
       if (!recordId) {
         setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
         formik.setFieldValue('header.tdType', 2)
@@ -1657,7 +1645,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const setDefaultFields = () => {
     formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
     if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
     if (!formik.values.header.siteId)
       formik.setFieldValue(
         'header.siteId',
