@@ -24,6 +24,8 @@ import { createConditionalSchema } from '@argus/shared-domain/src/lib/validation
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { useError } from '@argus/shared-providers/src/providers/error'
+import JTCheckoutForm from '@argus/shared-ui/src/components/Shared/Forms/JTCheckoutForm'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function BatchTransferForm({ labels, maxAccess: access, recordId }) {
@@ -31,6 +33,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const { userDefaults } = useContext(DefaultsContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack: stackError } = useError()
+  const { stack } = useWindow()
 
   const workCenterId = parseInt(userDefaults?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
 
@@ -282,6 +285,34 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       flex: 1,
       props: {
         readOnly: true
+      }
+    },
+    {
+      component: 'button',
+      name: 'jobTransfer',
+      label: labels.jobTransfer,
+      props: {
+        onCondition: row => {
+          if (row.transferRef) {
+            return {
+              imgSrc:  require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src,
+              hidden: false,
+            }
+          } else {
+            return {
+              imgSrc: '',
+              hidden: true
+            }
+          }
+        }
+      },
+      onClick: (e, row) => {
+        stack({
+          Component: JTCheckoutForm,
+          props: {
+            recordId: row?.transferId
+          }
+        })
       }
     }
   ]

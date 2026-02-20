@@ -92,43 +92,53 @@ const Window = React.memo(
       [editMode, maxAccess]
     )
 
-    const { width: screenWidth } = useWindowDimensions()
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions()
 
     const menuWidth =
       screenWidth <= 768 ? 180 :
       screenWidth <= 1024 ? 200 :
+      screenWidth <= 1280 ? 210 :
       screenWidth <= 1366 ? 220 :
       screenWidth <= 1600 ? 240 : 300
 
     const sidebarWidth = navCollapsed ? 10 : menuWidth
     const containerWidth = `calc(100vw - ${sidebarWidth}px)`
     const containerHeight = `calc(100vh - var(--tabs-height, 40px))`
+    const availableWidth = Math.max(0, screenWidth - sidebarWidth)
 
-       const availableWidth = Math.max(0, screenWidth - sidebarWidth)
+    const safeScreenHeight =
+      screenHeight || (typeof window !== 'undefined' ? window.innerHeight : 0)
+
+    const tabsHeight = 40
+    const availableHeight = Math.max(0, safeScreenHeight - tabsHeight)
+
+    const padding = 20
+
+    const fitScaleW = (() => {
+      const fit = width ? Math.max(0, availableWidth - padding) / width : 1
+      return Number.isFinite(fit) ? fit : 1
+    })()
+
+    const fitScaleH = (() => {
+      const fit = height ? Math.max(0, availableHeight - padding) / height : 1
+      return Number.isFinite(fit) ? fit : 1
+    })()
 
     const responsiveScale = (() => {
-      if (availableWidth >= 1680) return 1
-      if (availableWidth >= 1600) return 0.9
+      const baseW = 1280
+      const baseH = 800
 
-      const minW = 1024
-      const maxW = 1600
-      const minScale = 0.7
-      const maxScale = 0.92
+      const w = baseW ? availableWidth / baseW : 1
+      const h = baseH ? availableHeight / baseH : 1
 
-      if (availableWidth <= minW) return minScale
-      return (
-        minScale +
-        ((availableWidth - minW) / (maxW - minW)) * (maxScale - minScale)
-      )
+      const s = Math.min(1, w, h)
+      return Math.max(0.8, s)
     })()
 
-    const fitScale = (() => {
-      const padding = 20
-      const fit = width ? (availableWidth - padding) / width : 1
-      return Number.isFinite(fit) ? Math.min(1, fit) : 1
-    })()
-
-    const scaleFactor = Math.min(responsiveScale, fitScale)
+    const scaleFactor = Math.max(
+      0.8,
+      Math.min(1, fitScaleW, fitScaleH, responsiveScale)
+    )
 
     const scaledWidth = expanded
       ? containerWidth

@@ -1,5 +1,4 @@
 .popperRoot {
-  /* 3 is too low for dropdowns vs dialogs/menus */
   z-index: 1500 !important;
 }
 
@@ -11,23 +10,20 @@
   visibility: hidden;
 }
 
-/* Autocomplete listbox height */
 .popperRoot :global(.css-n4sunj-MuiAutocomplete-listbox) {
   max-height: 43vh;
 }
 
-/* MenuItem spacing (if your dropdown uses MenuItem) */
 .popperRoot :global(.MuiMenuItem-root) {
   padding-right: 10px;
 }
 
-/* =========================
-   PICKERS - SAFE DEFAULTS
-   ========================= */
-
 .dateTimePopper {
-  /* keep pickers clean and stable */
   background: #fff;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  overflow-x: auto;
+  border-radius: 10px;
 }
 
 .popperRoot :global(.MuiPickersLayout-actionBar),
@@ -62,7 +58,7 @@
 }
 
 .popperRoot :global(.MuiPickersCalendarHeader-root .MuiIconButton-root) {
-  padding: 0px; /* was -1px (invalid) */
+  padding: 0px;
 }
 
 .popperRoot :global(.MuiPickersLayout-toolbar .MuiButton-root) {
@@ -70,58 +66,43 @@
   font-size: 0.75rem;
 }
 
-/* =========================
-   ✅ COMPACT TIME PICKER
-   matches your screenshot
-   ========================= */
-
 .timePopper {
-  width: 190px !important;
-  min-width: 190px !important;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+
+  width: max-content !important;
+  min-width: unset !important;
+  max-width: calc(100vw - 16px);
 }
 
-/* Remove toolbar/header for time dropdown */
 .timePopper :global(.MuiPickersLayout-toolbar) {
   display: none !important;
 }
 
-/* Keep layout container compact */
-.timePopper :global(.MuiPickersLayout-root) {
-  width: 190px !important;
-  min-width: 190px !important;
-}
-
-/* Make content wrapper fit */
-.timePopper :global(.MuiPickersLayout-contentWrapper) {
-  width: 190px !important;
-}
-
-/* Clock root: 2 columns */
+.timePopper :global(.MuiPickersLayout-root),
+.timePopper :global(.MuiPickersLayout-contentWrapper),
 .timePopper :global(.MuiMultiSectionDigitalClock-root),
 .timePopper :global(.MuiTimeClock-root),
 .timePopper :global(.MuiClock-root) {
-  width: 190px !important;
-  height: 200px !important;
-  overflow: hidden !important;
+  width: max-content !important;
 }
 
-/* Each column (hours / minutes) */
+.timePopper :global(.MuiMultiSectionDigitalClock-root) {
+  display: flex !important;
+}
+
 .timePopper :global(.MuiMultiSectionDigitalClockSection-root) {
-  width: 50% !important;
+  flex: 1 1 0 !important;
   min-width: 0 !important;
 }
 
-/* Items style */
 .timePopper :global(.MuiMultiSectionDigitalClockSection-item) {
   height: 32px !important;
   font-size: 0.85rem !important;
 }
 
-/* OK button area */
 .timePopper :global(.MuiPickersActionBar-root),
 .timePopper :global(.MuiPickersLayout-actionBar) {
   margin: 0 !important;
@@ -132,15 +113,10 @@
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* OK button */
 .timePopper :global(.MuiPickersActionBar-root .MuiButton-root) {
   font-size: 0.85rem !important;
   min-width: 0 !important;
 }
-
-/* =========================
-   YEAR CALENDAR (your original section)
-   ========================= */
 
 .popperRoot :global(.MuiYearCalendar-root) {
   padding: 4px 0;

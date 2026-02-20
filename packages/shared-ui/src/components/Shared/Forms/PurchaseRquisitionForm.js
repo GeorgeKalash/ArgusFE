@@ -337,6 +337,7 @@ export default function PurchaseRquisitionForm({ recordId, window }) {
         readOnlyField: isClosed || isCancelled,
         maxSeqNo,
         seqNo: obj?.seqNo,
+        siteId: formik.values.siteId,
         refetchTable: refetchForm
       },
       width: 800,

@@ -619,11 +619,11 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.clientId
+      disabled: !formik.values.clientId || !formik.values.date
     }
   ]
 

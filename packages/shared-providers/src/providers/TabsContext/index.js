@@ -252,28 +252,46 @@ const TabsProvider = ({ children }) => {
     [openTabs, navigateTo, setOpenTabs, setCurrentTabIndex]
   )
 
-  const closeTab = useCallback(
-    async tabRoute => {
-      const index = openTabs.findIndex(tab => tab.route === tabRoute)
-      const activeTabsLength = openTabs.length
+const closeTab = useCallback(
+  async tabRoute => {
+    setOpenTabs(prevTabs => {
+      const index = prevTabs.findIndex(tab => tab.route === tabRoute)
+      if (index === -1) return prevTabs
 
-      if (activeTabsLength === 2) return handleCloseAllTabs()
+      if (prevTabs.length === 2) {
+        return prevTabs
+      }
 
-      if (currentTabIndex === index) {
-        const newValue = index === activeTabsLength - 1 ? index - 1 : index + 1
-        if (newValue === index - 1 || router.asPath === window?.history?.state?.as) setCurrentTabIndex(newValue)
+      const nextTabs = prevTabs.filter(tab => tab.route !== tabRoute)
 
-        const nextRoute = openTabs?.[newValue]?.route
+      if (index < currentTabIndex) {
+        setCurrentTabIndex(v => Math.max(0, v - 1))
+        return nextTabs
+      }
+
+      if (index === currentTabIndex) {
+        const newIndex = index >= nextTabs.length ? nextTabs.length - 1 : index
+        setCurrentTabIndex(newIndex)
+
+        const nextRoute = nextTabs?.[newIndex]?.route
         if (nextRoute) {
-          await navigateTo(nextRoute)
-          if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+          queueMicrotask(() => {
+            navigateTo(nextRoute).finally(() => {
+              if (typeof window !== 'undefined') window.history.replaceState(null, '', nextRoute)
+            })
+          })
         }
-      } else if (index < currentTabIndex) setCurrentTabIndex(currentValue => currentValue - 1)
+      }
 
-      setOpenTabs(prevState => prevState.filter(tab => tab.route !== tabRoute))
-    },
-    [openTabs, currentTabIndex, handleCloseAllTabs, navigateTo, router.asPath, setCurrentTabIndex, setOpenTabs]
-  )
+      return nextTabs
+    })
+
+    if (openTabs.length === 2) {
+      await handleCloseAllTabs()
+    }
+  },
+  [currentTabIndex, navigateTo, setCurrentTabIndex, setOpenTabs, openTabs.length, handleCloseAllTabs]
+)
 
   const reopenTab = useCallback(
     async tabRoute => {

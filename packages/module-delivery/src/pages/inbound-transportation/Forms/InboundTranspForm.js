@@ -537,9 +537,9 @@ export default function InboundTranspForm({ labels, maxAccess: access, recordId 
                                 name='vehicleId'
                                 label={labels.vehicle}
                                 valueField='recordId'
-                                readOnly
                                 displayField='name'
                                 values={formik.values}
+                                readOnly
                                 maxAccess={maxAccess}
                                 required
                                 onChange={(_, newValue) =>

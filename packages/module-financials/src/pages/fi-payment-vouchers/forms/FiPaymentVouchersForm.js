@@ -395,11 +395,11 @@ export default function FiPaymentVouchersForm({ recordId, window }) {
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.accountId),
-            moduleId: 1
+            date: formik.values.date
           }
         })
       },
-      disabled: !formik.values.accountId
+      disabled: !formik.values.accountId || !formik.values.date
     }
   ]
 

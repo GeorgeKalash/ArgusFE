@@ -276,7 +276,7 @@ const OpenPurchaseOrder = () => {
                     valueField='recordId'
                     displayField='name'
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('dtId', newValue?.recordId || null)
                     }}
                     error={formik.touched.dtId && Boolean(formik.errors.dtId)}
@@ -294,7 +294,7 @@ const OpenPurchaseOrder = () => {
                     displayFieldWidth={1}
                     values={formik?.values}
                     maxAccess={access}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('categoryId', newValue?.recordId || 0)
                     }}
                     error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
@@ -313,7 +313,7 @@ const OpenPurchaseOrder = () => {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('groupId', newValue?.recordId || 0)
                     }}
                     error={formik.touched.groupId && Boolean(formik.errors.groupId)}
@@ -342,7 +342,7 @@ const OpenPurchaseOrder = () => {
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'Foreign Language' }
                     ]}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('vendorName', newValue?.name || '')
                       formik.setFieldValue('vendorRef', newValue?.reference || '')
                       formik.setFieldValue('vendorId', newValue?.recordId || 0)
@@ -364,7 +364,7 @@ const OpenPurchaseOrder = () => {
                     ]}
                     required
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId || 0)
                     }}
                     error={formik.touched.sitId && Boolean(formik.errors.sitId)}
@@ -382,7 +382,7 @@ const OpenPurchaseOrder = () => {
                       { key: 'name', value: 'Name' }
                     ]}
                     values={formik.values}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('plantId', newValue?.recordId || 0)
                     }}
                     error={formik.touched.plantId && Boolean(formik.errors.plantId)}
@@ -407,7 +407,7 @@ const OpenPurchaseOrder = () => {
                       { key: 'sku', value: 'SKU' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('itemId', newValue?.recordId || 0)
                       formik.setFieldValue('itemName', newValue?.name || '')
                       formik.setFieldValue('itemRef', newValue?.sku || '')
@@ -433,7 +433,7 @@ const OpenPurchaseOrder = () => {
                       { key: 'reference', value: 'Reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={async (event, newValue) => {
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('poName', newValue?.name || '')
                       formik.setFieldValue('poRef', newValue?.reference || '')
                       formik.setFieldValue('poId', newValue?.recordId || 0)

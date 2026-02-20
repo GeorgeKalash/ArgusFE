@@ -114,103 +114,95 @@ export default function SalesSettingsForm({ _labels, access }) {
           <Grid container spacing={2}>
             <Grid item xs={11.5}>
               <FieldSet title={_labels.salesDefaultValues}>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.PriceLevel.qry}
-                    name='plId'
-                    label={_labels.priceLevel}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    displayFieldWidth={1}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik?.values}
-                    maxAccess={access}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('plId', newValue?.recordId)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SaleRepository.PaymentTerms.qry}
-                    name='ptId'
-                    label={_labels.paymentTerm}
-                    valueField='recordId'
-                    displayField={['reference', 'name']}
-                    displayFieldWidth={1}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' }
-                    ]}
-                    values={formik?.values}
-                    maxAccess={access}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('ptId', newValue?.recordId)
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={SystemRepository.Currency.qry}
-                    name='currencyId'
-                    label={_labels.currencyName}
-                    valueField='recordId'
-                    displayField={['reference', 'name', 'flName']}
-                    columnsInDropDown={[
-                      { key: 'reference', value: 'Reference' },
-                      { key: 'name', value: 'Name' },
-                      { key: 'flName', value: 'FL Name' }
-                    ]}
-                    values={formik?.values}
-                    maxAccess={access}
-                    onChange={(_, newValue) => 
-                      formik.setFieldValue('currencyId', newValue?.recordId)
-                    }
-                    error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    endpointId={InventoryRepository.Site.qry}
-                    name='siteId'
-                    label={_labels.site}
-                    values={formik?.values}
-                    displayField='name'
-                    maxAccess={access}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('siteId', newValue?.recordId)
-                    }}
-                    error={formik.touched.siteId && Boolean(formik.errors.siteId)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='maxReturnDays'
-                    label={_labels.maxReturnDays}
-                    value={formik?.values?.maxReturnDays}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('maxReturnDays', '')}
-                    error={formik.touched.maxReturnDays && Boolean(formik.errors.maxReturnDays)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ResourceComboBox
-                    datasetId={DataSets.SA_FI_INTEGRATION}
-                    name='SAFIIntegration'
-                    label={_labels.SAFIIntegration}
-                    values={formik?.values}
-                    valueField='key'
-                    displayField='value'
-                    maxAccess={access}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('SAFIIntegration', newValue ? newValue.key : '')
-                    }}
-                    error={formik.touched.SAFIIntegration && Boolean(formik.errors.SAFIIntegration)}
-                  />
-                </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.PriceLevel.qry}
+                      name='plId'
+                      label={_labels.priceLevel}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      displayFieldWidth={1}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      values={formik?.values}
+                      maxAccess={access}
+                      onChange={(_, newValue) => formik.setFieldValue('plId', newValue?.recordId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={SaleRepository.PaymentTerms.qry}
+                      name='ptId'
+                      label={_labels.paymentTerm}
+                      valueField='recordId'
+                      displayField={['reference', 'name']}
+                      displayFieldWidth={1}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' }
+                      ]}
+                      values={formik?.values}
+                      maxAccess={access}
+                      onChange={(_, newValue) => formik.setFieldValue('ptId', newValue?.recordId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={SystemRepository.Currency.qry}
+                      name='currencyId'
+                      label={_labels.currencyName}
+                      valueField='recordId'
+                      displayField={['reference', 'name', 'flName']}
+                      columnsInDropDown={[
+                        { key: 'reference', value: 'Reference' },
+                        { key: 'name', value: 'Name' },
+                        { key: 'flName', value: 'FL Name' }
+                      ]}
+                      values={formik?.values}
+                      maxAccess={access}
+                      onChange={(_, newValue) => formik.setFieldValue('currencyId', newValue?.recordId)}
+                      error={formik.touched.currencyId && Boolean(formik.errors.currencyId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      endpointId={InventoryRepository.Site.qry}
+                      name='siteId'
+                      label={_labels.site}
+                      values={formik?.values}
+                      displayField='name'
+                      maxAccess={access}
+                      onChange={(_, newValue) => formik.setFieldValue('siteId', newValue?.recordId)}
+                      error={formik.touched.siteId && Boolean(formik.errors.siteId)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CustomNumberField
+                      name='maxReturnDays'
+                      label={_labels.maxReturnDays}
+                      value={formik?.values?.maxReturnDays}
+                      onChange={formik.handleChange}
+                      onClear={() => formik.setFieldValue('maxReturnDays', '')}
+                      error={formik.touched.maxReturnDays && Boolean(formik.errors.maxReturnDays)}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ResourceComboBox
+                      datasetId={DataSets.SA_FI_INTEGRATION}
+                      name='SAFIIntegration'
+                      label={_labels.SAFIIntegration}
+                      values={formik?.values}
+                      valueField='key'
+                      displayField='value'
+                      maxAccess={access}
+                      onChange={(_, newValue) => formik.setFieldValue('SAFIIntegration', newValue ? newValue.key : '')}
+                      error={formik.touched.SAFIIntegration && Boolean(formik.errors.SAFIIntegration)}
+                    />
+                    </Grid>
+                  </Grid>
               </FieldSet>
             </Grid>
             <Grid item xs={11.5}>

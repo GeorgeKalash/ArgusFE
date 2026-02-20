@@ -1,8 +1,172 @@
 import { useCallback, useEffect, useRef, memo } from 'react'
 import Chart from 'chart.js/auto'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import styles from './charts.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+
+const styles = new Proxy(
+  {},
+  {
+    get: (_, prop) => String(prop)
+  }
+)
+
+const CHARTS_STYLE_ID = 'argus-charts-styles'
+
+const CHARTS_CSS = String.raw`
+.chartCanvas {
+  box-sizing: border-box;
+  width: 100% !important;
+  display: block;
+  position: relative;
+  height: clamp(220px, 30vw, 420px);
+  min-height: clamp(220px, 30vw, 420px);
+  --chart-bar-1-bg: rgb(88, 2, 1);
+  --chart-bar-1-hover-bg: rgb(113, 27, 26);
+  --chart-bar-2-bg: rgb(5, 28, 104);
+  --chart-bar-2-hover-bg: rgb(33, 58, 141);
+  --chart-primary-bar-bg: #6673FD;
+  --chart-primary-bar-border: #6673FD;
+  --chart-mixed-1: rgba(88, 2, 1);
+  --chart-mixed-2: rgba(67, 67, 72);
+  --chart-mixed-3: rgba(144, 237, 125);
+  --chart-mixed-4: rgba(247, 163, 92);
+  --chart-mixed-5: rgba(54, 162, 235);
+  --chart-mixed-6: rgba(153, 102, 255);
+  --chart-mixed-7: rgba(201, 203, 207);
+  --chart-line-1-color: rgb(102, 115, 253);   
+  --chart-line-1-hover: rgb(126, 135, 243);
+  --chart-line-multi-1: #808000;
+  --chart-line-multi-2: #1F3BB3;
+  --chart-line-multi-3: #00FF00;
+  --chart-line-multi-4: #FF5733;
+  --chart-line-multi-5: #FFC300;
+  --chart-line-multi-6: #800080;
+  --chart-radar-fill: rgba(102, 115, 253, 0.2);
+  --chart-radar-border: #6673FD;
+  --chart-radar-point: #6673FD;
+  --chart-pie-1: #6673FD;
+  --chart-pie-2: #FF6384;
+  --chart-pie-3: #36A2EB;
+  --chart-pie-4: #FFCE56;
+  --chart-compbar-bg: rgba(0, 123, 255, 0.5);
+  --chart-compbar-hover-bg: rgb(255, 255, 0);
+  --chart-compbar-axis-color: #000000;             
+  --chart-compbar-grid-color: rgba(255, 255, 255, 0.2);
+  --chart-datalabel-compbar-color: black;           
+  --chart-legend-label-color: #f0f0f0;
+  --chart-title-color: #f0f0f0;
+  --chart-datalabel-inside-color: #fff;         
+  --chart-datalabel-outside-color: #000;   
+  --chart-axis-color: #f0f0f0;
+  --chart-tooltip-bg: #f0f0f0;
+  --chart-tooltip-title-color: #231F20;
+  --chart-tooltip-body-color: #231F20;
+}
+
+.chartCanvasDark {
+  --chart-legend-label-color: #f0f0f0;
+  --chart-title-color: #f0f0f0;
+  --chart-axis-color: #f0f0f0;
+  --chart-tooltip-bg: #f0f0f0;
+  --chart-tooltip-title-color: #231F20;
+  --chart-tooltip-body-color: #231F20;
+  --chart-datalabel-inside-color: #fff;
+  --chart-datalabel-outside-color: #000;
+}
+
+.chartCanvasLight {
+  --chart-legend-label-color: #222222;
+  --chart-title-color: #222222;
+  --chart-axis-color: #444444;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-title-color: #222222;
+  --chart-tooltip-body-color: #222222;
+  --chart-datalabel-inside-color: #222222;
+  --chart-datalabel-outside-color: #222222;
+}
+
+.chartHeight {
+  width: 100%;
+  display: block;
+}
+
+@media (min-width: 1281px) {
+  .chartCanvas {
+    height: 280px;
+    min-height: 280px;
+  }
+}
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .chartCanvas {
+    height: 230px;
+    min-height: 230px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chartCanvas {
+    height: 210px !important;
+    min-height: 210px !important; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .chartCanvas {
+    height: 240px !important;
+    min-height: 240px !important; }
+}
+
+@media (max-width: 480px) {
+  .chartCanvas {
+    height: clamp(180px, 60vw, 300px);
+  }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) {
+  .chartCanvas {
+    height: clamp(180px, 40vh, 320px);
+  }
+}
+.chartCanvas {
+  --chart-title-size: 16px;
+}
+
+@media (max-width: 1024px) {
+  .chartCanvas {
+    --chart-title-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .chartCanvas {
+    --chart-title-size: 12px;
+  }
+}
+
+@media (min-width: 1441px) and (max-width: 1599px) {
+  .chartCanvas {
+    --chart-title-size: 15px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .chartCanvas {
+    --chart-title-size: 16px;
+  }
+}
+`
+
+const useInjectChartsStyles = () => {
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    if (document.getElementById(CHARTS_STYLE_ID)) return
+
+    const style = document.createElement('style')
+    style.id = CHARTS_STYLE_ID
+    style.type = 'text/css'
+    style.appendChild(document.createTextNode(CHARTS_CSS))
+    document.head.appendChild(style)
+  }, [])
+}
 
 const sizes = {
   1024: {
@@ -183,6 +347,8 @@ const getChartOptions = (label, type, canvas) => {
 }
 
 export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, ratio = 3, rotation, hasLegend }) => {
+  useInjectChartsStyles()
+
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -373,6 +539,8 @@ export const MixedBarChart = memo(({ id, labels, data1, data2, label1, label2, r
 })
 
 export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, hoverColor }) => {
+  useInjectChartsStyles()
+
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -527,6 +695,8 @@ export const HorizontalBarChartDark = memo(({ id, labels, data, label, color, ho
 })
 
 export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hoverColor, ratio = 3 }) => {
+  useInjectChartsStyles()
+
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -670,6 +840,8 @@ export const CompositeBarChartDark = memo(({ id, labels, data, label, color, hov
 })
 
 export const MixedColorsBarChartDark = memo(({ id, labels, data, label, ratio = 3 }) => {
+  useInjectChartsStyles()
+
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -812,6 +984,8 @@ export const MixedColorsBarChartDark = memo(({ id, labels, data, label, ratio = 
 })
 
 export const CompositeBarChart = memo(({ labels, data, label }) => {
+  useInjectChartsStyles()
+
   const canvasRef = useRef(null)
   const chartRef = useRef(null)
 
@@ -886,6 +1060,8 @@ export const CompositeBarChart = memo(({ labels, data, label }) => {
 })
 
 export const LineChart = memo(({ id, labels, data, label }) => {
+  useInjectChartsStyles()
+
   const chartRef = useRef(null)
   const chartInstanceRef = useRef(null)
 
@@ -1042,6 +1218,8 @@ export const LineChart = memo(({ id, labels, data, label }) => {
 })
 
 export const LineChartDark = memo(({ labels, datasets, datasetLabels }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 
@@ -1132,6 +1310,8 @@ const getColorForIndex = (index, canvas) => {
 }
 
 export const PieChart = memo(({ id, labels, data, label }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 
@@ -1197,6 +1377,8 @@ export const PieChart = memo(({ id, labels, data, label }) => {
 })
 
 export const DoughnutChart = memo(({ id, labels, data, label }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 
@@ -1262,6 +1444,8 @@ export const DoughnutChart = memo(({ id, labels, data, label }) => {
 })
 
 export const RadarChart = memo(({ id, labels, data, label }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 
@@ -1329,6 +1513,8 @@ export const RadarChart = memo(({ id, labels, data, label }) => {
 })
 
 export const PolarAreaChart = memo(({ id, labels, data, label }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 
@@ -1394,6 +1580,8 @@ export const PolarAreaChart = memo(({ id, labels, data, label }) => {
 })
 
 export const CompBarChart = memo(({ id, labels, datasets, collapsed }) => {
+  useInjectChartsStyles()
+
   const ref = useRef(null)
   const inst = useRef(null)
 

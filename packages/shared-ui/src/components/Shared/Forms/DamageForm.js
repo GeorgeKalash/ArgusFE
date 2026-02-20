@@ -28,10 +28,12 @@ import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
 import WorkFlow from '../WorkFlow'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
 
-export default function DamageForm({ recordId, jobId }) {
+export default function DamageForm({ recordId, lockRecord }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
+  const { addLockedScreen } = useContext(LockedScreensContext)
   const { stack } = useWindow()
 
   const invalidate = useInvalidate({
@@ -95,8 +97,8 @@ export default function DamageForm({ recordId, jobId }) {
         jobPcs: yup.number().required(),
         netJobQty: yup.number().required(),
         netJobPcs: yup.number().required(),
-        metalQty: yup.number().required(),
-        nonMetalQty: yup.number().required(),
+        metalQty: yup.number().required().min(0),
+        nonMetalQty: yup.number().required().min(0),
         routingId: yup
           .number()
           .nullable()
@@ -167,6 +169,20 @@ export default function DamageForm({ recordId, jobId }) {
         },
         items: res?.record?.items || []
       })
+
+      !formik.values.recordId &&
+        lockRecord({
+          recordId: res?.record?.header?.recordId,
+          reference: res?.record?.header?.reference,
+          resourceId: ResourceIds.Damages,
+          onSuccess: () => {
+            addLockedScreen({
+              resourceId: ResourceIds.Damages,
+              recordId: res?.record?.header?.recordId,
+              reference: res?.record?.header?.reference
+            })
+          }
+        })
     })
   }
 
@@ -253,9 +269,9 @@ export default function DamageForm({ recordId, jobId }) {
       extension: ManufacturingRepository.Damage.preview,
       parameters: `_jobId=${formik.values.header.jobId || 0}&_damagedQty=${
         formik.values.header.damagedQty || 0
-      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${
+      }&_damagedPcs=${formik.values.header.damagedPcs || 0}&_metalQty=${parseFloat(
         formik.values.header.metalQty || 0
-      }&_nonMetalQty=${formik.values.header.nonMetalQty || 0}`
+      ).toFixed(2)}&_nonMetalQty=${parseFloat(formik.values.header.nonMetalQty || 0).toFixed(2)}`
     })
 
     formik.setFieldValue('items', items?.list || [])
@@ -276,9 +292,21 @@ export default function DamageForm({ recordId, jobId }) {
 
     const list = res?.list || []
 
-    const metalQty = list.filter(i => !!i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+    const metalQty = list
+      .filter(i => !!i.isMetal)
+      .reduce((sum, i) => {
+        const value = Number(i.qty) || 0
 
-    const nonMetalQty = list.filter(i => !i.isMetal).reduce((sum, i) => sum + (Number(i.qty) || 0), 0)
+        return Math.round((sum + value) * 100) / 100
+      }, 0)
+
+    const nonMetalQty = list
+      .filter(i => !i.isMetal)
+      .reduce((sum, i) => {
+        const value = Number(i.qty) || 0
+
+        return Math.round((sum + value) * 100) / 100
+      }, 0)
 
     return { metalQty, nonMetalQty }
   }
@@ -631,8 +659,12 @@ export default function DamageForm({ recordId, jobId }) {
                 </Grid>
                 <Grid item xs={12}>
                   <ResourceComboBox
-                    endpointId={ManufacturingRepository.Labor.qry}
-                    parameters={`_startAt=0&_pageSize=200&_params=`}
+                    endpointId={editMode ?
+                       ManufacturingRepository.Labor.qry : 
+                       formik.values?.header?.workCenterId && ManufacturingRepository.Labor.qry2}
+                    parameters={editMode ? 
+                      `_startAt=0&_pageSize=10000&_params=` :
+                      `_workCenterId=${formik.values?.header?.workCenterId}`}
                     name='header.laborId'
                     label={labels.labor}
                     valueField='recordId'
@@ -643,7 +675,7 @@ export default function DamageForm({ recordId, jobId }) {
                     ]}
                     displayFieldWidth={2}
                     required
-                    readOnly={isPosted}
+                    readOnly={editMode}
                     values={formik.values.header}
                     onChange={(_, newValue) => {
                       formik.setFieldValue('header.laborId', newValue?.recordId || null)

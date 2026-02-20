@@ -17,6 +17,7 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { MasterSource } from '@argus/shared-domain/src/resources/MasterSource'
 
 export default function CbBankAccountsForm({ labels, maxAccess, recordId, invalidate }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -76,8 +77,18 @@ export default function CbBankAccountsForm({ labels, maxAccess, recordId, invali
     })()
   }, [])
 
+  const actions = [
+    {
+      key: 'Integration Account',
+      condition: true,
+      onClick: 'onClickGIA',
+      masterSource: MasterSource.CashAccount,
+      disabled: !editMode
+    }
+  ]
+
   return (
-    <FormShell resourceId={ResourceIds.CbBankAccounts} form={formik} maxAccess={maxAccess} editMode={editMode}>
+    <FormShell resourceId={ResourceIds.CbBankAccounts} form={formik} maxAccess={maxAccess} editMode={editMode} actions={actions}>
       <VertLayout>
         <Grow>
           <Grid container spacing={2}>

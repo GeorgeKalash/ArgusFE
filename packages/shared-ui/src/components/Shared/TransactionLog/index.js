@@ -6,7 +6,7 @@ import { SystemRepository } from '@argus/repositories/src/repositories/SystemRep
 import Table from '../Table'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
-import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { formatDateFromApi, formatDateFromISO } from '@argus/shared-domain/src/lib/date-helper'
 import ResourceComboBox from '../ResourceComboBox'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -48,15 +48,17 @@ const TransactionLog = props => {
     trxName: labels && labels.find(item => item.key === '6').value,
     title: labels && labels.find(item => item.key === '7').value
   }
-
-  const getGridData = () => {
-    var parameters = `_resourceId=${resourceId}&_masterRef=${recordId}&_trxType=${transactionType}`
-    getRequest({
+ 
+  const getGridData = async () => {
+    const res = await getRequest({
       extension: SystemRepository.TransactionLog.qry,
-      parameters: parameters
-    }).then(res => {
-      setGridData(res)
+      parameters:  `_resourceId=${resourceId}&_masterRef=${recordId}&_trxType=${transactionType}`
     })
+    
+    const updatedList = (res?.list || []).map(record => {
+      return {...record, eventDt: record?.eventDt ? formatDateFromISO(record.eventDt) : null}
+    })
+    setGridData({ list: updatedList || [] })
   }
 
   const showInfo = obj => {

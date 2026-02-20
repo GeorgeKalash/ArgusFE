@@ -24,10 +24,19 @@ import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReference
 import { formatDateFromApi, formatDateToApi } from '@argus/shared-domain/src/lib/date-helper'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { useInvalidate } from '@argus/shared-hooks/src/hooks/resource'
+import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { useError } from '@argus/shared-providers/src/providers/error'
 
-export default function JTCheckoutForm({ labels, recordId, access, window }) {
+export default function JTCheckoutForm({ recordId, window }) {
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
+  
+  const { labels, access } = useResourceParams({
+    datasetId: ResourceIds.JTCheckOut,
+    editMode: !!recordId
+  })
+  const { stack: stackError } = useError()
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.JTCheckOut,
@@ -35,6 +44,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     enabled: !recordId,
     objectName: 'transfer'
   })
+  
+  useSetWindow({ title: labels.jobTransfer, window })
 
   const invalidate = useInvalidate({
     endpointId: ManufacturingRepository.JobTransfer.page
@@ -55,6 +66,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         fromWCId: null,
         toWCId: null,
         designId: null,
+        jobQty: 0.0,
         qty: 0.0,
         pcs: 0.0,
         fromSeqNo: null,
@@ -65,7 +77,9 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         sku: '',
         designRef: '',
         itemNmae: '',
-        designName: ''
+        designName: '',
+        closedDate: null,
+        postedDate: null
       },
       categorySummary: []
     },
@@ -89,6 +103,23 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
       })
     }),
     onSubmit: async obj => {
+      const round = (n, decimals = 3) => Number(n.toFixed(decimals))
+
+      const hasTotalQty = totalQty !== null && totalQty !== undefined
+      const hasJobQty = obj?.transfer?.jobQty !== null && obj?.transfer?.jobQty !== undefined
+
+      if (hasTotalQty && hasJobQty) {
+        const delta = Math.abs(round(Number(totalQty)) - round(Number(obj.transfer.jobQty)))
+
+        if (delta > 0.01) {
+          stackError({
+            message: labels.QtyNotMatching
+          })
+
+          return
+        }
+      }
+
       const transferPack = {
         transfer: {
           ...obj.transfer,
@@ -121,6 +152,8 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
         transfer: {
           ...res?.record?.transfer,
           date: formatDateFromApi(res?.record?.transfer?.date),
+          closedDate: formatDateFromApi(res?.record?.transfer?.closedDate),
+          postedDate: formatDateFromApi(res?.record?.transfer?.postedDate),
           maxQty: res?.record?.transfer.qty,
           maxPcs: res?.record?.transfer.pcs,
           workCenterId: res?.record?.transfer?.fromWCId
@@ -203,6 +236,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
             fromWCId: record.workCenterId,
             workCenterId: record.workCenterId,
             fromSVName: record.supervisorName,
+            jobQty: record.qty,
             qty: record.qty,
             pcs: record.pcs,
             toWCId: toWCRecord?.workCenterId,
@@ -459,6 +493,7 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                         ]}
                         onChange={async (event, newValue) => {
                           formik.setFieldValue('transfer.qty', newValue?.qty || 0)
+                          formik.setFieldValue('transfer.jobQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.maxQty', newValue?.qty || 0)
                           formik.setFieldValue('transfer.pcs', newValue?.pcs || 0)
                           formik.setFieldValue('transfer.maxPcs', newValue?.pcs || 0)
@@ -617,15 +652,11 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     seqNo={0}
                     recordId={formik.values.transfer.jobId}
                     customWidth={330}
-                    customHeight={240}
+                    customHeight={220}
                     isAbsolutePath={true}
                     disabled
                   />
                 </Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
-                <Grid item xs={12}></Grid>
                 <Grid item xs={12}>
                   <CustomNumberField
                     name='transfer.totalQty'
@@ -633,6 +664,30 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
                     readOnly
                     label={labels.totalQty}
                     maxAccess
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='transfer.closedDate'
+                    readOnly
+                    label={labels.closedDate}
+                    value={formik.values?.transfer?.closedDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('transfer.closedDate', null)}
+                    error={formik.touched.transfer?.closedDate && Boolean(formik.errors.transfer?.closedDate)}
+                    maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CustomDatePicker
+                    name='transfer.postedDate'
+                    readOnly
+                    label={labels.postedDate}
+                    value={formik.values?.transfer?.postedDate}
+                    onChange={formik.setFieldValue}
+                    onClear={() => formik.setFieldValue('transfer.postedDate', null)}
+                    error={formik.touched.transfer?.postedDate && Boolean(formik.errors.transfer?.postedDate)}
+                    maxAccess={maxAccess}
                   />
                 </Grid>
               </Grid>
@@ -666,3 +721,6 @@ export default function JTCheckoutForm({ labels, recordId, access, window }) {
     </FormShell>
   )
 }
+
+JTCheckoutForm.width = 1200
+JTCheckoutForm.height = 700

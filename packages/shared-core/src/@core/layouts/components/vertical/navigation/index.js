@@ -31,6 +31,16 @@ import styles from './Navigation.module.css'
 
 const SwipeableDrawer = MuiSwipeableDrawer
 
+const NodeIcon = React.memo(function NodeIcon({ icon, title }) {
+  return icon ? (
+    <div className={styles['node-icon']}>
+      <Image src={icon} alt={title} width={22} height={22} />
+    </div>
+  ) : (
+    <div className={styles['node-icon-placeholder']} />
+  )
+})
+
 const Navigation = props => {
   const {
     hidden,
@@ -90,20 +100,20 @@ const Navigation = props => {
   }, [navCollapsed])
 
   useEffect(() => {
-  const handleAutoCollapse = () => {
-    const width = window.innerWidth
-    if (width <= 1024) {
-      if (!settings.navCollapsed) {
-        saveSettings({ ...settings, navCollapsed: true })
+    const handleAutoCollapse = () => {
+      const width = window.innerWidth
+      if (width <= 1024) {
+        if (!settings.navCollapsed) {
+          saveSettings({ ...settings, navCollapsed: true })
+        }
       }
     }
-  }
 
-  handleAutoCollapse()
-  window.addEventListener('resize', handleAutoCollapse)
+    handleAutoCollapse()
+    window.addEventListener('resize', handleAutoCollapse)
 
-  return () => window.removeEventListener('resize', handleAutoCollapse)
-}, [])
+    return () => window.removeEventListener('resize', handleAutoCollapse)
+  }, [])
 
 
   const MobileDrawerProps = {
@@ -273,7 +283,6 @@ const Navigation = props => {
     const image = getNodeIcon(node, isOpen, isRoot)
     const truncatedTitle = truncateTitle(node.title, level)
 
-
     const icon =
       image &&
       require(`@argus/shared-ui/src/components/images/folderIcons/${image}`).default.src
@@ -287,25 +296,22 @@ const Navigation = props => {
           onContextMenu={e => !isFolder && handleRightClick(e, node, icon)}
         >
           <div className={styles['node-content']}>
-            {icon ? (
-              <div className={styles['node-icon']}>
-                <Image src={icon} alt={node.title} width={22} height={22} />
-              </div>
-            ) : (
-              <div style={{ width: 30, height: 22 }} />
-            )}
+            <NodeIcon icon={icon} title={node.title} />
 
             {!navCollapsed && (
-              <div className={styles['node-text']}>
-                <div className='text' title={truncatedTitle == node.title ? null : node.title}>
-                  {truncatedTitle}
+              <>
+                <div className={styles['node-text']}>
+                  <div className='text' title={truncatedTitle == node.title ? null : node.title}>
+                    {truncatedTitle}
+                  </div>
                 </div>
+
                 {isFolder && (
-                  <div className={styles.arrow} style={{ right: isArabic ? '260px' : '8px' }}>
+                  <div className={styles.arrow}>
                     {renderArrowIcon(isOpen, isArabic)}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -401,17 +407,13 @@ const Navigation = props => {
           )}
         </Box>
         <Box className={styles['menu-scroll-wrapper']} onScroll={scrollMenu}>
-        <List className='nav-items'>
-          <div className={styles.sidebar}>{filteredMenu.map(node => renderNode(node, 0))}</div>
-        </List>
+          <List className='nav-items'>
+            <div className={styles.sidebar}>{filteredMenu.map(node => renderNode(node, 0))}</div>
+          </List>
         </Box>
       </SwipeableDrawer>
       {hidden ? (
-        <IconButton
-          disableRipple
-          onClick={toggleNavVisibility}
-          sx={{ p: 0, backgroundColor: 'transparent !important' }}
-        >
+        <IconButton disableRipple onClick={toggleNavVisibility} sx={{ p: 0, backgroundColor: 'transparent !important' }}>
           <Icon icon='mdi:close' fontSize={15} />
         </IconButton>
       ) : userMenuLockedIcon === null && userMenuUnlockedIcon === null ? null : (

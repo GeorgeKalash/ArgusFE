@@ -24,6 +24,7 @@ import { SaleRepository } from '@argus/repositories/src/repositories/SaleReposit
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import CustomTimePicker from '@argus/shared-ui/src/components/Inputs/CustomTimePicker'
 import dayjs from 'dayjs'
+import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumberField'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function OutboundTranspForm({ labels, maxAccess: access, recordId }) {
@@ -617,27 +618,23 @@ export default function OutboundTranspForm({ labels, maxAccess: access, recordId
         <Fixed>
           <Grid container rowGap={1} xs={10} spacing={2} pt={2}>
             <Grid item xs={5}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalVolume'
                 label={labels.totVol}
                 maxAccess={maxAccess}
                 value={totalVol}
-                maxLength='30'
+                decimalScale={2}
                 readOnly
-                error={formik.touched.totalVolume && Boolean(formik.errors.totalVolume)}
-                helperText={formik.touched.totalVolume && formik.errors.totalVolume}
               />
             </Grid>
             <Grid item xs={5}>
-              <CustomTextField
+              <CustomNumberField
                 name='totalWeight'
                 label={labels.totalWeight}
                 maxAccess={maxAccess}
                 value={totalWeight}
-                maxLength='30'
+                decimalScale={2}
                 readOnly
-                error={formik.touched.totalWeight && Boolean(formik.errors.totalWeight)}
-                helperText={formik.touched.totalWeight && formik.errors.totalWeight}
               />
             </Grid>
           </Grid>

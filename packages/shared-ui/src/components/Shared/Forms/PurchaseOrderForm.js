@@ -1347,13 +1347,9 @@ export default function PurchaseOrderForm({ recordId, window }) {
                       { key: 'name', value: 'Name' },
                       { key: 'flName', value: 'FL Name' }
                     ]}
-                    onChange={(event, newValue) => {
-                      fillVendorData(newValue)
-                    }}
+                    onChange={(_, newValue) => fillVendorData(newValue)}
                     secondFieldName={'header.vendorName'}
-                    onSecondValueChange={(name, value) => {
-                      formik.setFieldValue('header.vendorName', value)
-                    }}
+                    onSecondValueChange={(_, value) => formik.setFieldValue('header.vendorName', value)}
                     errorCheck={'header.vendorId'}
                     maxAccess={maxAccess}
                     required
@@ -1372,7 +1368,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     formObject={formik.values}
                     form={formik}
                     secondDisplayField={false}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       formik.setFieldValue('requestId', newValue?.recordId || null)
                       formik.setFieldValue('requestRef', newValue?.reference || '')
                     }}
@@ -1392,7 +1388,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     label={labels.date}
                     readOnly={isClosed}
                     value={formik?.values?.header?.date}
-                    onChange={(e, newValue) => formik.setFieldValue('header.date', newValue)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.date', newValue)}
                     editMode={editMode}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.date', null)}
@@ -1414,9 +1410,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     required
                     values={formik.values.header}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.currencyId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.currencyId', newValue?.recordId || null)}
                     error={formik.touched?.header?.currencyId && Boolean(formik.errors?.header?.currencyId)}
                   />
                 </Grid>
@@ -1462,9 +1456,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.plantId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.plantId', newValue?.recordId || null)}
                     displayFieldWidth={2}
                     error={formik.touched.header?.plantId && Boolean(formik.errors.header?.plantId)}
                   />
@@ -1478,9 +1470,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     valueField='key'
                     displayField='value'
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.paymentMethod', newValue?.key || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.paymentMethod', newValue?.key || null)}
                     error={formik.touched.header?.paymentMethod && Boolean(formik.errors.header?.paymentMethod)}
                     maxAccess={maxAccess}
                   />
@@ -1497,9 +1487,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                       (formik?.values?.items?.length > 0 && formik?.values?.items[0]?.sku)
                     }
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.taxId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.taxId', newValue?.recordId || null)}
                     error={formik.touched.header?.taxId && Boolean(formik.errors.header?.taxId)}
                     maxAccess={maxAccess}
                   />
@@ -1527,7 +1515,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     label={labels.deliveryDate}
                     readOnly={isClosed}
                     value={formik?.values?.header?.deliveryDate}
-                    onChange={(e, newValue) => formik.setFieldValue('header.deliveryDate', newValue)}
+                    onChange={(_, newValue) => formik.setFieldValue('header.deliveryDate', newValue)}
                     editMode={editMode}
                     maxAccess={maxAccess}
                     onClear={() => formik.setFieldValue('header.deliveryDate', '')}
@@ -1543,9 +1531,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     valueField='recordId'
                     displayField={['name']}
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.deliveryMethodId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.deliveryMethodId', newValue?.recordId || null)}
                     error={formik.touched.header?.deliveryMethodId && Boolean(formik.errors.header?.deliveryMethodId)}
                     maxAccess={maxAccess}
                   />
@@ -1559,9 +1545,7 @@ export default function PurchaseOrderForm({ recordId, window }) {
                     valueField='recordId'
                     displayField={['name']}
                     values={formik.values.header}
-                    onChange={(event, newValue) => {
-                      formik.setFieldValue('header.ptId', newValue?.recordId || null)
-                    }}
+                    onChange={(_, newValue) => formik.setFieldValue('header.ptId', newValue?.recordId || null)}
                     error={formik.touched.header?.ptId && Boolean(formik.errors.header?.ptId)}
                     maxAccess={maxAccess}
                   />

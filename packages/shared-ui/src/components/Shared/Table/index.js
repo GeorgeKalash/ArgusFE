@@ -1,11 +1,9 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext, useRef, useState, useEffect } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '@argus/shared-ui/src/components/images/TableIcons/edit.png'
-import { useState } from 'react'
-import { useEffect } from 'react'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -27,7 +25,6 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
-import styles from './Table.module.css'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
 
 const Table = ({
@@ -72,10 +69,10 @@ const Table = ({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-  width <= 768 ? 30 : width <= 1024 ? 26 : width <= 1280 ? 25 : width <=1366 ? 28 : width < 1600 ? 30 : 32
+    width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34 : 36
 
   const rowHeightImage =
-  width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <=1366 ? 50 : width < 1600 ? 52 : 70
+    width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
 
   const columns = props?.columns
     .filter(
@@ -108,10 +105,7 @@ const Table = ({
         return {
           ...col,
           valueGetter: ({ data }) => getFormattedNumber(data?.[col.field], col.type?.decimal, col.type?.round),
-          cellStyle: params => ({
-            fontWeight: params.data?.isBold ? 'bold' : 'normal',
-            textAlign: languageId === 2 ? 'left' : 'right'
-          }),
+          cellClass: params => `${col?.isBold ? 'bold ' : ''}${languageId == 2 ? '' : 'right'}`,
           sortable: !disableSorting
         }
       }
@@ -136,7 +130,7 @@ const Table = ({
               <Checkbox
                 checked={data?.[col.field]}
                 onChange={col.editable ? handleCheckboxChange : null}
-                className={col.editable ? '' : styles.pointerNone}
+                className={col.editable ? '' : 'pointerNone'}
               />
             )
           }
@@ -149,8 +143,8 @@ const Table = ({
             const color = data?.[col.field]
 
             return color ? (
-              <div className={styles.colorComboWrapper}>
-                <div className={styles.colorSwatch} style={{ backgroundColor: color }} />
+              <div className={'colorComboWrapper'}>
+                <div className={'colorSwatch'} style={{ backgroundColor: color }} />
                 <span>{color}</span>
               </div>
             ) : null
@@ -245,7 +239,7 @@ const Table = ({
         return (
           <TextField
             size={'small'}
-            className={styles.pageTextField}
+            className={'pageTextField'}
             autoFocus={focus}
             onInput={handleInput}
             defaultValue={value}
@@ -282,8 +276,8 @@ const Table = ({
         }
 
         return (
-          <Box className={styles.paginationWrapper}>
-            <Box className={styles.paginationBar}>
+          <Box className={'paginationWrapper'}>
+            <Box className={'paginationBar'}>
               <IconButton
                 onClick={goToFirstPage}
                 disabled={page === 1}
@@ -323,7 +317,7 @@ const Table = ({
               {platformLabels.Of} {totalRecords}
             </Box>
             <Box>
-              <IconButton onClick={onReset} className={styles.paginationBar}>
+              <IconButton onClick={onReset} className={'paginationBar'}>
                 <CachedIcon />
               </IconButton>
             </Box>
@@ -391,8 +385,8 @@ const Table = ({
           }
 
           return (
-            <Box className={styles.paginationWrapper}>
-              <Box className={styles.paginationBar}>
+            <Box className={'paginationWrapper'}>
+              <Box className={'paginationBar'}>
                 <IconButton
                   onClick={goToFirstPage}
                   disabled={page === 1}
@@ -479,7 +473,7 @@ const Table = ({
       refresh: false
     })
   }
-  
+
   function openDeleteConfirmation(obj) {
     stack({
       Component: StrictConfirmation,
@@ -496,9 +490,9 @@ const Table = ({
   const checkboxCellRenderer = params => {
     return (
       <Checkbox
-        className={styles.fullSizeCheckbox}
+        className={'fullSizeCheckbox'}
         checked={params.value}
-        disabled={props?.disable && props?.disable(params?.data) || props?.disableCheckBox}
+        disabled={(props?.disable && props?.disable(params?.data)) || props?.disableCheckBox}
         onChange={e => {
           e.preventDefault()
           const rowIndex = params.node.rowIndex
@@ -570,8 +564,12 @@ const Table = ({
 
     return (
       <>
-        {tooltipOpen && <Box className={styles.copiedTooltip}>Copied!</Box>}
-        <Box onClick={handleClick} onDoubleClick={handleDoubleClick} className={`${styles.fieldWrapper} ${!params.colDef?.wrapText ? styles.nowrap : ''}`}>
+        {tooltipOpen && <Box className={'copiedTooltip'}>Copied!</Box>}
+        <Box
+          onClick={handleClick}
+          onDoubleClick={handleDoubleClick}
+          className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
+        >
           {params.value}
         </Box>
       </>
@@ -636,17 +634,28 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
+  const EMPTY_PHOTO = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
   const imageRenderer =
     column =>
     ({ data }) => {
       const imageUrl = data?.[column.field]
+      const src = imageUrl ? imageUrl : EMPTY_PHOTO
+      const isEmpty = !imageUrl
 
-      const image =
-        imageUrl
-          ? imageUrl
-          : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
-
-      return <img src={image?.default?.src||image} alt='' width={rowHeightImage} />
+      return (
+        <div className="agImgCell">
+          <img
+            src={src}
+            alt=""
+            className={`agImg ${isEmpty ? 'agImg--empty' : 'agImg--real'}`}
+            onError={e => {
+              e.currentTarget.src = EMPTY_PHOTO
+              e.currentTarget.classList.remove('agImg--real')
+              e.currentTarget.classList.add('agImg--empty')
+            }}
+          />
+        </div>
+      )
     }
 
   const columnDefs = [
@@ -678,7 +687,7 @@ const Table = ({
                     focusable && focusable.focus && focusable.focus()
                     selectAll(params, e)
                   }}
-                  className={styles.fullSizeCheckbox}
+                  className={'fullSizeCheckbox'}
                 />
               ),
             suppressMenu: true
@@ -720,16 +729,16 @@ const Table = ({
           const isWIP = data.wip === 2
 
           return (
-            <Box className={styles.actionsBox}>
+            <Box className={'actionsBox'}>
               {props?.onEdit && (!props?.actionCondition || props?.actionCondition(data, 'edit')) && (
                 <IconButton
                   size='small'
                   onClick={e => {
                     props?.onEdit(data)
                   }}
-                  className={styles.actionIconButton}
+                  className={'actionIconButton'}
                 >
-                  <Image src={editIcon} alt='Edit' className={styles.actionIcon} />
+                  <Image src={editIcon} alt='Edit' className={'actionIcon'} />
                 </IconButton>
               )}
 
@@ -744,9 +753,9 @@ const Table = ({
                     }
                   }}
                   color='error'
-                  className={styles.actionIconButton}
+                  className={'actionIconButton'}
                 >
-                  <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
+                  <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
                 </IconButton>
               )}
               {globalStatus &&
@@ -765,9 +774,9 @@ const Table = ({
                       }
                     }}
                     color='error'
-                    className={styles.actionIconButton}
+                    className={'actionIconButton'}
                   >
-                    <Image src={deleteIcon} alt={platformLabels.Delete} className={styles.actionIcon} />
+                    <Image src={deleteIcon} alt={platformLabels.Delete} className={'actionIcon'} />
                   </IconButton>
                 )}
             </Box>
@@ -781,8 +790,6 @@ const Table = ({
       'even-row': params => params.node.rowIndex % 2 === 0
     }
   }
-
-  const height = gridData?.list?.length * 35 + 40 + 40
 
   const tableName =
     name && name !== 'table' ? `${name}.${props?.maxAccess?.record?.resourceId}` : props?.maxAccess?.record?.resourceId
@@ -824,12 +831,6 @@ const Table = ({
     await deleteFromDB(storeName, tableName)
     invalidate()
   }
-
-  const totalWidth = tableSettings?.reduce((acc, col) => {
-    const width = parseFloat(col.width) || 0
-
-    return acc + width
-  }, 0)
 
   const updatedColumns = tableSettings
     ? columnDefs.map(({ flex, ...col }, index) => {
@@ -879,8 +880,8 @@ const Table = ({
           onMouseLeave={handleMouseLeave}
           className={[
             'ag-theme-alpine',
-            styles.agGridContainer,
-            !props.maxHeight && !props.height ? styles.agGridFlex : ''
+            'agGridContainer',
+            !props.maxHeight && !props.height ? 'agGridFlex' : ''
           ].join(' ')}
           sx={{
             height: props?.height || '100%',
@@ -890,7 +891,7 @@ const Table = ({
         
         >
           {hoveredTable && !pagination && (
-            <Box className={styles.hoverReset}>
+            <Box className={'hoverReset'}>
               <IconButton size='small' onClick={onReset}>
                 <CachedIcon fontSize='small' />
               </IconButton>
@@ -922,11 +923,375 @@ const Table = ({
           />
         </Box>
       </Grow>
+
       {pagination && (
         <Fixed>
           <CustomPagination />
         </Fixed>
       )}
+
+      <style jsx global>{`
+        .agGridContainer {
+          position: relative;
+          width: 100%;
+          height: auto;
+          max-height: none;
+          --ag-font-size: 14px;
+        }
+
+        .agGridFlex {
+          flex: 1 1 auto;
+        }
+
+        .hoverReset {
+          position: absolute;
+          top: 0;
+          right: 0;
+          z-index: 9999;
+          box-shadow: var(--shadow-3, 0 1px 2px rgba(0, 0, 0, 0.15));
+          border-radius: 4px;
+          background: #fff;
+        }
+
+        .paginationWrapper {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .paginationBar {
+          flex: 1 1 auto;
+          min-width: 0;
+          background-color: #fff;
+          font-size: 0.8rem;
+          padding: 1px 5px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          height: 30px;
+          line-height: 1;
+        }
+
+        .pageTextField {
+          padding: 0;
+          width: 70px;
+        }
+
+        .pageTextField :global(.MuiOutlinedInput-root),
+        .pageTextField :global(.MuiInputBase-root) {
+          height: 22px;
+          min-height: 22px;
+          font-size: 1rem;
+        }
+
+        .pageTextField :global(.MuiOutlinedInput-input),
+        .pageTextField :global(.MuiInputBase-input) {
+          padding: 1px 5px;
+        }
+
+        .actionsBox {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          justify-content: center;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .actionIconButton {
+          padding: 0;
+          width: 22px;
+          height: 22px;
+          min-width: 0;
+        }
+
+        .actionIcon {
+          width: 16px;
+          height: 16px;
+        }
+
+        .fullSizeCheckbox {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .agGridContainer :global(.MuiCheckbox-root) {
+          width: 100% !important;
+          height: 100% !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .agGridContainer :global(.MuiCheckbox-root .MuiSvgIcon-root) {
+          font-size: 20px !important;
+        }
+
+        .pointerNone {
+          pointer-events: none;
+        }
+
+        .fieldWrapper {
+          user-select: text;
+          cursor: pointer;
+          width: 100%;
+          line-height: 1.6;
+          padding-block: 2px;
+          box-sizing: border-box;
+        }
+
+        .agGridContainer :global(.ag-cell-value),
+        .agGridContainer :global(.ag-cell-wrapper) {
+          line-height: 1.6;
+        }
+
+        .fieldWrapper::selection {
+          background: none !important;
+          color: inherit;
+        }
+
+        .nowrap {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .copiedTooltip {
+          z-index: 1000;
+          position: fixed;
+          top: -40px;
+          background-color: #000;
+          color: #fff;
+          padding: 1px 3px;
+          border-radius: 5px;
+        }
+
+        .colorComboWrapper {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .colorSwatch {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+        }
+
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          object-fit: contain !important;
+        }
+
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+          width: auto !important;
+          height: auto !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
+
+        .agGridContainer :global(.ag-header),
+        .agGridContainer :global(.ag-header-cell) {
+          height: 32px !important;
+          min-height: 32px !important;
+        }
+
+        .agGridContainer :global(.ag-header-cell-text),
+        .agGridContainer :global(.ag-cell) {
+          font-size: var(--ag-font-size);
+        }
+
+        .agGridContainer :global(.ag-cell) {
+          border-right: 1px solid #d0d0d0 !important;
+        }
+
+        .agGridContainer :global(.ag-cell .MuiBox-root) {
+          padding: 0 !important;
+        }
+
+        .paginationBar :global(.MuiIconButton-root) {
+          padding: 0;
+          width: 20px;
+          height: 20px;
+          min-width: 0;
+        }
+
+        .paginationBar :global(.MuiSvgIcon-root) {
+          font-size: 20px;
+          line-height: 1;
+        }
+
+        @media (min-width: 1025px) and (max-width: 1600px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 12px;
+          }
+        }
+
+        @media (max-width: 1366px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+            --ag-header-cell-horizontal-padding: clamp(2px, 0.55vw, 8px);
+          }
+
+          .agGridContainer :global(.ag-header-cell),
+          .agGridContainer :global(.ag-header-cell-label) {
+            padding-left: var(--ag-header-cell-horizontal-padding) !important;
+            padding-right: var(--ag-header-cell-horizontal-padding) !important;
+          }
+
+          .agGridContainer :global(.ag-cell) {
+            padding-left: var(--ag-cell-horizontal-padding) !important;
+            padding-right: var(--ag-cell-horizontal-padding) !important;
+          }
+        }
+
+        @media (min-width: 1025px) and (max-width: 1280px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 10px;
+            --ag-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
+            --ag-header-cell-horizontal-padding: clamp(2px, 0.35vw, 7px);
+          }
+
+          .agGridContainer :global(.ag-header-cell),
+          .agGridContainer :global(.ag-header-cell-label) {
+            padding-left: var(--ag-header-cell-horizontal-padding) !important;
+            padding-right: var(--ag-header-cell-horizontal-padding) !important;
+          }
+
+          .agGridContainer :global(.ag-cell) {
+            padding-left: var(--ag-cell-horizontal-padding) !important;
+            padding-right: var(--ag-cell-horizontal-padding) !important;
+          }
+
+          .agGridContainer :global(.ag-header-cell-label) {
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+          }
+
+          .agGridContainer :global(.ag-cell) {
+            display: flex !important;
+            align-items: center !important;
+          }
+
+          .agGridContainer :global(.ag-cell-wrapper),
+          .agGridContainer :global(.ag-cell-value) {
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+          }
+
+          .fieldWrapper {
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            padding-inline: 6px;
+          }
+
+          .paginationWrapper,
+          .paginationBar,
+          .paginationBar * {
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
+          }
+
+          .pageTextField :global(.MuiOutlinedInput-root),
+          .pageTextField :global(.MuiInputBase-root),
+          .pageTextField :global(.MuiOutlinedInput-input),
+          .pageTextField :global(.MuiInputBase-input) {
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
+          }
+
+          .paginationBar :global(.MuiSvgIcon-root) {
+            font-size: 16px !important;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 9.2px;
+            --ag-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+            --ag-header-cell-horizontal-padding: clamp(1px, 0.25vw, 6px);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.9px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.5px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8.2px;
+          }
+        }
+
+        @media (max-width: 375px) {
+          .agGridContainer:global(.ag-theme-alpine) {
+            --ag-font-size: 8px;
+          }
+        }
+
+        .right .fieldWrapper {
+          display: flex;
+          justify-content: flex-end;
+          width: 100%;
+        }
+
+        .bold {
+          font-weight: bold;
+        }
+      `}</style>
     </VertLayout>
   )
 }

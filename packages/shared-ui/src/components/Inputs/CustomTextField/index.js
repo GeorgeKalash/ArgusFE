@@ -48,14 +48,17 @@ const CustomTextField = ({
 
   const [focus, setFocus] = useState(!hasBorder)
   const [isFocused, setIsFocused] = useState(false)
-  const [hasValue, setHasValue] = useState(Boolean(value))
+
+  const [hasValue, setHasValue] = useState(
+    value !== null && value !== undefined && String(value).length > 0
+  )
 
   useEffect(() => {
-    setHasValue(Boolean(value && value.length > 0))
+    setHasValue(value !== null && value !== undefined && String(value).length > 0)
   }, [value])
 
   useEffect(() => {
-    if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && value?.length < 1) {
+    if (inputRef.current && inputRef.current.selectionStart !== undefined && focus && value && String(value).length < 1) {
       inputRef.current.focus()
     }
   }, [value])
@@ -156,7 +159,9 @@ const CustomTextField = ({
       autoFocus={focus}
       onFocus={() => setIsFocused(true)}
       onBlur={() => {
-        setIsFocused(false), setFocus(false), setHasValue(Boolean(value && value.length > 0))
+        setIsFocused(false)
+        setFocus(false)
+        setHasValue(value !== null && value !== undefined && String(value).length > 0)
       }}
       inputProps={{
         autoComplete: 'off',
@@ -227,6 +232,7 @@ const CustomTextField = ({
       }}
       InputLabelProps={{
         ...InputLabelProps,
+        shrink: Boolean(InputLabelProps?.shrink || isFocused || hasValue),
         className:
           isFocused || value || InputLabelProps?.shrink
             ? inputs.inputLabelShrink

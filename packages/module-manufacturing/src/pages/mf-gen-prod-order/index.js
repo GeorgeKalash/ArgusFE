@@ -27,10 +27,6 @@ const GeneratePoductionOrder = () => {
     datasetId: ResourceIds.GenerateProductionOrder
   })
 
-  const { labels: _labels, access: maxAccess } = useResourceQuery({
-    datasetId: ResourceIds.ProductionOrder
-  })
-
   const { formik } = useForm({
     initialValues: {
       clientId: null,
@@ -72,7 +68,7 @@ const GeneratePoductionOrder = () => {
     {
       field: 'sku',
       headerName: labels.sku,
-      flex: 1
+      flex: 1.3
     },
     {
       field: 'itemName',
@@ -83,43 +79,43 @@ const GeneratePoductionOrder = () => {
       field: 'soQty',
       headerName: labels.soQty,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'remainingQty',
       headerName: labels.remainingQty,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'onHand',
       headerName: labels.onHand,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'minQty',
       headerName: labels.minQty,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'inProduction',
       headerName: labels.inProduction,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'deltaQty',
       headerName: labels.deltaQty,
       type: 'number',
-      width: 130
+      flex: 1
     },
     {
       field: 'produceNow',
       headerName: labels.produceNow,
       type: 'number',
-      width: 130
+      flex: 1
     }
   ]
 
@@ -259,6 +255,7 @@ const GeneratePoductionOrder = () => {
               <Grid container spacing={2} sx={{ display: 'flex', flex: 1 }}>
                 <Grid item xs={12} sx={{ display: 'flex' }}>
                   <Table
+                    name='ItemSummary'
                     columns={columnsItemsSummary}
                     gridData={formik?.values?.itemSummaries}
                     rowId={['itemId']}
@@ -278,6 +275,7 @@ const GeneratePoductionOrder = () => {
                 </Grid>
                 <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Table
+                    name='Orders'
                     columns={columnsOrders}
                     gridData={formik?.values?.orders}
                     rowId={['itemId']}

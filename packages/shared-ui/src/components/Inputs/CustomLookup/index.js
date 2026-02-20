@@ -96,7 +96,12 @@ const CustomLookup = ({
           options={store}
           PopperComponent={PopperComponent}
           slotProps={{
-            popper: { className: dropdownStyles.dropdownPopper }
+            popper: {
+              className: dropdownStyles.dropdownPopper,
+              style: {
+                '--dropdown-min-width': `${displayFieldWidth * 100}%`
+              }
+            }
           }}
           noOptionsText={
             <div className={dropdownStyles.dropdownNoOptionsRow}>
@@ -142,7 +147,7 @@ const CustomLookup = ({
           }}
           PaperComponent={({ children }) =>
             props.renderOption && (
-              <Paper style={{ minWidth: `${displayFieldWidth * 100}%`, width: 'max-content' }}>
+              <Paper style={{ width: 'max-content' }}>
                 {children}
               </Paper>
             )
@@ -158,9 +163,7 @@ const CustomLookup = ({
               return (
                 <Box>
                   {propsOption.id.endsWith('-0') && (
-                    <li
-                      className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}
-                    >
+                    <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                       {columnsWithGrid.map((header, i) => (
                         <Box
                           key={i}
@@ -200,9 +203,7 @@ const CustomLookup = ({
             return (
               <Box>
                 {propsOption.id.endsWith('-0') && (
-                  <li
-                    className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}
-                  >
+                  <li className={`${propsOption.className} ${dropdownStyles.dropdownHeaderRow}`}>
                     {secondDisplayField && (
                       <Box className={dropdownStyles.dropdownHeaderCellMain}>
                         {valueField.toUpperCase()}
@@ -220,9 +221,8 @@ const CustomLookup = ({
                   {...propsOption}
                   className={`${propsOption.className} ${dropdownStyles.dropdownOptionRow}`}
                 >
-                  <Box className={dropdownStyles.dropdownOptionCellMain}>
-                    {option[valueField]}
-                  </Box>
+                  <Box className={dropdownStyles.dropdownOptionCellMain}>{option[valueField]}</Box>
+
                   {secondDisplayField && (
                     <Box className={dropdownStyles.dropdownOptionCellSecondary}>
                       {option[displayField]}
@@ -238,10 +238,14 @@ const CustomLookup = ({
               fullWidth
               className={`${secondDisplayField && styles.firstField} ${styles.root}`}
               onChange={e => {
-                setInputValue(e.target.value)
-                if (e.target.value) {
-                  onLookup(e.target.value)
-                  setFreeSolo(true)
+                const v = e.target.value
+                setInputValue(v)
+
+                if (v) {
+                  if (!minChars || v.length >= minChars) {
+                    onLookup(v)
+                    setFreeSolo(true)
+                  }
                 } else {
                   setStore([])
                   setFreeSolo(false)
@@ -249,13 +253,18 @@ const CustomLookup = ({
               }}
               onKeyDown={onKeyDown}
               onBlur={e => {
-                if (!store.some(item => item[valueField] === inputValue) && e.target.value !== firstValue) {
+                if (
+                  !store.some(item => item?.[valueField] === inputValue) &&
+                  e.target.value !== firstValue
+                ) {
                   setInputValue('')
                   setFreeSolo(true)
                 }
+
                 if (selectFirstValue.current !== 'click') {
                   onBlur(e, valueHighlightedOption.current)
                 }
+
                 valueHighlightedOption.current = null
               }}
               onFocus={e => {
@@ -297,6 +306,7 @@ const CustomLookup = ({
                     ) : (
                       <CircularProgress size={15} className={inputs.icon} />
                     )}
+
                     <IconButton
                       className={inputs.iconButton}
                       tabIndex={-1}

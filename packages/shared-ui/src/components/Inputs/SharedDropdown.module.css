@@ -16,11 +16,19 @@
 
 .dropdownHeaderCellMain,
 .dropdownHeaderCellSecondary,
-.dropdownOptionCellMain,
-.dropdownOptionCellSecondary {
+.dropdownHeaderCell {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap; 
+  min-width: 0;
 }
 
 .dropdownHeaderRow,
@@ -39,6 +47,7 @@
   z-index: 5;
   background: #fff;
   width: 100%;
+  white-space: nowrap;
 }
 
 .dropdownHeaderCell {
@@ -51,9 +60,6 @@
   display: flex;
   align-items: flex-start;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .dropdownOptionIcon {
@@ -64,27 +70,48 @@
 }
 
 .dropdownOptionCell,
-.dropdownOptionSingleText {
-  font-size: 0.72rem !important;
-  font-weight: 400 !important;
-  line-height: 1.35 !important;
-
-  display: flex;
-  align-items: flex-start;
-
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+.dropdownOptionCellMain,
+.dropdownOptionCellSecondary {
+  display: block !important;
+  min-width: 0;
 }
 
-.dropdownPopper :global(.MuiAutocomplete-listbox) {
-  padding: 4px !important;
+.dropdownCellClamp {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root) {
+  width: max-content !important;
+  min-width: 100% !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root) {
+  width: max-content !important;
+  min-width: var(--dropdown-min-width, 100%) !important;
+  max-width: 95vw !important;
+  overflow-x: auto !important;
 }
 
 .dropdownPopper :global(.MuiAutocomplete-option) {
   min-height: unset !important;
   padding: 4px 10px !important;
   align-items: flex-start !important;
+  white-space: normal !important;
+}
+
+.dropdownPopper :global(.MuiPaper-root)::-webkit-scrollbar {
+  height: 8px;
 }
 
 .dropdownNoOptionsRow {
@@ -93,6 +120,7 @@
   padding: 5px 10px !important;
   line-height: 1.35 !important;
   font-weight: 600 !important;
+  white-space: nowrap;
 }
 
 .dropdownNoOptionsCell,

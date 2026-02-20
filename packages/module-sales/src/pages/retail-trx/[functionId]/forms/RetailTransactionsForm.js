@@ -41,7 +41,6 @@ import { useError } from '@argus/shared-providers/src/providers/error'
 import { useDocumentType } from '@argus/shared-hooks/src/hooks/documentReferenceBehaviors'
 import { PointofSaleRepository } from '@argus/repositories/src/repositories/PointofSaleRepository'
 import { SystemChecks } from '@argus/shared-domain/src/resources/SystemChecks'
-import { CashBankRepository } from '@argus/repositories/src/repositories/CashBankRepository'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import { FinancialRepository } from '@argus/repositories/src/repositories/FinancialRepository'
 import { MultiCurrencyRepository } from '@argus/repositories/src/repositories/MultiCurrencyRepository'
@@ -51,6 +50,7 @@ import TaxDetails from '@argus/shared-ui/src/components/Shared/TaxDetails'
 import AddressForm from '@argus/shared-ui/src/components/Shared/AddressForm'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { LockedScreensContext } from '@argus/shared-providers/src/providers/LockedScreensContext'
+import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function RetailTransactionsForm({
@@ -71,10 +71,12 @@ export default function RetailTransactionsForm({
   const { systemDefaults, systemChecks } = useContext(DefaultsContext)
   const [address, setAddress] = useState({})
   const [reCal, setReCal] = useState(false)
-  const [cashGridData, setCashGridData] = useState({ cashAccounts: [], creditCards: [], creditCardFees: [] })
   const [addressModified, setAddressModified] = useState(false)
   const filteredCreditCard = useRef([])
+  const level2CacheRef = useRef(null)
+
   const autoPostAfterSavePos = systemChecks.some(check => check.checkId === SystemChecks.AUTO_POST_POS_ACTIVITY_ON_SAVE)
+  const jumpToNextLine = systemChecks?.find(item => item.checkId === SystemChecks.POS_JUMP_TO_NEXT_LINE)?.value || false
 
   const getEndpoint = {
     [SystemFunction.RetailInvoice]: PointofSaleRepository.RetailInvoice.set2,
@@ -230,7 +232,11 @@ export default function RetailTransactionsForm({
         yup.object({
           sku: yup.string().required(),
           itemName: yup.string().required(),
-          qty: yup.number().required().min(1),
+          qty: yup.string().test(function () {
+            const { qty } = this.parent
+
+            return qty > 0
+          }),
           barcode: yup.string().required()
         })
       ),
@@ -298,16 +304,41 @@ export default function RetailTransactionsForm({
     return res?.list
   }
 
-  async function barcodeSkuSelection(update, row) {
+  const getBarcodeData = async barcode => {
+    if (!formik.values?.header?.siteId) return
+
+    const res = await getRequest({
+      extension: InventoryRepository.Barcodes.get2,
+      parameters: `_barcode=${barcode}&_siteId=${formik.values?.header?.siteId}`
+    })
+
+    return res?.record
+  }
+
+  async function barcodeSkuSelection(update, row, addRow) {
     const itemRetail = await getItemRetail(row?.itemId)
     const itemPhysical = await getItemPhysical(row?.itemId)
-    const itemConvertPrice = await getItemConvertPrice(row?.itemId)
+    const itemConvertPrice = await getItemConvertPrice(row?.itemId, row?.muId)
     const basePrice = ((formik.values.header.KGmetalPrice || 0) * (itemPhysical?.metalPurity || 0)) / 1000
+
     const TotPricePerG = (basePrice || 0) + (itemConvertPrice?.baseLaborPrice || 0)
-    const taxDetailsInfo = await getTaxDetails(row?.taxId)
+
+    const taxId = !formik.values.header.isVatable
+      ? null
+      : formik.values.header.taxId
+      ? row?.taxId
+        ? formik.values.header.taxId
+        : null
+      : row?.taxId ?? null
+
+    const unitPrice =
+      itemConvertPrice?.priceType == 3 ? (itemPhysical?.weight || 0) * (TotPricePerG || 0) : itemConvertPrice?.unitPrice
+
+    const taxDetailsInfo = await getTaxDetails(taxId)
 
     const result = {
       id: row?.id,
+      barcode: row?.barcode,
       itemId: row?.itemId,
       sku: row?.sku,
       itemName: row?.itemName,
@@ -317,38 +348,40 @@ export default function RetailTransactionsForm({
       metalId: itemPhysical?.metalId || null,
       weight: itemPhysical?.weight || 0,
       volume: itemPhysical?.volume || 0,
+      baseLaborPrice: itemConvertPrice?.baseLaborPrice || 0,
       basePrice: basePrice || 0,
       TotPricePerG: TotPricePerG || 0,
       priceType: itemConvertPrice?.priceType,
-      unitPrice:
-        itemConvertPrice?.priceType == 3
-          ? (itemPhysical?.weight || 0) * (TotPricePerG || 0)
-          : itemConvertPrice?.unitPrice,
+      unitPrice,
       qty: row?.qty || 1,
       extendedPrice: 0,
       mdAmount: 0,
       mdValue: 0,
-      taxId: row?.taxId || formik.values.header.taxId,
+      taxId,
       taxDetails: taxDetailsInfo || null
     }
-    update(result)
-
-    if (result?.basePrice) {
-      const basePriceResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
-      update(basePriceResult)
-    }
+    let finalResult = result
+    if (result?.basePrice) finalResult = getItemPriceRow(result, DIRTYFIELD_BASE_PRICE)
     if (result?.unitPrice) {
-      const result2 = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
-      update(result2)
-
-      if (row?.qty > 0) {
-        const result3 = getItemPriceRow(result2, DIRTYFIELD_QTY)
-        update(result3)
-      }
+      finalResult = getItemPriceRow(result, DIRTYFIELD_UNIT_PRICE)
+      if (row?.qty > 0) finalResult = getItemPriceRow(result, DIRTYFIELD_QTY)
     }
+
+    if (!jumpToNextLine) return update(finalResult)
+
+    if (formik.values.disableSKULookup)
+      return addRow({
+        fieldName: 'sku',
+        changes: finalResult
+      })
+
+    update(finalResult)
+    addRow()
   }
 
   async function getItemRetail(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.ItemRetail.get,
       parameters: `_itemId=${itemId}`
@@ -357,6 +390,8 @@ export default function RetailTransactionsForm({
     return res?.record
   }
   async function getItemPhysical(itemId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: InventoryRepository.Physical.get,
       parameters: `_itemId=${itemId}`
@@ -365,12 +400,14 @@ export default function RetailTransactionsForm({
     return res?.record
   }
 
-  async function getItemConvertPrice(itemId) {
+  async function getItemConvertPrice(itemId, muId) {
+    if (!itemId) return
+
     const res = await getRequest({
       extension: SaleRepository.ItemConvertPrice.get,
       parameters: `_clientId=0&_itemId=${itemId}&_currencyId=${formik.values.header.currencyId}&_plId=${
         formik.values.header.plId
-      }&_muId=${0}`
+      }&_muId=${muId || 0}`
     })
 
     return res?.record
@@ -390,7 +427,7 @@ export default function RetailTransactionsForm({
 
   function calculateBankFees(ccId, amount = 0) {
     if (!ccId || !amount) return
-    const arrayCC = cashGridData?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
+    const arrayCC = level2CacheRef?.current?.creditCardFees?.filter(({ creditCardId }) => parseInt(creditCardId) === ccId) ?? []
     if (arrayCC.length === 0) return
     const feeTier = arrayCC.find(({ upToAmount }) => upToAmount >= amount)
     if (!feeTier) return
@@ -521,7 +558,7 @@ export default function RetailTransactionsForm({
           qty: parseFloat(item.qty).toFixed(2),
           unitPrice: parseFloat(item.unitPrice).toFixed(2),
           extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+          priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
           totPricePerG: getTotPricePerG(retailTrxHeader, item, DIRTYFIELD_BASE_PRICE),
           taxDetails
         }
@@ -596,7 +633,7 @@ export default function RetailTransactionsForm({
     })
   }
 
-  function getItemPriceRow(newRow, dirtyField, iconClicked) {
+  function getItemPriceRow(newRow, dirtyField, iconClicked, source) {
     !reCal && setReCal(true)
 
     const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType)
@@ -612,13 +649,12 @@ export default function RetailTransactionsForm({
       extendedPrice: parseFloat(newRow?.extendedPrice),
       mdAmount: mdAmount,
       mdType: newRow?.mdType || 1,
-      baseLaborPrice: newRow?.baseLaborPrice || 0,
-      totalWeightPerG: newRow?.TotPricePerG,
+      baseLaborPrice: parseFloat(newRow?.baseLaborPrice) || 0,
+      totalWeightPerG: newRow?.totPricePerG,
       mdValue: parseFloat(newRow?.mdValue),
       tdPct: 0,
       dirtyField: dirtyField
     })
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
 
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
@@ -626,7 +662,7 @@ export default function RetailTransactionsForm({
       qty: parseFloat(itemPriceRow?.qty),
       weight: parseFloat(itemPriceRow?.weight),
       extendedPrice: parseFloat(itemPriceRow?.extendedPrice),
-      baseLaborPrice: itemPriceRow?.baseLaborPrice,
+      baseLaborPrice: parseFloat(itemPriceRow?.baseLaborPrice),
       vatAmount: parseFloat(itemPriceRow?.vatAmount) || 0,
       tdPct: 0,
       taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
@@ -639,6 +675,7 @@ export default function RetailTransactionsForm({
       volume: itemPriceRow?.volume ? parseFloat(itemPriceRow.volume).toFixed(2) : 0,
       weight: itemPriceRow?.weight ? parseFloat(itemPriceRow.weight).toFixed(2) : 0,
       basePrice: itemPriceRow?.basePrice ? parseFloat(itemPriceRow.basePrice).toFixed(5) : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(5) : 0,
       unitPrice: itemPriceRow?.unitPrice ? parseFloat(itemPriceRow.unitPrice).toFixed(3) : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? parseFloat(itemPriceRow.extendedPrice).toFixed(2) : 0,
       mdValue: itemPriceRow?.mdValue,
@@ -646,8 +683,10 @@ export default function RetailTransactionsForm({
       totPricePerG: itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0,
       mdAmount: itemPriceRow?.mdAmount ? parseFloat(itemPriceRow.mdAmount).toFixed(2) : 0,
       vatAmount: vatCalcRow?.vatAmount ? parseFloat(vatCalcRow.vatAmount).toFixed(2) : 0,
-      taxDetails: formik.values.header.isVatable ? newRow.taxDetails : null
+      taxDetails: newRow.taxDetails
     }
+
+    if (source != 'priceWithVAT') commonData.priceWithVAT = calculatePrice(commonData, vatCalcRow?.taxDetails?.[0], DIRTYFIELD_UNIT_PRICE)
 
     return iconClicked ? { changes: commonData } : commonData
   }
@@ -680,16 +719,7 @@ export default function RetailTransactionsForm({
 
   const totalQty = _footerSummary?.totalQty?.toFixed(2) || 0
   const amount = reCal ? _footerSummary?.net?.toFixed(2) : parseFloat(formik.values?.header?.amount).toFixed(2) || 0
-
-  const totalWeight = reCal
-    ? formik.values.items.reduce((curSum, row) => {
-        const curValue = parseFloat(row.weight?.toString().replace(/,/g, '')) || 0
-        const result = curSum + curValue
-
-        return (parseFloat(result) || 0).toFixed(2)
-      }, 0)
-    : parseFloat(formik.values?.header?.weight || 0).toFixed(2)
-
+  const totalWeight = _footerSummary?.totalWeight?.toFixed(2)
   const subtotal = reCal ? subTotal?.toFixed(2) : parseFloat(formik.values?.header?.subtotal).toFixed(2) || 0
 
   const vatAmount = reCal
@@ -715,16 +745,51 @@ export default function RetailTransactionsForm({
       label: labels.barcode,
       name: 'barcode',
       updateOn: 'blur',
-      async onChange({ row: { update, newRow } }) {
-        if (!newRow?.barcode) return
-        await barcodeSkuSelection(update, newRow)
+      jumpToNextLine,
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        if (!newRow?.barcode) return update({ barcode: null })
+        const barcodeInfo = await getBarcodeData(newRow?.barcode)
+
+        const resetRow = () => {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id
+          })
+        }
+        if (!barcodeInfo) {
+          resetRow()
+        } else {
+          await barcodeSkuSelection(
+            update,
+            {
+              ...newRow,
+              taxId: barcodeInfo?.taxId ?? newRow?.taxId,
+              muId: barcodeInfo?.muId ?? newRow?.muId,
+              itemId: barcodeInfo?.itemId ?? newRow?.itemId,
+              sku: barcodeInfo?.sku ?? newRow?.sku,
+              itemName: barcodeInfo?.itemName ?? newRow?.itemName
+            },
+            addRow
+          )
+        }
       }
     },
     {
       component: formik?.values?.disableSKULookup ? 'textfield' : 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      jumpToNextLine,
       flex: 2,
+      link: {
+        enabled: true,
+        popup: row => stack({
+          Component: ItemDetails,
+          props: {
+            itemId: row?.itemId || null,
+            plId: formik.values?.header?.plId || null
+          }
+        })
+      },   
       ...(formik.values.disableSKULookup && { updateOn: 'blur' }),
       props: {
         ...(!formik.values.disableSKULookup && {
@@ -747,45 +812,46 @@ export default function RetailTransactionsForm({
           displayFieldWidth: 3
         })
       },
-      async onChange({ row: { update, newRow } }) {
-        if (!formik.values.disableSKULookup) {
-          if (!newRow.itemId) return
-          await barcodeSkuSelection(update, newRow)
-        } else {
-          if (!newRow?.sku) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-
-            return
-          }
-
-          const skuInfo = await getRequest({
-            extension: InventoryRepository.Items.get2,
-            parameters: `_sku=${newRow.sku}`
-          })
-          if (!skuInfo.record) {
-            update({
-              ...formik.initialValues.items[0],
-              id: newRow.id
-            })
-            stackError({
-              message: labels.invalidSKU
-            })
-
-            return
-          }
-          await barcodeSkuSelection(update, {
-            id: newRow?.id,
-            itemId: skuInfo?.record?.recordId,
-            sku: skuInfo?.record?.sku,
-            itemName: skuInfo?.record?.name,
-            taxId: skuInfo?.record?.taxId,
-            priceType: skuInfo?.record?.priceType,
-            qty: newRow?.qty || 0
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
+        const resetRow = () => {
+          update({
+            ...formik.initialValues.items[0],
+            id: newRow.id,
+            barcode: newRow.barcode
           })
         }
+
+        if (!formik.values.disableSKULookup) {
+          if (!newRow.itemId) return resetRow()
+
+          return await barcodeSkuSelection(update, newRow, addRow)
+        }
+
+        if (!newRow?.sku) return resetRow()
+
+        const skuInfo = await getRequest({
+          extension: InventoryRepository.Items.get2,
+          parameters: `_sku=${newRow.sku}`
+        })
+
+        if (!skuInfo?.record) {
+          resetRow()
+          stackError({ message: labels.invalidSKU })
+
+          return
+        }
+
+        const rowData = {
+          id: newRow.id,
+          itemId: skuInfo.record.recordId,
+          sku: skuInfo.record.sku,
+          itemName: skuInfo.record.name,
+          taxId: skuInfo?.record?.taxId,
+          priceType: skuInfo.record.priceType,
+          qty: newRow.qty || 0
+        }
+
+        await barcodeSkuSelection(update, rowData, addRow)
       }
     },
     {
@@ -858,7 +924,13 @@ export default function RetailTransactionsForm({
     {
       component: 'numberfield',
       label: labels.priceWithVat,
-      name: 'priceWithVAT'
+      name: 'priceWithVAT',
+      updateOn: 'blur',
+      async onChange({ row: { update, newRow } }) {
+        const unitPrice = calculatePrice(newRow, newRow?.taxDetails?.[0])
+        const data = getItemPriceRow({ ...newRow, unitPrice }, DIRTYFIELD_UNIT_PRICE, null, 'priceWithVAT')
+        update(data)
+      }
     },
     {
       component: 'numberfield',
@@ -937,8 +1009,7 @@ export default function RetailTransactionsForm({
       label: labels.cashbox,
       name: 'cashAccountId',
       props: {
-        endpointId: PointofSaleRepository.CashAccount.qry,
-        parameters: `_posId=${parseInt(posUser?.posId)}`,
+        store: level2CacheRef?.current?.posCashAccounts,
         displayField: 'cashAccountRef',
         valueField: 'cashAccountId',
         mapping: [
@@ -961,6 +1032,9 @@ export default function RetailTransactionsForm({
         } else {
           update({ ccId: null, ccRef: '', bankFees: null })
         }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, store: level2CacheRef?.current?.posCashAccounts }
       }
     },
     {
@@ -1037,7 +1111,7 @@ export default function RetailTransactionsForm({
       }`
     })
 
-    return res.record.exRate * 1000
+    return res?.record?.exRate * 1000
   }
 
   function openAddressForm() {
@@ -1094,7 +1168,7 @@ export default function RetailTransactionsForm({
 
     const hasSingleCashPos = checkSingleCashPos?.record?.value
     const countryId = systemDefaults?.list?.find(({ key }) => key === 'countryId')
-    const posDtId = await isPosDtMatchesdgId(posInfo?.dtId)
+    const posDtId = level2CacheRef?.current?.documentTypes?.some(x => x.recordId == posInfo?.dtId) || false
     formik.setFieldValue('singleCashPos', hasSingleCashPos)
     formik.setFieldValue('header.isVatable', isVat)
     formik.setFieldValue('header.taxId', tax)
@@ -1115,61 +1189,24 @@ export default function RetailTransactionsForm({
     }))
   }
 
-  async function isPosDtMatchesdgId(posDtId) {
+
+  async function loadLevel2() {
     const res = await getRequest({
       extension: PointofSaleRepository.RetailInvoice.level,
       parameters: `_posId=${parseInt(posUser?.posId)}&_functionId=${functionId}`
     })
 
-    return res?.record?.documentTypes?.some(x => x.recordId == posDtId) || false
-  }
-
-  async function fillCashObjects() {
-    const cashAccounts = await getAllCashBanks()
-    const creditCards = await fillCreditCardStore()
-    const creditCardFees = await getCreditCardFees()
-    setCashGridData({
-      cashAccounts: cashAccounts,
-      creditCards: creditCards,
-      creditCardFees: creditCardFees
-    })
-  }
-
-  async function getAllCashBanks() {
-    const res = await getRequest({
-      extension: CashBankRepository.CashAccount.qry,
-      parameters: `_type=1`
-    })
-
-    return res?.list || []
-  }
-
-  async function fillCreditCardStore() {
-    const res = await getRequest({
-      extension: CashBankRepository.CreditCard.qry,
-      parameters: `_filter=`
-    })
-
-    return res?.list || []
-  }
-
-  async function getCreditCardFees() {
-    const response = await getRequest({
-      extension: CashBankRepository.CreditCardFees.qry,
-      parameters: `_creditCardId=0&_filter=`
-    })
-
-    return response?.list?.sort((a, b) => a.upToAmount - b.upToAmount) || []
+    level2CacheRef.current = res?.record || null
   }
 
   async function getFilteredCC(cashAccountId) {
     if (!cashAccountId) return
 
-    const currentBankId = cashGridData?.cashAccounts?.find(
+    const currentBankId = level2CacheRef?.current?.cashAccounts?.find(
       account => parseInt(account.recordId) === cashAccountId
     )?.bankId
 
-    const arrayCC = cashGridData?.creditCards?.filter(card => card.bankId == currentBankId) || []
+    const arrayCC = level2CacheRef?.current?.creditCards?.filter(card => card.bankId == currentBankId) || []
     filteredCreditCard.current = arrayCC
   }
 
@@ -1202,7 +1239,7 @@ export default function RetailTransactionsForm({
             qty: parseFloat(item.qty).toFixed(2),
             unitPrice: parseFloat(item.unitPrice).toFixed(2),
             extendedPrice: parseFloat(item.extendedPrice).toFixed(2),
-            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_BASE_PRICE),
+            priceWithVAT: calculatePrice(item, taxDetails?.[0], DIRTYFIELD_UNIT_PRICE),
             taxDetails
           },
           DIRTYFIELD_BASE_PRICE
@@ -1215,8 +1252,8 @@ export default function RetailTransactionsForm({
     setReCal(true)
   }
   function calculatePrice(item = {}, taxDetails = null, dirtyField) {
-    const unitPrice = item?.unitPrice ?? 0
-    const priceWithVAT = item?.priceWithVAT ?? 0
+    const unitPrice = parseFloat(item?.unitPrice || 0)
+    const priceWithVAT = parseFloat(item?.priceWithVAT || 0)
 
     if (!taxDetails) {
       const price = priceWithVAT ? Math.abs(priceWithVAT - unitPrice) : unitPrice
@@ -1225,20 +1262,12 @@ export default function RetailTransactionsForm({
     }
 
     const { amount = 0, taxBase } = taxDetails
+    if (dirtyField == DIRTYFIELD_UNIT_PRICE) return (unitPrice * (1 + parseFloat(amount) / 100)).toFixed(2)
+    else {
+      if (taxBase == 1) return (priceWithVAT / (1 + parseFloat(amount) / 100)).toFixed(2)
+      if (taxBase == 2) return priceWithVAT.toFixed(2)
 
-    switch (dirtyField) {
-      case DIRTYFIELD_BASE_PRICE:
-        return (unitPrice * (1 + amount / 100)).toFixed(2)
-
-      case DIRTYFIELD_UNIT_PRICE:
-        if (taxBase == 1) return (priceWithVAT / (1 + amount / 100)).toFixed(2)
-
-        if (taxBase == 2) return priceWithVAT.toFixed(2)
-
-        return (priceWithVAT - unitPrice).toFixed(2)
-
-      default:
-        return
+      return (priceWithVAT - unitPrice).toFixed(2)
     }
   }
 
@@ -1255,7 +1284,7 @@ export default function RetailTransactionsForm({
       mdAmount: header?.mdAmount || 0,
       mdType: item?.mdType || 1,
       baseLaborPrice: item?.baseLaborPrice || 0,
-      totalWeightPerG: item?.TotPricePerG,
+      totalWeightPerG: item?.totPricePerG,
       mdValue: parseFloat(item?.mdValue),
       tdPct: 0,
       dirtyField
@@ -1288,6 +1317,7 @@ export default function RetailTransactionsForm({
 
   useEffect(() => {
     ;(async function () {
+      await loadLevel2()
       if (recordId) {
         await refetchForm(recordId)
       } else {
@@ -1295,7 +1325,6 @@ export default function RetailTransactionsForm({
         const res = await getPosInfo()
         await setDefaults(res?.record)
       }
-      await fillCashObjects()
     })()
   }, [])
 
@@ -1455,7 +1484,7 @@ export default function RetailTransactionsForm({
                 <Grid item xs={12}>
                   <CustomTextField
                     name='header.name'
-                    label={labels.Name}
+                    label={labels.name}
                     value={formik?.values?.header?.name}
                     maxAccess={maxAccess}
                     readOnly={isPosted}

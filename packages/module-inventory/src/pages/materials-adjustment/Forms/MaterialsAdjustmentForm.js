@@ -213,20 +213,25 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         parameters: `_dtId=${dtId}`
       })
 
-      formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
-      formik.setFieldValue('plantId', res?.record?.plantId || plantId)
-      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
-
       return res
     }
   }
   useEffect(() => {
-    if (formik.values.dtId && !recordId) getDTD(formik?.values?.dtId)
-    if (!formik?.values?.dtId) {
-      formik.setFieldValue('disableSKULookup', false)
+    ;(async function () {
+      if (!formik?.values?.dtId) {
+        formik.setFieldValue('disableSKULookup', false)
 
-      return
-    }
+        return
+      }
+
+      const res = await getDTD(formik?.values?.dtId)
+
+      formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
+      if (!recordId) {
+        formik.setFieldValue('siteId', res?.record?.siteId || siteId || null)
+        formik.setFieldValue('plantId', res?.record?.plantId || plantId)
+      }
+    })()
   }, [formik.values.dtId])
 
   const onCondition = row => {
@@ -320,7 +325,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     })()
   }, [])
 
-  const fillSkuData = async (newRow, update) => {
+  const fillSkuData = async (newRow, update, addRow) => {
     const itemIdValue = formik.values.disableSKULookup ? newRow?.recordId : newRow?.itemId
     const itemNameValue = formik.values.disableSKULookup ? newRow?.name : newRow?.itemName
     if (itemIdValue) {
@@ -331,7 +336,8 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       await getFilteredMU(itemIdValue, newRow?.msId)
       const filteredMeasurements = measurements?.filter(item => item.msId === itemInfo?.msId)
       const measurementSchedule = await getMeasurementObject(newRow?.msId)
-      update({
+
+      let data = {
         qty: 0,
         sku: newRow.sku,
         itemId: itemIdValue,
@@ -347,7 +353,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
         metalId,
         metalRef,
         priceType: newRow?.priceType
-      })
+      }
+
+      update(data)
+      if (jumpToNextLine) await addRow({ changes: null })
     }
   }
 
@@ -383,7 +392,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
       propsReducer({ row, props }) {
         return { ...props, imgSrc: onCondition(row) }
       },
-      async onChange({ row: { update, newRow } }) {
+      async onChange({ row: { update, newRow, oldRow, addRow } }) {
         if (!formik.values.disableSKULookup) {
           if (!newRow?.itemId) {
             update({
@@ -405,7 +414,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
           }
 
           if (newRow?.itemId) {
-            await fillSkuData(newRow, update)
+            await fillSkuData(newRow, update, addRow)
           }
         } else {
           if (!newRow?.sku) {
@@ -433,7 +442,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             return
           }
           if (newRow?.sku) {
-            fillSkuData(skuInfo.record, update)
+            fillSkuData(skuInfo.record, update, addRow)
           }
         }
       }
@@ -536,7 +545,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             totalCost
           })
         }
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.qty < 0 }
+      },
     },
     {
       component: 'numberfield',
@@ -550,7 +562,10 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
             unitCost
           })
         }
-      }
+      },
+      propsReducer({ row, props }) {
+        return { ...props, readOnly: row?.qty < 0 }
+      },
     },
     {
       component: 'textfield',
@@ -621,6 +636,7 @@ export default function MaterialsAdjustmentForm({ labels, access, recordId, wind
     )
 
     formik.setValues({
+      ...formik.values,
       ...res.record,
       date: formatDateFromApi(res.record.date),
       rows: updatedAdjustments

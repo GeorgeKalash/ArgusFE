@@ -4,7 +4,7 @@ import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { SaleRepository } from '@argus/repositories/src/repositories/SaleRepository'
@@ -15,6 +15,8 @@ import { ControlContext } from '@argus/shared-providers/src/providers/ControlCon
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import Form from './Form'
 import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 
 export default function AddressFilterForm({
   labels,
@@ -26,7 +28,6 @@ export default function AddressFilterForm({
   checkedAddressId,
   window
 }) {
-  const [data, setData] = useState([])
   const { getRequest } = useContext(RequestsContext)
   const { platformLabels } = useContext(ControlContext)
 
@@ -91,57 +92,45 @@ export default function AddressFilterForm({
     }
   ]
 
-  const LoadShipAddresses = async () => {
-    if (formik.values.search) {
-      const res = await getRequest({
-        extension: SaleRepository.FilterAddress.snapshot,
-        parameters: `_countryId=${formik.values.countryId}&_cityId=${formik.values.cityId}&_clientId=${
-          form.clientId
-        }&_filter=${formik.values.search || ''}`
-      })
-      if (res?.list?.length > 0) {
-        const formattedAddressList = await Promise.all(
-          res.list.map(async item => {
-            return {
-              addressId: item.recordId,
-              address: `${item.name || ''}, ${item.street1 || ''}, ${item.street2 || ''}, ${item.city || ''}, ${
-                item.phone || ''
-              },${item.phone2 || ''},${item.email1 || ''}`,
-              checked: false
-            }
-          })
-        )
-        setData({ list: formattedAddressList })
-      } else setData({ list: [] })
-    } else await LoadAllAddresses()
-  }
+  const LoadAllAddresses = async (options = {}) => {
+    const { _startAt = 0, _pageSize = 50 } = options
 
-  const LoadAllAddresses = async () => {
-    const res = await getRequest({
-      extension: SaleRepository.Address.qry,
-      parameters: `_params=1|${form.clientId}`
+    const canSearch = !!formik.values.search && !!formik.values.countryId && !!formik.values.cityId && !!form.clientId
+
+    const response = await getRequest({
+      extension: canSearch ? SaleRepository.FilterAddress.snapshot : SaleRepository.Address.page,
+      parameters: canSearch
+        ? `_countryId=${formik.values.countryId}&_cityId=${formik.values.cityId}&_clientId=${form.clientId}&_filter=${formik.values.search}`
+        : `_startAt=${_startAt}&_pageSize=${_pageSize}&_params=1|${form.clientId}`
     })
 
-    if (res?.list?.length > 0) {
-      const formattedAddressList = await Promise.all(
-        res.list.map(async item => {
-          const res2 = await getRequest({
-            extension: SystemRepository.Address.format,
-            parameters: `_addressId=${item.addressId}`
-          })
-          const formattedAddress = res2.record.formattedAddress.replace(/[\r\n]+/g, ',').replace(/,$/, '')
+    const list =
+      response?.list?.map(item => ({
+        addressId: item.addressId || item.recordId,
+        address:
+          item.formattedAddress ??
+          `${item.name || ''}, ${item.street1 || ''}, ${item.street2 || ''}, ${item.city || ''}, ${item.phone || ''},${
+            item.phone2 || ''
+          },${item.email1 || ''}`,
+        checked: (item.addressId || item.recordId) === checkedAddressId
+      })) || []
 
-          return { addressId: item.addressId, address: formattedAddress }
-        })
-      )
-      setData({ list: formattedAddressList })
-
-      if (checkedAddressId) {
-        const matchingAddress = formattedAddressList.find(address => address.addressId === checkedAddressId)
-        matchingAddress.checked = true
-      }
+    return {
+      list,
+      _startAt,
+      count: list.length
     }
   }
+
+  const {
+    query: { data },
+    paginationParameters,
+    refetch
+  } = useResourceQuery({
+    queryFn: LoadAllAddresses,
+    endpointId: SaleRepository.Address.page,
+    datasetId: ResourceIds.Address
+  })
 
   async function getDefaultCountry() {
     const res = await getRequest({
@@ -153,7 +142,6 @@ export default function AddressFilterForm({
 
   useEffect(() => {
     ;(async function () {
-      await LoadAllAddresses()
       await getDefaultCountry()
     })()
   }, [])
@@ -210,6 +198,12 @@ export default function AddressFilterForm({
                 onClear={() => {
                   formik.setFieldValue('search', '')
                 }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }
+                }}
                 onChange={formik.handleChange}
               />
             </Grid>
@@ -217,7 +211,7 @@ export default function AddressFilterForm({
             <Grid item xs={2}>
               <CustomButton
                 label={labels.apply}
-                onClick={LoadShipAddresses}
+                onClick={refetch}
                 disabled={!(formik.values.countryId && formik.values.cityId)}
               />
             </Grid>
@@ -225,11 +219,13 @@ export default function AddressFilterForm({
         </Fixed>
         <Grow>
           <Table
+            name="addressFilterTable"
             columns={rowColumns}
             gridData={data}
-            rowId={['recordId']}
-            isLoading={false}
-            pagination={false}
+            rowId={['addressId']}
+            pageSize={50}
+            paginationType='api'
+            paginationParameters={paginationParameters}
             checkTitle={''}
             checkboxFlex={1}
             rowSelection='single'

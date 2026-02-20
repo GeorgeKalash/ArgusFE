@@ -452,7 +452,7 @@ export const ResourceIds = {
   SAVerifyTransIntegrity: 51601,
   PUDocumentTypeDefaults: 50103,
   SyncSalesTrx: 51603,
-  GenerateProductionOrder: 51416,
+  GenerateProductionOrder: 42306,
   ProductionOrder: 42337,
   YearlyComparativeSales: 51550,
   PurchaseTransactions: 50303,
@@ -619,6 +619,7 @@ export const ResourceIds = {
   DamageReason: 42136,
   DamageCategory: 42137,
   InboundTransportation: 52314,
+  ItemDetails: 41607,
 
   // GL
   GLSalesInvoice: 51604,

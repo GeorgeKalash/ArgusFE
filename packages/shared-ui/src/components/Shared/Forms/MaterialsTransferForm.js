@@ -27,10 +27,10 @@ import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { getFormattedNumber } from '@argus/shared-domain/src/lib/numberField-helper'
 import { useError } from '@argus/shared-providers/src/providers/error'
 import { AccessControlRepository } from '@argus/repositories/src/repositories/AccessControlRepository'
-import SkuForm from '@argus/module-inventory/src/pages/iv-materials-tfr/Form/SkuForm'
 import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
+import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 import { DefaultsContext } from '@argus/shared-providers/src/providers/DefaultsContext'
 
 export default function MaterialsTransferForm({ recordId, window }) {
@@ -101,8 +101,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
         metalId: null,
         metalRef: '',
         totalCost: 0,
-        priceType: null,
-        details: false
+        priceType: null
       }
     ],
     serials: []
@@ -348,6 +347,16 @@ export default function MaterialsTransferForm({ recordId, window }) {
       component: 'resourcelookup',
       label: labels.sku,
       name: 'sku',
+      link: {
+        enabled: true,
+        popup: row =>  stack({
+          Component: ItemDetails,
+          props: {
+            itemId: row?.itemId,
+            plId: formik.values?.plId
+          }
+        })
+      }, 
       props: {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
@@ -375,18 +384,17 @@ export default function MaterialsTransferForm({ recordId, window }) {
         return { ...props, imgSrc: onCondition(row) }
       },
       async onChange({ row: { update, newRow } }) {
-        if (!newRow?.itemId) {
-          update({
-            details: false
-          })
-
-          return
-        }
-        if (newRow.isInactive) {
-          update({
+        const resetRow = () => {
+         update({
             ...formik.initialValues.transfers[0],
             id: newRow.id
           })
+        }
+
+        if (!newRow?.itemId) return resetRow()
+
+        if (newRow.isInactive) {
+          resetRow()
           stackError({
             message: labels.inactiveItem
           })
@@ -405,36 +413,11 @@ export default function MaterialsTransferForm({ recordId, window }) {
             weight,
             unitCost,
             totalCost,
-            details: true,
             msId: itemInfo?.msId,
             muRef: filteredMeasurements?.[0]?.reference,
             muId: filteredMeasurements?.[0]?.recordId,
             metalId,
             metalRef
-          })
-        }
-      }
-    },
-    {
-      component: 'button',
-      name: 'details',
-      props: {
-        imgSrc:require('@argus/shared-ui/src/components/images/buttonsIcons/popup-black.png').default.src
-      },
-      label: labels.details,
-      onClick: (e, row, update, newRow) => {
-        if (row?.itemId) {
-          stack({
-            Component: SkuForm,
-            props: {
-              labels,
-              maxAccess,
-              itemId: row?.itemId,
-              plId: formik.values?.plId
-            },
-            width: 700,
-            height: 500,
-            title: labels.Transfer
           })
         }
       }
@@ -693,7 +676,101 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const actions = [
+  const onVerify = async () => {
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    invalidate()
+    window.close()
+  }
+  
+  const hasInvalidQty = formik.values.transfers?.some(
+    item => Number(item.qty) == 0
+  )
+
+  const onCopy = async () => {
+     if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+    
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.clone,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Copied)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const onReturn = async () => {
+    if (formik.values?.fromSiteId == formik.values?.toSiteId) {
+      stackError({
+        message: labels.errorMessage
+      })
+
+      return
+    }
+
+    if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.return,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Returned)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const handleMetalClick = async () => {
+   return (formik.values?.transfers || [])
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+  }
+
+   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
@@ -718,13 +795,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Close',
@@ -743,6 +820,36 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
+      disabled: !isPosted
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
+    },
+    {
+      key: 'Return',
+      condition: true,
+      onClick: onReturn,
+      disabled: !isPosted
     }
   ]
 
@@ -1049,7 +1156,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
               const data = value?.map(transfer => {
                 return {
                   ...transfer,
-                  details: false,
                   qtyInBase: 0
                 }
               })

@@ -436,10 +436,6 @@ export default function JobOrderForm({
       formik.setFieldValue('stdWeight', null)
       formik.setFieldValue('itemCategoryId', null)
       formik.setFieldValue('itemFromDesign', false)
-      formik.setFieldValue('lineId', null)
-      formik.setFieldValue('routingId', null)
-      formik.setFieldValue('routingRef', null)
-      formik.setFieldValue('routingName', null)
 
       return
     }
@@ -465,9 +461,6 @@ export default function JobOrderForm({
     )
     formik.setFieldValue('itemsPL', ItemProduction?.record?.lineId)
     formik.setFieldValue('lineId', ItemProduction?.record?.lineId)
-    formik.setFieldValue('routingId', null)
-    formik.setFieldValue('routingRef', null)
-    formik.setFieldValue('routingName', null)
     formik.setFieldValue('itemCategoryId', values?.categoryId)
   }
   async function fillDesignInfo(values) {
@@ -746,6 +739,13 @@ export default function JobOrderForm({
                         form={formik}
                         displayFieldWidth={2}
                         onChange={async (_, newValue) => {
+                          if (isReleased) {
+                            formik.setFieldValue('itemId', newValue?.recordId || null)
+                            formik.setFieldValue('itemName', newValue?.name || '')
+                            formik.setFieldValue('sku', newValue?.sku || '')
+
+                            return
+                          }
                           await fillItemInfo(newValue)
                         }}
                         errorCheck={'itemId'}
@@ -884,35 +884,24 @@ export default function JobOrderForm({
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceComboBox
-                        endpointId={formik?.values?.itemId && ManufacturingRepository.ProductionLine.qry3}
-                        parameters={`_itemId=${formik?.values?.itemId}`}
+                        endpointId={ManufacturingRepository.MFJobOrder.pack}
+                        reducer={response => response?.record?.productionLines}
                         name='lineId'
                         label={labels.line}
                         values={formik.values}
                         valueField='recordId'
                         displayField='name'
                         maxAccess={maxAccess}
-                        readOnly={!formik?.values?.itemId || isCancelled || isPosted}
+                        readOnly={isCancelled || isPosted}
                         onChange={(_, newValue) => {
                           formik.setFieldValue('lineId', newValue?.recordId)
-                          formik.setFieldValue('routingId', null)
-                          formik.setFieldValue('routingRef', '')
-                          formik.setFieldValue('routingName', '')
-                        }}
-                        onClear={() => {
-                          formik.setFieldValue('routingId', null)
-                          formik.setFieldValue('routingRef', '')
-                          formik.setFieldValue('routingName', '')
                         }}
                         error={formik.touched.lineId && Boolean(formik.errors.lineId)}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <ResourceLookup
-                        endpointId={ManufacturingRepository.Routing.snapshot2}
-                        parameters={{
-                          _lineId: formik.values.lineId || 0
-                        }}
+                        endpointId={ManufacturingRepository.Routing.snapshot}
                         valueField='reference'
                         displayField='name'
                         name='routingId'
@@ -924,7 +913,7 @@ export default function JobOrderForm({
                         errorCheck={'routingId'}
                         maxAccess={maxAccess}
                         displayFieldWidth={2}
-                        readOnly={!formik?.values?.lineId || isCancelled || isReleased || isPosted}
+                        readOnly={isCancelled || isReleased || isPosted}
                         columnsInDropDown={[
                           { key: 'reference', value: 'Reference' },
                           { key: 'name', value: 'Name' }

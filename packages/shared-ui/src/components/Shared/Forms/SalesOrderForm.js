@@ -142,7 +142,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     volume: '',
     weight: '',
     qty: 0,
-    phoneNo: null,
     serializedAddress: '',
     items: [
       {
@@ -218,11 +217,11 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
           clientId: copy.clientId,
           address: address
         }
-
-         await postRequest({
+        const addressRes = await postRequest({
           extension: SaleRepository.Address.set,
           record: JSON.stringify(addressData)
         })
+        copy.shipToAddressId = addressRes.recordId
       }
 
       const updatedRows = obj.items
@@ -825,14 +824,13 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setValues({
       ...header,
       currentDiscount:
-        soHeader?.record?.tdType == 1 || soHeader?.record?.tdType == null
-          ? soHeader?.record?.tdAmount
-          : soHeader?.record?.tdPct,
-      amount: parseFloat(soHeader?.record?.amount).toFixed(2),
-      shipAddress: shipAdd?.address || '',
-      billAddress: billAdd?.address || '',
-      phoneNo: `${shipAdd?.phoneNo || ''};${shipAdd?.phoneNo2 || ''}`,
-      tdPct: soHeader?.record?.tdPct || 0,
+        header?.tdType == 1 || header?.tdType == null
+          ? header?.tdAmount
+          : header?.tdPct,
+      amount: parseFloat(header?.amount).toFixed(2),
+      shipAddress: shipAdd,
+      billAddress: billAdd,
+      tdPct: header?.tdPct || 0,
       initialTdPct: client?.record?.tdPct || 0,
       items: modifiedList
     })
@@ -856,10 +854,7 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       extension: SystemRepository.Address.format,
       parameters: `_addressId=${addressId}`
     })
-
-    return {address: res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n'), 
-      phoneNo: res?.record?.phoneNo || null, 
-      phoneNo2: res?.record?.phoneNo2 || null }
+    return res?.record?.formattedAddress.replace(/(\r\n|\r|\n)+/g, '\r\n')
   }
 
   const getClient = async clientId => {
@@ -885,12 +880,9 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
     formik.setFieldValue('billToAddressId', res?.record?.billAddressId || null)
     const shipAdd = await getAddress(res?.record?.shipAddressId)
     const billAdd = await getAddress(res?.record?.billAddressId)
-
-    formik.setFieldValue('shipAddress', shipAdd?.address || '')
-    formik.setFieldValue('billAddress', billAdd?.address || '')
-    formik.setFieldValue('phoneNo', `${shipAdd?.phoneNo || ''};${shipAdd?.phoneNo2 || ''}`)
+    formik.setFieldValue('shipAddress', shipAdd || '')
+    formik.setFieldValue('billAddress', billAdd || '')
   }
-
   async function getItemPhysProp(itemId) {
     const res = await getRequest({
       extension: InventoryRepository.ItemPhysProp.get,
@@ -1180,11 +1172,6 @@ const SalesOrderForm = ({ recordId, currency, window }) => {
       props: {
         address: address,
         setAddress: setAddress,
-        onSubmit:async (values) => {
-          const addressRes = await getAddress(values?.addressId || null)
-          formik.setFieldValue('phoneNo',  `${addressRes?.phoneNo || ''};${addressRes?.phoneNo2 || ''}`)
-          formik.setFieldValue('shipToAddressId', values?.addressId || null)
-        },
         isCleared: false,
         datasetId: ResourceIds.ADDSalesOrder
       }

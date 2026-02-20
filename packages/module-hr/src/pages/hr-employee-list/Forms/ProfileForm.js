@@ -446,7 +446,6 @@ const ProfileForm = ({ labels, maxAccess, setStore, store, imageUploadRef, getDa
                     row
                     value={formik.values.gender}
                     onChange={e => formik.setFieldValue('gender', Number(e.target.value))}
-                    required
                     options={[
                       { label: labels.male, value: 1 },
                       { label: labels.female, value: 2 }
