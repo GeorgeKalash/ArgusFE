@@ -689,11 +689,11 @@ export function DataGrid({
     ? [
         {
           field: 'Count',
-          headerName: platformLabels.Count,
-          headerTooltip: platformLabels.Count,
+          headerName: '',
+          headerTooltip: '',
           editable: false, 
           sortable: false,
-          flex: 1,
+          width: 70,
           autoHeight: true,
           cellRenderer: params => (
             <div
