@@ -31,7 +31,7 @@ export default function PurchaseOrderDTDForm({ labels, maxAccess, recordId, wind
       functionId: SystemFunction.PurchaseOrder,
       dtId: null,
       plantId: null,
-      disableSKULookup: null
+      disableSKULookup: false
     },
     maxAccess,
     validationSchema: yup.object({
