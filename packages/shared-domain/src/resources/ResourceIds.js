@@ -620,6 +620,7 @@ export const ResourceIds = {
   DamageCategory: 42137,
   InboundTransportation: 52314,
   ItemDetails: 41607,
+  PurchaseOrderDTD: 50109,
 
   // GL
   GLSalesInvoice: 51604,
