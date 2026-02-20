@@ -1293,6 +1293,7 @@ export default function DraftReturnForm({ labels, access, recordId, invalidate }
             error={formik.errors.serials}
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
+            showCounterColumn={true}
             name='serials'
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}

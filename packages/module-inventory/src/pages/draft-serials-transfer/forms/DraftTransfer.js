@@ -11,7 +11,6 @@ import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import CustomTextField from '@argus/shared-ui/src/components/Inputs/CustomTextField'
 import CustomTextArea from '@argus/shared-ui/src/components/Inputs/CustomTextArea'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { SystemFunction } from '@argus/shared-domain/src/resources/SystemFunction'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
@@ -786,6 +785,7 @@ export default function DraftTransfer({ labels, access, recordId }) {
             value={formik.values.serials || []}
             error={formik.errors.serials}
             columns={serialsColumns}
+            showCounterColumn={true}
             name='serials'
             maxAccess={maxAccess}
             disabled={isPosted || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}

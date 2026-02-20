@@ -1077,6 +1077,7 @@ const DraftForm = ({ labels, access, recordId, invalidate }) => {
             initialValues={formik?.initialValues?.serials?.[0]}
             columns={serialsColumns}
             name='serials'
+            showCounterColumn={true}
             maxAccess={maxAccess}
             disabled={isClosed || Object.entries(formik?.errors || {}).filter(([key]) => key !== 'serials').length > 0}
             allowDelete={!isClosed}

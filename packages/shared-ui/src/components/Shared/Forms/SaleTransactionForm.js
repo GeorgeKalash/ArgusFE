@@ -2352,6 +2352,7 @@ export default function SaleTransactionForm({
               if (field == 'muRef') getFilteredMU(row?.itemId, row?.msId)
             }}
             name='items'
+            showCounterColumn={true}
             columns={columns}
             maxAccess={maxAccess}
             allowDelete={!isPosted}

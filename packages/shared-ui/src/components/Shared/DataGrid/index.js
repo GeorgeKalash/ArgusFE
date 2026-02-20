@@ -33,7 +33,8 @@ export function DataGrid({
   bg,
   searchValue,
   onValidationRequired,
-  isDeleteDisabled
+  isDeleteDisabled,
+  showCounterColumn = false,
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -707,7 +708,29 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
+  const counterColumn = showCounterColumn
+    ? [
+        {
+          field: 'Count',
+          headerName: '',
+          headerTooltip: '',
+          editable: false, 
+          sortable: false,
+          width: 70,
+          autoHeight: true,
+          cellRenderer: params => (
+            <div
+              tabIndex={0} 
+            >
+              {params.node.rowIndex + 1 }
+            </div>
+          ),
+        },
+      ]
+    : []
+
   const columnDefs = [
+    ...counterColumn, 
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
