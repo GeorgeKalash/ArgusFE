@@ -88,7 +88,8 @@ export default function SaleTransactionForm({
   const [userDefaultsDataState, setUserDefaultsDataState] = useState(null)
   const [reCal, setReCal] = useState(false)
   const filteredMeasurements = useRef([])
-  const taxDetailsCacheRef = useRef({})
+  const [taxDetails, setTaxDetails] = useState([])
+
 
   const { documentType, maxAccess } = useDocumentType({
     functionId: functionId,
@@ -388,37 +389,28 @@ export default function SaleTransactionForm({
     const unitPrice = ItemConvertPrice?.priceType === 3 ? weight * totalWeightPerG : ItemConvertPrice?.unitPrice || 0
 
     const minPrice = parseFloat(ItemConvertPrice?.minPrice || 0).toFixed(3)
-    let rowTax = null
-    let rowTaxDetails = null
+    let rowTax
+    let rowTaxDetails
 
-    if (!formik.values.header.taxId) {
-      if (itemInfo?.taxId) {
-        const taxDetailsResponse = await getTaxDetails(itemInfo.taxId)
+    const effectiveTaxId = !formik.values.header.isVattable
+      ? null
+      : formik.values.header.taxId
+      ? itemInfo.taxId
+        ? formik.values.header.taxId
+        : null
+      : itemInfo.taxId ?? null
 
-        const details = taxDetailsResponse?.map(item => ({
-          invoiceId: formik.values.recordId,
-          taxSeqNo: item.seqNo,
-          taxId: itemInfo.taxId,
-          taxCodeId: item.taxCodeId,
-          taxBase: item.taxBase,
-          amount: item.amount ?? 0
-        }))
-        rowTax = itemInfo.taxId
-        rowTaxDetails = details
-      }
-    } else {
-      const taxDetailsResponse = await getTaxDetails(formik.values.header.taxId)
-
-      const details = taxDetailsResponse?.map(item => ({
-        invoiceId: formik.values.recordId,
-        taxSeqNo: item.seqNo,
-        taxId: formik.values.header.taxId,
+    if (effectiveTaxId) {
+      const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+      rowTax = effectiveTaxId
+      rowTaxDetails = taxDetailsResponse.map(item => ({
+        taxId: effectiveTaxId,
         taxCodeId: item.taxCodeId,
         taxBase: item.taxBase,
-        amount: item.amount
+        amount: item.amount ?? 0,
+        invoiceId: formik.values.recordId || 0,
+        taxSeqNo: item.seqNo,
       }))
-      rowTax = formik.values.header.taxId
-      rowTaxDetails = details
     }
 
     if (parseFloat(unitPrice) < parseFloat(minPrice)) {
@@ -1172,7 +1164,7 @@ export default function SaleTransactionForm({
     return res?.record
   }
 
-  async function fillForm(saTrxPack, dtInfo) {
+  async function fillForm(saTrxPack, dtInfo, taxDetails) {
     const saTrxHeader = saTrxPack?.header
     const saTrxItems = saTrxPack?.items
     const saTrxTaxes = saTrxPack?.taxes
@@ -1186,9 +1178,8 @@ export default function SaleTransactionForm({
       : setCycleButtonState({ text: '%', value: 2 })
       
     const taxDetailsMap = saTrxHeader.isVattable
-    ? taxDetailsCacheRef.current
-    : {}
-
+    ? taxDetails
+    : []
 
     const modifiedList = await Promise.all(
       saTrxItems?.map(async (item, index) => {
@@ -1212,7 +1203,7 @@ export default function SaleTransactionForm({
             }),
           priceWithVAT: calculatePrice(item, taxDetailsMap?.[0], DIRTYFIELD_BASE_PRICE),
           totalWeightPerG: getTotPricePerG(saTrxHeader, item, DIRTYFIELD_BASE_PRICE),
-          taxDetails: taxDetailsMap[item.taxId] || null
+          taxDetails: taxDetailsMap?.filter(td => td.taxId === item.taxId && td.seqNo === item.seqNo) || []
         }
       })
     )
@@ -1273,15 +1264,7 @@ export default function SaleTransactionForm({
       parameters: `_functionId=${functionId}`
     })
 
-    const taxMap = (res?.record?.taxDetails || []).reduce((acc, td) => {
-      if (!acc[td.taxId]) acc[td.taxId] = []
-      acc[td.taxId].push(td)
-      return acc
-    }, {})
-
-    taxDetailsCacheRef.current = taxMap 
-
-    return res?.record?.measurementUnits || []
+    return res?.record
   }
 
 
@@ -1396,13 +1379,9 @@ export default function SaleTransactionForm({
   }
 
   async function getTaxDetails(taxId) {
-    if (!taxId) return []
+    if (!taxId) return taxDetails
 
-    if (taxDetailsCacheRef.current[taxId]) {
-      return taxDetailsCacheRef.current[taxId]
-    }
-
-    return []
+    return taxDetails.filter(t => t.taxId === taxId)
   }
 
 
@@ -1488,8 +1467,6 @@ export default function SaleTransactionForm({
       dirtyField: dirtyField
     })
 
-    if (newRow?.taxDetails?.length > 0) newRow.taxDetails = [newRow.taxDetails[0]]
-
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1499,7 +1476,7 @@ export default function SaleTransactionForm({
       extendedPrice: itemPriceRow?.extendedPrice,
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
-      tdPct: formik?.values?.header?.tdPct,
+      tdPct: formik?.values?.header?.tdPct || 0,
       taxDetails: formik.values.header?.isVattable ? newRow.taxDetails : null
     })
 
@@ -1639,8 +1616,6 @@ export default function SaleTransactionForm({
 
   function recalcNewVat(tdPct) {
     formik.values.items.map((item, index) => {
-      if (item?.taxDetails?.length > 0) item.taxDetails = [item.taxDetails[0]]
-
       const vatCalcRow = getVatCalc({
         priceType: item?.priceType,
         basePrice: item?.basePrice,
@@ -1715,9 +1690,10 @@ export default function SaleTransactionForm({
 
   async function refetchForm(recordId, callDt) {
     let dtInfo = {}
+    const res = await getPackData()
     const saTrxpack = await getSalesTransactionPack(recordId)
     if (callDt) dtInfo = await getDTD(saTrxpack.header.dtId)
-    await fillForm(saTrxpack, dtInfo)
+    await fillForm(saTrxpack, dtInfo, res?.taxDetails)
   }
 
   function setAddressValues(obj) {
@@ -1867,8 +1843,9 @@ export default function SaleTransactionForm({
 
   useEffect(() => {
     ;(async function () {
-      const muList = await getPackData()
-      setMeasurements(muList)
+      const res = await getPackData()
+      setTaxDetails(res?.taxDetails || [])
+      setMeasurements(res?.measurementUnits)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
       !recordId && getUserDefaultsData()
@@ -1880,7 +1857,7 @@ export default function SaleTransactionForm({
           setCycleButtonState({ text: '123', value: 1 })
           formik.setFieldValue('header.tdType', 1)
         }
-      } else if (muList) await refetchForm(recordId, true)
+      } else if (res?.measurementUnits) await refetchForm(recordId, true)
     })()
   }, [])
 
@@ -1954,15 +1931,6 @@ export default function SaleTransactionForm({
       formik.setFieldValue(`header.${key}`, val)
     })
   }
-
-  useEffect(() => {
-    taxDetailsCacheRef.current = {}
-  }, [
-    formik.values.header.taxId,
-    formik.values.header.currencyId,
-    formik.values.header.date,
-    formik.values.header.isVattable
-  ])
 
 
   return (
