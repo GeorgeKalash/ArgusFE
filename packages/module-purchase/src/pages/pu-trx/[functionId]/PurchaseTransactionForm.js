@@ -37,7 +37,7 @@ import {
   MDTYPE_PCT,
   MDTYPE_AMOUNT
 } from '@argus/shared-utils/src/utils/ItemPriceCalculator'
-import { getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
+import { calcVatAmountPerTaxDetail, getVatCalc } from '@argus/shared-utils/src/utils/VatCalculator'
 import {
   getDiscValues,
   getFooterTotals,
@@ -117,7 +117,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       vendorRef: '',
       currencyId: null,
       szId: null,
-      spId: null,
       siteId: null,
       description: '',
       status: 1,
@@ -554,7 +553,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         }
       },
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_QTY)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_QTY)
         update({
           ...data,
           totalWeight: data.weight * newRow.qty
@@ -603,7 +602,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         decimalScale: 5
       },
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_BASE_PRICE)
         update(data)
       }
     },
@@ -613,7 +612,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'baseLaborPrice',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_BASE_LABOR_PRICE)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_BASE_LABOR_PRICE)
         update(data)
       }
     },
@@ -623,7 +622,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       name: 'totalWeightPerG',
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_TWPG)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_TWPG)
         update(data)
       }
     },
@@ -636,7 +635,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         decimalScale: 3
       },
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_UNIT_PRICE)
         update(data)
       }
     },
@@ -714,7 +713,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         iconKey
       },
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_MDAMOUNT)
         update(data)
       }
     },
@@ -727,7 +726,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         decimalScale: 2
       },
       async onChange({ row: { update, newRow } }) {
-        const data = getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
+        const data = await getItemPriceRow(newRow, DIRTYFIELD_EXTENDED_PRICE)
         update(data)
       }
     },
@@ -965,18 +964,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const modifiedList = puTrxItems.length
       ? await Promise.all(
           puTrxItems?.map(async (item, index) => {
-            const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
-            const taxDetailsResponse = []
-
-            const updatedpuTrxTaxes =
-              puTrxTaxes?.map(tax => {
-                const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-                return {
-                  ...tax,
-                  taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-                }
-              }) || null
+            const taxDetails = puTrxTaxes.filter(tax => tax.seqNo === item.seqNo) || []
 
             return {
               ...item,
@@ -996,7 +984,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     id: index
                   }
                 }),
-              taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
+              taxDetails
             }
           })
         )
@@ -1186,7 +1174,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
           taxId: itemInfo.taxId,
           taxCodeId: item.taxCodeId,
           taxBase: item.taxBase,
-          amount: item.amount ?? 0
+          taxScheduleAmount: item.amount ?? 0
         }))
         rowTax = itemInfo.taxId
         rowTaxDetails = details
@@ -1200,7 +1188,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         taxId: formik.values.header.taxId,
         taxCodeId: item.taxCodeId,
         taxBase: item.taxBase,
-        amount: item.amount
+        taxScheduleAmount: item.amount
       }))
       rowTax = formik.values.header.taxId
       rowTaxDetails = details
@@ -1231,14 +1219,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       muId: filteredMeasurements?.[0]?.recordId,
       muQty: filteredMeasurements?.[0]?.qty,
       mdAmount: formik.values.header.maxDiscount ? formik.values.header.maxDiscount : 0,
-      mdValue: 0,
       mdType: MDTYPE_PCT,
       extendedPrice: 0,
       mdValue: 0,
       taxId: rowTax,
       taxDetails: rowTaxDetails
     }
-    let data = getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
+    let data = await getItemPriceRow(updatedRowValues, DIRTYFIELD_QTY)
 
     const dirtyField = isValidPrice(updatedRowValues.baseLaborPrice)
       ? DIRTYFIELD_BASE_LABOR_PRICE
@@ -1246,7 +1233,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ? DIRTYFIELD_UNIT_PRICE
       : null
 
-    if (dirtyField) data = getItemPriceRow(data, dirtyField)
+    if (dirtyField) data = await getItemPriceRow(data, dirtyField)
 
     formik.setFieldValue(
       'header.mdAmount',
@@ -1266,15 +1253,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
     update(data)
     addRow()
-  }
-
-  async function getTaxDetails(taxId) {
-    const res = await getRequest({
-      extension: FinancialRepository.TaxDetailPack.qry,
-      parameters: `_taxId=${taxId}`
-    })
-
-    return res?.list
   }
 
   const handleButtonClick = () => {
@@ -1315,7 +1293,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
   }
 
-  function getItemPriceRow(newRow, dirtyField, iconClicked) {
+  async function getItemPriceRow(newRow, dirtyField, iconClicked) {
     !reCal && setReCal(true)
 
     const mdAmount = checkMinMaxAmount(newRow?.mdAmount, newRow?.mdType, MDTYPE_PCT)
@@ -1338,6 +1316,64 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       dirtyField: dirtyField
     })
 
+    let rowTax
+    let rowTaxDetails
+
+    const effectiveTaxId = !formik.values.header.isVattable
+      ? null
+      : formik.values.header.taxId
+      ? newRow.taxId
+        ? formik.values.header.taxId
+        : null
+      : newRow.taxId ?? null
+
+    if (effectiveTaxId) {
+      const taxDetailsResponse = await getTaxDetails(effectiveTaxId)
+      rowTax = effectiveTaxId
+      rowTaxDetails = taxDetailsResponse.map(item => {
+        const calculatedAmount = calcVatAmountPerTaxDetail(
+          {
+            priceType: itemPriceRow?.priceType,
+            basePrice: itemPriceRow?.basePrice,
+            unitPrice: itemPriceRow?.unitPrice,
+            qty: itemPriceRow?.qty,
+            weight: itemPriceRow?.weight,
+            extendedPrice: itemPriceRow?.extendedPrice,
+            baseLaborPrice: itemPriceRow?.baseLaborPrice,
+            vatAmount: itemPriceRow?.vatAmount || 0,
+            tdPct: formik?.values?.header?.tdPct || 0,
+            taxDetails:
+              formik.values.header.isVattable === true
+                ? {
+                    ...item,
+                    taxScheduleAmount: item.amount || 0
+                  }
+                : null
+          },
+          {
+            ...item,
+            taxScheduleAmount: item.amount || 0
+          }
+        )
+          
+        return {
+          taxId: effectiveTaxId,
+          taxCodeId: item.taxCodeId,
+          taxCodeName: item.taxCodeName,
+          taxBaseName: item.taxBaseName,
+          taxCodeRef: item.taxCodeRef,
+          taxBase: item.taxBase,
+          taxScheduleAmount: item.amount ?? 0,
+          invoiceId: formik.values.recordId || 0,
+          taxSeqNo: item.seqNo,
+          taxId: formik.values.header.taxId,
+          amount: parseFloat(calculatedAmount)
+        }
+      })
+    }
+
+    const qtyInBase = itemPriceRow?.qty * newRow?.muQty
+
     const vatCalcRow = getVatCalc({
       priceType: itemPriceRow?.priceType,
       basePrice: itemPriceRow?.basePrice,
@@ -1348,10 +1384,13 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       baseLaborPrice: itemPriceRow?.baseLaborPrice,
       vatAmount: itemPriceRow?.vatAmount || 0,
       tdPct: formik?.values?.header?.tdPct,
-      taxDetails: formik.values.header.isVattable === true ? newRow.taxDetails : null
+      taxDetails: formik.values.header.isVattable === true && rowTaxDetails
+        ? rowTaxDetails.map(td => ({
+            ...td,
+            amount: td.taxScheduleAmount
+          }))
+        : null
     })
-
-    const qtyInBase = itemPriceRow?.qty * newRow?.muQty
 
     let commonData = {
       ...newRow,
@@ -1368,7 +1407,9 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       mdType: itemPriceRow?.mdType,
       totalWeightPerG: itemPriceRow?.totalWeightPerG ? itemPriceRow?.totalWeightPerG : 0,
       mdAmount: itemPriceRow?.mdAmount ? itemPriceRow.mdAmount : 0,
-      vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0
+      vatAmount: vatCalcRow?.vatAmount ? vatCalcRow.vatAmount : 0,
+      taxDetails: rowTaxDetails,
+      taxId: rowTax
     }
 
     return iconClicked ? { changes: commonData } : commonData
@@ -1440,7 +1481,12 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
         baseLaborPrice: parseFloat(item?.baseLaborPrice),
         vatAmount: item?.vatAmount,
         tdPct: tdPct,
-        taxDetails: formik.values.header.isVattable === true ? item.taxDetails : null
+        taxDetails: formik.values.header.isVattable === true && item?.taxDetails
+          ? item.taxDetails.map(td => ({
+              ...td,
+              amount: td.taxScheduleAmount
+            }))
+          : null
       })
       formik.setFieldValue(`items[${index}].vatAmount`, vatCalcRow?.vatAmount)
     })
@@ -1486,7 +1532,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     }
     formik.setFieldValue('header.postMetalToFinancials', dtd?.record?.postMetalToFinancials)
     formik.setFieldValue('header.plantId', dtd?.record?.plantId || userDefaultsDataState?.plantId || null)
-    formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
       dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
@@ -1557,7 +1602,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       setMeasurements(muList?.list)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
+      await getUserDefaultsData()
       if (!recordId) {
         setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
         formik.setFieldValue('header.tdType', 2)
@@ -1624,7 +1669,6 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   const setDefaultFields = () => {
     formik.setFieldValue('header.currencyId', defaultsDataState?.currencyId || null)
     if (!formik.values.header.plantId) formik.setFieldValue('header.plantId', userDefaultsDataState?.plantId || null)
-    if (!formik.values.header.spId) formik.setFieldValue('header.spId', userDefaultsDataState?.spId || null)
     if (!formik.values.header.siteId)
       formik.setFieldValue(
         'header.siteId',
