@@ -621,6 +621,7 @@ export const ResourceIds = {
   InboundTransportation: 52314,
   ItemDetails: 41607,
   PODocTypeDefaults: 31622,
+  PurchaseOrderDTD: 50109,
 
   // GL
   GLSalesInvoice: 51604,
