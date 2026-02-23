@@ -6,6 +6,7 @@ import PopperComponent from '../../Shared/Popper/PopperComponent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { checkAccess } from '@argus/shared-domain/src/lib/maxAccess'
 import { formatDateDefault } from '@argus/shared-domain/src/lib/date-helper'
+import { useStackValueLink } from '../../useStackValueLink'
 import styles from './CustomLookup.module.css'
 import dropdownStyles from '../SharedDropdown.module.css'
 import inputs from '../Inputs.module.css'
@@ -46,7 +47,7 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
-  onValueClick,
+  linkOpen,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
@@ -83,18 +84,16 @@ const CustomLookup = ({
   useEffect(() => {
     if (!firstValue) setInputValue('')
   }, [firstValue])
+  const link = linkOpen
+    ? useStackValueLink({
+        linkOpen,
+        inputElRef,
+        textMeasureRef
+      })
+    : null
 
-  const measureTextWidth = (text, inputEl) => {
-    if (!textMeasureRef.current || !inputEl) return 0
-    const style = window.getComputedStyle(inputEl)
-
-    textMeasureRef.current.style.font = style.font
-    textMeasureRef.current.style.letterSpacing = style.letterSpacing
-    textMeasureRef.current.style.textTransform = style.textTransform
-    textMeasureRef.current.textContent = text || ''
-
-    return textMeasureRef.current.getBoundingClientRect().width
-  }
+  const linkStyle = link?.linkStyle
+  const TextMeasure = link?.TextMeasure
 
   if (_hidden) return <></>
 
@@ -246,7 +245,6 @@ const CustomLookup = ({
           }}
           renderInput={params => {
             const hasSelectedValue = !!(firstValue || inputValue)
-            const isValueLink = typeof onValueClick === 'function' && hasSelectedValue && !_readOnly
 
             return (
               <TextField
@@ -308,46 +306,14 @@ const CustomLookup = ({
                   tabIndex: _readOnly ? -1 : 0,
                   style: {
                     ...(params.inputProps?.style || {}),
-                    ...(isValueLink
-                      ? {
-                          color: '#1976d2',
-                          textDecoration: 'underline',
-                          cursor: 'pointer'
-                        }
-                      : {})
+                    ...(linkOpen && hasSelectedValue ? linkStyle : {})
                   },
                   onMouseDown: e => {
                     params.inputProps?.onMouseDown?.(e)
                   },
                   onClick: e => {
                     params.inputProps?.onClick?.(e)
-                    if (!isValueLink) return
-
-                    const inputEl = inputElRef.current
-                    if (!inputEl) return
-
-                    const valueText = (inputEl.value ?? '').toString()
-                    if (!valueText) return
-
-                    const rect = inputEl.getBoundingClientRect()
-                    const clickX = e.clientX - rect.left
-
-                    const style = window.getComputedStyle(inputEl)
-                    const paddingLeft = parseFloat(style.paddingLeft || '0')
-                    const paddingRight = parseFloat(style.paddingRight || '0')
-
-                    const textWidth = measureTextWidth(valueText, inputEl)
-
-                    const textStart = paddingLeft
-                    const textEnd = rect.width - paddingRight
-                    const effectiveTextEnd = Math.min(textStart + textWidth, textEnd)
-
-                    const clickedOnText = clickX >= textStart && clickX <= effectiveTextEnd
-                    if (!clickedOnText) return
-
-                    e.preventDefault()
-                    e.stopPropagation()
-                    onValueClick()
+                    if (linkOpen && link?.handleClick) link.handleClick(e)
                   }
                 }}
                 autoFocus={focus}
@@ -436,15 +402,7 @@ const CustomLookup = ({
         </Grid>
       )}
 
-      <span
-        ref={textMeasureRef}
-        style={{
-          position: 'absolute',
-          visibility: 'hidden',
-          whiteSpace: 'pre',
-          pointerEvents: 'none'
-        }}
-      />
+      {TextMeasure && <TextMeasure />}
     </Grid>
   )
 }

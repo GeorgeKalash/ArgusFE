@@ -26,6 +26,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import { useStackValueLink } from '../../useStackValueLink'
 
 const Table = ({
   name,
@@ -534,7 +535,27 @@ const Table = ({
   const FieldWrapper = params => {
     const [tooltipOpen, setTooltipOpen] = useState(false)
 
-    const handleClick = event => {
+    const inputElRef = useRef(null)
+    const textMeasureRef = useRef(null)
+    const linkOpenResolver = params?.colDef?.linkOpen
+
+    const linkOpen =
+      typeof linkOpenResolver === 'function'
+        ? linkOpenResolver(params?.data, params) || null
+        : linkOpenResolver || null
+
+    const link = linkOpen
+      ? useStackValueLink({
+          linkOpen,
+          inputElRef,
+          textMeasureRef
+        })
+      : null
+
+    const linkStyle = link?.linkStyle
+    const TextMeasure = link?.TextMeasure
+
+    const handleSelectText = event => {
       if (selectionMode === 'row' && onSelectionChange) {
         onSelectionChange(params.data, params.rowIndex)
       } else if (selectionMode === 'column' && onSelectionChange) {
@@ -555,12 +576,24 @@ const Table = ({
       selection.addRange(range)
     }
 
+    const handleClick = event => {
+      if (link?.handleClick) {
+        link.handleClick(event)
+        if (event.defaultPrevented) return
+      }
+
+      handleSelectText(event)
+    }
+
     const handleDoubleClick = params => {
       navigator.clipboard.writeText(params.target.innerText).then(() => {
         setTooltipOpen(true)
         setTimeout(() => setTooltipOpen(false), 500)
       })
     }
+
+    const hasValue = params.value != null && params.value !== ''
+    const displayValue = hasValue ? params.value : ''
 
     return (
       <>
@@ -569,8 +602,18 @@ const Table = ({
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
           className={`fieldWrapper ${!params.colDef?.wrapText ? 'nowrap' : ''}`}
+          ref={node => {
+            inputElRef.current = node
+            if (node) {
+              node.value = node.innerText ?? ''
+            }
+          }}
+          style={{
+            ...(linkOpen && hasValue ? linkStyle : {})
+          }}
         >
-          {params.value}
+          {displayValue}
+          {TextMeasure && <TextMeasure />}
         </Box>
       </>
     )

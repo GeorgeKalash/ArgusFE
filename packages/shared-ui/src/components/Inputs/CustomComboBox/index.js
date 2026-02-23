@@ -10,6 +10,7 @@ import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
 import ClearIcon from '@mui/icons-material/Clear'
+import { useStackValueLink } from '../../useStackValueLink'
 
 const CustomComboBox = ({
   type = 'text',
@@ -44,6 +45,7 @@ const CustomComboBox = ({
   isLoading,
   onOpen,
   onBlur = () => {},
+  linkOpen,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -65,6 +67,9 @@ const CustomComboBox = ({
   const selectFirstValue = useRef(null)
   const filterOptions = useRef(null)
 
+  const inputElRef = useRef(null)
+  const textMeasureRef = useRef(null)
+
   useEffect(() => {
     function handleBlur(event) {
       if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
@@ -79,9 +84,21 @@ const CustomComboBox = ({
     }
   }, [])
 
+  const link = linkOpen
+    ? useStackValueLink({
+        linkOpen,
+        inputElRef,
+        textMeasureRef
+      })
+    : null
+
+  const linkStyle = link?.linkStyle
+  const TextMeasure = link?.TextMeasure
+
   return _hidden ? (
     <></>
   ) : (
+    <>
     <Autocomplete
       ref={autocompleteRef}
       name={name}
@@ -325,12 +342,31 @@ const CustomComboBox = ({
             ? null
             : null
 
+        const hasSelectedValue = !!value
+
         return (
           <TextField
             {...params}
             inputProps={{
               ...params.inputProps,
-              tabIndex: _readOnly ? -1 : 0
+              ...(linkOpen
+                ? {
+                    ref: node => {
+                      if (typeof params.inputProps.ref === 'function') params.inputProps.ref(node)
+                      else if (params.inputProps.ref) params.inputProps.ref.current = node
+                      inputElRef.current = node
+                    }
+                  }
+                : {}),
+              tabIndex: _readOnly ? -1 : 0,
+              style: {
+                ...(params.inputProps?.style || {}),
+                ...(linkOpen && hasSelectedValue ? linkStyle : {})
+              },
+              onClick: e => {
+                params.inputProps?.onClick?.(e)
+                if (linkOpen) link.handleClick(e)
+              }
             }}
             type={type}
             variant={variant}
@@ -374,6 +410,9 @@ const CustomComboBox = ({
       }}
       {...props}
     />
+
+    {TextMeasure && <TextMeasure />}
+    </>
   )
 }
 

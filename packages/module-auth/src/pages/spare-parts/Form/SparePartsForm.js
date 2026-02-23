@@ -18,8 +18,6 @@ import CustomCheckBox from '@argus/shared-ui/src/components/Inputs/CustomCheckBo
 import { ResourceLookup } from '@argus/shared-ui/src/components/Shared/ResourceLookup'
 import { InventoryRepository } from '@argus/repositories/src/repositories/InventoryRepository'
 import { useWindow } from '@argus/shared-providers/src/providers/windows'
-import ItemWindow from '@argus/module-inventory/src/pages/iv-items/window/ItemWindow'
-import ItemDetails from '@argus/shared-ui/src/components/Shared/ItemDetails'
 
 export default function SparePartsForm({ labels, maxAccess, recordId, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -222,14 +220,10 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
                   { key: 'sku', value: 'SKU' },
                   { key: 'name', value: 'Name' }
                 ]}
-                onValueClick={() => {
-                    stack({
-                     Component: ItemDetails,
-                      props: {
-                        itemId:formik.values.itemId,
-                      }
-                    })
-                  }}
+                linkOpen={{
+                  resourceIds: ResourceIds.Item,
+                  props: { recordId: formik.values.itemId },
+                }}
                 onChange={(_, newValue) => {
                   formik.setFieldValue('itemName', newValue?.name || '')
                   formik.setFieldValue('sku', newValue?.sku || '')

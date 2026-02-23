@@ -151,6 +151,7 @@ export const ResourceLookup = ({
           renderOption,
           minChars,
           ...rest,
+          form,
           onLookup
         }}
       />

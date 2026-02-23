@@ -153,6 +153,7 @@ export default function ResourceComboBox({
         allowClear,
         fetchData,
         name,
+        values,
         fullName: rest.name,
         store: finalItemsList,
         valueField,
