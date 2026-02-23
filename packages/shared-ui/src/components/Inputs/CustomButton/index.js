@@ -34,9 +34,19 @@ const CustomButton = ({
     setTooltip(null)
   }
 
-  const imageIcon =
-    image &&
-    require(`@argus/shared-ui/src/components/images/buttonsIcons/${image}`)
+  const iconsContext = require.context(
+    '@argus/shared-ui/src/components/images/buttonsIcons',
+    false,
+    /\.(png|jpe?g|svg)$/
+  )
+
+  const icons = {}
+
+  iconsContext.keys().forEach((key) => {
+    icons[key.replace('./', '')] = iconsContext(key)
+  })
+
+  const imageIcon = image ? icons[image] : null
 
   const isLabelOnly = !image && !icon && label
 

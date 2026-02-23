@@ -26,6 +26,7 @@ import CustomNumberField from '@argus/shared-ui/src/components/Inputs/CustomNumb
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import { formatDateFromApi } from '@argus/shared-domain/src/lib/date-helper'
+import { SerialsForm } from '@argus/shared-ui/src/components/Shared/SerialsForm'
 
 export default function ItemDisposalForm({ recordId, access, labels }) {
   const { getRequest, postRequest } = useContext(RequestsContext)

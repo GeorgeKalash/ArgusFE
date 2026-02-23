@@ -25,9 +25,32 @@ export default function ItemTab({ labels, maxAccess, store }) {
   const conditions = {
     sku: row => row?.sku,
     itemName: row => row?.itemName,
-    qty: row => row?.qty > 0
+    qty: row => row?.qty > 0,
+    metalQty: row => row?.qty > 0 && row?.metalQty <= row?.qty,
+    nonMetalQty: row => row?.qty > 0 && row?.nonMetalQty <= row?.qty
   }
   const { schema, requiredFields } = createConditionalSchema(conditions, true, maxAccess, 'items')
+
+  const getMaterialPercentages = () => {
+    const materials = store?.jobMaterials || []
+
+    let metal = 0
+    let nonMetal = 0
+
+    materials.forEach(m => {
+      const qty = parseFloat(m.qty) || 0
+
+      if (m.isMetal) metal += qty
+      else nonMetal += qty
+    })
+
+    const total = metal + nonMetal || 1
+
+    return {
+      metalPct: (metal / total) * 100,
+      nonMetalPct: (nonMetal / total) * 100
+    }
+  }
 
   const { formik } = useForm({
     initialValues: {
@@ -40,7 +63,9 @@ export default function ItemTab({ labels, maxAccess, store }) {
           qty: 0,
           pcs: 0,
           sku: '',
-          itemName: ''
+          itemName: '',
+          metalQty: 0,
+          nonMetalQty: 0
         }
       ]
     },
@@ -54,6 +79,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
         .map((details, index) => ({
           ...details,
           seqNo: index + 1,
+          metalQty: parseFloat(details?.metalQty).toFixed(2) || 0,
+          nonMetalQty: parseFloat(details?.nonMetalQty).toFixed(2) || 0,
           jobId: recordId
         }))
 
@@ -120,7 +147,7 @@ export default function ItemTab({ labels, maxAccess, store }) {
       },
       updateOn: 'blur',
       async onChange({ row: { update, newRow } }) {
-        update({ qty: newRow?.qty || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
+        update({ qty: parseFloat(newRow?.qty) || 0, extendedCost: (newRow?.qty || 0) * (newRow?.unitCost || 0) })
       }
     },
     {
@@ -169,8 +196,72 @@ export default function ItemTab({ labels, maxAccess, store }) {
           }
         })
       }
+    },
+    {
+      component: 'numberfield',
+      label: labels.metalQty,
+      name: 'metalQty',
+      updateOn: 'blur',
+      props: {
+        decimalScale: 2,
+        allowNegative: false
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow) return
+
+        const qty = parseFloat(newRow.qty) || 0
+        const metal = parseFloat(newRow.metalQty) || 0
+
+        if (metal <= qty && metal >= 0) {
+          update({
+            nonMetalQty: qty - metal
+          })
+        } else {
+          update({
+            metal: parseFloat(newRow?.metal)
+          })
+        }
+      }
+    },
+    {
+      component: 'numberfield',
+      label: labels.nonMetalQty,
+      name: 'nonMetalQty',
+      updateOn: 'blur',
+      props: {
+        decimalScale: 2,
+        allowNegative: false
+      },
+      async onChange({ row: { update, newRow } }) {
+        if (!newRow) return
+
+        const qty = parseFloat(newRow.qty) || 0
+        const nonMetal = parseFloat(newRow.nonMetalQty) || 0
+
+        if (nonMetal <= qty && nonMetal >= 0) {
+          update({
+            metalQty: qty - nonMetal
+          })
+        } else {
+          update({
+            nonMetalQty: parseFloat(newRow?.nonMetalQty)
+          })
+        }
+      }
     }
   ]
+
+  const defaultOnClick = () => {
+    const { metalPct, nonMetalPct } = getMaterialPercentages()
+
+    const updatedItems = formik.values.items.map(row => ({
+      ...row,
+      metalQty: (metalPct / 100) * row.qty,
+      nonMetalQty: (nonMetalPct / 100) * row.qty
+    }))
+
+    formik.setFieldValue('items', updatedItems)
+  }
 
   const totalCost =
     formik?.values?.items?.length > 0
@@ -192,6 +283,8 @@ export default function ItemTab({ labels, maxAccess, store }) {
                   return {
                     ...item,
                     id: index + 1,
+                    metal: item?.metal || 0,
+                    nonMetal: item?.nonMetal || 0,
                     extendedCost: (item?.unitCost || 0) * (item?.qty || 0)
                   }
                 })
@@ -201,12 +294,23 @@ export default function ItemTab({ labels, maxAccess, store }) {
     })()
   }, [jobItems])
 
+  const actions = [
+    {
+      key: 'Default',
+      condition: true,
+      label: platformLabels.default,
+      onClick: defaultOnClick,
+      disabled: store?.isCancelled || store?.isPosted
+    }
+  ]
+
   return (
     <Form
       onSave={formik.handleSubmit}
       maxAccess={maxAccess}
       isParentWindow={false}
       disabledSubmit={store?.isCancelled || store?.isPosted}
+      actions={actions}
     >
       <VertLayout>
         <Grow>

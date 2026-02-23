@@ -65,7 +65,14 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
     const finalList = await Promise.all(
       filteredItems.map(async (entry, index) => {
         const { item, qty, balanceQty, returnedQty } = entry
-        const { taxId } = item
+
+        const taxId = !form.values.isVattable
+          ? null
+          : form.values.taxId
+          ? item.taxId
+            ? form.values.taxId
+            : null
+          : item.taxId ?? null
 
         const itemPriceRow = getIPR({
           priceType: item?.priceType || 0,
@@ -96,7 +103,7 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
         const vatCalcRow = getVatCalc({
           priceType: itemPriceRow?.priceType,
           basePrice: (form.values.metalPrice || 0) * (form.values.metalPurity || 0),
-          qty,
+          qty: itemPriceRow?.qty,
           weight: itemPriceRow?.weight,
           extendedPrice: parseFloat(itemPriceRow.extendedPrice) || 0,
           baseLaborPrice: itemPriceRow.baseLaborPrice || 0,
@@ -104,11 +111,11 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           tdPct: form.values.tdPct,
           taxDetails: form.values.isVattable ? taxDetailList : null
         })
-        const { muId, ...restItem } = item
 
         return {
-          ...restItem,
+          ...item,
           id: index + 1,
+          taxId,
           basePrice: itemPriceRow.basePrice,
           unitPrice: itemPriceRow.unitPrice,
           extendedPrice: itemPriceRow.extendedPrice,
@@ -119,9 +126,10 @@ export default function InvoiceForm({ form, maxAccess, labels, setReCal, window 
           vatAmount: vatCalcRow.vatAmount,
           returnedQty,
           balanceQty,
-          returnNowQty: (itemPriceRow?.qty || 0).toFixed(restItem?.decimals || 0),
+          returnNowQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0),
           totalWeight: (itemPriceRow.weight || 0) * (itemPriceRow.qty || 0),
-          taxDetails: form.values.isVattable ? taxDetailList : null
+          taxDetails: form.values.isVattable ? taxDetailList : null,
+          baseQty: (itemPriceRow?.qty || 0).toFixed(item?.decimals || 0) * item?.muQty
         }
       })
     )

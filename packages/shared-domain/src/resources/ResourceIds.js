@@ -111,6 +111,7 @@ export const ResourceIds = {
   ReleaseIndicators: 10105,
   ReleaseCodes: 10104,
   DRGroups: 10103,
+  DrDefaults: 10107,
   ClientMaster: 36201,
   ClientList: 35201,
   UpdateClientRemittance: 36204,
@@ -620,6 +621,8 @@ export const ResourceIds = {
   DamageCategory: 42137,
   InboundTransportation: 52314,
   ItemDetails: 41607,
+  PaymentOrderDTD: 31622,
+  PurchaseOrderDTD: 50109,
 
   // GL
   GLSalesInvoice: 51604,

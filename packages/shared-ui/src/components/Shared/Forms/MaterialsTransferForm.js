@@ -674,7 +674,101 @@ export default function MaterialsTransferForm({ recordId, window }) {
     await refetchForm(formik.values.recordId)
   }
 
-  const actions = [
+  const onVerify = async () => {
+    await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.verify,
+      record: JSON.stringify(formik.values)
+    })
+
+    toast.success(!formik.values.isVerified ? platformLabels.Verified : platformLabels.Unverfied)
+    invalidate()
+    window.close()
+  }
+  
+  const hasInvalidQty = formik.values.transfers?.some(
+    item => Number(item.qty) == 0
+  )
+
+  const onCopy = async () => {
+     if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+    
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.clone,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Copied)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const onReturn = async () => {
+    if (formik.values?.fromSiteId == formik.values?.toSiteId) {
+      stackError({
+        message: labels.errorMessage
+      })
+
+      return
+    }
+
+    if (hasInvalidQty) {
+      stackError({ message: labels.qtyException })
+
+      return
+    }
+
+    const header = { ...formik.values }
+    delete header.transfers
+    delete header.serials
+
+    const payload = {
+      header,
+      items: formik.values?.transfers || [],
+      serials: formik.values?.serials || [],
+      lots: []
+
+    }
+
+    const res = await postRequest({
+      extension: InventoryRepository.MaterialsTransfer.return,
+      record: JSON.stringify(payload)
+    })
+
+    toast.success(platformLabels.Returned)
+    refetchForm(res?.recordId)
+    invalidate()
+  }
+
+  const handleMetalClick = async () => {
+   return (formik.values?.transfers || [])
+      ?.filter(item => item.metalId)
+      .map(item => ({
+        qty: item.qty,
+        metalRef: '',
+        metalId: item.metalId,
+        metalPurity: item.metalPurity,
+        weight: item.weight,
+        priceType: item.priceType
+      }))
+  }
+
+   const actions = [
     {
       key: 'RecordRemarks',
       condition: true,
@@ -699,13 +793,13 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: isPosted,
       onClick: 'onUnpostConfirmation',
       onSuccess: onUnpost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Unlocked',
       condition: !isPosted,
       onClick: onPost,
-      disabled: !editMode || !isClosed || formik.values.isVerified
+      disabled: !editMode || (!isPosted ? !isClosed : formik.values.isVerified )
     },
     {
       key: 'Close',
@@ -724,6 +818,36 @@ export default function MaterialsTransferForm({ recordId, window }) {
       condition: true,
       onClick: onWorkFlowClick,
       disabled: !editMode
+    },
+    {
+      key: 'Verify',
+      condition: !formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Unverify',
+      condition: formik.values.isVerified,
+      onClick: onVerify,
+      disabled: !isPosted
+    },
+    {
+      key: 'Copy',
+      condition: true,
+      onClick: onCopy,
+      disabled: !isPosted
+    },
+    {
+      key: 'Metals',
+      condition: true,
+      onClick: 'onClickMetal',
+      handleMetalClick
+    },
+    {
+      key: 'Return',
+      condition: true,
+      onClick: onReturn,
+      disabled: !isPosted
     }
   ]
 

@@ -1,4 +1,3 @@
-import { useFormik } from 'formik'
 import { useContext, useEffect } from 'react'
 import { DataGrid } from '@argus/shared-ui/src/components/Shared/DataGrid'
 import toast from 'react-hot-toast'
@@ -7,13 +6,17 @@ import { FinancialRepository } from '@argus/repositories/src/repositories/Financ
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
 import Form from '@argus/shared-ui/src/components/Shared/Form'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+import { useForm } from '@argus/shared-hooks/src/hooks/form'
 
-const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
+const CreditLimitsForm = ({ labels, editMode, store, maxAccess }) => {
   const { getRequest, postRequest } = useContext(RequestsContext)
+  const { platformLabels } = useContext(ControlContext)
   const { recordId: accountId } = store
 
-  const formik = useFormik({
+  const { formik } = useForm({
     validateOnChange: true,
+    maxAccess,
     initialValues: {
       currencies: [{ id: 1, accountId: accountId, currencyName: '', currencyId: '', limit: '' }]
     },
@@ -38,11 +41,9 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
         record: JSON.stringify(data)
       })
     })
-    Promise.all(saveCurrency)
-      .then(res => {
-        toast.success('Record Edited Successfully')
-      })
-      .catch(error => {})
+    Promise.all(saveCurrency).then(res => {
+      toast.success(platformLabels.Edited)
+    })
   }
 
   const column = [
@@ -62,30 +63,21 @@ const CreditLimitsForm = ({ setStore, labels, editMode, store, maxAccess }) => {
 
   useEffect(() => {
     accountId && getCurrencies(accountId)
-  }, [accountId])
+  }, [])
 
   const getCurrencies = accountId => {
-    const defaultParams = `_accountId=${accountId}`
-    var parameters = defaultParams
     getRequest({
       extension: FinancialRepository.AccountCreditLimit.qry,
-      parameters: parameters
+      parameters: `_accountId=${accountId}`
+    }).then(res => {
+      if (res.list.length > 0) {
+        const currencies = res.list.map((currency, index) => ({
+          id: index,
+          ...currency
+        }))
+        formik.setValues({ currencies })
+      }
     })
-      .then(res => {
-        if (res.list.length > 0) {
-          const currencies = res.list.map((currency, index) => ({
-            id: index,
-            ...currency
-          }))
-          formik.setValues({ currencies: currencies })
-
-          setStore(prevStore => ({
-            ...prevStore,
-            currencies: currencies
-          }))
-        }
-      })
-      .catch(error => {})
   }
 
   return (

@@ -956,7 +956,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
-    const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
+    const doctypeInfo = await dtInfo(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -986,6 +986,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               vatAmount: item.vatAmount ? item.vatAmount : 0,
               totalWeight: item.weight * item.qty,
               extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
+              totalWeightPerG: getTotPricePerG(puTrxHeader, item, DIRTYFIELD_BASE_PRICE),
               puTrx: true,
               serials: puTrxSerials
                 ?.filter(row => row.seqNo == item.seqNo)
@@ -1005,7 +1006,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
-      disableSKULookup: disableLookup || false,
+      disableSKULookup: doctypeInfo?.disableSKULookup || false,
       installments: puTrxInstallments?.map((installment, index) => {
         return {
           ...installment,
@@ -1016,6 +1017,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       header: {
         ...formik.values.header,
         ...puTrxHeader,
+        postMetalToFinancials: doctypeInfo?.postMetalToFinancials ?? false,
         amount: parseFloat(puTrxHeader?.amount).toFixed(2),
         currentDiscount:
           puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
@@ -1132,6 +1134,28 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   function isValidPrice(value) {
     return value != null && value != '' && !isNaN(value) && value != 0
+  }
+
+  function getTotPricePerG(header, item, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: item?.priceType,
+      basePrice: parseFloat(item?.basePrice || 0),
+      volume: parseFloat(item?.volume) || 0,
+      weight: parseFloat(item?.weight),
+      unitPrice: parseFloat(item?.unitPrice || 0),
+      upo: 0,
+      qty: parseFloat(item?.qty) || 0,
+      extendedPrice: parseFloat(item?.extendedPrice),
+      mdAmount: header?.mdAmount || 0,
+      mdType: item?.mdType || 1,
+      baseLaborPrice: item?.baseLaborPrice || 0,
+      totalWeightPerG: item?.TotPricePerG,
+      mdValue: parseFloat(item?.mdValue),
+      tdPct: 0,
+      dirtyField
+    })
+
+    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
   }
 
   async function fillItemObject(update, addRow, newRow, itemPhysProp, itemInfo, vendorPrice) {
@@ -1337,6 +1361,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       volume: itemPriceRow?.volume ? itemPriceRow.volume : 0,
       weight: itemPriceRow?.weight ? itemPriceRow.weight : 0,
       basePrice: itemPriceRow?.basePrice ? itemPriceRow.basePrice : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
       unitPrice: itemPriceRow?.unitPrice ? itemPriceRow.unitPrice : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? itemPriceRow.extendedPrice : 0,
       mdValue: itemPriceRow?.mdValue,
@@ -1464,15 +1489,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
-      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
     )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
 
-  async function sKULookupInfo(dtId) {
+  async function dtInfo(dtId) {
     if (!dtId) {
       formik.setFieldValue('disableSKULookup', false)
+      formik.setFieldValue('header.postMetalToFinancials', false)
 
       return
     }
@@ -1483,7 +1509,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
 
-    return res?.record?.disableSKULookup || false
+    return res?.record
   }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
@@ -1555,7 +1581,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   useEffect(() => {
     if (!recordId) {
       if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
-      sKULookupInfo(formik.values.header.dtId)
+      dtInfo(formik.values.header.dtId)
     }
   }, [formik.values?.header.dtId])
 
@@ -2005,7 +2031,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
-                hidden={metalPriceVisibility}
+                hidden={!metalPriceVisibility}
               />
             </Grid>
           </Grid>

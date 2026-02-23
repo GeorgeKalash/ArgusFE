@@ -1143,11 +1143,11 @@ export default function SaleTransactionForm({
           Component: AccountSummary,
           props: {
             accountId: parseInt(formik.values.header.accountId),
-            moduleId: 1
+            date: formik?.values?.header?.date
           }
         })
       },
-      disabled: !formik.values.header.clientId
+      disabled: !formik.values.header.clientId || !formik.values.header.date
     },
     {
       key: 'Verify',
@@ -1871,7 +1871,7 @@ export default function SaleTransactionForm({
       setMeasurements(muList)
       setMetalPriceOperations()
       const defaultObj = await getDefaultsData()
-      getUserDefaultsData()
+      !recordId && getUserDefaultsData()
       if (!recordId) {
         if (defaultObj.salesTD == 'True') {
           setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
@@ -1935,9 +1935,7 @@ export default function SaleTransactionForm({
     const validSpId = await validateSalesPerson(userDefaultsDataState?.spId)
     formik.setFieldValue('header.spId', validSpId)
     const currentSiteId = userDefaultsDataState?.siteId || null
-    const siteRef = await getSiteInfo(currentSiteId)
     formik.setFieldValue('header.siteId', currentSiteId)
-    formik.setFieldValue('header.siteRef', siteRef || '')
   }
 
   async function previewBtnClicked() {
@@ -2132,6 +2130,7 @@ export default function SaleTransactionForm({
               <ResourceComboBox
                 endpointId={SaleRepository.SaleTransaction.pack}
                 parameters={`_functionId=${functionId}`}
+                triggerOnDefault={formik.values.header.siteId && !formik.values.header.siteRef}
                 reducer={response => response?.record?.sites}
                 name='header.siteId'
                 label={labels.site}

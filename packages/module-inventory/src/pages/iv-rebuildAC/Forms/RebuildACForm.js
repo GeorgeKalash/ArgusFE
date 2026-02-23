@@ -29,7 +29,8 @@ export default function RebuildACForm({ _labels, maxAccess }) {
       startDate: null,
       endDate: null,
       year: null,
-      itemId: null
+      itemId: null,
+      categoryId: 0
     },
     maxAccess,
     validationSchema: yup.object({
@@ -160,6 +161,20 @@ export default function RebuildACForm({ _labels, maxAccess }) {
                 maxAccess={maxAccess}
                 onClear={() => formik.setFieldValue('endDate', '')}
                 error={formik.touched.endDate && Boolean(formik.errors.endDate)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ResourceComboBox
+                endpointId={InventoryRepository.Category.qry}
+                parameters='_pagesize=1000&_startAt=0&_name='
+                name='categoryId'
+                label={_labels.itemCategory}
+                valueField='recordId'
+                displayField='name'
+                values={formik?.values}
+                maxAccess={maxAccess}
+                onChange={(_, newValue) => formik.setFieldValue('categoryId', newValue?.recordId || 0)}
+                error={formik.touched.categoryId && Boolean(formik.errors.categoryId)}
               />
             </Grid>
           </Grid>
