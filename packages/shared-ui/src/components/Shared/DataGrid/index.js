@@ -418,7 +418,7 @@ export function DataGrid({
 
     const nextCell = findCell(params)
 
-    if (currentColumnIndex === allCols.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
+    if (currentColumnIndex === allColumns.length - 1 - skip && node.rowIndex === api.getDisplayedRowCount() - 1) {
       if ((error || !allowAddNewLine) && !event.shiftKey) {
         event.stopPropagation()
         return
@@ -428,7 +428,7 @@ export function DataGrid({
     const countColumn = nextColumn(nextCell.columnIndex, data)
 
     if (
-      (currentColumnIndex === allCols.length - 1 - skip || !countColumn) &&
+      (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
       if (allowAddNewLine && !error && !_disabled) {
