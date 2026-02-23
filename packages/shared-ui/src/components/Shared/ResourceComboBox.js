@@ -21,6 +21,7 @@ export default function ResourceComboBox({
   allowClear,
   setData,
   triggerOnDefault = false,
+  showHyperlink,
   ...rest
 }) {
   const { store: data } = rest
@@ -159,7 +160,8 @@ export default function ResourceComboBox({
         value: _value,
         onOpen: () => noCache && fetchData(),
         onBlur,
-        isLoading
+        isLoading,
+        showHyperlink
       }}
     />
   )

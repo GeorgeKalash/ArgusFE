@@ -300,6 +300,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     onChange={(_, newValue) => {
                       formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
+                    showHyperlink={ {type: 'OPEN_STACK', params: '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'} } //for testing only
                     error={formik.touched.designerId && Boolean(formik.errors.designerId)}
                   />
                 </Grid>

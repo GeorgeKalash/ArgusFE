@@ -10,6 +10,7 @@ import dropdownStyles from '../SharedDropdown.module.css'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import inputs from '../Inputs.module.css'
 import ClearIcon from '@mui/icons-material/Clear'
+import HyperlinkValue from '../../Shared/HyperlinkValue'
 
 const CustomComboBox = ({
   type = 'text',
@@ -44,6 +45,7 @@ const CustomComboBox = ({
   isLoading,
   onOpen,
   onBlur = () => {},
+  showHyperlink = null,
   ...props
 }) => {
   const { _readOnly, _required, _hidden, _disabled } = checkAccess(
@@ -78,6 +80,26 @@ const CustomComboBox = ({
       document.removeEventListener('mousedown', handleBlur)
     }
   }, [])
+
+  // const HyperlinkInputComponent = React.forwardRef(function HyperlinkInputComponent(
+  //   props,
+  //   ref
+  // ) {
+  //   const { value, linkConfig, disabled, ...other } = props
+
+  //   if (!value) return <span ref={ref} {...other} />
+
+  //   return (
+  //     <span ref={ref} {...other}>
+  //       <HyperlinkValue
+  //         value={value}
+  //         linkConfig={linkConfig}
+  //         disabled={disabled}
+  //       />
+  //     </span>
+  //   )
+  // })
+
 
   return _hidden ? (
     <></>
@@ -349,6 +371,7 @@ const CustomComboBox = ({
             }}
             InputProps={{
               ...params.InputProps,
+              //inputComponent: showHyperlink ? HyperlinkInputComponent : undefined,
               classes: {
                 root: inputs.outlinedRoot,
                 notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
