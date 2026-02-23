@@ -111,6 +111,7 @@ export const ResourceIds = {
   ReleaseIndicators: 10105,
   ReleaseCodes: 10104,
   DRGroups: 10103,
+  DrDefaults: 10107,
   ClientMaster: 36201,
   ClientList: 35201,
   UpdateClientRemittance: 36204,
