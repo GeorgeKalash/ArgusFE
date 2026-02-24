@@ -405,6 +405,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                         metalId: newValue?.metalId || null
                       })
                     }}
+                    showHyperlink={ {type: 'OPEN_STACK', params: {component: SketchForm, props: {recordId: formik?.values?.sketchId} }} }
                     errorCheck={'sketchId'}
                     maxAccess={maxAccess}
                   />

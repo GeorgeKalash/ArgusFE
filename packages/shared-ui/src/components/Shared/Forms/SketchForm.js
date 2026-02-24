@@ -24,6 +24,7 @@ import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { ManufacturingRepository } from '@argus/repositories/src/repositories/ManufacturingRepository'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import ThreeDDesignForm from './ThreeDDesignForm'
 
 export default function SketchForm({ recordId, invalidate, window }) {
   const { getRequest, postRequest } = useContext(RequestsContext)
@@ -300,7 +301,7 @@ export default function SketchForm({ recordId, invalidate, window }) {
                     onChange={(_, newValue) => {
                       formik.setFieldValue('designerId', newValue?.recordId || null)
                     }}
-                    showHyperlink={ {type: 'OPEN_STACK', params: '@argus/shared-ui/src/components/Shared/Forms/ThreeDDesignForm'} } //for testing only
+                    showHyperlink={ {type: 'OPEN_STACK', params: {component: ThreeDDesignForm, props: {recordId:2} }} } //for testing only
                     error={formik.touched.designerId && Boolean(formik.errors.designerId)}
                   />
                 </Grid>

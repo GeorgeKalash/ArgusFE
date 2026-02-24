@@ -82,7 +82,16 @@ const ThreeDDesign = () => {
     {
       field: 'sketchRef',
       headerName: labels.sketchRef,
-      flex: 1
+      flex: 1,
+      showHyperlink:{
+        type: 'OPEN_STACK',
+        params: {
+          component: ThreeDDesignForm,
+          props: (row) => ({
+            recordId: row?.recordId
+          })
+        }
+      }
     },
     {
       field: 'designerName',

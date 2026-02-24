@@ -81,26 +81,6 @@ const CustomComboBox = ({
     }
   }, [])
 
-  // const HyperlinkInputComponent = React.forwardRef(function HyperlinkInputComponent(
-  //   props,
-  //   ref
-  // ) {
-  //   const { value, linkConfig, disabled, ...other } = props
-
-  //   if (!value) return <span ref={ref} {...other} />
-
-  //   return (
-  //     <span ref={ref} {...other}>
-  //       <HyperlinkValue
-  //         value={value}
-  //         linkConfig={linkConfig}
-  //         disabled={disabled}
-  //       />
-  //     </span>
-  //   )
-  // })
-
-
   return _hidden ? (
     <></>
   ) : (
@@ -347,12 +327,23 @@ const CustomComboBox = ({
             ? null
             : null
 
+        const selectedDisplayValue = value
+          ? (typeof displayField === 'object'
+              ? displayField
+                  .map(field => value[field])
+                  .filter(Boolean)
+                  .join(' ')
+              : value?.[displayField])
+          : ''
+        const shouldRenderLink = showHyperlink && selectedDisplayValue
+
         return (
           <TextField
             {...params}
             inputProps={{
               ...params.inputProps,
-              tabIndex: _readOnly ? -1 : 0
+              tabIndex: _readOnly ? -1 : 0,
+              value: shouldRenderLink ? '' : params.inputProps.value
             }}
             type={type}
             variant={variant}
@@ -371,22 +362,37 @@ const CustomComboBox = ({
             }}
             InputProps={{
               ...params.InputProps,
-              //inputComponent: showHyperlink ? HyperlinkInputComponent : undefined,
               classes: {
                 root: inputs.outlinedRoot,
                 notchedOutline: hasBorder ? inputs.outlinedFieldset : inputs.outlinedNoBorder,
                 input: inputs.inputBase
               },
-              startAdornment: value?.icon ? (
-                <img src={value.icon} alt={value[displayField]} className={styles.comboStartIcon} />
-              ) : props?.startAdornment || (params.InputProps.startAdornment && (
-                <InputAdornment position='start' className={inputs.startAdornment}>
-                  {props?.startAdornment || params.InputProps.startAdornment}
-                </InputAdornment>
-              )),
+              startAdornment: (
+                <>
+                  {value?.icon ? (
+                    <img
+                      src={value.icon}
+                      alt={value[displayField]}
+                      className={styles.comboStartIcon}
+                    />
+                  ) : props?.startAdornment || (params.InputProps.startAdornment && (
+                    <InputAdornment position='start' className={inputs.startAdornment}>
+                      {props?.startAdornment || params.InputProps.startAdornment}
+                    </InputAdornment>
+                  ))}
+
+                  {shouldRenderLink && (
+                    <HyperlinkValue
+                      value={selectedDisplayValue}
+                      linkConfig={showHyperlink}
+                    />
+                  )}
+                </>
+              ),
               endAdornment: mergedEndAdornment
             }}
             InputLabelProps={{
+              shrink: Boolean(value),
               classes: {
                 root: inputs.inputLabel,
                 shrink: inputs.inputLabelShrink

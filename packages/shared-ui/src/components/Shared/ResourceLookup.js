@@ -16,6 +16,7 @@ export const ResourceLookup = ({
   autoSelectFistValue = true,
   viewHelperText = true,
   minChars = 3,
+  showHyperlink,
   ...rest
 }) => {
   const { getRequest } = useContext(RequestsContext)
@@ -150,6 +151,7 @@ export const ResourceLookup = ({
           isLoading,
           renderOption,
           minChars,
+          showHyperlink,
           ...rest,
           onLookup
         }}

@@ -26,6 +26,7 @@ import { useQuery } from '@tanstack/react-query'
 import CachedIcon from '@mui/icons-material/Cached'
 import { getFromDB, saveToDB, deleteFromDB } from '@argus/shared-domain/src/lib/indexDB'
 import { useWindowDimensions } from '@argus/shared-domain/src/lib/useWindowDimensions'
+import HyperlinkValue from '../HyperlinkValue'
 
 const Table = ({
   name,
@@ -700,7 +701,15 @@ const Table = ({
       flex: column.flex,
       sort: column.sort || '',
       cellRenderer:
-        column.type === 'image'
+        column?.showHyperlink
+          ? params => (
+              <HyperlinkValue
+                value={params.value}
+                linkConfig={column.showHyperlink}
+                rowData={params.data}
+              />
+            )
+          : column.type === 'image'
           ? imageRenderer(column)
           : column.isTree
           ? IndentedCellRenderer
