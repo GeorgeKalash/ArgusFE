@@ -84,6 +84,7 @@ const CustomLookup = ({
   useEffect(() => {
     if (!firstValue) setInputValue('')
   }, [firstValue])
+  
   const link = linkOpen
     ? useStackValueLink({
         linkOpen,

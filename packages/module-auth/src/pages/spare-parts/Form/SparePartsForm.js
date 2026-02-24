@@ -221,7 +221,7 @@ export default function SparePartsForm({ labels, maxAccess, recordId, window }) 
                   { key: 'name', value: 'Name' }
                 ]}
                 linkOpen={{
-                  resourceIds: ResourceIds.Item,
+                  resourceId: ResourceIds.Item,
                   props: { recordId: formik.values.itemId },
                 }}
                 onChange={(_, newValue) => {

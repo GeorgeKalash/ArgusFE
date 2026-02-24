@@ -537,16 +537,11 @@ const Table = ({
 
     const inputElRef = useRef(null)
     const textMeasureRef = useRef(null)
-    const linkOpenResolver = params?.colDef?.linkOpen
-
-    const linkOpen =
-      typeof linkOpenResolver === 'function'
-        ? linkOpenResolver(params?.data, params) || null
-        : linkOpenResolver || null
+    const linkOpen = params?.colDef?.linkOpen
 
     const link = linkOpen
       ? useStackValueLink({
-          linkOpen,
+          linkOpen: linkOpen(params?.data, params),
           inputElRef,
           textMeasureRef
         })

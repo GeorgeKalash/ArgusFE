@@ -3,7 +3,6 @@ import { useWindow } from '@argus/shared-providers/src/providers/windows'
 import { isClickOnText } from './linkTextUtils'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
-import { TrxType } from '@argus/shared-domain/src/resources/AccessLevels'
 
 const getStackLoaderByResourceId = resourceId => {
   switch (resourceId) {
@@ -24,24 +23,11 @@ const getStackLoaderByResourceId = resourceId => {
 export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
   const { stack } = useWindow()
 
-
   // const { access } = useResourceParams({
   //   datasetId: linkOpen?.resourceId
   // })
 
-  // const numericAccess = access?.maxAccess
-  // const accessFlags = access?.accessFlags
-
-  // const canOpen =
-  //   !linkOpen?.resourceId
-  //     ? true
-  //     : numericAccess !== undefined
-  //     ? editMode
-  //       ? numericAccess >= TrxType.EDIT
-  //       : numericAccess >= TrxType.ADD
-  //     : editMode
-  //     ? !!accessFlags?.edit
-  //     : !!accessFlags?.add
+  // const canOpen = !!access?.record?.accessFlags?.edit
 
   const isValueLink = !!linkOpen
 
@@ -55,7 +41,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
       }
 
   const openStack = useCallback(async () => {
-    if (!linkOpen?.resourceId || typeof stack !== 'function') return
+    // if (!canOpen) return
 
     const loader = getStackLoaderByResourceId(linkOpen.resourceId)
     if (!loader) return
@@ -71,7 +57,7 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
   }, [linkOpen?.props])
 
   const handleClick = async e => {
-    if (!isValueLink) return
+    // if (!canOpen) return
 
     const inputEl = inputElRef.current
     const textMeasureEl = textMeasureRef.current
