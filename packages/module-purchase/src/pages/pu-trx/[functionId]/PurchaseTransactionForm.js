@@ -1577,7 +1577,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       const muList = await getMeasurementUnits()
       setMeasurements(muList?.list)
       setMetalPriceOperations()
-      const defaultObj = await getDefaultsData()
+      await getDefaultsData()
       await getUserDefaultsData()
       if (!recordId) {
         setCycleButtonState({ text: '%', value: DIRTYFIELD_TDPCT })
