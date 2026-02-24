@@ -30,8 +30,10 @@ import { ManufacturingRepository } from '@argus/repositories/src/repositories/Ma
 import CustomDateTimePicker from '@argus/shared-ui/src/components/Inputs/CustomDateTimePicker'
 import useResourceParams from '@argus/shared-hooks/src/hooks/useResourceParams'
 import useSetWindow from '@argus/shared-hooks/src/hooks/useSetWindow'
+import { useOpenRecordWindow } from '@argus/shared-hooks/src/hooks/useOpenRecordWindow'
 
 const ThreeDDesignForm = ({ recordId, window }) => {
+  const openSketch = useOpenRecordWindow()
   const { platformLabels } = useContext(ControlContext)
   const { getRequest, postRequest } = useContext(RequestsContext)
   const { stack } = useWindow()
@@ -405,6 +407,7 @@ const ThreeDDesignForm = ({ recordId, window }) => {
                         metalId: newValue?.metalId || null
                       })
                     }}
+                    onValueClick={() => openSketch(ResourceIds.Sketch, { props: { recordId: formik.values.sketchId }})}
                     errorCheck={'sketchId'}
                     maxAccess={maxAccess}
                   />

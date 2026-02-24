@@ -46,6 +46,7 @@ const CustomLookup = ({
   minChars,
   onBlur = () => {},
   onFocus = () => {},
+  onValueClick,
   ...props
 }) => {
   const { _readOnly, _required, _hidden } = checkAccess(
@@ -63,6 +64,7 @@ const CustomLookup = ({
   const selectFirstValue = useRef(null)
   const autocompleteRef = useRef(null)
 
+  const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState(firstValue || '')
 
   useEffect(() => {
@@ -80,6 +82,9 @@ const CustomLookup = ({
     if (!firstValue) setInputValue('')
   }, [firstValue])
 
+  const isLinkMode = !!firstValue && typeof onValueClick === 'function'
+
+
   if (_hidden) return <></>
 
   return (
@@ -91,6 +96,9 @@ const CustomLookup = ({
           name={name}
           key={firstValue || null}
           value={firstValue}
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
           {...(!firstValue && { inputValue })}
           size={size}
           options={store}
@@ -237,6 +245,39 @@ const CustomLookup = ({
               {...params}
               fullWidth
               className={`${secondDisplayField && styles.firstField} ${styles.root}`}
+              onMouseDownCapture={e => {
+                if (!isLinkMode) return
+                if (e.target.closest('button') || e.target.closest('[role="button"]')) return
+
+                const input = e.currentTarget.querySelector('input')
+                if (!input) return
+                const value = input.value || ''
+                if (!value) return
+
+                const rect = input.getBoundingClientRect()
+                const style = window.getComputedStyle(input)
+                const paddingLeft = parseFloat(style.paddingLeft || '0')
+                const paddingRight = parseFloat(style.paddingRight || '0')
+
+                const canvas = document.createElement('canvas')
+                const ctx = canvas.getContext('2d')
+                ctx.font = style.font || `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+                const textWidth = ctx.measureText(value).width
+
+                const clickX = e.clientX - rect.left
+                const textStart = paddingLeft
+                const maxVisibleTextWidth = rect.width - paddingLeft - paddingRight
+                const visibleTextWidth = Math.min(textWidth, maxVisibleTextWidth)
+                const textEnd = textStart + visibleTextWidth
+
+                const clickedOnText = clickX >= textStart && clickX <= textEnd
+                if (!clickedOnText) return 
+
+                e.preventDefault()
+                e.stopPropagation()
+                setOpen(false)
+                onValueClick()
+              }}
               onChange={e => {
                 const v = e.target.value
                 setInputValue(v)
@@ -251,6 +292,19 @@ const CustomLookup = ({
                   setFreeSolo(false)
                 }
               }}
+              sx={
+                isLinkMode
+                  ? {
+                      '& .MuiInputBase-input': {
+                        color: '#1976d2',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none'
+                      }
+                    }
+                  : {}
+              }
               onKeyDown={onKeyDown}
               onBlur={e => {
                 if (
@@ -268,8 +322,10 @@ const CustomLookup = ({
                 valueHighlightedOption.current = null
               }}
               onFocus={e => {
-                setStore([])
-                setFreeSolo(true)
+                if (!isLinkMode) {
+                  setStore([])
+                  setFreeSolo(true)
+                }
                 selectFirstValue.current = ''
                 onFocus(e)
               }}
@@ -290,6 +346,7 @@ const CustomLookup = ({
               helperText={helperText}
               InputProps={{
                 ...params.InputProps,
+                readOnly: isLinkMode || (secondField ? !secondField.editable : _readOnly),
                 classes: {
                   root: inputs.outlinedRoot,
                   notchedOutline: hasBorder
@@ -310,7 +367,8 @@ const CustomLookup = ({
                     <IconButton
                       className={inputs.iconButton}
                       tabIndex={-1}
-                      onClick={() => {
+                      onClick={e => {
+                        e.stopPropagation()
                         setInputValue('')
                         onChange(name, '')
                         setStore([])
