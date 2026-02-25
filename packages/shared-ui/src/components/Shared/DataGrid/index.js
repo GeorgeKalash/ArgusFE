@@ -685,26 +685,27 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
-  const counterColumn = showCounterColumn
-    ? [
-        {
-          field: 'Count',
-          headerName: '',
-          headerTooltip: '',
-          editable: false, 
-          sortable: false,
-          width: 70,
-          autoHeight: true,
-          cellRenderer: params => (
-            <div
-              tabIndex={0} 
-            >
-              {params.node.rowIndex + 1 }
-            </div>
-          ),
-        },
-      ]
-    : []
+  const counterColumn = showCounterColumn &&
+    accessLevel({ maxAccess, name: `${name}.Count` }) !== HIDDEN 
+      ? [
+          {
+            field: 'Count',
+            headerName: '',
+            headerTooltip: '',
+            editable: false, 
+            sortable: false,
+            width: 70,
+            autoHeight: true,
+            cellRenderer: params => (
+              <div
+                tabIndex={0} 
+              >
+                {params.node.rowIndex + 1 }
+              </div>
+            )
+          }
+        ]
+      : []
 
   const columnDefs = [
     ...counterColumn, 
