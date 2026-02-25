@@ -281,6 +281,84 @@ const PopperComponent = ({
     return () => ro.disconnect()
   }, [open])
 
+  useEffect(() => {
+    if (!popperRef.current) return
+    if (!isTimePicker && !isDateTimePicker) return
+
+    let cancelled = false
+
+    const scrollSelectedInEachSection = () => {
+      if (cancelled || !popperRef.current) return
+
+      const root = popperRef.current
+      const sections = root.querySelectorAll('.MuiMultiSectionDigitalClockSection-root')
+
+      if (sections.length) {
+        sections.forEach(section => {
+          const selected =
+            section.querySelector('[role="option"][aria-selected="true"]') ||
+            section.querySelector('.Mui-selected')
+
+          if (!selected) return
+
+          const scroller =
+            selected.closest('ul') ||
+            section.querySelector('ul') ||
+            section
+
+          selected.scrollIntoView({
+            block: 'center',
+            inline: 'nearest',
+            behavior: 'auto'
+          })
+
+          if (
+            scroller &&
+            typeof scroller.scrollTop === 'number' &&
+            scroller.getBoundingClientRect
+          ) {
+            const itemRect = selected.getBoundingClientRect()
+            const containerRect = scroller.getBoundingClientRect()
+            const delta =
+              itemRect.top -
+              containerRect.top -
+              containerRect.height / 2 +
+              itemRect.height / 2
+
+            if (Math.abs(delta) > 2) scroller.scrollTop += delta
+          }
+        })
+
+        return
+      }
+
+      const selected =
+        root.querySelector('[role="option"][aria-selected="true"]') ||
+        root.querySelector('.Mui-selected')
+
+      if (selected) {
+        selected.scrollIntoView({
+          block: 'center',
+          inline: 'nearest',
+          behavior: 'auto'
+        })
+      }
+    }
+
+    const raf1 = requestAnimationFrame(scrollSelectedInEachSection)
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(scrollSelectedInEachSection))
+    const t1 = setTimeout(scrollSelectedInEachSection, 80)
+    const t2 = setTimeout(scrollSelectedInEachSection, 200)
+
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [isTimePicker, isDateTimePicker, rect])
+
   if (!rect) return null
 
   const layout = computeLayout({
@@ -350,7 +428,28 @@ const PopperComponent = ({
                   width: layout.isNarrow ? '100%' : 'auto'
                 },
 
-                '& .MuiMultiSectionDigitalClock-root, & .MuiTimeClock-root, & .MuiClock-root': {
+                '& .MuiMultiSectionDigitalClock-root': {
+                  flex: '0 0 auto',
+                  height: 'auto',
+                  maxHeight: layout.calendarMaxHeight,
+                  overflow: 'hidden',
+                  overflowX: 'hidden',
+                  width: layout.isNarrow ? '100%' : 'auto'
+                },
+
+                '& .MuiMultiSectionDigitalClockSection-root': {
+                  maxHeight: layout.calendarMaxHeight,
+                  overflowY: 'auto',
+                  overflowX: 'hidden'
+                },
+
+                '& .MuiMultiSectionDigitalClockSection-root ul': {
+                  maxHeight: 'inherit',
+                  overflowY: 'auto',
+                  overflowX: 'hidden'
+                },
+
+                '& .MuiTimeClock-root, & .MuiClock-root': {
                   flex: '0 0 auto',
                   height: 'auto',
                   maxHeight: layout.calendarMaxHeight,
