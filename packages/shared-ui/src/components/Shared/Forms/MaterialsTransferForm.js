@@ -359,8 +359,6 @@ export default function MaterialsTransferForm({ recordId, window }) {
         endpointId: InventoryRepository.Item.snapshot,
         valueField: 'sku',
         displayField: 'sku',
-        mandatory: true,
-        readOnly: isClosed,
         displayFieldWidth: 4,
         mapping: [
           { from: 'recordId', to: 'itemId' },
