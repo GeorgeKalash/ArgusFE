@@ -98,11 +98,12 @@ const ClientsCorporateList = () => {
   ]
 
   const addClient = async () => {
-    if (plantId !== '') {
-      openForm('')
-    } else {
+    if (!plantId) {
       stackError({ message: platformLabels.noDefaultPlant })
+
+      return
     }
+    openForm()
   }
 
   const editClient = obj => {

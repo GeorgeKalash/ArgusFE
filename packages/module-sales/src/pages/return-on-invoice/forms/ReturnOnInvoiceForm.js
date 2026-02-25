@@ -94,7 +94,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     return spId
   }
 
-  const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
+  const defaultMCbaseCU = parseInt(systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')?.value)
 
   const initialValues = {
     dtId: null,
@@ -137,7 +137,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
     KGmetalPrice: 0,
     clientDiscount: 0,
     currentDiscount: 0,
-    baseMetalCuId: parseInt(defaultMCbaseCU?.value),
+    baseMetalCuId: defaultMCbaseCU,
     items: [
       {
         id: 1,
@@ -1408,9 +1408,8 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
   }
 
   async function setMetalPriceOperations() {
-    const defaultMCbaseCU = systemDefaults?.list?.find(({ key }) => key === 'baseMetalCuId')
     const defaultRateType = systemDefaults?.list?.find(({ key }) => key === 'mc_defaultRTSA')
-    formik.setFieldValue('baseMetalCuId', parseInt(defaultMCbaseCU?.value))
+    formik.setFieldValue('baseMetalCuId', defaultMCbaseCU)
     if (!defaultRateType.value) {
       stackError({
         message: labels.RTSANoteDefined
@@ -1418,7 +1417,7 @@ export default function ReturnOnInvoiceForm({ labels, access, recordId, currency
 
       return
     }
-    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU?.value)
+    const kgMetalPriceValue = await fillMetalPrice(defaultMCbaseCU)
     formik.setFieldValue('KGmetalPrice', kgMetalPriceValue != null ? kgMetalPriceValue : 0)
     formik.setFieldValue('metalPrice', kgMetalPriceValue != null ? kgMetalPriceValue / 1000 : 0)
   }
