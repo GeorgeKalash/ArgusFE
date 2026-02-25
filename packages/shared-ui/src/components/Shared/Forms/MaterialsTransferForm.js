@@ -1170,6 +1170,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             columns={columns}
             allowDelete={!isClosed}
             allowAddNewLine={!isClosed}
+            disabled={isClosed}
           />
         </Grow>
         <Fixed>
