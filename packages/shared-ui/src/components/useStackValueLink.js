@@ -56,20 +56,35 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
     })
   }, [linkOpen?.props])
 
-  const handleClick = async e => {
-    // if (!canOpen) return
+  const shouldHandleMouseDown = useCallback(
+    e => {
+      const inputEl = inputElRef.current
+      const textMeasureEl = textMeasureRef.current
+      if (!inputEl || !textMeasureEl) return false
 
-    const inputEl = inputElRef.current
-    const textMeasureEl = textMeasureRef.current
-    if (!inputEl || !textMeasureEl) return
+      return !!isClickOnText({ e, inputEl, textMeasureEl })
+    },
+    [inputElRef, textMeasureRef]
+  )
 
-    const clickedOnText = isClickOnText({ e, inputEl, textMeasureEl })
-    if (!clickedOnText) return
+  const handleClick = useCallback(
+    async e => {
 
-    e.preventDefault()
-    e.stopPropagation()
-    await openStack()
-  }
+      const inputEl = inputElRef.current
+      const textMeasureEl = textMeasureRef.current
+      if (!inputEl || !textMeasureEl) return false
+
+      const clickedOnText = isClickOnText({ e, inputEl, textMeasureEl })
+      if (!clickedOnText) return false
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      const opened = await openStack()
+      return !!opened
+    },
+    [inputElRef, textMeasureRef, openStack]
+  )
 
   const TextMeasure = () => (
     <span
@@ -83,5 +98,5 @@ export const useStackValueLink = ({ linkOpen, inputElRef, textMeasureRef }) => {
     />
   )
 
-  return { linkStyle, handleClick, TextMeasure }
+  return { linkStyle, shouldHandleMouseDown, handleClick, TextMeasure }
 }

@@ -70,6 +70,9 @@ const CustomComboBox = ({
   const inputElRef = useRef(null)
   const textMeasureRef = useRef(null)
 
+  const linkMouseDownHandledRef = useRef(false)
+  const suppressNextOpenRef = useRef(false)
+
   useEffect(() => {
     function handleBlur(event) {
       if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
@@ -362,6 +365,24 @@ const CustomComboBox = ({
               style: {
                 ...(params.inputProps?.style || {}),
                 ...(linkOpen && hasSelectedValue ? linkStyle : {})
+              },
+              onMouseDownCapture: e => {
+                linkMouseDownHandledRef.current = false
+
+                if (!linkOpen || !hasSelectedValue || !link?.shouldHandleMouseDown) return
+
+                const shouldHandle = link.shouldHandleMouseDown(e)
+                if (!shouldHandle) return
+
+                linkMouseDownHandledRef.current = true
+                suppressNextOpenRef.current = true
+
+                e.preventDefault()
+                e.stopPropagation()
+              },
+              onMouseDown: e => {
+                if (linkMouseDownHandledRef.current) return
+                params.inputProps?.onMouseDown?.(e)
               },
               onClick: e => {
                 params.inputProps?.onClick?.(e)
