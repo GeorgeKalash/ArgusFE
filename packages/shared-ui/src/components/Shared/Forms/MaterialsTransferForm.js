@@ -1171,6 +1171,7 @@ export default function MaterialsTransferForm({ recordId, window }) {
             error={formik?.errors?.transfers}
             columns={columns}
             allowDelete={!isClosed}
+            allowAddNewLine={!isClosed}
           />
         </Grow>
         <Fixed>

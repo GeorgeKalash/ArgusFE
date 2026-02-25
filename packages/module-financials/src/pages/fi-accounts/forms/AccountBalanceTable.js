@@ -21,7 +21,8 @@ const AccountBalanceForm = ({ labels, maxAccess, store }) => {
     {
       field: 'balance',
       headerName: labels.balance,
-      flex: 1
+      flex: 1,
+      type: 'number'
     }
   ]
 
