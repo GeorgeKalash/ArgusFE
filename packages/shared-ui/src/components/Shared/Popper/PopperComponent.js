@@ -182,6 +182,8 @@ const PICKER_ROOT_SELECTOR =
 const TIME_PICKER_ROOT_SELECTOR =
   '.MuiMultiSectionDigitalClock-root, .MuiTimeClock-root, .MuiClock-root'
 
+const TINY_TIME_SECTION_CLASS = 'noSectionScroll'
+
 const PopperComponent = ({
   children,
   anchorEl,
@@ -189,7 +191,6 @@ const PopperComponent = ({
   isDateTimePicker = false,
   matchAnchorWidth = true,
   fitContent = false,
-
   ...props
 }) => {
   const [rect, setRect] = useState(null)
@@ -287,7 +288,43 @@ const PopperComponent = ({
 
     let cancelled = false
 
-    const scrollSelectedInEachSection = () => {
+    const isItemOutsideVisibleArea = (item, container) => {
+      if (!item || !container || !container.getBoundingClientRect) return false
+
+      const itemRect = item.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+
+      const topThreshold = containerRect.top + 8
+      const bottomThreshold = containerRect.bottom - 8
+
+      return itemRect.top < topThreshold || itemRect.bottom > bottomThreshold
+    }
+
+    const centerItemInScroller = (selected, scroller) => {
+      if (!selected || !scroller) return
+      if (!isItemOutsideVisibleArea(selected, scroller)) return
+
+      selected.scrollIntoView({
+        block: 'center',
+        inline: 'nearest',
+        behavior: 'auto'
+      })
+
+      if (typeof scroller.scrollTop === 'number' && scroller.getBoundingClientRect) {
+        const itemRect = selected.getBoundingClientRect()
+        const containerRect = scroller.getBoundingClientRect()
+
+        const delta =
+          itemRect.top -
+          containerRect.top -
+          containerRect.height / 2 +
+          itemRect.height / 2
+
+        if (Math.abs(delta) > 2) scroller.scrollTop += delta
+      }
+    }
+
+    const classifyAndScrollSections = () => {
       if (cancelled || !popperRef.current) return
 
       const root = popperRef.current
@@ -295,6 +332,17 @@ const PopperComponent = ({
 
       if (sections.length) {
         sections.forEach(section => {
+          const options = section.querySelectorAll('[role="option"], li')
+          const optionCount = options.length
+
+          const isTinySection = optionCount > 0 && optionCount <= 3
+
+          if (isTinySection) {
+            section.classList.add(TINY_TIME_SECTION_CLASS)
+          } else {
+            section.classList.remove(TINY_TIME_SECTION_CLASS)
+          }
+
           const selected =
             section.querySelector('[role="option"][aria-selected="true"]') ||
             section.querySelector('.Mui-selected')
@@ -306,27 +354,15 @@ const PopperComponent = ({
             section.querySelector('ul') ||
             section
 
-          selected.scrollIntoView({
-            block: 'center',
-            inline: 'nearest',
-            behavior: 'auto'
-          })
-
-          if (
+          const scrollerCanScroll =
             scroller &&
-            typeof scroller.scrollTop === 'number' &&
-            scroller.getBoundingClientRect
-          ) {
-            const itemRect = selected.getBoundingClientRect()
-            const containerRect = scroller.getBoundingClientRect()
-            const delta =
-              itemRect.top -
-              containerRect.top -
-              containerRect.height / 2 +
-              itemRect.height / 2
+            typeof scroller.scrollHeight === 'number' &&
+            typeof scroller.clientHeight === 'number' &&
+            scroller.scrollHeight > scroller.clientHeight + 2
 
-            if (Math.abs(delta) > 2) scroller.scrollTop += delta
-          }
+          if (!scrollerCanScroll || isTinySection) return
+
+          centerItemInScroller(selected, scroller)
         })
 
         return
@@ -337,18 +373,15 @@ const PopperComponent = ({
         root.querySelector('.Mui-selected')
 
       if (selected) {
-        selected.scrollIntoView({
-          block: 'center',
-          inline: 'nearest',
-          behavior: 'auto'
-        })
+        const scroller = selected.closest('ul') || selected.parentElement || root
+        centerItemInScroller(selected, scroller)
       }
     }
 
-    const raf1 = requestAnimationFrame(scrollSelectedInEachSection)
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(scrollSelectedInEachSection))
-    const t1 = setTimeout(scrollSelectedInEachSection, 80)
-    const t2 = setTimeout(scrollSelectedInEachSection, 200)
+    const raf1 = requestAnimationFrame(classifyAndScrollSections)
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(classifyAndScrollSections))
+    const t1 = setTimeout(classifyAndScrollSections, 80)
+    const t2 = setTimeout(classifyAndScrollSections, 200)
 
     return () => {
       cancelled = true
@@ -447,6 +480,12 @@ const PopperComponent = ({
                   maxHeight: 'inherit',
                   overflowY: 'auto',
                   overflowX: 'hidden'
+                },
+                [`& .MuiMultiSectionDigitalClockSection-root.${TINY_TIME_SECTION_CLASS}`]: {
+                  overflowY: 'hidden'
+                },
+                [`& .MuiMultiSectionDigitalClockSection-root.${TINY_TIME_SECTION_CLASS} ul`]: {
+                  overflowY: 'hidden'
                 },
 
                 '& .MuiTimeClock-root, & .MuiClock-root': {
