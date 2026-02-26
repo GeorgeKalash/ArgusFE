@@ -1,0 +1,91 @@
+.matrixRoot {
+  height: 100%;
+  width: 100%;
+}
+
+.rowLabelCell {
+  font-weight: bold;
+  /* padding: 0 8px; */
+  direction: rtl;
+  font-size: 14px;
+  text-align: center;
+  text-justify: center;
+
+}
+
+.rotatedHeader {
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  white-space: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  height: 100%;
+  width: 100%;
+}
+
+.matrixRoot :global(.ag-header-group-cell) {
+margin: 0px !important;
+padding: 0px !important;
+
+}
+
+.diagonalCell {
+  background-color: #d3d3d3;
+  color: #888;
+  pointer-events: none;
+}
+
+.modifiedCell {
+  background-color: #ffff99;
+  font-weight: bold;
+  text-align: center;
+}
+
+.highlightCell {
+  background-color: #e0f7fa;
+}
+
+.normalCell {
+  background-color: #fff;
+  color: #000;
+}
+
+.highlightRow {
+  background-color: #e0f7fa !important;
+}
+
+@media (max-width: 1600px) {
+  .matrixRoot :global(.ag-cell){
+    font-size: 12px !important;
+    }
+  
+    .matrixRoot :global(.ag-header-cell-comp-wrapper){
+      font-size: 12px !important;
+    }
+  }
+
+@media (max-width: 1280px) {
+.matrixRoot :global(.ag-cell){
+  font-size: 10px !important;
+  }
+
+  .matrixRoot :global(.ag-header-cell-comp-wrapper){
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  .matrixRoot :global(.ag-cell){
+    font-size: 9px !important;
+    }
+  
+    .matrixRoot :global(.ag-header-cell-comp-wrapper){
+      font-size: 9px !important;
+    }
+  }
+
+
+
+

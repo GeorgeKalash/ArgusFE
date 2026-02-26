@@ -1,0 +1,153 @@
+.span {
+  display: block;
+  text-transform: capitalize;
+  text-align: center;
+  color: #f0f0f0;
+  flex: 1;
+  line-height: 1.15;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.span.big {
+  font-size: clamp(12px, 1.4vw, 18px);
+  font-weight: 300;
+  margin-bottom: clamp(1px, 0.4vw, 4px);
+}
+
+.span.small {
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight: 300;
+}
+
+.circleItemContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  margin: clamp(2px, 0.6vw, 6px);
+  padding: clamp(1px, 0.4vw, 4px);
+
+  min-width: 0;
+}
+
+.circleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: clamp(48px, 8vw, 96px);
+  aspect-ratio: 1 / 1;
+
+  border-radius: 50%;
+  background: #ffffff;
+  color: #176fb5;
+
+  font-size: clamp(12px, 1.6vw, 18px);
+  font-weight: 500;
+
+  margin-bottom: clamp(3px, 0.6vw, 6px);
+
+  box-shadow: 0
+    clamp(1px, 0.3vw, 3px)
+    clamp(3px, 0.6vw, 6px)
+    rgba(0, 0, 0, 0.16);
+}
+
+.circleIconContent {
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  background: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: clamp(1px, 0.4vw, 4px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .circleIcon {
+    width: 44px;
+    font-size: 11px;
+  }
+
+  .span.big {
+    font-size: 12px;
+  }
+
+  .span.small {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .circleIcon {
+    width: clamp(48px, 10vw, 72px);
+  }
+
+  .span.big {
+    font-size: clamp(12px, 2.2vw, 14px);
+  }
+
+  .span.small {
+    font-size: clamp(11px, 2vw, 13px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .circleIcon {
+    width: clamp(52px, 9vw, 88px);
+  }
+}
+
+@media (max-width: 1440px) {
+  .circleIcon {
+    width: clamp(60px, 7vw, 92px);
+  }
+}
+
+@media (min-width: 1441px) and (max-width: 1599px) {
+  .circleIcon {
+    width: 88px;
+    font-size: 16px;
+  }
+
+  .span.big {
+    font-size: 16px;
+  }
+
+  .span.small {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .circleIcon {
+    width: 100px;
+    font-size: 18px;
+  }
+
+  .span.big {
+    font-size: 18px;
+  }
+
+  .span.small {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .circleIcon {
+    width: 110px;
+  }
+
+  .circleItemContainer {
+    margin: 8px;
+    padding: 6px;
+  }
+}

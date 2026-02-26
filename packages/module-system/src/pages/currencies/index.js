@@ -1,0 +1,145 @@
+import { useContext } from 'react'
+import toast from 'react-hot-toast'
+import Table from '@argus/shared-ui/src/components/Shared/Table'
+import GridToolbar from '@argus/shared-ui/src/components/Shared/GridToolbar'
+import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
+import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
+import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
+import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
+import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
+import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
+import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import { useWindow } from '@argus/shared-providers/src/providers/windows'
+import CurrencyForm from './forms/CurrencyForm'
+import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
+
+const Currencies = () => {
+  const { postRequest, getRequest } = useContext(RequestsContext)
+  const { stack } = useWindow()
+  const { platformLabels } = useContext(ControlContext)
+  async function fetchGridData() {
+    return await getRequest({
+      extension: SystemRepository.Currency.qry,
+      parameters: `_filter=`
+    })
+  }
+
+  const {
+    query: { data },
+    labels: _labels,
+    refetch,
+    invalidate,
+    filterBy,
+    clearFilter,
+    access
+  } = useResourceQuery({
+    queryFn: fetchGridData,
+    endpointId: SystemRepository.Currency.qry,
+    datasetId: ResourceIds.Currencies,
+    filter: {
+      endpointId: SystemRepository.Currency.snapshot,
+      filterFn: fetchWithSearch
+    }
+  })
+
+  async function fetchWithSearch({ filters }) {
+    if (!filters.qry) {
+      return fetchGridData()
+    } else {
+      const res = await getRequest({
+        extension: SystemRepository.Currency.snapshot,
+        parameters: `_filter=${filters.qry}`
+      })
+
+      return res
+    }
+  }
+
+  const columns = [
+    {
+      field: 'reference',
+      headerName: _labels.reference,
+      flex: 1
+    },
+    {
+      field: 'name',
+      headerName: _labels.name,
+      flex: 1
+    },
+    {
+      field: 'flName',
+      headerName: _labels.foreignLanguage,
+      flex: 1
+    },
+    {
+      field: 'currencyTypeName',
+      headerName: _labels.currencyType,
+      flex: 1
+    }
+  ]
+
+  const del = async obj => {
+    await postRequest({
+      extension: SystemRepository.Currency.del,
+      record: JSON.stringify(obj)
+    })
+    invalidate()
+    toast.success(platformLabels.Deleted)
+  }
+
+  const add = () => {
+    openForm()
+  }
+
+  const edit = obj => {
+    openForm(obj?.recordId)
+  }
+
+  function openForm(recordId) {
+    stack({
+      Component: CurrencyForm,
+      props: {
+        labels: _labels,
+        recordId: recordId,
+        maxAccess: access
+      },
+      width: 700,
+      height: 700,
+      title: _labels.currency
+    })
+  }
+
+  return (
+    <VertLayout>
+      <Fixed>
+        <GridToolbar
+          onAdd={add}
+          maxAccess={access}
+          onSearch={value => {
+            filterBy('qry', value)
+          }}
+          onSearchClear={() => {
+            clearFilter('qry')
+          }}
+          inputSearch={true}
+        />
+      </Fixed>
+      <Grow>
+        <Table
+          columns={columns}
+          gridData={data}
+          rowId={['recordId']}
+          onEdit={edit}
+          onDelete={del}
+          refetch={refetch}
+          isLoading={false}
+          pageSize={50}
+          paginationType='client'
+          maxAccess={access}
+        />
+      </Grow>
+    </VertLayout>
+  )
+}
+
+export default Currencies
