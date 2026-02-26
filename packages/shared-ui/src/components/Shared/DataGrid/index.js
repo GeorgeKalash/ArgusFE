@@ -33,7 +33,8 @@ export function DataGrid({
   bg,
   searchValue,
   onValidationRequired,
-  isDeleteDisabled
+  isDeleteDisabled,
+  maxLines
 }) {
   const gridApiRef = useRef(null)
   const { user } = useContext(AuthContext)
@@ -58,6 +59,17 @@ export function DataGrid({
   const rowHeight =
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
+  const canAddNewLine = () => {
+    if (!allowAddNewLine) return false
+    if (_disabled) return false
+    if (maxLines === null || maxLines === undefined) return true
+
+    const limit = parseInt(maxLines)
+    if (!Number.isFinite(limit)) return true
+
+    return (value?.length || 0) < limit
+  }
+  
   const GridCheckbox = ({ checked, disabled, onChange }) => {
     return (
       <Checkbox
@@ -431,6 +443,10 @@ export function DataGrid({
       (currentColumnIndex === allColumns.length - 1 - skip || !countColumn) &&
       node.rowIndex === api.getDisplayedRowCount() - 1
     ) {
+      if (!canAddNewLine()) {
+        event.stopPropagation()
+        return
+      }
       if (allowAddNewLine && !error && !_disabled) {
         event.stopPropagation()
         addNewRow()
