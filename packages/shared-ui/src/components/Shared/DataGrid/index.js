@@ -341,8 +341,22 @@ export function DataGrid({
       }
     }
   }
+  
+  const counterColumn = showCounterColumn
+    ? [
+        {
+          component: 'numberfield',
+          name: 'Count',
+          label: ' ',
+          props: { readOnly: true },
+          counterColumn: true,
+        }
+      ]
+    : []
 
-  const allColumns = columns?.filter(
+  const mergedColumns = [...counterColumn, ...columns]
+
+  const allColumns = mergedColumns?.filter(
     ({ name: field, hidden }) =>
       (accessLevel({ maxAccess, name: `${name}.${field}` }) !== HIDDEN && !hidden) ||
       (hidden && accessLevel({ maxAccess, name: `${name}.${field}` }) === FORCE_ENABLED)
@@ -530,7 +544,14 @@ export function DataGrid({
         </Box>
       )
     }
-
+    
+    if (column.colDef?.counterColumn) {
+      return (
+        <Box sx={{ width: '100%', textAlign: 'center' }}>
+          {params.node.rowIndex + 1}
+        </Box>
+      )
+    }
 
     const Component =
       typeof column.colDef.component === 'string'
@@ -685,30 +706,8 @@ export function DataGrid({
       ? (gridWidth - totalWidth) / allColumns?.length
       : 0
 
-  const counterColumn = showCounterColumn &&
-    accessLevel({ maxAccess, name: `${name}.Count` }) !== HIDDEN 
-      ? [
-          {
-            field: 'Count',
-            headerName: '',
-            headerTooltip: '',
-            editable: false, 
-            sortable: false,
-            width: 70,
-            autoHeight: true,
-            cellRenderer: params => (
-              <div
-                tabIndex={0} 
-              >
-                {params.node.rowIndex + 1 }
-              </div>
-            )
-          }
-        ]
-      : []
 
   const columnDefs = [
-    ...counterColumn, 
     ...allColumns.map(column => {
       const mergedCellClass = [column.cellClass, 'wrapTextCell']
 
@@ -723,7 +722,7 @@ export function DataGrid({
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: !_disabled,
+        editable: !_disabled && !column.counterColumn,
         flex: column.flex || (!column.width && 1),
         sortable: false,
         cellRenderer: CustomCellRenderer,
