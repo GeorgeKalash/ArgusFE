@@ -79,6 +79,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       lotCategoryId: null,
       labourId: null,
       shiftId: null,
+      onHand: null,
       items: []
     },
     maxAccess,
@@ -566,6 +567,17 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     if (recordId) refetchForm(recordId)
   }, [])
 
+  const getOnHand = async (itemId, siteId) => {
+    if (itemId && siteId) {
+      const res2 = await getRequest({
+        extension: InventoryRepository.Availability.get,
+        parameters: `_itemId=${itemId}&_seqNo=0`
+      })
+
+      formik.setFieldValue('onHand', res2?.record?.onhand)
+    }
+  }
+
   return (
     <FormShell
       resourceId={ResourceIds.Assemblies}
@@ -697,6 +709,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       formik.setFieldValue('bomName', newValue?.name)
                       formik.setFieldValue('bomRef', newValue?.reference)
                       const item = await fillItem(newValue?.recordId)
+                      await getOnHand(item?.itemId , formik.values?.siteId)
                       formik.setFieldValue('itemName', item?.itemName)
                       formik.setFieldValue('sku', item?.sku)
                       formik.setFieldValue('itemId', item?.itemId)
@@ -773,13 +786,22 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     disabled={isPosted || disablePreview}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={6}>
                   <CustomNumberField
                     name='avgUnitCost'
                     label={labels.unitCost}
                     readOnly
                     value={avgUnitCost}
                     maxAccess={maxAccess}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <CustomNumberField
+                    name='onHand'
+                    label={labels.onhand}
+                    value={formik.values?.onHand}
+                    maxAccess={maxAccess}
+                    readOnly
                   />
                 </Grid>
               </Grid>
