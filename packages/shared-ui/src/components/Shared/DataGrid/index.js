@@ -341,8 +341,8 @@ export function DataGrid({
           component: 'numberfield',
           name: 'Count',
           label: ' ',
-          props: { readOnly: true },
-          counterColumn: true,
+          props: { disabled: true },
+          counterColumn: true
         }
       ]
     : []
@@ -362,6 +362,7 @@ export function DataGrid({
         (allColumns?.[i]?.props?.readOnly &&
           (accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === FORCE_ENABLED ||
             accessLevel({ maxAccess, name: `${name}.${allColumns?.[i]?.name}` }) === MANDATORY))) &&
+             !allColumns?.[i]?.props?.disabled && 
       (typeof allColumns?.[i]?.props?.disableCondition !== 'function' ||
         !allColumns?.[i]?.props?.disableCondition(data)) &&
       (typeof allColumns?.[i]?.props?.onCondition !== 'function' ||
@@ -746,7 +747,7 @@ export function DataGrid({
         field: column.name,
         headerName: column.label || column.name,
         headerTooltip: column.label,
-        editable: !_disabled && !column.counterColumn,
+        editable: params => !_disabled && !params.colDef?.props?.disabled,
         flex: column.flex || (!column.width && 1),
         sortable: false,
         cellRenderer: CustomCellRenderer,

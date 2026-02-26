@@ -42,6 +42,7 @@ export default function NumberfieldEdit({ id, column: { props, field }, value, d
       }
       label={''}
       readOnly={readOnly}
+      disabled={props?.disabled}
       decimalScale={decimalScale}
       autoFocus
       autoSelect
