@@ -69,4 +69,4 @@ const getVatCalc = _vatCalcRow => {
   return _vatCalcRow
 }
 
-export { VatCalcRow, getVatCalc, TAXBASE_POU, TAXBASE_FAPQU, TAXBASE_FAPIUW, TAXBASE_PLP }
+export { VatCalcRow, getVatCalc, TAXBASE_POU, TAXBASE_FAPQU, TAXBASE_FAPIUW, TAXBASE_PLP, calcVatAmountPerTaxDetail }

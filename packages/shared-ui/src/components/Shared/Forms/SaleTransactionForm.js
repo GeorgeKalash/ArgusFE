@@ -474,7 +474,7 @@ export default function SaleTransactionForm({
       taxDetailsButton: true
     }
 
-    let data = getItemPriceRow({ ...result, id: newRow?.id, qty: newRow?.defaultQty || 1 }, DIRTYFIELD_QTY)
+    let data = getItemPriceRow({ ...result, id: newRow?.id, qty: newRow?.defaultQty || 0 }, DIRTYFIELD_QTY)
 
     const dirtyField = isValidPrice(result.basePrice)
       ? DIRTYFIELD_BASE_PRICE

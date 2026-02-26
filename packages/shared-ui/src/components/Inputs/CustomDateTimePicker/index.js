@@ -90,6 +90,7 @@ const CustomDateTimePicker = ({
         value={resolvedValue}
         label={label}
         views={views}
+        timeSteps={{ minutes: 1 }}
         minDate={!!min ? min : disabledRangeDate.date}
         maxDate={!!max ? max : newDate}
         fullWidth={fullWidth}
@@ -103,9 +104,7 @@ const CustomDateTimePicker = ({
         clearable
         shouldDisableDate={disabledDate && shouldDisableDate}
         slotProps={{
-          // ✅ the important part: keep the popper in the same DOM tree
           popper: { disablePortal: true },
-
           textField: {
             required: _required,
             size: size,
