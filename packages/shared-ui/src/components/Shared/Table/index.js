@@ -1,11 +1,9 @@
-import React, { useContext, useRef } from 'react'
+import React, { useContext, useRef, useState, useEffect } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { Box, IconButton, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import Image from 'next/image'
 import editIcon from '@argus/shared-ui/src/components/images/TableIcons/edit.png'
-import { useState } from 'react'
-import { useEffect } from 'react'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -71,7 +69,7 @@ const Table = ({
   const { width } = useWindowDimensions()
 
   const rowHeight =
-    width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34    : 36
+    width <= 768 ? 36 : width <= 1024 ? 32 : width <= 1280 ? 30 : width <= 1366 ? 32 : width < 1600 ? 34 : 36
 
   const rowHeightImage =
     width <= 768 ? 44 : width <= 1024 ? 46 : width <= 1280 ? 50 : width <= 1366 ? 50 : width < 1600 ? 52 : 70
@@ -636,17 +634,28 @@ const Table = ({
     props?.setRowData(updatedVisibleRows)
   }
 
+  const EMPTY_PHOTO = require('@argus/shared-ui/src/components/images/emptyPhoto.jpg').default.src
   const imageRenderer =
     column =>
     ({ data }) => {
       const imageUrl = data?.[column.field]
+      const src = imageUrl ? imageUrl : EMPTY_PHOTO
+      const isEmpty = !imageUrl
 
-      const image =
-        imageUrl
-          ? imageUrl
-          : require('@argus/shared-ui/src/components/images/emptyPhoto.jpg')
-
-      return <img src={image?.default?.src||image} alt='' width={rowHeightImage} />
+      return (
+        <div className="agImgCell">
+          <img
+            src={src}
+            alt=""
+            className={`agImg ${isEmpty ? 'agImg--empty' : 'agImg--real'}`}
+            onError={e => {
+              e.currentTarget.src = EMPTY_PHOTO
+              e.currentTarget.classList.remove('agImg--real')
+              e.currentTarget.classList.add('agImg--empty')
+            }}
+          />
+        </div>
+      )
     }
 
   const columnDefs = [
@@ -1073,6 +1082,55 @@ const Table = ({
           border-radius: 4px;
           border: 1px solid #ccc;
         }
+
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          object-fit: contain !important;
+        }
+
+        .agGridContainer :global(.agImgCell) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+        }
+
+        .agGridContainer :global(img.agImg) {
+          display: block !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+          width: auto !important;
+          height: auto !important;
+        }
+
+        .agGridContainer :global(img.agImg--real) {
+          width: auto !important;
+          height: auto !important;
+          max-width: 100% !important;
+          max-height: 100% !important;
+          object-fit: contain !important;
+        }
+
 
         .agGridContainer :global(.ag-header),
         .agGridContainer :global(.ag-header-cell) {

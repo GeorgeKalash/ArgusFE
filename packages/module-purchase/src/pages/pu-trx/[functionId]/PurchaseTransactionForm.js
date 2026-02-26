@@ -986,6 +986,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
               vatAmount: item.vatAmount ? item.vatAmount : 0,
               totalWeight: item.weight * item.qty,
               extendedPrice: item.extendedPrice ? item.extendedPrice : 0,
+              totalWeightPerG: getTotPricePerG(puTrxHeader, item, DIRTYFIELD_BASE_PRICE),
               puTrx: true,
               serials: puTrxSerials
                 ?.filter(row => row.seqNo == item.seqNo)
@@ -1133,6 +1134,28 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
 
   function isValidPrice(value) {
     return value != null && value != '' && !isNaN(value) && value != 0
+  }
+
+  function getTotPricePerG(header, item, dirtyField) {
+    const itemPriceRow = getIPR({
+      priceType: item?.priceType,
+      basePrice: parseFloat(item?.basePrice || 0),
+      volume: parseFloat(item?.volume) || 0,
+      weight: parseFloat(item?.weight),
+      unitPrice: parseFloat(item?.unitPrice || 0),
+      upo: 0,
+      qty: parseFloat(item?.qty) || 0,
+      extendedPrice: parseFloat(item?.extendedPrice),
+      mdAmount: header?.mdAmount || 0,
+      mdType: item?.mdType || 1,
+      baseLaborPrice: item?.baseLaborPrice || 0,
+      totalWeightPerG: item?.TotPricePerG,
+      mdValue: parseFloat(item?.mdValue),
+      tdPct: 0,
+      dirtyField
+    })
+
+    return itemPriceRow?.totalWeightPerG ? parseFloat(itemPriceRow.totalWeightPerG).toFixed(2) : 0
   }
 
   async function fillItemObject(update, addRow, newRow, itemPhysProp, itemInfo, vendorPrice) {
@@ -1338,6 +1361,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       volume: itemPriceRow?.volume ? itemPriceRow.volume : 0,
       weight: itemPriceRow?.weight ? itemPriceRow.weight : 0,
       basePrice: itemPriceRow?.basePrice ? itemPriceRow.basePrice : 0,
+      baseLaborPrice: itemPriceRow?.baseLaborPrice ? parseFloat(itemPriceRow.baseLaborPrice).toFixed(2) : 0,
       unitPrice: itemPriceRow?.unitPrice ? itemPriceRow.unitPrice : 0,
       extendedPrice: itemPriceRow?.extendedPrice ? itemPriceRow.extendedPrice : 0,
       mdValue: itemPriceRow?.mdValue,

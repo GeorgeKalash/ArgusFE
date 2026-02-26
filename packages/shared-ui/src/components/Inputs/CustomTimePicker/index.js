@@ -50,6 +50,7 @@ const CustomTimePicker = ({
         label={label}
         fullWidth={fullWidth}
         ampm={!use24Hour}
+        timeSteps={{ minutes: 1 }}
         minTime={min}
         maxTime={max}
         onFocus={() => setIsFocused(true)}
