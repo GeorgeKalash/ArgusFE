@@ -3,12 +3,13 @@ import * as yup from 'yup'
 import { RequestsContext } from '@argus/shared-providers/src/providers/RequestsContext'
 import Table from '@argus/shared-ui/src/components/Shared/Table'
 import { useResourceQuery } from '@argus/shared-hooks/src/hooks/resource'
-import { Box, Grid } from '@mui/material'
+import { Grid } from '@mui/material'
 import { ResourceIds } from '@argus/shared-domain/src/resources/ResourceIds'
 import { useForm } from '@argus/shared-hooks/src/hooks/form'
 import { VertLayout } from '@argus/shared-ui/src/components/Layouts/VertLayout'
 import { Fixed } from '@argus/shared-ui/src/components/Layouts/Fixed'
 import { Grow } from '@argus/shared-ui/src/components/Layouts/Grow'
+import CollapsibleCard from '@argus/shared-ui/src/components/Layouts/CollapsibleCard'
 import { ControlContext } from '@argus/shared-providers/src/providers/ControlContext'
 import { SystemRepository } from '@argus/repositories/src/repositories/SystemRepository'
 import { ReportPSGeneratorRepository } from '@argus/repositories/src/repositories/ReportPSGeneratorRepository'
@@ -16,11 +17,6 @@ import CustomButton from '@argus/shared-ui/src/components/Inputs/CustomButton'
 import { DataSets } from '@argus/shared-domain/src/resources/DataSets'
 import { CommonContext } from '@argus/shared-providers/src/providers/CommonContext'
 import ResourceComboBox from '@argus/shared-ui/src/components/Shared/ResourceComboBox'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import IconButton from '@mui/material/IconButton'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { CompBarChart } from '@argus/shared-ui/src/components/Shared/dashboardApplets/charts'
 
 const RetailCompFigures = () => {
@@ -28,7 +24,6 @@ const RetailCompFigures = () => {
   const { platformLabels } = useContext(ControlContext)
   const { getAllKvsByDataset } = useContext(CommonContext)
   const [columns, setColumns] = useState([])
-  const [collapsed, setCollapsed] = useState(false)
   const [prevRow, setPrevRow] = useState('')
   const [prevCol, setPrevCol] = useState('')
   const [monthsHeaders, setMonthsHeaders] = useState([])
@@ -175,8 +170,6 @@ const RetailCompFigures = () => {
         headerName: labels.total,
         type: 'number',
         width: 180
-
-        //comparator: (valueA, valueB) => valueB - valueA,
       }
     ]
 
@@ -283,50 +276,13 @@ const RetailCompFigures = () => {
           }}
         />
       </Grow>
-      <Fixed>
-        <Card
-          sx={{
-            my: 2,
-            width: '100%',
-            transition: 'all 0.4s ease'
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}
-          >
-            <IconButton
-              onClick={() => setCollapsed(!collapsed)}
-              sx={{
-                display: 'flex',
-                margin: 2,
-                color: 'black',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '30%',
-                padding: 1,
-                '&:hover': {
-                  backgroundColor: '#d9d9d9'
-                }
-              }}
-              size='small'
-            >
-              {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
-            </IconButton>
-          </Box>
-          {!collapsed && (
-            <CardContent sx={{ p: '8px !important' }}>
-              <CompBarChart
-                id='compFigChart'
-                labels={chartInfo.categories}
-                datasets={chartInfo.displayedGraph}
-                collapsed={collapsed}
-              />
-            </CardContent>
-          )}
-        </Card>
-      </Fixed>
+      <CollapsibleCard direction="down">
+        <CompBarChart
+          id='compFigChart'
+          labels={chartInfo.categories}
+          datasets={chartInfo.displayedGraph}
+        />
+      </CollapsibleCard>
     </VertLayout>
   )
 }
