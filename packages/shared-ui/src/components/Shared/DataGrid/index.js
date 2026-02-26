@@ -341,6 +341,7 @@ export function DataGrid({
           component: 'numberfield',
           name: 'Count',
           label: ' ',
+          flex: 0.7,
           props: { disabled: true },
           counterColumn: true
         }
