@@ -45,8 +45,7 @@ const SystemDefaults = () => {
         obj.key === 'cityName' ||
         obj.key === 'buildingNumber' ||
         obj.key === 'streetName' ||
-        obj.key === 'citySubdivisionName' ||
-        obj.key === 'max_btfr_lines_allowed'
+        obj.key === 'citySubdivisionName'
       )
     })
 
@@ -329,17 +328,6 @@ const SystemDefaults = () => {
                     onClear={() => formik.setFieldValue('citySubdivisionName', '')}
                     error={formik.touched.citySubdivisionName && Boolean(formik.errors.citySubdivisionName)}
                     maxAccess={access}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <CustomNumberField
-                    name='MF_MAX_BTFR_LINES_ALLOWED'
-                    label={_labels.MF_MAX_BTFR_LINES_ALLOWED}
-                    value={formik.values.MF_MAX_BTFR_LINES_ALLOWED}
-                    numberField={true}
-                    onChange={formik.handleChange}
-                    onClear={() => formik.setFieldValue('MF_MAX_BTFR_LINES_ALLOWED', null)}
-                    error={formik.touched.MF_MAX_BTFR_LINES_ALLOWED && Boolean(formik.errors.MF_MAX_BTFR_LINES_ALLOWED)}
                   />
                 </Grid>
               </Grid>

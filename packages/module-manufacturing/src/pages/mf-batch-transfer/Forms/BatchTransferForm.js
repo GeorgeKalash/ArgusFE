@@ -34,7 +34,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   const { stack } = useWindow()
 
   const workCenterId = parseInt(userDefaultsData?.list?.find(obj => obj.key === 'workCenterId')?.value) || null
-  const MaxLines = parseInt(defaultsData?.list?.find(obj => obj.key === 'MF_MAX_BTFR_LINES_ALLOWED')?.value) || null
+  const max_btfr_lines_allowed = parseInt(defaultsData?.list?.find(obj => obj.key === 'max_btfr_lines_allowed')?.value) || null
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: SystemFunction.BatchTransfer,
@@ -83,7 +83,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           sku: '',
           itemName: '',
           itemGroupId: null,
-          transferStatusName: ''
+          transferStatusName: '',
+          wipName: ''
         }
       ]
     },
@@ -127,7 +128,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   async function onChangeDT(dtId) {
     if (dtId) {
       const res = await getRequest({
-        extension: ManufacturingRepository.BatchTransferDTD.get,
+        extension: ManufacturingRepository.DocumentTypeDefault.get,
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('header.fromWCId',  res?.record?.workCenterId || workCenterId || null)
@@ -307,6 +308,15 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       props: {
         readOnly: true
       }
+    },
+    {
+      component: 'textfield',
+      name: 'wipName',
+      label: labels.wipName,
+      flex: 1,
+      props: {
+        readOnly: true
+      }
     }
   ]
 
@@ -474,7 +484,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
             name='items'
             columns={columns}
             maxAccess={maxAccess}
-            maxLines={MaxLines}
+            maxLines={max_btfr_lines_allowed}
           />
         </Grow>
         <Fixed>

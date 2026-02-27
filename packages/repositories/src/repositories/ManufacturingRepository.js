@@ -472,10 +472,4 @@ export const ManufacturingRepository = {
     del: service + 'delDCA',
     snapshot: service + 'snapshotDCA'
   },
-  BatchTransferDTD: {
-    get: service + 'getDTD',
-    page: service + 'pageDTD',
-    set: service + 'setDTD',
-    del: service + 'delDTD'
-  },
 }

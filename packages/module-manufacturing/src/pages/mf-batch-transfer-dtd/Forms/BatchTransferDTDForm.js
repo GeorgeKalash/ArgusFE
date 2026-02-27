@@ -21,7 +21,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
   const { getRequest, postRequest } = useContext(RequestsContext)
 
   const invalidate = useInvalidate({
-    endpointId: ManufacturingRepository.BatchTransferDTD.page
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page
   })
 
   const { formik } = useForm({
@@ -37,7 +37,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
     }),
     onSubmit: async obj => {
       await postRequest({
-        extension: ManufacturingRepository.BatchTransferDTD.set,
+        extension: ManufacturingRepository.DocumentTypeDefault.set,
         record: JSON.stringify(obj)
       })
 
@@ -52,7 +52,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
     ;(async function () {
       if (recordId) {
         const res = await getRequest({
-          extension: ManufacturingRepository.BatchTransferDTD.get,
+          extension: ManufacturingRepository.DocumentTypeDefault.get,
           parameters: `_dtId=${recordId}`
         })
 
@@ -66,7 +66,7 @@ export default function BatchTransferDTDForm({ labels, maxAccess, recordId, wind
 
   return (
     <FormShell
-      resourceId={ResourceIds.ProdSheetBatchTransferDTD}
+      resourceId={ResourceIds.BatchTransferDTD}
       form={formik}
       maxAccess={maxAccess}
       editMode={editMode}

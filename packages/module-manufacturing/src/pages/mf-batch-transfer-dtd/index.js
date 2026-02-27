@@ -23,7 +23,7 @@ const BatchTransferDTD = () => {
     const { _startAt = 0, _pageSize = 50 } = options
 
     const response = await getRequest({
-      extension: ManufacturingRepository.BatchTransferDTD.page,
+      extension: ManufacturingRepository.DocumentTypeDefault.page,
       parameters: `_startAt=${_startAt}&_pageSize=${_pageSize}&_functionId=${SystemFunction.BatchTransfer}`
     })
 
@@ -39,7 +39,7 @@ const BatchTransferDTD = () => {
     paginationParameters
   } = useResourceQuery({
     queryFn: fetchGridData,
-    endpointId: ManufacturingRepository.BatchTransferDTD.page,
+    endpointId: ManufacturingRepository.DocumentTypeDefault.page,
     datasetId: ResourceIds.BatchTransferDTD
   })
 
@@ -63,7 +63,7 @@ const BatchTransferDTD = () => {
 
   const del = async obj => {
     await postRequest({
-      extension: ManufacturingRepository.BatchTransferDTD.del,
+      extension: ManufacturingRepository.DocumentTypeDefault.del,
       record: JSON.stringify(obj)
     })
     invalidate()
