@@ -91,7 +91,7 @@ export default function ItemDetailsForm({
 
     const res = await getRequest({
       extension: InventoryRepository.Availability.get,
-      parameters: `_itemId=${itemId}&_seqNo=0`
+      parameters: `_siteId=0&_itemId=${itemId}&_seqNo=0`
     })
     formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
   }
