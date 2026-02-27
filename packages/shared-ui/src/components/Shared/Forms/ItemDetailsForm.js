@@ -83,17 +83,14 @@ export default function ItemDetailsForm({
   const editMode = !!formik.values.details.recordId
 
   async function getAvailability(itemId, siteId) {
-    if (!itemId) {
-      formik.setFieldValue('details.onhand', 0)
+    if (itemId) {
+      const res = await getRequest({
+        extension: InventoryRepository.Availability.get,
+        parameters: `_siteId=${siteId || 0}&_itemId=${itemId}&_seqNo=0`
+      })
 
-      return
+      return res
     }
-
-    const res = await getRequest({
-      extension: InventoryRepository.Availability.get,
-      parameters: `_siteId=${siteId || 0}&_itemId=${itemId}&_seqNo=0`
-    })
-    formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
   }
   async function getlastIVI(itemId) {
     if (!itemId) {
@@ -189,7 +186,8 @@ export default function ItemDetailsForm({
 
                         return
                       }
-                      await getAvailability(newValue?.recordId, formik?.values?.details?.siteId)
+                      const res = await getAvailability(newValue?.recordId, formik?.values?.details?.siteId)
+                      formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
                       formik.setFieldValue('details.msId', newValue?.msId || null)
@@ -220,7 +218,8 @@ export default function ItemDetailsForm({
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
                     onChange={async (event, newValue) => {
-                      await getAvailability(formik?.values?.details?.itemId, newValue?.recordId)
+                      const res = await getAvailability(formik?.values?.details?.itemId, newValue?.recordId)
+                      formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
                       formik.setFieldValue('details.siteId', newValue?.recordId || null)
                     }}
                     error={formik?.touched.details?.siteId && Boolean(formik?.errors.details?.siteId)}
