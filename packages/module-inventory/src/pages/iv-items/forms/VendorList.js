@@ -127,13 +127,11 @@ const VendorList = ({ store, labels, maxAccess }) => {
           columns={columns}
           gridData={data}
           rowId={['vendorId', 'currencyId']}
-          isLoading={false}
           pageSize={50}
           onEdit={edit}
           pagination={false}
           onDelete={delVendor}
           maxAccess={maxAccess}
-          height={200}
         />
       </Grow>
     </VertLayout>
