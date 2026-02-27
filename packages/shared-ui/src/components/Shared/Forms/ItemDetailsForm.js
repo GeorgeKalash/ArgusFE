@@ -82,7 +82,7 @@ export default function ItemDetailsForm({
 
   const editMode = !!formik.values.details.recordId
 
-  async function getAvailability(itemId) {
+  async function getAvailability(itemId, siteId) {
     if (!itemId) {
       formik.setFieldValue('details.onhand', 0)
 
@@ -91,7 +91,7 @@ export default function ItemDetailsForm({
 
     const res = await getRequest({
       extension: InventoryRepository.Availability.get,
-      parameters: `_siteId=0&_itemId=${itemId}&_seqNo=0`
+      parameters: `_siteId=${siteId || 0}&_itemId=${itemId}&_seqNo=0`
     })
     formik.setFieldValue('details.onhand', res?.record?.onhand || 0)
   }
@@ -189,7 +189,7 @@ export default function ItemDetailsForm({
 
                         return
                       }
-                      await getAvailability(newValue?.recordId)
+                      await getAvailability(newValue?.recordId, formik?.values?.details?.siteId)
                       await getlastIVI(newValue?.recordId)
                       await getCurrentCost(newValue?.recordId)
                       formik.setFieldValue('details.msId', newValue?.msId || null)
@@ -219,7 +219,8 @@ export default function ItemDetailsForm({
                     valueField='recordId'
                     displayField={['reference', 'name']}
                     maxAccess={maxAccess}
-                    onChange={(event, newValue) => {
+                    onChange={async (event, newValue) => {
+                      await getAvailability(formik?.values?.details?.itemId, newValue?.recordId)
                       formik.setFieldValue('details.siteId', newValue?.recordId || null)
                     }}
                     error={formik?.touched.details?.siteId && Boolean(formik?.errors.details?.siteId)}
