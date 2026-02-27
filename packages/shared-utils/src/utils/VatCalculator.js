@@ -32,8 +32,6 @@ const calcVatAmountPerTaxDetail = (vatCalcRow, taxDetail) => {
     case TAXBASE_FAPQU:
       vatAmount = taxDetail.amount * vatCalcRow.qty
 
-      //price type = 1 -> taxDetail.amount * vatCalcRow.qty
-      //price type = 3 => qty * weight
       break
     case TAXBASE_FAPIUW: // base price
       vatAmount = (vatCalcRow.basePrice * vatCalcRow.qty * taxDetail.amount) / 100
