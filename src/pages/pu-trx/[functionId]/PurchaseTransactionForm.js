@@ -953,7 +953,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const puTrxTaxes = puTrxPack?.taxCodes
     const puTrxSerials = puTrxPack?.serials
     const puTrxInstallments = puTrxPack?.installments
-    const disableLookup = await sKULookupInfo(puTrxPack?.header?.dtId)
+    const doctypeInfo = await dtInfo(puTrxPack?.header?.dtId)
 
     puTrxHeader?.tdType === 1 || puTrxHeader?.tdType == null
       ? setCycleButtonState({ text: '123', value: 1 })
@@ -963,17 +963,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ? await Promise.all(
           puTrxItems?.map(async (item, index) => {
             const puTrxTaxes = item?.taxId && (await getTaxDetails(item.taxId))
-            const taxDetailsResponse = []
-
-            const updatedpuTrxTaxes =
-              puTrxTaxes?.map(tax => {
-                const matchingTaxDetail = taxDetailsResponse?.find(responseTax => responseTax.seqNo === tax.taxSeqNo)
-
-                return {
-                  ...tax,
-                  taxBase: matchingTaxDetail ? matchingTaxDetail.taxBase : tax.taxBase
-                }
-              }) || null
+            
 
             return {
               ...item,
@@ -992,7 +982,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                     id: index
                   }
                 }),
-              taxDetails: updatedpuTrxTaxes?.filter(tax => tax.seqNo === item.seqNo)
+              taxDetails: puTrxTaxes
             }
           })
         )
@@ -1002,7 +992,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       ...formik.values,
       recordId: puTrxHeader.recordId || null,
       dtId: puTrxHeader.dtId || null,
-      disableSKULookup: disableLookup || false,
+      disableSKULookup: doctypeInfo?.disableSKULookup || false,
       installments: puTrxInstallments?.map((installment, index) => {
         return {
           ...installment,
@@ -1013,6 +1003,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
       header: {
         ...formik.values.header,
         ...puTrxHeader,
+        postMetalToFinancials: doctypeInfo?.postMetalToFinancials ?? false,
         amount: parseFloat(puTrxHeader?.amount).toFixed(2),
         currentDiscount:
           puTrxHeader?.tdType == 1 || puTrxHeader?.tdType == null ? puTrxHeader?.tdAmount : puTrxHeader?.tdPct,
@@ -1461,15 +1452,16 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     formik.setFieldValue('header.spId', dtd?.record?.spId || userDefaultsDataState?.spId || null)
     formik.setFieldValue(
       'header.siteId',
-      dtd?.record.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
+      dtd?.record?.commitItems ? dtd?.record?.siteId || userDefaultsDataState?.siteId || null : null
     )
     formik.setFieldValue('header.commitItems', dtd?.record?.commitItems)
     fillMetalPrice()
   }
 
-  async function sKULookupInfo(dtId) {
+  async function dtInfo(dtId) {
     if (!dtId) {
       formik.setFieldValue('disableSKULookup', false)
+      formik.setFieldValue('header.postMetalToFinancials', false)
 
       return
     }
@@ -1480,7 +1472,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     })
     formik.setFieldValue('disableSKULookup', res?.record?.disableSKULookup || false)
 
-    return res?.record?.disableSKULookup || false
+    return res?.record
   }
   useEffect(() => {
     formik.setFieldValue('header.qty', parseFloat(totalQty).toFixed(2))
@@ -1552,7 +1544,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
   useEffect(() => {
     if (!recordId) {
       if (formik.values?.header.dtId) onChangeDtId(formik.values?.header.dtId)
-      sKULookupInfo(formik.values.header.dtId)
+      dtInfo(formik.values.header.dtId)
     }
   }, [formik.values?.header.dtId])
 
@@ -2002,7 +1994,7 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
                 label={labels.metalPrice}
                 value={formik.values.header.KGmetalPrice}
                 readOnly
-                hidden={metalPriceVisibility}
+                hidden={!metalPriceVisibility}
               />
             </Grid>
           </Grid>
