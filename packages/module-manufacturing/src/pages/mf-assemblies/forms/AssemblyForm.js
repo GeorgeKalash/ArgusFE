@@ -87,10 +87,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      dtId: yup.string().required(),
-      siteId: yup.string().required(),
+      dtId: yup.number().required(),
+      siteId: yup.number().required(),
       qty: yup.number().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       items: yup
         .array()
         .of(
@@ -752,7 +752,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                     onChange={async (event, newValue) => {
                       const res = await getAvailability(formik.values?.itemId, newValue?.recordId)
                       formik.setFieldValue('onHand', res?.record?.onhand || null)
-                      formik.setFieldValue('siteId', newValue?.recordId)
+                      formik.setFieldValue('siteId', newValue?.recordId || null)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
                   />
