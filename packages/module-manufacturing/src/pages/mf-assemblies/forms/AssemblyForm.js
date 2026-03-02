@@ -235,7 +235,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           return
         }
         const currentCost = await getCost(newRow.itemId)
-        update({ cost: currentCost })
+        const ava = await getAvailability(newRow?.itemId, newRow?.siteId)
+        update({ cost: currentCost, onHand: ava?.record?.onHand || 0  })
       }
     },
     {
@@ -266,8 +267,8 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         displayFieldWidth: 3
       },
       async onChange({ row: { update, newRow } }) {
-        const res = await getAvailability(newRow?.itemId, newRow?.siteId)
-        update({ onHand: res?.onHand || 0 })
+        const ava = await getAvailability(newRow?.itemId, newRow?.siteId)
+        update({ onHand: ava?.record?.onhand || 0 })
       }
     },
     {
@@ -279,7 +280,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       }
     },
     {
-      component: 'textfield',
+      component: 'numberfield',
       label: labels.onHand,
       name: 'onHand',
       props: {
@@ -431,7 +432,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   async function getBillItem() {
     const res = await getRequest({
       extension: ManufacturingRepository.Component.preview,
-      parameters: `_bomId=${formik.values.bomId}`
+      parameters: `_bomId=${formik.values.bomId}&_siteId=${formik.values.siteId}`
     })
     const site = await getSiteInfo()
     const bomInfo = await getBomInfo()
@@ -445,9 +446,9 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       qty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       diffQty: 0,
       baseQty: item.baseQty * (formik.values.qty || 0),
-      siteId: item.siteId || formik.values.siteId,
-      siteRef: item.siteId ? item.siteRef : site?.reference,
-      siteName: item.siteId ? item.siteName : site?.name
+      siteId: formik.values.siteId,
+      siteRef: site?.reference,
+      siteName: site?.name
     }))
 
     formik.setFieldValue('items', itemsList)
