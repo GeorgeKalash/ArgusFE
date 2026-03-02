@@ -236,7 +236,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
         }
         const currentCost = await getCost(newRow.itemId)
         const ava = await getAvailability(newRow?.itemId, newRow?.siteId)
-        update({ cost: currentCost, onHand: ava?.record?.onHand || 0  })
+        update({ cost: currentCost, onHand: ava?.record?.onhand || 0  })
       }
     },
     {
