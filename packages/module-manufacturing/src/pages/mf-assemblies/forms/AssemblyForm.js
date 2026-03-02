@@ -264,12 +264,24 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
           { key: 'name', value: 'Name' }
         ],
         displayFieldWidth: 3
+      },
+      async onChange({ row: { update, newRow } }) {
+        const res = await getAvailability(newRow?.itemId, newRow?.siteId)
+        update({ onHand: res?.onHand || 0 })
       }
     },
     {
       component: 'textfield',
       label: labels.siteName,
       name: 'siteName',
+      props: {
+        readOnly: true
+      }
+    },
+    {
+      component: 'textfield',
+      label: labels.onHand,
+      name: 'onHand',
       props: {
         readOnly: true
       }
@@ -418,7 +430,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
 
   async function getBillItem() {
     const res = await getRequest({
-      extension: ManufacturingRepository.Component.qry,
+      extension: ManufacturingRepository.Component.preview,
       parameters: `_bomId=${formik.values.bomId}`
     })
     const site = await getSiteInfo()
@@ -428,6 +440,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
       ...item,
       id: item.seqNo,
       cost: item.currentCost || 0,
+      onHand: item.onHand || 0,
       designQty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       qty: ((item.qty * (formik.values.qty || 0)) / parseFloat(bomInfo?.qty || 0)).toFixed(3),
       diffQty: 0,
@@ -568,10 +581,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
   }, [])
 
   const getAvailability = async (itemId, siteId) => {
-    if (itemId && siteId) {
+    if (itemId) {
       const res = await getRequest({
         extension: InventoryRepository.Availability.get,
-        parameters: `_siteId=${siteId}&_itemId=${itemId}&_seqNo=0`
+        parameters: `_siteId=${siteId || 0}&_itemId=${itemId}&_seqNo=0`
       })
 
       return res
@@ -709,7 +722,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       formik.setFieldValue('bomName', newValue?.name)
                       formik.setFieldValue('bomRef', newValue?.reference)
                       const item = await fillItem(newValue?.recordId)
-                      const res = await getAvailability(item?.itemId, formik.values?.siteId)
+                      const res = await getAvailability(item?.itemId, 0)
                       formik.setFieldValue('onHand', res?.record?.onhand || null)
                       formik.setFieldValue('itemName', item?.itemName)
                       formik.setFieldValue('sku', item?.sku)
@@ -749,9 +762,7 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
                       { key: 'reference', value: 'reference' },
                       { key: 'name', value: 'Name' }
                     ]}
-                    onChange={async (event, newValue) => {
-                      const res = await getAvailability(formik.values?.itemId, newValue?.recordId)
-                      formik.setFieldValue('onHand', res?.record?.onhand || null)
+                    onChange={async (_, newValue) => {
                       formik.setFieldValue('siteId', newValue?.recordId)
                     }}
                     error={formik.touched.siteId && Boolean(formik.errors.siteId)}
