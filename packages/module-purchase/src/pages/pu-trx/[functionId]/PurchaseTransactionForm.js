@@ -1156,9 +1156,10 @@ export default function PurchaseTransactionForm({ labels, access, recordId, func
     const metalPrice = formik?.values?.header?.KGmetalPrice ?? 0
     const basePrice = (metalPrice * metalPurity) / 1000
     const basePriceValue = postMetalToFinancials === false ? basePrice : 0
-
-    const unitPrice = !vendorPrice ? 0 : vendorPrice.priceList
-    const baseLaborPrice = !vendorPrice ? 0 : vendorPrice.baseLaborPrice
+    
+    const hasMetalPrice = metalPriceVisibility && metalPrice
+    const unitPrice = !vendorPrice || hasMetalPrice ? 0 : vendorPrice.priceList
+    const baseLaborPrice = !vendorPrice || hasMetalPrice ? 0 : vendorPrice.baseLaborPrice
     const TotPricePerG = basePriceValue + baseLaborPrice
 
     let rowTax = null
