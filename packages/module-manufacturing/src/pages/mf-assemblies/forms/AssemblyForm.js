@@ -87,10 +87,10 @@ export default function AssemblyForm({ labels, maxAccess: access, store, setStor
     validateOnChange: true,
     validationSchema: yup.object({
       date: yup.date().required(),
-      dtId: yup.string().required(),
-      siteId: yup.string().required(),
+      dtId: yup.number().required(),
+      siteId: yup.number().required(),
       qty: yup.number().required(),
-      itemId: yup.string().required(),
+      itemId: yup.number().required(),
       items: yup
         .array()
         .of(
