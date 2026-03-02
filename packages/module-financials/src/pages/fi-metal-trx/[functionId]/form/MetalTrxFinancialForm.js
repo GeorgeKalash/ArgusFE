@@ -36,26 +36,12 @@ export default function MetalTrxFinancialForm({ labels, access, recordId, functi
   const filteredItems = useRef()
   const { stack } = useWindow()
 
-  const MetalTrxEndpoints = {
-    [SystemFunction.MetalReceiptVoucher]: {
-      page: FinancialRepository.MetalReceiptVoucher.page,
-      get2: FinancialRepository.MetalReceiptVoucher.get2,
-      post: FinancialRepository.MetalReceiptVoucher.post,
-      del: FinancialRepository.MetalReceiptVoucher.del,
-      set2: FinancialRepository.MetalReceiptVoucher.set2,
-      unpost: FinancialRepository.MetalReceiptVoucher.unpost
-    },
-    [SystemFunction.MetalPaymentVoucher]: {
-      page: FinancialRepository.MetalPaymentVoucher.page,
-      get2: FinancialRepository.MetalPaymentVoucher.get2,
-      post: FinancialRepository.MetalPaymentVoucher.post,
-      del: FinancialRepository.MetalPaymentVoucher.del,
-      set2: FinancialRepository.MetalPaymentVoucher.set2,
-      unpost: FinancialRepository.MetalPaymentVoucher.unpost
-    }
-  }
+  const MetalRepositories = {
+    [SystemFunction.MetalReceiptVoucher]: FinancialRepository.MetalReceiptVoucher,
+    [SystemFunction.MetalPaymentVoucher]: FinancialRepository.MetalPaymentVoucher
+  };
 
-  const getEndpoint = (functionId) => MetalTrxEndpoints[Number(functionId)]
+  const getEndpoint = (functionId) => MetalRepositories[Number(functionId)] ?? null;
 
   const { documentType, maxAccess, changeDT } = useDocumentType({
     functionId: functionId,
