@@ -11,6 +11,7 @@
     "next": "14.2.35"
   },
   "dependencies": {
+    "reactflow": "^11.11.4",
     "slate": "^0.120.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.120.0"
