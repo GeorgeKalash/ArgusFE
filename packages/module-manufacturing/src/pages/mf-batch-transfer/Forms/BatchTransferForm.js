@@ -131,7 +131,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         parameters: `_dtId=${dtId}`
       })
       formik.setFieldValue('header.fromWCId', res?.record?.workCenterId || workCenterId || null)
-      formik.setFieldValue('items',( max_btfr_lines_allowed == 0 || max_btfr_lines_allowed == null) ? [] : formik.initialValues.items)
+      formik.setFieldValue('items', formik.initialValues.items)
     }
   }
 
@@ -340,12 +340,6 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [recordId])
-
-  useEffect(() => {
-    if (max_btfr_lines_allowed == 0 || max_btfr_lines_allowed == null) {
-      formik.setFieldValue('items', [])
-    }
-  }, [max_btfr_lines_allowed])
 
   const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
   const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
