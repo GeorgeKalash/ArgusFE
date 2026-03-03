@@ -158,6 +158,7 @@ const MfSettingForm = ({ _labels, access }) => {
                   name='max_btfr_lines_allowed'
                   label={_labels.max_btfr_lines_allowed}
                   value={formik.values.max_btfr_lines_allowed}
+                  allowNegative={false}
                   onChange={formik.handleChange}
                   onClear={() => formik.setFieldValue('max_btfr_lines_allowed', null)}
                   error={formik.touched.max_btfr_lines_allowed && Boolean(formik.errors.max_btfr_lines_allowed)}

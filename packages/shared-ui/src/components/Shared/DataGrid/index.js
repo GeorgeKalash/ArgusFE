@@ -60,8 +60,7 @@ export function DataGrid({
     width <= 768 ? 30 : width <= 1024 ? 25 : width <= 1280 ? 25 : width < 1600 ? 30 : 35
 
   const canAddNewLine = () => {
-    if (!allowAddNewLine) return false
-    if (_disabled) return false
+    if (!allowAddNewLine || _disabled) return false
     if (maxLines === null || maxLines === undefined) return true
 
     const limit = parseInt(maxLines)

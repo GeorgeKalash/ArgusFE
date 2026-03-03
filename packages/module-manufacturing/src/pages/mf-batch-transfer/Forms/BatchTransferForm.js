@@ -82,9 +82,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
           transferRef: null,
           sku: '',
           itemName: '',
-          itemGroupId: null,
           transferStatusName: '',
-          wipName: ''
+          transferWipName: ''
         }
       ]
     },
@@ -131,8 +130,8 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
         extension: ManufacturingRepository.DocumentTypeDefault.get,
         parameters: `_dtId=${dtId}`
       })
-      formik.setFieldValue('header.fromWCId',  res?.record?.workCenterId || workCenterId || null)
-      formik.setFieldValue('items', formik.initialValues.items)
+      formik.setFieldValue('header.fromWCId', res?.record?.workCenterId || workCenterId || null)
+      formik.setFieldValue('items',( max_btfr_lines_allowed == 0 || max_btfr_lines_allowed == null) ? [] : formik.initialValues.items)
     }
   }
 
@@ -255,19 +254,19 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'numberfield',
       name: 'qty',
       label: labels.qty,
-      flex: 1
+      flex: 0.5
     },
     {
       component: 'numberfield',
       name: 'pcs',
       label: labels.pcs,
-      flex: 1
+      flex: 0.5
     },
     {
       component: 'numberfield',
       name: 'jobQty',
       label: labels.jobQty,
-      flex: 1,
+      flex: 0.7,
       props: {
         readOnly: true
       }
@@ -276,7 +275,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
       component: 'numberfield',
       name: 'jobPcs',
       label: labels.jobPcs,
-      flex: 1,
+      flex: 0.7,
       props: {
         readOnly: true
       }
@@ -311,7 +310,7 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
     },
     {
       component: 'textfield',
-      name: 'wipName',
+      name: 'transferWipName',
       label: labels.wipName,
       flex: 1,
       props: {
@@ -335,8 +334,18 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
   ]
 
   useEffect(() => {
+    if (!recordId && documentType?.dtId) onChangeDT(documentType.dtId)
+  }, [documentType?.dtId])
+
+  useEffect(() => {
     if (recordId) refetchForm(recordId)
   }, [recordId])
+
+  useEffect(() => {
+    if (max_btfr_lines_allowed == 0 || max_btfr_lines_allowed == null) {
+      formik.setFieldValue('items', [])
+    }
+  }, [max_btfr_lines_allowed])
 
   const totalQty = formik.values?.items?.reduce((qty, row) => qty + (parseFloat(row.qty) || 0), 0) ?? 0
   const totalPcs = formik.values?.items?.reduce((pcs, row) => pcs + (parseFloat(row.pcs) || 0), 0) ?? 0
@@ -372,10 +381,9 @@ export default function BatchTransferForm({ labels, maxAccess: access, recordId 
                     values={formik.values.header}
                     maxAccess={maxAccess}
                     onChange={async (_, newValue) => {
-                      const dtId = newValue?.recordId || null
-                      formik.setFieldValue('header.dtId', dtId)
                       changeDT(newValue)
-                      await onChangeDT(dtId)
+                      await onChangeDT(newValue?.recordId)
+                      formik.setFieldValue('header.dtId', newValue?.recordId)
                     }}
                     error={formik.touched.header?.dtId && Boolean(formik.errors.header?.dtId)}
                   />
